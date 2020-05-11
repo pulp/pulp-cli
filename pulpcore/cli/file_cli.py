@@ -29,16 +29,35 @@ def repository(ctx, repo_type):
 @click.pass_context
 def list(ctx):
     result = ctx.obj.repositories_api.list()
-    click.echo(result)
+    ctx.obj.output_result(result.to_dict())
 
 
 @repository.command()
 @click.option("--name", required=True)
+@click.option("--description")
 @click.pass_context
-def create(ctx, name):
-    repository = ctx.obj.repository_class(name=name)
+def create(ctx, name, description):
+    repository = ctx.obj.repository_class(name=name, description=description)
     result = ctx.obj.repositories_api.create(repository)
-    click.echo(result)
+    ctx.obj.output_result(result.to_dict())
+
+
+@repository.command()
+@click.option("--name", required=True)
+@click.option("--description")
+@click.pass_context
+def update(ctx, name, description):
+    search_result = ctx.obj.repositories_api.list(name=name).results
+    if len(search_result) != 1:
+        raise Exception(f"Repository '{name}' not found.")
+    repository = search_result[0]
+    if description:
+        if description != repository.description:
+            repository.description = description
+    task_href = ctx.obj.repositories_api.update(repository.pulp_href, repository).task
+    click.echo(f"Started task {task_href}")
+    ctx.obj.wait_for_task(task_href)
+    click.echo("Done.")
 
 
 @repository.command()

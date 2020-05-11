@@ -10,4 +10,4 @@ from pulpcore.cli import main
 def status(ctx):
     status_api = StatusApi(ctx.obj.core_client)
     result = status_api.status_read()
-    click.echo(result)
+    ctx.obj.output_result(result.to_dict())

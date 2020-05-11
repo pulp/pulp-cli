@@ -1,7 +1,10 @@
 import click
+import datetime
 import importlib
+import json
 import pkgutil
 import time
+
 from pulpcore.client.pulpcore import (
     Configuration,
     ApiClient,
@@ -9,7 +12,19 @@ from pulpcore.client.pulpcore import (
 )
 
 
+class PulpJSONEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, datetime.datetime):
+            return obj.isoformat()
+        else:
+            super(json.JSONEncoder).default(obj)
+
+
 class PulpContext:
+    def output_result(self, result):
+        if self.format == "json":
+            click.echo(json.dumps(result, cls=PulpJSONEncoder, indent=2))
+
     def wait_for_task(self, task_href, timeout=120):
         while timeout:
             timeout -= 1
@@ -31,8 +46,9 @@ class PulpContext:
 # @click.option("--password", prompt=True, hide_input=True, help="Password on pulp server")
 @click.option("--password", default="password", help="Password on pulp server")
 @click.option("--verify-ssl", is_flag=True, default=True, help="Verify SSL connection")
+@click.option("--format", type=click.Choice(["json"], case_sensitive=False), default="json")
 @click.pass_context
-def main(ctx, base_url, user, password, verify_ssl):
+def main(ctx, base_url, user, password, verify_ssl, format):
     ctx.ensure_object(PulpContext)
     ctx.obj.api_config = Configuration()
     ctx.obj.api_config.host = base_url
@@ -42,6 +58,7 @@ def main(ctx, base_url, user, password, verify_ssl):
     ctx.obj.api_config.safe_chars_for_path_param = '/'
     ctx.obj.core_client = ApiClient(ctx.obj.api_config)
     ctx.obj.tasks_api = TasksApi(ctx.obj.core_client)
+    ctx.obj.format = format
 
 
 # Load plugins from the pulpcore.cli namespace
