@@ -9,8 +9,11 @@ setup(
         "click",
         "pulpcore-client",
     ],
-    entry_points='''
-        [console_scripts]
-        pulp=pulpcore.cli:main
-    ''',
+    entry_points={
+        "console_scripts": "pulp=pulpcore.cli:main",
+        "pulp_cli.plugins": [
+            "core=pulpcore.cli.core_cli",
+            "file=pulpcore.cli.file_cli",
+        ],
+    },
 )

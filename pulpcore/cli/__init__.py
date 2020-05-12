@@ -1,8 +1,7 @@
 import click
 import datetime
-import importlib
 import json
-import pkgutil
+import pkg_resources
 import time
 
 from pulpcore.client.pulpcore import (
@@ -61,9 +60,10 @@ def main(ctx, base_url, user, password, verify_ssl, format):
     ctx.obj.format = format
 
 
-# Load plugins from the pulpcore.cli namespace
-# https://packaging.python.org/guides/creating-and-discovering-plugins/#using-namespace-packages
+# Load plugins
+# https://packaging.python.org/guides/creating-and-discovering-plugins/#using-package-metadata
 discovered_plugins = {
-    name: importlib.import_module(name)
-    for _finder, name, _ispkg in pkgutil.iter_modules(__path__, __name__ + ".")
+    entry_point.name: entry_point.load()
+    for entry_point
+    in pkg_resources.iter_entry_points('pulp_cli.plugins')
 }
