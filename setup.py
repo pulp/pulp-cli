@@ -7,7 +7,7 @@ setup(
     packages=find_namespace_packages(include=["pulpcore.*"]),
     install_requires=[
         "click",
-        "pulpcore-client",
+        "requests",
     ],
     entry_points={
         "console_scripts": "pulp=pulpcore.cli:main",
