@@ -1,5 +1,5 @@
 PULP_CLI="pulp"
-BASE_URL="http://pulp"
+BASE_URL="http://localhost:8080"
 USER="admin"
 PASSWORD="password"
 
