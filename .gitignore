@@ -2,3 +2,5 @@
 __pycache__/
 build/
 tests/scripts/config.sh
+/.ci/settings/
+!/.ci/settings/settings.py
