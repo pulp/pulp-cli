@@ -20,6 +20,15 @@ class PulpContext:
         if self.format == "json":
             click.echo(json.dumps(result, cls=PulpJSONEncoder, indent=2))
 
+    def call(self, operation_id, *args, **kwargs):
+        result = self.api.call(operation_id, *args, **kwargs)
+        if "task" in result:
+            task_href = result["task"]
+            click.echo(f"Started task {task_href}")
+            result = self.wait_for_task(task_href)
+            click.echo("Done.")
+        return result
+
     def wait_for_task(self, task_href, timeout=120):
         while timeout:
             timeout -= 1
