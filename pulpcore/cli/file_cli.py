@@ -26,7 +26,7 @@ def repository(ctx, repo_type):
 @repository.command()
 @click.pass_context
 def list(ctx):
-    result = ctx.obj.api.call(ctx.obj.list_id)
+    result = ctx.obj.call(ctx.obj.list_id)
     ctx.obj.output_result(result)
 
 
@@ -36,7 +36,7 @@ def list(ctx):
 @click.pass_context
 def create(ctx, name, description):
     repository = {"name": name, "description": description}
-    result = ctx.obj.api.call(ctx.obj.create_id, body=repository)
+    result = ctx.obj.call(ctx.obj.create_id, body=repository)
     ctx.obj.output_result(result)
 
 
@@ -45,7 +45,7 @@ def create(ctx, name, description):
 @click.option("--description")
 @click.pass_context
 def update(ctx, name, description):
-    search_result = ctx.obj.api.call(ctx.obj.list_id, parameters={"name": name, "limit": 1})
+    search_result = ctx.obj.call(ctx.obj.list_id, parameters={"name": name, "limit": 1})
     if search_result["count"] != 1:
         raise Exception(f"Repository '{name}' not found.")
     repository = search_result["results"][0]
@@ -53,21 +53,15 @@ def update(ctx, name, description):
     if description:
         if description != repository["description"]:
             repository["description"] = description
-    task_href = ctx.obj.api.call(ctx.obj.update_id, parameters={ctx.obj.href_key: repository_href}, body=repository)["task"]
-    click.echo(f"Started task {task_href}")
-    ctx.obj.wait_for_task(task_href)
-    click.echo("Done.")
+    ctx.obj.call(ctx.obj.update_id, parameters={ctx.obj.href_key: repository_href}, body=repository)
 
 
 @repository.command()
 @click.option("--name", required=True)
 @click.pass_context
 def destroy(ctx, name):
-    search_result = ctx.obj.api.call(ctx.obj.list_id, parameters={"name": name, "limit": 1})
+    search_result = ctx.obj.call(ctx.obj.list_id, parameters={"name": name, "limit": 1})
     if search_result["count"] != 1:
         raise Exception(f"Repository '{name}' not found.")
     repository_href = search_result["results"][0]["pulp_href"]
-    task_href = ctx.obj.api.call(ctx.obj.delete_id, parameters={ctx.obj.href_key: repository_href})["task"]
-    click.echo(f"Started task {task_href}")
-    ctx.obj.wait_for_task(task_href)
-    click.echo("Done.")
+    ctx.obj.call(ctx.obj.delete_id, parameters={ctx.obj.href_key: repository_href})

@@ -165,6 +165,16 @@ class OpenAPI:
         headers["Content-Length"] = str(len(data))
         return data
 
+    def parse_response(self, method_spec, response):
+        try:
+            response_spec = method_spec["responses"][str(response.status_code)]
+        except KeyError:
+            # Fallback 201 -> 200
+            response_spec = method_spec["responses"][str(100 * int(response.status_code / 100))]
+        if "application/json" in response_spec["content"]:
+            return response.json()
+        return None
+
     def call(self, operation_id, parameters=None, body=None, uploads=None):
         method, path = self.operations[operation_id]
         path_spec = self.api_spec["paths"][path]
@@ -201,8 +211,6 @@ class OpenAPI:
 
         data = self.render_body(path_spec, method_spec, headers, body, uploads)
 
-        r = self._session.request(method, url, data=data, headers=headers)
-        r.raise_for_status()
-        if r:
-            return r.json()
-        return None
+        response = self._session.request(method, url, data=data, headers=headers)
+        response.raise_for_status()
+        return self.parse_response(method_spec, response)
