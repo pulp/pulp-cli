@@ -24,9 +24,9 @@ class PulpContext:
         result = self.api.call(operation_id, *args, **kwargs)
         if "task" in result:
             task_href = result["task"]
-            click.echo(f"Started task {task_href}")
+            click.echo(f"Started task {task_href}", err=True)
             result = self.wait_for_task(task_href)
-            click.echo("Done.")
+            click.echo("Done.", err=True)
         return result
 
     def wait_for_task(self, task_href, timeout=120):
@@ -39,7 +39,7 @@ class PulpContext:
                 raise Exception("Task failed")
             time.sleep(1)
             timeout -= 1
-            click.echo(".", nl=False)
+            click.echo(".", nl=False, err=True)
         raise Exception("Task timed out")
 
 
