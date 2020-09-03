@@ -166,6 +166,9 @@ class OpenAPI:
         return data
 
     def parse_response(self, method_spec, response):
+        if response.status_code == 204:
+            return "{}"
+
         try:
             response_spec = method_spec["responses"][str(response.status_code)]
         except KeyError:
