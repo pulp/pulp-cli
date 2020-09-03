@@ -2,7 +2,13 @@ import click
 
 
 @click.group()
-@click.option("-t", "--type", "remote_type", type=click.Choice(["file"], case_sensitive=False), default="file")
+@click.option(
+    "-t",
+    "--type",
+    "remote_type",
+    type=click.Choice(["file"], case_sensitive=False),
+    default="file",
+)
 @click.pass_context
 def remote(ctx, remote_type):
     if remote_type == "file":

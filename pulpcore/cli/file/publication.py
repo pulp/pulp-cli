@@ -2,7 +2,13 @@ import click
 
 
 @click.group()
-@click.option("-t", "--type", "publication_type", type=click.Choice(["file"], case_sensitive=False), default="file")
+@click.option(
+    "-t",
+    "--type",
+    "publication_type",
+    type=click.Choice(["file"], case_sensitive=False),
+    default="file",
+)
 @click.pass_context
 def publication(ctx, publication_type):
     if publication_type == "file":
@@ -26,14 +32,16 @@ def list(ctx):
 @click.option("--repository", required=True)
 @click.pass_context
 def create(ctx, repository):
-    search_result = ctx.obj.call("repositories_file_file_list", parameters={"name": repository,
-                                                                            "limit": 1})
+    search_result = ctx.obj.call(
+        "repositories_file_file_list", parameters={"name": repository, "limit": 1}
+    )
     if search_result["count"] != 1:
         raise Exception(f"Repository '{repository}' not found.")
     body = {"repository": search_result["results"][0]["pulp_href"]}
     result = ctx.obj.call(ctx.obj.create_id, body=body)
-    publication = ctx.obj.call(ctx.obj.read_id,
-                               parameters={ctx.obj.href_key: result["created_resources"][0]})
+    publication = ctx.obj.call(
+        ctx.obj.read_id, parameters={ctx.obj.href_key: result["created_resources"][0]}
+    )
     ctx.obj.output_result(publication)
 
 
