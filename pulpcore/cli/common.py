@@ -50,9 +50,18 @@ class PulpContext:
 # @click.option("--password", prompt=True, hide_input=True, help="Password on pulp server")
 @click.option("--password", default="password", help="Password on pulp server")
 @click.option("--verify-ssl", is_flag=True, default=True, help="Verify SSL connection")
-@click.option("--format", type=click.Choice(["json"], case_sensitive=False), default="json")
+@click.option(
+    "--format", type=click.Choice(["json"], case_sensitive=False), default="json"
+)
 @click.pass_context
 def main(ctx, base_url, user, password, verify_ssl, format):
     ctx.ensure_object(PulpContext)
-    ctx.obj.api = OpenAPI(base_url=base_url, doc_path="/pulp/api/v3/docs/api.json", username=user, password=password, validate_certs=verify_ssl, refresh_cache=True)
+    ctx.obj.api = OpenAPI(
+        base_url=base_url,
+        doc_path="/pulp/api/v3/docs/api.json",
+        username=user,
+        password=password,
+        validate_certs=verify_ssl,
+        refresh_cache=True,
+    )
     ctx.obj.format = format

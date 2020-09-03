@@ -2,7 +2,13 @@ import click
 
 
 @click.group()
-@click.option("-t", "--type", "repo_type", type=click.Choice(["file"], case_sensitive=False), default="file")
+@click.option(
+    "-t",
+    "--type",
+    "repo_type",
+    type=click.Choice(["file"], case_sensitive=False),
+    default="file",
+)
 @click.pass_context
 def repository(ctx, repo_type):
     if repo_type == "file":
@@ -24,7 +30,9 @@ def list(ctx):
 
 
 def _find_remote(ctx, name):
-    search_result = ctx.obj.call("remotes_file_file_list", parameters={"name": name, "limit": 1})
+    search_result = ctx.obj.call(
+        "remotes_file_file_list", parameters={"name": name, "limit": 1}
+    )
     if search_result["count"] != 1:
         raise Exception(f"Remote '{name}' not found.")
     remote = search_result["results"][0]
@@ -68,7 +76,11 @@ def update(ctx, name, description, remote):
         remote_href = _find_remote(ctx, remote)["pulp_href"]
         repository["remote"] = remote_href
 
-    ctx.obj.call(ctx.obj.update_id, parameters={ctx.obj.href_key: repository_href}, body=repository)
+    ctx.obj.call(
+        ctx.obj.update_id,
+        parameters={ctx.obj.href_key: repository_href},
+        body=repository,
+    )
 
 
 @repository.command()
@@ -98,4 +110,6 @@ def sync(ctx, name, remote):
         remote_href = _find_remote(ctx, remote)["pulp_href"]
         body["remote"] = remote_href
 
-    ctx.obj.call(ctx.obj.sync_id, parameters={ctx.obj.href_key: repository_href}, body=body)
+    ctx.obj.call(
+        ctx.obj.sync_id, parameters={ctx.obj.href_key: repository_href}, body=body
+    )

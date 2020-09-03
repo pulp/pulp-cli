@@ -173,7 +173,9 @@ class OpenAPI:
             response_spec = method_spec["responses"][str(response.status_code)]
         except KeyError:
             # Fallback 201 -> 200
-            response_spec = method_spec["responses"][str(100 * int(response.status_code / 100))]
+            response_spec = method_spec["responses"][
+                str(100 * int(response.status_code / 100))
+            ]
         if "application/json" in response_spec["content"]:
             return response.json()
         return None

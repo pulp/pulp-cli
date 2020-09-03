@@ -2,7 +2,13 @@ import click
 
 
 @click.group()
-@click.option("-t", "--type", "distribution_type", type=click.Choice(["file"], case_sensitive=False), default="file")
+@click.option(
+    "-t",
+    "--type",
+    "distribution_type",
+    type=click.Choice(["file"], case_sensitive=False),
+    default="file",
+)
 @click.pass_context
 def distribution(ctx, distribution_type):
     if distribution_type == "file":
@@ -32,8 +38,9 @@ def create(ctx, name, base_path, publication):
     if publication:
         body["publication"] = publication
     result = ctx.obj.call(ctx.obj.create_id, body=body)
-    distribution = ctx.obj.call(ctx.obj.read_id,
-                                parameters={ctx.obj.href_key: result["created_resources"][0]})
+    distribution = ctx.obj.call(
+        ctx.obj.read_id, parameters={ctx.obj.href_key: result["created_resources"][0]}
+    )
     ctx.obj.output_result(distribution)
 
 
