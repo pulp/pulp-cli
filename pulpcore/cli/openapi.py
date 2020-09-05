@@ -111,21 +111,21 @@ class OpenAPI:
                 )
             ):
                 boundary = uuid.uuid4().hex
-                part_boundary = b"--" + to_bytes(boundary, errors="surrogate_or_strict")
+                part_boundary = b"--" + str.encode(boundary)
 
                 form = []
                 for key, value in body.items():
-                    b_key = to_bytes(key, errors="surrogate_or_strict")
+                    b_key = str.encode(key)
                     form.extend(
                         [
                             part_boundary,
                             b'Content-Disposition: form-data; name="%s"' % b_key,
                             b"",
-                            to_bytes(value, errors="surrogate_or_strict"),
+                            str.encode(value),
                         ]
                     )
                 for key, file_data in uploads.items():
-                    b_key = to_bytes(key, errors="surrogate_or_strict")
+                    b_key = str.encode(key)
                     form.extend(
                         [
                             part_boundary,

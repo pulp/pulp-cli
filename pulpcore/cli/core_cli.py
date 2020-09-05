@@ -1,6 +1,7 @@
 import click
 
 from pulpcore.cli import main
+from pulpcore.cli.core.artifact import artifact
 from pulpcore.cli.core.orphans import orphans
 from pulpcore.cli.core.task import task
 
@@ -12,5 +13,6 @@ def status(ctx):
     ctx.obj.output_result(result)
 
 
+main.add_command(artifact)
 main.add_command(orphans)
 main.add_command(task)
