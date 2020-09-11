@@ -97,8 +97,9 @@ def destroy(ctx, name):
 @repository.command()
 @click.option("--name", required=True)
 @click.option("--remote")
+@click.option("-b", "--background", is_flag=True)
 @click.pass_context
-def sync(ctx, name, remote):
+def sync(ctx, name, remote, background):
     body = {}
 
     search_result = ctx.obj.call(ctx.obj.list_id, parameters={"name": name, "limit": 1})
@@ -111,5 +112,8 @@ def sync(ctx, name, remote):
         body["remote"] = remote_href
 
     ctx.obj.call(
-        ctx.obj.sync_id, parameters={ctx.obj.href_key: repository_href}, body=body
+        ctx.obj.sync_id,
+        parameters={ctx.obj.href_key: repository_href},
+        background=background,
+        body=body,
     )

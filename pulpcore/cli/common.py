@@ -1,7 +1,6 @@
 import click
 import datetime
 import json
-import pkg_resources
 import time
 
 from pulpcore.cli.openapi import OpenAPI
@@ -20,13 +19,14 @@ class PulpContext:
         if self.format == "json":
             click.echo(json.dumps(result, cls=PulpJSONEncoder, indent=2))
 
-    def call(self, operation_id, *args, **kwargs):
+    def call(self, operation_id, background=False, *args, **kwargs):
         result = self.api.call(operation_id, *args, **kwargs)
         if "task" in result:
             task_href = result["task"]
             click.echo(f"Started task {task_href}", err=True)
-            result = self.wait_for_task(task_href)
-            click.echo("Done.", err=True)
+            if not background:
+                result = self.wait_for_task(task_href)
+                click.echo("Done.", err=True)
         return result
 
     def wait_for_task(self, task_href, timeout=120):
@@ -37,6 +37,8 @@ class PulpContext:
                 return task
             if task["state"] == "failed":
                 raise Exception("Task failed")
+            if task["state"] == "canceled":
+                raise Exception("Task canceled")
             time.sleep(1)
             timeout -= 1
             click.echo(".", nl=False, err=True)

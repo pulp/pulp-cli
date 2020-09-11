@@ -1,19 +1,8 @@
 import click
 
 from pulpcore.cli import main
-
-
-@main.group()
-@click.pass_context
-def orphans(ctx):
-    pass
-
-
-@orphans.command()
-@click.pass_context
-def delete(ctx):
-    result = ctx.obj.call("orphans_delete")
-    ctx.obj.output_result(result)
+from pulpcore.cli.core.orphans import orphans
+from pulpcore.cli.core.task import task
 
 
 @main.command()
@@ -21,3 +10,7 @@ def delete(ctx):
 def status(ctx):
     result = ctx.obj.call("status_read")
     ctx.obj.output_result(result)
+
+
+main.add_command(orphans)
+main.add_command(task)
