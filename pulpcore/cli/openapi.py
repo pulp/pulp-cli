@@ -36,6 +36,7 @@ class OpenAPI:
         self.load_api(refresh_cache=refresh_cache)
 
     def load_api(self, refresh_cache=False):
+        # TODO: Find a way to invalidate caches on upstream change
         xdg_cache_home = os.environ.get("XDG_CACHE_HOME") or "~/.cache"
         apidoc_cache = os.path.join(
             os.path.expanduser(xdg_cache_home),
@@ -48,14 +49,17 @@ class OpenAPI:
                 raise IOError()
             with open(apidoc_cache) as f:
                 data = f.read()
-        except IOError:
+            self._parse_api(data)
+        except Exception:
+            # Try again with a freshly downloaded version
+            data = self._download_api()
+            self._parse_api(data)
+            # Write to cache as it seems to be valid
             os.makedirs(os.path.dirname(apidoc_cache), exist_ok=True)
             with open(apidoc_cache, "wb") as f:
-                r = self._session.get(urljoin(self.base_url, self.doc_path))
-                r.raise_for_status()
-                f.write(r.content)
-            with open(apidoc_cache) as f:
-                data = f.read()
+                f.write(data)
+
+    def _parse_api(self, data):
         self.api_spec = json.loads(data)
         if self.api_spec.get("openapi", "").startswith("3."):
             self.openapi_version = 3
@@ -68,6 +72,11 @@ class OpenAPI:
             if method
             in {"get", "put", "post", "delete", "options", "head", "patch", "trace"}
         }
+
+    def _download_api(self):
+        r = self._session.get(urljoin(self.base_url, self.doc_path))
+        r.raise_for_status()
+        return r.content
 
     def extract_params(self, param_type, path_spec, method_spec, params):
         param_spec = {
