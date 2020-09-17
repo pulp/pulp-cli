@@ -20,8 +20,10 @@ def list(ctx, **kwargs):
 
 
 @artifact.command()
-@click.option("--file", type=click.File('rb'), required=True)
-@click.option("--chunk-size", default=1000000, help="Chunk size in bytes (default is 1 MB)")
+@click.option("--file", type=click.File("rb"), required=True)
+@click.option(
+    "--chunk-size", default=1000000, help="Chunk size in bytes (default is 1 MB)"
+)
 @click.pass_context
 def upload(ctx, file, chunk_size):
     start = 0
@@ -37,19 +39,21 @@ def upload(ctx, file, chunk_size):
             chunk = file.read(chunk_size)
             sha256.update(chunk)
             range_header = f"bytes {start}-{end}/{size}"
-            ctx.obj.call("uploads_update",
-                         parameters={"upload_href": upload_href, "Content-Range": range_header},
-                         body={"sha256": hashlib.sha256(chunk).hexdigest()},
-                         uploads={"file": chunk},
-                         )
+            ctx.obj.call(
+                "uploads_update",
+                parameters={"upload_href": upload_href, "Content-Range": range_header},
+                body={"sha256": hashlib.sha256(chunk).hexdigest()},
+                uploads={"file": chunk},
+            )
             start += chunk_size
             click.echo(".", nl=False, err=True)
 
         click.echo("Upload complete. Creating artifact.", err=True)
-        ctx.obj.call("uploads_commit",
-                     parameters={"upload_href": upload_href},
-                     body={"sha256": sha256.hexdigest()},
-                     )
+        ctx.obj.call(
+            "uploads_commit",
+            parameters={"upload_href": upload_href},
+            body={"sha256": sha256.hexdigest()},
+        )
     except Exception as e:
         ctx.obj.call("uploads_delete", parameters={"upload_href": upload_href})
         raise e

@@ -28,7 +28,7 @@ jobs:
         run: |
           pip install black pytest .
       - name: Lint code
-        run: black --diff .
+        run: black --diff --check .
       - name: Run tests
         run: |
           cp tests/scripts/config.sh.example tests/scripts/config.sh
