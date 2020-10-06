@@ -51,7 +51,9 @@ class PulpContext:
 @click.option("--user", default="admin", help="Username on pulp server")
 # @click.option("--password", prompt=True, hide_input=True, help="Password on pulp server")
 @click.option("--password", default="password", help="Password on pulp server")
-@click.option("--verify-ssl", is_flag=True, default=True, help="Verify SSL connection")
+@click.option(
+    "--verify-ssl/--no-verify-ssl", default=True, help="Verify SSL connection"
+)
 @click.option(
     "--format", type=click.Choice(["json"], case_sensitive=False), default="json"
 )
