@@ -31,9 +31,12 @@ jobs:
       - name: Install Test Dependencies
         run: |
           pip install black pytest .
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
       - name: Lint code
         run: black --diff --check .
       - name: Run tests
         run: |
+          df -h
           cp tests/scripts/config.sh.example tests/scripts/config.sh
           .ci/run_container.sh pytest -v
