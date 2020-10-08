@@ -36,4 +36,4 @@ jobs:
       - name: Run tests
         run: |
           cp tests/scripts/config.sh.example tests/scripts/config.sh
-          .ci/run_container.sh pytest -v
+          CONTAINER_RUNTIME=docker .ci/run_container.sh pytest -v
