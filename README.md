@@ -12,6 +12,13 @@ options include:
   * `--user`
   * `--password`
 
+## Known issues
+
+  * Redirecting from `http` to `https`, as done by a typical Pulp installation,
+    does not work properly with `POST` and `PUT` requests.
+    Please use `https://` in the base url.
+    Note that the attempt to use `http` leaks sensitive data over an unencrypted connection.
+
 ## Example commands
 
 `pulp status`
