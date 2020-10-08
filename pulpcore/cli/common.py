@@ -47,7 +47,7 @@ class PulpContext:
 
 @click.group()
 @click.version_option(prog_name="pulp3 command line interface")
-@click.option("--base-url", default="http://localhost", help="Api base url")
+@click.option("--base-url", default="https://localhost", help="Api base url")
 @click.option("--user", default="admin", help="Username on pulp server")
 # @click.option("--password", prompt=True, hide_input=True, help="Password on pulp server")
 @click.option("--password", default="password", help="Password on pulp server")
