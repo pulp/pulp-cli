@@ -1,14 +1,18 @@
 #!/bin/sh
 
 BASEPATH=$(dirname $(readlink -f $0))
-if ls /usr/bin/podman
+
+if [ -z ${CONTAINER_RUNTIME+x} ]
 then
-  RUNTIME=podman
-else
-  RUNTIME=docker
+  if ls /usr/bin/podman
+  then
+    CONTAINER_RUNTIME=podman
+  else
+    CONTAINER_RUNTIME=docker
+  fi
 fi
 
-"${RUNTIME}" run --rm --detach --name "pulp" --volume "${BASEPATH}/settings:/etc/pulp" --publish "8080:80" pulp/pulp-fedora31
+"${CONTAINER_RUNTIME}" run --rm --detach --name "pulp" --volume "${BASEPATH}/settings:/etc/pulp" --publish "8080:80" pulp/pulp-fedora31
 
 echo "Wait for pulp to start."
 for i in $(seq 10)
@@ -22,8 +26,8 @@ do
   echo -n "."
 done
 
-trap "${RUNTIME} stop pulp" EXIT
+trap "${CONTAINER_RUNTIME} stop pulp" EXIT
 
-"${RUNTIME}" exec -t pulp bash -c "pulpcore-manager reset-admin-password --password password"
+"${CONTAINER_RUNTIME}" exec -t pulp bash -c "pulpcore-manager reset-admin-password --password password"
 
 "$@"
