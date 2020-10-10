@@ -34,7 +34,7 @@ def _find_remote(ctx, name):
         "remotes_file_file_list", parameters={"name": name, "limit": 1}
     )
     if search_result["count"] != 1:
-        raise Exception(f"Remote '{name}' not found.")
+        raise click.ClickException(f"Remote '{name}' not found.")
     remote = search_result["results"][0]
     return remote
 
@@ -61,7 +61,7 @@ def create(ctx, name, description, remote):
 def update(ctx, name, description, remote):
     search_result = ctx.obj.call(ctx.obj.list_id, parameters={"name": name, "limit": 1})
     if search_result["count"] != 1:
-        raise Exception(f"Repository '{name}' not found.")
+        raise click.ClickException(f"Repository '{name}' not found.")
     repository = search_result["results"][0]
     repository_href = repository["pulp_href"]
 
@@ -89,7 +89,7 @@ def update(ctx, name, description, remote):
 def destroy(ctx, name):
     search_result = ctx.obj.call(ctx.obj.list_id, parameters={"name": name, "limit": 1})
     if search_result["count"] != 1:
-        raise Exception(f"Repository '{name}' not found.")
+        raise click.ClickException(f"Repository '{name}' not found.")
     repository_href = search_result["results"][0]["pulp_href"]
     ctx.obj.call(ctx.obj.delete_id, parameters={ctx.obj.href_key: repository_href})
 
@@ -104,12 +104,17 @@ def sync(ctx, name, remote, background):
 
     search_result = ctx.obj.call(ctx.obj.list_id, parameters={"name": name, "limit": 1})
     if search_result["count"] != 1:
-        raise Exception(f"Repository '{name}' not found.")
-    repository_href = search_result["results"][0]["pulp_href"]
+        raise click.ClickException(f"Repository '{name}' not found.")
+    repository = search_result["results"][0]
+    repository_href = repository["pulp_href"]
 
     if remote:
         remote_href = _find_remote(ctx, remote)["pulp_href"]
         body["remote"] = remote_href
+    elif repository["remote"] is None:
+        raise click.ClickException(
+            f"Repository '{name}' does not have a default remote. Please specify with '--remote'."
+        )
 
     ctx.obj.call(
         ctx.obj.sync_id,
