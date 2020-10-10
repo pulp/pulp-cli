@@ -13,7 +13,7 @@ def _find_repository(ctx, repository):
         repo_list_id, parameters={"name": repository, "limit": 1}
     )
     if search_result["count"] != 1:
-        raise Exception(f"Repository '{repository}' not found.")
+        raise click.ClickException(f"Repository '{repository}' not found.")
 
     return search_result["results"][0]
 

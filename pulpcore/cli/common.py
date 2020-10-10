@@ -36,13 +36,13 @@ class PulpContext:
             if task["state"] == "completed":
                 return task
             if task["state"] == "failed":
-                raise Exception("Task failed")
+                raise click.ClickException("Task failed")
             if task["state"] == "canceled":
-                raise Exception("Task canceled")
+                raise click.ClickException("Task canceled")
             time.sleep(1)
             timeout -= 1
             click.echo(".", nl=False, err=True)
-        raise Exception("Task timed out")
+        raise click.ClickException("Task timed out")
 
 
 @click.group()

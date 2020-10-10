@@ -36,7 +36,7 @@ def create(ctx, repository):
         "repositories_file_file_list", parameters={"name": repository, "limit": 1}
     )
     if search_result["count"] != 1:
-        raise Exception(f"Repository '{repository}' not found.")
+        raise click.ClickException(f"Repository '{repository}' not found.")
     body = {"repository": search_result["results"][0]["pulp_href"]}
     result = ctx.obj.call(ctx.obj.create_id, body=body)
     publication = ctx.obj.call(

@@ -50,6 +50,6 @@ def create(ctx, name, base_path, publication):
 def destroy(ctx, name):
     search_result = ctx.obj.call(ctx.obj.list_id, parameters={"name": name, "limit": 1})
     if search_result["count"] != 1:
-        raise Exception(f"Distribution '{name}' not found.")
+        raise click.ClickException(f"Distribution '{name}' not found.")
     distribution_href = search_result["results"][0]["pulp_href"]
     ctx.obj.call(ctx.obj.delete_id, parameters={ctx.obj.href_key: distribution_href})
