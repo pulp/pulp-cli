@@ -12,6 +12,34 @@ options include:
   * `--user`
   * `--password`
 
+## Configuration
+
+The CLI can be configured by using a toml file.
+By default the location of this file is `~/.config/pulp/settings.toml`. 
+However, this can be customized by using the `--config` option.
+Any settings supplied as options to a command will override these settings.
+
+Example file:
+
+```toml
+[cli]
+base_url = "https://pulp.dev"
+verify_ssl = false
+format = "json"
+```
+
+### netrc
+
+If no user/pass is supplied either in the config file or as an option,
+then the CLI will attempt to use `~/.netrc`.
+Here is a `.netrc` example for localhost:
+
+```
+machine localhost
+login admin
+password password
+```
+
 ## Known issues
 
   * Redirecting from `http` to `https`, as done by a typical Pulp installation,

@@ -8,6 +8,7 @@ setup(
     install_requires=[
         "click",
         "requests",
+        "toml",
     ],
     entry_points={
         "console_scripts": "pulp=pulpcore.cli:main",

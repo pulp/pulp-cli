@@ -1,3 +1,4 @@
+# these variables must be defined
 PULP_CLI="pulp"
 PULP_BASE_URL="http://localhost:8080"
 PULP_USER="admin"
