@@ -1,7 +1,10 @@
 import click
 import datetime
 import json
+import os
 import time
+
+import toml
 
 from pulpcore.cli.openapi import OpenAPI
 
@@ -45,12 +48,35 @@ class PulpContext:
         raise click.ClickException("Task timed out")
 
 
+def _config_callback(ctx, param, value):
+    if ctx.default_map:
+        return
+
+    if value:
+        ctx.default_map = toml.load(value)["cli"]
+    else:
+        xdg_config_home = os.path.expanduser(os.environ.get("XDG_CACHE_HOME") or "~/.config")
+        default_config_path = os.path.join(xdg_config_home, "pulp", "settings.toml")
+
+        try:
+            ctx.default_map = toml.load(default_config_path)["cli"]
+        except FileNotFoundError:
+            pass
+
+
 @click.group()
 @click.version_option(prog_name="pulp3 command line interface")
+@click.option(
+    "--config",
+    type=click.Path(resolve_path=True),
+    help="Path to the Pulp settings.toml file",
+    callback=_config_callback,
+    expose_value=False,
+)
 @click.option("--base-url", default="https://localhost", help="Api base url")
-@click.option("--user", default="admin", help="Username on pulp server")
+@click.option("--user", help="Username on pulp server")
 # @click.option("--password", prompt=True, hide_input=True, help="Password on pulp server")
-@click.option("--password", default="password", help="Password on pulp server")
+@click.option("--password", help="Password on pulp server")
 @click.option("--verify-ssl/--no-verify-ssl", default=True, help="Verify SSL connection")
 @click.option("--format", type=click.Choice(["json"], case_sensitive=False), default="json")
 @click.pass_context

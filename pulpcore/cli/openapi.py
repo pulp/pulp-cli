@@ -32,7 +32,12 @@ class OpenAPI:
             "Accept": "application/json",
         }
         self._session = requests.session()
-        self._session.auth = (username, password)
+        if username and password:
+            self._session.auth = (username, password)
+        elif username:
+            raise Exception("Password is required if username is set.")
+        elif password:
+            raise Exception("Username is required if password is set.")
         self._session.headers.update(headers)
         self._session.verify = validate_certs
 
