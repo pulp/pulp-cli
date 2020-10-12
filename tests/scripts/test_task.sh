@@ -3,9 +3,9 @@
 . "$(dirname "$(realpath $0)")/config.sh"
 
 cleanup() {
-  pulp_cli file remote destroy --name "cli_test_file_remote"
-  pulp_cli file repository destroy --name "cli_test_file_repository"
-  pulp_cli orphans delete
+  pulp_cli file remote destroy --name "cli_test_file_remote" || true
+  pulp_cli file repository destroy --name "cli_test_file_repository" || true
+  pulp_cli orphans delete || true
 }
 trap cleanup EXIT
 
@@ -16,7 +16,7 @@ pulp_cli file remote create --name "cli_test_file_remote" \
   --url "https://fixtures.pulpproject.org/file-large/PULP_MANIFEST"
 pulp_cli file repository create --name "cli_test_file_repository" --remote "cli_test_file_remote"
 
-task=$(pulp_cli file repository sync --background --name "cli_test_file_repository" 2>&1 | egrep -o "/.*/")
+task=$(pulp_cli file repository sync --background --name "cli_test_file_repository" 2>&1 | egrep -o "/pulp/api/v3/tasks/[-[:xdigit:]]*/")
 pulp_cli task cancel --href "$task"
 test $(pulp_cli task list --name $sync_task --state canceled | jq -r .count) -eq $(($count + 1))
 
