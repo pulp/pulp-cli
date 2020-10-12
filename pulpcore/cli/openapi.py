@@ -9,6 +9,7 @@ import os
 import uuid
 import requests
 from urllib.parse import urlencode, urljoin
+import urllib3
 
 
 class OpenAPI:
@@ -21,6 +22,9 @@ class OpenAPI:
         validate_certs=True,
         refresh_cache=False,
     ):
+        if not validate_certs:
+            urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
         self.base_url = base_url
         self.doc_path = doc_path
 

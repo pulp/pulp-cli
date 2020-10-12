@@ -1,10 +1,10 @@
 PULP_CLI="pulp"
-BASE_URL="http://localhost:8080"
-USER="admin"
-PASSWORD="password"
+PULP_BASE_URL="http://localhost:8080"
+PULP_USER="admin"
+PULP_PASSWORD="password"
 
 pulp_cli () {
-  $PULP_CLI --base-url "${BASE_URL}" --user "${USER}" --password "${PASSWORD}" "$@"
+  $PULP_CLI --base-url "${PULP_BASE_URL}" --user "${PULP_USER}" --password "${PULP_PASSWORD}" "$@"
 }
 
 set -euv

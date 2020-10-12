@@ -12,7 +12,7 @@ pulp_cli file distribution create --name "cli_test_file_distro" \
   --base-path "cli_test_file_distro" \
   --publication "$PUBLICATION_HREF"
 
-curl --head --fail $BASE_URL/pulp/content/cli_test_file_distro/1.iso
+curl --head --fail $PULP_BASE_URL/pulp/content/cli_test_file_distro/1.iso
 
 pulp_cli file remote destroy --name "cli_test_file_remote"
 pulp_cli file repository destroy --name "cli_test_file_repository"
