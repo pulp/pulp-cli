@@ -9,9 +9,7 @@ def _find_repository(ctx, repository):
     else:
         raise NotImplementedError()
 
-    search_result = ctx.obj.call(
-        repo_list_id, parameters={"name": repository, "limit": 1}
-    )
+    search_result = ctx.obj.call(repo_list_id, parameters={"name": repository, "limit": 1})
     if search_result["count"] != 1:
         raise click.ClickException(f"Repository '{repository}' not found.")
 
@@ -34,9 +32,7 @@ def version(ctx):
 @click.pass_context
 def list(ctx, repository):
     repo_href = _find_repository(ctx, repository)["pulp_href"]
-    result = ctx.obj.call(
-        ctx.obj.list_id, parameters={"file_file_repository_href": repo_href}
-    )
+    result = ctx.obj.call(ctx.obj.list_id, parameters={"file_file_repository_href": repo_href})
     ctx.obj.output_result(result)
 
 
@@ -47,7 +43,5 @@ def list(ctx, repository):
 def destroy(ctx, repository, version):
     repo_href = _find_repository(ctx, repository)["pulp_href"]
     repo_version_href = f"{repo_href}versions/{version}"
-    result = ctx.obj.call(
-        ctx.obj.delete_id, parameters={ctx.obj.href_key: repo_version_href}
-    )
+    result = ctx.obj.call(ctx.obj.delete_id, parameters={ctx.obj.href_key: repo_version_href})
     ctx.obj.output_result(result)

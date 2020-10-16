@@ -21,9 +21,7 @@ def list(ctx, **kwargs):
 
 @artifact.command()
 @click.option("--file", type=click.File("rb"), required=True)
-@click.option(
-    "--chunk-size", default=1000000, help="Chunk size in bytes (default is 1 MB)"
-)
+@click.option("--chunk-size", default=1000000, help="Chunk size in bytes (default is 1 MB)")
 @click.pass_context
 def upload(ctx, file, chunk_size):
     start = 0
