@@ -30,9 +30,11 @@ jobs:
           python-version: ${{ matrix.python }}
       - name: Install Test Dependencies
         run: |
-          pip install black pytest .
+          pip install black pytest flake8 .
       - name: Lint code
-        run: black --diff --check .
+        run: |
+          black --diff --check .
+          flake8 --config flake8.cfg
       - name: Run tests
         run: |
           cp tests/scripts/config.sh.example tests/scripts/config.sh
