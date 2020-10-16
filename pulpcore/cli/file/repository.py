@@ -30,9 +30,7 @@ def list(ctx):
 
 
 def _find_remote(ctx, name):
-    search_result = ctx.obj.call(
-        "remotes_file_file_list", parameters={"name": name, "limit": 1}
-    )
+    search_result = ctx.obj.call("remotes_file_file_list", parameters={"name": name, "limit": 1})
     if search_result["count"] != 1:
         raise click.ClickException(f"Remote '{name}' not found.")
     remote = search_result["results"][0]

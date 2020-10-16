@@ -72,8 +72,7 @@ class OpenAPI:
             method_entry["operationId"]: (method, path)
             for path, path_entry in self.api_spec["paths"].items()
             for method, method_entry in path_entry.items()
-            if method
-            in {"get", "put", "post", "delete", "options", "head", "patch", "trace"}
+            if method in {"get", "put", "post", "delete", "options", "head", "patch", "trace"}
         }
 
     def _download_api(self):
@@ -117,10 +116,7 @@ class OpenAPI:
         if uploads:
             body = body or {}
             if any(
-                (
-                    content_type.startswith("multipart/form-data")
-                    for content_type in content_types
-                )
+                (content_type.startswith("multipart/form-data") for content_type in content_types)
             ):
                 boundary = uuid.uuid4().hex
                 part_boundary = b"--" + str.encode(boundary)
@@ -141,8 +137,7 @@ class OpenAPI:
                     form.extend(
                         [
                             part_boundary,
-                            b'Content-Disposition: file; name="%s"; filename="%s"'
-                            % (b_key, b_key),
+                            b'Content-Disposition: file; name="%s"; filename="%s"' % (b_key, b_key),
                             b"Content-Type: application/octet-stream",
                             b"",
                             file_data,
@@ -150,18 +145,13 @@ class OpenAPI:
                     )
                 form.append(part_boundary + b"--")
                 data = b"\r\n".join(form)
-                headers[
-                    "Content-Type"
-                ] = "multipart/form-data; boundary={boundary}".format(boundary=boundary)
+                headers["Content-Type"] = "multipart/form-data; boundary={boundary}".format(
+                    boundary=boundary
+                )
             else:
                 raise Exception("No suitable content type for file upload specified.")
         else:
-            if any(
-                (
-                    content_type.startswith("application/json")
-                    for content_type in content_types
-                )
-            ):
+            if any((content_type.startswith("application/json") for content_type in content_types)):
                 data = json.dumps(body)
                 headers["Content-Type"] = "application/json"
             elif any(
@@ -185,9 +175,7 @@ class OpenAPI:
             response_spec = method_spec["responses"][str(response.status_code)]
         except KeyError:
             # Fallback 201 -> 200
-            response_spec = method_spec["responses"][
-                str(100 * int(response.status_code / 100))
-            ]
+            response_spec = method_spec["responses"][str(100 * int(response.status_code / 100))]
         if "application/json" in response_spec["content"]:
             return response.json()
         return None
@@ -207,9 +195,7 @@ class OpenAPI:
 
         headers = self.extract_params("header", path_spec, method_spec, parameters)
 
-        for name, value in self.extract_params(
-            "path", path_spec, method_spec, parameters
-        ).items():
+        for name, value in self.extract_params("path", path_spec, method_spec, parameters).items():
             path = path.replace("{" + name + "}", value)
 
         query_string = urlencode(

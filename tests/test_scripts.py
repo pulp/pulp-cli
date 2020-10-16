@@ -12,7 +12,5 @@ TEST_NAMES = [
 
 @pytest.mark.parametrize("test_name", TEST_NAMES)
 def test_script(test_name):
-    run = subprocess.run(
-        [os.path.join("tests", "scripts", "test_" + test_name + ".sh")]
-    )
+    run = subprocess.run([os.path.join("tests", "scripts", "test_" + test_name + ".sh")])
     assert run.returncode == 0

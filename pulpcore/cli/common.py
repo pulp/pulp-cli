@@ -51,12 +51,8 @@ class PulpContext:
 @click.option("--user", default="admin", help="Username on pulp server")
 # @click.option("--password", prompt=True, hide_input=True, help="Password on pulp server")
 @click.option("--password", default="password", help="Password on pulp server")
-@click.option(
-    "--verify-ssl/--no-verify-ssl", default=True, help="Verify SSL connection"
-)
-@click.option(
-    "--format", type=click.Choice(["json"], case_sensitive=False), default="json"
-)
+@click.option("--verify-ssl/--no-verify-ssl", default=True, help="Verify SSL connection")
+@click.option("--format", type=click.Choice(["json"], case_sensitive=False), default="json")
 @click.pass_context
 def main(ctx, base_url, user, password, verify_ssl, format):
     ctx.ensure_object(PulpContext)
