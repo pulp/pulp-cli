@@ -10,7 +10,7 @@ import click
     default="file",
 )
 @click.pass_context
-def remote(ctx, remote_type):
+def remote(ctx: click.Context, remote_type: str) -> None:
     if remote_type == "file":
         ctx.obj.href_key = "file_file_remote_href"
         ctx.obj.list_id = "remotes_file_file_list"
@@ -23,16 +23,16 @@ def remote(ctx, remote_type):
 
 @remote.command()
 @click.pass_context
-def list(ctx):
+def list(ctx: click.Context) -> None:
     result = ctx.obj.call(ctx.obj.list_id)
     ctx.obj.output_result(result)
 
 
 @remote.command()
 @click.option("--name", required=True)
-@click.option("--url")
+@click.option("--url", required=True)
 @click.pass_context
-def create(ctx, name, url):
+def create(ctx: click.Context, name: str, url: str) -> None:
     remote = {"name": name, "url": url}
     result = ctx.obj.call(ctx.obj.create_id, body=remote)
     ctx.obj.output_result(result)
@@ -41,7 +41,7 @@ def create(ctx, name, url):
 @remote.command()
 @click.option("--name", required=True)
 @click.pass_context
-def destroy(ctx, name):
+def destroy(ctx: click.Context, name: str) -> None:
     search_result = ctx.obj.call(ctx.obj.list_id, parameters={"name": name, "limit": 1})
     if search_result["count"] != 1:
         raise click.ClickException(f"Remote '{name}' not found.")

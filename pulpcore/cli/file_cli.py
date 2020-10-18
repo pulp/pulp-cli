@@ -1,6 +1,4 @@
-import click
-
-from pulpcore.cli import main
+from pulpcore.cli.common import main
 from pulpcore.cli.file.repository import repository
 from pulpcore.cli.file.repository_version import version
 from pulpcore.cli.file.remote import remote
@@ -9,8 +7,7 @@ from pulpcore.cli.file.distribution import distribution
 
 
 @main.group()
-@click.pass_context
-def file(ctx):
+def file() -> None:
     pass
 
 

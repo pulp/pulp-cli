@@ -1,3 +1,5 @@
+from typing import Any, Optional
+
 import click
 
 
@@ -10,7 +12,7 @@ import click
     default="file",
 )
 @click.pass_context
-def repository(ctx, repo_type):
+def repository(ctx: click.Context, repo_type: str) -> None:
     if repo_type == "file":
         ctx.obj.href_key = "file_file_repository_href"
         ctx.obj.list_id = "repositories_file_file_list"
@@ -24,12 +26,12 @@ def repository(ctx, repo_type):
 
 @repository.command()
 @click.pass_context
-def list(ctx):
+def list(ctx: click.Context) -> None:
     result = ctx.obj.call(ctx.obj.list_id)
     ctx.obj.output_result(result)
 
 
-def _find_remote(ctx, name):
+def _find_remote(ctx: click.Context, name: str) -> Any:
     search_result = ctx.obj.call("remotes_file_file_list", parameters={"name": name, "limit": 1})
     if search_result["count"] != 1:
         raise click.ClickException(f"Remote '{name}' not found.")
@@ -42,7 +44,9 @@ def _find_remote(ctx, name):
 @click.option("--description")
 @click.option("--remote")
 @click.pass_context
-def create(ctx, name, description, remote):
+def create(
+    ctx: click.Context, name: str, description: Optional[str], remote: Optional[str]
+) -> None:
     repository = {"name": name, "description": description}
     if remote:
         repository["remote"] = _find_remote(ctx, remote)["pulp_href"]
@@ -56,7 +60,9 @@ def create(ctx, name, description, remote):
 @click.option("--description")
 @click.option("--remote")
 @click.pass_context
-def update(ctx, name, description, remote):
+def update(
+    ctx: click.Context, name: str, description: Optional[str], remote: Optional[str]
+) -> None:
     search_result = ctx.obj.call(ctx.obj.list_id, parameters={"name": name, "limit": 1})
     if search_result["count"] != 1:
         raise click.ClickException(f"Repository '{name}' not found.")
@@ -84,7 +90,7 @@ def update(ctx, name, description, remote):
 @repository.command()
 @click.option("--name", required=True)
 @click.pass_context
-def destroy(ctx, name):
+def destroy(ctx: click.Context, name: str) -> None:
     search_result = ctx.obj.call(ctx.obj.list_id, parameters={"name": name, "limit": 1})
     if search_result["count"] != 1:
         raise click.ClickException(f"Repository '{name}' not found.")
@@ -97,7 +103,7 @@ def destroy(ctx, name):
 @click.option("--remote")
 @click.option("-b", "--background", is_flag=True)
 @click.pass_context
-def sync(ctx, name, remote, background):
+def sync(ctx: click.Context, name: str, remote: Optional[str], background: bool) -> None:
     body = {}
 
     search_result = ctx.obj.call(ctx.obj.list_id, parameters={"name": name, "limit": 1})

@@ -15,7 +15,7 @@ options include:
 ## Configuration
 
 The CLI can be configured by using a toml file.
-By default the location of this file is `~/.config/pulp/settings.toml`. 
+By default the location of this file is `~/.config/pulp/settings.toml`.
 However, this can be customized by using the `--config` option.
 Any settings supplied as options to a command will override these settings.
 
@@ -64,3 +64,8 @@ password password
 Tests are run using `pytest`.
 
 Tests are shell scripts in `tests/scripts` with names like `test_*.sh`.
+
+## Contributing
+
+`pulp-cli` comes with python type annotations and black code formatting.
+To verify your code please run `black`, `flake8` and `mypy`.

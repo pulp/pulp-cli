@@ -1,6 +1,6 @@
 import pkg_resources
 
-from pulpcore.cli.common import main  # noqa
+from pulpcore.cli.common import main  # noqa: F401
 
 
 # Load plugins

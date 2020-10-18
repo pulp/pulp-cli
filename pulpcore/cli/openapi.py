@@ -3,6 +3,8 @@
 # copyright (c) 2020, Matthias Dellweg
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 
+from typing import Any, Dict, List, Optional
+
 import json
 import os
 import uuid
@@ -14,12 +16,12 @@ import urllib3
 class OpenAPI:
     def __init__(
         self,
-        base_url,
-        doc_path,
-        username=None,
-        password=None,
-        validate_certs=True,
-        refresh_cache=False,
+        base_url: str,
+        doc_path: str,
+        username: Optional[str] = None,
+        password: Optional[str] = None,
+        validate_certs: bool = True,
+        refresh_cache: bool = False,
     ):
         if not validate_certs:
             urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -43,10 +45,10 @@ class OpenAPI:
 
         self.load_api(refresh_cache=refresh_cache)
 
-    def load_api(self, refresh_cache=False):
+    def load_api(self, refresh_cache: bool = False) -> None:
         # TODO: Find a way to invalidate caches on upstream change
-        xdg_cache_home = os.environ.get("XDG_CACHE_HOME") or "~/.cache"
-        apidoc_cache = os.path.join(
+        xdg_cache_home: str = os.environ.get("XDG_CACHE_HOME") or "~/.cache"
+        apidoc_cache: str = os.path.join(
             os.path.expanduser(xdg_cache_home),
             "squeezer",
             self.base_url.replace(":", "_").replace("/", "_"),
@@ -55,8 +57,8 @@ class OpenAPI:
         try:
             if refresh_cache:
                 raise IOError()
-            with open(apidoc_cache) as f:
-                data = f.read()
+            with open(apidoc_cache, "b") as f:
+                data: bytes = f.read()
             self._parse_api(data)
         except Exception:
             # Try again with a freshly downloaded version
@@ -64,28 +66,34 @@ class OpenAPI:
             self._parse_api(data)
             # Write to cache as it seems to be valid
             os.makedirs(os.path.dirname(apidoc_cache), exist_ok=True)
-            with open(apidoc_cache, "wb") as f:
+            with open(apidoc_cache, "bw") as f:
                 f.write(data)
 
-    def _parse_api(self, data):
-        self.api_spec = json.loads(data)
+    def _parse_api(self, data: bytes) -> None:
+        self.api_spec: Dict[str, Any] = json.loads(data)
         if self.api_spec.get("openapi", "").startswith("3."):
-            self.openapi_version = 3
+            self.openapi_version: int = 3
         else:
             raise NotImplementedError("Unknown schema version")
-        self.operations = {
+        self.operations: Dict[str, Any] = {
             method_entry["operationId"]: (method, path)
             for path, path_entry in self.api_spec["paths"].items()
             for method, method_entry in path_entry.items()
             if method in {"get", "put", "post", "delete", "options", "head", "patch", "trace"}
         }
 
-    def _download_api(self):
-        r = self._session.get(urljoin(self.base_url, self.doc_path))
+    def _download_api(self) -> bytes:
+        r: requests.Response = self._session.get(urljoin(self.base_url, self.doc_path))
         r.raise_for_status()
         return r.content
 
-    def extract_params(self, param_type, path_spec, method_spec, params):
+    def extract_params(
+        self,
+        param_type: str,
+        path_spec: Dict[str, Any],
+        method_spec: Dict[str, Any],
+        params: Dict[str, Any],
+    ) -> Dict[str, Any]:
         param_spec = {
             entry["name"]: entry
             for entry in path_spec.get("parameters", [])
@@ -98,7 +106,7 @@ class OpenAPI:
                 if entry["in"] == param_type
             }
         )
-        result = {}
+        result: Dict[str, Any] = {}
         for name in list(params.keys()):
             if name in param_spec:
                 param_spec.pop(name)
@@ -114,21 +122,28 @@ class OpenAPI:
             )
         return result
 
-    def render_body(self, path_spec, method_spec, headers, body=None, uploads=None):
+    def render_body(
+        self,
+        path_spec: Dict[str, Any],
+        method_spec: Dict[str, Any],
+        headers: Dict[str, str],
+        body: Optional[Dict[str, Any]] = None,
+        uploads: Optional[Dict[str, bytes]] = None,
+    ) -> Optional[bytes]:
         if not (body or uploads):
             return None
-        content_types = list(method_spec["requestBody"]["content"].keys())
+        content_types: List[str] = list(method_spec["requestBody"]["content"].keys())
         if uploads:
             body = body or {}
             if any(
                 (content_type.startswith("multipart/form-data") for content_type in content_types)
             ):
-                boundary = uuid.uuid4().hex
-                part_boundary = b"--" + str.encode(boundary)
+                boundary: str = uuid.uuid4().hex
+                part_boundary: bytes = b"--" + str.encode(boundary)
 
-                form = []
+                form: List[bytes] = []
                 for key, value in body.items():
-                    b_key = str.encode(key)
+                    b_key: bytes = str.encode(key)
                     form.extend(
                         [
                             part_boundary,
@@ -155,9 +170,9 @@ class OpenAPI:
                 )
             else:
                 raise Exception("No suitable content type for file upload specified.")
-        else:
+        elif body:
             if any((content_type.startswith("application/json") for content_type in content_types)):
-                data = json.dumps(body)
+                data = str.encode(json.dumps(body))
                 headers["Content-Type"] = "application/json"
             elif any(
                 (
@@ -165,14 +180,14 @@ class OpenAPI:
                     for content_type in content_types
                 )
             ):
-                data = urlencode(body)
+                data = str.encode(urlencode(body))
                 headers["Content-Type"] = "application/x-www-form-urlencoded"
             else:
                 raise Exception("No suitable content type for file upload specified.")
         headers["Content-Length"] = str(len(data))
         return data
 
-    def parse_response(self, method_spec, response):
+    def parse_response(self, method_spec: Dict[str, Any], response: requests.Response) -> Any:
         if response.status_code == 204:
             return "{}"
 
@@ -185,7 +200,13 @@ class OpenAPI:
             return response.json()
         return None
 
-    def call(self, operation_id, parameters=None, body=None, uploads=None):
+    def call(
+        self,
+        operation_id: str,
+        parameters: Optional[Dict[str, Any]] = None,
+        body: Optional[Dict[str, Any]] = None,
+        uploads: Optional[Dict[str, bytes]] = None,
+    ) -> Any:
         method, path = self.operations[operation_id]
         path_spec = self.api_spec["paths"][path]
         method_spec = path_spec[method]
@@ -217,8 +238,8 @@ class OpenAPI:
         if query_string:
             url += "?" + query_string
 
-        data = self.render_body(path_spec, method_spec, headers, body, uploads)
+        data: Optional[bytes] = self.render_body(path_spec, method_spec, headers, body, uploads)
 
-        response = self._session.request(method, url, data=data, headers=headers)
+        response: requests.Response = self._session.request(method, url, data=data, headers=headers)
         response.raise_for_status()
         return self.parse_response(method_spec, response)
