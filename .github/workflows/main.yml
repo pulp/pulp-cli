@@ -18,9 +18,7 @@ jobs:
       fail-fast: false
       matrix:
         python:
-          # Plugin loading does not seem to work here.
-          # "ImportError: cannot import name find_namespace_packages"
-          # - "2.7"
+          - "3.6"
           - "3.8"
     steps:
       - uses: actions/checkout@v2
@@ -30,11 +28,12 @@ jobs:
           python-version: ${{ matrix.python }}
       - name: Install Test Dependencies
         run: |
-          pip install black pytest flake8 .
+          pip install black pytest flake8 mypy .
       - name: Lint code
         run: |
           black --diff --check .
           flake8 --config flake8.cfg
+          mypy
       - name: Run tests
         run: |
           cp tests/scripts/config.sh.example tests/scripts/config.sh

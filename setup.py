@@ -5,6 +5,7 @@ setup(
     name="pulp-cli",
     version="0.0.0a1.dev",
     packages=find_namespace_packages(include=["pulpcore.*"]),
+    package_data={"pulpcore.cli": ["py.typed"]},
     install_requires=[
         "click",
         "requests",

@@ -1,3 +1,5 @@
+from typing import Any, Optional
+
 import click
 import datetime
 import json
@@ -10,19 +12,32 @@ from pulpcore.cli.openapi import OpenAPI
 
 
 class PulpJSONEncoder(json.JSONEncoder):
-    def default(self, obj):
+    def default(self, obj: Any) -> Any:
         if isinstance(obj, datetime.datetime):
             return obj.isoformat()
         else:
-            super(json.JSONEncoder).default(obj)
+            return super().default(obj)
 
 
 class PulpContext:
-    def output_result(self, result):
+    def __init__(self, api: OpenAPI, format: str) -> None:
+        self.api: OpenAPI = api
+        self.format: str = format
+
+        # define some names
+        self.href_key: Optional[str] = None
+        self.list_id: Optional[str] = None
+        self.cancel_id: Optional[str] = None
+
+    def output_result(self, result: Any) -> None:
         if self.format == "json":
             click.echo(json.dumps(result, cls=PulpJSONEncoder, indent=2))
+        else:
+            raise NotImplementedError(f"Format '{self.format}' not implemented.")
 
-    def call(self, operation_id, background=False, *args, **kwargs):
+    def call(self, operation_id: str, background: bool = False, *args: Any, **kwargs: Any) -> Any:
+        if self.api is None:
+            raise click.ClickException("Api is not initialized.")
         result = self.api.call(operation_id, *args, **kwargs)
         if "task" in result:
             task_href = result["task"]
@@ -32,8 +47,11 @@ class PulpContext:
                 click.echo("Done.", err=True)
         return result
 
-    def wait_for_task(self, task_href, timeout=120):
+    def wait_for_task(self, task_href: str, timeout: int = 120) -> Any:
+        if self.api is None:
+            raise click.ClickException("Api is not initialized.")
         while timeout:
+            time.sleep(1)
             timeout -= 1
             task = self.api.call("tasks_read", parameters={"task_href": task_href})
             if task["state"] == "completed":
@@ -42,13 +60,11 @@ class PulpContext:
                 raise click.ClickException("Task failed")
             if task["state"] == "canceled":
                 raise click.ClickException("Task canceled")
-            time.sleep(1)
-            timeout -= 1
             click.echo(".", nl=False, err=True)
         raise click.ClickException("Task timed out")
 
 
-def _config_callback(ctx, param, value):
+def _config_callback(ctx: click.Context, param: Any, value: str) -> None:
     if ctx.default_map:
         return
 
@@ -80,9 +96,10 @@ def _config_callback(ctx, param, value):
 @click.option("--verify-ssl/--no-verify-ssl", default=True, help="Verify SSL connection")
 @click.option("--format", type=click.Choice(["json"], case_sensitive=False), default="json")
 @click.pass_context
-def main(ctx, base_url, user, password, verify_ssl, format):
-    ctx.ensure_object(PulpContext)
-    ctx.obj.api = OpenAPI(
+def main(
+    ctx: click.Context, base_url: str, user: str, password: str, verify_ssl: bool, format: str
+) -> None:
+    api = OpenAPI(
         base_url=base_url,
         doc_path="/pulp/api/v3/docs/api.json",
         username=user,
@@ -90,4 +107,4 @@ def main(ctx, base_url, user, password, verify_ssl, format):
         validate_certs=verify_ssl,
         refresh_cache=True,
     )
-    ctx.obj.format = format
+    ctx.obj = PulpContext(api=api, format=format)

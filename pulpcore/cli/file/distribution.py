@@ -1,3 +1,5 @@
+from typing import Optional
+
 import click
 
 
@@ -10,7 +12,7 @@ import click
     default="file",
 )
 @click.pass_context
-def distribution(ctx, distribution_type):
+def distribution(ctx: click.Context, distribution_type: str) -> None:
     if distribution_type == "file":
         ctx.obj.href_key = "file_file_distribution_href"
         ctx.obj.list_id = "distributions_file_file_list"
@@ -23,7 +25,7 @@ def distribution(ctx, distribution_type):
 
 @distribution.command()
 @click.pass_context
-def list(ctx):
+def list(ctx: click.Context) -> None:
     result = ctx.obj.call(ctx.obj.list_id)
     ctx.obj.output_result(result)
 
@@ -33,7 +35,7 @@ def list(ctx):
 @click.option("--base-path", required=True)
 @click.option("--publication")
 @click.pass_context
-def create(ctx, name, base_path, publication):
+def create(ctx: click.Context, name: str, base_path: str, publication: Optional[str]) -> None:
     body = {"name": name, "base_path": base_path}
     if publication:
         body["publication"] = publication
@@ -47,7 +49,7 @@ def create(ctx, name, base_path, publication):
 @distribution.command()
 @click.option("--name", required=True)
 @click.pass_context
-def destroy(ctx, name):
+def destroy(ctx: click.Context, name: str) -> None:
     search_result = ctx.obj.call(ctx.obj.list_id, parameters={"name": name, "limit": 1})
     if search_result["count"] != 1:
         raise click.ClickException(f"Distribution '{name}' not found.")

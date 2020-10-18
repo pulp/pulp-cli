@@ -10,7 +10,7 @@ import click
     default="file",
 )
 @click.pass_context
-def publication(ctx, publication_type):
+def publication(ctx: click.Context, publication_type: str) -> None:
     if publication_type == "file":
         ctx.obj.href_key = "file_file_publication_href"
         ctx.obj.list_id = "publications_file_file_list"
@@ -23,7 +23,7 @@ def publication(ctx, publication_type):
 
 @publication.command()
 @click.pass_context
-def list(ctx):
+def list(ctx: click.Context) -> None:
     result = ctx.obj.call(ctx.obj.list_id)
     ctx.obj.output_result(result)
 
@@ -31,7 +31,7 @@ def list(ctx):
 @publication.command()
 @click.option("--repository", required=True)
 @click.pass_context
-def create(ctx, repository):
+def create(ctx: click.Context, repository: str) -> None:
     search_result = ctx.obj.call(
         "repositories_file_file_list", parameters={"name": repository, "limit": 1}
     )
@@ -48,5 +48,5 @@ def create(ctx, repository):
 @publication.command()
 @click.option("--href", required=True)
 @click.pass_context
-def destroy(ctx, href):
+def destroy(ctx: click.Context, href: str) -> None:
     ctx.obj.call(ctx.obj.delete_id, parameters={ctx.obj.href_key: href})
