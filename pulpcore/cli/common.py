@@ -32,6 +32,8 @@ class PulpContext:
     def output_result(self, result: Any) -> None:
         if self.format == "json":
             click.echo(json.dumps(result, cls=PulpJSONEncoder, indent=2))
+        elif self.format == "none":
+            pass
         else:
             raise NotImplementedError(f"Format '{self.format}' not implemented.")
 
@@ -91,13 +93,25 @@ def _config_callback(ctx: click.Context, param: Any, value: str) -> None:
 )
 @click.option("--base-url", default="https://localhost", help="Api base url")
 @click.option("--user", help="Username on pulp server")
-# @click.option("--password", prompt=True, hide_input=True, help="Password on pulp server")
 @click.option("--password", help="Password on pulp server")
 @click.option("--verify-ssl/--no-verify-ssl", default=True, help="Verify SSL connection")
-@click.option("--format", type=click.Choice(["json"], case_sensitive=False), default="json")
+@click.option("--format", type=click.Choice(["json", "none"], case_sensitive=False), default="json")
+@click.option(
+    "-v",
+    "--verbose",
+    type=int,
+    count=True,
+    help="Increase verbosity. Explain api calls as they are made",
+)
 @click.pass_context
 def main(
-    ctx: click.Context, base_url: str, user: str, password: str, verify_ssl: bool, format: str
+    ctx: click.Context,
+    base_url: str,
+    user: str,
+    password: str,
+    verify_ssl: bool,
+    format: str,
+    verbose: int,
 ) -> None:
     api = OpenAPI(
         base_url=base_url,
@@ -106,5 +120,6 @@ def main(
         password=password,
         validate_certs=verify_ssl,
         refresh_cache=True,
+        debug_callback=lambda x: click.secho(x, err=True, bold=True) if verbose >= 1 else None,
     )
     ctx.obj = PulpContext(api=api, format=format)

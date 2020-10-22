@@ -3,7 +3,7 @@
 # copyright (c) 2020, Matthias Dellweg
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional
 
 import json
 import os
@@ -22,18 +22,20 @@ class OpenAPI:
         password: Optional[str] = None,
         validate_certs: bool = True,
         refresh_cache: bool = False,
+        debug_callback: Optional[Callable[[str], Any]] = None,
     ):
         if not validate_certs:
             urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-        self.base_url = base_url
-        self.doc_path = doc_path
+        self.debug_callback: Callable[[str], Any] = debug_callback or (lambda x: None)
+        self.base_url: str = base_url
+        self.doc_path: str = doc_path
 
         headers = {
             "Content-Type": "application/json",
             "Accept": "application/json",
         }
-        self._session = requests.session()
+        self._session: requests.Session = requests.session()
         if username and password:
             self._session.auth = (username, password)
         elif username:
@@ -240,6 +242,11 @@ class OpenAPI:
 
         data: Optional[bytes] = self.render_body(path_spec, method_spec, headers, body, uploads)
 
+        self.debug_callback(f"{method} {url}")
+        for key, value in headers.items():
+            self.debug_callback(f"  {key}: {value}")
+        if data:
+            self.debug_callback(f"{data!r}")
         response: requests.Response = self._session.request(method, url, data=data, headers=headers)
         response.raise_for_status()
         return self.parse_response(method_spec, response)
