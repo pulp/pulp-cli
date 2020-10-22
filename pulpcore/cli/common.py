@@ -38,8 +38,6 @@ class PulpContext:
             raise NotImplementedError(f"Format '{self.format}' not implemented.")
 
     def call(self, operation_id: str, background: bool = False, *args: Any, **kwargs: Any) -> Any:
-        if self.api is None:
-            raise click.ClickException("Api is not initialized.")
         result = self.api.call(operation_id, *args, **kwargs)
         if "task" in result:
             task_href = result["task"]
@@ -50,8 +48,6 @@ class PulpContext:
         return result
 
     def wait_for_task(self, task_href: str, timeout: int = 120) -> Any:
-        if self.api is None:
-            raise click.ClickException("Api is not initialized.")
         while timeout:
             time.sleep(1)
             timeout -= 1
@@ -107,12 +103,14 @@ def _config_callback(ctx: click.Context, param: Any, value: str) -> None:
 def main(
     ctx: click.Context,
     base_url: str,
-    user: str,
-    password: str,
+    user: Optional[str],
+    password: Optional[str],
     verify_ssl: bool,
     format: str,
     verbose: int,
 ) -> None:
+    if user and not password:
+        password = click.prompt("password", hide_input=True)
     api = OpenAPI(
         base_url=base_url,
         doc_path="/pulp/api/v3/docs/api.json",
