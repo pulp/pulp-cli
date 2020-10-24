@@ -1,7 +1,7 @@
 #!/bin/sh
 
-. "$(dirname "$(realpath $0)")/config.sh"
-. "$(dirname "$(realpath $0)")/constants.sh"
+. "$(dirname "$(realpath "$0")")/config.source"
+. "$(dirname "$(realpath "$0")")/constants.source"
 
 cleanup() {
   pulp_cli file remote destroy --name "cli_test_file_remote" || true
@@ -27,4 +27,4 @@ pulp_cli file repository sync --name "cli_test_file_repository"
 pulp_cli file repository sync --name "cli_test_file_repository" --remote "cli_test_file_remote"
 
 # Verify sync
-test $(pulp_cli file repository version list --repository "cli_test_file_repository" | jq -r .count) -eq 2
+test "$(pulp_cli file repository version list --repository "cli_test_file_repository" | jq -r .count)" -eq 2

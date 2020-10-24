@@ -31,10 +31,11 @@ jobs:
           pip install black pytest flake8 mypy .
       - name: Lint code
         run: |
+          find . -name '*.sh' -print0 | xargs -0 shellcheck -e SC1090
           black --diff --check .
           flake8 --config flake8.cfg
           mypy
       - name: Run tests
         run: |
-          cp tests/scripts/config.sh.example tests/scripts/config.sh
+          cp tests/scripts/config.source.example tests/scripts/config.source
           CONTAINER_RUNTIME=docker .ci/run_container.sh pytest -v

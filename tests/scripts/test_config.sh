@@ -1,6 +1,6 @@
 #!/bin/sh
 
-. "$(dirname "$(realpath $0)")/config.sh"
+. "$(dirname "$(realpath "$0")")/config.source"
 
 good_settings="good_settings.toml"
 bad_settings="bad_settings.toml"
@@ -28,7 +28,7 @@ password = "$PULP_PASSWORD"
 EOL
 
 $good_cli file repository list
-$bad_cli --base-url $PULP_BASE_URL file repository list
+$bad_cli --base-url "$PULP_BASE_URL" file repository list
 
 if $bad_cli file repository list 2> /dev/null; then
   echo "'$bad_cli ...' succeeded unexpectedly"
