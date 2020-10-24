@@ -79,4 +79,4 @@ eval "$(_PULP_COMPLETE=source_bash pulp)"
 ## Contributing
 
 `pulp-cli` comes with python type annotations and black code formatting.
-To verify your code please run `black`, `flake8` and `mypy`.
+To verify your code please run `black`, `flake8`, `shellcheck`, and `mypy`.

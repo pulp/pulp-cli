@@ -1,7 +1,7 @@
 #!/bin/sh
 
-. "$(dirname "$(realpath $0)")/config.sh"
-. "$(dirname "$(realpath $0)")/constants.sh"
+. "$(dirname "$(realpath "$0")")/config.source"
+. "$(dirname "$(realpath "$0")")/constants.source"
 
 pulp_cli file remote create --name "cli_test_file_remote" --url "$FILE_REMOTE_URL"
 pulp_cli file repository create --name "cli_test_file_repository" --remote "cli_test_file_remote"

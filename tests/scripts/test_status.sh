@@ -1,6 +1,6 @@
 #!/bin/sh
 
-. "$(dirname "$(realpath $0)")/config.sh"
+. "$(dirname "$(realpath "$0")")/config.source"
 
 STATUS_RESULT=$(pulp_cli status)
 
