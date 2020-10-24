@@ -35,11 +35,6 @@ class PulpContext:
         self.api: OpenAPI = api
         self.format: str = format
 
-        # define some names
-        self.href_key: Optional[str] = None
-        self.list_id: Optional[str] = None
-        self.cancel_id: Optional[str] = None
-
     def output_result(self, result: Any) -> None:
         if self.format == "json":
             output = json.dumps(result, cls=PulpJSONEncoder, indent=2)
@@ -76,13 +71,16 @@ class PulpContext:
             task = self.api.call("tasks_read", parameters={"task_href": task_href})
             if task["state"] == "completed":
                 return task
-            if task["state"] == "failed":
+            elif task["state"] == "failed":
                 raise click.ClickException(
                     f"Task {task_href} failed: '{task['error']['description']}'"
                 )
-            if task["state"] == "canceled":
+            elif task["state"] == "canceled":
                 raise click.ClickException("Task canceled")
-            click.echo(".", nl=False, err=True)
+            elif task["state"] in ["waiting", "running"]:
+                click.echo(".", nl=False, err=True)
+            else:
+                raise NotImplementedError(f"Unknown task state: {task['state']}")
         raise click.ClickException("Task timed out")
 
 
