@@ -8,6 +8,7 @@ setup(
     package_data={"pulpcore.cli": ["py.typed"]},
     install_requires=[
         "click",
+        "PyYAML",
         "requests",
         "toml",
     ],
@@ -17,5 +18,8 @@ setup(
             "core=pulpcore.cli.core_cli",
             "file=pulpcore.cli.file_cli",
         ],
+    },
+    extras_require={
+        "pygments": ["pygments"],
     },
 )
