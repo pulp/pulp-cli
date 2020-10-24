@@ -7,8 +7,19 @@ import os
 import time
 
 import toml
+import yaml
 
 from pulpcore.cli.openapi import OpenAPI
+
+try:
+    from pygments import highlight
+    from pygments.formatters import Terminal256Formatter
+    from pygments.lexers import JsonLexer, YamlLexer
+except ImportError:
+    PYGMENTS = False
+else:
+    PYGMENTS = True
+    PYGMENTS_STYLE = "solarized-dark"
 
 
 class PulpJSONEncoder(json.JSONEncoder):
@@ -31,7 +42,15 @@ class PulpContext:
 
     def output_result(self, result: Any) -> None:
         if self.format == "json":
-            click.echo(json.dumps(result, cls=PulpJSONEncoder, indent=2))
+            output = json.dumps(result, cls=PulpJSONEncoder, indent=2)
+            if PYGMENTS:
+                output = highlight(output, JsonLexer(), Terminal256Formatter(style=PYGMENTS_STYLE))
+            click.echo(output)
+        elif self.format == "yaml":
+            output = yaml.dump(result)
+            if PYGMENTS:
+                output = highlight(output, YamlLexer(), Terminal256Formatter(style=PYGMENTS_STYLE))
+            click.echo(output)
         elif self.format == "none":
             pass
         else:
@@ -91,7 +110,9 @@ def _config_callback(ctx: click.Context, param: Any, value: str) -> None:
 @click.option("--user", help="Username on pulp server")
 @click.option("--password", help="Password on pulp server")
 @click.option("--verify-ssl/--no-verify-ssl", default=True, help="Verify SSL connection")
-@click.option("--format", type=click.Choice(["json", "none"], case_sensitive=False), default="json")
+@click.option(
+    "--format", type=click.Choice(["json", "yaml", "none"], case_sensitive=False), default="json"
+)
 @click.option(
     "-v",
     "--verbose",
