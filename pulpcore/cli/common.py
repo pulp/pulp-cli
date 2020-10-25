@@ -8,7 +8,7 @@ import time
 
 import toml
 
-from pulpcore.cli.openapi import OpenAPI
+from pulpcore.cli.openapi import OpenAPI, OpenAPIError
 
 
 class PulpJSONEncoder(json.JSONEncoder):
@@ -38,7 +38,10 @@ class PulpContext:
             raise NotImplementedError(f"Format '{self.format}' not implemented.")
 
     def call(self, operation_id: str, background: bool = False, *args: Any, **kwargs: Any) -> Any:
-        result = self.api.call(operation_id, *args, **kwargs)
+        try:
+            result = self.api.call(operation_id, *args, **kwargs)
+        except OpenAPIError as e:
+            raise click.ClickException(str(e))
         if "task" in result:
             task_href = result["task"]
             click.echo(f"Started task {task_href}", err=True)
@@ -55,7 +58,9 @@ class PulpContext:
             if task["state"] == "completed":
                 return task
             if task["state"] == "failed":
-                raise click.ClickException("Task failed")
+                raise click.ClickException(
+                    f"Task {task_href} failed: '{task['error']['description']}'"
+                )
             if task["state"] == "canceled":
                 raise click.ClickException("Task canceled")
             click.echo(".", nl=False, err=True)
@@ -111,13 +116,16 @@ def main(
 ) -> None:
     if user and not password:
         password = click.prompt("password", hide_input=True)
-    api = OpenAPI(
-        base_url=base_url,
-        doc_path="/pulp/api/v3/docs/api.json",
-        username=user,
-        password=password,
-        validate_certs=verify_ssl,
-        refresh_cache=True,
-        debug_callback=lambda x: click.secho(x, err=True, bold=True) if verbose >= 1 else None,
-    )
+    try:
+        api = OpenAPI(
+            base_url=base_url,
+            doc_path="/pulp/api/v3/docs/api.json",
+            username=user,
+            password=password,
+            validate_certs=verify_ssl,
+            refresh_cache=True,
+            debug_callback=lambda x: click.secho(x, err=True, bold=True) if verbose >= 1 else None,
+        )
+    except OpenAPIError as e:
+        raise click.ClickException(str(e))
     ctx.obj = PulpContext(api=api, format=format)
