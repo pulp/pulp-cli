@@ -65,6 +65,17 @@ Tests are run using `pytest`.
 
 Tests are shell scripts in `tests/scripts` with names like `test_*.sh`.
 
+## Shell Completion
+
+The CLI uses the click package which supports shell completion.
+To configure this, check out [click's
+documentation](https://click.palletsprojects.com/en/7.x/bashcomplete/).
+As an example, here is what to add to your `~/.bashrc` file if you're using bash:
+
+```bash
+eval "$(_PULP_COMPLETE=source_bash pulp)"
+```
+
 ## Contributing
 
 `pulp-cli` comes with python type annotations and black code formatting.
