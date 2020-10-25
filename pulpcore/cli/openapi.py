@@ -13,6 +13,10 @@ from urllib.parse import urlencode, urljoin
 import urllib3
 
 
+class OpenAPIError(Exception):
+    pass
+
+
 class OpenAPI:
     def __init__(
         self,
@@ -39,9 +43,9 @@ class OpenAPI:
         if username and password:
             self._session.auth = (username, password)
         elif username:
-            raise Exception("Password is required if username is set.")
+            raise OpenAPIError("Password is required if username is set.")
         elif password:
-            raise Exception("Username is required if password is set.")
+            raise OpenAPIError("Username is required if password is set.")
         self._session.headers.update(headers)
         self._session.verify = validate_certs
 
@@ -76,7 +80,7 @@ class OpenAPI:
         if self.api_spec.get("openapi", "").startswith("3."):
             self.openapi_version: int = 3
         else:
-            raise NotImplementedError("Unknown schema version")
+            raise OpenAPIError("Unknown schema version")
         self.operations: Dict[str, Any] = {
             method_entry["operationId"]: (method, path)
             for path, path_entry in self.api_spec["paths"].items()
@@ -85,7 +89,10 @@ class OpenAPI:
         }
 
     def _download_api(self) -> bytes:
-        r: requests.Response = self._session.get(urljoin(self.base_url, self.doc_path))
+        try:
+            r: requests.Response = self._session.get(urljoin(self.base_url, self.doc_path))
+        except requests.exceptions.ConnectionError as e:
+            raise OpenAPIError(str(e))
         r.raise_for_status()
         return r.content
 
@@ -117,7 +124,7 @@ class OpenAPI:
             item["name"] for item in param_spec.values() if item.get("required", False)
         ]
         if any(remaining_required):
-            raise Exception(
+            raise OpenAPIError(
                 "Required parameters [{0}] missing for {1}.".format(
                     ", ".join(remaining_required), param_type
                 )
@@ -171,7 +178,7 @@ class OpenAPI:
                     boundary=boundary
                 )
             else:
-                raise Exception("No suitable content type for file upload specified.")
+                raise OpenAPIError("No suitable content type for file upload specified.")
         elif body:
             if any((content_type.startswith("application/json") for content_type in content_types)):
                 data = str.encode(json.dumps(body))
@@ -185,7 +192,7 @@ class OpenAPI:
                 data = str.encode(urlencode(body))
                 headers["Content-Type"] = "application/x-www-form-urlencoded"
             else:
-                raise Exception("No suitable content type for file upload specified.")
+                raise OpenAPIError("No suitable content type for request specified.")
         headers["Content-Length"] = str(len(data))
         return data
 
@@ -231,7 +238,7 @@ class OpenAPI:
         )
 
         if any(parameters):
-            raise Exception(
+            raise OpenAPIError(
                 "Parameter [{names}] not available for {operation_id}.".format(
                     names=", ".join(parameters.keys()), operation_id=operation_id
                 )
