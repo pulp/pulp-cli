@@ -22,6 +22,10 @@ else:
     PYGMENTS_STYLE = "solarized-dark"
 
 
+DEFAULT_LIMIT = 25
+BATCH_SIZE = 25
+
+
 class PulpJSONEncoder(json.JSONEncoder):
     def default(self, obj: Any) -> Any:
         if isinstance(obj, datetime.datetime):

@@ -1,6 +1,6 @@
 *.egg-info
 __pycache__/
 build/
-tests/scripts/config.sh
+tests/scripts/config.source
 /.ci/settings/
 !/.ci/settings/settings.py
