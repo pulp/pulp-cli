@@ -1,43 +1,20 @@
-from typing import Any, Dict, List
+from typing import Any
 
 import click
 
-from pulpcore.cli.common import DEFAULT_LIMIT, BATCH_SIZE, PulpContext
+from pulpcore.cli.common import DEFAULT_LIMIT, PulpContext, PulpEntityContext
 
 
-class PulpTaskContext:
-    def __init__(self, pulp_ctx: PulpContext) -> None:
-        self.pulp_ctx: PulpContext = pulp_ctx
-
-    def list(self, limit: int, offset: int, parameters: Dict[str, Any]) -> List[Any]:
-        count: int = -1
-        entities: List[Any] = []
-        payload: Dict[str, Any] = parameters.copy()
-        payload["offset"] = offset
-        payload["limit"] = BATCH_SIZE
-        while limit != 0:
-            if limit > BATCH_SIZE:
-                limit -= BATCH_SIZE
-            else:
-                payload["limit"] = limit
-                limit = 0
-            result: Dict[str, Any] = self.pulp_ctx.call("tasks_list", parameters=payload)
-            count = result["count"]
-            entities.extend(result["results"])
-            if result["next"] is None:
-                break
-            payload["offset"] += payload["limit"]
-        else:
-            click.echo(f"Not all {count} entries were shown.", err=True)
-        return entities
-
-    def show(self, task_href: str) -> Any:
-        return self.pulp_ctx.call("tasks_read", parameters={"task_href": task_href})
+class PulpTaskContext(PulpEntityContext):
+    HREF: str = "task_href"
+    LIST_ID: str = "tasks_list"
+    READ_ID: str = "tasks_read"
+    CANCEL_ID: str = "tasks_cancel"
 
     def cancel(self, task_href: str) -> Any:
         return self.pulp_ctx.call(
-            "tasks_cancel",
-            parameters={"task_href": task_href},
+            self.CANCEL_ID,
+            parameters={self.HREF: task_href},
             body={"state": "canceled"},
         )
 

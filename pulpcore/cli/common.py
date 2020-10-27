@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any, Optional, Dict, List
 
 import click
 import datetime
@@ -86,6 +86,41 @@ class PulpContext:
             else:
                 raise NotImplementedError(f"Unknown task state: {task['state']}")
         raise click.ClickException("Task timed out")
+
+
+class PulpEntityContext:
+    # Subclasses should provide appropriate values here
+    HREF: str = "entity"
+    LIST_ID: str = "entities_list"
+    READ_ID: str = "entities_read"
+
+    def __init__(self, pulp_ctx: PulpContext) -> None:
+        self.pulp_ctx: PulpContext = pulp_ctx
+
+    def list(self, limit: int, offset: int, parameters: Dict[str, Any]) -> List[Any]:
+        count: int = -1
+        entities: List[Any] = []
+        payload: Dict[str, Any] = parameters.copy()
+        payload["offset"] = offset
+        payload["limit"] = BATCH_SIZE
+        while limit != 0:
+            if limit > BATCH_SIZE:
+                limit -= BATCH_SIZE
+            else:
+                payload["limit"] = limit
+                limit = 0
+            result: Dict[str, Any] = self.pulp_ctx.call(self.LIST_ID, parameters=payload)
+            count = result["count"]
+            entities.extend(result["results"])
+            if result["next"] is None:
+                break
+            payload["offset"] += payload["limit"]
+        else:
+            click.echo(f"Not all {count} entries were shown.", err=True)
+        return entities
+
+    def show(self, task_href: str) -> Any:
+        return self.pulp_ctx.call(self.READ_ID, parameters={self.HREF: task_href})
 
 
 def _config_callback(ctx: click.Context, param: Any, value: str) -> None:
