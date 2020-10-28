@@ -1,5 +1,15 @@
 import click
 
+from pulpcore.cli.common import limit_option, offset_option, PulpContext, PulpEntityContext
+
+
+class PulpFileRemoteContext(PulpEntityContext):
+    HREF: str = "file_file_remote_href"
+    LIST_ID: str = "remotes_file_file_list"
+    CREATE_ID: str = "remotes_file_file_create"
+    UPDATE_ID: str = "remotes_file_file_update"
+    DELETE_ID: str = "remotes_file_file_delete"
+
 
 @click.group()
 @click.option(
@@ -11,21 +21,24 @@ import click
 )
 @click.pass_context
 def remote(ctx: click.Context, remote_type: str) -> None:
+    pulp_ctx: PulpContext = ctx.find_object(PulpContext)
+
     if remote_type == "file":
-        ctx.obj.href_key = "file_file_remote_href"
-        ctx.obj.list_id = "remotes_file_file_list"
-        ctx.obj.create_id = "remotes_file_file_create"
-        ctx.obj.update_id = "remotes_file_file_update"
-        ctx.obj.delete_id = "remotes_file_file_delete"
+        ctx.obj = PulpFileRemoteContext(pulp_ctx)
     else:
         raise NotImplementedError()
 
 
 @remote.command()
+@limit_option
+@offset_option
 @click.pass_context
-def list(ctx: click.Context) -> None:
-    result = ctx.obj.call(ctx.obj.list_id)
-    ctx.obj.output_result(result)
+def list(ctx: click.Context, limit: int, offset: int) -> None:
+    pulp_ctx: PulpContext = ctx.find_object(PulpContext)
+    remote_ctx: PulpFileRemoteContext = ctx.find_object(PulpFileRemoteContext)
+
+    result = remote_ctx.list(limit=limit, offset=offset, parameters={})
+    pulp_ctx.output_result(result)
 
 
 @remote.command()
@@ -33,17 +46,22 @@ def list(ctx: click.Context) -> None:
 @click.option("--url", required=True)
 @click.pass_context
 def create(ctx: click.Context, name: str, url: str) -> None:
+    pulp_ctx: PulpContext = ctx.find_object(PulpContext)
+    remote_ctx: PulpFileRemoteContext = ctx.find_object(PulpFileRemoteContext)
+
     remote = {"name": name, "url": url}
-    result = ctx.obj.call(ctx.obj.create_id, body=remote)
-    ctx.obj.output_result(result)
+    result = remote_ctx.create(body=remote)
+    pulp_ctx.output_result(result)
 
 
 @remote.command()
 @click.option("--name", required=True)
 @click.pass_context
 def destroy(ctx: click.Context, name: str) -> None:
-    search_result = ctx.obj.call(ctx.obj.list_id, parameters={"name": name, "limit": 1})
-    if search_result["count"] != 1:
+    remote_ctx: PulpFileRemoteContext = ctx.find_object(PulpFileRemoteContext)
+
+    search_result = remote_ctx.list(limit=1, offset=0, parameters={"name": name})
+    if len(search_result) != 1:
         raise click.ClickException(f"Remote '{name}' not found.")
-    remote_href = search_result["results"][0]["pulp_href"]
-    ctx.obj.call(ctx.obj.delete_id, parameters={ctx.obj.href_key: remote_href})
+    remote_href: str = search_result[0]["pulp_href"]
+    remote_ctx.delete(remote_href)
