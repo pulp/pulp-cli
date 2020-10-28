@@ -5,22 +5,48 @@ import os
 
 import click
 
-from pulpcore.cli.common import PulpContext
+from pulpcore.cli.common import DEFAULT_LIMIT, PulpContext, PulpEntityContext
+
+
+class PulpArtifactContext(PulpEntityContext):
+    HREF: str = "artifact_href"
+    LIST_ID: str = "artifacts_list"
+    READ_ID: str = "artifacts_read"
 
 
 @click.group()
-def artifact() -> None:
-    pass
+@click.pass_context
+def artifact(ctx: click.Context) -> None:
+    pulp_ctx: PulpContext = ctx.find_object(PulpContext)
+    ctx.obj = PulpArtifactContext(pulp_ctx)
 
 
 @artifact.command()
+@click.option(
+    "--limit", default=DEFAULT_LIMIT, type=int, help="Limit the number of artifacts to show."
+)
+@click.option("--offset", default=0, type=int, help="Skip a number of tasks to show.")
 @click.option("--sha256")
 @click.pass_context
-def list(ctx: click.Context, **kwargs: str) -> None:
+def list(ctx: click.Context, limit: int, offset: int, **kwargs: str) -> None:
     pulp_ctx: PulpContext = ctx.find_object(PulpContext)
+    artifact_ctx: PulpArtifactContext = ctx.find_object(PulpArtifactContext)
+
     params = {k: v for k, v in kwargs.items() if v is not None}
-    result = pulp_ctx.call("artifacts_list", parameters=params)
+    result = artifact_ctx.list(limit=limit, offset=offset, parameters=params)
     pulp_ctx.output_result(result)
+
+
+@artifact.command()
+@click.option("--href", required=True, help="HREF of the artifact")
+@click.pass_context
+def show(ctx: click.Context, href: str, wait: bool) -> None:
+    """Shows details of an artifact."""
+    pulp_ctx: PulpContext = ctx.find_object(PulpContext)
+    artifact_ctx: PulpArtifactContext = ctx.find_object(PulpArtifactContext)
+
+    entity = artifact_ctx.show(href)
+    pulp_ctx.output_result(entity)
 
 
 @artifact.command()
