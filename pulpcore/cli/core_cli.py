@@ -4,6 +4,7 @@ from pulpcore.cli.common import main, PulpContext
 from pulpcore.cli.core.artifact import artifact
 from pulpcore.cli.core.orphans import orphans
 from pulpcore.cli.core.task import task
+from pulpcore.cli.core.pulpexport import pulpexporter
 
 
 @main.command()
@@ -17,3 +18,4 @@ def status(ctx: click.Context) -> None:
 main.add_command(artifact)
 main.add_command(orphans)
 main.add_command(task)
+main.add_command(pulpexporter)
