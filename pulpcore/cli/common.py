@@ -26,6 +26,14 @@ DEFAULT_LIMIT = 25
 BATCH_SIZE = 25
 
 
+limit_option = click.option(
+    "--limit", default=DEFAULT_LIMIT, type=int, help="Limit the number of entries to show."
+)
+offset_option = click.option(
+    "--offset", default=0, type=int, help="Skip a number of entries to show."
+)
+
+
 class PulpJSONEncoder(json.JSONEncoder):
     def default(self, obj: Any) -> Any:
         if isinstance(obj, datetime.datetime):
@@ -93,6 +101,8 @@ class PulpEntityContext:
     HREF: str = "entity"
     LIST_ID: str = "entities_list"
     READ_ID: str = "entities_read"
+    CREATE_ID: str = "entities_create"
+    DELETE_ID: str = "entities_delete"
 
     def __init__(self, pulp_ctx: PulpContext) -> None:
         self.pulp_ctx: PulpContext = pulp_ctx
@@ -119,8 +129,14 @@ class PulpEntityContext:
             click.echo(f"Not all {count} entries were shown.", err=True)
         return entities
 
-    def show(self, task_href: str) -> Any:
-        return self.pulp_ctx.call(self.READ_ID, parameters={self.HREF: task_href})
+    def show(self, href: str) -> Any:
+        return self.pulp_ctx.call(self.READ_ID, parameters={self.HREF: href})
+
+    def create(self, body: Dict[str, Any]) -> Any:
+        return self.pulp_ctx.call(self.CREATE_ID, body=body)
+
+    def delete(self, href: str) -> Any:
+        return self.pulp_ctx.call(self.DELETE_ID, parameters={self.HREF: href})
 
 
 def _config_callback(ctx: click.Context, param: Any, value: str) -> None:

@@ -2,7 +2,7 @@ from typing import Any
 
 import click
 
-from pulpcore.cli.common import DEFAULT_LIMIT, PulpContext, PulpEntityContext
+from pulpcore.cli.common import limit_option, offset_option, PulpContext, PulpEntityContext
 
 
 class PulpTaskContext(PulpEntityContext):
@@ -27,8 +27,8 @@ def task(ctx: click.Context) -> None:
 
 
 @task.command()
-@click.option("--limit", default=DEFAULT_LIMIT, type=int, help="Limit the number of tasks to show.")
-@click.option("--offset", default=0, type=int, help="Skip a number of tasks to show.")
+@limit_option
+@offset_option
 @click.option("--name", help="List only tasks with this name.")
 @click.option("--name-contains", "name__contains", help="List only tasks whose name contains this.")
 @click.option("--state", help="List only tasks in this state.")
