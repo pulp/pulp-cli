@@ -27,4 +27,7 @@ pulp_cli file repository sync --name "cli_test_file_repository"
 pulp_cli file repository sync --name "cli_test_file_repository" --remote "cli_test_file_remote"
 
 # Verify sync
-test "$(pulp_cli file repository version list --repository "cli_test_file_repository" | jq -r .count)" -eq 2
+test "$(pulp_cli file repository version list --repository "cli_test_file_repository" | jq -r length)" -eq 2
+
+# Delete version again
+pulp_cli file repository version destroy --repository "cli_test_file_repository" --version 1

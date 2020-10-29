@@ -4,6 +4,7 @@ from pulpcore.cli.common import limit_option, offset_option, PulpContext, PulpEn
 
 
 class PulpFileRemoteContext(PulpEntityContext):
+    ENTITY: str = "remote"
     HREF: str = "file_file_remote_href"
     LIST_ID: str = "remotes_file_file_list"
     CREATE_ID: str = "remotes_file_file_create"
@@ -60,8 +61,6 @@ def create(ctx: click.Context, name: str, url: str) -> None:
 def destroy(ctx: click.Context, name: str) -> None:
     remote_ctx: PulpFileRemoteContext = ctx.find_object(PulpFileRemoteContext)
 
-    search_result = remote_ctx.list(limit=1, offset=0, parameters={"name": name})
-    if len(search_result) != 1:
-        raise click.ClickException(f"Remote '{name}' not found.")
-    remote_href: str = search_result[0]["pulp_href"]
+    remote = remote_ctx.find(name=name)
+    remote_href: str = remote["pulp_href"]
     remote_ctx.delete(remote_href)
