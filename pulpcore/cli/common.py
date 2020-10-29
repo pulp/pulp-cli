@@ -98,10 +98,12 @@ class PulpContext:
 
 class PulpEntityContext:
     # Subclasses should provide appropriate values here
-    HREF: str = "entity"
+    ENTITY: str = "entity"
+    HREF: str = "entity_href"
     LIST_ID: str = "entities_list"
     READ_ID: str = "entities_read"
     CREATE_ID: str = "entities_create"
+    UPDATE_ID: str = "entities_update"
     DELETE_ID: str = "entities_delete"
 
     def __init__(self, pulp_ctx: PulpContext) -> None:
@@ -129,11 +131,20 @@ class PulpEntityContext:
             click.echo(f"Not all {count} entries were shown.", err=True)
         return entities
 
+    def find(self, **kwargs: Any) -> Any:
+        search_result = self.list(limit=1, offset=0, parameters=kwargs)
+        if len(search_result) != 1:
+            raise click.ClickException(f"Could not find {self.ENTITY} with {kwargs}.")
+        return search_result[0]
+
     def show(self, href: str) -> Any:
         return self.pulp_ctx.call(self.READ_ID, parameters={self.HREF: href})
 
     def create(self, body: Dict[str, Any]) -> Any:
         return self.pulp_ctx.call(self.CREATE_ID, body=body)
+
+    def update(self, href: str, body: Dict[str, Any]) -> Any:
+        return self.pulp_ctx.call(self.UPDATE_ID, parameters={self.HREF: href}, body=body)
 
     def delete(self, href: str) -> Any:
         return self.pulp_ctx.call(self.DELETE_ID, parameters={self.HREF: href})
