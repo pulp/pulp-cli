@@ -1,7 +1,8 @@
 #!/bin/sh
 
+# shellcheck source=tests/scripts/config.source
 . "$(dirname "$(realpath "$0")")/config.source"
 
-STATUS_RESULT=$(pulp_cli orphans delete)
+expect_succ pulp_cli orphans delete
 
-test "$(echo "${STATUS_RESULT}" | jq -r '.state' )" = "completed"
+test "$(echo "${OUTPUT}" | jq -r '.state' )" = "completed"

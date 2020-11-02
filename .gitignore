@@ -1,6 +1,6 @@
 *.egg-info
 __pycache__/
 build/
-tests/scripts/config.source
+tests/scripts/config/pulp/settings.toml
 /.ci/settings/
 !/.ci/settings/settings.py

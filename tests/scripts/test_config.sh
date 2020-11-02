@@ -1,47 +1,18 @@
 #!/bin/sh
 
+# shellcheck source=tests/scripts/config.source
 . "$(dirname "$(realpath "$0")")/config.source"
 
-good_settings="good_settings.toml"
-bad_settings="bad_settings.toml"
-good_cli="$PULP_CLI --config $good_settings"
-bad_cli="$PULP_CLI --config $bad_settings"
+good_settings="${XDG_CONFIG_HOME}/pulp/settings.toml"
+bad_settings="${XDG_CONFIG_HOME}/pulp/bad_settings.toml"
 
-cleanup() {
-  rm $good_settings || true
-  rm $bad_settings || true
-}
-trap cleanup EXIT
+export XDG_CONFIG_HOME=/nowhere
 
-cat >$good_settings <<EOL
-[cli]
-base_url = "$PULP_BASE_URL"
-user = "$PULP_USER"
-password = "$PULP_PASSWORD"
-EOL
+expect_succ pulp --config "$good_settings" file repository list
+expect_succ pulp --config "$bad_settings" --base-url "$PULP_BASE_URL" file repository list
 
-cat >$bad_settings <<EOL
-[cli]
-base_url = "http://badurl"
-user = "$PULP_USER"
-password = "$PULP_PASSWORD"
-EOL
-
-$good_cli file repository list
-$bad_cli --base-url "$PULP_BASE_URL" file repository list
-
-if $bad_cli file repository list 2> /dev/null; then
-  echo "'$bad_cli ...' succeeded unexpectedly"
-  exit 1
-fi
-
-if $good_cli --base-url "http://badurl" file repository list 2> /dev/null; then
-  echo "'$good_cli --base-url http://badurl ...' succeeded unexpectedly"
-  exit 1
-fi
+expect_fail pulp --config "$bad_settings" file repository list
+expect_fail pulp --config "$good_settings" --base-url "http://badurl" file repository list
 
 # fail as both username and password are required together
-if $PULP_CLI --password test file repository list 2> /dev/null; then
-  echo "'$PULP_CLI --password test ...' succeeded unexpectedly"
-  exit 1
-fi
+expect_fail pulp --password test file repository list

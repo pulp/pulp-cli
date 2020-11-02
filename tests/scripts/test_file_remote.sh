@@ -1,10 +1,15 @@
 #!/bin/sh
 
+# shellcheck source=tests/scripts/config.source
 . "$(dirname "$(realpath "$0")")/config.source"
-. "$(dirname "$(realpath "$0")")/constants.source"
 
-pulp_cli file remote list
+cleanup() {
+  pulp_cli file remote destroy --name "cli_test_file_remote" || true
+}
+trap cleanup EXIT
 
-pulp_cli file remote create --name "cli_test_file_remote" --url "$FILE_REMOTE_URL"
-pulp_cli file remote list
-pulp_cli file remote destroy --name "cli_test_file_remote"
+expect_succ pulp file remote list
+
+expect_succ pulp file remote create --name "cli_test_file_remote" --url "$FILE_REMOTE_URL"
+expect_succ pulp file remote list
+expect_succ pulp file remote destroy --name "cli_test_file_remote"
