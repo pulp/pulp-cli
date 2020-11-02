@@ -78,8 +78,6 @@ class PulpContext:
 
     def wait_for_task(self, task_href: str, timeout: int = 120) -> Any:
         while timeout:
-            time.sleep(1)
-            timeout -= 1
             task = self.api.call("tasks_read", parameters={"task_href": task_href})
             if task["state"] == "completed":
                 return task
@@ -90,6 +88,8 @@ class PulpContext:
             elif task["state"] == "canceled":
                 raise click.ClickException("Task canceled")
             elif task["state"] in ["waiting", "running"]:
+                time.sleep(1)
+                timeout -= 1
                 click.echo(".", nl=False, err=True)
             else:
                 raise NotImplementedError(f"Unknown task state: {task['state']}")
@@ -157,7 +157,7 @@ def _config_callback(ctx: click.Context, param: Any, value: str) -> None:
     if value:
         ctx.default_map = toml.load(value)["cli"]
     else:
-        xdg_config_home = os.path.expanduser(os.environ.get("XDG_CACHE_HOME") or "~/.config")
+        xdg_config_home = os.path.expanduser(os.environ.get("XDG_CONFIG_HOME") or "~/.config")
         default_config_path = os.path.join(xdg_config_home, "pulp", "settings.toml")
 
         try:

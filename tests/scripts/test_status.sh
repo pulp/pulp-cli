@@ -1,7 +1,8 @@
 #!/bin/sh
 
+# shellcheck source=tests/scripts/config.source
 . "$(dirname "$(realpath "$0")")/config.source"
 
-STATUS_RESULT=$(pulp_cli status)
+expect_succ pulp status
 
-test "$(echo "${STATUS_RESULT}" | jq -r '.database_connection.connected' )" = "true"
+test "$(echo "${OUTPUT}" | jq -r '.database_connection.connected' )" = "true"

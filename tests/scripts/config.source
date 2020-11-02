@@ -1,0 +1,61 @@
+# Constants used in tests
+FILE_REMOTE_URL="https://fixtures.pulpproject.org/file/PULP_MANIFEST"
+
+# Provide values from config
+settings="$(dirname "$(realpath "$0")")/config/pulp/settings.toml"
+PULP_BASE_URL="$(sed -n -e 's/^base_url\s*=\s*"\(\S*\)"\s*$/\1/p' "$settings")"
+VERIFY_SSL="$(sed -n -e 's/^verify_ssl\s*=\s*\(\S*\)\s*$/\1/p' "$settings")"
+
+# Configure path to config
+export XDG_CONFIG_HOME="$(dirname "$(realpath "$0")")/config"
+
+# Library for test helper functions
+
+pulp_cli () {
+  echo "WARNING: Migrate to call 'pulp' directly." >&2
+  pulp "$@"
+}
+
+expect_succ () {
+  TMP="$(mktemp -d)"
+  if {
+    "$@"
+  } 1>"${TMP}/log.out" 2>"${TMP}/log.err"
+  then
+    echo "SUCCESS"
+    OUTPUT="$(cat "${TMP}/log.out")"
+    ERROUTPUT="$(cat "${TMP}/log.err")"
+  else
+    echo "FAILURE"
+    echo "=== STDOUT ==="
+    cat "${TMP}/log.out"
+    echo "=== STDERR ==="
+    cat "${TMP}/log.err"
+    echo "=============="
+    false
+  fi
+  rm -rf "$TMP"
+}
+
+expect_fail () {
+  TMP="$(mktemp -d)"
+  if {
+    "$@"
+  } 1>"${TMP}/log.out" 2>"${TMP}/log.err"
+  then
+    echo "FAILURE"
+    echo "=== STDOUT ==="
+    cat "${TMP}/log.out"
+    echo "=== STDERR ==="
+    cat "${TMP}/log.err"
+    echo "=============="
+    false
+  else
+    echo "SUCCESS"
+    OUTPUT="$(cat "${TMP}/log.out")"
+    ERROUTPUT="$(cat "${TMP}/log.err")"
+  fi
+  rm -rf "$TMP"
+}
+
+set -euv

@@ -1,7 +1,8 @@
 #!/bin/sh
 
+# shellcheck source=tests/scripts/config.source
 . "$(dirname "$(realpath "$0")")/config.source"
 
-STATUS_RESULT=$(pulp_cli -v status 2>&1 >/dev/null)
+expect_succ pulp -v status
 
-echo "${STATUS_RESULT}" | grep -q "^get https\?://\w.*/pulp/api/v3/status/$"
+echo "${ERROUTPUT}" | grep -q "^get https\?://\w.*/pulp/api/v3/status/$"

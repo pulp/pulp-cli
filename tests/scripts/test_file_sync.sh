@@ -1,33 +1,34 @@
 #!/bin/sh
 
+# shellcheck source=tests/scripts/config.source
 . "$(dirname "$(realpath "$0")")/config.source"
-. "$(dirname "$(realpath "$0")")/constants.source"
 
 cleanup() {
-  pulp_cli file remote destroy --name "cli_test_file_remote" || true
-  pulp_cli file repository destroy --name "cli_test_file_repository" || true
+  pulp file remote destroy --name "cli_test_file_remote" || true
+  pulp file repository destroy --name "cli_test_file_repository" || true
 }
 trap cleanup EXIT
 
 # Prepare
-pulp_cli file remote create --name "cli_test_file_remote" --url "$FILE_REMOTE_URL"
-pulp_cli file repository create --name "cli_test_file_repository"
+pulp file remote create --name "cli_test_file_remote" --url "$FILE_REMOTE_URL"
+pulp file repository create --name "cli_test_file_repository"
 
 # Test without remote (should fail)
-! pulp_cli file repository sync --name "cli_test_file_repository"
+expect_fail pulp file repository sync --name "cli_test_file_repository"
 # Test with remote
-pulp_cli file repository sync --name "cli_test_file_repository" --remote "cli_test_file_remote"
+expect_succ pulp file repository sync --name "cli_test_file_repository" --remote "cli_test_file_remote"
 
 # Preconfigure remote
-pulp_cli file repository update --name "cli_test_file_repository" --remote "cli_test_file_remote"
+pulp file repository update --name "cli_test_file_repository" --remote "cli_test_file_remote"
 
 # Test with remote
-pulp_cli file repository sync --name "cli_test_file_repository"
+expect_succ pulp file repository sync --name "cli_test_file_repository"
 # Test without remote
-pulp_cli file repository sync --name "cli_test_file_repository" --remote "cli_test_file_remote"
+expect_succ pulp file repository sync --name "cli_test_file_repository" --remote "cli_test_file_remote"
 
 # Verify sync
-test "$(pulp_cli file repository version list --repository "cli_test_file_repository" | jq -r length)" -eq 2
+expect_succ pulp file repository version list --repository "cli_test_file_repository"
+test "$(echo "$OUTPUT" | jq -r length)" -eq 2
 
 # Delete version again
-pulp_cli file repository version destroy --repository "cli_test_file_repository" --version 1
+expect_succ pulp file repository version destroy --repository "cli_test_file_repository" --version 1
