@@ -1,6 +1,20 @@
 import click
 
 
+from pulpcore.cli.common import limit_option, offset_option, PulpContext, PulpEntityContext
+
+from pulpcore.cli.file.repository import PulpFileRepositoryContext
+
+
+class PulpFilePublicationContext(PulpEntityContext):
+    ENTITY: str = "publication"
+    HREF: str = "file_file_publication_href"
+    LIST_ID: str = "publications_file_file_list"
+    READ_ID: str = "publications_file_file_read"
+    CREATE_ID: str = "publications_file_file_create"
+    DELETE_ID: str = "publications_file_file_delete"
+
+
 @click.group()
 @click.option(
     "-t",
@@ -11,42 +25,44 @@ import click
 )
 @click.pass_context
 def publication(ctx: click.Context, publication_type: str) -> None:
+    pulp_ctx: PulpContext = ctx.find_object(PulpContext)
+
     if publication_type == "file":
-        ctx.obj.href_key = "file_file_publication_href"
-        ctx.obj.list_id = "publications_file_file_list"
-        ctx.obj.read_id = "publications_file_file_read"
-        ctx.obj.create_id = "publications_file_file_create"
-        ctx.obj.delete_id = "publications_file_file_delete"
+        ctx.obj = PulpFilePublicationContext(pulp_ctx)
     else:
         raise NotImplementedError()
 
 
 @publication.command()
+@limit_option
+@offset_option
 @click.pass_context
-def list(ctx: click.Context) -> None:
-    result = ctx.obj.call(ctx.obj.list_id)
-    ctx.obj.output_result(result)
+def list(ctx: click.Context, limit: int, offset: int) -> None:
+    pulp_ctx: PulpContext = ctx.find_object(PulpContext)
+    publication_ctx: PulpFilePublicationContext = ctx.find_object(PulpFilePublicationContext)
+
+    result = publication_ctx.list(limit=limit, offset=offset, parameters={})
+    pulp_ctx.output_result(result)
 
 
 @publication.command()
 @click.option("--repository", required=True)
 @click.pass_context
 def create(ctx: click.Context, repository: str) -> None:
-    search_result = ctx.obj.call(
-        "repositories_file_file_list", parameters={"name": repository, "limit": 1}
-    )
-    if search_result["count"] != 1:
-        raise click.ClickException(f"Repository '{repository}' not found.")
-    body = {"repository": search_result["results"][0]["pulp_href"]}
-    result = ctx.obj.call(ctx.obj.create_id, body=body)
-    publication = ctx.obj.call(
-        ctx.obj.read_id, parameters={ctx.obj.href_key: result["created_resources"][0]}
-    )
-    ctx.obj.output_result(publication)
+    pulp_ctx: PulpContext = ctx.find_object(PulpContext)
+    publication_ctx: PulpFilePublicationContext = ctx.find_object(PulpFilePublicationContext)
+
+    repository_href: str = PulpFileRepositoryContext(pulp_ctx).find(name=repository)["pulp_href"]
+    body = {"repository": repository_href}
+    result = publication_ctx.create(body=body)
+    publication = publication_ctx.show(result["created_resources"][0])
+    pulp_ctx.output_result(publication)
 
 
 @publication.command()
 @click.option("--href", required=True)
 @click.pass_context
 def destroy(ctx: click.Context, href: str) -> None:
-    ctx.obj.call(ctx.obj.delete_id, parameters={ctx.obj.href_key: href})
+    publication_ctx: PulpFilePublicationContext = ctx.find_object(PulpFilePublicationContext)
+
+    publication_ctx.delete(href)

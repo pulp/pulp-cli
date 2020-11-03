@@ -98,13 +98,13 @@ class PulpContext:
 
 class PulpEntityContext:
     # Subclasses should provide appropriate values here
-    ENTITY: str = "entity"
-    HREF: str = "entity_href"
-    LIST_ID: str = "entities_list"
-    READ_ID: str = "entities_read"
-    CREATE_ID: str = "entities_create"
-    UPDATE_ID: str = "entities_update"
-    DELETE_ID: str = "entities_delete"
+    ENTITY: str
+    HREF: str
+    LIST_ID: str
+    READ_ID: str
+    CREATE_ID: str
+    UPDATE_ID: str
+    DELETE_ID: str
 
     def __init__(self, pulp_ctx: PulpContext) -> None:
         self.pulp_ctx: PulpContext = pulp_ctx

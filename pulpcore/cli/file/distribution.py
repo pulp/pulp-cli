@@ -3,6 +3,20 @@ from typing import Optional
 import click
 
 
+from pulpcore.cli.common import limit_option, offset_option, PulpContext, PulpEntityContext
+
+
+class PulpFileDistributionContext(PulpEntityContext):
+    ENTITY: str = "distribution"
+    HREF: str = "file_file_distribution_href"
+    LIST_ID: str = "distributions_file_file_list"
+    READ_ID: str = "distributions_file_file_read"
+    CREATE_ID: str = "distributions_file_file_create"
+    UPDATE_ID: str = "distributions_file_file_update"
+    DELETE_ID: str = "distributions_file_file_delete"
+    SYNC_ID: str = "distributions_file_file_sync"
+
+
 @click.group()
 @click.option(
     "-t",
@@ -13,21 +27,24 @@ import click
 )
 @click.pass_context
 def distribution(ctx: click.Context, distribution_type: str) -> None:
+    pulp_ctx: PulpContext = ctx.find_object(PulpContext)
+
     if distribution_type == "file":
-        ctx.obj.href_key = "file_file_distribution_href"
-        ctx.obj.list_id = "distributions_file_file_list"
-        ctx.obj.read_id = "distributions_file_file_read"
-        ctx.obj.create_id = "distributions_file_file_create"
-        ctx.obj.delete_id = "distributions_file_file_delete"
+        ctx.obj = PulpFileDistributionContext(pulp_ctx)
     else:
         raise NotImplementedError()
 
 
 @distribution.command()
+@limit_option
+@offset_option
 @click.pass_context
-def list(ctx: click.Context) -> None:
-    result = ctx.obj.call(ctx.obj.list_id)
-    ctx.obj.output_result(result)
+def list(ctx: click.Context, limit: int, offset: int) -> None:
+    pulp_ctx: PulpContext = ctx.find_object(PulpContext)
+    distribution_ctx: PulpFileDistributionContext = ctx.find_object(PulpFileDistributionContext)
+
+    result = distribution_ctx.list(limit=limit, offset=offset, parameters={})
+    pulp_ctx.output_result(result)
 
 
 @distribution.command()
@@ -36,22 +53,22 @@ def list(ctx: click.Context) -> None:
 @click.option("--publication")
 @click.pass_context
 def create(ctx: click.Context, name: str, base_path: str, publication: Optional[str]) -> None:
+    pulp_ctx: PulpContext = ctx.find_object(PulpContext)
+    distribution_ctx: PulpFileDistributionContext = ctx.find_object(PulpFileDistributionContext)
+
     body = {"name": name, "base_path": base_path}
     if publication:
         body["publication"] = publication
-    result = ctx.obj.call(ctx.obj.create_id, body=body)
-    distribution = ctx.obj.call(
-        ctx.obj.read_id, parameters={ctx.obj.href_key: result["created_resources"][0]}
-    )
-    ctx.obj.output_result(distribution)
+    result = distribution_ctx.create(body=body)
+    distribution = distribution_ctx.show(result["created_resources"][0])
+    pulp_ctx.output_result(distribution)
 
 
 @distribution.command()
 @click.option("--name", required=True)
 @click.pass_context
 def destroy(ctx: click.Context, name: str) -> None:
-    search_result = ctx.obj.call(ctx.obj.list_id, parameters={"name": name, "limit": 1})
-    if search_result["count"] != 1:
-        raise click.ClickException(f"Distribution '{name}' not found.")
-    distribution_href = search_result["results"][0]["pulp_href"]
-    ctx.obj.call(ctx.obj.delete_id, parameters={ctx.obj.href_key: distribution_href})
+    distribution_ctx: PulpFileDistributionContext = ctx.find_object(PulpFileDistributionContext)
+
+    distribution_href = distribution_ctx.find(name=name)["pulp_href"]
+    distribution_ctx.delete(distribution_href)

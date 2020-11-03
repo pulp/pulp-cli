@@ -104,8 +104,7 @@ def update(
 def destroy(ctx: click.Context, name: str) -> None:
     repository_ctx: PulpFileRepositoryContext = ctx.find_object(PulpFileRepositoryContext)
 
-    repository = repository_ctx.find(name=name)
-    repository_href = repository["pulp_href"]
+    repository_href = repository_ctx.find(name=name)["pulp_href"]
     repository_ctx.delete(repository_href)
 
 
