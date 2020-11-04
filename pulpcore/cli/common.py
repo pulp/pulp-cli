@@ -1,4 +1,4 @@
-from typing import Any, Optional, Dict, List
+from typing import Any, Optional, Dict, List, Tuple
 
 import click
 import datetime
@@ -34,6 +34,9 @@ limit_option = click.option(
 offset_option = click.option(
     "--offset", default=0, type=int, help="Skip a number of entries to show."
 )
+
+RepositoryDefinition = Tuple[str, str]  # name, pulp_type
+RepositoryVersionDefinition = Tuple[str, str, int]  # name, pulp_type, version
 
 
 class PulpJSONEncoder(json.JSONEncoder):
@@ -109,6 +112,21 @@ class PulpEntityContext:
     CREATE_ID: str
     UPDATE_ID: str
     DELETE_ID: str
+    # { "pulp_type" : repository-list-id }
+    REPOSITORY_FIND_IDS: Dict[str, str] = {
+        "file": "repositories_file_file_list",
+        "rpm": "repositories_rpm_rpm_list",
+    }
+    # { "pulp_type" : repository-version-list-id }
+    REPOSITORY_VERSION_FIND_IDS: Dict[str, str] = {
+        "file": "repositories_file_file_versions_list",
+        "rpm": "repositories_rpm_rpm_versions_list",
+    }
+    # { "pulp_type" : repository-href-ids }
+    REPOSITORY_HREF_IDS = {
+        "file": "file_file_repository_href",
+        "rpm": "rpm_rpm_repository_href",
+    }
 
     def __init__(self, pulp_ctx: PulpContext) -> None:
         self.pulp_ctx: PulpContext = pulp_ctx
@@ -152,6 +170,44 @@ class PulpEntityContext:
 
     def delete(self, href: str) -> Any:
         return self.pulp_ctx.call(self.DELETE_ID, parameters={self.HREF: href})
+
+    def find_repository(self, definition: RepositoryDefinition) -> Any:
+        name, repo_type = definition
+        if repo_type in self.REPOSITORY_FIND_IDS:
+            search_result = self.pulp_ctx.call(
+                self.REPOSITORY_FIND_IDS[repo_type], parameters={"name": name, "limit": 1}
+            )
+        else:
+            raise click.ClickException(
+                f"PulpExporter 'Repository-type '{repo_type}' not supported!"
+            )
+
+        if search_result["count"] != 1:
+            raise click.ClickException(f"Repository '{name}/{repo_type}' not found.")
+
+        repository = search_result["results"][0]
+        return repository
+
+    def find_repository_version(self, definition: RepositoryVersionDefinition) -> Any:
+        name, repo_type, number = definition
+        repo_href = self.find_repository((name, repo_type))["pulp_href"]
+        if repo_type in self.REPOSITORY_VERSION_FIND_IDS:
+            params = {self.REPOSITORY_HREF_IDS[repo_type]: repo_href, "number": number, "limit": 1}
+            search_result = self.pulp_ctx.call(
+                self.REPOSITORY_VERSION_FIND_IDS[repo_type], parameters=params
+            )
+        else:
+            raise click.ClickException(
+                f"PulpExporter 'Repository-type '{repo_type}' not supported!"
+            )
+
+        if search_result["count"] != 1:
+            raise click.ClickException(
+                f"RepositoryVersion '{name}/{repo_type}/{number}' not found."
+            )
+
+        repo_version = search_result["results"][0]
+        return repo_version
 
 
 def _config_callback(ctx: click.Context, param: Any, value: str) -> None:
