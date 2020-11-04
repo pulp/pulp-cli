@@ -17,6 +17,7 @@ setup(
         "pulp_cli.plugins": [
             "core=pulpcore.cli.core_cli",
             "file=pulpcore.cli.file_cli",
+            "container=pulpcore.cli.container_cli",
         ],
     },
     extras_require={
