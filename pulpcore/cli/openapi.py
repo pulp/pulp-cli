@@ -26,12 +26,12 @@ class OpenAPI:
         password: Optional[str] = None,
         validate_certs: bool = True,
         refresh_cache: bool = False,
-        debug_callback: Optional[Callable[[str], Any]] = None,
+        debug_callback: Optional[Callable[[int, str], Any]] = None,
     ):
         if not validate_certs:
             urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-        self.debug_callback: Callable[[str], Any] = debug_callback or (lambda x: None)
+        self.debug_callback: Callable[[int, str], Any] = debug_callback or (lambda i, x: None)
         self.base_url: str = base_url
         self.doc_path: str = doc_path
 
@@ -249,11 +249,14 @@ class OpenAPI:
 
         data: Optional[bytes] = self.render_body(path_spec, method_spec, headers, body, uploads)
 
-        self.debug_callback(f"{method} {url}")
+        self.debug_callback(1, f"{method} {url}")
         for key, value in headers.items():
-            self.debug_callback(f"  {key}: {value}")
+            self.debug_callback(2, f"  {key}: {value}")
         if data:
-            self.debug_callback(f"{data!r}")
+            self.debug_callback(2, f"{data!r}")
         response: requests.Response = self._session.request(method, url, data=data, headers=headers)
+        self.debug_callback(1, f"Response: {response.status_code}")
+        if response.text:
+            self.debug_callback(3, f"{response.text}")
         response.raise_for_status()
         return self.parse_response(method_spec, response)
