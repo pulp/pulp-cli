@@ -9,6 +9,8 @@ import time
 import toml
 import yaml
 
+from requests import HTTPError
+
 from pulpcore.cli.openapi import OpenAPI, OpenAPIError
 
 try:
@@ -68,6 +70,8 @@ class PulpContext:
             result = self.api.call(operation_id, *args, **kwargs)
         except OpenAPIError as e:
             raise click.ClickException(str(e))
+        except HTTPError as e:
+            raise click.ClickException(str(e.response.json()))
         if "task" in result:
             task_href = result["task"]
             click.echo(f"Started task {task_href}", err=True)
@@ -209,7 +213,9 @@ def main(
             password=password,
             validate_certs=verify_ssl,
             refresh_cache=True,
-            debug_callback=lambda x: click.secho(x, err=True, bold=True) if verbose >= 1 else None,
+            debug_callback=lambda level, x: click.secho(x, err=True, bold=True)
+            if verbose >= level
+            else None,
         )
     except OpenAPIError as e:
         raise click.ClickException(str(e))
