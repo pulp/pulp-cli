@@ -11,51 +11,58 @@ export XDG_CONFIG_HOME="$(dirname "$(realpath "$0")")/config"
 
 # Library for test helper functions
 
+TMP="$(mktemp -d)"
+trap "rm -rf $TMP" EXIT
+
+# open fd 3 as a copy of stderr
+exec 3<&2
+
 pulp_cli () {
-  echo "WARNING: Migrate to call 'pulp' directly." >&2
+  echo "WARNING: Migrate to call 'pulp' directly." >&3
   pulp "$@"
 }
 
+# Expects the command to succeed
+# Supresses all output, which is redirected to $OUTPUT and $ERROUTPUT
+# Reports verbosely on failure
 expect_succ () {
-  TMP="$(mktemp -d)"
   if {
     "$@"
   } 1>"${TMP}/log.out" 2>"${TMP}/log.err"
   then
-    echo "SUCCESS"
+    echo "SUCCESS [$@]" >&3
     OUTPUT="$(cat "${TMP}/log.out")"
     ERROUTPUT="$(cat "${TMP}/log.err")"
   else
-    echo "FAILURE"
-    echo "=== STDOUT ==="
-    cat "${TMP}/log.out"
-    echo "=== STDERR ==="
-    cat "${TMP}/log.err"
-    echo "=============="
+    echo "FAILURE [$@]" >&3
+    echo "=== STDOUT ===" >&3
+    cat "${TMP}/log.out" >&3
+    echo "=== STDERR ===" >&3
+    cat "${TMP}/log.err" >&3
+    echo "==============" >&3
     false
   fi
-  rm -rf "$TMP"
 }
 
+# Expects the command to fail
+# Supresses all output, which is redirected to $OUTPUT and $ERROUTPUT
+# Reports verbosely on failure
 expect_fail () {
-  TMP="$(mktemp -d)"
   if {
     "$@"
   } 1>"${TMP}/log.out" 2>"${TMP}/log.err"
   then
-    echo "FAILURE"
-    echo "=== STDOUT ==="
-    cat "${TMP}/log.out"
-    echo "=== STDERR ==="
-    cat "${TMP}/log.err"
-    echo "=============="
+    echo "FAILURE [! $@]" >&3
+    echo "=== STDOUT ===" >&3
+    cat "${TMP}/log.out" >&3
+    echo "=== STDERR ===" >&3
+    cat "${TMP}/log.err" >&3
     false
   else
-    echo "SUCCESS"
+    echo "SUCCESS [! $@]" >&3
     OUTPUT="$(cat "${TMP}/log.out")"
     ERROUTPUT="$(cat "${TMP}/log.err")"
   fi
-  rm -rf "$TMP"
 }
 
-set -euv
+set -eu
