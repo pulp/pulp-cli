@@ -48,12 +48,20 @@ class PulpJSONEncoder(json.JSONEncoder):
 
 
 class PulpContext:
+    """
+    Class for the global PulpContext object.
+    It is an abstraction layer for api access and output handling.
+    """
+
     def __init__(self, api: OpenAPI, format: str, background_tasks: bool) -> None:
         self.api: OpenAPI = api
         self.format: str = format
         self.background_tasks: bool = background_tasks
 
     def output_result(self, result: Any) -> None:
+        """
+        Dump the provided result to the console using the selected renderer
+        """
         if self.format == "json":
             output = json.dumps(result, cls=PulpJSONEncoder, indent=2)
             if PYGMENTS:
@@ -70,6 +78,10 @@ class PulpContext:
             raise NotImplementedError(f"Format '{self.format}' not implemented.")
 
     def call(self, operation_id: str, *args: Any, **kwargs: Any) -> Any:
+        """
+        Perform an API call for operation_id.
+        Wait for triggered tasks to finish if not background.
+        """
         try:
             result = self.api.call(operation_id, *args, **kwargs)
         except OpenAPIError as e:
@@ -85,6 +97,9 @@ class PulpContext:
         return result
 
     def wait_for_task(self, task: Dict[str, Any], timeout: int = 120) -> Any:
+        """
+        Wait for a task to finish and return the finished task object.
+        """
         task_href = task["pulp_href"]
         try:
             while True:
@@ -113,6 +128,12 @@ class PulpContext:
 
 
 class PulpEntityContext:
+    """
+    Base class for entity specific contexts.
+    This class provides the basic CRUD commands and ties its instances to the global
+    PulpContext for api access.
+    """
+
     # Subclasses should provide appropriate values here
     ENTITY: str
     HREF: str
@@ -233,6 +254,39 @@ def _config_callback(ctx: click.Context, param: Any, value: str) -> None:
             ctx.default_map = toml.load(default_config_path)["cli"]
         except FileNotFoundError:
             pass
+
+
+##############################################################################
+# Generic reusable commands
+
+
+@click.command(name="destroy")
+@click.option("--name", required=True, help="Name of the entry to destroy")
+@click.pass_context
+def destroy_by_name(ctx: click.Context, name: str) -> None:
+    """
+    Destroy an entry
+    """
+    entity_ctx: PulpEntityContext = ctx.find_object(PulpEntityContext)
+
+    entity_href = entity_ctx.find(name=name)["pulp_href"]
+    entity_ctx.delete(entity_href)
+
+
+@click.command(name="destroy")
+@click.option("--href", required=True, help="HREF of the entry to destroy")
+@click.pass_context
+def destroy_by_href(ctx: click.Context, href: str) -> None:
+    """
+    Destroy an entry
+    """
+    entity_ctx: PulpEntityContext = ctx.find_object(PulpEntityContext)
+
+    entity_ctx.delete(href)
+
+
+##############################################################################
+# Main entry point
 
 
 @click.group()
