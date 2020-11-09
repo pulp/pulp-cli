@@ -5,7 +5,7 @@ import os
 
 import click
 
-from pulpcore.cli.common import DEFAULT_LIMIT, PulpContext, PulpEntityContext
+from pulpcore.cli.common import DEFAULT_LIMIT, show_by_href, PulpContext, PulpEntityContext
 
 
 class PulpArtifactContext(PulpEntityContext):
@@ -37,16 +37,7 @@ def list(ctx: click.Context, limit: int, offset: int, **kwargs: str) -> None:
     pulp_ctx.output_result(result)
 
 
-@artifact.command()
-@click.option("--href", required=True, help="HREF of the artifact")
-@click.pass_context
-def show(ctx: click.Context, href: str) -> None:
-    """Shows details of an artifact."""
-    pulp_ctx: PulpContext = ctx.find_object(PulpContext)
-    artifact_ctx: PulpArtifactContext = ctx.find_object(PulpArtifactContext)
-
-    entity = artifact_ctx.show(href)
-    pulp_ctx.output_result(entity)
+artifact.add_command(show_by_href)
 
 
 @artifact.command()

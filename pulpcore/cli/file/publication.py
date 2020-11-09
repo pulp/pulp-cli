@@ -2,6 +2,7 @@ import click
 
 
 from pulpcore.cli.common import (
+    show_by_href,
     destroy_by_href,
     limit_option,
     offset_option,
@@ -49,6 +50,9 @@ def list(ctx: click.Context, limit: int, offset: int) -> None:
 
     result = publication_ctx.list(limit=limit, offset=offset, parameters={})
     pulp_ctx.output_result(result)
+
+
+publication.add_command(show_by_href)
 
 
 @publication.command()

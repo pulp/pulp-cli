@@ -4,6 +4,7 @@ import click
 
 
 from pulpcore.cli.common import (
+    show_by_name,
     destroy_by_name,
     limit_option,
     offset_option,
@@ -51,6 +52,9 @@ def list(ctx: click.Context, limit: int, offset: int) -> None:
 
     result = distribution_ctx.list(limit=limit, offset=offset, parameters={})
     pulp_ctx.output_result(result)
+
+
+distribution.add_command(show_by_name)
 
 
 @distribution.command()

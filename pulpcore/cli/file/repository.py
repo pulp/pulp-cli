@@ -3,6 +3,7 @@ from typing import Optional
 import click
 
 from pulpcore.cli.common import (
+    show_by_name,
     destroy_by_name,
     limit_option,
     offset_option,
@@ -38,6 +39,9 @@ def repository(ctx: click.Context, repo_type: str) -> None:
         ctx.obj = PulpFileRepositoryContext(pulp_ctx)
     else:
         raise NotImplementedError()
+
+
+repository.add_command(show_by_name)
 
 
 @repository.command()
