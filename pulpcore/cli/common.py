@@ -260,6 +260,31 @@ def _config_callback(ctx: click.Context, param: Any, value: str) -> None:
 # Generic reusable commands
 
 
+@click.command(name="show")
+@click.option("--name", required=True, help="Name of the entry")
+@click.pass_context
+def show_by_name(ctx: click.Context, name: str) -> None:
+    """Shows details of an entry"""
+    pulp_ctx: PulpContext = ctx.find_object(PulpContext)
+    entity_ctx: PulpEntityContext = ctx.find_object(PulpEntityContext)
+
+    href = entity_ctx.find(name=name)["pulp_href"]
+    entity = entity_ctx.show(href)
+    pulp_ctx.output_result(entity)
+
+
+@click.command(name="show")
+@click.option("--href", required=True, help="HREF of the entry")
+@click.pass_context
+def show_by_href(ctx: click.Context, href: str) -> None:
+    """Shows details of an entry"""
+    pulp_ctx: PulpContext = ctx.find_object(PulpContext)
+    entity_ctx: PulpEntityContext = ctx.find_object(PulpEntityContext)
+
+    entity = entity_ctx.show(href)
+    pulp_ctx.output_result(entity)
+
+
 @click.command(name="destroy")
 @click.option("--name", required=True, help="Name of the entry to destroy")
 @click.pass_context
@@ -269,8 +294,8 @@ def destroy_by_name(ctx: click.Context, name: str) -> None:
     """
     entity_ctx: PulpEntityContext = ctx.find_object(PulpEntityContext)
 
-    entity_href = entity_ctx.find(name=name)["pulp_href"]
-    entity_ctx.delete(entity_href)
+    href = entity_ctx.find(name=name)["pulp_href"]
+    entity_ctx.delete(href)
 
 
 @click.command(name="destroy")
