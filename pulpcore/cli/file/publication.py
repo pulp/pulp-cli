@@ -1,7 +1,13 @@
 import click
 
 
-from pulpcore.cli.common import limit_option, offset_option, PulpContext, PulpEntityContext
+from pulpcore.cli.common import (
+    destroy_by_href,
+    limit_option,
+    offset_option,
+    PulpContext,
+    PulpEntityContext,
+)
 
 from pulpcore.cli.file.repository import PulpFileRepositoryContext
 
@@ -59,10 +65,4 @@ def create(ctx: click.Context, repository: str) -> None:
     pulp_ctx.output_result(publication)
 
 
-@publication.command()
-@click.option("--href", required=True)
-@click.pass_context
-def destroy(ctx: click.Context, href: str) -> None:
-    publication_ctx: PulpFilePublicationContext = ctx.find_object(PulpFilePublicationContext)
-
-    publication_ctx.delete(href)
+publication.add_command(destroy_by_href)

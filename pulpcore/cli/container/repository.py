@@ -2,7 +2,13 @@ from typing import Optional
 
 import click
 
-from pulpcore.cli.common import limit_option, offset_option, PulpContext, PulpEntityContext
+from pulpcore.cli.common import (
+    destroy_by_name,
+    limit_option,
+    offset_option,
+    PulpContext,
+    PulpEntityContext,
+)
 from pulpcore.cli.container.remote import PulpContainerRemoteContext
 
 
@@ -98,14 +104,7 @@ def update(
     repository_ctx.update(repository_href, body=repository)
 
 
-@repository.command()
-@click.option("--name", required=True)
-@click.pass_context
-def destroy(ctx: click.Context, name: str) -> None:
-    repository_ctx: PulpContainerRepositoryContext = ctx.find_object(PulpContainerRepositoryContext)
-
-    repository_href = repository_ctx.find(name=name)["pulp_href"]
-    repository_ctx.delete(repository_href)
+repository.add_command(destroy_by_name)
 
 
 @repository.command()

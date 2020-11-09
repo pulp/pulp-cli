@@ -1,6 +1,12 @@
 import click
 
-from pulpcore.cli.common import limit_option, offset_option, PulpContext, PulpEntityContext
+from pulpcore.cli.common import (
+    destroy_by_name,
+    limit_option,
+    offset_option,
+    PulpContext,
+    PulpEntityContext,
+)
 
 
 class PulpFileRemoteContext(PulpEntityContext):
@@ -55,12 +61,4 @@ def create(ctx: click.Context, name: str, url: str) -> None:
     pulp_ctx.output_result(result)
 
 
-@remote.command()
-@click.option("--name", required=True)
-@click.pass_context
-def destroy(ctx: click.Context, name: str) -> None:
-    remote_ctx: PulpFileRemoteContext = ctx.find_object(PulpFileRemoteContext)
-
-    remote = remote_ctx.find(name=name)
-    remote_href: str = remote["pulp_href"]
-    remote_ctx.delete(remote_href)
+remote.add_command(destroy_by_name)

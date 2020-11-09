@@ -3,7 +3,13 @@ from typing import Optional
 import click
 
 
-from pulpcore.cli.common import limit_option, offset_option, PulpContext, PulpEntityContext
+from pulpcore.cli.common import (
+    destroy_by_name,
+    limit_option,
+    offset_option,
+    PulpContext,
+    PulpEntityContext,
+)
 
 
 class PulpFileDistributionContext(PulpEntityContext):
@@ -64,11 +70,4 @@ def create(ctx: click.Context, name: str, base_path: str, publication: Optional[
     pulp_ctx.output_result(distribution)
 
 
-@distribution.command()
-@click.option("--name", required=True)
-@click.pass_context
-def destroy(ctx: click.Context, name: str) -> None:
-    distribution_ctx: PulpFileDistributionContext = ctx.find_object(PulpFileDistributionContext)
-
-    distribution_href = distribution_ctx.find(name=name)["pulp_href"]
-    distribution_ctx.delete(distribution_href)
+distribution.add_command(destroy_by_name)

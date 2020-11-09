@@ -40,7 +40,7 @@ def list(ctx: click.Context, limit: int, offset: int, **kwargs: str) -> None:
 @artifact.command()
 @click.option("--href", required=True, help="HREF of the artifact")
 @click.pass_context
-def show(ctx: click.Context, href: str, wait: bool) -> None:
+def show(ctx: click.Context, href: str) -> None:
     """Shows details of an artifact."""
     pulp_ctx: PulpContext = ctx.find_object(PulpContext)
     artifact_ctx: PulpArtifactContext = ctx.find_object(PulpArtifactContext)
