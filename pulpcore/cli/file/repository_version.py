@@ -1,7 +1,7 @@
 import click
 
 from pulpcore.cli.common import limit_option, offset_option, PulpContext, PulpEntityContext
-from pulpcore.cli.file.repository import repository, PulpFileRepositoryContext
+from pulpcore.cli.file.repository import PulpFileRepositoryContext
 
 
 class PulpFileRepositoryVersionContext(PulpEntityContext):
@@ -11,7 +11,7 @@ class PulpFileRepositoryVersionContext(PulpEntityContext):
     DELETE_ID: str = "repositories_file_file_versions_delete"
 
 
-@repository.group()
+@click.group()
 @click.pass_context
 def version(ctx: click.Context) -> None:
     pulp_ctx: PulpContext = ctx.find_object(PulpContext)

@@ -11,9 +11,8 @@ def file() -> None:
     pass
 
 
-# TODO: figure out how we want to load/organize these commands
 file.add_command(repository)
-file.add_command(version)
+repository.add_command(version)
 file.add_command(remote)
 file.add_command(publication)
 file.add_command(distribution)
