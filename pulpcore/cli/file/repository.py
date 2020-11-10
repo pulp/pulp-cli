@@ -3,10 +3,9 @@ from typing import Optional
 import click
 
 from pulpcore.cli.common import (
+    list_entities,
     show_by_name,
     destroy_by_name,
-    limit_option,
-    offset_option,
     PulpContext,
     PulpEntityContext,
 )
@@ -42,18 +41,7 @@ def repository(ctx: click.Context, repo_type: str) -> None:
 
 
 repository.add_command(show_by_name)
-
-
-@repository.command()
-@limit_option
-@offset_option
-@click.pass_context
-def list(ctx: click.Context, limit: int, offset: int) -> None:
-    pulp_ctx: PulpContext = ctx.find_object(PulpContext)
-    repository_ctx: PulpFileRepositoryContext = ctx.find_object(PulpFileRepositoryContext)
-
-    result = repository_ctx.list(limit=limit, offset=offset, parameters={})
-    pulp_ctx.output_result(result)
+repository.add_command(list_entities)
 
 
 @repository.command()

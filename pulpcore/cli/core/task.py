@@ -1,8 +1,9 @@
 from typing import Any
 
+from copy import deepcopy
 import click
 
-from pulpcore.cli.common import limit_option, offset_option, PulpContext, PulpEntityContext
+from pulpcore.cli.common import list_entities, PulpContext, PulpEntityContext
 
 
 class PulpTaskContext(PulpEntityContext):
@@ -26,21 +27,14 @@ def task(ctx: click.Context) -> None:
     ctx.obj = PulpTaskContext(pulp_ctx)
 
 
-@task.command()
-@limit_option
-@offset_option
-@click.option("--name", help="List only tasks with this name.")
-@click.option("--name-contains", "name__contains", help="List only tasks whose name contains this.")
-@click.option("--state", help="List only tasks in this state.")
-@click.pass_context
-def list(ctx: click.Context, limit: int, offset: int, **kwargs: str) -> None:
-    """Shows a list of tasks."""
-    pulp_ctx: PulpContext = ctx.find_object(PulpContext)
-    task_ctx: PulpTaskContext = ctx.find_object(PulpTaskContext)
-
-    params = {k: v for k, v in kwargs.items() if v is not None}
-    result = task_ctx.list(limit=limit, offset=offset, parameters=params)
-    pulp_ctx.output_result(result)
+# deepcopy to not effect other list subcommands
+list_tasks = deepcopy(list_entities)
+click.option("--name", help="List only tasks with this name.")(list_tasks)
+click.option("--name-contains", "name__contains", help="List only tasks whose name contains this.")(
+    list_tasks
+)
+click.option("--state", help="List only tasks in this state.")(list_tasks)
+task.add_command(list_tasks)
 
 
 @task.command()

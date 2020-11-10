@@ -28,13 +28,6 @@ DEFAULT_LIMIT = 25
 BATCH_SIZE = 25
 
 
-limit_option = click.option(
-    "--limit", default=DEFAULT_LIMIT, type=int, help="Limit the number of entries to show."
-)
-offset_option = click.option(
-    "--offset", default=0, type=int, help="Skip a number of entries to show."
-)
-
 RepositoryDefinition = Tuple[str, str]  # name, pulp_type
 RepositoryVersionDefinition = Tuple[str, str, int]  # name, pulp_type, version
 
@@ -240,6 +233,87 @@ class PulpEntityContext:
         return repo_version
 
 
+##############################################################################
+# Decorator to access certain contexts or for common options
+
+
+pass_pulp_context = click.make_pass_decorator(PulpContext)
+pass_entity_context = click.make_pass_decorator(PulpEntityContext)
+
+limit_option = click.option(
+    "--limit", default=DEFAULT_LIMIT, type=int, help="Limit the number of entries to show."
+)
+offset_option = click.option(
+    "--offset", default=0, type=int, help="Skip a number of entries to show."
+)
+
+
+##############################################################################
+# Generic reusable commands
+
+
+@click.command(name="list")
+@limit_option
+@offset_option
+@pass_entity_context
+@pass_pulp_context
+def list_entities(
+    pulp_ctx: PulpContext, entity_ctx: PulpEntityContext, limit: int, offset: int, **kwargs: Any
+) -> None:
+    """
+    Show a list of entries
+    """
+    parameters = {k: v for k, v in kwargs.items() if v is not None}
+    result = entity_ctx.list(limit=limit, offset=offset, parameters=parameters)
+    pulp_ctx.output_result(result)
+
+
+@click.command(name="show")
+@click.option("--name", required=True, help="Name of the entry")
+@pass_entity_context
+@pass_pulp_context
+def show_by_name(pulp_ctx: PulpContext, entity_ctx: PulpEntityContext, name: str) -> None:
+    """Shows details of an entry"""
+    href = entity_ctx.find(name=name)["pulp_href"]
+    entity = entity_ctx.show(href)
+    pulp_ctx.output_result(entity)
+
+
+@click.command(name="show")
+@click.option("--href", required=True, help="HREF of the entry")
+@pass_entity_context
+@pass_pulp_context
+def show_by_href(pulp_ctx: PulpContext, entity_ctx: PulpEntityContext, href: str) -> None:
+    """Shows details of an entry"""
+    entity = entity_ctx.show(href)
+    pulp_ctx.output_result(entity)
+
+
+@click.command(name="destroy")
+@click.option("--name", required=True, help="Name of the entry to destroy")
+@pass_entity_context
+def destroy_by_name(entity_ctx: PulpEntityContext, name: str) -> None:
+    """
+    Destroy an entry
+    """
+    href = entity_ctx.find(name=name)["pulp_href"]
+    entity_ctx.delete(href)
+
+
+@click.command(name="destroy")
+@click.option("--href", required=True, help="HREF of the entry to destroy")
+@pass_entity_context
+def destroy_by_href(entity_ctx: PulpEntityContext, href: str) -> None:
+    """
+    Destroy an entry
+    """
+    entity_ctx.delete(href)
+
+
+##############################################################################
+# Main entry point
+
+
 def _config_callback(ctx: click.Context, param: Any, value: str) -> None:
     if ctx.default_map:
         return
@@ -254,64 +328,6 @@ def _config_callback(ctx: click.Context, param: Any, value: str) -> None:
             ctx.default_map = toml.load(default_config_path)["cli"]
         except FileNotFoundError:
             pass
-
-
-##############################################################################
-# Generic reusable commands
-
-
-@click.command(name="show")
-@click.option("--name", required=True, help="Name of the entry")
-@click.pass_context
-def show_by_name(ctx: click.Context, name: str) -> None:
-    """Shows details of an entry"""
-    pulp_ctx: PulpContext = ctx.find_object(PulpContext)
-    entity_ctx: PulpEntityContext = ctx.find_object(PulpEntityContext)
-
-    href = entity_ctx.find(name=name)["pulp_href"]
-    entity = entity_ctx.show(href)
-    pulp_ctx.output_result(entity)
-
-
-@click.command(name="show")
-@click.option("--href", required=True, help="HREF of the entry")
-@click.pass_context
-def show_by_href(ctx: click.Context, href: str) -> None:
-    """Shows details of an entry"""
-    pulp_ctx: PulpContext = ctx.find_object(PulpContext)
-    entity_ctx: PulpEntityContext = ctx.find_object(PulpEntityContext)
-
-    entity = entity_ctx.show(href)
-    pulp_ctx.output_result(entity)
-
-
-@click.command(name="destroy")
-@click.option("--name", required=True, help="Name of the entry to destroy")
-@click.pass_context
-def destroy_by_name(ctx: click.Context, name: str) -> None:
-    """
-    Destroy an entry
-    """
-    entity_ctx: PulpEntityContext = ctx.find_object(PulpEntityContext)
-
-    href = entity_ctx.find(name=name)["pulp_href"]
-    entity_ctx.delete(href)
-
-
-@click.command(name="destroy")
-@click.option("--href", required=True, help="HREF of the entry to destroy")
-@click.pass_context
-def destroy_by_href(ctx: click.Context, href: str) -> None:
-    """
-    Destroy an entry
-    """
-    entity_ctx: PulpEntityContext = ctx.find_object(PulpEntityContext)
-
-    entity_ctx.delete(href)
-
-
-##############################################################################
-# Main entry point
 
 
 @click.group()
