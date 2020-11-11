@@ -77,30 +77,38 @@ class PulpContext:
             raise click.ClickException(str(e.response.json()))
         if "task" in result:
             task_href = result["task"]
+            result = self.api.call("tasks_read", parameters={"task_href": task_href})
             click.echo(f"Started task {task_href}", err=True)
             if not background:
-                result = self.wait_for_task(task_href)
-                click.echo("Done.", err=True)
+                result = self.wait_for_task(result)
         return result
 
-    def wait_for_task(self, task_href: str, timeout: int = 120) -> Any:
-        while timeout:
-            task = self.api.call("tasks_read", parameters={"task_href": task_href})
-            if task["state"] == "completed":
-                return task
-            elif task["state"] == "failed":
-                raise click.ClickException(
-                    f"Task {task_href} failed: '{task['error']['description']}'"
-                )
-            elif task["state"] == "canceled":
-                raise click.ClickException("Task canceled")
-            elif task["state"] in ["waiting", "running"]:
-                time.sleep(1)
-                timeout -= 1
-                click.echo(".", nl=False, err=True)
-            else:
-                raise NotImplementedError(f"Unknown task state: {task['state']}")
-        raise click.ClickException("Task timed out")
+    def wait_for_task(self, task: Dict[str, Any], timeout: int = 120) -> Any:
+        task_href = task["pulp_href"]
+        try:
+            while True:
+                if task["state"] == "completed":
+                    click.echo("Done.", err=True)
+                    return task
+                elif task["state"] == "failed":
+                    raise click.ClickException(
+                        f"Task {task_href} failed: '{task['error']['description']}'"
+                    )
+                elif task["state"] == "canceled":
+                    raise click.ClickException("Task canceled")
+                elif task["state"] in ["waiting", "running"]:
+                    if timeout <= 0:
+                        return task
+                    time.sleep(1)
+                    timeout -= 1
+                    click.echo(".", nl=False, err=True)
+                    task = self.api.call("tasks_read", parameters={"task_href": task_href})
+                else:
+                    raise NotImplementedError(f"Unknown task state: {task['state']}")
+            raise click.ClickException("Task timed out")
+        except KeyboardInterrupt:
+            click.echo(f"Task {task_href} sent to background.", err=True)
+            return task
 
 
 class PulpEntityContext:

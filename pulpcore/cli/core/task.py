@@ -55,7 +55,7 @@ def show(ctx: click.Context, href: str, wait: bool) -> None:
     entity = task_ctx.show(href)
     if wait and entity["state"] in ["waiting", "running"]:
         click.echo(f"Waiting for task {href} to finish.", err=True)
-        entity = pulp_ctx.wait_for_task(href)
+        entity = pulp_ctx.wait_for_task(entity)
     pulp_ctx.output_result(entity)
 
 
@@ -74,7 +74,7 @@ def cancel(ctx: click.Context, href: str) -> None:
     task_ctx.cancel(href)
     click.echo(f"Waiting to cancel task {href}", err=True)
     try:
-        pulp_ctx.wait_for_task(href)
+        pulp_ctx.wait_for_task(entity)
     except Exception as e:
         if str(e) != "Task canceled":
             raise e
