@@ -26,17 +26,17 @@ expect_succ pulp --background file repository sync --name "cli_test_file_reposit
 task="$(echo "$ERROUTPUT" | grep -E -o "/pulp/api/v3/tasks/[-[:xdigit:]]*/")"
 expect_succ pulp task cancel --href "$task"
 expect_succ pulp task list --name $sync_task --state canceled
-test "$(echo "$OUTPUT" | jq -r length)" -eq $((count + 1))
+expect_succ test "$(echo "$OUTPUT" | jq -r length)" -eq $((count + 1))
 expect_succ pulp task show --href "$task"
-test "$(echo "$OUTPUT" | jq -r '.state')" = "canceled"
+expect_succ test "$(echo "$OUTPUT" | jq -r '.state')" = "canceled"
 
 # Test waiting for a task
 expect_succ pulp --background file repository sync --name "cli_test_file_repository" --remote "cli_test_file_remote"
 task=$(echo "$ERROUTPUT" | grep -E -o "/pulp/api/v3/tasks/[-[:xdigit:]]*/")
 expect_succ pulp task show --wait --href "$task"
-test "$(echo "$OUTPUT" | jq -r '.state')" = "completed"
+expect_succ test "$(echo "$OUTPUT" | jq -r '.state')" = "completed"
 
 expect_succ pulp task list --name-contains file
 
 expect_succ pulp task list --limit 1
-test "$(echo "$OUTPUT" | jq -r length)" -eq 1
+expect_succ test "$(echo "$OUTPUT" | jq -r length)" -eq 1

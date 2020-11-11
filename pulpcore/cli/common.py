@@ -233,12 +233,31 @@ class PulpEntityContext:
         return repo_version
 
 
+class PulpRepositoryContext(PulpEntityContext):
+    """
+    Base class for repository specific contexts.
+    This class provides the basic CRUD commands as well as synchronizing and
+    ties its instances to the global PulpContext for api access.
+    """
+
+    ENTITY = "repository"
+    SYNC_ID: str
+
+    def sync(self, href: str, body: Dict[str, Any]) -> Any:
+        return self.pulp_ctx.call(
+            self.SYNC_ID,
+            parameters={self.HREF: href},
+            body=body,
+        )
+
+
 ##############################################################################
 # Decorator to access certain contexts or for common options
 
 
 pass_pulp_context = click.make_pass_decorator(PulpContext)
 pass_entity_context = click.make_pass_decorator(PulpEntityContext)
+pass_repository_context = click.make_pass_decorator(PulpRepositoryContext)
 
 limit_option = click.option(
     "--limit", default=DEFAULT_LIMIT, type=int, help="Limit the number of entries to show."

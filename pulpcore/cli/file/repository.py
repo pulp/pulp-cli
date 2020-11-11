@@ -6,14 +6,15 @@ from pulpcore.cli.common import (
     list_entities,
     show_by_name,
     destroy_by_name,
+    pass_pulp_context,
+    pass_repository_context,
     PulpContext,
-    PulpEntityContext,
+    PulpRepositoryContext,
 )
 from pulpcore.cli.file.remote import PulpFileRemoteContext
 
 
-class PulpFileRepositoryContext(PulpEntityContext):
-    ENTITY: str = "repository"
+class PulpFileRepositoryContext(PulpRepositoryContext):
     HREF: str = "file_file_repository_href"
     LIST_ID: str = "repositories_file_file_list"
     CREATE_ID: str = "repositories_file_file_create"
@@ -102,11 +103,14 @@ repository.add_command(destroy_by_name)
 @repository.command()
 @click.option("--name", required=True)
 @click.option("--remote")
-@click.pass_context
-def sync(ctx: click.Context, name: str, remote: Optional[str]) -> None:
-    pulp_ctx: PulpContext = ctx.find_object(PulpContext)
-    repository_ctx: PulpFileRepositoryContext = ctx.find_object(PulpFileRepositoryContext)
-
+@pass_repository_context
+@pass_pulp_context
+def sync(
+    pulp_ctx: PulpContext,
+    repository_ctx: PulpRepositoryContext,
+    name: str,
+    remote: Optional[str],
+) -> None:
     repository = repository_ctx.find(name=name)
     repository_href = repository["pulp_href"]
 
@@ -120,8 +124,7 @@ def sync(ctx: click.Context, name: str, remote: Optional[str]) -> None:
             f"Repository '{name}' does not have a default remote. Please specify with '--remote'."
         )
 
-    pulp_ctx.call(
-        repository_ctx.SYNC_ID,
-        parameters={repository_ctx.HREF: repository_href},
+    repository_ctx.sync(
+        href=repository_href,
         body=body,
     )
