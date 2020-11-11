@@ -111,9 +111,8 @@ def destroy(ctx: click.Context, name: str) -> None:
 @repository.command()
 @click.option("--name", required=True)
 @click.option("--remote")
-@click.option("-b", "--background", is_flag=True)
 @click.pass_context
-def sync(ctx: click.Context, name: str, remote: Optional[str], background: bool) -> None:
+def sync(ctx: click.Context, name: str, remote: Optional[str]) -> None:
     pulp_ctx: PulpContext = ctx.find_object(PulpContext)
     repository_ctx: PulpFileRepositoryContext = ctx.find_object(PulpFileRepositoryContext)
 
@@ -133,6 +132,5 @@ def sync(ctx: click.Context, name: str, remote: Optional[str], background: bool)
     pulp_ctx.call(
         repository_ctx.SYNC_ID,
         parameters={repository_ctx.HREF: repository_href},
-        background=background,
         body=body,
     )

@@ -4,32 +4,39 @@
 . "$(dirname "$(realpath "$0")")/config.source"
 
 cleanup() {
-  pulp_cli file remote destroy --name "cli_test_file_remote" || true
-  pulp_cli file remote destroy --name "cli_test_file_large_remote" || true
-  pulp_cli file repository destroy --name "cli_test_file_repository" || true
-  pulp_cli orphans delete || true
+  pulp file remote destroy --name "cli_test_file_remote" || true
+  pulp file remote destroy --name "cli_test_file_large_remote" || true
+  pulp file repository destroy --name "cli_test_file_repository" || true
+  pulp orphans delete || true
 }
 trap cleanup EXIT
 
 sync_task="pulp_file.app.tasks.synchronizing.synchronize"
-count=$(pulp_cli task list --name $sync_task --state canceled | jq -r length)
+expect_succ pulp task list --name $sync_task --state canceled
+count="$(echo "$OUTPUT" | jq -r length)"
 
-pulp_cli file remote create --name "cli_test_file_remote" \
+expect_succ pulp file remote create --name "cli_test_file_remote" \
   --url "https://fixtures.pulpproject.org/file/PULP_MANIFEST"
-pulp_cli file remote create --name "cli_test_file_large_remote" \
+expect_succ pulp file remote create --name "cli_test_file_large_remote" \
   --url "https://fixtures.pulpproject.org/file-large/PULP_MANIFEST"
-pulp_cli file repository create --name "cli_test_file_repository" --remote "cli_test_file_large_remote"
+expect_succ pulp file repository create --name "cli_test_file_repository" --remote "cli_test_file_large_remote"
 
 # Test canceling a task
-task=$(pulp_cli file repository sync --background --name "cli_test_file_repository" 2>&1 | grep -E -o "/pulp/api/v3/tasks/[-[:xdigit:]]*/")
-pulp_cli task cancel --href "$task"
-test "$(pulp_cli task list --name $sync_task --state canceled | jq -r length)" -eq $((count + 1))
-test "$(pulp_cli task show --href "$task" | jq -r '.state')" = "canceled"
+expect_succ pulp --background file repository sync --name "cli_test_file_repository"
+task="$(echo "$ERROUTPUT" | grep -E -o "/pulp/api/v3/tasks/[-[:xdigit:]]*/")"
+expect_succ pulp task cancel --href "$task"
+expect_succ pulp task list --name $sync_task --state canceled
+test "$(echo "$OUTPUT" | jq -r length)" -eq $((count + 1))
+expect_succ pulp task show --href "$task"
+test "$(echo "$OUTPUT" | jq -r '.state')" = "canceled"
 
 # Test waiting for a task
-task=$(pulp_cli file repository sync --background --name "cli_test_file_repository" --remote "cli_test_file_remote" 2>&1 | grep -E -o "/pulp/api/v3/tasks/[-[:xdigit:]]*/")
-test "$(pulp_cli task show --wait --href "$task" | jq -r '.state')" = "completed"
+expect_succ pulp --background file repository sync --name "cli_test_file_repository" --remote "cli_test_file_remote"
+task=$(echo "$ERROUTPUT" | grep -E -o "/pulp/api/v3/tasks/[-[:xdigit:]]*/")
+expect_succ pulp task show --wait --href "$task"
+test "$(echo "$OUTPUT" | jq -r '.state')" = "completed"
 
-pulp_cli task list --name-contains file
+expect_succ pulp task list --name-contains file
 
-test "$(pulp_cli task list --limit 1 | jq -r length)" -eq 1
+expect_succ pulp task list --limit 1
+test "$(echo "$OUTPUT" | jq -r length)" -eq 1
