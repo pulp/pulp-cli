@@ -4,7 +4,7 @@
 . "$(dirname "$(realpath "$0")")/config.source"
 
 cleanup() {
-  pulp_cli file remote destroy --name "cli_test_file_remote" || true
+  pulp file remote destroy --name "cli_test_file_remote" || true
 }
 trap cleanup EXIT
 

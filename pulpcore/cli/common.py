@@ -45,9 +45,10 @@ class PulpJSONEncoder(json.JSONEncoder):
 
 
 class PulpContext:
-    def __init__(self, api: OpenAPI, format: str) -> None:
+    def __init__(self, api: OpenAPI, format: str, background_tasks: bool) -> None:
         self.api: OpenAPI = api
         self.format: str = format
+        self.background_tasks: bool = background_tasks
 
     def output_result(self, result: Any) -> None:
         if self.format == "json":
@@ -65,7 +66,7 @@ class PulpContext:
         else:
             raise NotImplementedError(f"Format '{self.format}' not implemented.")
 
-    def call(self, operation_id: str, background: bool = False, *args: Any, **kwargs: Any) -> Any:
+    def call(self, operation_id: str, *args: Any, **kwargs: Any) -> Any:
         try:
             result = self.api.call(operation_id, *args, **kwargs)
         except OpenAPIError as e:
@@ -75,8 +76,8 @@ class PulpContext:
         if "task" in result:
             task_href = result["task"]
             result = self.api.call("tasks_read", parameters={"task_href": task_href})
-            click.echo(f"Started task {task_href}", err=True)
-            if not background:
+            click.echo(f"Started background task {task_href}", err=True)
+            if not self.background_tasks:
                 result = self.wait_for_task(result)
         return result
 
@@ -199,7 +200,13 @@ def _config_callback(ctx: click.Context, param: Any, value: str) -> None:
     "--verbose",
     type=int,
     count=True,
-    help="Increase verbosity. Explain api calls as they are made",
+    help="Increase verbosity; explain api calls as they are made",
+)
+@click.option(
+    "-b",
+    "--background",
+    is_flag=True,
+    help="Start tasks in the background instead of awaiting them",
 )
 @click.pass_context
 def main(
@@ -210,6 +217,7 @@ def main(
     verify_ssl: bool,
     format: str,
     verbose: int,
+    background: bool,
 ) -> None:
     if user and not password:
         password = click.prompt("password", hide_input=True)
@@ -227,4 +235,4 @@ def main(
         )
     except OpenAPIError as e:
         raise click.ClickException(str(e))
-    ctx.obj = PulpContext(api=api, format=format)
+    ctx.obj = PulpContext(api=api, format=format, background_tasks=background)
