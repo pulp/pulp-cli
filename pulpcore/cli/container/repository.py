@@ -3,24 +3,37 @@ from typing import Optional
 import click
 
 from pulpcore.cli.common import (
+    list_entities,
     show_by_name,
     destroy_by_name,
-    limit_option,
-    offset_option,
+    pass_pulp_context,
+    pass_repository_context,
     PulpContext,
-    PulpEntityContext,
+    PulpRepositoryContext,
 )
 from pulpcore.cli.container.remote import PulpContainerRemoteContext
 
 
-class PulpContainerRepositoryContext(PulpEntityContext):
-    ENTITY: str = "repository"
+class PulpContainerRepositoryContext(PulpRepositoryContext):
     HREF: str = "container_container_repository_href"
     LIST_ID: str = "repositories_container_container_list"
+    READ_ID: str = "repositories_container_container_read"
     CREATE_ID: str = "repositories_container_container_create"
     UPDATE_ID: str = "repositories_container_container_update"
     DELETE_ID: str = "repositories_container_container_delete"
     SYNC_ID: str = "repositories_container_container_sync"
+
+
+class PulpContainerPushRepositoryContext(PulpRepositoryContext):
+    HREF: str = "container_container_push_repository_href"
+    LIST_ID: str = "repositories_container_container_push_list"
+    READ_ID: str = "repositories_container_container_push_read"
+    CREATE_ID: str = "repositories_container_container_push_create"
+    # UPDATE_ID: str = "repositories_container_container_push_update"
+    DELETE_ID: str = "repositories_container_container_push_delete"
+    # Cannot sync a push type repository
+    # TODO Incorporate into capabilities
+    # SYNC_ID: str = "repositories_container_container_push_sync"
 
 
 @click.group()
@@ -28,32 +41,22 @@ class PulpContainerRepositoryContext(PulpEntityContext):
     "-t",
     "--type",
     "repo_type",
-    type=click.Choice(["container"], case_sensitive=False),
+    type=click.Choice(["container", "push"], case_sensitive=False),
     default="container",
 )
+@pass_pulp_context
 @click.pass_context
-def repository(ctx: click.Context, repo_type: str) -> None:
-    pulp_ctx: PulpContext = ctx.find_object(PulpContext)
-
+def repository(ctx: click.Context, pulp_ctx: PulpContext, repo_type: str) -> None:
     if repo_type == "container":
         ctx.obj = PulpContainerRepositoryContext(pulp_ctx)
+    elif repo_type == "push":
+        ctx.obj = PulpContainerPushRepositoryContext(pulp_ctx)
     else:
         raise NotImplementedError()
 
 
-@repository.command()
-@limit_option
-@offset_option
-@click.pass_context
-def list(ctx: click.Context, limit: int, offset: int) -> None:
-    pulp_ctx: PulpContext = ctx.find_object(PulpContext)
-    repository_ctx: PulpContainerRepositoryContext = ctx.find_object(PulpContainerRepositoryContext)
-
-    result = repository_ctx.list(limit=limit, offset=offset, parameters={})
-    pulp_ctx.output_result(result)
-
-
 repository.add_command(show_by_name)
+repository.add_command(list_entities)
 
 
 @repository.command()
@@ -65,7 +68,7 @@ def create(
     ctx: click.Context, name: str, description: Optional[str], remote: Optional[str]
 ) -> None:
     pulp_ctx: PulpContext = ctx.find_object(PulpContext)
-    repository_ctx: PulpContainerRepositoryContext = ctx.find_object(PulpContainerRepositoryContext)
+    repository_ctx: PulpRepositoryContext = ctx.find_object(PulpRepositoryContext)
 
     repository = {"name": name, "description": description}
     if remote:
@@ -85,7 +88,7 @@ def update(
     ctx: click.Context, name: str, description: Optional[str], remote: Optional[str]
 ) -> None:
     pulp_ctx: PulpContext = ctx.find_object(PulpContext)
-    repository_ctx: PulpContainerRepositoryContext = ctx.find_object(PulpContainerRepositoryContext)
+    repository_ctx: PulpRepositoryContext = ctx.find_object(PulpRepositoryContext)
 
     repository = repository_ctx.find(name=name)
     repository_href = repository["pulp_href"]
@@ -109,15 +112,22 @@ def update(
 
 
 repository.add_command(destroy_by_name)
+repository.add_command(show_by_name)
 
 
 @repository.command()
 @click.option("--name", required=True)
 @click.option("--remote")
-@click.pass_context
-def sync(ctx: click.Context, name: str, remote: Optional[str]) -> None:
-    pulp_ctx: PulpContext = ctx.find_object(PulpContext)
-    repository_ctx: PulpContainerRepositoryContext = ctx.find_object(PulpContainerRepositoryContext)
+@pass_repository_context
+@pass_pulp_context
+def sync(
+    pulp_ctx: PulpContext,
+    repository_ctx: PulpRepositoryContext,
+    name: str,
+    remote: Optional[str],
+) -> None:
+    if repository_ctx is None:
+        raise click.ClickException("Repository type does not support sync.")
 
     repository = repository_ctx.find(name=name)
     repository_href = repository["pulp_href"]

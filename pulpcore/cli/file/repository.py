@@ -31,10 +31,9 @@ class PulpFileRepositoryContext(PulpRepositoryContext):
     type=click.Choice(["file"], case_sensitive=False),
     default="file",
 )
+@pass_pulp_context
 @click.pass_context
-def repository(ctx: click.Context, repo_type: str) -> None:
-    pulp_ctx: PulpContext = ctx.find_object(PulpContext)
-
+def repository(ctx: click.Context, pulp_ctx: PulpContext, repo_type: str) -> None:
     if repo_type == "file":
         ctx.obj = PulpFileRepositoryContext(pulp_ctx)
     else:
