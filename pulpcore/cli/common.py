@@ -151,6 +151,8 @@ class PulpEntityContext:
         "rpm": "rpm_rpm_repository_href",
     }
 
+    entity: Dict[str, Any]
+
     def __init__(self, pulp_ctx: PulpContext) -> None:
         self.pulp_ctx: PulpContext = pulp_ctx
 
