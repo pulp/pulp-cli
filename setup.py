@@ -1,12 +1,15 @@
 from setuptools import setup, find_namespace_packages
 
 
+packages = find_namespace_packages(include=["pulpcore.cli.*"])
+
+
 setup(
     name="pulp-cli",
     description="Command line interface to talk to pulpcore's REST API.",
     version="0.0.0a1.dev",
-    packages=find_namespace_packages(include=["pulpcore.*"]),
-    package_data={"pulpcore.cli": ["py.typed"]},
+    packages=packages,
+    package_data={package: ["py.typed"] for package in packages},
     python_requires=">=3.6",
     install_requires=[
         "click",
@@ -18,11 +21,11 @@ setup(
         "pygments": ["pygments"],
     },
     entry_points={
-        "console_scripts": "pulp=pulpcore.cli:main",
+        "console_scripts": "pulp=pulpcore.cli.common:main",
         "pulp_cli.plugins": [
-            "core=pulpcore.cli.core_cli",
-            "file=pulpcore.cli.file_cli",
-            "container=pulpcore.cli.container_cli",
+            "core=pulpcore.cli.core",
+            "file=pulpcore.cli.file",
+            "container=pulpcore.cli.container",
         ],
     },
     license="GPLv2+",

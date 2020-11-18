@@ -1,5 +1,6 @@
 from typing import Any, Optional, Dict, List, Tuple
 
+import pkg_resources
 import click
 import datetime
 import json
@@ -11,7 +12,7 @@ import yaml
 
 from requests import HTTPError
 
-from pulpcore.cli.openapi import OpenAPI, OpenAPIError
+from pulpcore.cli.common.openapi import OpenAPI, OpenAPIError
 
 try:
     from pygments import highlight
@@ -408,3 +409,12 @@ def main(
     except OpenAPIError as e:
         raise click.ClickException(str(e))
     ctx.obj = PulpContext(api=api, format=format, background_tasks=background)
+
+
+##############################################################################
+# Load plugins
+# https://packaging.python.org/guides/creating-and-discovering-plugins/#using-package-metadata
+discovered_plugins = {
+    entry_point.name: entry_point.load()
+    for entry_point in pkg_resources.iter_entry_points("pulp_cli.plugins")
+}
