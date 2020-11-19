@@ -3,7 +3,13 @@ from typing import Any
 from copy import deepcopy
 import click
 
-from pulpcore.cli.common import list_entities, PulpContext, PulpEntityContext
+from pulpcore.cli.common import (
+    list_entities,
+    pass_pulp_context,
+    pass_entity_context,
+    PulpContext,
+    PulpEntityContext,
+)
 
 
 class PulpTaskContext(PulpEntityContext):
@@ -21,9 +27,9 @@ class PulpTaskContext(PulpEntityContext):
 
 
 @click.group()
+@pass_pulp_context
 @click.pass_context
-def task(ctx: click.Context) -> None:
-    pulp_ctx: PulpContext = ctx.find_object(PulpContext)
+def task(ctx: click.Context, pulp_ctx: PulpContext) -> None:
     ctx.obj = PulpTaskContext(pulp_ctx)
 
 
@@ -40,12 +46,10 @@ task.add_command(list_tasks)
 @task.command()
 @click.option("--href", required=True, help="HREF of the task")
 @click.option("-w", "--wait", is_flag=True, help="Wait for the task to finish")
-@click.pass_context
-def show(ctx: click.Context, href: str, wait: bool) -> None:
+@pass_entity_context
+@pass_pulp_context
+def show(pulp_ctx: PulpContext, task_ctx: PulpTaskContext, href: str, wait: bool) -> None:
     """Shows details of a task."""
-    pulp_ctx: PulpContext = ctx.find_object(PulpContext)
-    task_ctx: PulpTaskContext = ctx.find_object(PulpTaskContext)
-
     entity = task_ctx.show(href)
     if wait and entity["state"] in ["waiting", "running"]:
         click.echo(f"Waiting for task {href} to finish.", err=True)
@@ -55,12 +59,10 @@ def show(ctx: click.Context, href: str, wait: bool) -> None:
 
 @task.command()
 @click.option("--href", required=True, help="HREF of the task")
-@click.pass_context
-def cancel(ctx: click.Context, href: str) -> None:
+@pass_entity_context
+@pass_pulp_context
+def cancel(pulp_ctx: PulpContext, task_ctx: PulpTaskContext, href: str) -> None:
     """Cancels a task and waits until the cancellation is confirmed."""
-    pulp_ctx: PulpContext = ctx.find_object(PulpContext)
-    task_ctx: PulpTaskContext = ctx.find_object(PulpTaskContext)
-
     entity = task_ctx.show(href)
     if entity["state"] not in ["waiting", "running"]:
         click.ClickException(f"Task {href} is in state {entity['state']} and cannot be canceled.")

@@ -2,10 +2,11 @@ import click
 
 
 from pulpcore.cli.common import (
+    list_entities,
     show_by_href,
     destroy_by_href,
-    limit_option,
-    offset_option,
+    pass_pulp_context,
+    pass_entity_context,
     PulpContext,
     PulpEntityContext,
 )
@@ -30,38 +31,26 @@ class PulpFilePublicationContext(PulpEntityContext):
     type=click.Choice(["file"], case_sensitive=False),
     default="file",
 )
+@pass_pulp_context
 @click.pass_context
-def publication(ctx: click.Context, publication_type: str) -> None:
-    pulp_ctx: PulpContext = ctx.find_object(PulpContext)
-
+def publication(ctx: click.Context, pulp_ctx: PulpContext, publication_type: str) -> None:
     if publication_type == "file":
         ctx.obj = PulpFilePublicationContext(pulp_ctx)
     else:
         raise NotImplementedError()
 
 
-@publication.command()
-@limit_option
-@offset_option
-@click.pass_context
-def list(ctx: click.Context, limit: int, offset: int) -> None:
-    pulp_ctx: PulpContext = ctx.find_object(PulpContext)
-    publication_ctx: PulpFilePublicationContext = ctx.find_object(PulpFilePublicationContext)
-
-    result = publication_ctx.list(limit=limit, offset=offset, parameters={})
-    pulp_ctx.output_result(result)
-
-
+publication.add_command(list_entities)
 publication.add_command(show_by_href)
 
 
 @publication.command()
 @click.option("--repository", required=True)
-@click.pass_context
-def create(ctx: click.Context, repository: str) -> None:
-    pulp_ctx: PulpContext = ctx.find_object(PulpContext)
-    publication_ctx: PulpFilePublicationContext = ctx.find_object(PulpFilePublicationContext)
-
+@pass_entity_context
+@pass_pulp_context
+def create(
+    pulp_ctx: PulpContext, publication_ctx: PulpFilePublicationContext, repository: str
+) -> None:
     repository_href: str = PulpFileRepositoryContext(pulp_ctx).find(name=repository)["pulp_href"]
     body = {"repository": repository_href}
     result = publication_ctx.create(body=body)

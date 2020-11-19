@@ -29,6 +29,7 @@ DEFAULT_LIMIT = 25
 BATCH_SIZE = 25
 
 
+EntityData = Dict[str, Any]
 RepositoryDefinition = Tuple[str, str]  # name, pulp_type
 RepositoryVersionDefinition = Tuple[str, str, int]  # name, pulp_type, version
 
@@ -90,7 +91,7 @@ class PulpContext:
                 result = self.wait_for_task(result)
         return result
 
-    def wait_for_task(self, task: Dict[str, Any], timeout: int = 120) -> Any:
+    def wait_for_task(self, task: EntityData, timeout: int = 120) -> Any:
         """
         Wait for a task to finish and return the finished task object.
         """
@@ -152,8 +153,6 @@ class PulpEntityContext:
         "rpm": "rpm_rpm_repository_href",
     }
 
-    entity: Dict[str, Any]
-
     def __init__(self, pulp_ctx: PulpContext) -> None:
         self.pulp_ctx: PulpContext = pulp_ctx
 
@@ -188,10 +187,10 @@ class PulpEntityContext:
     def show(self, href: str) -> Any:
         return self.pulp_ctx.call(self.READ_ID, parameters={self.HREF: href})
 
-    def create(self, body: Dict[str, Any]) -> Any:
+    def create(self, body: EntityData) -> Any:
         return self.pulp_ctx.call(self.CREATE_ID, body=body)
 
-    def update(self, href: str, body: Dict[str, Any]) -> Any:
+    def update(self, href: str, body: EntityData) -> Any:
         return self.pulp_ctx.call(self.UPDATE_ID, parameters={self.HREF: href}, body=body)
 
     def delete(self, href: str) -> Any:
@@ -254,6 +253,23 @@ class PulpRepositoryContext(PulpEntityContext):
         )
 
 
+class PulpRepositoryVersionContext(PulpEntityContext):
+    """
+    Base class for repository version specific contexts.
+    This class provides the basic CRUD commands and
+    ties its instances to the global PulpContext for api access.
+    """
+
+    ENTITY = "repository version"
+    REPOSITORY_HREF: str
+    repository: EntityData
+
+    def list(self, limit: int, offset: int, parameters: Dict[str, Any]) -> List[Any]:
+        _parameters = {self.REPOSITORY_HREF: self.repository["pulp_href"]}
+        _parameters.update(parameters)
+        return super().list(limit, offset, _parameters)
+
+
 ##############################################################################
 # Decorator to access certain contexts or for common options
 
@@ -261,6 +277,7 @@ class PulpRepositoryContext(PulpEntityContext):
 pass_pulp_context = click.make_pass_decorator(PulpContext)
 pass_entity_context = click.make_pass_decorator(PulpEntityContext)
 pass_repository_context = click.make_pass_decorator(PulpRepositoryContext)
+pass_repository_version_context = click.make_pass_decorator(PulpRepositoryVersionContext)
 
 limit_option = click.option(
     "--limit", default=DEFAULT_LIMIT, type=int, help="Limit the number of entries to show."
@@ -311,6 +328,21 @@ def show_by_href(pulp_ctx: PulpContext, entity_ctx: PulpEntityContext, href: str
     pulp_ctx.output_result(entity)
 
 
+@click.command(name="show")
+@click.option("--version", required=True, type=int)
+@pass_repository_version_context
+@pass_pulp_context
+def show_version(
+    pulp_ctx: PulpContext,
+    repository_version_ctx: PulpRepositoryVersionContext,
+    version: int,
+) -> None:
+    repo_href = repository_version_ctx.repository["pulp_href"]
+    href = f"{repo_href}versions/{version}"
+    result = repository_version_ctx.show(href)
+    pulp_ctx.output_result(result)
+
+
 @click.command(name="destroy")
 @click.option("--name", required=True, help="Name of the entry to destroy")
 @pass_entity_context
@@ -330,6 +362,18 @@ def destroy_by_href(entity_ctx: PulpEntityContext, href: str) -> None:
     Destroy an entry
     """
     entity_ctx.delete(href)
+
+
+@click.command(name="destroy")
+@click.option("--version", required=True, type=int)
+@pass_repository_version_context
+def destroy_version(
+    repository_version_ctx: PulpRepositoryVersionContext,
+    version: int,
+) -> None:
+    repo_href = repository_version_ctx.repository["pulp_href"]
+    href = f"{repo_href}versions/{version}"
+    repository_version_ctx.delete(href)
 
 
 ##############################################################################

@@ -30,6 +30,8 @@ expect_succ pulp container repository sync --name "cli_test_container_repository
 # Verify sync
 expect_succ pulp container repository version --repository "cli_test_container_repository" list
 test "$(echo "$OUTPUT" | jq -r length)" -eq 2
+expect_succ pulp container repository version --repository "cli_test_container_repository" show --version 1
+test "$(echo "$OUTPUT" | jq -r '.content_summary.present."container.tag".count')" -gt 0
 
 # Delete version again
 expect_succ pulp container repository version --repository "cli_test_container_repository" destroy --version 1

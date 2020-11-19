@@ -1,6 +1,6 @@
 import click
 
-from pulpcore.cli.common import PulpContext
+from pulpcore.cli.common import pass_pulp_context, PulpContext
 
 
 @click.group()
@@ -9,8 +9,7 @@ def orphans() -> None:
 
 
 @orphans.command()
-@click.pass_context
-def delete(ctx: click.Context) -> None:
-    pulp_ctx: PulpContext = ctx.find_object(PulpContext)
+@pass_pulp_context
+def delete(pulp_ctx: PulpContext) -> None:
     result = pulp_ctx.call("orphans_delete")
     pulp_ctx.output_result(result)
