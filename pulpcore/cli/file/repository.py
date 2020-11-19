@@ -17,6 +17,7 @@ from pulpcore.cli.file.remote import PulpFileRemoteContext
 class PulpFileRepositoryContext(PulpRepositoryContext):
     HREF: str = "file_file_repository_href"
     LIST_ID: str = "repositories_file_file_list"
+    READ_ID: str = "repositories_file_file_read"
     CREATE_ID: str = "repositories_file_file_create"
     UPDATE_ID: str = "repositories_file_file_update"
     DELETE_ID: str = "repositories_file_file_delete"
@@ -48,13 +49,15 @@ repository.add_command(list_entities)
 @click.option("--name", required=True)
 @click.option("--description")
 @click.option("--remote")
-@click.pass_context
+@pass_repository_context
+@pass_pulp_context
 def create(
-    ctx: click.Context, name: str, description: Optional[str], remote: Optional[str]
+    pulp_ctx: PulpContext,
+    repository_ctx: PulpRepositoryContext,
+    name: str,
+    description: Optional[str],
+    remote: Optional[str],
 ) -> None:
-    pulp_ctx: PulpContext = ctx.find_object(PulpContext)
-    repository_ctx: PulpFileRepositoryContext = ctx.find_object(PulpFileRepositoryContext)
-
     repository = {"name": name, "description": description}
     if remote:
         remote_href: str = PulpFileRemoteContext(pulp_ctx).find(name=remote)["pulp_href"]
@@ -68,13 +71,15 @@ def create(
 @click.option("--name", required=True)
 @click.option("--description")
 @click.option("--remote")
-@click.pass_context
+@pass_repository_context
+@pass_pulp_context
 def update(
-    ctx: click.Context, name: str, description: Optional[str], remote: Optional[str]
+    pulp_ctx: PulpContext,
+    repository_ctx: PulpRepositoryContext,
+    name: str,
+    description: Optional[str],
+    remote: Optional[str],
 ) -> None:
-    pulp_ctx: PulpContext = ctx.find_object(PulpContext)
-    repository_ctx: PulpFileRepositoryContext = ctx.find_object(PulpFileRepositoryContext)
-
     repository = repository_ctx.find(name=name)
     repository_href = repository["pulp_href"]
 
@@ -97,6 +102,7 @@ def update(
 
 
 repository.add_command(destroy_by_name)
+repository.add_command(show_by_name)
 
 
 @repository.command()

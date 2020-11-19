@@ -9,9 +9,11 @@ cleanup() {
 }
 trap cleanup EXIT
 
+cleanup
+
 # Prepare
-pulp file remote create --name "cli_test_file_remote" --url "$FILE_REMOTE_URL"
-pulp file repository create --name "cli_test_file_repository"
+expect_succ pulp file remote create --name "cli_test_file_remote" --url "$FILE_REMOTE_URL"
+expect_succ pulp file repository create --name "cli_test_file_repository"
 
 # Test without remote (should fail)
 expect_fail pulp file repository sync --name "cli_test_file_repository"
@@ -19,7 +21,7 @@ expect_fail pulp file repository sync --name "cli_test_file_repository"
 expect_succ pulp file repository sync --name "cli_test_file_repository" --remote "cli_test_file_remote"
 
 # Preconfigure remote
-pulp file repository update --name "cli_test_file_repository" --remote "cli_test_file_remote"
+expect_succ pulp file repository update --name "cli_test_file_repository" --remote "cli_test_file_remote"
 
 # Test with remote
 expect_succ pulp file repository sync --name "cli_test_file_repository"
@@ -27,8 +29,10 @@ expect_succ pulp file repository sync --name "cli_test_file_repository"
 expect_succ pulp file repository sync --name "cli_test_file_repository" --remote "cli_test_file_remote"
 
 # Verify sync
-expect_succ pulp file repository version list --repository "cli_test_file_repository"
+expect_succ pulp file repository version --repository "cli_test_file_repository" list
 test "$(echo "$OUTPUT" | jq -r length)" -eq 2
+expect_succ pulp file repository version --repository "cli_test_file_repository" show --version 1
+test "$(echo "$OUTPUT" | jq -r '.content_summary.present."file.file".count')" -eq 3
 
 # Delete version again
-expect_succ pulp file repository version destroy --repository "cli_test_file_repository" --version 1
+expect_succ pulp file repository version --repository "cli_test_file_repository" destroy --version 1

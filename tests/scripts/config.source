@@ -1,5 +1,6 @@
 # Constants used in tests
-FILE_REMOTE_URL="https://fixtures.pulpproject.org/file/PULP_MANIFEST"
+PULP_FIXTURES_URL="${PULP_FIXTURES_URL:-https://fixtures.pulpproject.org}"
+FILE_REMOTE_URL="${PULP_FIXTURES_URL}/file/PULP_MANIFEST"
 CONTAINER_REMOTE_URL="https://registry-1.docker.io"
 CONTAINER_IMAGE="hello-world"
 

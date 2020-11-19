@@ -63,13 +63,15 @@ repository.add_command(list_entities)
 @click.option("--name", required=True)
 @click.option("--description")
 @click.option("--remote")
-@click.pass_context
+@pass_repository_context
+@pass_pulp_context
 def create(
-    ctx: click.Context, name: str, description: Optional[str], remote: Optional[str]
+    pulp_ctx: PulpContext,
+    repository_ctx: PulpRepositoryContext,
+    name: str,
+    description: Optional[str],
+    remote: Optional[str],
 ) -> None:
-    pulp_ctx: PulpContext = ctx.find_object(PulpContext)
-    repository_ctx: PulpRepositoryContext = ctx.find_object(PulpRepositoryContext)
-
     repository = {"name": name, "description": description}
     if remote:
         remote_href: str = PulpContainerRemoteContext(pulp_ctx).find(name=remote)["pulp_href"]
@@ -83,13 +85,15 @@ def create(
 @click.option("--name", required=True)
 @click.option("--description")
 @click.option("--remote")
-@click.pass_context
+@pass_repository_context
+@pass_pulp_context
 def update(
-    ctx: click.Context, name: str, description: Optional[str], remote: Optional[str]
+    pulp_ctx: PulpContext,
+    repository_ctx: PulpRepositoryContext,
+    name: str,
+    description: Optional[str],
+    remote: Optional[str],
 ) -> None:
-    pulp_ctx: PulpContext = ctx.find_object(PulpContext)
-    repository_ctx: PulpRepositoryContext = ctx.find_object(PulpRepositoryContext)
-
     repository = repository_ctx.find(name=name)
     repository_href = repository["pulp_href"]
 
@@ -126,7 +130,7 @@ def sync(
     name: str,
     remote: Optional[str],
 ) -> None:
-    if repository_ctx is None:
+    if repository_ctx.SYNC_ID is None:
         raise click.ClickException("Repository type does not support sync.")
 
     repository = repository_ctx.find(name=name)
@@ -142,8 +146,7 @@ def sync(
             f"Repository '{name}' does not have a default remote. Please specify with '--remote'."
         )
 
-    pulp_ctx.call(
-        repository_ctx.SYNC_ID,
-        parameters={repository_ctx.HREF: repository_href},
+    repository_ctx.sync(
+        href=repository_href,
         body=body,
     )

@@ -4,12 +4,13 @@ import click
 
 
 from pulpcore.cli.common import (
+    list_entities,
     show_by_name,
     destroy_by_name,
-    limit_option,
-    offset_option,
     PulpContext,
     PulpEntityContext,
+    pass_pulp_context,
+    pass_entity_context,
 )
 
 
@@ -32,28 +33,16 @@ class PulpFileDistributionContext(PulpEntityContext):
     type=click.Choice(["file"], case_sensitive=False),
     default="file",
 )
+@pass_pulp_context
 @click.pass_context
-def distribution(ctx: click.Context, distribution_type: str) -> None:
-    pulp_ctx: PulpContext = ctx.find_object(PulpContext)
-
+def distribution(ctx: click.Context, pulp_ctx: PulpContext, distribution_type: str) -> None:
     if distribution_type == "file":
         ctx.obj = PulpFileDistributionContext(pulp_ctx)
     else:
         raise NotImplementedError()
 
 
-@distribution.command()
-@limit_option
-@offset_option
-@click.pass_context
-def list(ctx: click.Context, limit: int, offset: int) -> None:
-    pulp_ctx: PulpContext = ctx.find_object(PulpContext)
-    distribution_ctx: PulpFileDistributionContext = ctx.find_object(PulpFileDistributionContext)
-
-    result = distribution_ctx.list(limit=limit, offset=offset, parameters={})
-    pulp_ctx.output_result(result)
-
-
+distribution.add_command(list_entities)
 distribution.add_command(show_by_name)
 
 
@@ -61,11 +50,15 @@ distribution.add_command(show_by_name)
 @click.option("--name", required=True)
 @click.option("--base-path", required=True)
 @click.option("--publication")
-@click.pass_context
-def create(ctx: click.Context, name: str, base_path: str, publication: Optional[str]) -> None:
-    pulp_ctx: PulpContext = ctx.find_object(PulpContext)
-    distribution_ctx: PulpFileDistributionContext = ctx.find_object(PulpFileDistributionContext)
-
+@pass_entity_context
+@pass_pulp_context
+def create(
+    pulp_ctx: PulpContext,
+    distribution_ctx: PulpFileDistributionContext,
+    name: str,
+    base_path: str,
+    publication: Optional[str],
+) -> None:
     body = {"name": name, "base_path": base_path}
     if publication:
         body["publication"] = publication

@@ -1,12 +1,13 @@
 import click
 
 from pulpcore.cli.common import (
+    list_entities,
     show_by_name,
     destroy_by_name,
-    limit_option,
-    offset_option,
     PulpContext,
     PulpEntityContext,
+    pass_pulp_context,
+    pass_entity_context,
 )
 
 
@@ -27,28 +28,16 @@ class PulpContainerRemoteContext(PulpEntityContext):
     type=click.Choice(["container"], case_sensitive=False),
     default="container",
 )
+@pass_pulp_context
 @click.pass_context
-def remote(ctx: click.Context, remote_type: str) -> None:
-    pulp_ctx: PulpContext = ctx.find_object(PulpContext)
-
+def remote(ctx: click.Context, pulp_ctx: PulpContext, remote_type: str) -> None:
     if remote_type == "container":
         ctx.obj = PulpContainerRemoteContext(pulp_ctx)
     else:
         raise NotImplementedError()
 
 
-@remote.command()
-@limit_option
-@offset_option
-@click.pass_context
-def list(ctx: click.Context, limit: int, offset: int) -> None:
-    pulp_ctx: PulpContext = ctx.find_object(PulpContext)
-    remote_ctx: PulpContainerRemoteContext = ctx.find_object(PulpContainerRemoteContext)
-
-    result = remote_ctx.list(limit=limit, offset=offset, parameters={})
-    pulp_ctx.output_result(result)
-
-
+remote.add_command(list_entities)
 remote.add_command(show_by_name)
 
 
@@ -56,11 +45,15 @@ remote.add_command(show_by_name)
 @click.option("--name", required=True)
 @click.option("--upstream-name", required=True)
 @click.option("--url", required=True)
-@click.pass_context
-def create(ctx: click.Context, name: str, upstream_name: str, url: str) -> None:
-    pulp_ctx: PulpContext = ctx.find_object(PulpContext)
-    remote_ctx: PulpContainerRemoteContext = ctx.find_object(PulpContainerRemoteContext)
-
+@pass_entity_context
+@pass_pulp_context
+def create(
+    pulp_ctx: PulpContext,
+    remote_ctx: PulpContainerRemoteContext,
+    name: str,
+    upstream_name: str,
+    url: str,
+) -> None:
     remote = {"name": name, "upstream_name": upstream_name, "url": url}
     result = remote_ctx.create(body=remote)
     pulp_ctx.output_result(result)
