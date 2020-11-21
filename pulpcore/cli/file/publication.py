@@ -10,19 +10,9 @@ from pulpcore.cli.common.context import (
     pass_pulp_context,
     pass_entity_context,
     PulpContext,
-    PulpEntityContext,
 )
 
-from pulpcore.cli.file.repository import PulpFileRepositoryContext
-
-
-class PulpFilePublicationContext(PulpEntityContext):
-    ENTITY: str = "publication"
-    HREF: str = "file_file_publication_href"
-    LIST_ID: str = "publications_file_file_list"
-    READ_ID: str = "publications_file_file_read"
-    CREATE_ID: str = "publications_file_file_create"
-    DELETE_ID: str = "publications_file_file_delete"
+from pulpcore.cli.file.context import PulpFilePublicationContext, PulpFileRepositoryContext
 
 
 @click.group()

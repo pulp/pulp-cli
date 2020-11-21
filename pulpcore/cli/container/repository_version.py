@@ -10,28 +10,7 @@ from pulpcore.cli.common.context import (
     pass_repository_context,
     PulpContext,
     PulpRepositoryContext,
-    PulpRepositoryVersionContext,
 )
-from pulpcore.cli.container.repository import (
-    PulpContainerRepositoryContext,
-    PulpContainerPushRepositoryContext,
-)
-
-
-class PulpContainerRepositoryVersionContext(PulpRepositoryVersionContext):
-    HREF: str = "container_container_repository_version_href"
-    REPOSITORY_HREF: str = "container_container_repository_href"
-    LIST_ID: str = "repositories_container_container_versions_list"
-    READ_ID: str = "repositories_container_container_versions_read"
-    DELETE_ID: str = "repositories_container_container_versions_delete"
-
-
-class PulpContainerPushRepositoryVersionContext(PulpRepositoryVersionContext):
-    HREF: str = "container_container_push_repository_version_href"
-    REPOSITORY_HREF: str = "container_container_push_repository_href"
-    LIST_ID: str = "repositories_container_container_push_versions_list"
-    READ_ID: str = "repositories_container_container_push_versions_read"
-    DELETE_ID: str = "repositories_container_container_push_versions_delete"
 
 
 @click.group()
@@ -45,13 +24,7 @@ def version(
     repository_ctx: PulpRepositoryContext,
     repository: str,
 ) -> None:
-    # Maybe we can get this relationship being presented on the RepositoryContext class
-    if isinstance(repository_ctx, PulpContainerRepositoryContext):
-        ctx.obj = PulpContainerRepositoryVersionContext(pulp_ctx)
-    elif isinstance(repository_ctx, PulpContainerPushRepositoryContext):
-        ctx.obj = PulpContainerPushRepositoryVersionContext(pulp_ctx)
-    else:
-        raise NotImplementedError()
+    ctx.obj = repository_ctx.VERSION_CONTEXT(pulp_ctx)
     ctx.obj.repository = repository_ctx.find(name=repository)
 
 

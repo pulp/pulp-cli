@@ -7,19 +7,10 @@ from pulpcore.cli.common.generic import (
 )
 from pulpcore.cli.common.context import (
     PulpContext,
-    PulpEntityContext,
     pass_pulp_context,
     pass_entity_context,
 )
-
-
-class PulpFileRemoteContext(PulpEntityContext):
-    ENTITY: str = "remote"
-    HREF: str = "file_file_remote_href"
-    LIST_ID: str = "remotes_file_file_list"
-    CREATE_ID: str = "remotes_file_file_create"
-    UPDATE_ID: str = "remotes_file_file_update"
-    DELETE_ID: str = "remotes_file_file_delete"
+from pulpcore.cli.file.context import PulpFileRemoteContext
 
 
 @click.group()

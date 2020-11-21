@@ -12,14 +12,10 @@ from pulpcore.cli.common.generic import (
 from pulpcore.cli.common.context import (
     pass_pulp_context,
     PulpContext,
-    PulpEntityContext,
 )
-
-
-class PulpArtifactContext(PulpEntityContext):
-    HREF: str = "artifact_href"
-    LIST_ID: str = "artifacts_list"
-    READ_ID: str = "artifacts_read"
+from pulpcore.cli.core.context import (
+    PulpArtifactContext,
+)
 
 
 @click.group()

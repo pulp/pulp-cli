@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Tuple
+from typing import Any, ClassVar, Dict, List, Tuple, Type
 
 import click
 import datetime
@@ -126,13 +126,13 @@ class PulpEntityContext:
     """
 
     # Subclasses should provide appropriate values here
-    ENTITY: str
-    HREF: str
-    LIST_ID: str
-    READ_ID: str
-    CREATE_ID: str
-    UPDATE_ID: str
-    DELETE_ID: str
+    ENTITY: ClassVar[str]
+    HREF: ClassVar[str]
+    LIST_ID: ClassVar[str]
+    READ_ID: ClassVar[str]
+    CREATE_ID: ClassVar[str]
+    UPDATE_ID: ClassVar[str]
+    DELETE_ID: ClassVar[str]
     # { "pulp_type" : repository-list-id }
     REPOSITORY_FIND_IDS: Dict[str, str] = {
         "file": "repositories_file_file_list",
@@ -231,24 +231,6 @@ class PulpEntityContext:
         return repo_version
 
 
-class PulpRepositoryContext(PulpEntityContext):
-    """
-    Base class for repository specific contexts.
-    This class provides the basic CRUD commands as well as synchronizing and
-    ties its instances to the global PulpContext for api access.
-    """
-
-    ENTITY = "repository"
-    SYNC_ID: str
-
-    def sync(self, href: str, body: Dict[str, Any]) -> Any:
-        return self.pulp_ctx.call(
-            self.SYNC_ID,
-            parameters={self.HREF: href},
-            body=body,
-        )
-
-
 class PulpRepositoryVersionContext(PulpEntityContext):
     """
     Base class for repository version specific contexts.
@@ -257,13 +239,32 @@ class PulpRepositoryVersionContext(PulpEntityContext):
     """
 
     ENTITY = "repository version"
-    REPOSITORY_HREF: str
+    REPOSITORY_HREF: ClassVar[str]
     repository: EntityData
 
     def list(self, limit: int, offset: int, parameters: Dict[str, Any]) -> List[Any]:
         _parameters = {self.REPOSITORY_HREF: self.repository["pulp_href"]}
         _parameters.update(parameters)
         return super().list(limit, offset, _parameters)
+
+
+class PulpRepositoryContext(PulpEntityContext):
+    """
+    Base class for repository specific contexts.
+    This class provides the basic CRUD commands as well as synchronizing and
+    ties its instances to the global PulpContext for api access.
+    """
+
+    ENTITY = "repository"
+    SYNC_ID: ClassVar[str]
+    VERSION_CONTEXT: ClassVar[Type[PulpRepositoryVersionContext]]
+
+    def sync(self, href: str, body: Dict[str, Any]) -> Any:
+        return self.pulp_ctx.call(
+            self.SYNC_ID,
+            parameters={self.HREF: href},
+            body=body,
+        )
 
 
 ##############################################################################

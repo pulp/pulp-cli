@@ -13,29 +13,11 @@ from pulpcore.cli.common.context import (
     PulpContext,
     PulpRepositoryContext,
 )
-from pulpcore.cli.container.remote import PulpContainerRemoteContext
-
-
-class PulpContainerRepositoryContext(PulpRepositoryContext):
-    HREF: str = "container_container_repository_href"
-    LIST_ID: str = "repositories_container_container_list"
-    READ_ID: str = "repositories_container_container_read"
-    CREATE_ID: str = "repositories_container_container_create"
-    UPDATE_ID: str = "repositories_container_container_update"
-    DELETE_ID: str = "repositories_container_container_delete"
-    SYNC_ID: str = "repositories_container_container_sync"
-
-
-class PulpContainerPushRepositoryContext(PulpRepositoryContext):
-    HREF: str = "container_container_push_repository_href"
-    LIST_ID: str = "repositories_container_container_push_list"
-    READ_ID: str = "repositories_container_container_push_read"
-    CREATE_ID: str = "repositories_container_container_push_create"
-    # UPDATE_ID: str = "repositories_container_container_push_update"
-    DELETE_ID: str = "repositories_container_container_push_delete"
-    # Cannot sync a push type repository
-    # TODO Incorporate into capabilities
-    # SYNC_ID: str = "repositories_container_container_push_sync"
+from pulpcore.cli.container.context import (
+    PulpContainerRemoteContext,
+    PulpContainerRepositoryContext,
+    PulpContainerPushRepositoryContext,
+)
 
 
 @click.group()
