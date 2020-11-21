@@ -1,6 +1,6 @@
 import click
 
-from pulpcore.cli.common import pass_pulp_context, PulpContext
+from pulpcore.cli.common.context import pass_pulp_context, PulpContext
 
 
 @click.group()

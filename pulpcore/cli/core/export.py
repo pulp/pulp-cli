@@ -1,4 +1,4 @@
-from pulpcore.cli.common import (
+from pulpcore.cli.common.context import (
     DEFAULT_LIMIT,
     PulpContext,
     PulpEntityContext,
