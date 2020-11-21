@@ -5,9 +5,11 @@ import os
 from copy import deepcopy
 import click
 
-from pulpcore.cli.common import (
+from pulpcore.cli.common.generic import (
     list_entities,
     show_by_href,
+)
+from pulpcore.cli.common.context import (
     pass_pulp_context,
     PulpContext,
     PulpEntityContext,

@@ -3,8 +3,10 @@ from typing import Any
 from copy import deepcopy
 import click
 
-from pulpcore.cli.common import (
+from pulpcore.cli.common.generic import (
     list_entities,
+)
+from pulpcore.cli.common.context import (
     pass_pulp_context,
     pass_entity_context,
     PulpContext,

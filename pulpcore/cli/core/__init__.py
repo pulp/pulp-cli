@@ -1,6 +1,7 @@
 import click
 
-from pulpcore.cli.common import main, pass_pulp_context, PulpContext
+from pulpcore.cli.common import main
+from pulpcore.cli.common.context import pass_pulp_context, PulpContext
 
 from pulpcore.cli.core.artifact import artifact
 from pulpcore.cli.core.orphans import orphans

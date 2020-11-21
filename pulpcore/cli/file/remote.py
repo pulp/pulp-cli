@@ -1,9 +1,11 @@
 import click
 
-from pulpcore.cli.common import (
+from pulpcore.cli.common.generic import (
     list_entities,
     show_by_name,
     destroy_by_name,
+)
+from pulpcore.cli.common.context import (
     PulpContext,
     PulpEntityContext,
     pass_pulp_context,

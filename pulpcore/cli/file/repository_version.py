@@ -1,9 +1,11 @@
 import click
 
-from pulpcore.cli.common import (
+from pulpcore.cli.common.generic import (
     list_entities,
     show_version,
     destroy_version,
+)
+from pulpcore.cli.common.context import (
     pass_pulp_context,
     pass_repository_context,
     PulpContext,
