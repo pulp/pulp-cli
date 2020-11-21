@@ -22,7 +22,6 @@ class PulpFileDistributionContext(PulpEntityContext):
     CREATE_ID: str = "distributions_file_file_create"
     UPDATE_ID: str = "distributions_file_file_update"
     DELETE_ID: str = "distributions_file_file_delete"
-    SYNC_ID: str = "distributions_file_file_sync"
 
 
 @click.group()
