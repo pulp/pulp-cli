@@ -13,17 +13,7 @@ from pulpcore.cli.common.context import (
     PulpContext,
     PulpRepositoryContext,
 )
-from pulpcore.cli.file.remote import PulpFileRemoteContext
-
-
-class PulpFileRepositoryContext(PulpRepositoryContext):
-    HREF: str = "file_file_repository_href"
-    LIST_ID: str = "repositories_file_file_list"
-    READ_ID: str = "repositories_file_file_read"
-    CREATE_ID: str = "repositories_file_file_create"
-    UPDATE_ID: str = "repositories_file_file_update"
-    DELETE_ID: str = "repositories_file_file_delete"
-    SYNC_ID: str = "repositories_file_file_sync"
+from pulpcore.cli.file.context import PulpFileRemoteContext, PulpFileRepositoryContext
 
 
 @click.group()

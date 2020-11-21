@@ -1,5 +1,3 @@
-from typing import Any
-
 from copy import deepcopy
 import click
 
@@ -10,22 +8,10 @@ from pulpcore.cli.common.context import (
     pass_pulp_context,
     pass_entity_context,
     PulpContext,
-    PulpEntityContext,
 )
-
-
-class PulpTaskContext(PulpEntityContext):
-    HREF: str = "task_href"
-    LIST_ID: str = "tasks_list"
-    READ_ID: str = "tasks_read"
-    CANCEL_ID: str = "tasks_cancel"
-
-    def cancel(self, task_href: str) -> Any:
-        return self.pulp_ctx.call(
-            self.CANCEL_ID,
-            parameters={self.HREF: task_href},
-            body={"state": "canceled"},
-        )
+from pulpcore.cli.core.context import (
+    PulpTaskContext,
+)
 
 
 @click.group()

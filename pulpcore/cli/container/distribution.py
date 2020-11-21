@@ -10,25 +10,15 @@ from pulpcore.cli.common.generic import (
 )
 from pulpcore.cli.common.context import (
     PulpContext,
-    PulpEntityContext,
     PulpRepositoryContext,
     pass_pulp_context,
     pass_entity_context,
 )
-from pulpcore.cli.container.repository import (
+from pulpcore.cli.container.context import (
+    PulpContainerDistributionContext,
     PulpContainerRepositoryContext,
     PulpContainerPushRepositoryContext,
 )
-
-
-class PulpContainerDistributionContext(PulpEntityContext):
-    ENTITY: str = "distribution"
-    HREF: str = "container_container_distribution_href"
-    LIST_ID: str = "distributions_container_container_list"
-    READ_ID: str = "distributions_container_container_read"
-    CREATE_ID: str = "distributions_container_container_create"
-    UPDATE_ID: str = "distributions_container_container_update"
-    DELETE_ID: str = "distributions_container_container_delete"
 
 
 @click.group()

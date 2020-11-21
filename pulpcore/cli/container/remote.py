@@ -7,19 +7,12 @@ from pulpcore.cli.common.generic import (
 )
 from pulpcore.cli.common.context import (
     PulpContext,
-    PulpEntityContext,
     pass_pulp_context,
     pass_entity_context,
 )
-
-
-class PulpContainerRemoteContext(PulpEntityContext):
-    ENTITY: str = "remote"
-    HREF: str = "container_container_remote_href"
-    LIST_ID: str = "remotes_container_container_list"
-    CREATE_ID: str = "remotes_container_container_create"
-    UPDATE_ID: str = "remotes_container_container_update"
-    DELETE_ID: str = "remotes_container_container_delete"
+from pulpcore.cli.container.context import (
+    PulpContainerRemoteContext,
+)
 
 
 @click.group()
