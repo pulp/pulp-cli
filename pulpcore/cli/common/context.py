@@ -1,4 +1,4 @@
-from typing import Any, ClassVar, Dict, List, Tuple, Type
+from typing import Any, ClassVar, Dict, List, Optional, Tuple, Type
 
 import click
 import datetime
@@ -183,8 +183,8 @@ class PulpEntityContext:
     def show(self, href: str) -> Any:
         return self.pulp_ctx.call(self.READ_ID, parameters={self.HREF: href})
 
-    def create(self, body: EntityData) -> Any:
-        return self.pulp_ctx.call(self.CREATE_ID, body=body)
+    def create(self, body: EntityData, parameters: Optional[Dict[str, Any]] = None) -> Any:
+        return self.pulp_ctx.call(self.CREATE_ID, parameters=parameters, body=body)
 
     def update(self, href: str, body: EntityData) -> Any:
         return self.pulp_ctx.call(self.UPDATE_ID, parameters={self.HREF: href}, body=body)

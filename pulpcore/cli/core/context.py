@@ -1,7 +1,5 @@
 from typing import Any, ClassVar
 
-import click
-
 from pulpcore.cli.common.context import (
     PulpEntityContext,
 )
@@ -22,10 +20,6 @@ class PulpExporterContext(PulpEntityContext):
     UPDATE_ID = "exporters_core_pulp_update"
     DELETE_ID = "exporters_core_pulp_delete"
 
-    def delete(self, name: str) -> Any:
-        the_exporter = self.find(name=name)
-        return super().delete(the_exporter["pulp_href"])
-
 
 class PulpExportContext(PulpEntityContext):
     ENTITY = "PulpExport"
@@ -34,16 +28,6 @@ class PulpExportContext(PulpEntityContext):
     READ_ID = "exporters_core_pulp_exports_read"
     CREATE_ID = "exporters_core_pulp_exports_create"
     DELETE_ID = "exporters_core_pulp_exports_delete"
-    EXPORTER_LIST_ID: ClassVar[str] = "exporters_core_pulp_list"
-
-    def find_exporter(self, name: str) -> Any:
-        search_result = self.pulp_ctx.call(
-            self.EXPORTER_LIST_ID, parameters={"name": name, "limit": 1}
-        )
-        if search_result["count"] != 1:
-            raise click.ClickException(f"PulpExporter '{name}' not found.")
-        exporter = search_result["results"][0]
-        return exporter
 
 
 class PulpTaskContext(PulpEntityContext):

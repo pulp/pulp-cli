@@ -1,3 +1,4 @@
+from pulpcore.cli.common.generic import show_by_href, destroy_by_href
 from pulpcore.cli.common.context import (
     DEFAULT_LIMIT,
     pass_pulp_context,
@@ -7,6 +8,7 @@ from pulpcore.cli.common.context import (
 )
 from pulpcore.cli.core.context import (
     PulpExportContext,
+    PulpExporterContext,
 )
 
 from typing import Any, Dict, List
@@ -25,7 +27,11 @@ def pulp(ctx: click.Context, pulp_ctx: PulpContext) -> None:
     ctx.obj = PulpExportContext(pulp_ctx)
 
 
-@pulp.command()
+pulp.add_command(show_by_href)
+pulp.add_command(destroy_by_href)
+
+
+@pulp.command(deprecated=True)
 @click.option("--href", required=True, help="HREF of the PulpExport")
 @pass_entity_context
 @pass_pulp_context
@@ -35,7 +41,7 @@ def read(pulp_ctx: PulpContext, export_ctx: PulpExportContext, href: str) -> Non
     pulp_ctx.output_result(entity)
 
 
-@pulp.command()
+@pulp.command(deprecated=True)
 @click.option("--href", required=True)
 @pass_entity_context
 @pass_pulp_context
@@ -61,8 +67,9 @@ def list(
     **kwargs: Any
 ) -> None:
     params = {k: v for k, v in kwargs.items() if v is not None}
-    the_exporter = export_ctx.find_exporter(exporter)
-    params["pulp_exporter_href"] = the_exporter["pulp_href"]
+    exporter_ctx = PulpExporterContext(pulp_ctx)
+    exporter_href = exporter_ctx.find(name=exporter)["pulp_href"]
+    params[exporter_ctx.HREF] = exporter_href
     result = export_ctx.list(limit=limit, offset=offset, parameters=params)
     pulp_ctx.output_result(result)
 
@@ -84,9 +91,10 @@ def run(
     versions: List[RepositoryVersionDefinition],
     start_versions: List[RepositoryVersionDefinition],
 ) -> None:
-    the_exporter = export_ctx.find_exporter(exporter)
+    exporter_ctx = PulpExporterContext(pulp_ctx)
+    exporter_href = exporter_ctx.find(name=exporter)["pulp_href"]
     params = {
-        export_ctx.HREF: the_exporter["pulp_href"],
+        export_ctx.HREF: exporter_href,  # TODO This looks WRONG!!!
     }
 
     body: Dict[str, Any] = dict(full=full)
@@ -106,5 +114,5 @@ def run(
     if start_vers_list:
         body["start_versions"] = start_vers_list
 
-    result = pulp_ctx.call(export_ctx.CREATE_ID, parameters=params, body=body)
+    result = export_ctx.create(parameters=params, body=body)
     pulp_ctx.output_result(result)
