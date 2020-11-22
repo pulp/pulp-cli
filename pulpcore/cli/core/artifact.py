@@ -30,7 +30,6 @@ list_artifacts = deepcopy(list_entities)
 click.option("--sha256")(list_artifacts)
 artifact.add_command(list_artifacts)
 
-
 artifact.add_command(show_by_href)
 
 

@@ -1,5 +1,11 @@
+from copy import deepcopy
+
+from pulpcore.cli.common.generic import (
+    list_entities,
+    show_by_name,
+    destroy_by_name,
+)
 from pulpcore.cli.common.context import (
-    DEFAULT_LIMIT,
     pass_pulp_context,
     pass_entity_context,
     PulpContext,
@@ -9,7 +15,7 @@ from pulpcore.cli.core.context import (
     PulpExporterContext,
 )
 
-from typing import Any, List
+from typing import List
 import click
 
 
@@ -23,6 +29,12 @@ def exporter() -> None:
 @click.pass_context
 def pulp(ctx: click.Context, pulp_ctx: PulpContext) -> None:
     ctx.obj = PulpExporterContext(pulp_ctx)
+
+
+# deepcopy to not effect other list subcommands
+list_pulp_exporters = deepcopy(list_entities)
+click.option("--name", type=str)(list_pulp_exporters)
+pulp.add_command(list_pulp_exporters)
 
 
 @pulp.command()
@@ -47,14 +59,17 @@ def create(
     pulp_ctx.output_result(result)
 
 
-@pulp.command()
+pulp.add_command(show_by_name)
+
+
+@pulp.command(deprecated=True)
 @click.option("--name", required=True, help="Name of the PulpExporter")
 @pass_entity_context
 @pass_pulp_context
 def read(pulp_ctx: PulpContext, exporter_ctx: PulpExporterContext, name: str) -> None:
     """Shows details of an artifact."""
-    the_exporter = exporter_ctx.find(name=name)
-    entity = exporter_ctx.show(the_exporter["pulp_href"])
+    exporter_href = exporter_ctx.find(name=name)["pulp_href"]
+    entity = exporter_ctx.show(exporter_href)
     pulp_ctx.output_result(entity)
 
 
@@ -87,26 +102,14 @@ def update(
     pulp_ctx.output_result(result)
 
 
-@pulp.command()
+pulp.add_command(destroy_by_name)
+
+
+@pulp.command(deprecated=True)
 @click.option("--name", required=True)
 @pass_entity_context
 @pass_pulp_context
 def delete(pulp_ctx: PulpContext, exporter_ctx: PulpExporterContext, name: str) -> None:
-    result = exporter_ctx.delete(name)
-    pulp_ctx.output_result(result)
-
-
-@pulp.command()
-@click.option("--name", type=str)
-@click.option(
-    "--limit", default=DEFAULT_LIMIT, type=int, help="Limit the number of exporters to show."
-)
-@click.option("--offset", default=0, type=int, help="Skip a number of exporters to show.")
-@pass_entity_context
-@pass_pulp_context
-def list(
-    pulp_ctx: PulpContext, exporter_ctx: PulpExporterContext, limit: int, offset: int, **kwargs: Any
-) -> None:
-    params = {k: v for k, v in kwargs.items() if v is not None}
-    result = exporter_ctx.list(limit=limit, offset=offset, parameters=params)
+    exporter_href = exporter_ctx.find(name=name)["pulp_href"]
+    result = exporter_ctx.delete(exporter_href)
     pulp_ctx.output_result(result)

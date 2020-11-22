@@ -14,8 +14,8 @@ cleanup() {
   pulp file remote destroy --name $RMOTE || true
   pulp file repository destroy --name $REPO1 || true
   pulp file repository destroy --name $REPO2 || true
-  pulp exporter pulp delete --name $NAME1 || true
-  pulp exporter pulp delete --name $NAME2 || true
+  pulp exporter pulp destroy --name $NAME1 || true
+  pulp exporter pulp destroy --name $NAME2 || true
 }
 trap cleanup EXIT
 
@@ -30,7 +30,7 @@ expect_succ pulp exporter pulp create --name $NAME1 --path $PATH1 --repository $
 expect_succ pulp exporter pulp create --name $NAME2 --path $PATH1 --repository $REPO1 file
 
 # Test read
-expect_succ pulp exporter pulp read --name $NAME1
+expect_succ pulp exporter pulp show --name $NAME1
 
 # Test list
 expect_succ pulp exporter pulp list
@@ -57,7 +57,7 @@ expect_succ pulp export pulp list --exporter $NAME1
 
 # Test delete export
 HREF=$(pulp export pulp list --exporter $NAME1 |  jq -r '.[0].pulp_href')
-expect_succ pulp export pulp delete --href "$HREF"
+expect_succ pulp export pulp destroy --href "$HREF"
 
 # Test delete exporter
-expect_fail pulp  exporter pulp delete --name ${NAME1}_bar
+expect_fail pulp  exporter pulp destroy --name ${NAME1}_bar
