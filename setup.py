@@ -26,6 +26,7 @@ setup(
             "core=pulpcore.cli.core",
             "file=pulpcore.cli.file",
             "container=pulpcore.cli.container",
+            "rpm=pulpcore.cli.rpm",
         ],
     },
     license="GPLv2+",
