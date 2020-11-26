@@ -61,6 +61,10 @@ def _config_callback(ctx: click.Context, param: Any, value: str) -> None:
     is_flag=True,
     help="Start tasks in the background instead of awaiting them",
 )
+@click.option("--refresh-api", is_flag=True, help="Invalidate cached API docs")
+@click.option(
+    "--dry-run", is_flag=True, help="Trace commands without performing any unsafe HTTP calls"
+)
 @click.pass_context
 def main(
     ctx: click.Context,
@@ -71,6 +75,8 @@ def main(
     format: str,
     verbose: int,
     background: bool,
+    refresh_api: bool,
+    dry_run: bool,
 ) -> None:
     if user and not password:
         password = click.prompt("password", hide_input=True)
@@ -81,7 +87,8 @@ def main(
             username=user,
             password=password,
             validate_certs=verify_ssl,
-            refresh_cache=True,
+            refresh_cache=refresh_api,
+            safe_calls_only=dry_run,
             debug_callback=lambda level, x: click.secho(x, err=True, bold=True)
             if verbose >= level
             else None,

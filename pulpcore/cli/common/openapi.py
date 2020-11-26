@@ -13,6 +13,9 @@ from urllib.parse import urlencode, urljoin
 import urllib3
 
 
+SAFE_METHODS = ["GET", "HEAD", "OPTIONS"]
+
+
 class OpenAPIError(Exception):
     pass
 
@@ -26,6 +29,7 @@ class OpenAPI:
         password: Optional[str] = None,
         validate_certs: bool = True,
         refresh_cache: bool = False,
+        safe_calls_only: bool = False,
         debug_callback: Optional[Callable[[int, str], Any]] = None,
     ):
         if not validate_certs:
@@ -34,6 +38,7 @@ class OpenAPI:
         self.debug_callback: Callable[[int, str], Any] = debug_callback or (lambda i, x: None)
         self.base_url: str = base_url
         self.doc_path: str = doc_path
+        self.safe_calls_only: bool = safe_calls_only
 
         headers = {
             "Content-Type": "application/json",
@@ -63,7 +68,7 @@ class OpenAPI:
         try:
             if refresh_cache:
                 raise IOError()
-            with open(apidoc_cache, "b") as f:
+            with open(apidoc_cache, "rb") as f:
                 data: bytes = f.read()
             self._parse_api(data)
         except Exception:
@@ -254,6 +259,8 @@ class OpenAPI:
             self.debug_callback(2, f"  {key}: {value}")
         if data:
             self.debug_callback(2, f"{data!r}")
+        if self.safe_calls_only and method.upper() not in SAFE_METHODS:
+            raise OpenAPIError("Call aborted due to safe mode")
         response: requests.Response = self._session.request(method, url, data=data, headers=headers)
         self.debug_callback(1, f"Response: {response.status_code}")
         if response.text:
