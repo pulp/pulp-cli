@@ -56,6 +56,16 @@ class PulpGroupContext(PulpEntityContext):
         return search_result[0]
 
 
+class PulpImporterContext(PulpEntityContext):
+    ENTITY = "PulpImporter"
+    HREF = "pulp_importer_href"
+    CREATE_ID = "importers_core_pulp_create"
+    READ_ID = "importers_core_pulp_read"
+    UPDATE_ID = "importers_core_pulp_update"
+    DELETE_ID = "importers_core_pulp_delete"
+    LIST_ID = "importers_core_pulp_list"
+
+
 class PulpTaskContext(PulpEntityContext):
     ENTITY = "task"
     HREF = "task_href"
