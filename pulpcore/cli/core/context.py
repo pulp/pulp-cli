@@ -1,4 +1,6 @@
 from typing import Any, ClassVar
+import sys
+import click
 
 from pulpcore.cli.common.context import (
     PulpEntityContext,
@@ -6,6 +8,7 @@ from pulpcore.cli.common.context import (
 
 
 class PulpArtifactContext(PulpEntityContext):
+    ENTITY = "artifact"
     HREF = "artifact_href"
     LIST_ID = "artifacts_list"
     READ_ID = "artifacts_read"
@@ -30,7 +33,29 @@ class PulpExportContext(PulpEntityContext):
     DELETE_ID = "exporters_core_pulp_exports_delete"
 
 
+class PulpGroupContext(PulpEntityContext):
+    ENTITY = "group"
+    HREF = "auth_group_href"
+    LIST_ID = "groups_list"
+    READ_ID = "groups_read"
+    CREATE_ID = "groups_create"
+    UPDATE_ID = "groups_update"
+    DELETE_ID = "groups_delete"
+
+    def find(self, **kwargs: Any) -> Any:
+        """Workaroud for the missing ability to filter"""
+        # See https://pulp.plan.io/issues/7975
+        # TODO Make this version dependent
+        search_result = self.list(limit=sys.maxsize, offset=0, parameters={})
+        for key, value in kwargs.items():
+            search_result = [res for res in search_result if res[key] == value]
+        if len(search_result) != 1:
+            raise click.ClickException(f"Could not find {self.ENTITY} with {kwargs}.")
+        return search_result[0]
+
+
 class PulpTaskContext(PulpEntityContext):
+    ENTITY = "task"
     HREF = "task_href"
     LIST_ID = "tasks_list"
     READ_ID = "tasks_read"
@@ -42,3 +67,21 @@ class PulpTaskContext(PulpEntityContext):
             parameters={self.HREF: task_href},
             body={"state": "canceled"},
         )
+
+
+class PulpUserContext(PulpEntityContext):
+    ENTITY = "user"
+    HREF = "auth_user_href"
+    LIST_ID = "users_list"
+    READ_ID = "users_read"
+
+    def find(self, **kwargs: Any) -> Any:
+        """Workaroud for the missing ability to filter"""
+        # See https://pulp.plan.io/issues/7975
+        # TODO Make this version dependent
+        search_result = self.list(limit=sys.maxsize, offset=0, parameters={})
+        for key, value in kwargs.items():
+            search_result = [res for res in search_result if res[key] == value]
+        if len(search_result) != 1:
+            raise click.ClickException(f"Could not find {self.ENTITY} with {kwargs}.")
+        return search_result[0]

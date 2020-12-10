@@ -42,7 +42,7 @@ def _config_callback(ctx: click.Context, param: Any, value: str) -> None:
     expose_value=False,
 )
 @click.option("--base-url", default="https://localhost", help="Api base url")
-@click.option("--user", help="Username on pulp server")
+@click.option("--username", help="Username on pulp server")
 @click.option("--password", help="Password on pulp server")
 @click.option("--verify-ssl/--no-verify-ssl", default=True, help="Verify SSL connection")
 @click.option(
@@ -69,7 +69,7 @@ def _config_callback(ctx: click.Context, param: Any, value: str) -> None:
 def main(
     ctx: click.Context,
     base_url: str,
-    user: Optional[str],
+    username: Optional[str],
     password: Optional[str],
     verify_ssl: bool,
     format: str,
@@ -78,13 +78,13 @@ def main(
     refresh_api: bool,
     dry_run: bool,
 ) -> None:
-    if user and not password:
+    if username and not password:
         password = click.prompt("password", hide_input=True)
     try:
         api = OpenAPI(
             base_url=base_url,
             doc_path="/pulp/api/v3/docs/api.json",
-            username=user,
+            username=username,
             password=password,
             validate_certs=verify_ssl,
             refresh_cache=refresh_api,
