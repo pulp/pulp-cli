@@ -1,4 +1,4 @@
 [cli]
 base_url = "http://localhost:8080"
-user = "admin"
+username = "admin"
 password = "password"
