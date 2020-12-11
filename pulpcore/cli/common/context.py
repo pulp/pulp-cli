@@ -6,6 +6,7 @@ import json
 import time
 import yaml
 
+from packaging.version import parse as parse_version
 from requests import HTTPError
 
 from pulpcore.cli.common.openapi import OpenAPI, OpenAPIError
@@ -117,6 +118,20 @@ class PulpContext:
         except KeyboardInterrupt:
             click.echo(f"Task {task_href} sent to background.", err=True)
             return task
+
+    def has_plugin(
+        self, name: str, min_version: Optional[str] = None, max_version: Optional[str] = None
+    ) -> bool:
+        version: Optional[str] = self.component_versions.get(name)
+        if version is None:
+            return False
+        if min_version is not None:
+            if parse_version(version) < parse_version(min_version):
+                return False
+        if max_version is not None:
+            if parse_version(version) >= parse_version(max_version):
+                return False
+        return True
 
 
 class PulpEntityContext:
