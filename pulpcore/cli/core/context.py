@@ -44,8 +44,10 @@ class PulpGroupContext(PulpEntityContext):
 
     def find(self, **kwargs: Any) -> Any:
         """Workaroud for the missing ability to filter"""
+        if self.pulp_ctx.has_plugin("pulpcore", min_version="3.10"):
+            # Workaround not needed anymore
+            return super().find(**kwargs)
         # See https://pulp.plan.io/issues/7975
-        # TODO Make this version dependent
         search_result = self.list(limit=sys.maxsize, offset=0, parameters={})
         for key, value in kwargs.items():
             search_result = [res for res in search_result if res[key] == value]
@@ -77,8 +79,10 @@ class PulpUserContext(PulpEntityContext):
 
     def find(self, **kwargs: Any) -> Any:
         """Workaroud for the missing ability to filter"""
+        if self.pulp_ctx.has_plugin("pulpcore", min_version="3.10"):
+            # Workaround not needed anymore
+            return super().find(**kwargs)
         # See https://pulp.plan.io/issues/7975
-        # TODO Make this version dependent
         search_result = self.list(limit=sys.maxsize, offset=0, parameters={})
         for key, value in kwargs.items():
             search_result = [res for res in search_result if res[key] == value]
