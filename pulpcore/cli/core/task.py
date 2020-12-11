@@ -62,4 +62,4 @@ def cancel(pulp_ctx: PulpContext, task_ctx: PulpTaskContext, href: str) -> None:
     except Exception as e:
         if str(e) != "Task canceled":
             raise e
-    click.echo("Done.")
+    click.echo("Done.", err=True)

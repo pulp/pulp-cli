@@ -48,6 +48,7 @@ class PulpContext:
         self.api: OpenAPI = api
         self.format: str = format
         self.background_tasks: bool = background_tasks
+        self.component_versions = self.api.api_spec.get("info", {}).get("x-pulp-app-versions", {})
 
     def output_result(self, result: Any) -> None:
         """
