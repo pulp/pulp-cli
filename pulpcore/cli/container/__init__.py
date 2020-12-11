@@ -1,4 +1,7 @@
+import click
+
 from pulpcore.cli.common import main
+from pulpcore.cli.common.context import PulpContext, pass_pulp_context
 from pulpcore.cli.container.repository import repository
 from pulpcore.cli.container.repository_version import version
 from pulpcore.cli.container.remote import remote
@@ -6,8 +9,10 @@ from pulpcore.cli.container.distribution import distribution
 
 
 @main.group()
-def container() -> None:
-    pass
+@pass_pulp_context
+def container(pulp_ctx: PulpContext) -> None:
+    if not pulp_ctx.has_plugin("pulp_container"):
+        raise click.ClickException("'pulp_container' does not seem to be installed.")
 
 
 container.add_command(repository)
