@@ -1,22 +1,13 @@
-import click
-
 from pulpcore.cli.common import main
-from pulpcore.cli.common.context import pass_pulp_context, PulpContext
 
 from pulpcore.cli.core.artifact import artifact
 from pulpcore.cli.core.export import export
 from pulpcore.cli.core.exporter import exporter
 from pulpcore.cli.core.group import group
 from pulpcore.cli.core.orphans import orphans
+from pulpcore.cli.core.status import status
 from pulpcore.cli.core.task import task
 from pulpcore.cli.core.user import user
-
-
-@click.command()
-@pass_pulp_context
-def status(pulp_ctx: PulpContext) -> None:
-    result = pulp_ctx.call("status_read")
-    pulp_ctx.output_result(result)
 
 
 # Register commands with cli

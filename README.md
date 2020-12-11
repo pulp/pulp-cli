@@ -1,6 +1,6 @@
 # POC: pulp command line interface
 
-This is a _technology preview_ of the command line interface for pulp3.
+This is a _technology preview_ of the command line interface for Pulp 3.
 
 ## General command syntax
 
@@ -78,5 +78,11 @@ eval "$(_PULP_COMPLETE=source_bash pulp)"
 
 ## Contributing
 
+### Code conventions
 `pulp-cli` comes with python type annotations and black code formatting.
 To verify your code please run `black`, `flake8`, `shellcheck`, and `mypy`.
+
+### Compatibility
+This cli for Pulp 3 will be versioned indedendently of any version of the server components.
+It is supposed to be able to communicate with different combinations of server component versions at the same time.
+So it might be needed to guard certain features / workaround by the available server plugin version.
