@@ -122,6 +122,10 @@ class PulpContext:
     def has_plugin(
         self, name: str, min_version: Optional[str] = None, max_version: Optional[str] = None
     ) -> bool:
+        if not self.component_versions:
+            # Prior to 3.9 we do not have this information
+            # assume yes if no version constraint is specified
+            return (min_version is None) and (max_version is None)
         version: Optional[str] = self.component_versions.get(name)
         if version is None:
             return False
