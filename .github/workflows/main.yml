@@ -10,6 +10,7 @@ env:
   COLORTERM: 'yes'
   TERM: 'xterm-256color'
   PYTEST_ADDOPTS: '--color=yes'
+  CONTAINER_RUNTIME: 'docker'
 
 jobs:
   test:
@@ -27,15 +28,8 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
       - name: Install Test Dependencies
-        run: |
-          pip install black pytest flake8 mypy .
+        run: pip install -r test_requirements.txt
       - name: Lint code
-        run: |
-          find . -name '*.sh' -print0 | xargs -0 shellcheck -x
-          black --diff --check .
-          flake8 --config flake8.cfg
-          mypy
+        run: make lint
       - name: Run tests
-        run: |
-          cp tests/scripts/config/pulp/settings.toml.example tests/scripts/config/pulp/settings.toml
-          CONTAINER_RUNTIME=docker .ci/run_container.sh pytest -v
+        run: .ci/run_container.sh make test
