@@ -5,7 +5,7 @@ from typing import IO, Any, ClassVar, Dict, List, Optional
 
 import click
 
-from pulpcore.cli.common.context import EntityDefinition, PulpEntityContext
+from pulpcore.cli.common.context import EntityDefinition, PulpContext, PulpEntityContext
 
 
 class PulpArtifactContext(PulpEntityContext):
@@ -134,6 +134,52 @@ class PulpGroupContext(PulpEntityContext):
         if len(search_result) != 1:
             raise click.ClickException(f"Could not find {self.ENTITY} with {kwargs}.")
         return search_result[0]
+
+
+class PulpGroupUserContext(PulpEntityContext):
+    ENTITY = "group user"
+    # This is replaced by a version aware property below
+    # HREF = "auth_groups_user_href"
+    LIST_ID = "groups_users_list"
+    CREATE_ID = "groups_users_create"
+    DELETE_ID = "groups_users_delete"
+    group_ctx: PulpGroupContext
+
+    def __init__(self, pulp_ctx: PulpContext, group_ctx: PulpGroupContext) -> None:
+        super().__init__(pulp_ctx)
+        self.group_ctx = group_ctx
+
+    def list(self, limit: int, offset: int, parameters: Dict[str, Any]) -> List[Any]:
+        if not self.pulp_ctx.has_plugin("pulpcore", min_version="3.10.dev0"):
+            # Workaround for improperly rendered nested resource paths and weird HREF names
+            # https://github.com/pulp/pulpcore/pull/1066
+            parameters[PulpGroupContext.HREF] = self.group_ctx.pulp_href
+        return super().list(limit=limit, offset=offset, parameters=parameters)
+
+    def create(self, body: EntityDefinition, parameters: Optional[Dict[str, Any]] = None) -> Any:
+        if not self.pulp_ctx.has_plugin("pulpcore", min_version="3.10.dev0"):
+            # Workaround for improperly rendered nested resource paths and weird HREF names
+            # https://github.com/pulp/pulpcore/pull/1066
+            if parameters is None:
+                parameters = {}
+            parameters[self.HREF] = self.group_ctx.pulp_href
+        return super().create(parameters=parameters, body=body)
+
+    @property
+    def HREF(self) -> str:  # type: ignore
+        if not self.pulp_ctx.has_plugin("pulpcore", min_version="3.10.dev0"):
+            # Workaround for improperly rendered nested resource paths and weird HREF names
+            # https://github.com/pulp/pulpcore/pull/1066
+            return "auth_auth_groups_user_href"
+        return "auth_groups_user_href"
+
+    @property
+    def scope(self) -> Dict[str, Any]:
+        if not self.pulp_ctx.has_plugin("pulpcore", min_version="3.10.dev0"):
+            # Workaround for improperly rendered nested resource paths and weird HREF names
+            # https://github.com/pulp/pulpcore/pull/1066
+            return {}
+        return {PulpGroupContext.HREF: self.group_ctx.pulp_href}
 
 
 class PulpImporterContext(PulpEntityContext):
