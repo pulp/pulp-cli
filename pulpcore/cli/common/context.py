@@ -206,8 +206,19 @@ class PulpEntityContext:
     def create(self, body: EntityData, parameters: Optional[Dict[str, Any]] = None) -> Any:
         return self.pulp_ctx.call(self.CREATE_ID, parameters=parameters, body=body)
 
-    def update(self, href: str, body: EntityData) -> Any:
-        return self.pulp_ctx.call(self.UPDATE_ID, parameters={self.HREF: href}, body=body)
+    def update(
+        self,
+        href: str,
+        body: EntityData,
+        parameters: Optional[Dict[str, Any]] = None,
+        uploads: Optional[Dict[str, Any]] = None,
+    ) -> Any:
+        _parameters = {self.HREF: href}
+        if parameters:
+            _parameters.update(parameters)
+        return self.pulp_ctx.call(
+            self.UPDATE_ID, parameters=_parameters, body=body, uploads=uploads
+        )
 
     def delete(self, href: str) -> Any:
         return self.pulp_ctx.call(self.DELETE_ID, parameters={self.HREF: href})

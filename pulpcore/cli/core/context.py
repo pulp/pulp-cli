@@ -1,4 +1,6 @@
-from typing import Any, ClassVar
+from typing import Any, ClassVar, IO
+import hashlib
+import os
 import sys
 import click
 
@@ -12,6 +14,41 @@ class PulpArtifactContext(PulpEntityContext):
     HREF = "artifact_href"
     LIST_ID = "artifacts_list"
     READ_ID = "artifacts_read"
+
+    def upload(self, file: IO[bytes], chunk_size: int = 1000000) -> Any:
+        upload_ctx = PulpUploadContext(self.pulp_ctx)
+        start = 0
+        size = os.path.getsize(file.name)
+        sha256 = hashlib.sha256()
+        upload_href = upload_ctx.create(body={"size": size})["pulp_href"]
+        click.echo(f"Uploading file {file.name}", err=True)
+
+        try:
+            while start < size:
+                end = min(size, start + chunk_size) - 1
+                file.seek(start)
+                chunk = file.read(chunk_size)
+                sha256.update(chunk)
+                range_header = f"bytes {start}-{end}/{size}"
+                upload_ctx.update(
+                    href=upload_href,
+                    parameters={"Content-Range": range_header},
+                    body={"sha256": hashlib.sha256(chunk).hexdigest()},
+                    uploads={"file": chunk},
+                )
+                start += chunk_size
+                click.echo(".", nl=False, err=True)
+
+            click.echo("Upload complete. Creating artifact.", err=True)
+            task = upload_ctx.commit(
+                upload_href,
+                sha256.hexdigest(),
+            )
+            result = task["created_resources"][0]
+        except Exception as e:
+            upload_ctx.delete(upload_href)
+            raise e
+        return result
 
 
 class PulpExporterContext(PulpEntityContext):
@@ -78,6 +115,24 @@ class PulpTaskContext(PulpEntityContext):
             self.CANCEL_ID,
             parameters={self.HREF: task_href},
             body={"state": "canceled"},
+        )
+
+
+class PulpUploadContext(PulpEntityContext):
+    ENTITY = "upload"
+    HREF = "upload_href"
+    LIST_ID = "uploads_list"
+    READ_ID = "uploads_read"
+    CREATE_ID = "uploads_create"
+    UPDATE_ID = "uploads_update"
+    DELETE_ID = "uploads_delete"
+    COMMIT_ID: ClassVar[str] = "uploads_commit"
+
+    def commit(self, upload_href: str, sha256: str) -> Any:
+        return self.pulp_ctx.call(
+            self.COMMIT_ID,
+            parameters={self.HREF: upload_href},
+            body={"sha256": sha256},
         )
 
 
