@@ -5,6 +5,14 @@ from pulpcore.cli.common.context import (
 )
 
 
+class PulpFileContentContext(PulpEntityContext):
+    ENTITY = "file content"
+    HREF = "file_file_content_href"
+    LIST_ID = "content_file_files_list"
+    READ_ID = "content_file_files_read"
+    CREATE_ID = "content_file_files_create"
+
+
 class PulpFileDistributionContext(PulpEntityContext):
     ENTITY = "distribution"
     HREF = "file_file_distribution_href"
