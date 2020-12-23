@@ -15,3 +15,6 @@ sha256=$(sha256sum test.txt | cut -d' ' -f1)
 expect_succ pulp artifact upload --file test.txt
 expect_succ pulp artifact list --sha256 "$sha256"
 test "$(echo "$OUTPUT" | jq -r length)" -eq "1"
+
+# attempt to reupload the file
+expect_succ pulp artifact upload --file test.txt
