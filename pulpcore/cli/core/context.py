@@ -15,20 +15,30 @@ class PulpArtifactContext(PulpEntityContext):
     LIST_ID = "artifacts_list"
     READ_ID = "artifacts_read"
 
-    def upload(self, file: IO[bytes], chunk_size: int = 1000000) -> Any:
+    def upload(self, file: IO[bytes], chunk_size: int = 1000000, check_exists: bool = True) -> Any:
         upload_ctx = PulpUploadContext(self.pulp_ctx)
         start = 0
         size = os.path.getsize(file.name)
         sha256 = hashlib.sha256()
-        upload_href = upload_ctx.create(body={"size": size})["pulp_href"]
+
+        if check_exists:
+            for chunk in iter(lambda: file.read(chunk_size), b""):
+                sha256.update(chunk)
+            result = self.list(limit=1, offset=0, parameters={"sha256": sha256.hexdigest()})
+            if len(result) > 0:
+                click.echo("Artifact already exists.", err=True)
+                return result[0]["pulp_href"]
+
         click.echo(f"Uploading file {file.name}", err=True)
+        upload_href = upload_ctx.create(body={"size": size})["pulp_href"]
 
         try:
             while start < size:
                 end = min(size, start + chunk_size) - 1
                 file.seek(start)
                 chunk = file.read(chunk_size)
-                sha256.update(chunk)
+                if not check_exists:
+                    sha256.update(chunk)
                 range_header = f"bytes {start}-{end}/{size}"
                 upload_ctx.update(
                     href=upload_href,

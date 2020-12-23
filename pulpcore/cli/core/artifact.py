@@ -40,7 +40,10 @@ artifact.add_command(show_by_href)
 @pass_entity_context
 @pass_pulp_context
 def upload(
-    pulp_ctx: PulpContext, artifact_ctx: PulpArtifactContext, file: IO[bytes], chunk_size: int
+    pulp_ctx: PulpContext,
+    artifact_ctx: PulpArtifactContext,
+    file: IO[bytes],
+    chunk_size: int,
 ) -> None:
     artifact_href = artifact_ctx.upload(file, chunk_size)
     result = artifact_ctx.show(artifact_href)
