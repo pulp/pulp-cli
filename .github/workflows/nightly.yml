@@ -1,8 +1,8 @@
-name: CI
+name: Nightly Test
 
 on:
-  push:
-  pull_request:
+  schedule:
+    - cron: '15 3 * * *'
 
 env:
   COLORTERM: 'yes'
@@ -16,18 +16,20 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python:
-          - "3.6"
+        image_tag:
+          - "latest"
           - "3.8"
+          - "3.7"
+          - "3.6"
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: ${{ matrix.python }}
+          python-version: "3.8"
       - name: Install Test Dependencies
         run: pip install -r test_requirements.txt
-      - name: Lint code
-        run: make lint
       - name: Run tests
+        env:
+          IMAGE_TAG: ${{ matrix.image_tag }}
         run: .ci/run_container.sh make test

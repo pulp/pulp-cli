@@ -12,7 +12,12 @@ then
   fi
 fi
 
-"${CONTAINER_RUNTIME}" run --rm --detach --name "pulp" --volume "${BASEPATH}/settings:/etc/pulp" --publish "8080:80" pulp/pulp-fedora31
+if [ -z "${IMAGE_TAG+x}" ]
+then
+  IMAGE_TAG="latest"
+fi
+
+"${CONTAINER_RUNTIME}" run --rm --detach --name "pulp" --volume "${BASEPATH}/settings:/etc/pulp" --publish "8080:80" "pulp/pulp-fedora31:$IMAGE_TAG"
 
 echo "Wait for pulp to start."
 for _ in $(seq 10)
@@ -24,6 +29,9 @@ do
     break
   fi
 done
+
+# show pulpcore/plugin versions we're using
+curl -s http://localhost:8080/pulp/api/v3/status/ | jq ".versions"
 
 # shellcheck disable=SC2064
 trap "${CONTAINER_RUNTIME} stop pulp" EXIT
