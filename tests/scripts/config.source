@@ -1,14 +1,15 @@
+# Provide values from config
+settings="$(dirname "$(realpath "$0")")/config/pulp/settings.toml"
+PULP_BASE_URL="$(sed -n -e 's/^base_url\s*=\s*"\(\S*\)"\s*$/\1/p' "$settings")"
+VERIFY_SSL="$(sed -n -e 's/^verify_ssl\s*=\s*\(\S*\)\s*$/\1/p' "$settings")"
+
 # Constants used in tests
+PULPCORE_VERSION=$(http "$PULP_BASE_URL/pulp/api/v3/status/" | jq -r '.versions | .[] | select(.component=="pulpcore").version')
 PULP_FIXTURES_URL="${PULP_FIXTURES_URL:-https://fixtures.pulpproject.org}"
 FILE_REMOTE_URL="${PULP_FIXTURES_URL}/file/PULP_MANIFEST"
 CONTAINER_REMOTE_URL="https://registry-1.docker.io"
 CONTAINER_IMAGE="hello-world"
 RPM_REMOTE_URL="${PULP_FIXTURES_URL}/rpm-unsigned"
-
-# Provide values from config
-settings="$(dirname "$(realpath "$0")")/config/pulp/settings.toml"
-PULP_BASE_URL="$(sed -n -e 's/^base_url\s*=\s*"\(\S*\)"\s*$/\1/p' "$settings")"
-VERIFY_SSL="$(sed -n -e 's/^verify_ssl\s*=\s*\(\S*\)\s*$/\1/p' "$settings")"
 
 # Configure path to config
 export XDG_CONFIG_HOME="$(dirname "$(realpath "$0")")/config"
