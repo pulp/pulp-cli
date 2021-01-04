@@ -169,13 +169,19 @@ class PulpEntityContext:
         "rpm": "rpm_rpm_repository_href",
     }
 
+    # Subclasses for nested entities can define the parameters for there parent scope here
+    @property
+    def scope(self) -> Dict[str, Any]:
+        return {}
+
     def __init__(self, pulp_ctx: PulpContext) -> None:
         self.pulp_ctx: PulpContext = pulp_ctx
 
     def list(self, limit: int, offset: int, parameters: Dict[str, Any]) -> List[Any]:
         count: int = -1
         entities: List[Any] = []
-        payload: Dict[str, Any] = parameters.copy()
+        payload: Dict[str, Any] = self.scope
+        payload.update(parameters.copy())
         payload["offset"] = offset
         payload["limit"] = BATCH_SIZE
         while limit != 0:
@@ -204,6 +210,9 @@ class PulpEntityContext:
         return self.pulp_ctx.call(self.READ_ID, parameters={self.HREF: href})
 
     def create(self, body: EntityData, parameters: Optional[Dict[str, Any]] = None) -> Any:
+        _parameters = self.scope
+        if parameters:
+            _parameters.update(parameters)
         return self.pulp_ctx.call(self.CREATE_ID, parameters=parameters, body=body)
 
     def update(
@@ -273,10 +282,9 @@ class PulpRepositoryVersionContext(PulpEntityContext):
     REPOSITORY_HREF: ClassVar[str]
     repository: EntityData
 
-    def list(self, limit: int, offset: int, parameters: Dict[str, Any]) -> List[Any]:
-        _parameters = {self.REPOSITORY_HREF: self.repository["pulp_href"]}
-        _parameters.update(parameters)
-        return super().list(limit, offset, _parameters)
+    @property
+    def scope(self) -> Dict[str, Any]:
+        return {self.REPOSITORY_HREF: self.repository["pulp_href"]}
 
 
 class PulpRepositoryContext(PulpEntityContext):
