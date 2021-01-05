@@ -5,6 +5,7 @@ import sys
 import click
 
 from pulpcore.cli.common.context import (
+    PulpContext,
     PulpEntityContext,
 )
 
@@ -73,11 +74,18 @@ class PulpExporterContext(PulpEntityContext):
 
 class PulpExportContext(PulpEntityContext):
     ENTITY = "PulpExport"
-    HREF = "core_pulp_pulp_export_href"
+    HREF = "pulp_pulp_export_href"
     LIST_ID = "exporters_core_pulp_exports_list"
     READ_ID = "exporters_core_pulp_exports_read"
     CREATE_ID = "exporters_core_pulp_exports_create"
     DELETE_ID = "exporters_core_pulp_exports_delete"
+
+    def __init__(self, pulp_ctx: PulpContext) -> None:
+        if not pulp_ctx.has_plugin("pulpcore", min_version="3.10.dev0"):
+            # Workaround for old HREF_NAME
+            # https://github.com/pulp/pulpcore/pull/1066
+            self.__class__.HREF = "core_pulp_pulp_export_href"
+        super().__init__(pulp_ctx)
 
 
 class PulpGroupContext(PulpEntityContext):
