@@ -39,6 +39,7 @@ class PulpRpmRepositoryVersionContext(PulpRepositoryVersionContext):
     LIST_ID = "repositories_rpm_rpm_versions_list"
     READ_ID = "repositories_rpm_rpm_versions_read"
     DELETE_ID = "repositories_rpm_rpm_versions_delete"
+    REPAIR_ID = "repositories_rpm_rpm_versions_repair"
 
 
 class PulpRpmRepositoryContext(PulpRepositoryContext):

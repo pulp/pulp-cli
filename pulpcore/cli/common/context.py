@@ -270,6 +270,7 @@ class PulpRepositoryVersionContext(PulpEntityContext):
     """
 
     ENTITY = "repository version"
+    REPAIR_ID: ClassVar[str]
     REPOSITORY_HREF: ClassVar[str]
     repository: EntityData
 
@@ -277,6 +278,12 @@ class PulpRepositoryVersionContext(PulpEntityContext):
         _parameters = {self.REPOSITORY_HREF: self.repository["pulp_href"]}
         _parameters.update(parameters)
         return super().list(limit, offset, _parameters)
+
+    def repair(self, href: str) -> Any:
+        return self.pulp_ctx.call(
+            self.REPAIR_ID,
+            parameters={self.HREF: href},
+        )
 
 
 class PulpRepositoryContext(PulpEntityContext):
