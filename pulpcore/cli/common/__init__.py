@@ -12,6 +12,9 @@ from pulpcore.cli.common.context import (
 )
 
 
+__version__ = "0.0.0a2.dev"
+
+
 ##############################################################################
 # Main entry point
 
