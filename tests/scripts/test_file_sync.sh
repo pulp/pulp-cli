@@ -34,5 +34,9 @@ test "$(echo "$OUTPUT" | jq -r length)" -eq 2
 expect_succ pulp file repository version --repository "cli_test_file_repository" show --version 1
 test "$(echo "$OUTPUT" | jq -r '.content_summary.present."file.file".count')" -eq 3
 
+# Test repair the version
+expect_succ pulp file repository version --repository "cli_test_file_repository" repair --version 1
+test "$(echo "$OUTPUT" | jq -r '.state')" = "completed"
+
 # Delete version again
 expect_succ pulp file repository version --repository "cli_test_file_repository" destroy --version 1

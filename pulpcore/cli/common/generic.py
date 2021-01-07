@@ -6,9 +6,11 @@ from pulpcore.cli.common.context import (
     DEFAULT_LIMIT,
     PulpContext,
     PulpEntityContext,
+    PulpRepositoryContext,
     PulpRepositoryVersionContext,
     pass_pulp_context,
     pass_entity_context,
+    pass_repository_context,
     pass_repository_version_context,
 )
 
@@ -110,5 +112,42 @@ def destroy_version(
     version: int,
 ) -> None:
     repo_href = repository_version_ctx.repository["pulp_href"]
-    href = f"{repo_href}versions/{version}"
+    href = f"{repo_href}versions/{version}/"
     repository_version_ctx.delete(href)
+
+
+@click.command(name="repair")
+@click.option("--version", required=True, type=int)
+@pass_repository_version_context
+@pass_pulp_context
+def repair_version(
+    pulp_ctx: PulpContext,
+    repository_version_ctx: PulpRepositoryVersionContext,
+    version: int,
+) -> None:
+    repo_href = repository_version_ctx.repository["pulp_href"]
+    href = f"{repo_href}versions/{version}/"
+    result = repository_version_ctx.repair(href)
+    pulp_ctx.output_result(result)
+
+
+# Generic repository_version command group
+@click.group(name="version")
+@click.option("--repository", required=True)
+@pass_repository_context
+@pass_pulp_context
+@click.pass_context
+def version_group(
+    ctx: click.Context,
+    pulp_ctx: PulpContext,
+    repository_ctx: PulpRepositoryContext,
+    repository: str,
+) -> None:
+    ctx.obj = repository_ctx.VERSION_CONTEXT(pulp_ctx)
+    ctx.obj.repository = repository_ctx.find(name=repository)
+
+
+version_group.add_command(list_entities)
+version_group.add_command(show_version)
+version_group.add_command(destroy_version)
+version_group.add_command(repair_version)
