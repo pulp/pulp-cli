@@ -80,7 +80,7 @@ class PulpContext:
         except OpenAPIError as e:
             raise click.ClickException(str(e))
         except HTTPError as e:
-            raise click.ClickException(str(e.response.json()))
+            raise click.ClickException(str(e.response.text))
         if "task" in result:
             task_href = result["task"]
             result = self.api.call("tasks_read", parameters={"task_href": task_href})
@@ -295,11 +295,32 @@ class PulpRepositoryContext(PulpEntityContext):
 
     ENTITY = "repository"
     SYNC_ID: ClassVar[str]
+    MODIFY_ID: ClassVar[str]
     VERSION_CONTEXT: ClassVar[Type[PulpRepositoryVersionContext]]
 
     def sync(self, href: str, body: Dict[str, Any]) -> Any:
         return self.pulp_ctx.call(
             self.SYNC_ID,
+            parameters={self.HREF: href},
+            body=body,
+        )
+
+    def modify(
+        self,
+        href: str,
+        add_content: Optional[List[str]] = None,
+        remove_content: Optional[List[str]] = None,
+        base_version: Optional[str] = None,
+    ) -> Any:
+        body: Dict[str, Any] = {}
+        if add_content is not None:
+            body["add_content_units"] = add_content
+        if remove_content is not None:
+            body["remove_content_units"] = remove_content
+        if base_version is not None:
+            body["base_version"] = base_version
+        return self.pulp_ctx.call(
+            self.MODIFY_ID,
             parameters={self.HREF: href},
             body=body,
         )
