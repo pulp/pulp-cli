@@ -58,4 +58,5 @@ class PulpFileRepositoryContext(PulpRepositoryContext):
     UPDATE_ID = "repositories_file_file_update"
     DELETE_ID = "repositories_file_file_delete"
     SYNC_ID = "repositories_file_file_sync"
+    MODIFY_ID = "repositories_file_file_modify"
     VERSION_CONTEXT = PulpFileRepositoryVersionContext

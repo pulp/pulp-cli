@@ -13,7 +13,11 @@ from pulpcore.cli.common.context import (
     PulpContext,
     PulpRepositoryContext,
 )
-from pulpcore.cli.file.context import PulpFileRemoteContext, PulpFileRepositoryContext
+from pulpcore.cli.file.context import (
+    PulpFileContentContext,
+    PulpFileRemoteContext,
+    PulpFileRepositoryContext,
+)
 
 
 @click.group()
@@ -124,4 +128,74 @@ def sync(
     repository_ctx.sync(
         href=repository_href,
         body=body,
+    )
+
+
+@repository.command()
+@click.option("--name", required=True)
+@click.option("--sha256", required=True)
+@click.option("--relative-path", required=True)
+@click.option("--base-version", type=int)
+@pass_repository_context
+@pass_pulp_context
+def add(
+    pulp_ctx: PulpContext,
+    repository_ctx: PulpRepositoryContext,
+    name: str,
+    sha256: str,
+    relative_path: str,
+    base_version: Optional[int],
+) -> None:
+    repository = repository_ctx.find(name=name)
+    repository_href = repository["pulp_href"]
+
+    base_version_href: Optional[str]
+    if base_version is not None:
+        base_version_href = f"{repository_href}versions/{base_version}/"
+    else:
+        base_version_href = None
+
+    content_href = PulpFileContentContext(pulp_ctx).find(
+        sha256=sha256, relative_path=relative_path
+    )["pulp_href"]
+
+    repository_ctx.modify(
+        href=repository_href,
+        add_content=[content_href],
+        base_version=base_version_href,
+    )
+
+
+@repository.command()
+@click.option("--name", required=True)
+@click.option("--sha256", required=True)
+@click.option("--relative-path", required=True)
+@click.option("--base-version", type=int)
+@pass_repository_context
+@pass_pulp_context
+def remove(
+    pulp_ctx: PulpContext,
+    repository_ctx: PulpRepositoryContext,
+    name: str,
+    sha256: str,
+    relative_path: str,
+    base_version: Optional[int],
+) -> None:
+    repository = repository_ctx.find(name=name)
+    repository_href = repository["pulp_href"]
+
+    base_version_href: Optional[str]
+    if base_version is not None:
+        base_version_href = f"{repository_href}versions/{base_version}/"
+    else:
+        base_version_href = None
+
+    content_href = PulpFileContentContext(pulp_ctx).find(
+        sha256=sha256, relative_path=relative_path
+    )["pulp_href"]
+
+    repository_ctx.modify(
+        href=repository_href,
+        remove_content=[content_href],
+        base_version=base_version_href,
     )
