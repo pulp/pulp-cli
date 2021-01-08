@@ -93,13 +93,8 @@ def run(
 ) -> None:
     exporter_ctx = PulpExporterContext(pulp_ctx)
     exporter_href = exporter_ctx.find(name=exporter)["pulp_href"]
-    if pulp_ctx.has_plugin("pulpcore", min_version="3.10.dev0"):
-        params = {exporter_ctx.HREF: exporter_href}
-    else:
-        # Workaround for improperly rendered nested resurce paths
-        # https://github.com/pulp/pulpcore/pull/1066
-        params = {export_ctx.HREF: exporter_href}
 
+    params = {exporter_ctx.HREF: exporter_href}
     body: Dict[str, Any] = dict(full=full)
 
     if chunk_size:

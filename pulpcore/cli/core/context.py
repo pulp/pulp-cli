@@ -1,10 +1,11 @@
-from typing import Any, ClassVar, IO
+from typing import Any, ClassVar, Dict, IO, Optional
 import hashlib
 import os
 import sys
 import click
 
 from pulpcore.cli.common.context import (
+    EntityData,
     PulpContext,
     PulpEntityContext,
 )
@@ -80,12 +81,22 @@ class PulpExportContext(PulpEntityContext):
     CREATE_ID = "exporters_core_pulp_exports_create"
     DELETE_ID = "exporters_core_pulp_exports_delete"
 
-    def __init__(self, pulp_ctx: PulpContext) -> None:
+    def __new__(cls, pulp_ctx: PulpContext) -> Any:
         if not pulp_ctx.has_plugin("pulpcore", min_version="3.10.dev0"):
-            # Workaround for old HREF_NAME
+            # Workaround for improperly rendered nested resource paths and weird HREF names
             # https://github.com/pulp/pulpcore/pull/1066
-            self.__class__.HREF = "core_pulp_pulp_export_href"
-        super().__init__(pulp_ctx)
+            class PatchedPulpExporterContext(PulpExportContext):
+                HREF = "core_pulp_pulp_export_href"
+
+                def create(
+                    self, body: EntityData, parameters: Optional[Dict[str, Any]] = None
+                ) -> Any:
+                    if parameters and PulpExporterContext.HREF in parameters:
+                        parameters[self.HREF] = parameters.pop(PulpExporterContext.HREF)
+                    return super().create(parameters=parameters, body=body)
+
+            return super().__new__(PatchedPulpExporterContext)
+        return super().__new__(cls)
 
 
 class PulpGroupContext(PulpEntityContext):
