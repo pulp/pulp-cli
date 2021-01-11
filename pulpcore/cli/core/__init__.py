@@ -9,10 +9,12 @@ from pulpcore.cli.core.orphans import orphans
 from pulpcore.cli.core.status import status
 from pulpcore.cli.core.task import task
 from pulpcore.cli.core.user import user
+from pulpcore.cli.core.show import show
 
 
 # Register commands with cli
 main.add_command(status)
+main.add_command(show)
 main.add_command(user)
 main.add_command(group)
 main.add_command(artifact)

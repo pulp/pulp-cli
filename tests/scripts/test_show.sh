@@ -1,0 +1,18 @@
+#!/bin/sh
+
+# shellcheck source=tests/scripts/config.source
+. "$(dirname "$(realpath "$0")")/config.source"
+
+cleanup() {
+  pulp file repository destroy --name "cli_test_file_repo" || true
+  pulp file remote destroy --name "cli_test_file_remote" || true
+}
+trap cleanup EXIT
+
+expect_succ pulp file repository create --name "cli_test_file_repo"
+repo_href="$(echo "$OUTPUT" | jq -r .pulp_href)"
+expect_succ pulp show --href "$repo_href"
+
+expect_succ pulp file remote create --name "cli_test_file_remote" --url "$FILE_REMOTE_URL"
+remote_href="$(echo "$OUTPUT" | jq -r .pulp_href)"
+expect_succ pulp show --href "$remote_href"
