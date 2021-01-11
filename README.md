@@ -1,16 +1,40 @@
-# POC: pulp command line interface
+# Pulp command line interface
 
-This is a _technology preview_ of the command line interface for Pulp 3.
+This is a command line interface for Pulp 3. 
+
+This software is in beta and future releases may include backwards incompatible changes.
 
 ## General command syntax
 
-`pulp [<options>] <plugin> <resource_class> [--type <resource_type>] <action> [<action_specifics>]`
+`pulp [<global_options>] <plugin> <resource_class> [--type <resource_type>] <action> [<action_options>]`
 
-options include:
+Global options include:
 
   * `--base-url`
   * `--user`
   * `--password`
+  * `--config`
+  * `--format`
+  * `-v`/`-vv`/`-vvv`
+
+## Installation
+
+The pulp-cli package can be installed from a variety of sources. After installing, see the next
+section on how to configure pulp-cli.
+
+### From PyPI
+
+```
+pip install pulp-cli
+```
+
+### From a source checkout
+
+```
+git clone <your_fork_url>
+cd pulp-cli
+pip install -e .
+```
 
 ## Configuration
 
