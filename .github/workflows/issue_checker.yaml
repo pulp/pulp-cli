@@ -2,7 +2,7 @@
 name: Issue Checker
 on: pull_request
 jobs:
-  test:
+  check-commit:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2

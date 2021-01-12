@@ -16,16 +16,19 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        image_tag:
-          - "latest"
-          - "3.8"
-          - "3.7"
+        include:
+          - python: 3.6
+            image_tag: latest
+          - python: 3.7
+            image_tag: 3.8
+          - python: 3.8
+            image_tag: 3.7
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: "3.8"
+          python-version: ${{ matrix.python }}
       - name: Install Test Dependencies
         run: pip install -r test_requirements.txt
       - name: Run tests
