@@ -68,8 +68,7 @@ def list(
 ) -> None:
     params = {k: v for k, v in kwargs.items() if v is not None}
     exporter_ctx = PulpExporterContext(pulp_ctx)
-    exporter_href = exporter_ctx.find(name=exporter)["pulp_href"]
-    params[exporter_ctx.HREF] = exporter_href
+    export_ctx.exporter = exporter_ctx.find(name=exporter)
     result = export_ctx.list(limit=limit, offset=offset, parameters=params)
     pulp_ctx.output_result(result)
 
@@ -92,9 +91,8 @@ def run(
     start_versions: List[RepositoryVersionDefinition],
 ) -> None:
     exporter_ctx = PulpExporterContext(pulp_ctx)
-    exporter_href = exporter_ctx.find(name=exporter)["pulp_href"]
+    export_ctx.exporter = exporter_ctx.find(name=exporter)
 
-    params = {exporter_ctx.HREF: exporter_href}
     body: Dict[str, Any] = dict(full=full)
 
     if chunk_size:
@@ -112,5 +110,5 @@ def run(
     if start_vers_list:
         body["start_versions"] = start_vers_list
 
-    result = export_ctx.create(parameters=params, body=body)
+    result = export_ctx.create(body=body)
     pulp_ctx.output_result(result)
