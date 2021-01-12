@@ -1,4 +1,4 @@
-from typing import Any, ClassVar, Dict, IO, Optional
+from typing import Any, ClassVar, Dict, List, IO, Optional
 import hashlib
 import os
 import sys
@@ -80,6 +80,7 @@ class PulpExportContext(PulpEntityContext):
     READ_ID = "exporters_core_pulp_exports_read"
     CREATE_ID = "exporters_core_pulp_exports_create"
     DELETE_ID = "exporters_core_pulp_exports_delete"
+    exporter: EntityData
 
     def __new__(cls, pulp_ctx: PulpContext) -> Any:
         if not pulp_ctx.has_plugin("pulpcore", min_version="3.10.dev0"):
@@ -88,15 +89,29 @@ class PulpExportContext(PulpEntityContext):
             class PatchedPulpExporterContext(PulpExportContext):
                 HREF = "core_pulp_pulp_export_href"
 
+                def list(self, limit: int, offset: int, parameters: Dict[str, Any]) -> List[Any]:
+                    parameters[PulpExporterContext.HREF] = self.exporter["pulp_href"]
+                    return super().list(limit=limit, offset=offset, parameters=parameters)
+
                 def create(
                     self, body: EntityDefinition, parameters: Optional[Dict[str, Any]] = None
                 ) -> Any:
-                    if parameters and PulpExporterContext.HREF in parameters:
-                        parameters[self.HREF] = parameters.pop(PulpExporterContext.HREF)
+                    if parameters is None:
+                        parameters = {}
+                    parameters[self.HREF] = self.exporter["pulp_href"]
                     return super().create(parameters=parameters, body=body)
+
+                @property
+                def scope(self) -> Dict[str, Any]:
+                    return {}
 
             return super().__new__(PatchedPulpExporterContext)
         return super().__new__(cls)
+
+    @property
+    def scope(self) -> Dict[str, Any]:
+        return {PulpExporterContext.HREF: self.exporter["pulp_href"]}
+
 
 
 class PulpGroupContext(PulpEntityContext):
