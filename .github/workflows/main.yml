@@ -16,9 +16,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python:
-          - "3.6"
-          - "3.8"
+        include:
+          - python: 3.6
+            image_tag: latest
+          - python: 3.7
+            image_tag: 3.8
+          - python: 3.8
+            image_tag: 3.7
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python
@@ -30,4 +34,6 @@ jobs:
       - name: Lint code
         run: make lint
       - name: Run tests
+        env:
+          IMAGE_TAG: ${{ matrix.image_tag }}
         run: .ci/run_container.sh make test
