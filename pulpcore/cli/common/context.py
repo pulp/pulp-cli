@@ -330,6 +330,23 @@ class PulpEntityContext:
     def delete(self, href: str) -> Any:
         return self.pulp_ctx.call(self.DELETE_ID, parameters={self.HREF: href})
 
+    def set_label(self, href: str, key: str, value: str) -> Any:
+        entity = self.show(href)
+        entity["pulp_labels"][key] = value
+        return self.update(href, body=entity)
+
+    def unset_label(self, href: str, key: str) -> Any:
+        entity = self.show(href)
+        entity["pulp_labels"].pop(key)
+        return self.update(href, body=entity)
+
+    def show_label(self, href: str, key: str) -> Any:
+        entity = self.show(href)
+        try:
+            return entity["pulp_labels"][key]
+        except KeyError:
+            raise click.ClickException(f"Could not find label with key '{key}'.")
+
     def find_repository(self, definition: RepositoryDefinition) -> Any:
         name, repo_type = definition
         if repo_type in self.REPOSITORY_FIND_IDS:
