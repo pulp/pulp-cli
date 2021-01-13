@@ -107,6 +107,14 @@ version_option = click.option(
     expose_value=False,
 )
 
+label_select_option = click.option(
+    "--label-select",
+    "pulp_label_select",
+    help="Filter {entities} by a label search query.",
+    type=str,
+    cls=PulpOption,
+)
+
 ##############################################################################
 # Generic reusable commands
 
@@ -231,6 +239,50 @@ def version_command(**kwargs: Any) -> click.Command:
         pulp_ctx.output_result(result)
 
     return callback
+
+
+def label_command(**kwargs: Any) -> click.Command:
+    """A factory that creates a label command group."""
+
+    if "name" not in kwargs:
+        kwargs["name"] = "label"
+    decorators = kwargs.pop("decorators", [name_option, href_option])
+
+    @click.group(**kwargs)
+    def label_group() -> None:
+        pass
+
+    @click.command(name="set")
+    @click.option("--key", required=True, help="Key of the label")
+    @click.option("--value", required=True, help="Value of the label")
+    @pass_entity_context
+    def label_set(entity_ctx: PulpEntityContext, key: str, value: str) -> None:
+        """Add or update a label"""
+        href = entity_ctx.entity["pulp_href"]
+        entity_ctx.set_label(href, key, value)
+
+    @click.command(name="unset")
+    @click.option("--key", required=True, help="Key of the label")
+    @pass_entity_context
+    def label_unset(entity_ctx: PulpEntityContext, key: str) -> None:
+        """Remove a label with a given key"""
+        href = entity_ctx.entity["pulp_href"]
+        entity_ctx.unset_label(href, key)
+
+    @click.command(name="show")
+    @click.option("--key", required=True, help="Key of the label")
+    @pass_entity_context
+    def label_show(entity_ctx: PulpEntityContext, key: str) -> None:
+        """Show the value for a particular label key"""
+        href = entity_ctx.entity["pulp_href"]
+        click.echo(entity_ctx.show_label(href, key))
+
+    for subcmd in [label_set, label_unset, label_show]:
+        for decorator in decorators:
+            subcmd = decorator(subcmd)
+        label_group.add_command(subcmd)
+
+    return label_group
 
 
 @click.command(name="list")

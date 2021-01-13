@@ -3,8 +3,11 @@ settings="$(dirname "$(realpath "$0")")/config/pulp/settings.toml"
 PULP_BASE_URL="$(sed -n -e 's/^base_url\s*=\s*"\(\S*\)"\s*$/\1/p' "$settings")"
 VERIFY_SSL="$(sed -n -e 's/^verify_ssl\s*=\s*\(\S*\)\s*$/\1/p' "$settings")"
 
+# Configure path to config
+export XDG_CONFIG_HOME="$(dirname "$(realpath "$0")")/config"
+
 # Constants used in tests
-PULPCORE_VERSION=$(http "$PULP_BASE_URL/pulp/api/v3/status/" | jq -r '.versions | .[] | select(.component=="pulpcore").version')
+PULPCORE_VERSION=$(pulp status | jq -r '.versions | .[] | select(.component=="pulpcore").version')
 PULP_FIXTURES_URL="${PULP_FIXTURES_URL:-https://fixtures.pulpproject.org}"
 FILE_REMOTE_URL="${PULP_FIXTURES_URL}/file/PULP_MANIFEST"
 CONTAINER_REMOTE_URL="https://registry-1.docker.io"
@@ -12,9 +15,6 @@ CONTAINER_IMAGE="hello-world"
 RPM_REMOTE_URL="${PULP_FIXTURES_URL}/rpm-unsigned"
 ANSIBLE_COLLECTION_REMOTE_URL="https://galaxy.ansible.com/"
 ANSIBLE_ROLE_REMOTE_URL="https://galaxy.ansible.com/api/v1/roles/?namespace__name=elastic"
-
-# Configure path to config
-export XDG_CONFIG_HOME="$(dirname "$(realpath "$0")")/config"
 
 # Library for test helper functions
 
@@ -64,6 +64,21 @@ expect_fail () {
     echo "SUCCESS [! $@]" >&3
     OUTPUT="$(cat "${TMP}/log.out")"
     ERROUTPUT="$(cat "${TMP}/log.err")"
+  fi
+}
+
+# Returns true if $PULPCORE_VERSION >= $1, false otherwise
+require_min_pulp () {
+  if [ -z "${PULPCORE_VERSION+x}" ]
+  then
+    echo "Error: require_min_pulp called without \$PULPCORE_VERSION defined."
+    exit 1
+  fi
+
+  if [ "$1" != "`printf "$PULPCORE_VERSION\n$1" | sort -V | head -n1`" ]
+  then
+    echo "Skipping $0"
+    exit 3 # skip exit code
   fi
 }
 

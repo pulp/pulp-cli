@@ -6,6 +6,8 @@ from pulpcore.cli.common.context import PulpContext, pass_entity_context, pass_p
 from pulpcore.cli.common.generic import (
     destroy_command,
     href_option,
+    label_command,
+    label_select_option,
     list_command,
     name_option,
     show_command,
@@ -32,9 +34,10 @@ def distribution(ctx: click.Context, pulp_ctx: PulpContext, distribution_type: s
 
 lookup_options = [href_option, name_option]
 
-distribution.add_command(list_command())
+distribution.add_command(list_command(decorators=[label_select_option]))
 distribution.add_command(show_command(decorators=lookup_options))
 distribution.add_command(destroy_command(decorators=lookup_options))
+distribution.add_command(label_command())
 
 
 @distribution.command()

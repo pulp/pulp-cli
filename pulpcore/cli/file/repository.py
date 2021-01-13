@@ -12,6 +12,8 @@ from pulpcore.cli.common.context import (
 from pulpcore.cli.common.generic import (
     destroy_command,
     href_option,
+    label_command,
+    label_select_option,
     list_command,
     name_option,
     show_command,
@@ -43,10 +45,11 @@ def repository(ctx: click.Context, pulp_ctx: PulpContext, repo_type: str) -> Non
 
 lookup_options = [href_option, name_option]
 
-repository.add_command(list_command())
+repository.add_command(list_command(decorators=[label_select_option]))
 repository.add_command(show_command(decorators=lookup_options))
 repository.add_command(destroy_command(decorators=lookup_options))
 repository.add_command(version_command())
+repository.add_command(label_command())
 
 
 @repository.command()

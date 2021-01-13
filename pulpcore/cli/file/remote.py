@@ -4,6 +4,8 @@ from pulpcore.cli.common.context import PulpContext, pass_entity_context, pass_p
 from pulpcore.cli.common.generic import (
     destroy_command,
     href_option,
+    label_command,
+    label_select_option,
     list_command,
     name_option,
     show_command,
@@ -30,9 +32,10 @@ def remote(ctx: click.Context, pulp_ctx: PulpContext, remote_type: str) -> None:
 
 lookup_options = [href_option, name_option]
 
-remote.add_command(list_command())
+remote.add_command(list_command(decorators=[label_select_option]))
 remote.add_command(show_command(decorators=lookup_options))
 remote.add_command(destroy_command(decorators=lookup_options))
+remote.add_command(label_command())
 
 
 @remote.command()
