@@ -10,6 +10,8 @@ FILE_REMOTE_URL="${PULP_FIXTURES_URL}/file/PULP_MANIFEST"
 CONTAINER_REMOTE_URL="https://registry-1.docker.io"
 CONTAINER_IMAGE="hello-world"
 RPM_REMOTE_URL="${PULP_FIXTURES_URL}/rpm-unsigned"
+ANSIBLE_COLLECTION_REMOTE_URL="https://galaxy.ansible.com/"
+ANSIBLE_ROLE_REMOTE_URL="https://galaxy.ansible.com/api/v1/roles/?namespace__name=elastic"
 
 # Configure path to config
 export XDG_CONFIG_HOME="$(dirname "$(realpath "$0")")/config"
