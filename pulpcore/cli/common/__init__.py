@@ -26,8 +26,7 @@ def _config_callback(ctx: click.Context, param: Any, value: str) -> None:
     if value:
         ctx.default_map = toml.load(value)["cli"]
     else:
-        xdg_config_home = os.path.expanduser(os.environ.get("XDG_CONFIG_HOME") or "~/.config")
-        default_config_path = os.path.join(xdg_config_home, "pulp", "settings.toml")
+        default_config_path = os.path.join(click.utils.get_app_dir("pulp"), "settings.toml")
 
         try:
             ctx.default_map = toml.load(default_config_path)["cli"]
