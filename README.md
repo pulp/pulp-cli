@@ -110,3 +110,15 @@ To verify your code please run `black`, `flake8`, `shellcheck`, and `mypy`.
 This cli for Pulp 3 will be versioned indedendently of any version of the server components.
 It is supposed to be able to communicate with different combinations of server component versions at the same time.
 So it might be needed to guard certain features / workaround by the available server plugin version.
+
+## Releasing
+
+1. Run `bumpversion release`
+1. Generate the changelog (eg `towncrier --yes --version 0.1.0`)
+1. Commit your local changes, open a PR, and get it merged.
+1. After your PR is merged, pull the latest changes from develop
+1. Now tag your release (e.g. `git tag 0.1.0`) and push to pulp/pulp-cli
+1. Monitor the build job and then check PyPI to make sure the package has been uploaded
+1. Go into plan.io and set CLI issues to `CLOSED - CURRENT RELEASE`
+1. Send an email to pulp-list and pulp-dev to announce the release
+1. Run `bumpversion patch` and get the changes merged to develop
