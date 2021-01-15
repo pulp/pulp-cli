@@ -12,3 +12,11 @@ Changelog
     WARNING: Don't drop the towncrier directive!
 
 .. towncrier release notes start
+
+0.1.0 (2021-01-15)
+==================
+
+Initial release of pulp-cli.
+
+
+----
