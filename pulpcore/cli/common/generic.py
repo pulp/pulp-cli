@@ -48,6 +48,16 @@ def list_entities(
 
 
 @click.command(name="show")
+@pass_entity_context
+@pass_pulp_context
+def show_entity(pulp_ctx: PulpContext, entity_ctx: PulpEntityContext) -> None:
+    """Shows details of an entry"""
+    assert entity_ctx.entity is not None
+    entity = entity_ctx.show(entity_ctx.entity["pulp_href"])
+    pulp_ctx.output_result(entity)
+
+
+@click.command(name="show")
 @click.option("--name", required=True, help="Name of the entry")
 @pass_entity_context
 @pass_pulp_context
@@ -81,6 +91,16 @@ def show_version(
     href = f"{repo_href}versions/{version}"
     result = repository_version_ctx.show(href)
     pulp_ctx.output_result(result)
+
+
+@click.command(name="destroy")
+@pass_entity_context
+def destroy_entity(entity_ctx: PulpEntityContext) -> None:
+    """
+    Destroy an entry
+    """
+    assert entity_ctx.entity is not None
+    entity_ctx.delete(entity_ctx.entity["pulp_href"])
 
 
 @click.command(name="destroy")
@@ -133,7 +153,6 @@ def repair_version(
 
 # Generic repository_version command group
 @click.group(name="version")
-@click.option("--repository", required=True)
 @pass_repository_context
 @pass_pulp_context
 @click.pass_context
@@ -141,10 +160,10 @@ def version_group(
     ctx: click.Context,
     pulp_ctx: PulpContext,
     repository_ctx: PulpRepositoryContext,
-    repository: str,
 ) -> None:
     ctx.obj = repository_ctx.VERSION_CONTEXT(pulp_ctx)
-    ctx.obj.repository = repository_ctx.find(name=repository)
+    assert repository_ctx.entity is not None
+    ctx.obj.repository = repository_ctx.entity
 
 
 version_group.add_command(list_entities)

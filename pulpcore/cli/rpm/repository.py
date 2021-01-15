@@ -1,11 +1,11 @@
-from typing import Optional
+from typing import Any, Optional, cast
 
 import click
 
 from pulpcore.cli.common.generic import (
     list_entities,
-    show_by_name,
-    destroy_by_name,
+    show_entity,
+    destroy_entity,
 )
 from pulpcore.cli.common.context import (
     pass_pulp_context,
@@ -16,6 +16,22 @@ from pulpcore.cli.common.context import (
 from pulpcore.cli.rpm.context import PulpRpmRemoteContext, PulpRpmRepositoryContext
 
 
+def _name_callback(ctx: click.Context, param: Any, value: str) -> str:
+    group: click.Group = cast(click.Group, ctx.command)
+    if value is not None:
+        group.commands.pop("list", None)
+        group.commands.pop("create", None)
+    else:
+        group.commands.pop("show", None)
+        group.commands.pop("update", None)
+        group.commands.pop("destroy", None)
+        group.commands.pop("sync", None)
+        group.commands.pop("add", None)
+        group.commands.pop("remove", None)
+        group.commands.pop("version", None)
+    return value
+
+
 @click.group()
 @click.option(
     "-t",
@@ -24,16 +40,25 @@ from pulpcore.cli.rpm.context import PulpRpmRemoteContext, PulpRpmRepositoryCont
     type=click.Choice(["rpm"], case_sensitive=False),
     default="rpm",
 )
+@click.option("--name", type=str, callback=_name_callback, is_eager=True)
 @pass_pulp_context
 @click.pass_context
-def repository(ctx: click.Context, pulp_ctx: PulpContext, repo_type: str) -> None:
+def repository(
+    ctx: click.Context,
+    pulp_ctx: PulpContext,
+    repo_type: str,
+    name: Optional[str],
+) -> None:
     if repo_type == "rpm":
         ctx.obj = PulpRpmRepositoryContext(pulp_ctx)
     else:
         raise NotImplementedError()
 
+    if name is not None:
+        ctx.obj.entity = ctx.obj.find(name=name)
 
-repository.add_command(show_by_name)
+
+repository.add_command(show_entity)
 repository.add_command(list_entities)
 
 
@@ -60,7 +85,6 @@ def create(
 
 
 @repository.command()
-@click.option("--name", required=True)
 @click.option("--description")
 @click.option("--remote")
 @pass_repository_context
@@ -68,11 +92,11 @@ def create(
 def update(
     pulp_ctx: PulpContext,
     repository_ctx: PulpRepositoryContext,
-    name: str,
     description: Optional[str],
     remote: Optional[str],
 ) -> None:
-    repository = repository_ctx.find(name=name)
+    repository = repository_ctx.entity
+    assert repository is not None
     repository_href = repository["pulp_href"]
 
     if description is not None:
@@ -93,22 +117,20 @@ def update(
     repository_ctx.update(repository_href, body=repository)
 
 
-repository.add_command(destroy_by_name)
-repository.add_command(show_by_name)
+repository.add_command(destroy_entity)
 
 
 @repository.command()
-@click.option("--name", required=True)
 @click.option("--remote")
 @pass_repository_context
 @pass_pulp_context
 def sync(
     pulp_ctx: PulpContext,
     repository_ctx: PulpRepositoryContext,
-    name: str,
     remote: Optional[str],
 ) -> None:
-    repository = repository_ctx.find(name=name)
+    repository = repository_ctx.entity
+    assert repository is not None
     repository_href = repository["pulp_href"]
 
     body = {}
@@ -117,6 +139,7 @@ def sync(
         remote_href: str = PulpRpmRemoteContext(pulp_ctx).find(name=remote)["pulp_href"]
         body["remote"] = remote_href
     elif repository["remote"] is None:
+        name = repository["name"]
         raise click.ClickException(
             f"Repository '{name}' does not have a default remote. Please specify with '--remote'."
         )

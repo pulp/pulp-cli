@@ -153,6 +153,10 @@ class PulpEntityContext:
     CREATE_ID: ClassVar[str]
     UPDATE_ID: ClassVar[str]
     DELETE_ID: ClassVar[str]
+
+    # Placeholder for an actual entity, subcommands are supposed to act on
+    entity: Optional[EntityData]
+
     # { "pulp_type" : repository-list-id }
     REPOSITORY_FIND_IDS: Dict[str, str] = {
         "file": "repositories_file_file_list",
