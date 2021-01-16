@@ -184,7 +184,8 @@ class PulpEntityContext:
     """
 
     # Subclasses should provide appropriate values here
-    ENTITY: ClassVar[str]
+    ENTITY: ClassVar[str] = "entity"
+    ENTITIES: ClassVar[str] = "entities"
     HREF: ClassVar[str]
     LIST_ID: ClassVar[str]
     READ_ID: ClassVar[str]
@@ -193,7 +194,7 @@ class PulpEntityContext:
     DELETE_ID: ClassVar[str]
 
     _entity: Optional[EntityDefinition]
-    _entity_lookup: Optional[EntityDefinition]
+    _entity_lookup: EntityDefinition
 
     # { "pulp_type" : repository-list-id }
     REPOSITORY_FIND_IDS: Dict[str, str] = {
@@ -226,18 +227,24 @@ class PulpEntityContext:
         Assigning to it will reset the lazy lookup behaviour.
         """
         if self._entity is None:
-            if self._entity_lookup is None:
+            if not self._entity_lookup:
                 raise click.ClickException(f"A {self.ENTITY} must be specified for this command.")
             if "pulp_href" in self._entity_lookup:
                 self._entity = self.show(self._entity_lookup["pulp_href"])
             else:
                 self._entity = self.find(**self._entity_lookup)
+            self._entity_lookup = {}
         return self._entity
 
     @entity.setter
     def entity(self, value: Optional[EntityDefinition]) -> None:
-        # Setting this property will always (lazily) retrigger retrieving the entity
-        self._entity_lookup = value
+        # Setting this property will always (lazily) retrigger retrieving the entity.
+        # If set multiple times in a row without reading, the criteria will be added.
+        if value is None:
+            self._entity_lookup = {}
+        else:
+            self._entity_lookup.update(value)
+            self._entity_lookup.pop("pulp_href", None)
         self._entity = None
 
     @property
@@ -250,7 +257,7 @@ class PulpEntityContext:
 
     @pulp_href.setter
     def pulp_href(self, value: str) -> None:
-        # Setting this property will always (lazily) retrigger retrieving the entity
+        # Setting this property will always (lazily) retrigger retrieving the entity.
         self._entity_lookup = {"pulp_href": value}
         self._entity = None
 
@@ -265,7 +272,7 @@ class PulpEntityContext:
         self.pulp_ctx: PulpContext = pulp_ctx
         self._entity = None
         if pulp_href is None:
-            self._entity_lookup = entity
+            self._entity_lookup = entity or {}
         else:
             self.pulp_href = pulp_href
 
@@ -371,6 +378,7 @@ class PulpRepositoryVersionContext(PulpEntityContext):
     """
 
     ENTITY = "repository version"
+    ENTITIES = "repository versions"
     REPAIR_ID: ClassVar[str]
     repository_ctx: "PulpRepositoryContext"
 
@@ -397,6 +405,7 @@ class PulpRepositoryContext(PulpEntityContext):
     """
 
     ENTITY = "repository"
+    ENTITIES = "repositories"
     SYNC_ID: ClassVar[str]
     MODIFY_ID: ClassVar[str]
     VERSION_CONTEXT: ClassVar[Type[PulpRepositoryVersionContext]]

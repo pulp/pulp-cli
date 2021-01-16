@@ -1,8 +1,7 @@
-from copy import deepcopy
 import click
 
 from pulpcore.cli.common.generic import (
-    list_entities,
+    list_command,
 )
 from pulpcore.cli.common.context import (
     pass_pulp_context,
@@ -21,14 +20,19 @@ def task(ctx: click.Context, pulp_ctx: PulpContext) -> None:
     ctx.obj = PulpTaskContext(pulp_ctx)
 
 
-# deepcopy to not effect other list subcommands
-list_tasks = deepcopy(list_entities)
-click.option("--name", help="List only tasks with this name.")(list_tasks)
-click.option("--name-contains", "name__contains", help="List only tasks whose name contains this.")(
-    list_tasks
+task.add_command(
+    list_command(
+        decorators=[
+            click.option("--name", help="List only tasks with this name."),
+            click.option(
+                "--name-contains",
+                "name__contains",
+                help="List only tasks whose name contains this.",
+            ),
+            click.option("--state", help="List only tasks in this state."),
+        ]
+    )
 )
-click.option("--state", help="List only tasks in this state.")(list_tasks)
-task.add_command(list_tasks)
 
 
 @task.command()

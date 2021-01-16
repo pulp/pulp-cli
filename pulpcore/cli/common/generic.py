@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any, Optional, Tuple
 
 import click
 
@@ -15,20 +15,222 @@ from pulpcore.cli.common.context import (
 )
 
 
+class PulpCommand(click.Command):
+    def get_short_help_str(self, limit: int = 45) -> str:
+        return self.short_help or ""
+
+    def format_help_text(
+        self, ctx: click.Context, formatter: click.formatting.HelpFormatter
+    ) -> None:
+        entity_ctx: PulpEntityContext = ctx.find_object(PulpEntityContext)
+        if self.help is not None:
+            self.help = self.help.format(entity=entity_ctx.ENTITY, entities=entity_ctx.ENTITIES)
+        super().format_help_text(ctx, formatter)
+
+
+class PulpOption(click.Option):
+    def get_help_record(self, ctx: click.Context) -> Tuple[str, str]:
+        synopsis, help_text = super().get_help_record(ctx)
+        entity_ctx: PulpEntityContext = ctx.find_object(PulpEntityContext)
+        help_text = help_text.format(entity=entity_ctx.ENTITY, entities=entity_ctx.ENTITIES)
+        return synopsis, help_text
+
+
+##############################################################################
+# Option callbacks
+
+
+def _href_callback(ctx: click.Context, param: click.Parameter, value: str) -> str:
+    if value is not None:
+        entity_ctx: PulpEntityContext = ctx.find_object(PulpEntityContext)
+        entity_ctx.pulp_href = value
+    return value
+
+
+def _name_callback(ctx: click.Context, param: click.Parameter, value: str) -> str:
+    if value is not None:
+        entity_ctx: PulpEntityContext = ctx.find_object(PulpEntityContext)
+        entity_ctx.entity = {"name": value}
+    return value
+
+
+def _version_callback(ctx: click.Context, param: click.Parameter, value: int) -> int:
+    entity_ctx: PulpEntityContext = ctx.find_object(PulpEntityContext)
+    repository_ctx: PulpRepositoryContext = ctx.find_object(PulpRepositoryContext)
+    if value is not None:
+        entity_ctx.pulp_href = repository_ctx.entity["versions_href"] + str(value)
+    else:
+        entity_ctx.pulp_href = repository_ctx.entity["latest_version_href"]
+    return value
+
+
 ##############################################################################
 # Decorator common options
 
 
 limit_option = click.option(
-    "--limit", default=DEFAULT_LIMIT, type=int, help="Limit the number of entries to show."
+    "--limit",
+    default=DEFAULT_LIMIT,
+    type=int,
+    help="Limit the number of {entities} to show.",
+    cls=PulpOption,
 )
 offset_option = click.option(
-    "--offset", default=0, type=int, help="Skip a number of entries to show."
+    "--offset",
+    default=0,
+    type=int,
+    help="Skip a number of {entities} to show.",
+    cls=PulpOption,
 )
 
+href_option = click.option(
+    "--href",
+    help="HREF of the {entity}",
+    callback=_href_callback,
+    expose_value=False,
+    cls=PulpOption,
+)
+
+name_option = click.option(
+    "--name",
+    help="Name of the {entity}",
+    callback=_name_callback,
+    expose_value=False,
+    cls=PulpOption,
+)
+
+version_option = click.option(
+    "--version",
+    help="Repository version number",
+    type=int,
+    callback=_version_callback,
+    expose_value=False,
+)
 
 ##############################################################################
 # Generic reusable commands
+
+
+def list_command(**kwargs: Any) -> click.Command:
+    """A factory that creates a list command."""
+
+    if "cls" not in kwargs:
+        kwargs["cls"] = PulpCommand
+    if "name" not in kwargs:
+        kwargs["name"] = "list"
+    decorators = kwargs.pop("decorators", [])
+
+    @click.command(**kwargs)
+    @limit_option
+    @offset_option
+    @pass_entity_context
+    @pass_pulp_context
+    def callback(
+        pulp_ctx: PulpContext, entity_ctx: PulpEntityContext, limit: int, offset: int, **kwargs: Any
+    ) -> None:
+        """
+        Show the list of optionally filtered {entities}.
+        """
+        parameters = {k: v for k, v in kwargs.items() if v is not None}
+        result = entity_ctx.list(limit=limit, offset=offset, parameters=parameters)
+        pulp_ctx.output_result(result)
+
+    for option in decorators:
+        # Decorate callback
+        callback = option(callback)
+    return callback
+
+
+def show_command(**kwargs: Any) -> click.Command:
+    """A factory that creates a show command."""
+
+    if "cls" not in kwargs:
+        kwargs["cls"] = PulpCommand
+    if "name" not in kwargs:
+        kwargs["name"] = "show"
+    decorators = kwargs.pop("decorators", [])
+
+    @click.command(**kwargs)
+    @pass_entity_context
+    @pass_pulp_context
+    def callback(pulp_ctx: PulpContext, entity_ctx: PulpEntityContext) -> None:
+        """
+        Show details of a {entity}.
+        """
+        pulp_ctx.output_result(entity_ctx.entity)
+
+    for option in decorators:
+        # Decorate callback
+        callback = option(callback)
+    return callback
+
+
+def destroy_command(**kwargs: Any) -> click.Command:
+    """A factory that creates a destroy command."""
+
+    if "cls" not in kwargs:
+        kwargs["cls"] = PulpCommand
+    if "name" not in kwargs:
+        kwargs["name"] = "destroy"
+    decorators = kwargs.pop("decorators", [])
+
+    @click.command(**kwargs)
+    @pass_entity_context
+    def callback(entity_ctx: PulpEntityContext) -> None:
+        """
+        Destroy a {entity}.
+        """
+        entity_ctx.delete(entity_ctx.pulp_href)
+
+    for option in decorators:
+        # Decorate callback
+        callback = option(callback)
+    return callback
+
+
+def version_command(**kwargs: Any) -> click.Command:
+    """A factory that creates a repository version command group."""
+
+    if "name" not in kwargs:
+        kwargs["name"] = "version"
+    decorators = kwargs.pop("decorators", [])
+
+    @click.group(**kwargs)
+    @click.option("--repository")
+    @pass_repository_context
+    @pass_pulp_context
+    @click.pass_context
+    def callback(
+        ctx: click.Context,
+        pulp_ctx: PulpContext,
+        repository_ctx: PulpRepositoryContext,
+        repository: Optional[str],
+    ) -> None:
+        ctx.obj = repository_ctx.get_version_context()
+        if repository is not None:
+            repository_ctx.entity = {"name": repository}
+
+    for option in decorators:
+        # Decorate callback
+        callback = option(callback)
+
+    callback.add_command(list_command())
+    callback.add_command(show_command(decorators=[version_option]))
+    callback.add_command(destroy_command(decorators=[version_option]))
+
+    @callback.command()
+    @version_option
+    @pass_repository_version_context
+    @pass_pulp_context
+    def repair(
+        pulp_ctx: PulpContext,
+        repository_version_ctx: PulpRepositoryVersionContext,
+    ) -> None:
+        href = repository_version_ctx.pulp_href
+        result = repository_version_ctx.repair(href)
+        pulp_ctx.output_result(result)
+
+    return callback
 
 
 @click.command(name="list")

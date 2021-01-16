@@ -1,11 +1,11 @@
 from typing import IO
 
-from copy import deepcopy
 import click
 
 from pulpcore.cli.common.generic import (
-    list_entities,
-    show_by_href,
+    list_command,
+    show_command,
+    href_option,
 )
 from pulpcore.cli.common.context import (
     PulpContext,
@@ -33,13 +33,15 @@ def content(ctx: click.Context, pulp_ctx: PulpContext, content_type: str) -> Non
         raise NotImplementedError()
 
 
-# deepcopy to not effect other list subcommands
-list_content = deepcopy(list_entities)
-click.option("--relative-path", type=str)(list_content)
-click.option("--sha256", type=str)(list_content)
-content.add_command(list_content)
-
-content.add_command(show_by_href)
+content.add_command(
+    list_command(
+        decorators=[
+            click.option("--relative-path", type=str),
+            click.option("--sha256", type=str),
+        ]
+    )
+)
+content.add_command(show_command(decorators=[href_option]))
 
 
 @content.command()
