@@ -1,11 +1,13 @@
-from typing import Any, Optional, cast
+from typing import Optional
 
 import click
 
 from pulpcore.cli.common.generic import (
-    list_entities,
-    show_entity,
-    destroy_entity,
+    CondGroup,
+    list_command,
+    show_command,
+    destroy_command,
+    version_command,
 )
 from pulpcore.cli.common.context import (
     pass_pulp_context,
@@ -20,31 +22,24 @@ from pulpcore.cli.file.context import (
 )
 
 
-def _name_callback(ctx: click.Context, param: Any, value: str) -> str:
-    group: click.Group = cast(click.Group, ctx.command)
-    if value is not None:
-        group.commands.pop("list", None)
-        group.commands.pop("create", None)
-    else:
-        group.commands.pop("show", None)
-        group.commands.pop("update", None)
-        group.commands.pop("destroy", None)
-        group.commands.pop("sync", None)
-        group.commands.pop("add", None)
-        group.commands.pop("remove", None)
-        group.commands.pop("version", None)
-    return value
+def _is_collection_cmd(ctx: click.Context) -> bool:
+    return ctx.params.get("name") is None
 
 
-@click.group()
+def _is_entity_cmd(ctx: click.Context) -> bool:
+    return ctx.params.get("name") is not None
+
+
+@click.group(cls=CondGroup)
 @click.option(
     "-t",
     "--type",
     "repo_type",
     type=click.Choice(["file"], case_sensitive=False),
     default="file",
+    is_eager=True,
 )
-@click.option("--name", type=str, callback=_name_callback, is_eager=True)
+@click.option("--name", type=str, is_eager=True)
 @pass_pulp_context
 @click.pass_context
 def repository(
@@ -59,14 +54,16 @@ def repository(
         raise NotImplementedError()
 
     if name is not None:
-        ctx.obj.entity = ctx.obj.find(name=name)
+        ctx.obj.entity = {"name": name}
 
 
-repository.add_command(show_entity)
-repository.add_command(list_entities)
+repository.add_command(list_command(condition=_is_collection_cmd))
+repository.add_command(show_command(condition=_is_entity_cmd))
+repository.add_command(destroy_command(condition=_is_entity_cmd))
+repository.add_command(version_command(condition=_is_entity_cmd))
 
 
-@repository.command()
+@repository.command(condition=_is_collection_cmd)
 @click.option("--name", required=True)
 @click.option("--description")
 @click.option("--remote")
@@ -88,7 +85,7 @@ def create(
     pulp_ctx.output_result(result)
 
 
-@repository.command()
+@repository.command(condition=_is_entity_cmd)
 @click.option("--description")
 @click.option("--remote")
 @pass_repository_context
@@ -121,10 +118,7 @@ def update(
     repository_ctx.update(repository_href, body=repository)
 
 
-repository.add_command(destroy_entity)
-
-
-@repository.command()
+@repository.command(condition=_is_entity_cmd)
 @click.option("--remote")
 @pass_repository_context
 @pass_pulp_context
@@ -154,7 +148,7 @@ def sync(
     )
 
 
-@repository.command()
+@repository.command(condition=_is_entity_cmd)
 @click.option("--sha256", required=True)
 @click.option("--relative-path", required=True)
 @click.option("--base-version", type=int)
@@ -188,7 +182,7 @@ def add(
     )
 
 
-@repository.command()
+@repository.command(condition=_is_entity_cmd)
 @click.option("--sha256", required=True)
 @click.option("--relative-path", required=True)
 @click.option("--base-version", type=int)

@@ -31,12 +31,12 @@ expect_succ pulp file repository --name "cli_test_file_repository" sync --remote
 # Verify sync
 expect_succ pulp file repository --name "cli_test_file_repository" version list
 test "$(echo "$OUTPUT" | jq -r length)" -eq 2
-expect_succ pulp file repository --name "cli_test_file_repository" version show --version 1
+expect_succ pulp file repository --name "cli_test_file_repository" version --number 1 show
 test "$(echo "$OUTPUT" | jq -r '.content_summary.present."file.file".count')" -eq 3
 
 # Test repair the version
-expect_succ pulp file repository --name "cli_test_file_repository" version repair --version 1
+expect_succ pulp file repository --name "cli_test_file_repository" version --number 1 repair
 test "$(echo "$OUTPUT" | jq -r '.state')" = "completed"
 
 # Delete version again
-expect_succ pulp file repository --name "cli_test_file_repository" version destroy --version 1
+expect_succ pulp file repository --name "cli_test_file_repository" version --number 1 destroy

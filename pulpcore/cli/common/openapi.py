@@ -261,7 +261,12 @@ class OpenAPI:
             self.debug_callback(2, f"{data!r}")
         if self.safe_calls_only and method.upper() not in SAFE_METHODS:
             raise OpenAPIError("Call aborted due to safe mode")
-        response: requests.Response = self._session.request(method, url, data=data, headers=headers)
+        try:
+            response: requests.Response = self._session.request(
+                method, url, data=data, headers=headers
+            )
+        except requests.ConnectionError as e:
+            raise OpenAPIError(str(e))
         self.debug_callback(1, f"Response: {response.status_code}")
         if response.text:
             self.debug_callback(3, f"{response.text}")

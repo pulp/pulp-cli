@@ -155,7 +155,8 @@ class PulpEntityContext:
     DELETE_ID: ClassVar[str]
 
     # Placeholder for an actual entity, subcommands are supposed to act on
-    entity: Optional[EntityData]
+    _entity: Optional[EntityData]
+    _entity_lookup: Optional[EntityData]
 
     # { "pulp_type" : repository-list-id }
     REPOSITORY_FIND_IDS: Dict[str, str] = {
@@ -178,8 +179,25 @@ class PulpEntityContext:
     def scope(self) -> Dict[str, Any]:
         return {}
 
+    # Lazy lookup of the entity to allow the help to be built without a server call
+    @property
+    def entity(self) -> EntityData:
+        if self._entity is None:
+            assert self._entity_lookup is not None
+            if "pulp_href" in self._entity_lookup:
+                self._entity = self.show(self._entity_lookup["pulp_href"])
+            else:
+                self._entity = self.find(**self._entity_lookup)
+        return self._entity
+
+    @entity.setter
+    def entity(self, value: Optional[EntityData]) -> None:
+        self._entity_lookup = value
+        self._entity = None
+
     def __init__(self, pulp_ctx: PulpContext) -> None:
         self.pulp_ctx: PulpContext = pulp_ctx
+        self._entity = None
 
     def list(self, limit: int, offset: int, parameters: Dict[str, Any]) -> List[Any]:
         count: int = -1
