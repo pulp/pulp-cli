@@ -4,9 +4,12 @@ import click
 import json
 
 from pulpcore.cli.common.generic import (
-    list_entities,
-    show_by_name,
-    destroy_by_name,
+    list_command,
+    show_command,
+    destroy_command,
+    version_command,
+    name_option,
+    href_option,
 )
 from pulpcore.cli.common.context import (
     pass_pulp_context,
@@ -38,8 +41,12 @@ def repository(ctx: click.Context, pulp_ctx: PulpContext, repo_type: str) -> Non
         raise NotImplementedError()
 
 
-repository.add_command(show_by_name)
-repository.add_command(list_entities)
+lookup_options = [href_option, name_option]
+
+repository.add_command(list_command())
+repository.add_command(show_command(decorators=lookup_options))
+repository.add_command(destroy_command(decorators=lookup_options))
+repository.add_command(version_command())
 
 
 @repository.command()
@@ -57,7 +64,7 @@ def create(
 ) -> None:
     repository = {"name": name, "description": description}
     if remote:
-        remote_href: str = PulpFileRemoteContext(pulp_ctx).find(name=remote)["pulp_href"]
+        remote_href: str = PulpFileRemoteContext(pulp_ctx, entity={"name": remote}).pulp_href
         repository["remote"] = remote_href
 
     result = repository_ctx.create(body=repository)
@@ -65,7 +72,8 @@ def create(
 
 
 @repository.command()
-@click.option("--name", required=True)
+@name_option
+@href_option
 @click.option("--description")
 @click.option("--remote")
 @pass_repository_context
@@ -73,12 +81,11 @@ def create(
 def update(
     pulp_ctx: PulpContext,
     repository_ctx: PulpRepositoryContext,
-    name: str,
     description: Optional[str],
     remote: Optional[str],
 ) -> None:
-    repository = repository_ctx.find(name=name)
-    repository_href = repository["pulp_href"]
+    repository = repository_ctx.entity
+    repository_href = repository_ctx.pulp_href
 
     if description is not None:
         if description == "":
@@ -92,29 +99,25 @@ def update(
             # unset the remote
             repository["remote"] = ""
         elif remote:
-            remote_href: str = PulpFileRemoteContext(pulp_ctx).find(name=remote)["pulp_href"]
+            remote_href: str = PulpFileRemoteContext(pulp_ctx, entity={"name": remote}).pulp_href
             repository["remote"] = remote_href
 
     repository_ctx.update(repository_href, body=repository)
 
 
-repository.add_command(destroy_by_name)
-repository.add_command(show_by_name)
-
-
 @repository.command()
-@click.option("--name", required=True)
+@name_option
+@href_option
 @click.option("--remote")
 @pass_repository_context
 @pass_pulp_context
 def sync(
     pulp_ctx: PulpContext,
     repository_ctx: PulpRepositoryContext,
-    name: str,
     remote: Optional[str],
 ) -> None:
-    repository = repository_ctx.find(name=name)
-    repository_href = repository["pulp_href"]
+    repository = repository_ctx.entity
+    repository_href = repository_ctx.pulp_href
 
     body = {}
 
@@ -122,6 +125,7 @@ def sync(
         remote_href: str = PulpFileRemoteContext(pulp_ctx).find(name=remote)["pulp_href"]
         body["remote"] = remote_href
     elif repository["remote"] is None:
+        name = repository["name"]
         raise click.ClickException(
             f"Repository '{name}' does not have a default remote. Please specify with '--remote'."
         )
@@ -133,7 +137,8 @@ def sync(
 
 
 @repository.command()
-@click.option("--name", required=True)
+@name_option
+@href_option
 @click.option("--sha256", required=True)
 @click.option("--relative-path", required=True)
 @click.option("--base-version", type=int)
@@ -142,13 +147,11 @@ def sync(
 def add(
     pulp_ctx: PulpContext,
     repository_ctx: PulpRepositoryContext,
-    name: str,
     sha256: str,
     relative_path: str,
     base_version: Optional[int],
 ) -> None:
-    repository = repository_ctx.find(name=name)
-    repository_href = repository["pulp_href"]
+    repository_href = repository_ctx.pulp_href
 
     base_version_href: Optional[str]
     if base_version is not None:
@@ -156,9 +159,9 @@ def add(
     else:
         base_version_href = None
 
-    content_href = PulpFileContentContext(pulp_ctx).find(
-        sha256=sha256, relative_path=relative_path
-    )["pulp_href"]
+    content_href = PulpFileContentContext(
+        pulp_ctx, entity={"sha256": sha256, "relative_path": relative_path}
+    ).pulp_href
 
     repository_ctx.modify(
         href=repository_href,
@@ -168,7 +171,8 @@ def add(
 
 
 @repository.command()
-@click.option("--name", required=True)
+@name_option
+@href_option
 @click.option("--sha256", required=True)
 @click.option("--relative-path", required=True)
 @click.option("--base-version", type=int)
@@ -177,13 +181,11 @@ def add(
 def remove(
     pulp_ctx: PulpContext,
     repository_ctx: PulpRepositoryContext,
-    name: str,
     sha256: str,
     relative_path: str,
     base_version: Optional[int],
 ) -> None:
-    repository = repository_ctx.find(name=name)
-    repository_href = repository["pulp_href"]
+    repository_href = repository_ctx.pulp_href
 
     base_version_href: Optional[str]
     if base_version is not None:
@@ -191,9 +193,9 @@ def remove(
     else:
         base_version_href = None
 
-    content_href = PulpFileContentContext(pulp_ctx).find(
-        sha256=sha256, relative_path=relative_path
-    )["pulp_href"]
+    content_href = PulpFileContentContext(
+        pulp_ctx, entity={"sha256": sha256, "relative_path": relative_path}
+    ).pulp_href
 
     repository_ctx.modify(
         href=repository_href,
@@ -230,7 +232,8 @@ def _load_json_from_option(
 
 
 @repository.command()
-@click.option("--name", required=True)
+@name_option
+@href_option
 @click.option("--base-version", type=int)
 @click.option(
     "--add-content",
@@ -257,13 +260,11 @@ def _load_json_from_option(
 def modify(
     pulp_ctx: PulpContext,
     repository_ctx: PulpRepositoryContext,
-    name: str,
     add_content: List[Dict[str, str]],
     remove_content: List[Dict[str, str]],
     base_version: Optional[int],
 ) -> None:
-    repository = repository_ctx.find(name=name)
-    repository_href = repository["pulp_href"]
+    repository_href = repository_ctx.pulp_href
 
     base_version_href: Optional[str]
     if base_version is not None:
@@ -272,16 +273,10 @@ def modify(
         base_version_href = None
 
     add_content_href = [
-        PulpFileContentContext(pulp_ctx).find(
-            sha256=unit["sha256"], relative_path=unit["relative_path"]
-        )["pulp_href"]
-        for unit in add_content
+        PulpFileContentContext(pulp_ctx, entity=unit).pulp_href for unit in add_content
     ]
     remove_content_href = [
-        PulpFileContentContext(pulp_ctx).find(
-            sha256=unit["sha256"], relative_path=unit["relative_path"]
-        )["pulp_href"]
-        for unit in remove_content
+        PulpFileContentContext(pulp_ctx, entity=unit).pulp_href for unit in remove_content
     ]
 
     repository_ctx.modify(

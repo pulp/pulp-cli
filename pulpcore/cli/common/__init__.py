@@ -18,7 +18,7 @@ __version__ = "0.1.1.dev"
 # Main entry point
 
 
-def _config_callback(ctx: click.Context, param: Any, value: str) -> None:
+def _config_callback(ctx: click.Context, param: Any, value: Optional[str]) -> None:
     if ctx.default_map:
         return
 
