@@ -26,7 +26,7 @@ DEFAULT_LIMIT = 25
 BATCH_SIZE = 25
 
 
-EntityData = Dict[str, Any]
+EntityDefinition = Dict[str, Any]
 RepositoryDefinition = Tuple[str, str]  # name, pulp_type
 RepositoryVersionDefinition = Tuple[str, str, int]  # name, pulp_type, version
 
@@ -89,7 +89,7 @@ class PulpContext:
                 result = self.wait_for_task(result)
         return result
 
-    def wait_for_task(self, task: EntityData, timeout: int = 120) -> Any:
+    def wait_for_task(self, task: EntityDefinition, timeout: int = 120) -> Any:
         """
         Wait for a task to finish and return the finished task object.
         """
@@ -209,7 +209,7 @@ class PulpEntityContext:
     def show(self, href: str) -> Any:
         return self.pulp_ctx.call(self.READ_ID, parameters={self.HREF: href})
 
-    def create(self, body: EntityData, parameters: Optional[Dict[str, Any]] = None) -> Any:
+    def create(self, body: EntityDefinition, parameters: Optional[Dict[str, Any]] = None) -> Any:
         _parameters = self.scope
         if parameters:
             _parameters.update(parameters)
@@ -218,7 +218,7 @@ class PulpEntityContext:
     def update(
         self,
         href: str,
-        body: EntityData,
+        body: EntityDefinition,
         parameters: Optional[Dict[str, Any]] = None,
         uploads: Optional[Dict[str, Any]] = None,
     ) -> Any:
@@ -281,7 +281,7 @@ class PulpRepositoryVersionContext(PulpEntityContext):
     ENTITY = "repository version"
     REPAIR_ID: ClassVar[str]
     REPOSITORY_HREF: ClassVar[str]
-    repository: EntityData
+    repository: EntityDefinition
 
     @property
     def scope(self) -> Dict[str, Any]:

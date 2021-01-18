@@ -5,7 +5,7 @@ import sys
 import click
 
 from pulpcore.cli.common.context import (
-    EntityData,
+    EntityDefinition,
     PulpContext,
     PulpEntityContext,
 )
@@ -89,7 +89,7 @@ class PulpExportContext(PulpEntityContext):
                 HREF = "core_pulp_pulp_export_href"
 
                 def create(
-                    self, body: EntityData, parameters: Optional[Dict[str, Any]] = None
+                    self, body: EntityDefinition, parameters: Optional[Dict[str, Any]] = None
                 ) -> Any:
                     if parameters and PulpExporterContext.HREF in parameters:
                         parameters[self.HREF] = parameters.pop(PulpExporterContext.HREF)
