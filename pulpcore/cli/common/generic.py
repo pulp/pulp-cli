@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Optional
 
 import click
 
@@ -71,13 +71,15 @@ def show_by_href(pulp_ctx: PulpContext, entity_ctx: PulpEntityContext, href: str
 @click.command(name="show")
 @click.option("--version", required=True, type=int)
 @pass_repository_version_context
+@pass_repository_context
 @pass_pulp_context
 def show_version(
     pulp_ctx: PulpContext,
+    repository_ctx: PulpRepositoryContext,
     repository_version_ctx: PulpRepositoryVersionContext,
     version: int,
 ) -> None:
-    repo_href = repository_version_ctx.repository["pulp_href"]
+    repo_href = repository_ctx.pulp_href
     href = f"{repo_href}versions/{version}"
     result = repository_version_ctx.show(href)
     pulp_ctx.output_result(result)
@@ -107,11 +109,13 @@ def destroy_by_href(entity_ctx: PulpEntityContext, href: str) -> None:
 @click.command(name="destroy")
 @click.option("--version", required=True, type=int)
 @pass_repository_version_context
+@pass_repository_context
 def destroy_version(
+    repository_ctx: PulpRepositoryContext,
     repository_version_ctx: PulpRepositoryVersionContext,
     version: int,
 ) -> None:
-    repo_href = repository_version_ctx.repository["pulp_href"]
+    repo_href = repository_ctx.pulp_href
     href = f"{repo_href}versions/{version}/"
     repository_version_ctx.delete(href)
 
@@ -119,13 +123,15 @@ def destroy_version(
 @click.command(name="repair")
 @click.option("--version", required=True, type=int)
 @pass_repository_version_context
+@pass_repository_context
 @pass_pulp_context
 def repair_version(
     pulp_ctx: PulpContext,
+    repository_ctx: PulpRepositoryContext,
     repository_version_ctx: PulpRepositoryVersionContext,
     version: int,
 ) -> None:
-    repo_href = repository_version_ctx.repository["pulp_href"]
+    repo_href = repository_ctx.pulp_href
     href = f"{repo_href}versions/{version}/"
     result = repository_version_ctx.repair(href)
     pulp_ctx.output_result(result)
@@ -133,7 +139,7 @@ def repair_version(
 
 # Generic repository_version command group
 @click.group(name="version")
-@click.option("--repository", required=True)
+@click.option("--repository")
 @pass_repository_context
 @pass_pulp_context
 @click.pass_context
@@ -141,10 +147,11 @@ def version_group(
     ctx: click.Context,
     pulp_ctx: PulpContext,
     repository_ctx: PulpRepositoryContext,
-    repository: str,
+    repository: Optional[str],
 ) -> None:
-    ctx.obj = repository_ctx.VERSION_CONTEXT(pulp_ctx)
-    ctx.obj.repository = repository_ctx.find(name=repository)
+    ctx.obj = repository_ctx.get_version_context()
+    if repository is not None:
+        repository_ctx.entity = {"name": repository}
 
 
 version_group.add_command(list_entities)
