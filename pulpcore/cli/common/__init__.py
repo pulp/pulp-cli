@@ -6,7 +6,6 @@ import os
 
 import toml
 
-from pulpcore.cli.common.openapi import OpenAPI, OpenAPIError
 from pulpcore.cli.common.context import (
     PulpContext,
 )
@@ -80,24 +79,21 @@ def main(
     refresh_api: bool,
     dry_run: bool,
 ) -> None:
-    if username and not password:
-        password = click.prompt("password", hide_input=True)
-    try:
-        api = OpenAPI(
-            base_url=base_url,
-            doc_path="/pulp/api/v3/docs/api.json",
-            username=username,
-            password=password,
-            validate_certs=verify_ssl,
-            refresh_cache=refresh_api,
-            safe_calls_only=dry_run,
-            debug_callback=lambda level, x: click.secho(x, err=True, bold=True)
-            if verbose >= level
-            else None,
-        )
-    except OpenAPIError as e:
-        raise click.ClickException(str(e))
-    ctx.obj = PulpContext(api=api, format=format, background_tasks=background)
+    def _debug_callback(level: int, x: str) -> None:
+        if verbose >= level:
+            click.secho(x, err=True, bold=True)
+
+    api_kwargs = dict(
+        base_url=base_url,
+        doc_path="/pulp/api/v3/docs/api.json",
+        username=username,
+        password=password,
+        validate_certs=verify_ssl,
+        refresh_cache=refresh_api,
+        safe_calls_only=dry_run,
+        debug_callback=_debug_callback,
+    )
+    ctx.obj = PulpContext(api_kwargs=api_kwargs, format=format, background_tasks=background)
 
 
 ##############################################################################

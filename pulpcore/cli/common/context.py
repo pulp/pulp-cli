@@ -45,11 +45,32 @@ class PulpContext:
     It is an abstraction layer for api access and output handling.
     """
 
-    def __init__(self, api: OpenAPI, format: str, background_tasks: bool) -> None:
-        self.api: OpenAPI = api
+    def __init__(self, api_kwargs: Dict[str, Any], format: str, background_tasks: bool) -> None:
+        self._api: Optional[OpenAPI] = None
+        self._api_kwargs = api_kwargs
+        self._needed_plugins: List[Tuple[str, Optional[str], Optional[str]]] = []
+
         self.format: str = format
         self.background_tasks: bool = background_tasks
-        self.component_versions = self.api.api_spec.get("info", {}).get("x-pulp-app-versions", {})
+
+    @property
+    def api(self) -> OpenAPI:
+        if self._api is None:
+            if self._api_kwargs.get("username") and not self._api_kwargs.get("password"):
+                self._api_kwargs["password"] = click.prompt("password", hide_input=True)
+            try:
+                self._api = OpenAPI(**self._api_kwargs)
+            except OpenAPIError as e:
+                raise click.ClickException(str(e))
+            # Rerun scheduled version checks
+            for name, min_version, max_version in self._needed_plugins:
+                self.needs_plugin(name, min_version, max_version)
+        return self._api
+
+    @property
+    def component_versions(self) -> Dict[str, str]:
+        result: Dict[str, str] = self.api.api_spec.get("info", {}).get("x-pulp-app-versions", {})
+        return result
 
     def output_result(self, result: Any) -> None:
         """
@@ -137,6 +158,23 @@ class PulpContext:
                 return False
         return True
 
+    def needs_plugin(
+        self, name: str, min_version: Optional[str] = None, max_version: Optional[str] = None
+    ) -> None:
+        if self._api is not None:
+            if not self.has_plugin(name, min_version, max_version):
+                specifier = name
+                separator = ""
+                if min_version is not None:
+                    specifier += f">={min_version}"
+                    separator = ","
+                if max_version is not None:
+                    specifier += f"{separator}<{max_version}"
+                raise click.ClickException(f"'{specifier} is not available")
+        else:
+            # Schedule for later checking
+            self._needed_plugins.append((name, min_version, max_version))
+
 
 class PulpEntityContext:
     """
@@ -178,11 +216,18 @@ class PulpEntityContext:
     def scope(self) -> Dict[str, Any]:
         return {}
 
-    # Lazy lookup of the entity to allow the help to be built without a server call
     @property
     def entity(self) -> EntityDefinition:
+        """
+        Entity property that will perform a lazy lookup once it is accessed.
+        You can specify lookup parameters by assigning a dictionary to it,
+        or assign an href to the ``pulp_href`` property.
+        To reset to having no attached entity you can assign ``None``.
+        Assigning to it will reset the lazy lookup behaviour.
+        """
         if self._entity is None:
-            assert self._entity_lookup is not None
+            if self._entity_lookup is None:
+                raise click.ClickException(f"A {self.ENTITY} must be specified for this command.")
             if "pulp_href" in self._entity_lookup:
                 self._entity = self.show(self._entity_lookup["pulp_href"])
             else:
@@ -197,6 +242,10 @@ class PulpEntityContext:
 
     @property
     def pulp_href(self) -> str:
+        """
+        Property to represent the href of the attached entity.
+        Assigning to it will reset the lazy lookup behaviour.
+        """
         return str(self.entity["pulp_href"])
 
     @pulp_href.setter
@@ -323,12 +372,15 @@ class PulpRepositoryVersionContext(PulpEntityContext):
 
     ENTITY = "repository version"
     REPAIR_ID: ClassVar[str]
-    REPOSITORY_HREF: ClassVar[str]
-    repository: EntityDefinition
+    repository_ctx: "PulpRepositoryContext"
+
+    def __init__(self, pulp_ctx: PulpContext, repository_ctx: "PulpRepositoryContext") -> None:
+        super().__init__(pulp_ctx)
+        self.repository_ctx = repository_ctx
 
     @property
     def scope(self) -> Dict[str, Any]:
-        return {self.REPOSITORY_HREF: self.repository["pulp_href"]}
+        return {self.repository_ctx.HREF: self.repository_ctx.pulp_href}
 
     def repair(self, href: str) -> Any:
         return self.pulp_ctx.call(
@@ -348,6 +400,9 @@ class PulpRepositoryContext(PulpEntityContext):
     SYNC_ID: ClassVar[str]
     MODIFY_ID: ClassVar[str]
     VERSION_CONTEXT: ClassVar[Type[PulpRepositoryVersionContext]]
+
+    def get_version_context(self) -> PulpRepositoryVersionContext:
+        return self.VERSION_CONTEXT(self.pulp_ctx, self)
 
     def sync(self, href: str, body: Dict[str, Any]) -> Any:
         return self.pulp_ctx.call(

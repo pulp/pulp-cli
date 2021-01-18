@@ -1,5 +1,3 @@
-import click
-
 from pulpcore.cli.common import main
 from pulpcore.cli.common.context import PulpContext, pass_pulp_context
 from pulpcore.cli.common.generic import version_group
@@ -13,8 +11,7 @@ from pulpcore.cli.file.repository import repository
 @main.group()
 @pass_pulp_context
 def file(pulp_ctx: PulpContext) -> None:
-    if not pulp_ctx.has_plugin("pulp_file"):
-        raise click.ClickException("'pulp_file' does not seem to be installed.")
+    pulp_ctx.needs_plugin("pulp_file")
 
 
 file.add_command(repository)
