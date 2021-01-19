@@ -38,6 +38,7 @@ setup(
             "core=pulpcore.cli.core",
             "file=pulpcore.cli.file",
             "migration=pulpcore.cli.migration",
+            "python=pulpcore.cli.python",
             "rpm=pulpcore.cli.rpm",
         ],
     },
