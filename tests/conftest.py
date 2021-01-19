@@ -16,6 +16,7 @@ ENV_CONSTANTS = {
     "RPM_REMOTE_URL": urljoin(PULP_FIXTURES_URL, "/rpm-unsigned"),
     "ANSIBLE_COLLECTION_REMOTE_URL": "https://galaxy.ansible.com/",
     "ANSIBLE_ROLE_REMOTE_URL": "https://galaxy.ansible.com/api/v1/roles/?namespace__name=elastic",
+    "PYTHON_REMOTE_URL": PULP_FIXTURES_URL + "/python-pypi/",
 }
 
 
