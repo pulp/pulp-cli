@@ -1,6 +1,7 @@
-from typing import Optional
+from typing import Optional, Union
 
 import click
+import json
 
 from pulpcore.cli.common.generic import (
     list_entities,
@@ -197,5 +198,69 @@ def remove(
     repository_ctx.modify(
         href=repository_href,
         remove_content=[content_href],
+        base_version=base_version_href,
+    )
+
+
+@repository.command()
+@click.option("--name", required=True)
+@click.option("--base-version", type=int)
+@click.option(
+    "--add-content",
+    default="[]",
+    help="JSON string with list of objects with 'sha256' and 'relative_path' keys",
+)
+@click.option(
+    "--remove-content",
+    default="[]",
+    help="JSON string with list of objects with 'sha256' and 'relative_path' keys",
+)
+@pass_repository_context
+@pass_pulp_context
+def modify(
+    pulp_ctx: PulpContext,
+    repository_ctx: PulpRepositoryContext,
+    name: str,
+    add_content: Union[str, bytes],
+    remove_content: Union[str, bytes],
+    base_version: Optional[int],
+) -> None:
+    repository = repository_ctx.find(name=name)
+    repository_href = repository["pulp_href"]
+
+    base_version_href: Optional[str]
+    if base_version is not None:
+        base_version_href = f"{repository_href}versions/{base_version}/"
+    else:
+        base_version_href = None
+
+    try:
+        add_content_list = json.loads(add_content)
+    except json.decoder.JSONDecodeError:
+        raise click.ClickException("Failed to decode JSON from '--add-content' option.")
+    else:
+        add_content_href = [
+            PulpFileContentContext(pulp_ctx).find(
+                sha256=unit["sha256"], relative_path=unit["relative_path"]
+            )["pulp_href"]
+            for unit in add_content_list
+        ]
+
+    try:
+        remove_content_list = json.loads(remove_content)
+    except json.decoder.JSONDecodeError:
+        raise click.ClickException("Failed to decode JSON from '--remove-content' option.")
+    else:
+        remove_content_href = [
+            PulpFileContentContext(pulp_ctx).find(
+                sha256=unit["sha256"], relative_path=unit["relative_path"]
+            )["pulp_href"]
+            for unit in remove_content_list
+        ]
+
+    repository_ctx.modify(
+        href=repository_href,
+        add_content=add_content_href,
+        remove_content=remove_content_href,
         base_version=base_version_href,
     )
