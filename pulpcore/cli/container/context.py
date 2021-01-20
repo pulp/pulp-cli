@@ -55,9 +55,9 @@ class PulpContainerPushRepositoryContext(PulpRepositoryContext):
     HREF = "container_container_push_repository_href"
     LIST_ID = "repositories_container_container_push_list"
     READ_ID = "repositories_container_container_push_read"
-    CREATE_ID = "repositories_container_container_push_create"
+    # CREATE_ID = "repositories_container_container_push_create"
     # UPDATE_ID = "repositories_container_container_push_update"
-    DELETE_ID = "repositories_container_container_push_delete"
+    # DELETE_ID = "repositories_container_container_push_delete"
     # Cannot sync a push type repository
     # TODO Incorporate into capabilities
     # SYNC_ID = "repositories_container_container_push_sync"
