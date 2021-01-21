@@ -1,4 +1,4 @@
-from typing import Optional, Union
+from typing import Optional, Union, List, Dict
 
 import click
 import json
@@ -202,27 +202,44 @@ def remove(
     )
 
 
+def _load_json_from_option(
+    option_value: str,
+) -> List[Dict[str, str]]:
+    """Load JSON from input string or from file if string starts with @."""
+    json_object: List[Dict[str, str]]
+    json_string: Union[str, bytes]
+
+    if option_value.startswith("@"):
+        json_file = option_value[1:]
+        try:
+            with open(json_file, "r") as fp:
+                json_string = fp.read()
+        except OSError:
+            raise RuntimeError(f"Failed to load content from {json_file}")
+    else:
+        json_string = option_value
+
+    try:
+        json_object = json.loads(json_string)
+    except json.decoder.JSONDecodeError:
+        raise RuntimeError("Failed to decode JSON")
+    else:
+        return json_object
+
+
 @repository.command()
 @click.option("--name", required=True)
 @click.option("--base-version", type=int)
-@click.option(
-    "--add-content",
-    default="[]",
-    help="JSON string with list of objects with 'sha256' and 'relative_path' keys",
-)
-@click.option(
-    "--remove-content",
-    default="[]",
-    help="JSON string with list of objects with 'sha256' and 'relative_path' keys",
-)
+@click.option("--add-content", default="[]")
+@click.option("--remove-content", default="[]")
 @pass_repository_context
 @pass_pulp_context
 def modify(
     pulp_ctx: PulpContext,
     repository_ctx: PulpRepositoryContext,
     name: str,
-    add_content: Union[str, bytes],
-    remove_content: Union[str, bytes],
+    add_content: str,
+    remove_content: str,
     base_version: Optional[int],
 ) -> None:
     repository = repository_ctx.find(name=name)
@@ -235,9 +252,9 @@ def modify(
         base_version_href = None
 
     try:
-        add_content_list = json.loads(add_content)
-    except json.decoder.JSONDecodeError:
-        raise click.ClickException("Failed to decode JSON from '--add-content' option.")
+        add_content_list = _load_json_from_option(add_content)
+    except RuntimeError as exc:
+        raise click.ClickException(f"Failed to parse '--add-content' option: {exc}")
     else:
         add_content_href = [
             PulpFileContentContext(pulp_ctx).find(
@@ -247,9 +264,9 @@ def modify(
         ]
 
     try:
-        remove_content_list = json.loads(remove_content)
-    except json.decoder.JSONDecodeError:
-        raise click.ClickException("Failed to decode JSON from '--remove-content' option.")
+        remove_content_list = _load_json_from_option(remove_content)
+    except RuntimeError as exc:
+        raise click.ClickException(f"Failed to parse '--add-content' option: {exc}")
     else:
         remove_content_href = [
             PulpFileContentContext(pulp_ctx).find(

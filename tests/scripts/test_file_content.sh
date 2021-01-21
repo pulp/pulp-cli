@@ -34,5 +34,3 @@ expect_succ pulp file repository add --name "cli_test_file_repository" --sha256 
 expect_succ pulp file repository add --name "cli_test_file_repository" --sha256 "$sha256" --relative-path upload_test/test.txt --base-version 0
 expect_succ pulp file repository remove --name "cli_test_file_repository" --sha256 "$sha256" --relative-path upload_test/test.txt
 expect_succ pulp file repository remove --name "cli_test_file_repository" --sha256 "$sha256" --relative-path upload_test/test.txt --base-version 1
-expect_succ pulp file repository modify --name "cli_test_file_repository" --add-content "[{\"sha256\":\"$sha256\",\"relative_path\":\"upload_test/test.txt\"}]" --base-version 0
-expect_succ pulp file repository modify --name "cli_test_file_repository" --remove-content "[{\"sha256\":\"$sha256\",\"relative_path\":\"upload_test/test.txt\"}]"
