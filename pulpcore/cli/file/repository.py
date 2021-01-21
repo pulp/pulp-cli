@@ -1,4 +1,4 @@
-from typing import Optional, Union, List, Dict
+from typing import Optional, Union, List, Dict, Any
 
 import click
 import json
@@ -203,6 +203,8 @@ def remove(
 
 
 def _load_json_from_option(
+    ctx: click.Context,
+    option: Any,
     option_value: str,
 ) -> List[Dict[str, str]]:
     """Load JSON from input string or from file if string starts with @."""
@@ -212,17 +214,17 @@ def _load_json_from_option(
     if option_value.startswith("@"):
         json_file = option_value[1:]
         try:
-            with open(json_file, "r") as fp:
+            with open(json_file, "rb") as fp:
                 json_string = fp.read()
         except OSError:
-            raise RuntimeError(f"Failed to load content from {json_file}")
+            raise click.ClickException(f"Failed to load content from {json_file}")
     else:
         json_string = option_value
 
     try:
         json_object = json.loads(json_string)
     except json.decoder.JSONDecodeError:
-        raise RuntimeError("Failed to decode JSON")
+        raise click.ClickException("Failed to decode JSON")
     else:
         return json_object
 
@@ -230,16 +232,30 @@ def _load_json_from_option(
 @repository.command()
 @click.option("--name", required=True)
 @click.option("--base-version", type=int)
-@click.option("--add-content", default="[]")
-@click.option("--remove-content", default="[]")
+@click.option(
+    "--add-content",
+    default="[]",
+    callback=_load_json_from_option,
+    is_eager=True,
+    expose_value=True,
+    help="JSON string with a list of objects with the keys 'sha256', 'relative_path'. The argument prefixed with the '@' can be the path to a JSON file with a list of objects.",
+)
+@click.option(
+    "--remove-content",
+    default="[]",
+    callback=_load_json_from_option,
+    is_eager=True,
+    expose_value=True,
+    help="JSON string with a list of objects with the keys 'sha256', 'relative_path'. The argument prefixed with the '@' can be the path to a JSON file with a list of objects.",
+)
 @pass_repository_context
 @pass_pulp_context
 def modify(
     pulp_ctx: PulpContext,
     repository_ctx: PulpRepositoryContext,
     name: str,
-    add_content: str,
-    remove_content: str,
+    add_content: List[Dict[str, str]],
+    remove_content: List[Dict[str, str]],
     base_version: Optional[int],
 ) -> None:
     repository = repository_ctx.find(name=name)
@@ -251,29 +267,18 @@ def modify(
     else:
         base_version_href = None
 
-    try:
-        add_content_list = _load_json_from_option(add_content)
-    except RuntimeError as exc:
-        raise click.ClickException(f"Failed to parse '--add-content' option: {exc}")
-    else:
-        add_content_href = [
-            PulpFileContentContext(pulp_ctx).find(
-                sha256=unit["sha256"], relative_path=unit["relative_path"]
-            )["pulp_href"]
-            for unit in add_content_list
-        ]
-
-    try:
-        remove_content_list = _load_json_from_option(remove_content)
-    except RuntimeError as exc:
-        raise click.ClickException(f"Failed to parse '--add-content' option: {exc}")
-    else:
-        remove_content_href = [
-            PulpFileContentContext(pulp_ctx).find(
-                sha256=unit["sha256"], relative_path=unit["relative_path"]
-            )["pulp_href"]
-            for unit in remove_content_list
-        ]
+    add_content_href = [
+        PulpFileContentContext(pulp_ctx).find(
+            sha256=unit["sha256"], relative_path=unit["relative_path"]
+        )["pulp_href"]
+        for unit in add_content
+    ]
+    remove_content_href = [
+        PulpFileContentContext(pulp_ctx).find(
+            sha256=unit["sha256"], relative_path=unit["relative_path"]
+        )["pulp_href"]
+        for unit in remove_content
+    ]
 
     repository_ctx.modify(
         href=repository_href,
