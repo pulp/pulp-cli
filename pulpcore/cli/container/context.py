@@ -11,7 +11,7 @@ class PulpContainerDistributionContext(PulpEntityContext):
     LIST_ID = "distributions_container_container_list"
     READ_ID = "distributions_container_container_read"
     CREATE_ID = "distributions_container_container_create"
-    UPDATE_ID = "distributions_container_container_update"
+    UPDATE_ID = "distributions_container_container_partial_update"
     DELETE_ID = "distributions_container_container_delete"
 
 
@@ -20,7 +20,7 @@ class PulpContainerRemoteContext(PulpEntityContext):
     HREF = "container_container_remote_href"
     LIST_ID = "remotes_container_container_list"
     CREATE_ID = "remotes_container_container_create"
-    UPDATE_ID = "remotes_container_container_update"
+    UPDATE_ID = "remotes_container_container_partial_update"
     DELETE_ID = "remotes_container_container_delete"
 
 
@@ -45,7 +45,7 @@ class PulpContainerRepositoryContext(PulpRepositoryContext):
     LIST_ID = "repositories_container_container_list"
     READ_ID = "repositories_container_container_read"
     CREATE_ID = "repositories_container_container_create"
-    UPDATE_ID = "repositories_container_container_update"
+    UPDATE_ID = "repositories_container_container_partial_update"
     DELETE_ID = "repositories_container_container_delete"
     SYNC_ID = "repositories_container_container_sync"
     VERSION_CONTEXT = PulpContainerRepositoryVersionContext

@@ -69,7 +69,7 @@ class PulpExporterContext(PulpEntityContext):
     LIST_ID = "exporters_core_pulp_list"
     READ_ID = "exporters_core_pulp_read"
     CREATE_ID = "exporters_core_pulp_create"
-    UPDATE_ID = "exporters_core_pulp_update"
+    UPDATE_ID = "exporters_core_pulp_partial_update"
     DELETE_ID = "exporters_core_pulp_delete"
 
 
@@ -105,7 +105,7 @@ class PulpGroupContext(PulpEntityContext):
     LIST_ID = "groups_list"
     READ_ID = "groups_read"
     CREATE_ID = "groups_create"
-    UPDATE_ID = "groups_update"
+    UPDATE_ID = "groups_partial_update"
     DELETE_ID = "groups_delete"
 
     def find(self, **kwargs: Any) -> Any:
@@ -127,7 +127,7 @@ class PulpImporterContext(PulpEntityContext):
     HREF = "pulp_importer_href"
     CREATE_ID = "importers_core_pulp_create"
     READ_ID = "importers_core_pulp_read"
-    UPDATE_ID = "importers_core_pulp_update"
+    UPDATE_ID = "importers_core_pulp_partial_update"
     DELETE_ID = "importers_core_pulp_delete"
     LIST_ID = "importers_core_pulp_list"
 

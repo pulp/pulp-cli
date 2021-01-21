@@ -11,7 +11,7 @@ class PulpRpmDistributionContext(PulpEntityContext):
     LIST_ID = "distributions_rpm_rpm_list"
     READ_ID = "distributions_rpm_rpm_read"
     CREATE_ID = "distributions_rpm_rpm_create"
-    UPDATE_ID = "distributions_rpm_rpm_update"
+    UPDATE_ID = "distributions_rpm_rpm_partial_update"
     DELETE_ID = "distributions_rpm_rpm_delete"
 
 
@@ -29,7 +29,7 @@ class PulpRpmRemoteContext(PulpEntityContext):
     HREF = "rpm_rpm_remote_href"
     LIST_ID = "remotes_rpm_rpm_list"
     CREATE_ID = "remotes_rpm_rpm_create"
-    UPDATE_ID = "remotes_rpm_rpm_update"
+    UPDATE_ID = "remotes_rpm_rpm_partial_update"
     DELETE_ID = "remotes_rpm_rpm_delete"
 
 
@@ -47,7 +47,7 @@ class PulpRpmRepositoryContext(PulpRepositoryContext):
     LIST_ID = "repositories_rpm_rpm_list"
     READ_ID = "repositories_rpm_rpm_read"
     CREATE_ID = "repositories_rpm_rpm_create"
-    UPDATE_ID = "repositories_rpm_rpm_update"
+    UPDATE_ID = "repositories_rpm_rpm_partial_update"
     DELETE_ID = "repositories_rpm_rpm_delete"
     SYNC_ID = "repositories_rpm_rpm_sync"
     VERSION_CONTEXT = PulpRpmRepositoryVersionContext
