@@ -10,6 +10,12 @@ expect_succ pulp --base-url "http://invalid" artifact --help
 expect_succ pulp --base-url "http://invalid" artifact list --help
 expect_succ pulp --base-url "http://invalid" artifact show --help
 
+expect_succ pulp --base-url "http://invalid" export
+expect_succ pulp --base-url "http://invalid" export pulp
+expect_succ pulp --base-url "http://invalid" export pulp show --help
+expect_succ pulp --base-url "http://invalid" exporter pulp
+expect_succ pulp --base-url "http://invalid" exporter pulp show --help
+
 expect_succ pulp --base-url "http://invalid" file
 expect_succ pulp --base-url "http://invalid" file --help
 expect_succ pulp --base-url "http://invalid" file remote

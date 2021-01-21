@@ -6,7 +6,6 @@ import click
 
 from pulpcore.cli.common.context import (
     EntityDefinition,
-    PulpContext,
     PulpEntityContext,
 )
 
@@ -75,43 +74,45 @@ class PulpExporterContext(PulpEntityContext):
 
 class PulpExportContext(PulpEntityContext):
     ENTITY = "PulpExport"
-    HREF = "pulp_pulp_export_href"
+    # This is replaced by a version aware property below
+    # HREF = "pulp_pulp_export_href"
     LIST_ID = "exporters_core_pulp_exports_list"
     READ_ID = "exporters_core_pulp_exports_read"
     CREATE_ID = "exporters_core_pulp_exports_create"
     DELETE_ID = "exporters_core_pulp_exports_delete"
-    exporter: EntityData
+    exporter: EntityDefinition
 
-    def __new__(cls, pulp_ctx: PulpContext) -> Any:
-        if not pulp_ctx.has_plugin("pulpcore", min_version="3.10.dev0"):
+    def list(self, limit: int, offset: int, parameters: Dict[str, Any]) -> List[Any]:
+        if not self.pulp_ctx.has_plugin("pulpcore", min_version="3.10.dev0"):
             # Workaround for improperly rendered nested resource paths and weird HREF names
             # https://github.com/pulp/pulpcore/pull/1066
-            class PatchedPulpExporterContext(PulpExportContext):
-                HREF = "core_pulp_pulp_export_href"
+            parameters[PulpExporterContext.HREF] = self.exporter["pulp_href"]
+        return super().list(limit=limit, offset=offset, parameters=parameters)
 
-                def list(self, limit: int, offset: int, parameters: Dict[str, Any]) -> List[Any]:
-                    parameters[PulpExporterContext.HREF] = self.exporter["pulp_href"]
-                    return super().list(limit=limit, offset=offset, parameters=parameters)
+    def create(self, body: EntityDefinition, parameters: Optional[Dict[str, Any]] = None) -> Any:
+        if not self.pulp_ctx.has_plugin("pulpcore", min_version="3.10.dev0"):
+            # Workaround for improperly rendered nested resource paths and weird HREF names
+            # https://github.com/pulp/pulpcore/pull/1066
+            if parameters is None:
+                parameters = {}
+            parameters[self.HREF] = self.exporter["pulp_href"]
+        return super().create(parameters=parameters, body=body)
 
-                def create(
-                    self, body: EntityDefinition, parameters: Optional[Dict[str, Any]] = None
-                ) -> Any:
-                    if parameters is None:
-                        parameters = {}
-                    parameters[self.HREF] = self.exporter["pulp_href"]
-                    return super().create(parameters=parameters, body=body)
-
-                @property
-                def scope(self) -> Dict[str, Any]:
-                    return {}
-
-            return super().__new__(PatchedPulpExporterContext)
-        return super().__new__(cls)
+    @property
+    def HREF(self) -> str:  # type: ignore
+        if not self.pulp_ctx.has_plugin("pulpcore", min_version="3.10.dev0"):
+            # Workaround for improperly rendered nested resource paths and weird HREF names
+            # https://github.com/pulp/pulpcore/pull/1066
+            return "core_pulp_pulp_export_href"
+        return "pulp_pulp_export_href"
 
     @property
     def scope(self) -> Dict[str, Any]:
+        if not self.pulp_ctx.has_plugin("pulpcore", min_version="3.10.dev0"):
+            # Workaround for improperly rendered nested resource paths and weird HREF names
+            # https://github.com/pulp/pulpcore/pull/1066
+            return {}
         return {PulpExporterContext.HREF: self.exporter["pulp_href"]}
-
 
 
 class PulpGroupContext(PulpEntityContext):
@@ -125,7 +126,7 @@ class PulpGroupContext(PulpEntityContext):
 
     def find(self, **kwargs: Any) -> Any:
         """Workaroud for the missing ability to filter"""
-        if self.pulp_ctx.has_plugin("pulpcore", min_version="3.10"):
+        if self.pulp_ctx.has_plugin("pulpcore", min_version="3.10.dev0"):
             # Workaround not needed anymore
             return super().find(**kwargs)
         # See https://pulp.plan.io/issues/7975
@@ -188,7 +189,7 @@ class PulpUserContext(PulpEntityContext):
 
     def find(self, **kwargs: Any) -> Any:
         """Workaroud for the missing ability to filter"""
-        if self.pulp_ctx.has_plugin("pulpcore", min_version="3.10"):
+        if self.pulp_ctx.has_plugin("pulpcore", min_version="3.10.dev0"):
             # Workaround not needed anymore
             return super().find(**kwargs)
         # See https://pulp.plan.io/issues/7975
