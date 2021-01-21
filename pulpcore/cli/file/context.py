@@ -19,7 +19,7 @@ class PulpFileDistributionContext(PulpEntityContext):
     LIST_ID = "distributions_file_file_list"
     READ_ID = "distributions_file_file_read"
     CREATE_ID = "distributions_file_file_create"
-    UPDATE_ID = "distributions_file_file_update"
+    UPDATE_ID = "distributions_file_file_partial_update"
     DELETE_ID = "distributions_file_file_delete"
 
 
@@ -37,7 +37,7 @@ class PulpFileRemoteContext(PulpEntityContext):
     HREF = "file_file_remote_href"
     LIST_ID = "remotes_file_file_list"
     CREATE_ID = "remotes_file_file_create"
-    UPDATE_ID = "remotes_file_file_update"
+    UPDATE_ID = "remotes_file_file_partial_update"
     DELETE_ID = "remotes_file_file_delete"
 
 
@@ -55,7 +55,7 @@ class PulpFileRepositoryContext(PulpRepositoryContext):
     LIST_ID = "repositories_file_file_list"
     READ_ID = "repositories_file_file_read"
     CREATE_ID = "repositories_file_file_create"
-    UPDATE_ID = "repositories_file_file_update"
+    UPDATE_ID = "repositories_file_file_partial_update"
     DELETE_ID = "repositories_file_file_delete"
     SYNC_ID = "repositories_file_file_sync"
     MODIFY_ID = "repositories_file_file_modify"

@@ -18,7 +18,10 @@ else
 fi
 
 expect_succ pulp rpm remote create --name "cli_test_rpm_remote" --url "$RPM_REMOTE_URL"
-expect_succ pulp rpm repository create --name "cli_test_rpm_repository" --remote "cli_test_rpm_remote"
+expect_succ pulp rpm repository create --name "cli_test_rpm_repository" --remote "cli_test_rpm_remote" --description "cli test repository"
+expect_succ pulp rpm repository update --name "cli_test_rpm_repository" --description ""
+expect_succ pulp rpm repository show --name "cli_test_rpm_repository"
+test "$(echo "$OUTPUT" | jq -r '.description')" = "null"
 expect_succ pulp rpm repository sync --name "cli_test_rpm_repository"
 expect_succ pulp rpm publication create --repository "cli_test_rpm_repository"
 PUBLICATION_HREF=$(echo "$OUTPUT" | jq -r .pulp_href)
