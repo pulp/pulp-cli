@@ -16,3 +16,6 @@ pulp file repository sync --name "cli_test_file_repository"
 expect_succ pulp file publication create --repository "cli_test_file_repository"
 PUBLICATION_HREF="$(echo "$OUTPUT" | jq -r .pulp_href)"
 expect_succ pulp file publication destroy --href "$PUBLICATION_HREF"
+expect_succ pulp file publication create --repository "cli_test_file_repository" --version 0
+PUBLICATION_HREF="$(echo "$OUTPUT" | jq -r .pulp_href)"
+expect_succ pulp file publication destroy --href "$PUBLICATION_HREF"

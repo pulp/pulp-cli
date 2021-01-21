@@ -1,5 +1,6 @@
 import click
 
+from typing import Optional
 
 from pulpcore.cli.common.generic import (
     list_entities,
@@ -38,13 +39,20 @@ publication.add_command(show_by_href)
 
 @publication.command()
 @click.option("--repository", required=True)
+@click.option("--version", type=int, help="a repository version number, leave blank for latest")
 @pass_entity_context
 @pass_pulp_context
 def create(
-    pulp_ctx: PulpContext, publication_ctx: PulpRpmPublicationContext, repository: str
+    pulp_ctx: PulpContext,
+    publication_ctx: PulpRpmPublicationContext,
+    repository: str,
+    version: Optional[int],
 ) -> None:
     repository_href: str = PulpRpmRepositoryContext(pulp_ctx).find(name=repository)["pulp_href"]
-    body = {"repository": repository_href}
+    if version is not None:
+        body = {"repository_version": f"{repository_href}versions/{version}/"}
+    else:
+        body = {"repository": repository_href}
     result = publication_ctx.create(body=body)
     publication = publication_ctx.show(result["created_resources"][0])
     pulp_ctx.output_result(publication)

@@ -46,6 +46,7 @@ distribution.add_command(show_by_name)
 @click.option("--name", required=True)
 @click.option("--base-path", required=True)
 @click.option("--repository")
+@click.option("--version", type=int, help="a repository version number, leave blank for latest")
 @click.option(
     "-t",
     "--repository-type",
@@ -61,6 +62,7 @@ def create(
     name: str,
     base_path: str,
     repository: Optional[str],
+    version: Optional[int],
     repository_type: Optional[str],
 ) -> None:
     repository_ctx: PulpRepositoryContext
@@ -73,7 +75,10 @@ def create(
         else:
             raise NotImplementedError()
         repository_href = repository_ctx.find(name=repository)["pulp_href"]
-        body["repository"] = repository_href
+        if version is not None:
+            body["repository_version"] = f"{repository_href}versions/{version}/"
+        else:
+            body["repository"] = repository_href
     result = distribution_ctx.create(body=body)
     distribution = distribution_ctx.show(result["created_resources"][0])
     pulp_ctx.output_result(distribution)
