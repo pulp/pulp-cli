@@ -22,6 +22,8 @@ expect_succ pulp rpm repository create --name "cli_test_rpm_repository" --remote
 expect_succ pulp rpm repository sync --name "cli_test_rpm_repository"
 expect_succ pulp rpm publication create --repository "cli_test_rpm_repository"
 PUBLICATION_HREF=$(echo "$OUTPUT" | jq -r .pulp_href)
+expect_succ pulp rpm publication create --repository "cli_test_rpm_repository" --version 0
+PUBLICATION_VER_HREF=$(echo "$OUTPUT" | jq -r .pulp_href)
 
 expect_succ pulp rpm distribution create --name "cli_test_rpm_distro" \
   --base-path "cli_test_rpm_distro" \
@@ -34,5 +36,6 @@ expect_succ pulp rpm repository version --repository "cli_test_rpm_repository" r
 
 expect_succ pulp rpm distribution destroy --name "cli_test_rpm_distro"
 expect_succ pulp rpm publication destroy --href "$PUBLICATION_HREF"
+expect_succ pulp rpm publication destroy --href "$PUBLICATION_VER_HREF"
 expect_succ pulp rpm repository destroy --name "cli_test_rpm_repository"
 expect_succ pulp rpm remote destroy --name "cli_test_rpm_remote"
