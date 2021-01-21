@@ -204,7 +204,7 @@ def remove(
 
 def _load_json_from_option(
     ctx: click.Context,
-    option: Any,
+    option_name: Any,
     option_value: str,
 ) -> List[Dict[str, str]]:
     """Load JSON from input string or from file if string starts with @."""
@@ -238,7 +238,9 @@ def _load_json_from_option(
     callback=_load_json_from_option,
     is_eager=True,
     expose_value=True,
-    help="JSON string with a list of objects with the keys 'sha256', 'relative_path'. The argument prefixed with the '@' can be the path to a JSON file with a list of objects.",
+    help="""JSON string with a list of objects to add to the repository.
+    Each object should consist of the following keys: "sha256", "relative_path"..
+    The argument prefixed with the '@' can be the path to a JSON file with a list of objects.""",
 )
 @click.option(
     "--remove-content",
@@ -246,7 +248,9 @@ def _load_json_from_option(
     callback=_load_json_from_option,
     is_eager=True,
     expose_value=True,
-    help="JSON string with a list of objects with the keys 'sha256', 'relative_path'. The argument prefixed with the '@' can be the path to a JSON file with a list of objects.",
+    help="""JSON string with a list of objects to remove from the repository.
+    Each object should consist of the following keys: "sha256", "relative_path"..
+    The argument prefixed with the '@' can be the path to a JSON file with a list of objects.""",
 )
 @pass_repository_context
 @pass_pulp_context
