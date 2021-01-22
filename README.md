@@ -1,6 +1,6 @@
 # Pulp command line interface
 
-This is a command line interface for Pulp 3. 
+This is a command line interface for Pulp 3.
 
 This software is in beta and future releases may include backwards incompatible changes.
 
@@ -83,12 +83,6 @@ password password
 
 `pulp file repository destroy --name file_repo1`
 
-## Testing
-
-Tests are run using `pytest`.
-
-Tests are shell scripts in `tests/scripts` with names like `test_*.sh`.
-
 ## Shell Completion
 
 The CLI uses the click package which supports shell completion.
@@ -105,11 +99,33 @@ eval "$(_PULP_COMPLETE=source_bash pulp)"
 ### Code conventions
 `pulp-cli` comes with python type annotations and black code formatting.
 To verify your code please run `black`, `flake8`, `shellcheck`, and `mypy`.
+Run `make lint` to check for compliance.
+Also please follow [The seven rules of a great Git commit message](https://chris.beams.io/posts/git-commit/).
 
-### Compatibility
+### Global help accessibility
+In order to be able to access every (sub-)commands help page,
+it is necessary that no code outside of the final performing command callback accesses the `api` property of the `PulpContext`.
+There are some facilities that perform lazy loading to help with that requirement.
+Those include:
+  - `PulpContext.api`
+  - `PulpContext.needs_version`
+  - `PulpEntityContext.entity`
+  - `PulpEntityContext.pulp_href`
+
+### Compatibility to pulp versions
 This cli for Pulp 3 will be versioned indedendently of any version of the server components.
 It is supposed to be able to communicate with different combinations of server component versions at the same time.
-So it might be needed to guard certain features / workaround by the available server plugin version.
+So it might be needed to guard certain features / workarounds by the available server plugin version.
+As a rule of thumb, all necessary workarounds should be implemented in the corresponding `Context` objects to provide a consistent interface to the command callbacks.
+
+### Testing
+
+Tests are shell scripts in `tests/scripts` with names like `test_*.sh`.
+They should should focus on the cli operation and are not a replacement for pulp integration tests;
+i.e. make sure the cli translates to the right api calls, but do not care about pulp internals.
+In order to perform, a running instance of pulp with all necessary plugins installed must be configured in `tests/scripts/config/pulp/settings.toml`.
+All tests are excercised using `make test`.
+Individual tests can be selected by pattern via `pytest -k file`.
 
 ## Releasing
 
