@@ -51,5 +51,5 @@ cat <<EOT >> add_content.json
 EOT
 cp add_content.json remove_content.json
 
-expect_succ pulp file repository modify --name "cli_test_file_repository" --add-content "@add_content.json" --base-version 0
+expect_succ pulp file repository modify --name "cli_test_file_repository" --add-content "@-" --base-version 0 < add_content.json
 expect_succ pulp file repository modify --name "cli_test_file_repository" --remove-content "@remove_content.json"

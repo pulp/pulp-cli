@@ -214,7 +214,7 @@ def _load_json_from_option(
     if option_value.startswith("@"):
         json_file = option_value[1:]
         try:
-            with open(json_file, "rb") as fp:
+            with click.open_file(json_file, "rb") as fp:
                 json_string = fp.read()
         except OSError:
             raise click.ClickException(f"Failed to load content from {json_file}")
