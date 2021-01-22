@@ -60,4 +60,29 @@ def create(
     pulp_ctx.output_result(distribution)
 
 
+@distribution.command()
+@click.option("--name", required=True)
+@click.option("--base-path")
+@click.option("--publication")
+@pass_entity_context
+@pass_pulp_context
+def update(
+    pulp_ctx: PulpContext,
+    distribution_ctx: PulpFileDistributionContext,
+    name: str,
+    base_path: Optional[str],
+    publication: Optional[str],
+) -> None:
+    distribution = distribution_ctx.find(name=name)
+    distribution_href = distribution["pulp_href"]
+
+    if (base_path is not None) and (base_path != distribution["base_path"]):
+        distribution["base_path"] = base_path
+
+    if publication is not None:
+        distribution["publication"] = None if publication == "" else publication
+
+    distribution_ctx.update(distribution_href, body=distribution)
+
+
 distribution.add_command(destroy_by_name)

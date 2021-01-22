@@ -23,7 +23,9 @@ expect_succ pulp file repository sync --name "cli_test_file_repository"
 expect_succ pulp file publication create --repository "cli_test_file_repository"
 PUBLICATION_HREF=$(echo "$OUTPUT" | jq -r .pulp_href)
 
-expect_succ pulp file distribution create --name "cli_test_file_distro" \
+expect_succ pulp file distribution create --name "cli_test_file_distro" --base-path "wrong_path" 
+expect_succ pulp file distribution update \
+  --name "cli_test_file_distro" \
   --base-path "cli_test_file_distro" \
   --publication "$PUBLICATION_HREF"
 
