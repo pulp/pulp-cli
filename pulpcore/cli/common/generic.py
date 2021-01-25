@@ -4,6 +4,7 @@ import click
 
 from pulpcore.cli.common.context import (
     DEFAULT_LIMIT,
+    EntityDefinition,
     PulpContext,
     PulpEntityContext,
     PulpRepositoryContext,
@@ -40,21 +41,27 @@ class PulpOption(click.Option):
 # Option callbacks
 
 
-def _href_callback(ctx: click.Context, param: click.Parameter, value: str) -> str:
+def _href_callback(
+    ctx: click.Context, param: click.Parameter, value: Optional[str]
+) -> Optional[str]:
     if value is not None:
         entity_ctx: PulpEntityContext = ctx.find_object(PulpEntityContext)
         entity_ctx.pulp_href = value
     return value
 
 
-def _name_callback(ctx: click.Context, param: click.Parameter, value: str) -> str:
+def _name_callback(
+    ctx: click.Context, param: click.Parameter, value: Optional[str]
+) -> Optional[str]:
     if value is not None:
         entity_ctx: PulpEntityContext = ctx.find_object(PulpEntityContext)
         entity_ctx.entity = {"name": value}
     return value
 
 
-def _version_callback(ctx: click.Context, param: click.Parameter, value: int) -> int:
+def _version_callback(
+    ctx: click.Context, param: click.Parameter, value: Optional[int]
+) -> Optional[int]:
     entity_ctx: PulpEntityContext = ctx.find_object(PulpEntityContext)
     repository_ctx: PulpRepositoryContext = ctx.find_object(PulpRepositoryContext)
     if value is not None:
@@ -166,6 +173,51 @@ def show_command(**kwargs: Any) -> click.Command:
         Show details of a {entity}.
         """
         pulp_ctx.output_result(entity_ctx.entity)
+
+    for option in decorators:
+        # Decorate callback
+        callback = option(callback)
+    return callback
+
+
+def create_command(**kwargs: Any) -> click.Command:
+    """A factory that creates a create command."""
+
+    if "cls" not in kwargs:
+        kwargs["cls"] = PulpCommand
+    if "name" not in kwargs:
+        kwargs["name"] = "create"
+    decorators = kwargs.pop("decorators", [])
+
+    @click.command(**kwargs)
+    @pass_entity_context
+    @pass_pulp_context
+    def callback(pulp_ctx: PulpContext, entity_ctx: PulpEntityContext, **kwargs: Any) -> None:
+        body: EntityDefinition = entity_ctx.preprocess_body(kwargs)
+        result = entity_ctx.create(body=body)
+        pulp_ctx.output_result(result)
+
+    for option in decorators:
+        # Decorate callback
+        callback = option(callback)
+    return callback
+
+
+def update_command(**kwargs: Any) -> click.Command:
+    """A factory that creates an update command."""
+
+    if "cls" not in kwargs:
+        kwargs["cls"] = PulpCommand
+    if "name" not in kwargs:
+        kwargs["name"] = "update"
+    decorators = kwargs.pop("decorators", [])
+
+    @click.command(**kwargs)
+    @pass_entity_context
+    @pass_pulp_context
+    def callback(pulp_ctx: PulpContext, entity_ctx: PulpEntityContext, **kwargs: Any) -> None:
+        body: EntityDefinition = entity_ctx.preprocess_body(kwargs)
+        entity_ctx.update(href=entity_ctx.pulp_href, body=body)
 
     for option in decorators:
         # Decorate callback

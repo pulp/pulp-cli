@@ -275,6 +275,13 @@ class PulpEntityContext:
         else:
             self.pulp_href = pulp_href
 
+    def preprocess_body(self, body: EntityDefinition) -> EntityDefinition:
+        return {
+            key: value.pulp_href if isinstance(value, PulpEntityContext) else value
+            for key, value in body.items()
+            if value is not None
+        }
+
     def list(self, limit: int, offset: int, parameters: Dict[str, Any]) -> List[Any]:
         count: int = -1
         entities: List[Any] = []
