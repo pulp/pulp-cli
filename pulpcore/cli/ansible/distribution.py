@@ -62,9 +62,11 @@ def create(
         body["repository_version"] = f'{repo["versions_href"]}{version}/'
     elif repository:
         body["repository"] = repo["pulp_href"]
+
     result = distribution_ctx.create(body=body)
-    distribution = distribution_ctx.show(result["created_resources"][0])
-    pulp_ctx.output_result(distribution)
+    if not pulp_ctx.background_tasks:
+        distribution = distribution_ctx.show(result["created_resources"][0])
+        pulp_ctx.output_result(distribution)
 
 
 @distribution.command()
@@ -127,5 +129,6 @@ def update(
                 f"please specify the repository to use  with --repository"
             )
     distribution_ctx.update(href, body=body)
-    dist_body = distribution_ctx.show(href)
-    pulp_ctx.output_result(dist_body)
+    if not pulp_ctx.background_tasks:
+        dist_body = distribution_ctx.show(href)
+        pulp_ctx.output_result(dist_body)

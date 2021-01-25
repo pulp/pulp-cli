@@ -109,8 +109,9 @@ def update(
         repository["remote"] = remote_href
 
     repository_ctx.update(repository["pulp_href"], body=repository)
-    result = repository_ctx.show(repository["pulp_href"])
-    pulp_ctx.output_result(result)
+    if not pulp_ctx.background_tasks:
+        result = repository_ctx.show(repository["pulp_href"])
+        pulp_ctx.output_result(result)
 
 
 @repository.command()
@@ -145,10 +146,12 @@ def sync(
             f"Repository '{name}' does not have a default remote. Please specify with '--remote'."
         )
 
-    repository_ctx.sync(
+    result = repository_ctx.sync(
         href=repository_href,
         body=body,
     )
+    if not pulp_ctx.background_tasks:
+        pulp_ctx.output_result(result)
 
 
 # TODO Finish 'add' and 'remove' commands when role and collection contexts are implemented

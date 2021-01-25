@@ -17,6 +17,7 @@ expect_succ pulp ansible remote -t "role" list
 expect_succ pulp ansible remote -t "collection" list
 expect_succ pulp ansible remote -t "role" update --name "cli_test_ansible_role_remote" --download-concurrency "5"
 expect_succ pulp ansible remote -t "collection" update --name "cli_test_ansible_collection_remote" --download-concurrency "5"
+expect_succ pulp -b ansible remote -t "collection" update --name "cli_test_ansible_collection_remote" --download-concurrency "1"
 expect_fail pulp ansible remote -t "role" update --name "cli_test_ansible_role_remote" --requirements "collections:\n  - robertdebock.ansible_development_environment"
 test "$ERROUTPUT" = "Error: Options not valid for Role remote, see --help"
 expect_succ pulp ansible remote -t "role" destroy --name "cli_test_ansible_role_remote"

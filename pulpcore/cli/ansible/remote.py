@@ -178,8 +178,9 @@ def update(
     remote = remote_ctx.find(name=name)
     remote_href = remote["pulp_href"]
     remote_ctx.update(remote_href, body=body)
-    result = remote_ctx.show(remote_href)
-    pulp_ctx.output_result(result)
+    if not pulp_ctx.background_tasks:
+        result = remote_ctx.show(remote_href)
+        pulp_ctx.output_result(result)
 
 
 for k, v in remote_options.items():
