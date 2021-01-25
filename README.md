@@ -25,7 +25,8 @@ section on how to configure pulp-cli.
 ### From PyPI
 
 ```
-pip install pulp-cli
+pip install pulp-cli[pygments]  # colorized output
+pip install pulp-cli  # no color output
 ```
 
 ### From a source checkout
