@@ -5,14 +5,26 @@
 
 cleanup() {
   pulp file repository destroy --name "cli_test_file_repo" || true
+  pulp file remote destroy --name "cli_test_file_remote1" || true
+  pulp file remote destroy --name "cli_test_file_remote2" || true
 }
 trap cleanup EXIT
+
+REMOTE1_HREF="$(pulp file remote create --name "cli_test_file_remote1" --url "http://a/" | jq -r '.pulp_href')"
+REMOTE2_HREF="$(pulp file remote create --name "cli_test_file_remote2" --url "http://b/" | jq -r '.pulp_href')"
 
 expect_succ pulp file repository list
 
 expect_succ pulp file repository create --name "cli_test_file_repo" --description "Test repository for CLI tests"
-expect_succ pulp file repository update --name "cli_test_file_repo" --description ""
+expect_succ pulp file repository update --name "cli_test_file_repo" --description "" --remote "cli_test_file_remote1"
 expect_succ pulp file repository show --name "cli_test_file_repo"
-test "$(echo "$OUTPUT" | jq -r '.description')" = "null"
+expect_succ test "$(echo "$OUTPUT" | jq -r '.remote')" = "$REMOTE1_HREF"
+expect_succ pulp file repository update --name "cli_test_file_repo" --remote "cli_test_file_remote2"
+expect_succ pulp file repository show --name "cli_test_file_repo"
+expect_succ test "$(echo "$OUTPUT" | jq -r '.remote')" = "$REMOTE2_HREF"
+expect_succ pulp file repository update --name "cli_test_file_repo" --remote ""
+expect_succ pulp file repository show --name "cli_test_file_repo"
+expect_succ test "$(echo "$OUTPUT" | jq -r '.description')" = "null"
+expect_succ test "$(echo "$OUTPUT" | jq -r '.remote')" = ""
 expect_succ pulp file repository list
 expect_succ pulp file repository destroy --name "cli_test_file_repo"
