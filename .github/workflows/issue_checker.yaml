@@ -14,7 +14,7 @@ jobs:
           python-version: 3.7
       - name: Install python dependencies
         run: |
-          pip install requests
+          pip install pygithub
       - name: Check commit message
         env:
           GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }}
