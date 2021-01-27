@@ -8,8 +8,8 @@ from pulpcore.cli.common.context import (
     PulpEntityContext,
     PulpRepositoryContext,
     PulpRepositoryVersionContext,
-    pass_pulp_context,
     pass_entity_context,
+    pass_pulp_context,
     pass_repository_context,
     pass_repository_version_context,
 )

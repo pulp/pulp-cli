@@ -1,19 +1,13 @@
 import click
 
-from pulpcore.cli.common.generic import (
-    list_entities,
-    show_by_name,
-    destroy_by_name,
-)
 from pulpcore.cli.common.context import (
-    pass_pulp_context,
-    pass_entity_context,
     PulpContext,
     PulpEntityContext,
+    pass_entity_context,
+    pass_pulp_context,
 )
-from pulpcore.cli.core.context import (
-    PulpGroupContext,
-)
+from pulpcore.cli.common.generic import destroy_by_name, list_entities, show_by_name
+from pulpcore.cli.core.context import PulpGroupContext
 
 
 @click.group()

@@ -1,21 +1,21 @@
-from typing import Optional, Union, List, Dict, Any
+import json
+from typing import Any, Dict, List, Optional, Union
 
 import click
-import json
 
-from pulpcore.cli.common.generic import (
-    list_command,
-    show_command,
-    destroy_command,
-    version_command,
-    name_option,
-    href_option,
-)
 from pulpcore.cli.common.context import (
-    pass_pulp_context,
-    pass_repository_context,
     PulpContext,
     PulpRepositoryContext,
+    pass_pulp_context,
+    pass_repository_context,
+)
+from pulpcore.cli.common.generic import (
+    destroy_command,
+    href_option,
+    list_command,
+    name_option,
+    show_command,
+    version_command,
 )
 from pulpcore.cli.file.context import (
     PulpFileContentContext,

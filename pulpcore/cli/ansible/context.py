@@ -4,7 +4,6 @@ from pulpcore.cli.common.context import (
     PulpRepositoryVersionContext,
 )
 
-
 # TODO Add Role and Collection Content contexts
 
 

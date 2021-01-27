@@ -2,16 +2,8 @@ from typing import IO
 
 import click
 
-from pulpcore.cli.common.generic import (
-    list_command,
-    show_command,
-    href_option,
-)
-from pulpcore.cli.common.context import (
-    PulpContext,
-    pass_pulp_context,
-    pass_entity_context,
-)
+from pulpcore.cli.common.context import PulpContext, pass_entity_context, pass_pulp_context
+from pulpcore.cli.common.generic import href_option, list_command, show_command
 from pulpcore.cli.core.context import PulpArtifactContext
 from pulpcore.cli.file.context import PulpFileContentContext
 

@@ -2,23 +2,19 @@ from typing import Optional
 
 import click
 
-from pulpcore.cli.common.generic import (
-    list_entities,
-    show_by_name,
-    destroy_by_name,
-)
-from pulpcore.cli.common.context import (
-    pass_pulp_context,
-    pass_repository_context,
-    PulpContext,
-    PulpRepositoryContext,
-    EntityDefinition,
-)
 from pulpcore.cli.ansible.context import (
-    PulpAnsibleRoleRemoteContext,
     PulpAnsibleCollectionRemoteContext,
     PulpAnsibleRepositoryContext,
+    PulpAnsibleRoleRemoteContext,
 )
+from pulpcore.cli.common.context import (
+    EntityDefinition,
+    PulpContext,
+    PulpRepositoryContext,
+    pass_pulp_context,
+    pass_repository_context,
+)
+from pulpcore.cli.common.generic import destroy_by_name, list_entities, show_by_name
 
 
 @click.group()

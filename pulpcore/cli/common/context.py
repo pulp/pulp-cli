@@ -1,11 +1,10 @@
-from typing import Any, ClassVar, Dict, List, Optional, Tuple, Type
-
-import click
 import datetime
 import json
 import time
-import yaml
+from typing import Any, ClassVar, Dict, List, Optional, Tuple, Type
 
+import click
+import yaml
 from packaging.version import parse as parse_version
 from requests import HTTPError
 

@@ -1,13 +1,11 @@
-from typing import Any, ClassVar, Dict, List, IO, Optional
 import hashlib
 import os
 import sys
+from typing import IO, Any, ClassVar, Dict, List, Optional
+
 import click
 
-from pulpcore.cli.common.context import (
-    EntityDefinition,
-    PulpEntityContext,
-)
+from pulpcore.cli.common.context import EntityDefinition, PulpEntityContext
 
 
 class PulpArtifactContext(PulpEntityContext):

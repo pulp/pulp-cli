@@ -1,20 +1,11 @@
+from copy import deepcopy
 from typing import IO
 
-from copy import deepcopy
 import click
 
-from pulpcore.cli.common.generic import (
-    list_entities,
-    show_by_href,
-)
-from pulpcore.cli.common.context import (
-    pass_pulp_context,
-    pass_entity_context,
-    PulpContext,
-)
-from pulpcore.cli.core.context import (
-    PulpArtifactContext,
-)
+from pulpcore.cli.common.context import PulpContext, pass_entity_context, pass_pulp_context
+from pulpcore.cli.common.generic import list_entities, show_by_href
+from pulpcore.cli.core.context import PulpArtifactContext
 
 
 @click.group()

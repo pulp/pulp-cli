@@ -1,25 +1,20 @@
-import click
-
-import yaml
-
 from typing import Any, Dict, Optional
 
-from pulpcore.cli.common.generic import (
-    list_entities,
-    show_by_name,
-    destroy_by_name,
+import click
+import yaml
+
+from pulpcore.cli.ansible.context import (
+    PulpAnsibleCollectionRemoteContext,
+    PulpAnsibleRoleRemoteContext,
 )
 from pulpcore.cli.common.context import (
-    PulpContext,
-    pass_pulp_context,
-    pass_entity_context,
-    PulpEntityContext,
     EntityDefinition,
+    PulpContext,
+    PulpEntityContext,
+    pass_entity_context,
+    pass_pulp_context,
 )
-from pulpcore.cli.ansible.context import (
-    PulpAnsibleRoleRemoteContext,
-    PulpAnsibleCollectionRemoteContext,
-)
+from pulpcore.cli.common.generic import destroy_by_name, list_entities, show_by_name
 
 
 @click.group()

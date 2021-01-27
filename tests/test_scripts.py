@@ -1,7 +1,7 @@
 import os
-import pytest
 import subprocess
 
+import pytest
 
 TEST_NAMES = [
     name[5:-3]
