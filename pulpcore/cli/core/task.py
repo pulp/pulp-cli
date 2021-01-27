@@ -1,16 +1,8 @@
 import click
 
-from pulpcore.cli.common.generic import (
-    list_command,
-)
-from pulpcore.cli.common.context import (
-    pass_pulp_context,
-    pass_entity_context,
-    PulpContext,
-)
-from pulpcore.cli.core.context import (
-    PulpTaskContext,
-)
+from pulpcore.cli.common.context import PulpContext, pass_entity_context, pass_pulp_context
+from pulpcore.cli.common.generic import list_command
+from pulpcore.cli.core.context import PulpTaskContext
 
 
 @click.group()

@@ -1,22 +1,16 @@
 from copy import deepcopy
+from typing import List
 
-from pulpcore.cli.common.generic import (
-    list_entities,
-    show_by_name,
-    destroy_by_name,
-)
+import click
+
 from pulpcore.cli.common.context import (
-    pass_pulp_context,
-    pass_entity_context,
     PulpContext,
     RepositoryDefinition,
+    pass_entity_context,
+    pass_pulp_context,
 )
-from pulpcore.cli.core.context import (
-    PulpExporterContext,
-)
-
-from typing import List
-import click
+from pulpcore.cli.common.generic import destroy_by_name, list_entities, show_by_name
+from pulpcore.cli.core.context import PulpExporterContext
 
 
 @click.group()

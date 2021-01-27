@@ -1,21 +1,11 @@
 from copy import deepcopy
-
-from pulpcore.cli.common.generic import (
-    list_entities,
-    show_by_name,
-    destroy_by_name,
-)
-from pulpcore.cli.common.context import (
-    pass_pulp_context,
-    pass_entity_context,
-    PulpContext,
-)
-from pulpcore.cli.core.context import (
-    PulpImporterContext,
-)
-
 from typing import Dict, List, Tuple, Union
+
 import click
+
+from pulpcore.cli.common.context import PulpContext, pass_entity_context, pass_pulp_context
+from pulpcore.cli.common.generic import destroy_by_name, list_entities, show_by_name
+from pulpcore.cli.core.context import PulpImporterContext
 
 RepositoryMap = Tuple[str, str]  # source repo, destination repo
 

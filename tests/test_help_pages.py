@@ -1,9 +1,9 @@
 # type: ignore
 
-from unittest.mock import patch, PropertyMock
-import pytest
+from unittest.mock import PropertyMock, patch
 
 import click
+import pytest
 from click.testing import CliRunner
 
 from pulpcore.cli.common import main

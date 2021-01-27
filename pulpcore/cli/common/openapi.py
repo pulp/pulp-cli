@@ -3,15 +3,14 @@
 # copyright (c) 2020, Matthias Dellweg
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 
-from typing import Any, Callable, Dict, List, Optional
-
 import json
 import os
 import uuid
-import requests
+from typing import Any, Callable, Dict, List, Optional
 from urllib.parse import urlencode, urljoin
-import urllib3
 
+import requests
+import urllib3
 
 SAFE_METHODS = ["GET", "HEAD", "OPTIONS"]
 

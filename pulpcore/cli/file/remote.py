@@ -1,16 +1,12 @@
 import click
 
+from pulpcore.cli.common.context import PulpContext, pass_entity_context, pass_pulp_context
 from pulpcore.cli.common.generic import (
-    list_command,
-    show_command,
     destroy_command,
-    name_option,
     href_option,
-)
-from pulpcore.cli.common.context import (
-    PulpContext,
-    pass_pulp_context,
-    pass_entity_context,
+    list_command,
+    name_option,
+    show_command,
 )
 from pulpcore.cli.file.context import PulpFileRemoteContext
 

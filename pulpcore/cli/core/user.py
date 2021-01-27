@@ -1,17 +1,13 @@
 import click
 
-from pulpcore.cli.common.generic import (
-    list_entities,
-)
 from pulpcore.cli.common.context import (
-    pass_pulp_context,
-    pass_entity_context,
     PulpContext,
     PulpEntityContext,
+    pass_entity_context,
+    pass_pulp_context,
 )
-from pulpcore.cli.core.context import (
-    PulpUserContext,
-)
+from pulpcore.cli.common.generic import list_entities
+from pulpcore.cli.core.context import PulpUserContext
 
 
 @click.group()

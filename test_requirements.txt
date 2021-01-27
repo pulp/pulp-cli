@@ -1,5 +1,6 @@
 -e .
-black 
-flake8 
+black
+flake8
+isort
 mypy==0.790
-pytest 
+pytest

@@ -1,15 +1,11 @@
+import os
 from typing import Any, Optional
 
-import pkg_resources
 import click
-import os
-
+import pkg_resources
 import toml
 
-from pulpcore.cli.common.context import (
-    PulpContext,
-)
-
+from pulpcore.cli.common.context import PulpContext
 
 __version__ = "0.2.1.dev"
 
