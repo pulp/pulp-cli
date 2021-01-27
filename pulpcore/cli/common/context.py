@@ -405,6 +405,7 @@ class PulpRepositoryContext(PulpEntityContext):
 
     ENTITY = "repository"
     ENTITIES = "repositories"
+    LIST_ID = "repositories_list"
     SYNC_ID: ClassVar[str]
     MODIFY_ID: ClassVar[str]
     VERSION_CONTEXT: ClassVar[Type[PulpRepositoryVersionContext]]

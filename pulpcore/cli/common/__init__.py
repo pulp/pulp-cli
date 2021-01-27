@@ -6,6 +6,7 @@ import pkg_resources
 import toml
 
 from pulpcore.cli.common.context import PulpContext
+from pulpcore.cli.common.debug import debug
 
 __version__ = "0.2.1.dev"
 
@@ -90,6 +91,9 @@ def main(
         debug_callback=_debug_callback,
     )
     ctx.obj = PulpContext(api_kwargs=api_kwargs, format=format, background_tasks=background)
+
+
+main.add_command(debug)
 
 
 ##############################################################################

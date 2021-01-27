@@ -5,6 +5,7 @@ from pulpcore.cli.core.exporter import exporter
 from pulpcore.cli.core.group import group
 from pulpcore.cli.core.importer import importer
 from pulpcore.cli.core.orphans import orphans
+from pulpcore.cli.core.repository import repository
 from pulpcore.cli.core.show import show
 from pulpcore.cli.core.status import status
 from pulpcore.cli.core.task import task
@@ -16,6 +17,7 @@ main.add_command(show)
 main.add_command(user)
 main.add_command(group)
 main.add_command(artifact)
+main.add_command(repository)
 main.add_command(orphans)
 main.add_command(task)
 main.add_command(exporter)
