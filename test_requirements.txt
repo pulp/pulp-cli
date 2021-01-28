@@ -3,4 +3,5 @@ black
 flake8
 isort
 mypy==0.790
+pygments
 pytest

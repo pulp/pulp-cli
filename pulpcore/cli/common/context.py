@@ -1,5 +1,6 @@
 import datetime
 import json
+import sys
 import time
 from typing import Any, ClassVar, Dict, List, Optional, Tuple, Type
 
@@ -48,6 +49,7 @@ class PulpContext:
         self._api: Optional[OpenAPI] = None
         self._api_kwargs = api_kwargs
         self._needed_plugins: List[Tuple[str, Optional[str], Optional[str]]] = []
+        self.isatty: bool = sys.stdout.isatty()
 
         self.format: str = format
         self.background_tasks: bool = background_tasks
@@ -76,13 +78,13 @@ class PulpContext:
         Dump the provided result to the console using the selected renderer
         """
         if self.format == "json":
-            output = json.dumps(result, cls=PulpJSONEncoder, indent=2)
-            if PYGMENTS:
+            output = json.dumps(result, cls=PulpJSONEncoder, indent=(2 if self.isatty else None))
+            if PYGMENTS and self.isatty:
                 output = highlight(output, JsonLexer(), Terminal256Formatter(style=PYGMENTS_STYLE))
             click.echo(output)
         elif self.format == "yaml":
             output = yaml.dump(result)
-            if PYGMENTS:
+            if PYGMENTS and self.isatty:
                 output = highlight(output, YamlLexer(), Terminal256Formatter(style=PYGMENTS_STYLE))
             click.echo(output)
         elif self.format == "none":
