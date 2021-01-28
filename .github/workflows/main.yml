@@ -31,8 +31,6 @@ jobs:
           python-version: ${{ matrix.python }}
       - name: Install Test Dependencies
         run: pip install -r test_requirements.txt
-      - name: Lint code
-        run: make lint
       - name: Run tests
         env:
           IMAGE_TAG: ${{ matrix.image_tag }}
