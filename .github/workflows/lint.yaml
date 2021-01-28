@@ -1,8 +1,8 @@
 ---
-name: Issue Checker
+name: Linting
 on: pull_request
 jobs:
-  check-commit:
+  lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -15,6 +15,7 @@ jobs:
       - name: Install python dependencies
         run: |
           pip install pygithub
+          pip install -r test_requirements.txt
       - name: Check commit message
         env:
           GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }}
@@ -28,3 +29,5 @@ jobs:
             fi
           done
         shell: bash
+      - name: Lint code
+        run: make lint
