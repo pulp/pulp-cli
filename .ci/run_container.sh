@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -eu
+
 BASEPATH="$(dirname "$(readlink -f "$0")")"
 
 if [ -z "${CONTAINER_RUNTIME+x}" ]
@@ -20,7 +22,7 @@ fi
 "${CONTAINER_RUNTIME}" run --rm --detach --name "pulp" --volume "${BASEPATH}/settings:/etc/pulp" --publish "8080:80" "pulp/pulp:$IMAGE_TAG"
 
 echo "Wait for pulp to start."
-for _ in $(seq 10)
+for counter in $(seq 20)
 do
   sleep 3
   if curl --fail http://localhost:8080/pulp/api/v3/status/ > /dev/null 2>&1
@@ -28,7 +30,13 @@ do
     echo "SUCCESS."
     break
   fi
+  echo "."
 done
+if [ "$counter" = "0" ]
+then
+  echo "FAIL."
+  exit 1
+fi
 
 # show pulpcore/plugin versions we're using
 curl -s http://localhost:8080/pulp/api/v3/status/ | jq ".versions"

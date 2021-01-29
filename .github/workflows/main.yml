@@ -17,6 +17,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - python: 3.9
+            image_tag: nightly
           - python: 3.6
             image_tag: latest
           - python: 3.7
