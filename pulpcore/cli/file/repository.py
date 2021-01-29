@@ -1,6 +1,5 @@
 import gettext
-import json
-from typing import Any, Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union
 
 import click
 
@@ -18,6 +17,7 @@ from pulpcore.cli.common.generic import (
     label_command,
     label_select_option,
     list_command,
+    load_json_callback,
     name_option,
     show_command,
     update_command,
@@ -175,33 +175,6 @@ def remove(
     )
 
 
-def _load_json_from_option(
-    ctx: click.Context,
-    option_name: Any,
-    option_value: str,
-) -> List[Dict[str, str]]:
-    """Load JSON from input string or from file if string starts with @."""
-    json_object: List[Dict[str, str]]
-    json_string: Union[str, bytes]
-
-    if option_value.startswith("@"):
-        json_file = option_value[1:]
-        try:
-            with click.open_file(json_file, "rb") as fp:
-                json_string = fp.read()
-        except OSError:
-            raise click.ClickException(f"Failed to load content from {json_file}")
-    else:
-        json_string = option_value
-
-    try:
-        json_object = json.loads(json_string)
-    except json.decoder.JSONDecodeError:
-        raise click.ClickException("Failed to decode JSON")
-    else:
-        return json_object
-
-
 @repository.command()
 @name_option
 @href_option
@@ -209,7 +182,7 @@ def _load_json_from_option(
 @click.option(
     "--add-content",
     default="[]",
-    callback=_load_json_from_option,
+    callback=load_json_callback,
     expose_value=True,
     help=_(
         """JSON string with a list of objects to add to the repository.
@@ -220,7 +193,7 @@ def _load_json_from_option(
 @click.option(
     "--remove-content",
     default="[]",
-    callback=_load_json_from_option,
+    callback=load_json_callback,
     expose_value=True,
     help=_(
         """JSON string with a list of objects to remove from the repository.
