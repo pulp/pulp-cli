@@ -1,5 +1,6 @@
 import gettext
-from typing import Any, Optional, Tuple
+import json
+from typing import Any, Optional, Tuple, Union
 
 import click
 
@@ -79,6 +80,36 @@ def _version_callback(
     else:
         entity_ctx.pulp_href = repository_ctx.entity["latest_version_href"]
     return value
+
+
+def load_json_callback(
+    ctx: click.Context,
+    param: click.Parameter,
+    value: str,
+) -> Any:
+    """Load JSON from input string or from file if string starts with @."""
+    json_object: Any
+    json_string: Union[str, bytes]
+
+    if value is None:
+        return None
+
+    if value.startswith("@"):
+        json_file = value[1:]
+        try:
+            with click.open_file(json_file, "rb") as fp:
+                json_string = fp.read()
+        except OSError:
+            raise click.ClickException(f"Failed to load content from {json_file}")
+    else:
+        json_string = value
+
+    try:
+        json_object = json.loads(json_string)
+    except json.decoder.JSONDecodeError:
+        raise click.ClickException("Failed to decode JSON")
+    else:
+        return json_object
 
 
 ##############################################################################

@@ -11,6 +11,28 @@ from pulpcore.cli.common.context import EntityDefinition, PulpContext, PulpEntit
 _ = gettext.gettext
 
 
+class PulpAccessPolicyContext(PulpEntityContext):
+    ENTITY = "access policy"
+    ENTITIES = "access_policies"
+    HREF = "access_policy_href"
+    LIST_ID = "access_policies_list"
+    READ_ID = "access_policies_read"
+    UPDATE_ID = "access_policies_partial_update"
+
+    def find(self, **kwargs: Any) -> Any:
+        """Workaroud for the missing ability to filter"""
+        # https://pulp.plan.io/issues/8189
+        if self.pulp_ctx.has_plugin("pulpcore", min_version="3.10.dev0"):
+            # Workaround not needed anymore
+            return super().find(**kwargs)
+        search_result = self.list(limit=sys.maxsize, offset=0, parameters={})
+        for key, value in kwargs.items():
+            search_result = [res for res in search_result if res[key] == value]
+        if len(search_result) != 1:
+            raise click.ClickException(f"Could not find {self.ENTITY} with {kwargs}.")
+        return search_result[0]
+
+
 class PulpArtifactContext(PulpEntityContext):
     ENTITY = "artifact"
     HREF = "artifact_href"
