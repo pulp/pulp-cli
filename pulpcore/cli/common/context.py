@@ -311,7 +311,7 @@ class PulpEntityContext:
         _parameters = self.scope
         if parameters:
             _parameters.update(parameters)
-        return self.pulp_ctx.call(self.CREATE_ID, parameters=parameters, body=body)
+        return self.pulp_ctx.call(self.CREATE_ID, parameters=_parameters, body=body)
 
     def update(
         self,
