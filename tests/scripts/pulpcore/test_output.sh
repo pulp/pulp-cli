@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # shellcheck source=tests/scripts/config.source
-. "$(dirname "$(realpath "$0")")/config.source"
+. "$(dirname "$(dirname "$(realpath "$0")")")"/config.source
 
 # skip this test if pygments is not installed
 pip show pygments > /dev/null || exit 3

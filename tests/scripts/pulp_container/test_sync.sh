@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # shellcheck source=tests/scripts/config.source
-. "$(dirname "$(realpath "$0")")/config.source"
+. "$(dirname "$(dirname "$(realpath "$0")")")"/config.source
 
 pulp debug has-plugin --name "pulp_container" || exit 3
 

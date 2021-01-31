@@ -91,9 +91,19 @@ As a rule of thumb, all necessary workarounds should be implemented in the corre
 Tests are shell scripts in `tests/scripts` with names like `test_*.sh`.
 They should should focus on the cli operation and are not a replacement for pulp integration tests;
 i.e. make sure the cli translates to the right api calls, but do not care about pulp internals.
-In order to perform, a running instance of pulp with all necessary plugins installed must be configured in `tests/scripts/config/pulp/settings.toml`.
-All tests are excercised using `make test`.
-Individual tests can be selected by pattern via `pytest -k file`.
+
+#### Running Tests
+
+In order to run tests, a running instance of pulp with all necessary plugins installed must be
+configured in `tests/settings.toml`.
+
+To run tests:
+
+```
+make test                           # all tests
+pytest -m pulp_file                 # tests for pulp_file
+pytest -m pulp_file -k test_remote  # run tests/scripts/pulp_file/test_remote.sh
+```
 
 ## Releasing
 
