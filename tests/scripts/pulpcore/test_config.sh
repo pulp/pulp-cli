@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # shellcheck source=tests/scripts/config.source
-. "$(dirname "$(realpath "$0")")/config.source"
+. "$(dirname "$(dirname "$(realpath "$0")")")"/config.source
 
 good_settings="${XDG_CONFIG_HOME}/pulp/settings.toml"
 bad_settings="bad_settings.toml"
