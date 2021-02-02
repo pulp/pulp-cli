@@ -41,6 +41,7 @@ class PulpFileRemoteContext(PulpEntityContext):
     HREF = "file_file_remote_href"
     LIST_ID = "remotes_file_file_list"
     CREATE_ID = "remotes_file_file_create"
+    READ_ID = "remotes_file_file_read"
     UPDATE_ID = "remotes_file_file_partial_update"
     DELETE_ID = "remotes_file_file_delete"
 
