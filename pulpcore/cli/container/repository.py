@@ -8,7 +8,12 @@ from pulpcore.cli.common.context import (
     pass_pulp_context,
     pass_repository_context,
 )
-from pulpcore.cli.common.generic import destroy_by_name, list_entities, show_by_name
+from pulpcore.cli.common.generic import (
+    destroy_by_name,
+    list_entities,
+    show_by_name,
+    version_command,
+)
 from pulpcore.cli.container.context import (
     PulpContainerPushRepositoryContext,
     PulpContainerRemoteContext,
@@ -97,6 +102,7 @@ def update(
 
 repository.add_command(destroy_by_name)
 repository.add_command(show_by_name)
+repository.add_command(version_command())
 
 
 @repository.command()

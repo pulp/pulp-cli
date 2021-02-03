@@ -59,6 +59,13 @@ def _name_callback(
     return value
 
 
+def _repository_callback(ctx: click.Context, param: click.Parameter, value: str) -> str:
+    if value is not None:
+        repository_ctx: PulpRepositoryContext = ctx.find_object(PulpRepositoryContext)
+        repository_ctx.entity = {"name": value}
+    return value
+
+
 def _version_callback(
     ctx: click.Context, param: click.Parameter, value: Optional[int]
 ) -> Optional[int]:
@@ -104,6 +111,13 @@ name_option = click.option(
     callback=_name_callback,
     expose_value=False,
     cls=PulpOption,
+)
+
+repository_option = click.option(
+    "--repository",
+    help="Name of the repository",
+    callback=_repository_callback,
+    expose_value=False,
 )
 
 version_option = click.option(
@@ -253,32 +267,22 @@ def version_command(**kwargs: Any) -> click.Command:
 
     if "name" not in kwargs:
         kwargs["name"] = "version"
-    decorators = kwargs.pop("decorators", [])
 
     @click.group(**kwargs)
-    @click.option("--repository")
     @pass_repository_context
-    @pass_pulp_context
     @click.pass_context
     def callback(
         ctx: click.Context,
-        pulp_ctx: PulpContext,
         repository_ctx: PulpRepositoryContext,
-        repository: Optional[str],
     ) -> None:
         ctx.obj = repository_ctx.get_version_context()
-        if repository is not None:
-            repository_ctx.entity = {"name": repository}
 
-    for option in decorators:
-        # Decorate callback
-        callback = option(callback)
-
-    callback.add_command(list_command())
-    callback.add_command(show_command(decorators=[version_option]))
-    callback.add_command(destroy_command(decorators=[version_option]))
+    callback.add_command(list_command(decorators=[repository_option]))
+    callback.add_command(show_command(decorators=[repository_option, version_option]))
+    callback.add_command(destroy_command(decorators=[repository_option, version_option]))
 
     @callback.command()
+    @repository_option
     @version_option
     @pass_repository_version_context
     @pass_pulp_context
@@ -337,6 +341,11 @@ def label_command(**kwargs: Any) -> click.Command:
     return label_group
 
 
+# =============================================================================
+# DEPRECATED: All generics below this line are deprecated.
+# Do not start to use them!
+
+
 @click.command(name="list")
 @limit_option
 @offset_option
@@ -374,23 +383,6 @@ def show_by_href(pulp_ctx: PulpContext, entity_ctx: PulpEntityContext, href: str
     pulp_ctx.output_result(entity)
 
 
-@click.command(name="show")
-@click.option("--version", required=True, type=int)
-@pass_repository_version_context
-@pass_repository_context
-@pass_pulp_context
-def show_version(
-    pulp_ctx: PulpContext,
-    repository_ctx: PulpRepositoryContext,
-    repository_version_ctx: PulpRepositoryVersionContext,
-    version: int,
-) -> None:
-    repo_href = repository_ctx.pulp_href
-    href = f"{repo_href}versions/{version}"
-    result = repository_version_ctx.show(href)
-    pulp_ctx.output_result(result)
-
-
 @click.command(name="destroy")
 @click.option("--name", required=True, help="Name of the entry to destroy")
 @pass_entity_context
@@ -410,57 +402,3 @@ def destroy_by_href(entity_ctx: PulpEntityContext, href: str) -> None:
     Destroy an entry
     """
     entity_ctx.delete(href)
-
-
-@click.command(name="destroy")
-@click.option("--version", required=True, type=int)
-@pass_repository_version_context
-@pass_repository_context
-def destroy_version(
-    repository_ctx: PulpRepositoryContext,
-    repository_version_ctx: PulpRepositoryVersionContext,
-    version: int,
-) -> None:
-    repo_href = repository_ctx.pulp_href
-    href = f"{repo_href}versions/{version}/"
-    repository_version_ctx.delete(href)
-
-
-@click.command(name="repair")
-@click.option("--version", required=True, type=int)
-@pass_repository_version_context
-@pass_repository_context
-@pass_pulp_context
-def repair_version(
-    pulp_ctx: PulpContext,
-    repository_ctx: PulpRepositoryContext,
-    repository_version_ctx: PulpRepositoryVersionContext,
-    version: int,
-) -> None:
-    repo_href = repository_ctx.pulp_href
-    href = f"{repo_href}versions/{version}/"
-    result = repository_version_ctx.repair(href)
-    pulp_ctx.output_result(result)
-
-
-# Generic repository_version command group
-@click.group(name="version")
-@click.option("--repository")
-@pass_repository_context
-@pass_pulp_context
-@click.pass_context
-def version_group(
-    ctx: click.Context,
-    pulp_ctx: PulpContext,
-    repository_ctx: PulpRepositoryContext,
-    repository: Optional[str],
-) -> None:
-    ctx.obj = repository_ctx.get_version_context()
-    if repository is not None:
-        repository_ctx.entity = {"name": repository}
-
-
-version_group.add_command(list_entities)
-version_group.add_command(show_version)
-version_group.add_command(destroy_version)
-version_group.add_command(repair_version)
