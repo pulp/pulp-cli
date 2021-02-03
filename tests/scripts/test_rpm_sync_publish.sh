@@ -34,8 +34,8 @@ expect_succ pulp rpm distribution create --name "cli_test_rpm_distro" \
 
 expect_succ curl "$curl_opt" --head --fail "$PULP_BASE_URL/pulp/content/cli_test_rpm_distro/config.repo"
 
-expect_succ pulp rpm repository version --repository "cli_test_rpm_repository" list
-expect_succ pulp rpm repository version --repository "cli_test_rpm_repository" repair --version 1
+expect_succ pulp rpm repository version list --repository "cli_test_rpm_repository"
+expect_succ pulp rpm repository version repair --repository "cli_test_rpm_repository" --version 1
 
 expect_succ pulp rpm distribution destroy --name "cli_test_rpm_distro"
 expect_succ pulp rpm publication destroy --href "$PUBLICATION_HREF"

@@ -32,24 +32,24 @@ expect_succ pulp ansible repository sync --name "cli_test_ansible_repository"
 expect_succ pulp ansible repository sync --name "cli_test_ansible_repository" --remote "cli_test_ansible_remote"
 
 # Verify sync
-expect_succ pulp ansible repository version --repository "cli_test_ansible_repository" list
+expect_succ pulp ansible repository version list --repository "cli_test_ansible_repository"
 test "$(echo "$OUTPUT" | jq -r length)" -eq 2
-expect_succ pulp ansible repository version --repository "cli_test_ansible_repository" show --version 1
+expect_succ pulp ansible repository version show --repository "cli_test_ansible_repository" --version 1
 test "$(echo "$OUTPUT" | jq -r '.content_summary.present."ansible.role".count')" -eq 56
 
 # Test repair the version
-expect_succ pulp ansible repository version --repository "cli_test_ansible_repository" repair --version 1
+expect_succ pulp ansible repository version repair --repository "cli_test_ansible_repository" --version 1
 test "$(echo "$OUTPUT" | jq -r '.state')" = "completed"
 
 # Delete version again
-expect_succ pulp ansible repository version --repository "cli_test_ansible_repository" destroy --version 1
+expect_succ pulp ansible repository version destroy --repository "cli_test_ansible_repository" --version 1
 
 # Test with collection remote
 expect_succ pulp ansible repository sync --name "cli_test_ansible_repository" --remote "cli_test_ansible_collection_remote"
 
 # Verify sync
-expect_succ pulp ansible repository version --repository "cli_test_ansible_repository" list
+expect_succ pulp ansible repository version list --repository "cli_test_ansible_repository"
 test "$(echo "$OUTPUT" | jq -r length)" -eq 2
-expect_succ pulp ansible repository version --repository "cli_test_ansible_repository" show --version 2
+expect_succ pulp ansible repository version show --repository "cli_test_ansible_repository" --version 2
 test "$(echo "$OUTPUT" | jq -r '.content_summary.present."ansible.collection_version".count')" -eq 3
 
