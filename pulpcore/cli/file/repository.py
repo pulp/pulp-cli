@@ -19,10 +19,13 @@ from pulpcore.cli.common.generic import (
     list_command,
     load_json_callback,
     name_option,
+    repository_href_option,
+    repository_option,
     show_command,
     update_command,
     version_command,
 )
+from pulpcore.cli.core.generic import task_command
 from pulpcore.cli.file.context import (
     PulpFileContentContext,
     PulpFileRemoteContext,
@@ -60,6 +63,7 @@ def repository(ctx: click.Context, pulp_ctx: PulpContext, repo_type: str) -> Non
 
 
 lookup_options = [href_option, name_option]
+nested_lookup_options = [repository_href_option, repository_option]
 create_options = [
     click.option("--name", required=True),
     click.option("--description"),
@@ -75,6 +79,7 @@ repository.add_command(show_command(decorators=lookup_options))
 repository.add_command(create_command(decorators=create_options))
 repository.add_command(update_command(decorators=lookup_options + update_options))
 repository.add_command(destroy_command(decorators=lookup_options))
+repository.add_command(task_command(decorators=nested_lookup_options))
 repository.add_command(version_command())
 repository.add_command(label_command())
 

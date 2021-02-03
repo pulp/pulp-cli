@@ -63,7 +63,18 @@ def _name_callback(
     return value
 
 
-def _repository_callback(ctx: click.Context, param: click.Parameter, value: str) -> str:
+def _repository_href_callback(
+    ctx: click.Context, param: click.Parameter, value: Optional[str]
+) -> Optional[str]:
+    if value is not None:
+        repository_ctx: PulpRepositoryContext = ctx.find_object(PulpRepositoryContext)
+        repository_ctx.pulp_href = value
+    return value
+
+
+def _repository_callback(
+    ctx: click.Context, param: click.Parameter, value: Optional[str]
+) -> Optional[str]:
     if value is not None:
         repository_ctx: PulpRepositoryContext = ctx.find_object(PulpRepositoryContext)
         repository_ctx.entity = {"name": value}
@@ -145,6 +156,13 @@ name_option = click.option(
     callback=_name_callback,
     expose_value=False,
     cls=PulpOption,
+)
+
+repository_href_option = click.option(
+    "--repository-href",
+    help=_("HREF of the repository"),
+    callback=_repository_href_callback,
+    expose_value=False,
 )
 
 repository_option = click.option(

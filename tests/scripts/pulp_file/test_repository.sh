@@ -30,6 +30,10 @@ expect_succ test "$(echo "$OUTPUT" | jq -r '.description')" = "null"
 expect_succ test "$(echo "$OUTPUT" | jq -r '.remote')" = ""
 expect_succ pulp file repository list
 test "$(echo "$OUTPUT" | jq -r '.|length')" != "0"
+
+expect_succ pulp file repository task list --repository "cli_test_file_repo"
+test "$(echo "$OUTPUT" | jq -r '.|length')" = "3"
+
 if pulp debug has-plugin --name "core" --min-version "3.10.dev"
 then
   expect_succ pulp repository list
