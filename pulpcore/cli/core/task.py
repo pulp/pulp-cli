@@ -5,6 +5,7 @@ import click
 from pulpcore.cli.common.context import PulpContext, pass_entity_context, pass_pulp_context
 from pulpcore.cli.common.generic import list_command
 from pulpcore.cli.core.context import PulpTaskContext
+from pulpcore.cli.core.generic import task_filter
 
 _ = gettext.gettext
 
@@ -16,26 +17,7 @@ def task(ctx: click.Context, pulp_ctx: PulpContext) -> None:
     ctx.obj = PulpTaskContext(pulp_ctx)
 
 
-task.add_command(
-    list_command(
-        decorators=[
-            click.option("--name", help=_("List only tasks with this name.")),
-            click.option(
-                "--name-contains",
-                "name__contains",
-                help=_("List only tasks whose name contains this."),
-            ),
-            click.option(
-                "--state",
-                type=click.Choice(
-                    ["waiting", "skipped", "running", "completed", "failed", "canceled"],
-                    case_sensitive=False,
-                ),
-                help=_("List only tasks in this state."),
-            ),
-        ]
-    )
-)
+task.add_command(list_command(decorators=task_filter))
 
 
 @task.command()

@@ -283,12 +283,21 @@ class PulpTaskContext(PulpEntityContext):
     READ_ID = "tasks_read"
     CANCEL_ID: ClassVar[str] = "tasks_cancel"
 
+    resource_context: Optional[PulpEntityContext] = None
+
     def cancel(self, task_href: str) -> Any:
         return self.pulp_ctx.call(
             self.CANCEL_ID,
             parameters={self.HREF: task_href},
             body={"state": "canceled"},
         )
+
+    @property
+    def scope(self) -> Dict[str, Any]:
+        if self.resource_context:
+            return {"reserved_resources_record": self.resource_context.pulp_href}
+        else:
+            return {}
 
 
 class PulpUploadContext(PulpEntityContext):
