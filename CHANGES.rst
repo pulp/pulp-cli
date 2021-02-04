@@ -13,6 +13,33 @@ Changelog
 
 .. towncrier release notes start
 
+0.3.0 (2021-02-04)
+==================
+
+
+Features
+--------
+
+- Added label commands.
+  `#100 <https://github.com/pulp/pulp-cli/issues/100>`_
+
+
+Bugfixes
+--------
+
+- Fixed missing READ_ID error for pulp file remote show.
+  `#107 <https://github.com/pulp/pulp-cli/issues/107>`_
+
+
+Misc
+----
+
+- `#89 <https://github.com/pulp/pulp-cli/issues/89>`_
+
+
+----
+
+
 0.2.0 (2021-01-26)
 ==================
 
