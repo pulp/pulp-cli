@@ -1,5 +1,5 @@
 import os
-from typing import Any, Optional
+from typing import Any, Callable, Optional
 
 import click
 import pkg_resources
@@ -30,6 +30,31 @@ def _config_callback(ctx: click.Context, param: Any, value: Optional[str]) -> No
             pass
 
 
+CONFIG_OPTIONS = [
+    click.option("--base-url", default="https://localhost", help="API base url"),
+    click.option("--username", help="Username on pulp server"),
+    click.option("--password", help="Password on pulp server"),
+    click.option("--cert", help="Path to client certificate"),
+    click.option(
+        "--key",
+        help="Path to client private key. Not required if client cert contains this.",
+    ),
+    click.option("--verify-ssl/--no-verify-ssl", default=True, help="Verify SSL connection"),
+    click.option(
+        "--format",
+        type=click.Choice(["json", "yaml", "none"], case_sensitive=False),
+        default="json",
+        help="Format of the response",
+    ),
+]
+
+
+def config_options(command: Callable[..., Any]) -> Callable[..., Any]:
+    for option in reversed(CONFIG_OPTIONS):
+        command = option(command)
+    return command
+
+
 @click.group()
 @click.version_option(prog_name="pulp3 command line interface")
 @click.option(
@@ -38,17 +63,6 @@ def _config_callback(ctx: click.Context, param: Any, value: Optional[str]) -> No
     help="Path to the Pulp settings.toml file",
     callback=_config_callback,
     expose_value=False,
-)
-@click.option("--base-url", default="https://localhost", help="Api base url")
-@click.option("--username", help="Username on pulp server")
-@click.option("--password", help="Password on pulp server")
-@click.option("--cert", help="Path to client certificate")
-@click.option(
-    "--key", help="Path to client private key. Not required if client cert contains this."
-)
-@click.option("--verify-ssl/--no-verify-ssl", default=True, help="Verify SSL connection")
-@click.option(
-    "--format", type=click.Choice(["json", "yaml", "none"], case_sensitive=False), default="json"
 )
 @click.option(
     "-v",
@@ -67,6 +81,7 @@ def _config_callback(ctx: click.Context, param: Any, value: Optional[str]) -> No
 @click.option(
     "--dry-run", is_flag=True, help="Trace commands without performing any unsafe HTTP calls"
 )
+@config_options
 @click.pass_context
 def main(
     ctx: click.Context,

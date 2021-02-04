@@ -1,5 +1,6 @@
 from pulpcore.cli.common import main
 from pulpcore.cli.core.artifact import artifact
+from pulpcore.cli.core.config import config
 from pulpcore.cli.core.export import export
 from pulpcore.cli.core.exporter import exporter
 from pulpcore.cli.core.group import group
@@ -23,3 +24,4 @@ main.add_command(task)
 main.add_command(exporter)
 main.add_command(export)
 main.add_command(importer)
+main.add_command(config)
