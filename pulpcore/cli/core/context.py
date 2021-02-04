@@ -166,6 +166,55 @@ class PulpGroupContext(PulpEntityContext):
         return search_result[0]
 
 
+class PulpGroupPermissionContext(PulpEntityContext):
+    ENTITY = "group permission"
+    ENTITIES = "group permissions"
+    group_ctx: PulpGroupContext
+
+    def __init__(self, pulp_ctx: PulpContext, group_ctx: PulpGroupContext) -> None:
+        pulp_ctx.needs_plugin("pulpcore", min_version="3.10.dev0")
+        super().__init__(pulp_ctx)
+        self.group_ctx = group_ctx
+
+    def find(self, **kwargs: Any) -> Any:
+        """Workaroud for the missing ability to filter"""
+        # # TODO fix upstream and adjust to guard for the proper version
+        # # https://pulp.plan.io/issues/8241
+        # if self.pulp_ctx.has_plugin("pulpcore", min_version="3.99.dev0"):
+        #     # Workaround not needed anymore
+        #     return super().find(**kwargs)
+        search_result = self.list(limit=sys.maxsize, offset=0, parameters={})
+        for key, value in kwargs.items():
+            search_result = [res for res in search_result if res[key] == value]
+        if len(search_result) != 1:
+            raise click.ClickException(f"Could not find {self.ENTITY} with {kwargs}.")
+        return search_result[0]
+
+    @property
+    def scope(self) -> Dict[str, Any]:
+        return {PulpGroupContext.HREF: self.group_ctx.pulp_href}
+
+
+class PulpGroupModelPermissionContext(PulpGroupPermissionContext):
+    ENTITY = "group model permission"
+    ENTITIES = "group model permissions"
+    HREF = "auth_groups_model_permission_href"
+    LIST_ID = "groups_model_permissions_list"
+    READ_ID = "groups_model_permissions_read"
+    CREATE_ID = "groups_model_permissions_create"
+    DELETE_ID = "groups_model_permissions_delete"
+
+
+class PulpGroupObjectPermissionContext(PulpGroupPermissionContext):
+    ENTITY = "group object permission"
+    ENTITIES = "group object permissions"
+    HREF = "auth_groups_object_permission_href"
+    LIST_ID = "groups_object_permissions_list"
+    READ_ID = "groups_object_permissions_read"
+    CREATE_ID = "groups_object_permissions_create"
+    DELETE_ID = "groups_object_permissions_delete"
+
+
 class PulpGroupUserContext(PulpEntityContext):
     ENTITY = "group user"
     # This is replaced by a version aware property below
