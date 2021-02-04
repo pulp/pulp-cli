@@ -1,7 +1,0 @@
-[cli]
-# base_url = "http://localhost:8080"
-base_url = "https://pulp3-sandbox-debian-testing"
-# base_url = "http://pulp3-source-debian-testing"
-username = "admin"
-password = "password"
-verify_ssl = false
