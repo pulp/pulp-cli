@@ -17,66 +17,16 @@ Global options include:
   * `--format`
   * `-v`/`-vv`/`-vvv`
 
-## Installation
+## Quick start
 
-The pulp-cli package can be installed from a variety of sources. After installing, see the next
-section on how to configure pulp-cli.
-
-### From PyPI
+To install and use the CLI, run these commands:
 
 ```
-pip install pulp-cli[pygments]  # colorized output
-pip install pulp-cli  # no color output
+pip install pulp-cli[pygments]
+pulp config create -e
 ```
 
-### From a source checkout
-
-```
-git clone <your_fork_url>
-cd pulp-cli
-pip install -e .
-```
-
-## Configuration
-
-The CLI can be configured by using a toml file.
-By default the location of this file is `~/.config/pulp/settings.toml`.
-However, this can be customized by using the `--config` option.
-Any settings supplied as options to a command will override these settings.
-
-Example file:
-
-```toml
-[cli]
-base_url = "https://pulp.dev"
-verify_ssl = false
-format = "json"
-```
-
-### netrc
-
-If no user/pass is supplied either in the config file or as an option,
-then the CLI will attempt to use `~/.netrc`.
-Here is a `.netrc` example for localhost:
-
-```
-machine localhost
-login admin
-password password
-```
-
-### Katello
-
-If you have a Katello environment and wish to use pulp-cli to connect to Pulp, you'll need to
-configure client certificate authentication:
-
-```toml
-[cli]
-base_url = "https://<your FQDN>"
-cert = "/etc/pki/katello/certs/pulp-client.crt"
-key = "/etc/pki/katello/private/pulp-client.key"
-verify_ssl = false
-```
+Read [the installation and configuration doc](docs/install.md) for more information.
 
 ## Known issues
 
