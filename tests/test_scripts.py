@@ -15,7 +15,7 @@ TEST_SCRIPTS = [
 
 @pytest.mark.script
 @pytest.mark.parametrize("script", TEST_SCRIPTS)
-def test_script(script, cli_env, tmp_path):
+def test_script(script, pulp_cli_env, tmp_path):
     run = subprocess.run([script], cwd=tmp_path)
     if run.returncode == 3:
         pytest.skip("Skipped as requested by the script.")
