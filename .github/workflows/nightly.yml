@@ -17,8 +17,12 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - python: 3.9
+            image_tag: nightly
           - python: 3.6
             image_tag: latest
+          - python: 3.9
+            image_tag: 3.9
           - python: 3.7
             image_tag: 3.8
           - python: 3.8
@@ -35,3 +39,10 @@ jobs:
         env:
           IMAGE_TAG: ${{ matrix.image_tag }}
         run: .ci/run_container.sh make test
+      - name: After failure
+        if: failure()
+        run: |
+          http --timeout 30 --check-status --pretty format --print hb http://pulp/pulp/api/v3/status/ || true
+          docker images || true
+          docker ps -a || true
+          docker logs pulp || true

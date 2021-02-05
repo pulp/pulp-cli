@@ -7,6 +7,7 @@ lint:
 	isort -c --diff .
 	flake8 --config flake8.cfg
 	mypy
+	@echo "🙊 Code 🙈 LGTM 🙉 !"
 
 tests/scripts/config/pulp/settings.toml:
 	cp $@.example $@
