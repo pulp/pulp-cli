@@ -65,6 +65,19 @@ login admin
 password password
 ```
 
+### Katello
+
+If you have a Katello environment and wish to use pulp-cli to connect to Pulp, you'll need to
+configure client certificate authentication:
+
+```toml
+[cli]
+base_url = "https://<your FQDN>"
+cert = "/etc/pki/katello/certs/pulp-client.crt"
+key = "/etc/pki/katello/private/pulp-client.key"
+verify_ssl = false
+```
+
 ## Known issues
 
   * Redirecting from `http` to `https`, as done by a typical Pulp installation,

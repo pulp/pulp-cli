@@ -16,3 +16,9 @@ expect_fail pulp --config "$good_settings" --base-url "http://badurl" file repos
 
 # fail as both username and password are required together
 expect_fail pulp --password test file repository list
+
+# fail when using basic auth and cert auth
+expect_fail pulp --username test --password test --client "/some/path" status
+
+# fail when using basic auth and cert auth
+expect_fail pulp --key "/some/path" file remote list

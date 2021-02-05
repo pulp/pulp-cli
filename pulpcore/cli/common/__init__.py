@@ -42,6 +42,10 @@ def _config_callback(ctx: click.Context, param: Any, value: Optional[str]) -> No
 @click.option("--base-url", default="https://localhost", help="Api base url")
 @click.option("--username", help="Username on pulp server")
 @click.option("--password", help="Password on pulp server")
+@click.option("--cert", help="Path to client certificate")
+@click.option(
+    "--key", help="Path to client private key. Not required if client cert contains this."
+)
 @click.option("--verify-ssl/--no-verify-ssl", default=True, help="Verify SSL connection")
 @click.option(
     "--format", type=click.Choice(["json", "yaml", "none"], case_sensitive=False), default="json"
@@ -69,6 +73,8 @@ def main(
     base_url: str,
     username: Optional[str],
     password: Optional[str],
+    cert: Optional[str],
+    key: Optional[str],
     verify_ssl: bool,
     format: str,
     verbose: int,
@@ -85,6 +91,8 @@ def main(
         doc_path="/pulp/api/v3/docs/api.json",
         username=username,
         password=password,
+        cert=cert,
+        key=key,
         validate_certs=verify_ssl,
         refresh_cache=refresh_api,
         safe_calls_only=dry_run,
