@@ -97,6 +97,10 @@ eval "$(_PULP_COMPLETE=source_bash pulp)"
 
 ## Contributing
 
+### Pulp CLI feedback & thank you
+
+If you take the time to evaluate, test, or build your own CLI commands, please complete [this survey](https://forms.gle/ca1nxVVkNivEeE5m8), and we will gladly ship you some SWAG!
+
 ### Code conventions
 `pulp-cli` comes with python type annotations and black code formatting.
 To verify your code please run `black`, `flake8`, `shellcheck`, and `mypy`.
