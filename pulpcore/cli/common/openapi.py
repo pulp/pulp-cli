@@ -26,6 +26,8 @@ class OpenAPI:
         doc_path: str,
         username: Optional[str] = None,
         password: Optional[str] = None,
+        cert: Optional[str] = None,
+        key: Optional[str] = None,
         validate_certs: bool = True,
         refresh_cache: bool = False,
         safe_calls_only: bool = False,
@@ -45,11 +47,19 @@ class OpenAPI:
         }
         self._session: requests.Session = requests.session()
         if username and password:
+            if cert or key:
+                raise OpenAPIError("Cannot use both username/password and cert auth.")
             self._session.auth = (username, password)
         elif username:
             raise OpenAPIError("Password is required if username is set.")
         elif password:
             raise OpenAPIError("Username is required if password is set.")
+        elif cert and key:
+            self._session.cert = (cert, key)
+        elif cert:
+            self._session.cert = cert
+        elif key:
+            raise OpenAPIError("Cert is required if key is set.")
         self._session.headers.update(headers)
         self._session.verify = validate_certs
 
