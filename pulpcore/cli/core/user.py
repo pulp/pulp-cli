@@ -1,3 +1,5 @@
+import gettext
+
 import click
 
 from pulpcore.cli.common.context import (
@@ -8,6 +10,8 @@ from pulpcore.cli.common.context import (
 )
 from pulpcore.cli.common.generic import list_entities
 from pulpcore.cli.core.context import PulpUserContext
+
+_ = gettext.gettext
 
 
 @click.group()
@@ -21,7 +25,7 @@ user.add_command(list_entities)
 
 
 @user.command()
-@click.option("--username", required=True, help="Username of the entry")
+@click.option("--username", required=True, help=_("Username of the entry"))
 @pass_entity_context
 @pass_pulp_context
 def show(pulp_ctx: PulpContext, entity_ctx: PulpEntityContext, username: str) -> None:

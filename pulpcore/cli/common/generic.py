@@ -1,3 +1,4 @@
+import gettext
 from typing import Any, Optional, Tuple
 
 import click
@@ -14,6 +15,8 @@ from pulpcore.cli.common.context import (
     pass_repository_context,
     pass_repository_version_context,
 )
+
+_ = gettext.gettext
 
 
 class PulpCommand(click.Command):
@@ -86,20 +89,20 @@ limit_option = click.option(
     "--limit",
     default=DEFAULT_LIMIT,
     type=int,
-    help="Limit the number of {entities} to show.",
+    help=_("Limit the number of {entities} to show."),
     cls=PulpOption,
 )
 offset_option = click.option(
     "--offset",
     default=0,
     type=int,
-    help="Skip a number of {entities} to show.",
+    help=_("Skip a number of {entities} to show."),
     cls=PulpOption,
 )
 
 href_option = click.option(
     "--href",
-    help="HREF of the {entity}",
+    help=_("HREF of the {entity}"),
     callback=_href_callback,
     expose_value=False,
     cls=PulpOption,
@@ -107,7 +110,7 @@ href_option = click.option(
 
 name_option = click.option(
     "--name",
-    help="Name of the {entity}",
+    help=_("Name of the {entity}"),
     callback=_name_callback,
     expose_value=False,
     cls=PulpOption,
@@ -115,14 +118,14 @@ name_option = click.option(
 
 repository_option = click.option(
     "--repository",
-    help="Name of the repository",
+    help=_("Name of the repository"),
     callback=_repository_callback,
     expose_value=False,
 )
 
 version_option = click.option(
     "--version",
-    help="Repository version number",
+    help=_("Repository version number"),
     type=int,
     callback=_version_callback,
     expose_value=False,
@@ -131,7 +134,7 @@ version_option = click.option(
 label_select_option = click.option(
     "--label-select",
     "pulp_label_select",
-    help="Filter {entities} by a label search query.",
+    help=_("Filter {entities} by a label search query."),
     type=str,
     cls=PulpOption,
 )
@@ -147,6 +150,8 @@ def list_command(**kwargs: Any) -> click.Command:
         kwargs["cls"] = PulpCommand
     if "name" not in kwargs:
         kwargs["name"] = "list"
+    if "help" not in kwargs:
+        kwargs["help"] = _("Show the list of optionally filtered {entities}.")
     decorators = kwargs.pop("decorators", [])
 
     @click.command(**kwargs)
@@ -177,6 +182,8 @@ def show_command(**kwargs: Any) -> click.Command:
         kwargs["cls"] = PulpCommand
     if "name" not in kwargs:
         kwargs["name"] = "show"
+    if "help" not in kwargs:
+        kwargs["help"] = _("Show details of a {entity}.")
     decorators = kwargs.pop("decorators", [])
 
     @click.command(**kwargs)
@@ -201,12 +208,17 @@ def create_command(**kwargs: Any) -> click.Command:
         kwargs["cls"] = PulpCommand
     if "name" not in kwargs:
         kwargs["name"] = "create"
+    if "help" not in kwargs:
+        kwargs["help"] = _("Create a {entity}.")
     decorators = kwargs.pop("decorators", [])
 
     @click.command(**kwargs)
     @pass_entity_context
     @pass_pulp_context
     def callback(pulp_ctx: PulpContext, entity_ctx: PulpEntityContext, **kwargs: Any) -> None:
+        """
+        Create a {entity}.
+        """
         body: EntityDefinition = entity_ctx.preprocess_body(kwargs)
         result = entity_ctx.create(body=body)
         if "created_resources" in result:
@@ -227,12 +239,17 @@ def update_command(**kwargs: Any) -> click.Command:
         kwargs["cls"] = PulpCommand
     if "name" not in kwargs:
         kwargs["name"] = "update"
+    if "help" not in kwargs:
+        kwargs["help"] = _("Update a {entity}.")
     decorators = kwargs.pop("decorators", [])
 
     @click.command(**kwargs)
     @pass_entity_context
     @pass_pulp_context
     def callback(pulp_ctx: PulpContext, entity_ctx: PulpEntityContext, **kwargs: Any) -> None:
+        """
+        Update a {entity}.
+        """
         body: EntityDefinition = entity_ctx.preprocess_body(kwargs)
         entity_ctx.update(href=entity_ctx.pulp_href, body=body)
 
@@ -249,6 +266,8 @@ def destroy_command(**kwargs: Any) -> click.Command:
         kwargs["cls"] = PulpCommand
     if "name" not in kwargs:
         kwargs["name"] = "destroy"
+    if "help" not in kwargs:
+        kwargs["help"] = _("Destroy a {entity}.")
     decorators = kwargs.pop("decorators", [])
 
     @click.command(**kwargs)
@@ -311,25 +330,25 @@ def label_command(**kwargs: Any) -> click.Command:
     def label_group() -> None:
         pass
 
-    @click.command(name="set")
-    @click.option("--key", required=True, help="Key of the label")
-    @click.option("--value", required=True, help="Value of the label")
+    @click.command(name="set", help=_("Add or update a label"))
+    @click.option("--key", required=True, help=_("Key of the label"))
+    @click.option("--value", required=True, help=_("Value of the label"))
     @pass_entity_context
     def label_set(entity_ctx: PulpEntityContext, key: str, value: str) -> None:
         """Add or update a label"""
         href = entity_ctx.entity["pulp_href"]
         entity_ctx.set_label(href, key, value)
 
-    @click.command(name="unset")
-    @click.option("--key", required=True, help="Key of the label")
+    @click.command(name="unset", help=_("Remove a label with a given key"))
+    @click.option("--key", required=True, help=_("Key of the label"))
     @pass_entity_context
     def label_unset(entity_ctx: PulpEntityContext, key: str) -> None:
         """Remove a label with a given key"""
         href = entity_ctx.entity["pulp_href"]
         entity_ctx.unset_label(href, key)
 
-    @click.command(name="show")
-    @click.option("--key", required=True, help="Key of the label")
+    @click.command(name="show", help=_("Show the value for a particular label key"))
+    @click.option("--key", required=True, help=_("Key of the label"))
     @pass_entity_context
     def label_show(entity_ctx: PulpEntityContext, key: str) -> None:
         """Show the value for a particular label key"""
@@ -366,7 +385,7 @@ def list_entities(
 
 
 @click.command(name="show")
-@click.option("--name", required=True, help="Name of the entry")
+@click.option("--name", required=True, help=_("Name of the entry"))
 @pass_entity_context
 @pass_pulp_context
 def show_by_name(pulp_ctx: PulpContext, entity_ctx: PulpEntityContext, name: str) -> None:
@@ -377,7 +396,7 @@ def show_by_name(pulp_ctx: PulpContext, entity_ctx: PulpEntityContext, name: str
 
 
 @click.command(name="show")
-@click.option("--href", required=True, help="HREF of the entry")
+@click.option("--href", required=True, help=_("HREF of the entry"))
 @pass_entity_context
 @pass_pulp_context
 def show_by_href(pulp_ctx: PulpContext, entity_ctx: PulpEntityContext, href: str) -> None:
@@ -387,7 +406,7 @@ def show_by_href(pulp_ctx: PulpContext, entity_ctx: PulpEntityContext, href: str
 
 
 @click.command(name="destroy")
-@click.option("--name", required=True, help="Name of the entry to destroy")
+@click.option("--name", required=True, help=_("Name of the entry to destroy"))
 @pass_entity_context
 def destroy_by_name(entity_ctx: PulpEntityContext, name: str) -> None:
     """
@@ -398,7 +417,7 @@ def destroy_by_name(entity_ctx: PulpEntityContext, name: str) -> None:
 
 
 @click.command(name="destroy")
-@click.option("--href", required=True, help="HREF of the entry to destroy")
+@click.option("--href", required=True, help=_("HREF of the entry to destroy"))
 @pass_entity_context
 def destroy_by_href(entity_ctx: PulpEntityContext, href: str) -> None:
     """

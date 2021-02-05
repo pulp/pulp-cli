@@ -1,8 +1,12 @@
+import gettext
+
 from pulpcore.cli.common.context import (
     PulpEntityContext,
     PulpRepositoryContext,
     PulpRepositoryVersionContext,
 )
+
+_ = gettext.gettext
 
 # TODO Add Role and Collection Content contexts
 

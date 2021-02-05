@@ -1,10 +1,14 @@
+import gettext
+
 import click
 
 from pulpcore.cli.common.context import PulpContext, pass_pulp_context
 
+_ = gettext.gettext
+
 
 @click.command(name="show")
-@click.option("--href", required=True, help="HREF of the entry")
+@click.option("--href", required=True, help=_("HREF of the entry"))
 @pass_pulp_context
 def show(pulp_ctx: PulpContext, href: str) -> None:
     """Show any resource given its href."""

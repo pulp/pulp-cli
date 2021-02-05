@@ -1,6 +1,10 @@
+import gettext
+
 import click
 
 from pulpcore.cli.common.context import PulpContext, pass_pulp_context
+
+_ = gettext.gettext
 
 
 @click.group()

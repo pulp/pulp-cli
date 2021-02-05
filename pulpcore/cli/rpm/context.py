@@ -1,9 +1,13 @@
+import gettext
+
 from pulpcore.cli.common.context import (
     EntityDefinition,
     PulpEntityContext,
     PulpRepositoryContext,
     PulpRepositoryVersionContext,
 )
+
+_ = gettext.gettext
 
 
 class PulpRpmDistributionContext(PulpEntityContext):

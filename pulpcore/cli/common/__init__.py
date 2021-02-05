@@ -1,3 +1,4 @@
+import gettext
 import os
 from typing import Any, Callable, Optional
 
@@ -8,6 +9,7 @@ import toml
 from pulpcore.cli.common.context import PulpContext
 from pulpcore.cli.common.debug import debug
 
+_ = gettext.gettext
 __version__ = "0.5.0.dev"
 
 
@@ -31,20 +33,20 @@ def _config_callback(ctx: click.Context, param: Any, value: Optional[str]) -> No
 
 
 CONFIG_OPTIONS = [
-    click.option("--base-url", default="https://localhost", help="API base url"),
-    click.option("--username", help="Username on pulp server"),
-    click.option("--password", help="Password on pulp server"),
-    click.option("--cert", help="Path to client certificate"),
+    click.option("--base-url", default="https://localhost", help=_("API base url")),
+    click.option("--username", help=_("Username on pulp server")),
+    click.option("--password", help=_("Password on pulp server")),
+    click.option("--cert", help=_("Path to client certificate")),
     click.option(
         "--key",
-        help="Path to client private key. Not required if client cert contains this.",
+        help=_("Path to client private key. Not required if client cert contains this."),
     ),
-    click.option("--verify-ssl/--no-verify-ssl", default=True, help="Verify SSL connection"),
+    click.option("--verify-ssl/--no-verify-ssl", default=True, help=_("Verify SSL connection")),
     click.option(
         "--format",
         type=click.Choice(["json", "yaml", "none"], case_sensitive=False),
         default="json",
-        help="Format of the response",
+        help=_("Format of the response"),
     ),
 ]
 
@@ -60,7 +62,7 @@ def config_options(command: Callable[..., Any]) -> Callable[..., Any]:
 @click.option(
     "--config",
     type=click.Path(resolve_path=True),
-    help="Path to the Pulp settings.toml file",
+    help=_("Path to the Pulp settings.toml file"),
     callback=_config_callback,
     expose_value=False,
 )
@@ -69,17 +71,17 @@ def config_options(command: Callable[..., Any]) -> Callable[..., Any]:
     "--verbose",
     type=int,
     count=True,
-    help="Increase verbosity; explain api calls as they are made",
+    help=_("Increase verbosity; explain api calls as they are made"),
 )
 @click.option(
     "-b",
     "--background",
     is_flag=True,
-    help="Start tasks in the background instead of awaiting them",
+    help=_("Start tasks in the background instead of awaiting them"),
 )
-@click.option("--refresh-api", is_flag=True, help="Invalidate cached API docs")
+@click.option("--refresh-api", is_flag=True, help=_("Invalidate cached API docs"))
 @click.option(
-    "--dry-run", is_flag=True, help="Trace commands without performing any unsafe HTTP calls"
+    "--dry-run", is_flag=True, help=_("Trace commands without performing any unsafe HTTP calls")
 )
 @config_options
 @click.pass_context

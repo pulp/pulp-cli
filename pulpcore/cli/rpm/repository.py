@@ -1,3 +1,4 @@
+import gettext
 from typing import Optional, Union
 
 import click
@@ -22,6 +23,8 @@ from pulpcore.cli.common.generic import (
     version_command,
 )
 from pulpcore.cli.rpm.context import PulpRpmRemoteContext, PulpRpmRepositoryContext
+
+_ = gettext.gettext
 
 
 def _remote_callback(

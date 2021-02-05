@@ -1,3 +1,4 @@
+import gettext
 import json
 from typing import Any, Dict, List, Optional, Union
 
@@ -27,6 +28,8 @@ from pulpcore.cli.file.context import (
     PulpFileRemoteContext,
     PulpFileRepositoryContext,
 )
+
+_ = gettext.gettext
 
 
 def _remote_callback(
@@ -208,18 +211,22 @@ def _load_json_from_option(
     default="[]",
     callback=_load_json_from_option,
     expose_value=True,
-    help="""JSON string with a list of objects to add to the repository.
+    help=_(
+        """JSON string with a list of objects to add to the repository.
     Each object should consist of the following keys: "sha256", "relative_path"..
-    The argument prefixed with the '@' can be the path to a JSON file with a list of objects.""",
+    The argument prefixed with the '@' can be the path to a JSON file with a list of objects."""
+    ),
 )
 @click.option(
     "--remove-content",
     default="[]",
     callback=_load_json_from_option,
     expose_value=True,
-    help="""JSON string with a list of objects to remove from the repository.
+    help=_(
+        """JSON string with a list of objects to remove from the repository.
     Each object should consist of the following keys: "sha256", "relative_path"..
-    The argument prefixed with the '@' can be the path to a JSON file with a list of objects.""",
+    The argument prefixed with the '@' can be the path to a JSON file with a list of objects."""
+    ),
 )
 @pass_repository_context
 @pass_pulp_context
