@@ -28,6 +28,7 @@ class PulpRpmRemoteContext(PulpEntityContext):
     ENTITY = "remote"
     HREF = "rpm_rpm_remote_href"
     LIST_ID = "remotes_rpm_rpm_list"
+    READ_ID = "remotes_rpm_rpm_read"
     CREATE_ID = "remotes_rpm_rpm_create"
     UPDATE_ID = "remotes_rpm_rpm_partial_update"
     DELETE_ID = "remotes_rpm_rpm_delete"
