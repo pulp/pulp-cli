@@ -1,3 +1,4 @@
+import gettext
 from typing import Optional
 
 import click
@@ -19,6 +20,8 @@ from pulpcore.cli.container.context import (
     PulpContainerRemoteContext,
     PulpContainerRepositoryContext,
 )
+
+_ = gettext.gettext
 
 
 @click.group()

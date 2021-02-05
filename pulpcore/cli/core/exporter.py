@@ -1,3 +1,4 @@
+import gettext
 from copy import deepcopy
 from typing import List
 
@@ -11,6 +12,8 @@ from pulpcore.cli.common.context import (
 )
 from pulpcore.cli.common.generic import destroy_by_name, list_entities, show_by_name
 from pulpcore.cli.core.context import PulpExporterContext
+
+_ = gettext.gettext
 
 
 @click.group()
@@ -57,7 +60,7 @@ pulp.add_command(show_by_name)
 
 
 @pulp.command(deprecated=True)
-@click.option("--name", required=True, help="Name of the PulpExporter")
+@click.option("--name", required=True, help=_("Name of the PulpExporter"))
 @pass_entity_context
 @pass_pulp_context
 def read(pulp_ctx: PulpContext, exporter_ctx: PulpExporterContext, name: str) -> None:

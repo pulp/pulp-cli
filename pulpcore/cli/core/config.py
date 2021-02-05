@@ -1,3 +1,4 @@
+import gettext
 from pathlib import Path
 from typing import Any, Optional
 
@@ -6,20 +7,22 @@ import toml
 
 from pulpcore.cli.common import config_options
 
+_ = gettext.gettext
+
 LOCATION = str(Path(click.utils.get_app_dir("pulp"), "settings.toml"))
 SETTINGS = ["base_url", "username", "password", "cert", "key", "verify_ssl", "format"]
 
 
-@click.group(name="config", help="Manage pulp-cli config file")
+@click.group(name="config", help=_("Manage pulp-cli config file"))
 def config() -> None:
     pass
 
 
-@config.command(help="Create a pulp-cli config settings file")
+@config.command(help=_("Create a pulp-cli config settings file"))
 @config_options
 @click.option("--interactive", "-i", is_flag=True)
-@click.option("--editor", "-e", is_flag=True, help="Edit the config file in an editor")
-@click.option("--overwrite", "-o", is_flag=True, help="Overwite any existing config file")
+@click.option("--editor", "-e", is_flag=True, help=_("Edit the config file in an editor"))
+@click.option("--overwrite", "-o", is_flag=True, help=_("Overwite any existing config file"))
 @click.option("--location", default=LOCATION, type=click.Path(resolve_path=True))
 @click.option(
     "--format", type=click.Choice(["json", "yaml", "none"], case_sensitive=False), default="json"
@@ -80,7 +83,7 @@ def create(
     click.echo(f"Created config file at '{location}'.")
 
 
-@config.command(help="Open the settings config file in an editor")
+@config.command(help=_("Open the settings config file in an editor"))
 @click.option("--location", default=LOCATION, type=click.Path(resolve_path=True))
 def edit(location: str) -> None:
     if not Path(location).exists():
@@ -98,9 +101,9 @@ def edit(location: str) -> None:
         sfile.write(output)
 
 
-@config.command(help="Validate a pulp-cli config file")
+@config.command(help=_("Validate a pulp-cli config file"))
 @click.option("--location", default=LOCATION, type=click.Path(resolve_path=True))
-@click.option("--strict", is_flag=True, help="Validate that all settings are present")
+@click.option("--strict", is_flag=True, help=_("Validate that all settings are present"))
 def validate(location: str, strict: bool) -> None:
     try:
         settings = toml.load(location)

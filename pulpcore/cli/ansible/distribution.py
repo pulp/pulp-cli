@@ -1,3 +1,4 @@
+import gettext
 from typing import Optional
 
 import click
@@ -13,6 +14,8 @@ from pulpcore.cli.common.context import (
     pass_pulp_context,
 )
 from pulpcore.cli.common.generic import destroy_by_name, list_entities, show_by_name
+
+_ = gettext.gettext
 
 
 @click.group()
@@ -41,8 +44,8 @@ distribution.add_command(destroy_by_name)
 @distribution.command()
 @click.option("--name", required=True)
 @click.option("--base-path", required=True)
-@click.option("--repository", help="name of repository")
-@click.option("--version", type=int, help="version of repository, leave blank for always latest")
+@click.option("--repository", help=_("name of repository"))
+@click.option("--version", type=int, help=_("version of repository, leave blank for always latest"))
 @pass_entity_context
 @pass_pulp_context
 def create(
@@ -68,13 +71,13 @@ def create(
 
 @distribution.command()
 @click.option("--name", required=True)
-@click.option("--base-path", help="new base_path")
-@click.option("--repository", type=str, default=None, help="new repository to be served")
+@click.option("--base-path", help=_("new base_path"))
+@click.option("--repository", type=str, default=None, help=_("new repository to be served"))
 @click.option(
     "--version",
     type=int,
     default=None,
-    help="version of new repository to be served, leave blank for always latest",
+    help=_("version of new repository to be served, leave blank for always latest"),
 )
 @pass_entity_context
 @pass_pulp_context

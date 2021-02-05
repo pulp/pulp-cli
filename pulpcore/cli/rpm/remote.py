@@ -1,3 +1,5 @@
+import gettext
+
 import click
 
 from pulpcore.cli.common.context import PulpContext, pass_pulp_context
@@ -13,6 +15,8 @@ from pulpcore.cli.common.generic import (
     update_command,
 )
 from pulpcore.cli.rpm.context import PulpRpmRemoteContext
+
+_ = gettext.gettext
 
 
 @click.group()

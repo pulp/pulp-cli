@@ -1,3 +1,4 @@
+import gettext
 from typing import IO, Optional, Union
 
 import click
@@ -11,6 +12,8 @@ from pulpcore.cli.common.context import (
 from pulpcore.cli.common.generic import create_command, href_option, list_command, show_command
 from pulpcore.cli.core.context import PulpArtifactContext
 from pulpcore.cli.file.context import PulpFileContentContext
+
+_ = gettext.gettext
 
 
 def _relative_path_callback(ctx: click.Context, param: click.Parameter, value: str) -> str:
@@ -65,7 +68,7 @@ create_options = [
         "--sha256",
         "artifact",
         required=True,
-        help="Digest of the artifact to use",
+        help=_("Digest of the artifact to use"),
         callback=_sha256_artifact_callback,
     ),
 ]
@@ -86,7 +89,7 @@ content.add_command(create_command(decorators=create_options))
 @click.option("--relative-path", required=True)
 @click.option("--file", type=click.File("rb"), required=True)
 @click.option(
-    "--chunk-size", default=1000000, type=int, help="Chunk size in bytes (default is 1 MB)"
+    "--chunk-size", default=1000000, type=int, help=_("Chunk size in bytes (default is 1 MB)")
 )
 @pass_entity_context
 @pass_pulp_context

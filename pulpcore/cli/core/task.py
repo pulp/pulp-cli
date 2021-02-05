@@ -1,8 +1,12 @@
+import gettext
+
 import click
 
 from pulpcore.cli.common.context import PulpContext, pass_entity_context, pass_pulp_context
 from pulpcore.cli.common.generic import list_command
 from pulpcore.cli.core.context import PulpTaskContext
+
+_ = gettext.gettext
 
 
 @click.group()
@@ -15,21 +19,21 @@ def task(ctx: click.Context, pulp_ctx: PulpContext) -> None:
 task.add_command(
     list_command(
         decorators=[
-            click.option("--name", help="List only tasks with this name."),
+            click.option("--name", help=_("List only tasks with this name.")),
             click.option(
                 "--name-contains",
                 "name__contains",
-                help="List only tasks whose name contains this.",
+                help=_("List only tasks whose name contains this."),
             ),
-            click.option("--state", help="List only tasks in this state."),
+            click.option("--state", help=_("List only tasks in this state.")),
         ]
     )
 )
 
 
 @task.command()
-@click.option("--href", required=True, help="HREF of the task")
-@click.option("-w", "--wait", is_flag=True, help="Wait for the task to finish")
+@click.option("--href", required=True, help=_("HREF of the task"))
+@click.option("-w", "--wait", is_flag=True, help=_("Wait for the task to finish"))
 @pass_entity_context
 @pass_pulp_context
 def show(pulp_ctx: PulpContext, task_ctx: PulpTaskContext, href: str, wait: bool) -> None:
@@ -42,7 +46,7 @@ def show(pulp_ctx: PulpContext, task_ctx: PulpTaskContext, href: str, wait: bool
 
 
 @task.command()
-@click.option("--href", required=True, help="HREF of the task")
+@click.option("--href", required=True, help=_("HREF of the task"))
 @pass_entity_context
 @pass_pulp_context
 def cancel(pulp_ctx: PulpContext, task_ctx: PulpTaskContext, href: str) -> None:

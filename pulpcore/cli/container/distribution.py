@@ -1,3 +1,4 @@
+import gettext
 from typing import Optional
 
 import click
@@ -14,6 +15,8 @@ from pulpcore.cli.container.context import (
     PulpContainerPushRepositoryContext,
     PulpContainerRepositoryContext,
 )
+
+_ = gettext.gettext
 
 
 @click.group()
@@ -41,7 +44,7 @@ distribution.add_command(show_by_name)
 @click.option("--name", required=True)
 @click.option("--base-path", required=True)
 @click.option("--repository")
-@click.option("--version", type=int, help="a repository version number, leave blank for latest")
+@click.option("--version", type=int, help=_("a repository version number, leave blank for latest"))
 @click.option(
     "-t",
     "--repository-type",

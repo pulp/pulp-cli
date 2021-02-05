@@ -1,3 +1,4 @@
+import gettext
 from typing import Optional, Union
 
 import click
@@ -11,6 +12,8 @@ from pulpcore.cli.common.generic import (
     show_command,
 )
 from pulpcore.cli.file.context import PulpFilePublicationContext, PulpFileRepositoryContext
+
+_ = gettext.gettext
 
 
 def _repository_callback(
@@ -43,7 +46,9 @@ def publication(ctx: click.Context, pulp_ctx: PulpContext, publication_type: str
 lookup_options = [href_option]
 create_options = [
     click.option("--repository", required=True, callback=_repository_callback),
-    click.option("--version", type=int, help="a repository version number, leave blank for latest"),
+    click.option(
+        "--version", type=int, help=_("a repository version number, leave blank for latest")
+    ),
 ]
 publication.add_command(list_command())
 publication.add_command(show_command(decorators=lookup_options))

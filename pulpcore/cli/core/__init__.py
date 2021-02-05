@@ -1,3 +1,5 @@
+import gettext
+
 from pulpcore.cli.common import main
 from pulpcore.cli.core.artifact import artifact
 from pulpcore.cli.core.config import config
@@ -12,6 +14,8 @@ from pulpcore.cli.core.status import status
 from pulpcore.cli.core.task import task
 from pulpcore.cli.core.user import user
 from pulpcore.cli.core.worker import worker
+
+_ = gettext.gettext
 
 # Register commands with cli
 main.add_command(status)

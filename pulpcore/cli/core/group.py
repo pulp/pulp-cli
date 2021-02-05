@@ -1,3 +1,5 @@
+import gettext
+
 import click
 
 from pulpcore.cli.common.context import (
@@ -8,6 +10,8 @@ from pulpcore.cli.common.context import (
 )
 from pulpcore.cli.common.generic import destroy_by_name, list_entities, show_by_name
 from pulpcore.cli.core.context import PulpGroupContext, PulpGroupUserContext, PulpUserContext
+
+_ = gettext.gettext
 
 
 @click.group()

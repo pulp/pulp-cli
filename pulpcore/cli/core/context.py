@@ -1,3 +1,4 @@
+import gettext
 import hashlib
 import os
 import sys
@@ -6,6 +7,8 @@ from typing import IO, Any, ClassVar, Dict, List, Optional
 import click
 
 from pulpcore.cli.common.context import EntityDefinition, PulpContext, PulpEntityContext
+
+_ = gettext.gettext
 
 
 class PulpArtifactContext(PulpEntityContext):

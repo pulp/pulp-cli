@@ -1,3 +1,4 @@
+import gettext
 from typing import Optional
 
 import click
@@ -20,6 +21,8 @@ from pulpcore.cli.common.generic import (
     show_by_name,
     version_command,
 )
+
+_ = gettext.gettext
 
 
 @click.group()
@@ -47,8 +50,8 @@ repository.add_command(version_command())
 
 @repository.command()
 @click.option("--name", required=True)
-@click.option("--description", help="an optional description")
-@click.option("--remote", help="an optional remote to default when syncing")
+@click.option("--description", help=_("an optional description"))
+@click.option("--remote", help=_("an optional remote to default when syncing"))
 @pass_repository_context
 @pass_pulp_context
 def create(
@@ -75,8 +78,8 @@ def create(
 
 @repository.command()
 @click.option("--name", required=True)
-@click.option("--description", help="new optional description")
-@click.option("--remote", help="new optional remote")
+@click.option("--description", help=_("new optional description"))
+@click.option("--remote", help=_("new optional remote"))
 @pass_repository_context
 @pass_pulp_context
 def update(
@@ -121,7 +124,7 @@ def update(
 
 @repository.command()
 @click.option("--name", required=True)
-@click.option("--remote", help="optional remote name to perform sync with")
+@click.option("--remote", help=_("optional remote name to perform sync with"))
 @pass_repository_context
 @pass_pulp_context
 def sync(

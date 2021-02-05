@@ -1,3 +1,4 @@
+import gettext
 from typing import Any, Dict, Optional
 
 import click
@@ -15,6 +16,8 @@ from pulpcore.cli.common.context import (
     pass_pulp_context,
 )
 from pulpcore.cli.common.generic import destroy_by_name, list_entities, show_by_name
+
+_ = gettext.gettext
 
 
 @click.group()
@@ -89,11 +92,11 @@ remote.add_command(destroy_by_name)
 @click.option(
     "--requirements-file",
     type=click.File(),
-    help="Collections only: a Collection requirements yaml",
+    help=_("Collections only: a Collection requirements yaml"),
 )
-@click.option("--requirements", help="Collections only: a string of a requirements yaml")
-@click.option("--auth-url", help="Collections only: URL to receive a session token")
-@click.option("--token", help="Collections only: token key use for authentication")
+@click.option("--requirements", help=_("Collections only: a string of a requirements yaml"))
+@click.option("--auth-url", help=_("Collections only: URL to receive a session token"))
+@click.option("--token", help=_("Collections only: token key use for authentication"))
 @pass_entity_context
 @pass_pulp_context
 def create(
@@ -135,11 +138,11 @@ def create(
 @click.option("--name", required=True)
 @click.option("--url")
 @click.option(
-    "--requirements-file", type=click.File(), help="Collections only: new requirements yaml file"
+    "--requirements-file", type=click.File(), help=_("Collections only: new requirements yaml file")
 )
-@click.option("--requirements", help="Collections only: new yaml string of requirements")
-@click.option("--auth-url", help="Collections only: new authentication url")
-@click.option("--token", help="Collections only: new token for authentication")
+@click.option("--requirements", help=_("Collections only: new yaml string of requirements"))
+@click.option("--auth-url", help=_("Collections only: new authentication url"))
+@click.option("--token", help=_("Collections only: new token for authentication"))
 @pass_entity_context
 @pass_pulp_context
 def update(

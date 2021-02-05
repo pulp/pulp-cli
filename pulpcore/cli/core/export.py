@@ -1,3 +1,4 @@
+import gettext
 from typing import Any, Dict, List
 
 import click
@@ -11,6 +12,8 @@ from pulpcore.cli.common.context import (
 )
 from pulpcore.cli.common.generic import destroy_by_href, show_by_href
 from pulpcore.cli.core.context import PulpExportContext, PulpExporterContext
+
+_ = gettext.gettext
 
 
 @click.group()
@@ -30,7 +33,7 @@ pulp.add_command(destroy_by_href)
 
 
 @pulp.command(deprecated=True)
-@click.option("--href", required=True, help="HREF of the PulpExport")
+@click.option("--href", required=True, help=_("HREF of the PulpExport"))
 @pass_entity_context
 @pass_pulp_context
 def read(pulp_ctx: PulpContext, export_ctx: PulpExportContext, href: str) -> None:
@@ -49,11 +52,11 @@ def delete(pulp_ctx: PulpContext, export_ctx: PulpExportContext, href: str) -> N
 
 
 @pulp.command()
-@click.option("--exporter", type=str, required=True, help="Name of owning PulpExporter")
+@click.option("--exporter", type=str, required=True, help=_("Name of owning PulpExporter"))
 @click.option(
-    "--limit", default=DEFAULT_LIMIT, type=int, help="Limit the number of exporters to show."
+    "--limit", default=DEFAULT_LIMIT, type=int, help=_("Limit the number of exporters to show.")
 )
-@click.option("--offset", default=0, type=int, help="Skip a number of exporters to show.")
+@click.option("--offset", default=0, type=int, help=_("Skip a number of exporters to show."))
 @pass_entity_context
 @pass_pulp_context
 def list(
@@ -74,7 +77,7 @@ def list(
 @pulp.command()
 @click.option("--exporter", required=True)
 @click.option("--full", type=bool, default=True)
-@click.option("--chunk-size", type=str, help="Examples: 512MB, 1GB")
+@click.option("--chunk-size", type=str, help=_("Examples: 512MB, 1GB"))
 @click.option("--versions", type=tuple([str, str, int]), multiple=True)
 @click.option("--start-versions", type=tuple([str, str, int]), multiple=True)
 @pass_entity_context

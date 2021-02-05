@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
-
 # copyright (c) 2020, Matthias Dellweg
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 
+import gettext
 import json
 import os
 import uuid
@@ -11,6 +10,8 @@ from urllib.parse import urlencode, urljoin
 
 import requests
 import urllib3
+
+_ = gettext.gettext
 
 SAFE_METHODS = ["GET", "HEAD", "OPTIONS"]
 

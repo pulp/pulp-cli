@@ -1,3 +1,4 @@
+import gettext
 from copy import deepcopy
 from typing import Dict, List, Tuple, Union
 
@@ -7,13 +8,17 @@ from pulpcore.cli.common.context import PulpContext, pass_entity_context, pass_p
 from pulpcore.cli.common.generic import destroy_by_name, list_entities, show_by_name
 from pulpcore.cli.core.context import PulpImporterContext
 
+_ = gettext.gettext
+
 RepositoryMap = Tuple[str, str]  # source repo, destination repo
 
 repo_map_option = click.option(
     "--repo-map",
     type=tuple([str, str]),
     multiple=True,
-    help="A map of source repository name to destination repository name (eg. --repo-map src dest)",
+    help=_(
+        "A map of source repository name to destination repository name (eg. --repo-map src dest)"
+    ),
 )
 
 

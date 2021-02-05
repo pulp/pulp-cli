@@ -1,4 +1,5 @@
 import datetime
+import gettext
 import json
 import sys
 import time
@@ -21,6 +22,7 @@ else:
     PYGMENTS = True
     PYGMENTS_STYLE = "solarized-dark"
 
+_ = gettext.gettext
 
 DEFAULT_LIMIT = 25
 BATCH_SIZE = 25
