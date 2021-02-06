@@ -11,6 +11,7 @@ from pulpcore.cli.common.generic import (
     list_command,
     name_option,
     show_command,
+    update_command,
 )
 from pulpcore.cli.file.context import PulpFileDistributionContext
 
@@ -33,9 +34,14 @@ def distribution(ctx: click.Context, pulp_ctx: PulpContext, distribution_type: s
 
 
 lookup_options = [href_option, name_option]
+update_options = [
+    click.option("--base-path"),
+    click.option("--publication"),
+]
 
 distribution.add_command(list_command(decorators=[label_select_option]))
 distribution.add_command(show_command(decorators=lookup_options))
+distribution.add_command(update_command(decorators=lookup_options + update_options))
 distribution.add_command(destroy_command(decorators=lookup_options))
 distribution.add_command(label_command())
 
@@ -59,28 +65,3 @@ def create(
     result = distribution_ctx.create(body=body)
     distribution = distribution_ctx.show(result["created_resources"][0])
     pulp_ctx.output_result(distribution)
-
-
-@distribution.command()
-@name_option
-@href_option
-@click.option("--base-path")
-@click.option("--publication")
-@pass_entity_context
-@pass_pulp_context
-def update(
-    pulp_ctx: PulpContext,
-    distribution_ctx: PulpFileDistributionContext,
-    base_path: Optional[str],
-    publication: Optional[str],
-) -> None:
-    distribution = distribution_ctx.entity
-    distribution_href = distribution_ctx.pulp_href
-
-    if (base_path is not None) and (base_path != distribution["base_path"]):
-        distribution["base_path"] = base_path
-
-    if publication is not None:
-        distribution["publication"] = None if publication == "" else publication
-
-    distribution_ctx.update(distribution_href, body=distribution)

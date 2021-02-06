@@ -1,7 +1,17 @@
 import click
 
-from pulpcore.cli.common.context import PulpContext, pass_entity_context, pass_pulp_context
-from pulpcore.cli.common.generic import destroy_by_name, list_entities, show_by_name
+from pulpcore.cli.common.context import PulpContext, pass_pulp_context
+from pulpcore.cli.common.generic import (
+    create_command,
+    destroy_command,
+    href_option,
+    label_command,
+    label_select_option,
+    list_command,
+    name_option,
+    show_command,
+    update_command,
+)
 from pulpcore.cli.rpm.context import PulpRpmRemoteContext
 
 
@@ -22,19 +32,48 @@ def remote(ctx: click.Context, pulp_ctx: PulpContext, remote_type: str) -> None:
         raise NotImplementedError()
 
 
-remote.add_command(list_entities)
-remote.add_command(show_by_name)
+lookup_options = [href_option, name_option]
+create_options = [
+    click.option("--name", required=True),
+    click.option("--url", required=True),
+    click.option("--ca-cert"),
+    click.option("--client-cert"),
+    click.option("--client-key"),
+    click.option("--connect-timeout", type=float),
+    click.option("--download-concurrency", type=int),
+    click.option("--password"),
+    click.option(
+        "--policy", type=click.Choice(["immediate", "on_demand", "streamed"], case_sensitive=False)
+    ),
+    click.option("--proxy-url"),
+    click.option("--sock-connect-timeout", type=float),
+    click.option("--sock-read-timeout", type=float),
+    click.option("--tls-validation", type=bool),
+    click.option("--total-timeout", type=float),
+    click.option("--username"),
+]
+update_options = [
+    click.option("--url"),
+    click.option("--ca-cert"),
+    click.option("--client-cert"),
+    click.option("--client-key"),
+    click.option("--connect-timeout", type=float),
+    click.option("--download-concurrency", type=int),
+    click.option("--password"),
+    click.option(
+        "--policy", type=click.Choice(["immediate", "on_demand", "streamed"], case_sensitive=False)
+    ),
+    click.option("--proxy-url"),
+    click.option("--sock-connect-timeout", type=float),
+    click.option("--sock-read-timeout", type=float),
+    click.option("--tls-validation", type=bool),
+    click.option("--total-timeout", type=float),
+    click.option("--username"),
+]
 
-
-@remote.command()
-@click.option("--name", required=True)
-@click.option("--url", required=True)
-@pass_entity_context
-@pass_pulp_context
-def create(pulp_ctx: PulpContext, remote_ctx: PulpRpmRemoteContext, name: str, url: str) -> None:
-    remote = {"name": name, "url": url}
-    result = remote_ctx.create(body=remote)
-    pulp_ctx.output_result(result)
-
-
-remote.add_command(destroy_by_name)
+remote.add_command(list_command(decorators=[label_select_option]))
+remote.add_command(show_command(decorators=lookup_options))
+remote.add_command(create_command(decorators=create_options))
+remote.add_command(update_command(decorators=lookup_options + update_options))
+remote.add_command(destroy_command(decorators=lookup_options))
+remote.add_command(label_command())
