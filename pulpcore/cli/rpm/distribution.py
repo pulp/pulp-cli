@@ -3,7 +3,16 @@ from typing import Optional
 import click
 
 from pulpcore.cli.common.context import PulpContext, pass_entity_context, pass_pulp_context
-from pulpcore.cli.common.generic import destroy_by_name, list_entities, show_by_name
+from pulpcore.cli.common.generic import (
+    destroy_command,
+    href_option,
+    label_command,
+    label_select_option,
+    list_command,
+    name_option,
+    show_command,
+    update_command,
+)
 from pulpcore.cli.rpm.context import PulpRpmDistributionContext
 
 
@@ -24,8 +33,17 @@ def distribution(ctx: click.Context, pulp_ctx: PulpContext, distribution_type: s
         raise NotImplementedError()
 
 
-distribution.add_command(list_entities)
-distribution.add_command(show_by_name)
+lookup_options = [href_option, name_option]
+update_options = [
+    click.option("--base-path"),
+    click.option("--publication"),
+]
+
+distribution.add_command(list_command(decorators=[label_select_option]))
+distribution.add_command(show_command(decorators=lookup_options))
+distribution.add_command(update_command(decorators=lookup_options + update_options))
+distribution.add_command(destroy_command(decorators=lookup_options))
+distribution.add_command(label_command())
 
 
 @distribution.command()
@@ -47,6 +65,3 @@ def create(
     result = distribution_ctx.create(body=body)
     distribution = distribution_ctx.show(result["created_resources"][0])
     pulp_ctx.output_result(distribution)
-
-
-distribution.add_command(destroy_by_name)

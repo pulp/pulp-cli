@@ -1,10 +1,25 @@
-from typing import Optional
+from typing import Optional, Union
 
 import click
 
-from pulpcore.cli.common.context import PulpContext, pass_entity_context, pass_pulp_context
-from pulpcore.cli.common.generic import destroy_by_href, list_entities, show_by_href
+from pulpcore.cli.common.context import (
+    PulpContext,
+    PulpEntityContext,
+    pass_entity_context,
+    pass_pulp_context,
+)
+from pulpcore.cli.common.generic import destroy_command, href_option, list_command, show_command
 from pulpcore.cli.rpm.context import PulpRpmPublicationContext, PulpRpmRepositoryContext
+
+
+def _repository_callback(
+    ctx: click.Context, param: click.Parameter, value: Optional[str]
+) -> Optional[Union[str, PulpEntityContext]]:
+    # Pass None and "" verbatim
+    if value:
+        pulp_ctx: PulpContext = ctx.find_object(PulpContext)
+        return PulpRpmRepositoryContext(pulp_ctx, entity={"name": value})
+    return value
 
 
 @click.group()
@@ -22,10 +37,6 @@ def publication(ctx: click.Context, pulp_ctx: PulpContext, publication_type: str
         ctx.obj = PulpRpmPublicationContext(pulp_ctx)
     else:
         raise NotImplementedError()
-
-
-publication.add_command(list_entities)
-publication.add_command(show_by_href)
 
 
 @publication.command()
@@ -49,4 +60,7 @@ def create(
     pulp_ctx.output_result(publication)
 
 
-publication.add_command(destroy_by_href)
+lookup_options = [href_option]
+publication.add_command(list_command())
+publication.add_command(show_command(decorators=lookup_options))
+publication.add_command(destroy_command(decorators=lookup_options))

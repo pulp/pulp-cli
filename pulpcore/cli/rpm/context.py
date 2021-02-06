@@ -1,4 +1,5 @@
 from pulpcore.cli.common.context import (
+    EntityDefinition,
     PulpEntityContext,
     PulpRepositoryContext,
     PulpRepositoryVersionContext,
@@ -33,6 +34,20 @@ class PulpRpmRemoteContext(PulpEntityContext):
     UPDATE_ID = "remotes_rpm_rpm_partial_update"
     DELETE_ID = "remotes_rpm_rpm_delete"
 
+    def preprocess_body(self, body: EntityDefinition) -> EntityDefinition:
+        body = super().preprocess_body(body)
+        for nullable in [
+            "ca_cert",
+            "client_cert",
+            "client_key",
+            "password",
+            "proxy_url",
+            "username",
+        ]:
+            if body.get(nullable) == "":
+                body[nullable] = None
+        return body
+
 
 class PulpRpmRepositoryVersionContext(PulpRepositoryVersionContext):
     HREF = "rpm_rpm_repository_version_href"
@@ -52,3 +67,9 @@ class PulpRpmRepositoryContext(PulpRepositoryContext):
     DELETE_ID = "repositories_rpm_rpm_delete"
     SYNC_ID = "repositories_rpm_rpm_sync"
     VERSION_CONTEXT = PulpRpmRepositoryVersionContext
+
+    def preprocess_body(self, body: EntityDefinition) -> EntityDefinition:
+        body = super().preprocess_body(body)
+        if body.get("description") == "":
+            body["description"] = None
+        return body
