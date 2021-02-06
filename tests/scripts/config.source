@@ -67,19 +67,4 @@ expect_fail () {
   fi
 }
 
-# Returns true if $PULPCORE_VERSION >= $1, false otherwise
-require_min_pulp () {
-  if [ -z "${PULPCORE_VERSION+x}" ]
-  then
-    echo "Error: require_min_pulp called without \$PULPCORE_VERSION defined."
-    exit 1
-  fi
-
-  if [ "$1" != "`printf "$PULPCORE_VERSION\n$1" | sort -V | head -n1`" ]
-  then
-    echo "Skipping $0"
-    exit 3 # skip exit code
-  fi
-}
-
 set -eu
