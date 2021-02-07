@@ -209,6 +209,9 @@ def create_command(**kwargs: Any) -> click.Command:
     def callback(pulp_ctx: PulpContext, entity_ctx: PulpEntityContext, **kwargs: Any) -> None:
         body: EntityDefinition = entity_ctx.preprocess_body(kwargs)
         result = entity_ctx.create(body=body)
+        if "created_resources" in result:
+            entity_ctx.pulp_href = result["created_resources"][0]
+            result = entity_ctx.entity
         pulp_ctx.output_result(result)
 
     for option in decorators:

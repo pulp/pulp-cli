@@ -1,10 +1,26 @@
-from typing import Optional
+from typing import Optional, Union
 
 import click
 
-from pulpcore.cli.common.context import PulpContext, pass_entity_context, pass_pulp_context
-from pulpcore.cli.common.generic import destroy_command, href_option, list_command, show_command
+from pulpcore.cli.common.context import PulpContext, PulpEntityContext, pass_pulp_context
+from pulpcore.cli.common.generic import (
+    create_command,
+    destroy_command,
+    href_option,
+    list_command,
+    show_command,
+)
 from pulpcore.cli.file.context import PulpFilePublicationContext, PulpFileRepositoryContext
+
+
+def _repository_callback(
+    ctx: click.Context, param: click.Parameter, value: Optional[str]
+) -> Optional[Union[str, PulpEntityContext]]:
+    # Pass None and "" verbatim
+    if value:
+        pulp_ctx: PulpContext = ctx.find_object(PulpContext)
+        return PulpFileRepositoryContext(pulp_ctx, entity={"name": value})
+    return value
 
 
 @click.group()
@@ -24,29 +40,12 @@ def publication(ctx: click.Context, pulp_ctx: PulpContext, publication_type: str
         raise NotImplementedError()
 
 
+lookup_options = [href_option]
+create_options = [
+    click.option("--repository", required=True, callback=_repository_callback),
+    click.option("--version", type=int, help="a repository version number, leave blank for latest"),
+]
 publication.add_command(list_command())
-publication.add_command(show_command(decorators=[href_option]))
-publication.add_command(destroy_command(decorators=[href_option]))
-
-
-@publication.command()
-@click.option("--repository", required=True)
-@click.option("--version", type=int, help="a repository version number, leave blank for latest")
-@pass_entity_context
-@pass_pulp_context
-def create(
-    pulp_ctx: PulpContext,
-    publication_ctx: PulpFilePublicationContext,
-    repository: str,
-    version: Optional[int],
-) -> None:
-    repository_href: str = PulpFileRepositoryContext(
-        pulp_ctx, entity={"name": repository}
-    ).pulp_href
-    if version is not None:
-        body = {"repository_version": f"{repository_href}versions/{version}/"}
-    else:
-        body = {"repository": repository_href}
-    result = publication_ctx.create(body=body)
-    publication = publication_ctx.show(result["created_resources"][0])
-    pulp_ctx.output_result(publication)
+publication.add_command(show_command(decorators=lookup_options))
+publication.add_command(create_command(decorators=create_options))
+publication.add_command(destroy_command(decorators=lookup_options))
