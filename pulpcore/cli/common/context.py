@@ -2,7 +2,7 @@ import datetime
 import json
 import sys
 import time
-from typing import Any, ClassVar, Dict, List, Optional, Tuple, Type
+from typing import IO, Any, ClassVar, Dict, List, Optional, Tuple, Type
 
 import click
 import yaml
@@ -29,6 +29,19 @@ BATCH_SIZE = 25
 EntityDefinition = Dict[str, Any]
 RepositoryDefinition = Tuple[str, str]  # name, pulp_type
 RepositoryVersionDefinition = Tuple[str, str, int]  # name, pulp_type, version
+
+
+class PulpNoWait(click.ClickException):
+    exit_code = 0
+
+    def show(self, file: Optional[IO[str]] = None) -> None:
+        """
+        Format the message into file or STDERR.
+        Overwritten from base class to not print "Error: ".
+        """
+        if file is None:
+            file = click.get_text_stream("stderr")
+        click.echo(self.format_message(), file=file)
 
 
 class PulpJSONEncoder(json.JSONEncoder):
@@ -92,10 +105,12 @@ class PulpContext:
         else:
             raise NotImplementedError(f"Format '{self.format}' not implemented.")
 
-    def call(self, operation_id: str, *args: Any, **kwargs: Any) -> Any:
+    def call(self, operation_id: str, non_blocking: bool = False, *args: Any, **kwargs: Any) -> Any:
         """
         Perform an API call for operation_id.
         Wait for triggered tasks to finish if not background.
+        Returns the operation result, or the finished task.
+        If non_blocking, returns unfinished tasks.
         """
         try:
             result = self.api.call(operation_id, *args, **kwargs)
@@ -107,14 +122,17 @@ class PulpContext:
             task_href = result["task"]
             result = self.api.call("tasks_read", parameters={"task_href": task_href})
             click.echo(f"Started background task {task_href}", err=True)
-            if not self.background_tasks:
+            if not non_blocking:
                 result = self.wait_for_task(result)
         return result
 
     def wait_for_task(self, task: EntityDefinition, timeout: int = 120) -> Any:
         """
         Wait for a task to finish and return the finished task object.
+        Raise `click.ClickException` on timeout, background, ctrl-c, if task failed or was canceled.
         """
+        if self.background_tasks:
+            raise PulpNoWait("Not waiting for task because --background was specified.")
         task_href = task["pulp_href"]
         try:
             while True:
@@ -138,8 +156,7 @@ class PulpContext:
                     raise NotImplementedError(f"Unknown task state: {task['state']}")
             raise click.ClickException("Task timed out")
         except KeyboardInterrupt:
-            click.echo(f"Task {task_href} sent to background.", err=True)
-            return task
+            raise PulpNoWait(f"Task {task_href} sent to background.")
 
     def has_plugin(
         self, name: str, min_version: Optional[str] = None, max_version: Optional[str] = None
@@ -316,11 +333,21 @@ class PulpEntityContext:
     def show(self, href: str) -> Any:
         return self.pulp_ctx.call(self.READ_ID, parameters={self.HREF: href})
 
-    def create(self, body: EntityDefinition, parameters: Optional[Dict[str, Any]] = None) -> Any:
+    def create(
+        self,
+        body: EntityDefinition,
+        parameters: Optional[Dict[str, Any]] = None,
+        non_blocking: bool = False,
+    ) -> Any:
         _parameters = self.scope
         if parameters:
             _parameters.update(parameters)
-        return self.pulp_ctx.call(self.CREATE_ID, parameters=_parameters, body=body)
+        result = self.pulp_ctx.call(
+            self.CREATE_ID, parameters=_parameters, body=body, non_blocking=non_blocking
+        )
+        if not non_blocking and result["pulp_href"].startswith("/pulp/api/v3/tasks/"):
+            result = self.show(result["created_resources"][0])
+        return result
 
     def update(
         self,
@@ -328,26 +355,33 @@ class PulpEntityContext:
         body: EntityDefinition,
         parameters: Optional[Dict[str, Any]] = None,
         uploads: Optional[Dict[str, Any]] = None,
+        non_blocking: bool = False,
     ) -> Any:
         _parameters = {self.HREF: href}
         if parameters:
             _parameters.update(parameters)
         return self.pulp_ctx.call(
-            self.UPDATE_ID, parameters=_parameters, body=body, uploads=uploads
+            self.UPDATE_ID,
+            parameters=_parameters,
+            body=body,
+            uploads=uploads,
+            non_blocking=non_blocking,
         )
 
-    def delete(self, href: str) -> Any:
-        return self.pulp_ctx.call(self.DELETE_ID, parameters={self.HREF: href})
+    def delete(self, href: str, non_blocking: bool = False) -> Any:
+        return self.pulp_ctx.call(
+            self.DELETE_ID, parameters={self.HREF: href}, non_blocking=non_blocking
+        )
 
-    def set_label(self, href: str, key: str, value: str) -> Any:
+    def set_label(self, href: str, key: str, value: str, non_blocking: bool = False) -> Any:
         entity = self.show(href)
         entity["pulp_labels"][key] = value
-        return self.update(href, body=entity)
+        return self.update(href, body=entity, non_blocking=non_blocking)
 
-    def unset_label(self, href: str, key: str) -> Any:
+    def unset_label(self, href: str, key: str, non_blocking: bool = False) -> Any:
         entity = self.show(href)
         entity["pulp_labels"].pop(key)
-        return self.update(href, body=entity)
+        return self.update(href, body=entity, non_blocking=non_blocking)
 
     def show_label(self, href: str, key: str) -> Any:
         entity = self.show(href)

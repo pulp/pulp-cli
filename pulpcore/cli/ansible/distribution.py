@@ -63,8 +63,7 @@ def create(
     elif repository:
         body["repository"] = repo["pulp_href"]
     result = distribution_ctx.create(body=body)
-    distribution = distribution_ctx.show(result["created_resources"][0])
-    pulp_ctx.output_result(distribution)
+    pulp_ctx.output_result(result)
 
 
 @distribution.command()
@@ -107,16 +106,18 @@ def update(
             repo = PulpAnsibleRepositoryContext(pulp_ctx).find(name=repository)
             if version is not None:
                 if dist_body["repository"]:
-                    distribution_ctx.update(href, body={"repository": ""})
+                    distribution_ctx.update(href, body={"repository": ""}, non_blocking=True)
                 body["repository_version"] = f'{repo["versions_href"]}{version}/'
             else:
                 if dist_body["repository_version"]:
-                    distribution_ctx.update(href, body={"repository_version": ""})
+                    distribution_ctx.update(
+                        href, body={"repository_version": ""}, non_blocking=True
+                    )
                 body["repository"] = repo["pulp_href"]
     elif version is not None:
         # keep current repository, change version
         if dist_body["repository"]:
-            distribution_ctx.update(href, body={"repository": ""})
+            distribution_ctx.update(href, body={"repository": ""}, non_blocking=True)
             body["repository_version"] = f'{dist_body["repository"]}versions/{version}/'
         elif dist_body["repository_version"]:
             repository_href, _, _ = dist_body["repository_version"].partition("versions")
@@ -127,5 +128,3 @@ def update(
                 f"please specify the repository to use  with --repository"
             )
     distribution_ctx.update(href, body=body)
-    dist_body = distribution_ctx.show(href)
-    pulp_ctx.output_result(dist_body)

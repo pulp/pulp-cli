@@ -75,8 +75,7 @@ def create(
         else:
             body["repository"] = repository_href
     result = distribution_ctx.create(body=body)
-    distribution = distribution_ctx.show(result["created_resources"][0])
-    pulp_ctx.output_result(distribution)
+    pulp_ctx.output_result(result)
 
 
 distribution.add_command(destroy_by_name)

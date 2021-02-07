@@ -87,14 +87,19 @@ class PulpExportContext(PulpEntityContext):
             parameters[PulpExporterContext.HREF] = self.exporter["pulp_href"]
         return super().list(limit=limit, offset=offset, parameters=parameters)
 
-    def create(self, body: EntityDefinition, parameters: Optional[Dict[str, Any]] = None) -> Any:
+    def create(
+        self,
+        body: EntityDefinition,
+        parameters: Optional[Dict[str, Any]] = None,
+        non_blocking: bool = False,
+    ) -> Any:
         if not self.pulp_ctx.has_plugin("pulpcore", min_version="3.10.dev0"):
             # Workaround for improperly rendered nested resource paths and weird HREF names
             # https://github.com/pulp/pulpcore/pull/1066
             if parameters is None:
                 parameters = {}
             parameters[self.HREF] = self.exporter["pulp_href"]
-        return super().create(parameters=parameters, body=body)
+        return super().create(parameters=parameters, body=body, non_blocking=non_blocking)
 
     @property
     def HREF(self) -> str:  # type: ignore
@@ -156,14 +161,19 @@ class PulpGroupUserContext(PulpEntityContext):
             parameters[PulpGroupContext.HREF] = self.group_ctx.pulp_href
         return super().list(limit=limit, offset=offset, parameters=parameters)
 
-    def create(self, body: EntityDefinition, parameters: Optional[Dict[str, Any]] = None) -> Any:
+    def create(
+        self,
+        body: EntityDefinition,
+        parameters: Optional[Dict[str, Any]] = None,
+        non_blocking: bool = False,
+    ) -> Any:
         if not self.pulp_ctx.has_plugin("pulpcore", min_version="3.10.dev0"):
             # Workaround for improperly rendered nested resource paths and weird HREF names
             # https://github.com/pulp/pulpcore/pull/1066
             if parameters is None:
                 parameters = {}
             parameters[self.HREF] = self.group_ctx.pulp_href
-        return super().create(parameters=parameters, body=body)
+        return super().create(parameters=parameters, body=body, non_blocking=non_blocking)
 
     @property
     def HREF(self) -> str:  # type: ignore

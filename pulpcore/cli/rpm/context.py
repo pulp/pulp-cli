@@ -15,6 +15,15 @@ class PulpRpmDistributionContext(PulpEntityContext):
     UPDATE_ID = "distributions_rpm_rpm_partial_update"
     DELETE_ID = "distributions_rpm_rpm_delete"
 
+    def preprocess_body(self, body: EntityDefinition) -> EntityDefinition:
+        body = super().preprocess_body(body)
+        for nullable in [
+            "publication",
+        ]:
+            if body.get(nullable) == "":
+                body[nullable] = None
+        return body
+
 
 class PulpRpmPublicationContext(PulpEntityContext):
     ENTITY = "publication"
@@ -23,6 +32,14 @@ class PulpRpmPublicationContext(PulpEntityContext):
     READ_ID = "publications_rpm_rpm_read"
     CREATE_ID = "publications_rpm_rpm_create"
     DELETE_ID = "publications_rpm_rpm_delete"
+
+    def preprocess_body(self, body: EntityDefinition) -> EntityDefinition:
+        body = super().preprocess_body(body)
+        version = body.pop("version", None)
+        if version is not None:
+            repository_href = body.pop("repository")
+            body["repository_version"] = f"{repository_href}versions/{version}/"
+        return body
 
 
 class PulpRpmRemoteContext(PulpEntityContext):
