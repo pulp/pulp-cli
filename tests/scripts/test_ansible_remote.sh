@@ -3,6 +3,8 @@
 # shellcheck source=tests/scripts/config.source
 . "$(dirname "$(realpath "$0")")/config.source"
 
+pulp debug has-plugin --name "pulp_ansible" || exit 3
+
 cleanup() {
   pulp ansible remote -t "role" destroy --name "cli_test_ansible_role_remote" || true
   pulp ansible remote -t "collection" destroy --name "cli_test_ansible_collection_remote" || true
