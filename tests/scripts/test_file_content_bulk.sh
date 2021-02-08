@@ -3,6 +3,8 @@
 # shellcheck source=tests/scripts/config.source
 . "$(dirname "$(realpath "$0")")/config.source"
 
+pulp debug has-plugin --name "pulp_file" || exit 3
+
 cleanup() {
   rm test_1.txt test_2.txt test_3.txt
   rm add_content.json remove_content.json
