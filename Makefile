@@ -9,10 +9,11 @@ lint:
 	mypy
 	@echo "🙊 Code 🙈 LGTM 🙉 !"
 
-tests/scripts/config/pulp/settings.toml:
+tests/settings.toml:
 	cp $@.example $@
+	@echo "In order to configure the tests to talk to your test server, you might need to edit $@ ."
 
-test: | tests/scripts/config/pulp/settings.toml
+test: | tests/settings.toml
 	pytest -v tests
 
 .PHONY: black lint

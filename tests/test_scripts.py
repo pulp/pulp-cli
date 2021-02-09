@@ -11,8 +11,11 @@ TEST_NAMES = [
 
 
 @pytest.mark.parametrize("test_name", TEST_NAMES)
-def test_script(test_name):
-    run = subprocess.run([os.path.join("tests", "scripts", "test_" + test_name + ".sh")])
+def test_script(test_name, cli_env, tmp_path):
+    run = subprocess.run(
+        [os.path.realpath(os.path.join("tests", "scripts", "test_" + test_name + ".sh"))],
+        cwd=tmp_path,
+    )
     if run.returncode == 3:
         pytest.skip("Skipped as requested by the script.")
     assert run.returncode == 0
