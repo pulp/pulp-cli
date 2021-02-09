@@ -4,18 +4,14 @@
 . "$(dirname "$(realpath "$0")")/config.source"
 
 good_settings="${XDG_CONFIG_HOME}/pulp/settings.toml"
-bad_settings="${XDG_CONFIG_HOME}/pulp/bad_settings.toml"
+bad_settings="bad_settings.toml"
 test_settings="test.toml"
 
 export XDG_CONFIG_HOME=/nowhere
 
-cleanup() {
-  rm $test_settings
-}
-trap cleanup EXIT
-
-
 # SETTINGS OPTION
+
+sed -e '/base_url/c\base_url = "http://badurl"' "$good_settings" > "$bad_settings"
 
 expect_succ pulp --config "$good_settings" file repository list
 expect_succ pulp --config "$bad_settings" --base-url "$PULP_BASE_URL" file repository list
