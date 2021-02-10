@@ -13,6 +13,46 @@ Changelog
 
 .. towncrier release notes start
 
+0.4.0 (2021-02-10)
+==================
+
+
+Features
+--------
+
+- Added config commands to manage pulp-cli's config.
+  `#111 <https://github.com/pulp/pulp-cli/issues/111>`_
+- Added support for client certificate auth.
+  `#122 <https://github.com/pulp/pulp-cli/issues/122>`_
+- Added --href options to address rpm resources.
+  `#124 <https://github.com/pulp/pulp-cli/issues/124>`_
+
+
+Bugfixes
+--------
+
+- Improve handling of background option and ctrl-c with tasks.
+  `#85 <https://github.com/pulp/pulp-cli/issues/85>`_
+- Added read capability to rpm remote.
+  `#125 <https://github.com/pulp/pulp-cli/issues/125>`_
+
+
+Deprecations and Removals
+-------------------------
+
+- Moved the location of `--repository` option after the last command for version commands.
+  `#123 <https://github.com/pulp/pulp-cli/issues/123>`_
+
+
+Misc
+----
+
+- `#91 <https://github.com/pulp/pulp-cli/issues/91>`_, `#118 <https://github.com/pulp/pulp-cli/issues/118>`_
+
+
+----
+
+
 0.3.0 (2021-02-04)
 ==================
 
