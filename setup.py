@@ -14,7 +14,7 @@ setup(
     name="pulp-cli",
     description="Command line interface to talk to pulpcore's REST API.",
     long_description=long_description,
-    version="0.4.0.dev",
+    version="0.4.0",
     packages=packages,
     package_data={package: ["py.typed"] for package in packages},
     python_requires=">=3.6",
