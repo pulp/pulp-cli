@@ -2,10 +2,18 @@ from setuptools import find_namespace_packages, setup
 
 packages = find_namespace_packages(include=["pulpcore.cli.*"])
 
+long_description = ""
+with open("README.md") as readme:
+    for line in readme:
+        if line == "## Contributing\n":
+            break
+        long_description += line
+
 
 setup(
     name="pulp-cli",
     description="Command line interface to talk to pulpcore's REST API.",
+    long_description=long_description,
     version="0.4.0.dev",
     packages=packages,
     package_data={package: ["py.typed"] for package in packages},
