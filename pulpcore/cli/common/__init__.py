@@ -8,7 +8,7 @@ import toml
 from pulpcore.cli.common.context import PulpContext
 from pulpcore.cli.common.debug import debug
 
-__version__ = "0.4.0"
+__version__ = "0.5.0.dev"
 
 
 ##############################################################################
