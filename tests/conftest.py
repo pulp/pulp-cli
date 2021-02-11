@@ -9,8 +9,8 @@ PULP_FIXTURES_URL = os.environ.get("PULP_FIXTURES_URL", "https://fixtures.pulppr
 ENV_CONSTANTS = {
     "PULP_FIXTURES_URL": PULP_FIXTURES_URL,
     "FILE_REMOTE_URL": PULP_FIXTURES_URL + "/file/PULP_MANIFEST",
-    "CONTAINER_REMOTE_URL": "https://registry-1.docker.io",
-    "CONTAINER_IMAGE": "hello-world",
+    "CONTAINER_REMOTE_URL": "https://quay.io",
+    "CONTAINER_IMAGE": "libpod/alpine",
     "RPM_REMOTE_URL": PULP_FIXTURES_URL + "/rpm-unsigned",
     "ANSIBLE_COLLECTION_REMOTE_URL": "https://galaxy.ansible.com/",
     "ANSIBLE_ROLE_REMOTE_URL": "https://galaxy.ansible.com/api/v1/roles/?namespace__name=elastic",

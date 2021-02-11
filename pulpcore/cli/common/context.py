@@ -289,6 +289,7 @@ class PulpEntityContext:
     ) -> None:
         assert pulp_href is None or entity is None
 
+        self.meta: Dict[str, str] = {}
         self.pulp_ctx: PulpContext = pulp_ctx
         self._entity = None
         if pulp_href is None:
