@@ -1,5 +1,5 @@
 import gettext
-from typing import Any, Dict, Optional
+from typing import Any, Optional, Union
 
 import click
 import yaml
@@ -8,16 +8,33 @@ from pulpcore.cli.ansible.context import (
     PulpAnsibleCollectionRemoteContext,
     PulpAnsibleRoleRemoteContext,
 )
-from pulpcore.cli.common.context import (
-    EntityDefinition,
-    PulpContext,
-    PulpEntityContext,
-    pass_entity_context,
-    pass_pulp_context,
+from pulpcore.cli.common.context import PulpContext, pass_pulp_context
+from pulpcore.cli.common.generic import (
+    create_command,
+    destroy_command,
+    href_option,
+    label_command,
+    label_select_option,
+    list_command,
+    name_option,
+    show_command,
+    update_command,
 )
-from pulpcore.cli.common.generic import destroy_by_name, list_entities, show_by_name
 
 _ = gettext.gettext
+
+
+def _requirements_callback(
+    ctx: click.Context, param: click.Parameter, value: Any
+) -> Optional[Union[str, Any]]:
+    if value:
+        if isinstance(ctx.obj, PulpAnsibleRoleRemoteContext):
+            raise click.ClickException(f"Option {param.name} not valid for Role remote, see --help")
+        if param.name == "requirements-file":
+            return f"{yaml.safe_load(value)}"
+        elif param.name == "requirements":
+            return yaml.safe_load(f'"{value}"')
+    return value
 
 
 @click.group()
@@ -40,151 +57,76 @@ def remote(ctx: click.Context, pulp_ctx: PulpContext, remote_type: str) -> None:
         raise NotImplementedError()
 
 
-remote_options = {
-    "ca-cert": (str, "a PEM encoded CA certificate"),
-    "client-cert": (str, "a PEM encoded client certificate"),
-    "client-key": (str, "a PEM encode private key"),
-    "tls-validation": (str, "if True, TLS peer validation must be performed"),
-    "proxy-url": (str, "format: scheme//user:password@host:port"),
-    "username": (str, "used for authentication when syncing"),
-    "password": (str, ""),
-    "download-concurrency": (int, "total number of simultaneous connections"),
-    "policy": (str, "policy to use when downloading"),
-    "total-timeout": (str, "aiohttp.ClientTimeout.total for download connections"),
-    "connect-timeout": (str, "aiohttp.ClientTimeout.connect for download connections"),
-    "sock-connect-timeout": (str, "aiohttp.ClientTimeout.sock_connect for download connections"),
-    "sock-read-timeout": (str, "aiohttp.ClientTimeout.sock_read for download connections"),
-}
-
-
-def check_collection_options(
-    remote_ctx: PulpEntityContext,
-    requirements_file: Any,
-    requirements: Optional[str],
-    auth_url: Optional[str],
-    token: Optional[str],
-) -> EntityDefinition:
-
-    body: EntityDefinition = dict()
-    if isinstance(remote_ctx, PulpAnsibleRoleRemoteContext) and any(
-        [requirements_file, requirements, auth_url, token]
-    ):
-        raise click.ClickException("Options not valid for Role remote, see --help")
-    if requirements_file is not None:
-        body["requirements_file"] = f"{yaml.safe_load(requirements_file)}"
-    elif requirements is not None:
-        body["requirements_file"] = yaml.safe_load(f'"{requirements}"')
-    if auth_url is not None:
-        body["auth_url"] = auth_url
-    if token is not None:
-        body["token"] = token
-    return body
-
-
-remote.add_command(list_entities)
-remote.add_command(show_by_name)
-remote.add_command(destroy_by_name)
-
-
-@remote.command(name="create")
-@click.option("--name", required=True)
-@click.option("--url", required=True)
-@click.option(
-    "--requirements-file",
-    type=click.File(),
-    help=_("Collections only: a Collection requirements yaml"),
+lookup_options = [href_option, name_option]
+remote_options = [
+    click.option("--ca-cert", help=_("a PEM encoded CA certificate")),
+    click.option("--client-cert", help=_("a PEM encoded client certificate")),
+    click.option("--client-key", help=_("a PEM encode private key")),
+    click.option("--tls-validation", help=_("if True, TLS peer validation must be performed")),
+    click.option("--proxy-url", help=_("format: scheme//user:password@host:port")),
+    click.option("--username", help=_("used for authentication when syncing")),
+    click.option("--password"),
+    click.option(
+        "--download-concurrency", type=int, help=_("total number of simultaneous connections")
+    ),
+    click.option("--policy", help=_("policy to use when downloading")),
+    click.option(
+        "--total-timeout",
+        type=float,
+        help=_("aiohttp.ClientTimeout.total for download connections"),
+    ),
+    click.option(
+        "--connect-timeout",
+        type=float,
+        help=_("aiohttp.ClientTimeout.connect for download connections"),
+    ),
+    click.option(
+        "--sock-connect-timeout",
+        type=float,
+        help=_("aiohttp.ClientTimeout.sock_connect for download connections"),
+    ),
+    click.option(
+        "--sock-read-timeout",
+        type=float,
+        help=_("aiohttp.ClientTimeout.sock_read for download connections"),
+    ),
+    click.option("--rate-limit", type=int, help=_("limit download rate in requests per second")),
+]
+collection_options = [
+    click.option(
+        "--requirements-file",
+        callback=_requirements_callback,
+        type=click.File(),
+        help=_("Collections only: a Collection requirements yaml"),
+    ),
+    click.option(
+        "--requirements",
+        callback=_requirements_callback,
+        help=_("Collections only: a string of a requirements yaml"),
+    ),
+    click.option(
+        "--auth-url",
+        callback=_requirements_callback,
+        help=_("Collections only: URL to receive a session token"),
+    ),
+    click.option(
+        "--token",
+        callback=_requirements_callback,
+        help=_("Collections only: token key use for authentication"),
+    ),
+]
+ansible_remote_options = remote_options + collection_options
+create_options = [
+    click.option("--name", required=True),
+    click.option("--url", required=True),
+] + ansible_remote_options
+update_options = (
+    lookup_options + [click.option("--url", help=_("new url"))] + ansible_remote_options
 )
-@click.option("--requirements", help=_("Collections only: a string of a requirements yaml"))
-@click.option("--auth-url", help=_("Collections only: URL to receive a session token"))
-@click.option("--token", help=_("Collections only: token key use for authentication"))
-@pass_entity_context
-@pass_pulp_context
-def create(
-    pulp_ctx: PulpContext,
-    remote_ctx: PulpEntityContext,
-    name: str,
-    url: str,
-    requirements_file: Any,
-    requirements: Optional[str],
-    auth_url: Optional[str],
-    token: Optional[str],
-    **remote_options: Dict[str, Any],
-) -> None:
-    """
-    Creates a Collection or Role remote based on -t parameter
 
-    e.g. pulp ansible remote -t role create ...
-    """
-    body: EntityDefinition = {"name": name, "url": url}
-
-    body.update(
-        check_collection_options(
-            remote_ctx=remote_ctx,
-            requirements_file=requirements_file,
-            requirements=requirements,
-            auth_url=auth_url,
-            token=token,
-        )
-    )
-
-    if remote_options:
-        removed_nulls = {k: v for k, v in remote_options.items() if v is not None}
-        body.update(removed_nulls)
-    result = remote_ctx.create(body=body)
-    pulp_ctx.output_result(result)
-
-
-@remote.command(name="update")
-@click.option("--name", required=True)
-@click.option("--url")
-@click.option(
-    "--requirements-file", type=click.File(), help=_("Collections only: new requirements yaml file")
-)
-@click.option("--requirements", help=_("Collections only: new yaml string of requirements"))
-@click.option("--auth-url", help=_("Collections only: new authentication url"))
-@click.option("--token", help=_("Collections only: new token for authentication"))
-@pass_entity_context
-@pass_pulp_context
-def update(
-    pulp_ctx: PulpContext,
-    remote_ctx: PulpEntityContext,
-    name: str,
-    url: Optional[str],
-    requirements_file: Any,
-    requirements: Optional[str],
-    auth_url: Optional[str],
-    token: Optional[str],
-    **remote_options: Dict[str, Any],
-) -> None:
-    """
-    Use -t to specify the type of the remote you are updating
-
-    e.g. pulp ansible remote -t role update ...
-    """
-    body: EntityDefinition = dict()
-
-    body.update(
-        check_collection_options(
-            remote_ctx=remote_ctx,
-            requirements_file=requirements_file,
-            requirements=requirements,
-            auth_url=auth_url,
-            token=token,
-        )
-    )
-    if url:
-        body["url"] = url
-    if remote_options:
-        removed_nulls = {k: v for k, v in remote_options.items() if v is not None}
-        body.update(removed_nulls)
-
-    remote = remote_ctx.find(name=name)
-    remote_href = remote["pulp_href"]
-    remote_ctx.update(remote_href, body=body)
-    result = remote_ctx.show(remote_href)
-    pulp_ctx.output_result(result)
-
-
-for k, v in remote_options.items():
-    click.option(f"--{k}", type=v[0], help=v[1])(create)
-    click.option(f"--{k}", type=v[0], help=v[1])(update)
+remote.add_command(list_command(decorators=[label_select_option]))
+remote.add_command(show_command(decorators=lookup_options))
+remote.add_command(destroy_command(decorators=lookup_options))
+remote.add_command(create_command(decorators=create_options))
+remote.add_command(update_command(decorators=update_options))
+remote.add_command(label_command())
