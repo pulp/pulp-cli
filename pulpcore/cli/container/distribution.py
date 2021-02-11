@@ -1,15 +1,23 @@
 import gettext
-from typing import Optional
+from typing import Optional, Union, cast
 
 import click
 
 from pulpcore.cli.common.context import (
+    EntityDefinition,
     PulpContext,
-    PulpRepositoryContext,
+    PulpEntityContext,
     pass_entity_context,
     pass_pulp_context,
 )
-from pulpcore.cli.common.generic import destroy_by_name, list_entities, show_by_name
+from pulpcore.cli.common.generic import (
+    create_command,
+    destroy_command,
+    href_option,
+    list_command,
+    name_option,
+    show_command,
+)
 from pulpcore.cli.container.context import (
     PulpContainerDistributionContext,
     PulpContainerPushRepositoryContext,
@@ -17,6 +25,30 @@ from pulpcore.cli.container.context import (
 )
 
 _ = gettext.gettext
+
+
+def _repository_callback(
+    ctx: click.Context, param: click.Parameter, value: Optional[str]
+) -> Union[None, str, PulpEntityContext]:
+    # Pass None and "" verbatim
+    if value:
+        pulp_ctx: PulpContext = ctx.find_object(PulpContext)
+        entity_ctx = ctx.find_object(PulpEntityContext)
+        if entity_ctx.meta.get("repository_type") == "container":
+            return PulpContainerRepositoryContext(pulp_ctx, entity={"name": value})
+        elif entity_ctx.meta.get("repository_type") == "push":
+            return PulpContainerPushRepositoryContext(pulp_ctx, entity={"name": value})
+        else:
+            raise NotImplementedError()
+    return value
+
+
+def _repository_type_callback(
+    ctx: click.Context, param: click.Parameter, value: Optional[str]
+) -> Optional[str]:
+    entity_ctx = ctx.find_object(PulpEntityContext)
+    entity_ctx.meta["repository_type"] = value
+    return value
 
 
 @click.group()
@@ -36,14 +68,37 @@ def distribution(ctx: click.Context, pulp_ctx: PulpContext, distribution_type: s
         raise NotImplementedError()
 
 
-distribution.add_command(list_entities)
-distribution.add_command(show_by_name)
+lookup_options = [href_option, name_option]
+create_options = [
+    click.option("--name", required=True),
+    click.option("--base-path", required=True),
+    click.option("--repository", callback=_repository_callback),
+    click.option(
+        "--version", type=int, help=_("a repository version number, leave blank for latest")
+    ),
+    click.option(
+        "-t",
+        "--repository-type",
+        "repository_type",
+        type=click.Choice(["container", "push"], case_sensitive=False),
+        default="container",
+        is_eager=True,
+        expose_value=False,
+        callback=_repository_type_callback,
+    ),
+]
+
+distribution.add_command(list_command())
+distribution.add_command(show_command(decorators=lookup_options))
+distribution.add_command(create_command(decorators=create_options))
+distribution.add_command(destroy_command(decorators=lookup_options))
 
 
 @distribution.command()
-@click.option("--name", required=True)
-@click.option("--base-path", required=True)
-@click.option("--repository")
+@href_option
+@name_option
+@click.option("--base-path")
+@click.option("--repository", callback=_repository_callback)
 @click.option("--version", type=int, help=_("a repository version number, leave blank for latest"))
 @click.option(
     "-t",
@@ -51,34 +106,57 @@ distribution.add_command(show_by_name)
     "repository_type",
     type=click.Choice(["container", "push"], case_sensitive=False),
     default="container",
+    is_eager=True,
+    expose_value=False,
+    callback=_repository_type_callback,
 )
 @pass_entity_context
 @pass_pulp_context
-def create(
+def update(
     pulp_ctx: PulpContext,
     distribution_ctx: PulpContainerDistributionContext,
-    name: str,
-    base_path: str,
-    repository: Optional[str],
+    base_path: Optional[str],
+    repository: Optional[Union[str, PulpEntityContext]],
     version: Optional[int],
-    repository_type: Optional[str],
 ) -> None:
-    repository_ctx: PulpRepositoryContext
-    body = {"name": name, "base_path": base_path}
-    if repository:
-        if repository_type == "container":
-            repository_ctx = PulpContainerRepositoryContext(pulp_ctx)
-        elif repository_type == "push":
-            repository_ctx = PulpContainerPushRepositoryContext(pulp_ctx)
+    distribution: EntityDefinition = distribution_ctx.entity
+    href: str = distribution_ctx.pulp_href
+    body: EntityDefinition = {}
+
+    if base_path is not None:
+        body["base_path"] = base_path
+    if repository is not None:
+        if repository == "":
+            # unset repository or repository version
+            if distribution["repository"]:
+                body["repository"] = ""
+            elif distribution["repository_version"]:
+                body["repository_version"] = ""
         else:
-            raise NotImplementedError()
-        repository_href = repository_ctx.find(name=repository)["pulp_href"]
-        if version is not None:
+            repository = cast(PulpEntityContext, repository)
+            if version is not None:
+                if distribution["repository"]:
+                    distribution_ctx.update(href, body={"repository": ""}, non_blocking=True)
+                body["repository_version"] = f"{repository.pulp_href}versions/{version}/"
+            else:
+                if distribution["repository_version"]:
+                    distribution_ctx.update(
+                        href, body={"repository_version": ""}, non_blocking=True
+                    )
+                body["repository"] = repository.pulp_href
+    elif version is not None:
+        # keep current repository, change version
+        if distribution["repository"]:
+            distribution_ctx.update(href, body={"repository": ""}, non_blocking=True)
+            body["repository_version"] = f'{distribution["repository"]}versions/{version}/'
+        elif distribution["repository_version"]:
+            repository_href, _, _ = distribution["repository_version"].partition("versions")
             body["repository_version"] = f"{repository_href}versions/{version}/"
         else:
-            body["repository"] = repository_href
-    result = distribution_ctx.create(body=body)
-    pulp_ctx.output_result(result)
-
-
-distribution.add_command(destroy_by_name)
+            raise click.ClickException(
+                _(
+                    "Distribution {distribution} doesn't have a repository set, "
+                    "please specify the repository to use  with --repository"
+                ).format(distribution=distribution["name"])
+            )
+    distribution_ctx.update(href, body=body)

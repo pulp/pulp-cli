@@ -1,6 +1,7 @@
 import gettext
 
 from pulpcore.cli.common.context import (
+    EntityDefinition,
     PulpEntityContext,
     PulpRepositoryContext,
     PulpRepositoryVersionContext,
@@ -10,7 +11,8 @@ _ = gettext.gettext
 
 
 class PulpContainerDistributionContext(PulpEntityContext):
-    ENTITY = "distribution"
+    ENTITY = "container distribution"
+    ENTITIES = "container distributions"
     HREF = "container_container_distribution_href"
     LIST_ID = "distributions_container_container_list"
     READ_ID = "distributions_container_container_read"
@@ -18,14 +20,37 @@ class PulpContainerDistributionContext(PulpEntityContext):
     UPDATE_ID = "distributions_container_container_partial_update"
     DELETE_ID = "distributions_container_container_delete"
 
+    def preprocess_body(self, body: EntityDefinition) -> EntityDefinition:
+        body = super().preprocess_body(body)
+        version = body.pop("version", None)
+        if version is not None:
+            repository_href = body.pop("repository")
+            body["repository_version"] = f"{repository_href}versions/{version}/"
+        return body
+
 
 class PulpContainerRemoteContext(PulpEntityContext):
-    ENTITY = "remote"
+    ENTITY = "container remote"
+    ENTITIES = "container remotes"
     HREF = "container_container_remote_href"
     LIST_ID = "remotes_container_container_list"
     CREATE_ID = "remotes_container_container_create"
     UPDATE_ID = "remotes_container_container_partial_update"
     DELETE_ID = "remotes_container_container_delete"
+
+    def preprocess_body(self, body: EntityDefinition) -> EntityDefinition:
+        body = super().preprocess_body(body)
+        for nullable in [
+            "ca_cert",
+            "client_cert",
+            "client_key",
+            "password",
+            "proxy_url",
+            "username",
+        ]:
+            if body.get(nullable) == "":
+                body[nullable] = None
+        return body
 
 
 class PulpContainerRepositoryVersionContext(PulpRepositoryVersionContext):
@@ -54,6 +79,12 @@ class PulpContainerRepositoryContext(PulpRepositoryContext):
     SYNC_ID = "repositories_container_container_sync"
     VERSION_CONTEXT = PulpContainerRepositoryVersionContext
 
+    def preprocess_body(self, body: EntityDefinition) -> EntityDefinition:
+        body = super().preprocess_body(body)
+        if body.get("description") == "":
+            body["description"] = None
+        return body
+
 
 class PulpContainerPushRepositoryContext(PulpRepositoryContext):
     HREF = "container_container_push_repository_href"
@@ -66,3 +97,9 @@ class PulpContainerPushRepositoryContext(PulpRepositoryContext):
     # TODO Incorporate into capabilities
     # SYNC_ID = "repositories_container_container_push_sync"
     VERSION_CONTEXT = PulpContainerPushRepositoryVersionContext
+
+    def preprocess_body(self, body: EntityDefinition) -> EntityDefinition:
+        body = super().preprocess_body(body)
+        if body.get("description") == "":
+            body["description"] = None
+        return body
