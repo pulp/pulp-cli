@@ -1,6 +1,7 @@
 import gettext
 
 from pulpcore.cli.common.context import (
+    EntityDefinition,
     PulpEntityContext,
     PulpRepositoryContext,
     PulpRepositoryVersionContext,
@@ -9,6 +10,14 @@ from pulpcore.cli.common.context import (
 _ = gettext.gettext
 
 # TODO Add Role and Collection Content contexts
+remote_nullables = [
+    "ca_cert",
+    "client_cert",
+    "client_key",
+    "password",
+    "proxy_url",
+    "username",
+]
 
 
 class PulpAnsibleDistributionContext(PulpEntityContext):
@@ -20,6 +29,14 @@ class PulpAnsibleDistributionContext(PulpEntityContext):
     UPDATE_ID = "distributions_ansible_ansible_partial_update"
     DELETE_ID = "distributions_ansible_ansible_delete"
 
+    def preprocess_body(self, body: EntityDefinition) -> EntityDefinition:
+        body = super().preprocess_body(body)
+        version = body.pop("version", None)
+        if version is not None:
+            repository_href = body.pop("repository")
+            body["repository_version"] = f"{repository_href}versions/{version}/"
+        return body
+
 
 class PulpAnsibleRoleRemoteContext(PulpEntityContext):
     ENTITY = "role remote"
@@ -30,6 +47,13 @@ class PulpAnsibleRoleRemoteContext(PulpEntityContext):
     UPDATE_ID = "remotes_ansible_role_partial_update"
     DELETE_ID = "remotes_ansible_role_delete"
 
+    def preprocess_body(self, body: EntityDefinition) -> EntityDefinition:
+        body = super().preprocess_body(body)
+        for nullable in remote_nullables:
+            if body.get(nullable) == "":
+                body[nullable] = None
+        return body
+
 
 class PulpAnsibleCollectionRemoteContext(PulpEntityContext):
     ENTITY = "collection remote"
@@ -39,6 +63,17 @@ class PulpAnsibleCollectionRemoteContext(PulpEntityContext):
     CREATE_ID = "remotes_ansible_collection_create"
     UPDATE_ID = "remotes_ansible_collection_partial_update"
     DELETE_ID = "remotes_ansible_collection_delete"
+    collection_nullable = ["auth_url", "requirements_file", "token"]
+
+    def preprocess_body(self, body: EntityDefinition) -> EntityDefinition:
+        body = super().preprocess_body(body)
+        if "requirements" in body.keys():
+            body["requirements_file"] = body.pop("requirements")
+        for nullable in remote_nullables + self.collection_nullable:
+            if body.get(nullable) == "":
+                body[nullable] = None
+        print(body)
+        return body
 
 
 class PulpAnsibleRepositoryVersionContext(PulpRepositoryVersionContext):
@@ -60,3 +95,9 @@ class PulpAnsibleRepositoryContext(PulpRepositoryContext):
     SYNC_ID = "repositories_ansible_ansible_sync"
     MODIFY_ID = "repositories_ansible_ansible_modify"
     VERSION_CONTEXT = PulpAnsibleRepositoryVersionContext
+
+    def preprocess_body(self, body: EntityDefinition) -> EntityDefinition:
+        body = super().preprocess_body(body)
+        if body.get("description") == "":
+            body["description"] = None
+        return body

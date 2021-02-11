@@ -9,13 +9,32 @@ from pulpcore.cli.ansible.context import (
 )
 from pulpcore.cli.common.context import (
     EntityDefinition,
+    EntityFieldDefinition,
     PulpContext,
     pass_entity_context,
     pass_pulp_context,
 )
-from pulpcore.cli.common.generic import destroy_by_name, list_entities, show_by_name
+from pulpcore.cli.common.generic import (
+    create_command,
+    destroy_command,
+    href_option,
+    label_select_option,
+    list_command,
+    name_option,
+    show_command,
+)
 
 _ = gettext.gettext
+
+
+def _repository_callback(
+    ctx: click.Context, param: click.Parameter, value: Optional[str]
+) -> EntityFieldDefinition:
+    # Pass None and "" verbatim
+    if value:
+        pulp_ctx: PulpContext = ctx.find_object(PulpContext)
+        return PulpAnsibleRepositoryContext(pulp_ctx, entity={"name": value})
+    return value
 
 
 @click.group()
@@ -35,42 +54,34 @@ def distribution(ctx: click.Context, pulp_ctx: PulpContext, distribution_type: s
         raise NotImplementedError()
 
 
-distribution.add_command(list_entities)
-distribution.add_command(show_by_name)
-distribution.add_command(destroy_by_name)
+lookup_options = [href_option, name_option]
+create_options = [
+    click.option("--name", required=True),
+    click.option(
+        "--base-path",
+        required=True,
+        help=_("the base (relative) path component of the published url."),
+    ),
+    click.option(
+        "--repository",
+        required=True,
+        callback=_repository_callback,
+        help=_("repository with content to distribute"),
+    ),
+    click.option(
+        "--version", type=int, help=_("a repository version number, leave blank for latest")
+    ),
+]
+distribution.add_command(list_command(decorators=[label_select_option]))
+distribution.add_command(show_command(decorators=lookup_options))
+distribution.add_command(destroy_command(decorators=lookup_options))
+distribution.add_command(create_command(decorators=create_options))
 
 
 # TODO Add content_guard option
 @distribution.command()
-@click.option("--name", required=True)
-@click.option("--base-path", required=True)
-@click.option("--repository", help=_("name of repository"))
-@click.option("--version", type=int, help=_("version of repository, leave blank for always latest"))
-@pass_entity_context
-@pass_pulp_context
-def create(
-    pulp_ctx: PulpContext,
-    distribution_ctx: PulpAnsibleDistributionContext,
-    name: str,
-    base_path: str,
-    repository: Optional[str],
-    version: Optional[int],
-) -> None:
-    """Creates a distribution at base-path for repository's content to be discovered at"""
-    body: EntityDefinition = {"name": name, "base_path": base_path}
-    repo: EntityDefinition = PulpAnsibleRepositoryContext(pulp_ctx).find(name=repository)
-    if version is not None and not repository:
-        click.ClickException("You must set --repository when using version")
-    elif version is not None:
-        body["repository_version"] = f'{repo["versions_href"]}{version}/'
-    elif repository:
-        body["repository"] = repo["pulp_href"]
-    result = distribution_ctx.create(body=body)
-    pulp_ctx.output_result(result)
-
-
-@distribution.command()
-@click.option("--name", required=True)
+@name_option
+@href_option
 @click.option("--base-path", help=_("new base_path"))
 @click.option("--repository", type=str, default=None, help=_("new repository to be served"))
 @click.option(
@@ -80,20 +91,18 @@ def create(
     help=_("version of new repository to be served, leave blank for always latest"),
 )
 @pass_entity_context
-@pass_pulp_context
 def update(
-    pulp_ctx: PulpContext,
     distribution_ctx: PulpAnsibleDistributionContext,
-    name: str,
     base_path: Optional[str],
-    repository: Optional[str],
+    repository: EntityFieldDefinition,
     version: Optional[int],
 ) -> None:
     """
     To remove repository or repository_version fields set --repository to ""
     """
-    dist_body: EntityDefinition = distribution_ctx.find(name=name)
+    dist_body: EntityDefinition = distribution_ctx.entity
     href: str = dist_body["pulp_href"]
+    name: str = dist_body["name"]
     body: EntityDefinition = dict()
 
     if base_path:
@@ -105,8 +114,8 @@ def update(
                 body["repository"] = ""
             elif dist_body["repository_version"]:
                 body["repository_version"] = ""
-        else:
-            repo = PulpAnsibleRepositoryContext(pulp_ctx).find(name=repository)
+        elif isinstance(repository, PulpAnsibleRepositoryContext):
+            repo = repository.entity
             if version is not None:
                 if dist_body["repository"]:
                     distribution_ctx.update(href, body={"repository": ""}, non_blocking=True)

@@ -3,7 +3,7 @@ import gettext
 import json
 import sys
 import time
-from typing import IO, Any, ClassVar, Dict, List, Optional, Tuple, Type
+from typing import IO, Any, ClassVar, Dict, List, Optional, Tuple, Type, Union
 
 import click
 import yaml
@@ -503,6 +503,7 @@ class PulpRepositoryContext(PulpEntityContext):
         )
 
 
+EntityFieldDefinition = Union[None, str, PulpEntityContext]
 ##############################################################################
 # Decorator to access certain contexts
 

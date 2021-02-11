@@ -9,20 +9,38 @@ from pulpcore.cli.ansible.context import (
     PulpAnsibleRoleRemoteContext,
 )
 from pulpcore.cli.common.context import (
-    EntityDefinition,
     PulpContext,
     PulpRepositoryContext,
     pass_pulp_context,
     pass_repository_context,
 )
 from pulpcore.cli.common.generic import (
-    destroy_by_name,
-    list_entities,
-    show_by_name,
+    create_command,
+    destroy_command,
+    href_option,
+    label_command,
+    label_select_option,
+    list_command,
+    name_option,
+    show_command,
+    update_command,
     version_command,
 )
 
 _ = gettext.gettext
+
+
+def _remote_callback(
+    ctx: click.Context, param: click.Parameter, value: Optional[str]
+) -> Optional[str]:
+    # Pass None and "" verbatim
+    if value:
+        pulp_ctx: PulpContext = ctx.find_object(PulpContext)
+        try:
+            return PulpAnsibleCollectionRemoteContext(pulp_ctx, entity={"name": value}).pulp_href
+        except click.ClickException:
+            return PulpAnsibleRoleRemoteContext(pulp_ctx, entity={"name": value}).pulp_href
+    return value
 
 
 @click.group()
@@ -42,114 +60,48 @@ def repository(ctx: click.Context, pulp_ctx: PulpContext, repo_type: str) -> Non
         raise NotImplementedError()
 
 
-repository.add_command(show_by_name)
-repository.add_command(list_entities)
-repository.add_command(destroy_by_name)
+lookup_options = [href_option, name_option]
+create_options = [
+    click.option("--name", required=True),
+    click.option("--description"),
+    click.option("--remote", callback=_remote_callback, help=_("an optional remote")),
+]
+update_options = [
+    click.option("--description"),
+    click.option("--remote", callback=_remote_callback, help=_("new optional remote")),
+]
+
+repository.add_command(show_command(decorators=lookup_options))
+repository.add_command(list_command(decorators=[label_select_option]))
+repository.add_command(destroy_command(decorators=lookup_options))
 repository.add_command(version_command())
+repository.add_command(create_command(decorators=create_options))
+repository.add_command(update_command(decorators=lookup_options + update_options))
+repository.add_command(label_command())
 
 
 @repository.command()
-@click.option("--name", required=True)
-@click.option("--description", help=_("an optional description"))
-@click.option("--remote", help=_("an optional remote to default when syncing"))
+@name_option
+@href_option
+@click.option(
+    "--remote", callback=_remote_callback, help=_("optional remote name to perform sync with")
+)
 @pass_repository_context
-@pass_pulp_context
-def create(
-    pulp_ctx: PulpContext,
-    repository_ctx: PulpRepositoryContext,
-    name: str,
-    description: Optional[str],
-    remote: Optional[str],
-) -> None:
-    """Creates a repository to store Role and Collection content"""
-    repository: EntityDefinition = {"name": name, "description": description}
-    if remote is not None:
-        try:
-            remote_href: str = PulpAnsibleCollectionRemoteContext(pulp_ctx).find(name=remote)[
-                "pulp_href"
-            ]
-        except click.ClickException:
-            remote_href = PulpAnsibleRoleRemoteContext(pulp_ctx).find(name=remote)["pulp_href"]
-        repository["remote"] = remote_href
-
-    result = repository_ctx.create(body=repository)
-    pulp_ctx.output_result(result)
-
-
-@repository.command()
-@click.option("--name", required=True)
-@click.option("--description", help=_("new optional description"))
-@click.option("--remote", help=_("new optional remote"))
-@pass_repository_context
-@pass_pulp_context
-def update(
-    pulp_ctx: PulpContext,
-    repository_ctx: PulpRepositoryContext,
-    name: str,
-    description: Optional[str],
-    remote: Optional[str],
-) -> None:
-    """
-    The description and remote can both be unset using an empty string
-
-    e.g. pulp ansible repository update --name foo --description ""
-    """
-    repository: EntityDefinition = repository_ctx.find(name=name)
-
-    if description is not None:
-        if description == "":
-            # unset the description
-            description = None
-        if description != repository["description"]:
-            repository["description"] = description
-
-    if remote is not None:
-        if remote == "":
-            # unset the remote
-            remote_href: str = ""
-        else:
-            try:
-                remote_href = PulpAnsibleCollectionRemoteContext(pulp_ctx).find(name=remote)[
-                    "pulp_href"
-                ]
-            except click.ClickException:
-                remote_href = PulpAnsibleRoleRemoteContext(pulp_ctx).find(name=remote)["pulp_href"]
-
-        repository["remote"] = remote_href
-
-    repository_ctx.update(repository["pulp_href"], body=repository)
-    result = repository_ctx.show(repository["pulp_href"])
-    pulp_ctx.output_result(result)
-
-
-@repository.command()
-@click.option("--name", required=True)
-@click.option("--remote", help=_("optional remote name to perform sync with"))
-@pass_repository_context
-@pass_pulp_context
 def sync(
-    pulp_ctx: PulpContext,
     repository_ctx: PulpRepositoryContext,
-    name: str,
     remote: Optional[str],
 ) -> None:
     """
     If remote is not specified sync will try to use the default remote associated with
     the repository
     """
-    repository: EntityDefinition = repository_ctx.find(name=name)
-    repository_href: str = repository["pulp_href"]
-    body: EntityDefinition = dict()
-
+    repository = repository_ctx.entity
+    repository_href = repository["pulp_href"]
+    body = {}
     if remote:
-        try:
-            remote_href: str = PulpAnsibleCollectionRemoteContext(pulp_ctx).find(name=remote)[
-                "pulp_href"
-            ]
-        except click.ClickException:
-            remote_href = PulpAnsibleRoleRemoteContext(pulp_ctx).find(name=remote)["pulp_href"]
-        body["remote"] = remote_href
+        body["remote"] = remote
     elif repository["remote"] is None:
+        name = repository["name"]
         raise click.ClickException(
             f"Repository '{name}' does not have a default remote. Please specify with '--remote'."
         )
