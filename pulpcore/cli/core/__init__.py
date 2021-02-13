@@ -11,6 +11,7 @@ from pulpcore.cli.core.show import show
 from pulpcore.cli.core.status import status
 from pulpcore.cli.core.task import task
 from pulpcore.cli.core.user import user
+from pulpcore.cli.core.worker import worker
 
 # Register commands with cli
 main.add_command(status)
@@ -25,3 +26,4 @@ main.add_command(exporter)
 main.add_command(export)
 main.add_command(importer)
 main.add_command(config)
+main.add_command(worker)

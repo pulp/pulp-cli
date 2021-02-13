@@ -253,3 +253,10 @@ class PulpUserContext(PulpEntityContext):
         if len(search_result) != 1:
             raise click.ClickException(f"Could not find {self.ENTITY} with {kwargs}.")
         return search_result[0]
+
+
+class PulpWorkerContext(PulpEntityContext):
+    ENTITY = "worker"
+    HREF = "worker_href"
+    LIST_ID = "workers_list"
+    READ_ID = "workers_read"
