@@ -35,6 +35,7 @@ setup(
             "container=pulpcore.cli.container",
             "core=pulpcore.cli.core",
             "file=pulpcore.cli.file",
+            "migration=pulpcore.cli.migration",
             "rpm=pulpcore.cli.rpm",
         ],
     },
