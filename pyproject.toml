@@ -16,8 +16,9 @@ line_length = 100
 [tool.pytest.ini_options]
 markers = [
   "script: Marks tests provided as shell scripts",
-  "pulpcore: pulpcore tests.",
-  "pulp_file: pulp_file tests.",
-  "pulp_ansible: pulp_ansible tests.",
-  "pulp_container: pulp_container tests."
+  "pulpcore: pulpcore tests",
+  "pulp_file: pulp_file tests",
+  "pulp_ansible: pulp_ansible tests",
+  "pulp_container: pulp_container tests",
+  "pulp_rpm: pulp_rpm tests",
 ]
