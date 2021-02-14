@@ -17,19 +17,39 @@ __version__ = "0.5.0.dev"
 # Main entry point
 
 
+PROFILE_KEY = f"{__name__}.profile"
+
+
+def _config_profile_callback(ctx: click.Context, param: Any, value: Optional[str]) -> Optional[str]:
+    if value is not None:
+        ctx.meta[PROFILE_KEY] = value
+    return value
+
+
 def _config_callback(ctx: click.Context, param: Any, value: Optional[str]) -> None:
     if ctx.default_map:
         return
 
     if value:
-        ctx.default_map = toml.load(value)["cli"]
+        config = toml.load(value)
     else:
         default_config_path = os.path.join(click.utils.get_app_dir("pulp"), "settings.toml")
 
         try:
-            ctx.default_map = toml.load(default_config_path)["cli"]
+            config = toml.load(default_config_path)
         except FileNotFoundError:
-            pass
+            # No config, but also none requested
+            return
+
+    profile: str = "cli"
+    if PROFILE_KEY in ctx.meta:
+        profile = "cli-" + ctx.meta[PROFILE_KEY]
+    try:
+        ctx.default_map = config[profile]
+    except KeyError:
+        raise click.ClickException(
+            _("Profile named '{profile}' not found.").format(profile=profile)
+        )
 
 
 CONFIG_OPTIONS = [
@@ -58,7 +78,15 @@ def config_options(command: Callable[..., Any]) -> Callable[..., Any]:
 
 
 @click.group()
-@click.version_option(prog_name="pulp3 command line interface")
+@click.version_option(prog_name=_("pulp3 command line interface"))
+@click.option(
+    "--profile",
+    "-p",
+    help=_("Config profile to use"),
+    callback=_config_profile_callback,
+    expose_value=False,
+    is_eager=True,
+)
 @click.option(
     "--config",
     type=click.Path(resolve_path=True),

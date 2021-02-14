@@ -1,10 +1,11 @@
 #!/bin/sh
 
 # shellcheck source=tests/scripts/config.source
-. "$(dirname "$(dirname "$(realpath "$0")")")"/config.source
+. "$(dirname "$(realpath "$0")")"/config.source
 
 good_settings="${XDG_CONFIG_HOME}/pulp/settings.toml"
 bad_settings="bad_settings.toml"
+profile_settings="profile_settings.toml"
 test_settings="test.toml"
 
 export XDG_CONFIG_HOME=/nowhere
@@ -28,6 +29,14 @@ expect_fail pulp --username test --password test --client "/some/path" status
 # fail when using basic auth and cert auth
 expect_fail pulp --key "/some/path" file remote list
 
+
+# CONFIG PROFILE
+
+cp "$bad_settings" "$profile_settings"
+sed -e 's/\[cli\]/[cli-profile1]/' "$good_settings" >> "$profile_settings"
+
+expect_fail pulp --config "$profile_settings" file repository list
+expect_succ pulp --config "$profile_settings" --profile profile1 file repository list
 
 # CONFIG COMMAND
 

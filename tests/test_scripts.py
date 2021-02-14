@@ -6,7 +6,7 @@ import pytest
 TEST_SCRIPTS = [
     pytest.param(
         path.resolve(),
-        id=path.stem,
+        id=("" if path.parent.name == "scripts" else path.parent.name + ".") + path.stem,
         marks=[] if path.parent.name == "scripts" else getattr(pytest.mark, path.parent.name),
     )
     for path in Path("tests/scripts").glob("**/test_*.sh")
