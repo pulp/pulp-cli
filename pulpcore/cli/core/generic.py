@@ -1,4 +1,3 @@
-import gettext
 from typing import Any
 
 import click
@@ -11,9 +10,11 @@ from pulpcore.cli.common.context import (
     pass_pulp_context,
 )
 from pulpcore.cli.common.generic import list_command, pulp_option
+from pulpcore.cli.common.i18n import get_translation
 from pulpcore.cli.core.context import PulpTaskContext
 
-_ = gettext.gettext
+translation = get_translation(__name__)
+_ = translation.gettext
 
 
 ##############################################################################

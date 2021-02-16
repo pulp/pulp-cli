@@ -1,4 +1,3 @@
-import gettext
 from typing import Iterable
 
 import click
@@ -20,9 +19,11 @@ from pulpcore.cli.common.generic import (
     resource_option,
     show_command,
 )
+from pulpcore.cli.common.i18n import get_translation
 from pulpcore.cli.core.context import PulpExporterContext
 
-_ = gettext.gettext
+translation = get_translation(__name__)
+_ = translation.gettext
 
 
 multi_repository_option = resource_option(

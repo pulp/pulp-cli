@@ -1,4 +1,3 @@
-import gettext
 from typing import Optional
 
 import click
@@ -19,6 +18,7 @@ from pulpcore.cli.common.generic import (
     null_callback,
     show_command,
 )
+from pulpcore.cli.common.i18n import get_translation
 from pulpcore.cli.core.context import (
     PulpGroupContext,
     PulpGroupModelPermissionContext,
@@ -29,7 +29,8 @@ from pulpcore.cli.core.context import (
     PulpUserContext,
 )
 
-_ = gettext.gettext
+translation = get_translation(__name__)
+_ = translation.gettext
 
 
 def _object_callback(ctx: click.Context, param: click.Parameter, value: str) -> str:

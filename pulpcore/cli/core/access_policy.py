@@ -14,7 +14,11 @@ from pulpcore.cli.common.generic import (
     show_command,
     update_command,
 )
+from pulpcore.cli.common.i18n import get_translation
 from pulpcore.cli.core.context import PulpAccessPolicyContext
+
+translation = get_translation(__name__)
+_ = translation.gettext
 
 
 def _vs_name_callback(ctx: click.Context, param: click.Parameter, value: str) -> str:

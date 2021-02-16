@@ -1,4 +1,3 @@
-import gettext
 import json
 from typing import Any, List, Optional
 
@@ -20,9 +19,11 @@ from pulpcore.cli.common.generic import (
     show_command,
     update_command,
 )
+from pulpcore.cli.common.i18n import get_translation
 from pulpcore.cli.python.context import PulpPythonRemoteContext
 
-_ = gettext.gettext
+translation = get_translation(__name__)
+_ = translation.gettext
 
 
 def _package_list_callback(ctx: click.Context, param: click.Parameter, value: Optional[str]) -> Any:

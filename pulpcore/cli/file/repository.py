@@ -1,4 +1,3 @@
-import gettext
 from typing import Any, Dict, List, Optional
 
 import click
@@ -35,6 +34,7 @@ from pulpcore.cli.common.generic import (
     update_command,
     version_command,
 )
+from pulpcore.cli.common.i18n import get_translation
 from pulpcore.cli.core.generic import task_command
 from pulpcore.cli.file.context import (
     PulpFileContentContext,
@@ -42,7 +42,8 @@ from pulpcore.cli.file.context import (
     PulpFileRepositoryContext,
 )
 
-_ = gettext.gettext
+translation = get_translation(__name__)
+_ = translation.gettext
 
 
 remote_option = resource_option(

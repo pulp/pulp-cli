@@ -1,4 +1,3 @@
-import gettext
 from typing import Optional
 
 import click
@@ -28,8 +27,10 @@ from pulpcore.cli.common.generic import (
     resource_option,
     show_command,
 )
+from pulpcore.cli.common.i18n import get_translation
 
-_ = gettext.gettext
+translation = get_translation(__name__)
+_ = translation.gettext
 
 
 repository_option = resource_option(

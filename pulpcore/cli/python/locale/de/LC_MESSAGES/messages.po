@@ -1,0 +1,131 @@
+# Translations for the pulp-cli python plugin.
+# Copyright (C) 2021
+# This file is distributed under the same license as the pulp-cli package.
+# Matthias Dellweg <mdellweg@redhat.com>, 2021.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-10-16 23:00+0200\n"
+"PO-Revision-Date: 2021-12-06 11:24+0100\n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Last-Translator: Matthias Dellweg <mdellweg@redhat.com>\n"
+"Language-Team: \n"
+"X-Generator: Poedit 3.0\n"
+
+#: pulpcore/cli/python/content.py:55 pulpcore/cli/python/content.py:76
+msgid "Exact name of file"
+msgstr ""
+
+#: pulpcore/cli/python/content.py:60
+msgid "Digest of the artifact to use"
+msgstr "Fingerabdruck des zu verwendenden Artefakts"
+
+#: pulpcore/cli/python/content.py:77
+msgid "Path to file"
+msgstr "Pfad zur Datei"
+
+#: pulpcore/cli/python/context.py:20
+msgid "python package"
+msgstr ""
+
+#: pulpcore/cli/python/context.py:21
+msgid "python packages"
+msgstr ""
+
+#: pulpcore/cli/python/context.py:29
+msgid "python distribution"
+msgstr ""
+
+#: pulpcore/cli/python/context.py:30
+msgid "python distributions"
+msgstr ""
+
+#: pulpcore/cli/python/context.py:50
+msgid "python publication"
+msgstr ""
+
+#: pulpcore/cli/python/context.py:51
+msgid "python publications"
+msgstr ""
+
+#: pulpcore/cli/python/context.py:68
+msgid "python remote"
+msgstr ""
+
+#: pulpcore/cli/python/context.py:69
+msgid "python remotes"
+msgstr ""
+
+#: pulpcore/cli/python/distribution.py:33
+msgid ""
+"Repository to be used for auto-publishing. When set, this will unset the "
+"'publication'. Specified as '[[<plugin>:]<type>:]<name>' or as href."
+msgstr ""
+
+#: pulpcore/cli/python/distribution.py:64
+msgid ""
+"Publication to be served. This will unset the 'repository' and disable auto "
+"publish."
+msgstr ""
+
+#: pulpcore/cli/python/publication.py:50
+msgid "a repository version number, leave blank for latest"
+msgstr ""
+"Versionsnummer des Repositories, leer lassen um die letzte zu verwenden"
+
+#: pulpcore/cli/python/remote.py:42
+msgid "Failed to decode JSON: {}"
+msgstr "Die JSON-Dekodierung ist fehlgeschlagen: {}"
+
+#: pulpcore/cli/python/remote.py:72
+msgid "Package allowlist"
+msgstr ""
+
+#: pulpcore/cli/python/remote.py:73
+msgid "Package blocklist"
+msgstr ""
+
+#: pulpcore/cli/python/remote.py:124
+#, python-brace-format
+msgid "Failed to load content from {requirements_file}"
+msgstr ""
+
+#: pulpcore/cli/python/repository.py:53
+msgid ""
+"Remote used for synching in the form '[[<plugin>:]<resource_type>:]<name>' "
+"or by href."
+msgstr ""
+
+#: pulpcore/cli/python/repository.py:102
+msgid "Filename of the python package"
+msgstr ""
+
+#: pulpcore/cli/python/repository.py:110
+msgid ""
+"JSON string with a list of objects to add to the repository.\n"
+"    Each object should have the key: \"filename\"\n"
+"    The argument prefixed with the '@' can be the path to a JSON file with a "
+"list of objects."
+msgstr ""
+
+#: pulpcore/cli/python/repository.py:119
+msgid ""
+"JSON string with a list of objects to remove from the repository.\n"
+"    Each object should have the key: \"filename\"\n"
+"    The argument prefixed with the '@' can be the path to a JSON file with a "
+"list of objects."
+msgstr ""
+
+#: pulpcore/cli/python/repository.py:163
+#, python-brace-format
+msgid ""
+"Repository '{name}' does not have a default remote. Please specify with '--"
+"remote'."
+msgstr ""
+"Repository '{name}' hat keine voreingestellte Gegenstelle. Bitte mit '--"
+"remote' angeben."

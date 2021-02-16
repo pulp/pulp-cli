@@ -1,5 +1,3 @@
-import gettext
-
 import click
 
 from pulpcore.cli.common.context import PulpContext, pass_pulp_context
@@ -16,9 +14,11 @@ from pulpcore.cli.common.generic import (
     show_command,
     update_command,
 )
+from pulpcore.cli.common.i18n import get_translation
 from pulpcore.cli.file.context import PulpFileRemoteContext
 
-_ = gettext.gettext
+translation = get_translation(__name__)
+_ = translation.gettext
 
 
 @click.group()

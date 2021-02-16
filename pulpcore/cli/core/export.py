@@ -1,4 +1,3 @@
-import gettext
 import re
 from typing import Any, Dict, Iterable, Optional, Tuple
 
@@ -15,9 +14,11 @@ from pulpcore.cli.common.context import (
     registered_repository_contexts,
 )
 from pulpcore.cli.common.generic import destroy_command, href_option, show_command
+from pulpcore.cli.common.i18n import get_translation
 from pulpcore.cli.core.context import PulpExportContext, PulpExporterContext
 
-_ = gettext.gettext
+translation = get_translation(__name__)
+_ = translation.gettext
 
 
 def _version_list_callback(

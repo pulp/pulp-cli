@@ -1,4 +1,3 @@
-import gettext
 import json
 import re
 from functools import lru_cache
@@ -23,8 +22,10 @@ from pulpcore.cli.common.context import (
     pass_repository_context,
     pass_repository_version_context,
 )
+from pulpcore.cli.common.i18n import get_translation
 
-_ = gettext.gettext
+translation = get_translation(__name__)
+_ = translation.gettext
 
 _F = Callable[..., Any]
 _FC = TypeVar("_FC", _F, click.Command)

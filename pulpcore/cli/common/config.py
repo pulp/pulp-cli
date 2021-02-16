@@ -1,11 +1,14 @@
-import gettext
 from pathlib import Path
 from typing import Any, Callable, Dict, List, MutableMapping, Optional, TypeVar
 
 import click
 import toml
 
-_ = gettext.gettext
+from pulpcore.cli.common.i18n import get_translation
+
+translation = get_translation(__name__)
+_ = translation.gettext
+
 _T = TypeVar("_T")
 
 CONFIG_LOCATIONS = [

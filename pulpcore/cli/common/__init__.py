@@ -1,4 +1,3 @@
-import gettext
 import os
 import sys
 from typing import Any, Optional
@@ -17,9 +16,12 @@ except ImportError:
 from pulpcore.cli.common.config import CONFIG_LOCATIONS, config, config_options, validate_config
 from pulpcore.cli.common.context import PluginRequirement, PulpContext
 from pulpcore.cli.common.debug import debug
+from pulpcore.cli.common.i18n import get_translation
 
-_ = gettext.gettext
 __version__ = "0.13.0.dev"
+
+translation = get_translation(__name__)
+_ = translation.gettext
 
 
 ##############################################################################

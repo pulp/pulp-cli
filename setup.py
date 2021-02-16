@@ -4,7 +4,9 @@ try:
     from setuptools import find_namespace_packages
 
     main_entrypoint = "pulp=pulpcore.cli.common:main"
-    plugin_packages = find_namespace_packages(include=["pulpcore.cli.*"])
+    plugin_packages = find_namespace_packages(
+        include=["pulpcore.cli.*"], exclude=["pulpcore.cli.*.*"]
+    )
 
 except ImportError:
     # Old versions of setuptools do not provide `find_namespace_packages`
@@ -30,7 +32,6 @@ with open("README.md") as readme:
             break
         long_description += line
 
-
 setup(
     name="pulp-cli",
     description="Command line interface to talk to pulpcore's REST API.",
@@ -41,7 +42,7 @@ setup(
     url="https://github.com/pulp/pulp-cli",
     version="0.13.0.dev",
     packages=plugin_packages + extra_packages,
-    package_data={package: ["py.typed"] for package in plugin_packages},
+    package_data={"": ["py.typed", "locale/*/LC_MESSAGES/*.mo"]},
     python_requires=">=3.6",
     install_requires=[
         "click>=7.1.2,<9.0.0",

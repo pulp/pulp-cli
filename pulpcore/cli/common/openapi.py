@@ -1,7 +1,6 @@
 # copyright (c) 2020, Matthias Dellweg
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 
-import gettext
 import json
 import os
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
@@ -10,7 +9,10 @@ from urllib.parse import urljoin
 import requests
 import urllib3
 
-_ = gettext.gettext
+from pulpcore.cli.common.i18n import get_translation
+
+translation = get_translation(__name__)
+_ = translation.gettext
 
 SAFE_METHODS = ["GET", "HEAD", "OPTIONS"]
 
