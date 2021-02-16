@@ -1,4 +1,3 @@
-import gettext
 import re
 from contextlib import suppress
 from datetime import datetime
@@ -14,10 +13,12 @@ from pulpcore.cli.common.context import (
     pass_pulp_context,
 )
 from pulpcore.cli.common.generic import destroy_command, href_option, list_command, pulp_option
+from pulpcore.cli.common.i18n import get_translation
 from pulpcore.cli.core.context import PulpTaskContext
 from pulpcore.cli.core.generic import task_filter
 
-_ = gettext.gettext
+translation = get_translation(__name__)
+_ = translation.gettext
 
 
 def _uuid_callback(

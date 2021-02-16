@@ -1,4 +1,3 @@
-import gettext
 import hashlib
 import os
 import sys
@@ -12,8 +11,10 @@ from pulpcore.cli.common.context import (
     PulpContext,
     PulpEntityContext,
 )
+from pulpcore.cli.common.i18n import get_translation
 
-_ = gettext.gettext
+translation = get_translation(__name__)
+_ = translation.gettext
 
 
 class PulpAccessPolicyContext(PulpEntityContext):

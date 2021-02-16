@@ -1,4 +1,3 @@
-import gettext
 import sys
 from typing import IO, Any, Dict, Iterable, Optional
 
@@ -6,8 +5,10 @@ import click
 
 from pulpcore.cli.common.context import PluginRequirement, PulpContext, pass_pulp_context
 from pulpcore.cli.common.generic import load_json_callback
+from pulpcore.cli.common.i18n import get_translation
 
-_ = gettext.gettext
+translation = get_translation(__name__)
+_ = translation.gettext
 
 
 @click.group(help=_("Commands useful for debugging"))

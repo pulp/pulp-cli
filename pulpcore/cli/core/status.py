@@ -1,11 +1,12 @@
-import gettext
 import time
 
 import click
 
 from pulpcore.cli.common.context import PulpContext, pass_pulp_context
+from pulpcore.cli.common.i18n import get_translation
 
-_ = gettext.gettext
+translation = get_translation(__name__)
+_ = translation.gettext
 
 
 @click.command()

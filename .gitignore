@@ -4,3 +4,5 @@ build/
 tests/cli.toml
 /.ci/settings/certs
 site/
+dist/
+*.po~

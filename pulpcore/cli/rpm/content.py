@@ -1,4 +1,3 @@
-import gettext
 from typing import IO, Optional, Union
 
 import click
@@ -16,10 +15,12 @@ from pulpcore.cli.common.generic import (
     list_command,
     show_command,
 )
+from pulpcore.cli.common.i18n import get_translation
 from pulpcore.cli.core.context import PulpArtifactContext
 from pulpcore.cli.rpm.context import PulpRpmPackageContext
 
-_ = gettext.gettext
+translation = get_translation(__name__)
+_ = translation.gettext
 
 
 def _relative_path_callback(ctx: click.Context, param: click.Parameter, value: str) -> str:

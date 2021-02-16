@@ -1,5 +1,4 @@
 import datetime
-import gettext
 import json
 import sys
 import time
@@ -10,6 +9,7 @@ import yaml
 from packaging.version import parse as parse_version
 from requests import HTTPError
 
+from pulpcore.cli.common.i18n import get_translation
 from pulpcore.cli.common.openapi import OpenAPI, OpenAPIError
 
 try:
@@ -22,7 +22,8 @@ else:
     PYGMENTS = True
     PYGMENTS_STYLE = "solarized-dark"
 
-_ = gettext.gettext
+translation = get_translation(__name__)
+_ = translation.gettext
 
 DEFAULT_LIMIT = 25
 BATCH_SIZE = 25

@@ -1,4 +1,3 @@
-import gettext
 from typing import List, Optional
 
 import click
@@ -18,9 +17,11 @@ from pulpcore.cli.common.generic import (
     show_command,
     update_command,
 )
+from pulpcore.cli.common.i18n import get_translation
 from pulpcore.cli.core.context import PulpContentGuardContext, PulpRbacContentGuardContext
 
-_ = gettext.gettext
+translation = get_translation(__name__)
+_ = translation.gettext
 
 
 @click.group()

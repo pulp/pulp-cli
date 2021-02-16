@@ -1,5 +1,3 @@
-import gettext
-
 from pulpcore.cli.common.context import (
     EntityDefinition,
     PluginRequirement,
@@ -9,8 +7,10 @@ from pulpcore.cli.common.context import (
     PulpRepositoryVersionContext,
     registered_repository_contexts,
 )
+from pulpcore.cli.common.i18n import get_translation
 
-_ = gettext.gettext
+translation = get_translation(__name__)
+_ = translation.gettext
 
 
 class PulpContainerNamespaceContext(PulpEntityContext):

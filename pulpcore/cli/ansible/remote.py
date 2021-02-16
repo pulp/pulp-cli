@@ -1,4 +1,3 @@
-import gettext
 from typing import Any, Optional, Union
 
 import click
@@ -24,8 +23,10 @@ from pulpcore.cli.common.generic import (
     show_command,
     update_command,
 )
+from pulpcore.cli.common.i18n import get_translation
 
-_ = gettext.gettext
+translation = get_translation(__name__)
+_ = translation.gettext
 
 
 def _requirements_callback(

@@ -1,7 +1,6 @@
-import gettext
-
 from pulpcore.cli.common import main
 from pulpcore.cli.common.context import PluginRequirement, PulpContext, pass_pulp_context
+from pulpcore.cli.common.i18n import get_translation
 from pulpcore.cli.file.acs import acs
 from pulpcore.cli.file.content import content
 from pulpcore.cli.file.distribution import distribution
@@ -9,7 +8,8 @@ from pulpcore.cli.file.publication import publication
 from pulpcore.cli.file.remote import remote
 from pulpcore.cli.file.repository import repository
 
-_ = gettext.gettext
+translation = get_translation(__name__)
+_ = translation.gettext
 
 
 @main.group(name="file")
