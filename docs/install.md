@@ -77,7 +77,7 @@ password password
 ### Katello
 
 If you have a Katello environment and wish to use pulp-cli to connect to Pulp, you'll need to
-configure client certificate authentication:
+configure client certificate authentication in your `~/.config/pulp/settings.toml`:
 
 ```toml
 [cli]
