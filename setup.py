@@ -14,6 +14,7 @@ setup(
     name="pulp-cli",
     description="Command line interface to talk to pulpcore's REST API.",
     long_description=long_description,
+    long_description_content_type="text/markdown",
     url="https://github.com/pulp/pulp-cli",
     version="0.5.0.dev",
     packages=packages,
