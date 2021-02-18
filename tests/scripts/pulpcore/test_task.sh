@@ -41,5 +41,9 @@ expect_succ test "$(echo "$OUTPUT" | jq -r '.state')" = "completed"
 
 expect_succ pulp task list --name-contains file
 
+expect_fail pulp task list --state=cannotwork
+expect_succ pulp task list --state=COmPLetED
+expect_succ test "$(echo "$OUTPUT" | jq -r '.[0].state')" = "completed"
+
 expect_succ pulp task list --limit 1
 expect_succ test "$(echo "$OUTPUT" | jq -r length)" -eq 1
