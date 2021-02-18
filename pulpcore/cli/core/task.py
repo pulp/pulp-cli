@@ -25,7 +25,14 @@ task.add_command(
                 "name__contains",
                 help=_("List only tasks whose name contains this."),
             ),
-            click.option("--state", help=_("List only tasks in this state.")),
+            click.option(
+                "--state",
+                type=click.Choice(
+                    ["waiting", "skipped", "running", "completed", "failed", "canceled"],
+                    case_sensitive=False,
+                ),
+                help=_("List only tasks in this state."),
+            ),
         ]
     )
 )
