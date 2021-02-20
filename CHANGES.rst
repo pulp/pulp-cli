@@ -13,6 +13,32 @@ Changelog
 
 .. towncrier release notes start
 
+0.5.0 (2021-02-20)
+==================
+
+
+Features
+--------
+
+- Made task state a choice option for pulp task list.
+  `#115 <https://github.com/pulp/pulp-cli/issues/115>`_
+- Added support for pulp-2to3-migration.
+  `#133 <https://github.com/pulp/pulp-cli/issues/133>`_
+- Added worker command.
+  `#144 <https://github.com/pulp/pulp-cli/issues/144>`_
+- Added the ability to include multiple server profiles into the pulp cli config.
+  `#145 <https://github.com/pulp/pulp-cli/issues/145>`_
+
+
+Misc
+----
+
+- `#148 <https://github.com/pulp/pulp-cli/issues/148>`_
+
+
+----
+
+
 0.4.0 (2021-02-10)
 ==================
 
