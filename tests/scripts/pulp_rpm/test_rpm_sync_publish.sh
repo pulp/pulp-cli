@@ -3,7 +3,7 @@
 # shellcheck source=tests/scripts/config.source
 . "$(dirname "$(dirname "$(realpath "$0")")")"/config.source
 
-pulp debug has-plugin --name "pulp_rpm" || exit 3
+pulp debug has-plugin --name "rpm" || exit 3
 
 cleanup() {
   pulp rpm remote destroy --name "cli_test_rpm_remote" || true

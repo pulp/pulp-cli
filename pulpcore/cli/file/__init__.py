@@ -14,7 +14,7 @@ _ = gettext.gettext
 @main.group(name="file")
 @pass_pulp_context
 def file_group(pulp_ctx: PulpContext) -> None:
-    pulp_ctx.needs_plugin("pulp_file")
+    pulp_ctx.needs_plugin("file")
 
 
 file_group.add_command(repository)

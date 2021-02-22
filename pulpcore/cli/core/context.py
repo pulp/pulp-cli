@@ -22,7 +22,7 @@ class PulpAccessPolicyContext(PulpEntityContext):
     def find(self, **kwargs: Any) -> Any:
         """Workaroud for the missing ability to filter"""
         # https://pulp.plan.io/issues/8189
-        if self.pulp_ctx.has_plugin("pulpcore", min_version="3.10.dev0"):
+        if self.pulp_ctx.has_plugin("core", min_version="3.10.dev"):
             # Workaround not needed anymore
             return super().find(**kwargs)
         search_result = self.list(limit=sys.maxsize, offset=0, parameters={})
@@ -106,7 +106,7 @@ class PulpExportContext(PulpEntityContext):
     exporter: EntityDefinition
 
     def list(self, limit: int, offset: int, parameters: Dict[str, Any]) -> List[Any]:
-        if not self.pulp_ctx.has_plugin("pulpcore", min_version="3.10.dev0"):
+        if not self.pulp_ctx.has_plugin("core", min_version="3.10.dev"):
             # Workaround for improperly rendered nested resource paths and weird HREF names
             # https://github.com/pulp/pulpcore/pull/1066
             parameters[PulpExporterContext.HREF] = self.exporter["pulp_href"]
@@ -118,7 +118,7 @@ class PulpExportContext(PulpEntityContext):
         parameters: Optional[Dict[str, Any]] = None,
         non_blocking: bool = False,
     ) -> Any:
-        if not self.pulp_ctx.has_plugin("pulpcore", min_version="3.10.dev0"):
+        if not self.pulp_ctx.has_plugin("core", min_version="3.10.dev"):
             # Workaround for improperly rendered nested resource paths and weird HREF names
             # https://github.com/pulp/pulpcore/pull/1066
             if parameters is None:
@@ -128,7 +128,7 @@ class PulpExportContext(PulpEntityContext):
 
     @property
     def HREF(self) -> str:  # type: ignore
-        if not self.pulp_ctx.has_plugin("pulpcore", min_version="3.10.dev0"):
+        if not self.pulp_ctx.has_plugin("core", min_version="3.10.dev"):
             # Workaround for improperly rendered nested resource paths and weird HREF names
             # https://github.com/pulp/pulpcore/pull/1066
             return "core_pulp_pulp_export_href"
@@ -136,7 +136,7 @@ class PulpExportContext(PulpEntityContext):
 
     @property
     def scope(self) -> Dict[str, Any]:
-        if not self.pulp_ctx.has_plugin("pulpcore", min_version="3.10.dev0"):
+        if not self.pulp_ctx.has_plugin("core", min_version="3.10.dev"):
             # Workaround for improperly rendered nested resource paths and weird HREF names
             # https://github.com/pulp/pulpcore/pull/1066
             return {}
@@ -154,7 +154,7 @@ class PulpGroupContext(PulpEntityContext):
 
     def find(self, **kwargs: Any) -> Any:
         """Workaroud for the missing ability to filter"""
-        if self.pulp_ctx.has_plugin("pulpcore", min_version="3.10.dev0"):
+        if self.pulp_ctx.has_plugin("core", min_version="3.10.dev"):
             # Workaround not needed anymore
             return super().find(**kwargs)
         # See https://pulp.plan.io/issues/7975
@@ -172,7 +172,7 @@ class PulpGroupPermissionContext(PulpEntityContext):
     group_ctx: PulpGroupContext
 
     def __init__(self, pulp_ctx: PulpContext, group_ctx: PulpGroupContext) -> None:
-        pulp_ctx.needs_plugin("pulpcore", min_version="3.10.dev0")
+        pulp_ctx.needs_plugin("core", min_version="3.10.dev")
         super().__init__(pulp_ctx)
         self.group_ctx = group_ctx
 
@@ -180,7 +180,7 @@ class PulpGroupPermissionContext(PulpEntityContext):
         """Workaroud for the missing ability to filter"""
         # # TODO fix upstream and adjust to guard for the proper version
         # # https://pulp.plan.io/issues/8241
-        # if self.pulp_ctx.has_plugin("pulpcore", min_version="3.99.dev0"):
+        # if self.pulp_ctx.has_plugin("core", min_version="3.99.dev"):
         #     # Workaround not needed anymore
         #     return super().find(**kwargs)
         search_result = self.list(limit=sys.maxsize, offset=0, parameters={})
@@ -229,7 +229,7 @@ class PulpGroupUserContext(PulpEntityContext):
         self.group_ctx = group_ctx
 
     def list(self, limit: int, offset: int, parameters: Dict[str, Any]) -> List[Any]:
-        if not self.pulp_ctx.has_plugin("pulpcore", min_version="3.10.dev0"):
+        if not self.pulp_ctx.has_plugin("core", min_version="3.10.dev"):
             # Workaround for improperly rendered nested resource paths and weird HREF names
             # https://github.com/pulp/pulpcore/pull/1066
             parameters[PulpGroupContext.HREF] = self.group_ctx.pulp_href
@@ -241,7 +241,7 @@ class PulpGroupUserContext(PulpEntityContext):
         parameters: Optional[Dict[str, Any]] = None,
         non_blocking: bool = False,
     ) -> Any:
-        if not self.pulp_ctx.has_plugin("pulpcore", min_version="3.10.dev0"):
+        if not self.pulp_ctx.has_plugin("core", min_version="3.10.dev"):
             # Workaround for improperly rendered nested resource paths and weird HREF names
             # https://github.com/pulp/pulpcore/pull/1066
             if parameters is None:
@@ -251,7 +251,7 @@ class PulpGroupUserContext(PulpEntityContext):
 
     @property
     def HREF(self) -> str:  # type: ignore
-        if not self.pulp_ctx.has_plugin("pulpcore", min_version="3.10.dev0"):
+        if not self.pulp_ctx.has_plugin("core", min_version="3.10.dev"):
             # Workaround for improperly rendered nested resource paths and weird HREF names
             # https://github.com/pulp/pulpcore/pull/1066
             return "auth_auth_groups_user_href"
@@ -259,7 +259,7 @@ class PulpGroupUserContext(PulpEntityContext):
 
     @property
     def scope(self) -> Dict[str, Any]:
-        if not self.pulp_ctx.has_plugin("pulpcore", min_version="3.10.dev0"):
+        if not self.pulp_ctx.has_plugin("core", min_version="3.10.dev"):
             # Workaround for improperly rendered nested resource paths and weird HREF names
             # https://github.com/pulp/pulpcore/pull/1066
             return {}
@@ -317,7 +317,7 @@ class PulpUserContext(PulpEntityContext):
 
     def find(self, **kwargs: Any) -> Any:
         """Workaroud for the missing ability to filter"""
-        if self.pulp_ctx.has_plugin("pulpcore", min_version="3.10.dev0"):
+        if self.pulp_ctx.has_plugin("core", min_version="3.10.dev"):
             # Workaround not needed anymore
             return super().find(**kwargs)
         # See https://pulp.plan.io/issues/7975

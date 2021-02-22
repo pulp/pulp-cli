@@ -3,7 +3,7 @@
 # shellcheck source=tests/scripts/config.source
 . "$(dirname "$(dirname "$(realpath "$0")")")"/config.source
 
-pulp debug has-plugin --name "pulp_file" || exit 3
+pulp debug has-plugin --name "file" || exit 3
 
 RMOTE="cli_test_file_remote"
 REPO1="cli_test_pulpexporter_repository_1"

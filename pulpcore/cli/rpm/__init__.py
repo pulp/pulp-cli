@@ -13,7 +13,7 @@ _ = gettext.gettext
 @main.group()
 @pass_pulp_context
 def rpm(pulp_ctx: PulpContext) -> None:
-    pulp_ctx.needs_plugin("pulp_rpm")
+    pulp_ctx.needs_plugin("rpm")
 
 
 rpm.add_command(repository)
