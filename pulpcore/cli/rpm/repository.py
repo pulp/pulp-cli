@@ -1,9 +1,10 @@
 import gettext
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, Optional
 
 import click
 
 from pulpcore.cli.common.context import (
+    EntityFieldDefinition,
     PluginRequirement,
     PulpContext,
     PulpEntityContext,
@@ -20,24 +21,26 @@ from pulpcore.cli.common.generic import (
     list_command,
     name_option,
     pulp_option,
+    repository_href_option,
+    repository_option,
+    resource_option,
     show_command,
     update_command,
     version_command,
 )
+from pulpcore.cli.core.generic import task_command
 from pulpcore.cli.rpm.common import CHECKSUM_CHOICES
 from pulpcore.cli.rpm.context import PulpRpmRemoteContext, PulpRpmRepositoryContext
 
 _ = gettext.gettext
 
 
-def _remote_callback(
-    ctx: click.Context, param: click.Parameter, value: Optional[str]
-) -> Optional[Union[str, PulpEntityContext]]:
-    # Pass None and "" verbatim
-    if value:
-        pulp_ctx: PulpContext = ctx.find_object(PulpContext)
-        return PulpRpmRemoteContext(pulp_ctx, entity={"name": value})
-    return value
+remote_option = resource_option(
+    "--remote",
+    default_plugin="rpm",
+    default_type="rpm",
+    context_table={"rpm:rpm": PulpRpmRemoteContext},
+)
 
 
 @click.group()
@@ -58,10 +61,11 @@ def repository(ctx: click.Context, pulp_ctx: PulpContext, repo_type: str) -> Non
 
 
 lookup_options = [href_option, name_option]
+nested_lookup_options = [repository_href_option, repository_option]
 update_options = [
     click.option("--description"),
     click.option("--retain-package-versions", type=int),
-    click.option("--remote", callback=_remote_callback),
+    remote_option,
     click.option(
         "--metadata-checksum-type", type=click.Choice(CHECKSUM_CHOICES, case_sensitive=False)
     ),
@@ -85,37 +89,38 @@ repository.add_command(show_command(decorators=lookup_options))
 repository.add_command(create_command(decorators=create_options))
 repository.add_command(update_command(decorators=lookup_options + update_options))
 repository.add_command(destroy_command(decorators=lookup_options))
-repository.add_command(version_command())
-repository.add_command(label_command())
+repository.add_command(task_command(decorators=nested_lookup_options))
+repository.add_command(version_command(decorators=nested_lookup_options))
+repository.add_command(label_command(decorators=nested_lookup_options))
 
 
 @repository.command()
-@click.option("--name", required=True)
+@name_option
+@href_option
+@remote_option
 @click.option("--mirror/--no-mirror", default=None)
-@click.option("--remote")
 @pass_repository_context
-@pass_pulp_context
 def sync(
-    pulp_ctx: PulpContext,
     repository_ctx: PulpRepositoryContext,
-    name: str,
-    remote: Optional[str],
+    remote: EntityFieldDefinition,
     mirror: Optional[bool],
 ) -> None:
-    repository = repository_ctx.find(name=name)
-    repository_href = repository["pulp_href"]
+    repository = repository_ctx.entity
+    repository_href = repository_ctx.pulp_href
 
     body: Dict[str, Any] = {}
 
     if mirror:
         body["mirror"] = mirror
 
-    if remote:
-        remote_href: str = PulpRpmRemoteContext(pulp_ctx).find(name=remote)["pulp_href"]
-        body["remote"] = remote_href
+    if isinstance(remote, PulpEntityContext):
+        body["remote"] = remote.pulp_href
     elif repository["remote"] is None:
         raise click.ClickException(
-            f"Repository '{name}' does not have a default remote. Please specify with '--remote'."
+            _(
+                "Repository '{name}' does not have a default remote. "
+                "Please specify with '--remote'."
+            ).format(name=repository["name"])
         )
 
     repository_ctx.sync(

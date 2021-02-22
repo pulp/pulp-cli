@@ -1,9 +1,10 @@
-from gettext import gettext
-from typing import Optional, Union
+import gettext
+from typing import Any, Dict, Optional
 
 import click
 
 from pulpcore.cli.common.context import (
+    EntityFieldDefinition,
     PluginRequirement,
     PulpContext,
     PulpEntityContext,
@@ -22,27 +23,29 @@ from pulpcore.cli.common.generic import (
     name_option,
     pulp_option,
     repository_content_command,
+    repository_href_option,
+    repository_option,
+    resource_option,
     show_command,
     update_command,
     version_command,
 )
+from pulpcore.cli.core.generic import task_command
 from pulpcore.cli.python.context import (
     PulpPythonContentContext,
     PulpPythonRemoteContext,
     PulpPythonRepositoryContext,
 )
 
-_ = gettext
+_ = gettext.gettext
 
 
-def _remote_callback(
-    ctx: click.Context, param: click.Parameter, value: Optional[str]
-) -> Optional[Union[str, PulpEntityContext]]:
-    # Pass None and "" verbatim
-    if value:
-        pulp_ctx: PulpContext = ctx.find_object(PulpContext)
-        return PulpPythonRemoteContext(pulp_ctx, entity={"name": value})
-    return value
+remote_option = resource_option(
+    "--remote",
+    default_plugin="python",
+    default_type="python",
+    context_table={"python:python": PulpPythonRemoteContext},
+)
 
 
 def _content_callback(
@@ -72,17 +75,18 @@ def repository(ctx: click.Context, pulp_ctx: PulpContext, repo_type: str) -> Non
 
 
 lookup_options = [href_option, name_option]
+nested_lookup_options = [repository_href_option, repository_option]
 update_options = [
     click.option("--description"),
-    click.option("--remote", callback=_remote_callback),
-    pulp_option("--retained-versions", needs_plugins=[PluginRequirement("core", "3.13.0.dev")]),
+    remote_option,
     pulp_option(
         "--autopublish/--no-autopublish",
         needs_plugins=[PluginRequirement("python", "3.3.0.dev")],
         default=None,
     ),
+    pulp_option("--retained-versions", needs_plugins=[PluginRequirement("core", "3.13.0.dev")]),
 ]
-create_options = [click.option("--name", required=True)] + update_options
+create_options = update_options + [click.option("--name", required=True)]
 package_option = click.option(
     "--filename",
     callback=_content_callback,
@@ -113,11 +117,12 @@ modify_options = [
 
 repository.add_command(list_command(decorators=[label_select_option]))
 repository.add_command(show_command(decorators=lookup_options))
-repository.add_command(destroy_command(decorators=lookup_options))
 repository.add_command(create_command(decorators=create_options))
 repository.add_command(update_command(decorators=lookup_options + update_options))
-repository.add_command(version_command())
-repository.add_command(label_command())
+repository.add_command(destroy_command(decorators=lookup_options))
+repository.add_command(task_command(decorators=nested_lookup_options))
+repository.add_command(version_command(decorators=nested_lookup_options))
+repository.add_command(label_command(decorators=nested_lookup_options))
 repository.add_command(
     repository_content_command(
         contexts={"package": PulpPythonContentContext},
@@ -131,25 +136,25 @@ repository.add_command(
 @repository.command()
 @name_option
 @href_option
-@click.option("--remote", callback=_remote_callback)
+@remote_option
 @pass_repository_context
-@pass_pulp_context
 def sync(
-    pulp_ctx: PulpContext,
     repository_ctx: PulpRepositoryContext,
-    remote: Optional[Union[str, PulpEntityContext]],
+    remote: EntityFieldDefinition,
 ) -> None:
     repository = repository_ctx.entity
     repository_href = repository_ctx.pulp_href
 
-    body = {}
+    body: Dict[str, Any] = {}
 
     if isinstance(remote, PulpEntityContext):
         body["remote"] = remote.pulp_href
     elif repository["remote"] is None:
-        name = repository["name"]
         raise click.ClickException(
-            f"Repository '{name}' does not have a default remote. Please specify with '--remote'."
+            _(
+                "Repository '{name}' does not have a default remote. "
+                "Please specify with '--remote'."
+            ).format(name=repository["name"])
         )
 
     repository_ctx.sync(

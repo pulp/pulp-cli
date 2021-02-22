@@ -16,8 +16,11 @@ from pulpcore.cli.common.generic import (
     create_command,
     destroy_command,
     href_option,
+    label_command,
+    label_select_option,
     list_command,
     name_option,
+    resource_option,
     show_command,
 )
 from pulpcore.cli.container.context import (
@@ -29,28 +32,15 @@ from pulpcore.cli.container.context import (
 _ = gettext.gettext
 
 
-def _repository_callback(
-    ctx: click.Context, param: click.Parameter, value: Optional[str]
-) -> Union[None, str, PulpEntityContext]:
-    # Pass None and "" verbatim
-    if value:
-        pulp_ctx: PulpContext = ctx.find_object(PulpContext)
-        entity_ctx = ctx.find_object(PulpEntityContext)
-        if entity_ctx.meta.get("repository_type") == "container":
-            return PulpContainerRepositoryContext(pulp_ctx, entity={"name": value})
-        elif entity_ctx.meta.get("repository_type") == "push":
-            return PulpContainerPushRepositoryContext(pulp_ctx, entity={"name": value})
-        else:
-            raise NotImplementedError()
-    return value
-
-
-def _repository_type_callback(
-    ctx: click.Context, param: click.Parameter, value: Optional[str]
-) -> Optional[str]:
-    entity_ctx = ctx.find_object(PulpEntityContext)
-    entity_ctx.meta["repository_type"] = value
-    return value
+repository_option = resource_option(
+    "--repository",
+    default_plugin="container",
+    default_type="container",
+    context_table={
+        "container:container": PulpContainerRepositoryContext,
+        "container:push": PulpContainerPushRepositoryContext,
+    },
+)
 
 
 @click.group()
@@ -70,24 +60,14 @@ def distribution(ctx: click.Context, pulp_ctx: PulpContext, distribution_type: s
         raise NotImplementedError()
 
 
-filter_options = [base_path_option, base_path_contains_option]
+filter_options = [label_select_option, base_path_option, base_path_contains_option]
 lookup_options = [href_option, name_option]
 create_options = [
     click.option("--name", required=True),
     click.option("--base-path", required=True),
-    click.option("--repository", callback=_repository_callback),
+    repository_option,
     click.option(
         "--version", type=int, help=_("a repository version number, leave blank for latest")
-    ),
-    click.option(
-        "-t",
-        "--repository-type",
-        "repository_type",
-        type=click.Choice(["container", "push"], case_sensitive=False),
-        default="container",
-        is_eager=True,
-        expose_value=False,
-        callback=_repository_type_callback,
     ),
 ]
 
@@ -95,24 +75,15 @@ distribution.add_command(list_command(decorators=filter_options))
 distribution.add_command(show_command(decorators=lookup_options))
 distribution.add_command(create_command(decorators=create_options))
 distribution.add_command(destroy_command(decorators=lookup_options))
+distribution.add_command(label_command())
 
 
 @distribution.command()
 @href_option
 @name_option
 @click.option("--base-path")
-@click.option("--repository", callback=_repository_callback)
+@repository_option
 @click.option("--version", type=int, help=_("a repository version number, leave blank for latest"))
-@click.option(
-    "-t",
-    "--repository-type",
-    "repository_type",
-    type=click.Choice(["container", "push"], case_sensitive=False),
-    default="container",
-    is_eager=True,
-    expose_value=False,
-    callback=_repository_type_callback,
-)
 @pass_entity_context
 @pass_pulp_context
 def update(

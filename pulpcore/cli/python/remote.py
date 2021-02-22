@@ -85,13 +85,14 @@ python_remote_options = [
         needs_plugins=[PluginRequirement("python", "3.2.0")],
     ),
 ]
+
 remote.add_command(list_command(decorators=[label_select_option]))
 remote.add_command(show_command(decorators=lookup_options))
-remote.add_command(destroy_command(decorators=lookup_options))
 remote.add_command(create_command(decorators=common_remote_create_options + python_remote_options))
 remote.add_command(
     update_command(decorators=lookup_options + common_remote_update_options + python_remote_options)
 )
+remote.add_command(destroy_command(decorators=lookup_options))
 remote.add_command(label_command())
 
 

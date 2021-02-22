@@ -1,9 +1,10 @@
 import gettext
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
 import click
 
 from pulpcore.cli.common.context import (
+    EntityFieldDefinition,
     PluginRequirement,
     PulpContext,
     PulpEntityContext,
@@ -26,6 +27,7 @@ from pulpcore.cli.common.generic import (
     repository_content_command,
     repository_href_option,
     repository_option,
+    resource_option,
     show_command,
     update_command,
     version_command,
@@ -40,21 +42,19 @@ from pulpcore.cli.file.context import (
 _ = gettext.gettext
 
 
-def _remote_callback(
-    ctx: click.Context, param: click.Parameter, value: Optional[str]
-) -> Optional[Union[str, PulpEntityContext]]:
-    # Pass None and "" verbatim
-    if value:
-        pulp_ctx: PulpContext = ctx.find_object(PulpContext)
-        return PulpFileRemoteContext(pulp_ctx, entity={"name": value})
-    return value
+remote_option = resource_option(
+    "--remote",
+    default_plugin="file",
+    default_type="file",
+    context_table={"file:file": PulpFileRemoteContext},
+)
 
 
-def _content_callback(ctx: click.Context, param: click.Parameter, value: Any) -> Optional[str]:
+def _content_callback(ctx: click.Context, param: click.Parameter, value: Any) -> Any:
     if value:
         pulp_ctx: PulpContext = ctx.find_object(PulpContext)
         ctx.obj = PulpFileContentContext(pulp_ctx, entity=value)
-    return str(value)
+    return value
 
 
 @click.group()
@@ -78,7 +78,7 @@ lookup_options = [href_option, name_option]
 nested_lookup_options = [repository_href_option, repository_option]
 update_options = [
     click.option("--description"),
-    click.option("--remote", callback=_remote_callback),
+    remote_option,
     click.option("--manifest"),
     pulp_option(
         "--autopublish/--no-autopublish",
@@ -87,9 +87,7 @@ update_options = [
     ),
     pulp_option("--retained-versions", needs_plugins=[PluginRequirement("core", "3.13.0.dev")]),
 ]
-create_options = update_options + [
-    click.option("--name", required=True),
-]
+create_options = update_options + [click.option("--name", required=True)]
 file_options = [
     click.option("--sha256", cls=GroupOption, expose_value=False, group=["relative_path"]),
     click.option(
@@ -143,23 +141,25 @@ repository.add_command(
 @repository.command()
 @name_option
 @href_option
-@click.option("--remote", callback=_remote_callback)
+@remote_option
 @pass_repository_context
 def sync(
     repository_ctx: PulpRepositoryContext,
-    remote: Optional[Union[str, PulpEntityContext]],
+    remote: EntityFieldDefinition,
 ) -> None:
     repository = repository_ctx.entity
     repository_href = repository_ctx.pulp_href
 
-    body = {}
+    body: Dict[str, Any] = {}
 
     if isinstance(remote, PulpEntityContext):
         body["remote"] = remote.pulp_href
     elif repository["remote"] is None:
-        name = repository["name"]
         raise click.ClickException(
-            f"Repository '{name}' does not have a default remote. Please specify with '--remote'."
+            _(
+                "Repository '{name}' does not have a default remote. "
+                "Please specify with '--remote'."
+            ).format(name=repository["name"])
         )
 
     repository_ctx.sync(
