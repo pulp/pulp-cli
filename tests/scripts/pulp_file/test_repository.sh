@@ -3,7 +3,7 @@
 # shellcheck source=tests/scripts/config.source
 . "$(dirname "$(dirname "$(realpath "$0")")")"/config.source
 
-pulp debug has-plugin --name "pulp_file" || exit 3
+pulp debug has-plugin --name "file" || exit 3
 
 cleanup() {
   pulp file repository destroy --name "cli_test_file_repo" || true
@@ -30,7 +30,7 @@ expect_succ test "$(echo "$OUTPUT" | jq -r '.description')" = "null"
 expect_succ test "$(echo "$OUTPUT" | jq -r '.remote')" = ""
 expect_succ pulp file repository list
 test "$(echo "$OUTPUT" | jq -r '.|length')" != "0"
-if pulp debug has-plugin --name "pulpcore" --min-version "3.10.dev"
+if pulp debug has-plugin --name "core" --min-version "3.10.dev"
 then
   expect_succ pulp repository list
   test "$(echo "$OUTPUT" | jq -r '.|length')" != "0"

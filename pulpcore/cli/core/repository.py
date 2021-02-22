@@ -18,7 +18,7 @@ def repository(ctx: click.Context, pulp_ctx: PulpContext) -> None:
     Please look for the plugin specific repository commands for more detailed actions.
     i.e. 'pulp file repository <...>'
     """
-    pulp_ctx.needs_plugin("pulpcore", min_version="3.10.dev")
+    pulp_ctx.needs_plugin("core", min_version="3.10.dev")
     ctx.obj = PulpRepositoryContext(pulp_ctx)
 
 

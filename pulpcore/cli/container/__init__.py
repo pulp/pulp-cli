@@ -12,7 +12,7 @@ _ = gettext.gettext
 @main.group()
 @pass_pulp_context
 def container(pulp_ctx: PulpContext) -> None:
-    pulp_ctx.needs_plugin("pulp_container")
+    pulp_ctx.needs_plugin("container")
 
 
 container.add_command(repository)

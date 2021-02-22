@@ -32,6 +32,15 @@ EntityDefinition = Dict[str, Any]
 RepositoryDefinition = Tuple[str, str]  # name, pulp_type
 RepositoryVersionDefinition = Tuple[str, str, int]  # name, pulp_type, version
 
+new_component_names_to_pre_3_11_names: Dict[str, str] = dict(
+    ansible="pulp_ansible",
+    container="pulp_container",
+    core="pulpcore",
+    deb="pulp_deb",
+    file="pulp_file",
+    rpm="pulp_rpm",
+)
+
 
 class PulpNoWait(click.ClickException):
     exit_code = 0
@@ -169,7 +178,10 @@ class PulpContext:
             return (min_version is None) and (max_version is None)
         version: Optional[str] = self.component_versions.get(name)
         if version is None:
-            return False
+            pre_3_11_name: str = new_component_names_to_pre_3_11_names.get(name, "")
+            version = self.component_versions.get(pre_3_11_name)
+            if version is None:
+                return False
         if min_version is not None:
             if parse_version(version) < parse_version(min_version):
                 return False

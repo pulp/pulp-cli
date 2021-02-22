@@ -13,7 +13,7 @@ expect_succ pulp worker list --online
 expect_succ pulp worker list --not-online
 expect_succ pulp worker list --name "resource-manager"
 
-if pulp debug has-plugin --name "pulpcore" --min-version "3.10.0"
+if pulp debug has-plugin --name "core" --min-version "3.10.0"
 then
   expect_succ pulp worker list --name-contains "resource"
 fi
