@@ -26,6 +26,7 @@ from pulpcore.cli.common.generic import (
     repository_content_command,
     repository_href_option,
     repository_option,
+    resource_option,
     show_command,
     update_command,
     version_command,
@@ -38,16 +39,6 @@ from pulpcore.cli.file.context import (
 )
 
 _ = gettext.gettext
-
-
-def _remote_callback(
-    ctx: click.Context, param: click.Parameter, value: Optional[str]
-) -> Optional[Union[str, PulpEntityContext]]:
-    # Pass None and "" verbatim
-    if value:
-        pulp_ctx: PulpContext = ctx.find_object(PulpContext)
-        return PulpFileRemoteContext(pulp_ctx, entity={"name": value})
-    return value
 
 
 def _content_callback(ctx: click.Context, param: click.Parameter, value: Any) -> Optional[str]:
@@ -74,11 +65,18 @@ def repository(ctx: click.Context, pulp_ctx: PulpContext, repo_type: str) -> Non
         raise NotImplementedError()
 
 
+remote_option = resource_option(
+    "--remote",
+    default_plugin="file",
+    default_type="file",
+    context_table={"file:file": PulpFileRemoteContext},
+)
+
 lookup_options = [href_option, name_option]
 nested_lookup_options = [repository_href_option, repository_option]
 update_options = [
     click.option("--description"),
-    click.option("--remote", callback=_remote_callback),
+    remote_option,
     click.option("--manifest"),
     pulp_option(
         "--autopublish/--no-autopublish",
@@ -143,7 +141,7 @@ repository.add_command(
 @repository.command()
 @name_option
 @href_option
-@click.option("--remote", callback=_remote_callback)
+@remote_option
 @pass_repository_context
 def sync(
     repository_ctx: PulpRepositoryContext,

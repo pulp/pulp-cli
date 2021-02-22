@@ -67,4 +67,3 @@ class PulpRpmRepositoryContext(PulpRepositoryContext):
     DELETE_ID = "repositories_rpm_rpm_delete"
     SYNC_ID = "repositories_rpm_rpm_sync"
     VERSION_CONTEXT = PulpRpmRepositoryVersionContext
-    NULLABLES = {"description"}
