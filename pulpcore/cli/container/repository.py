@@ -1,9 +1,11 @@
 import gettext
-from typing import Optional, Union
+from typing import Any, Dict
 
 import click
 
 from pulpcore.cli.common.context import (
+    EntityFieldDefinition,
+    PluginRequirement,
     PulpContext,
     PulpEntityContext,
     PulpRepositoryContext,
@@ -18,6 +20,10 @@ from pulpcore.cli.common.generic import (
     label_select_option,
     list_command,
     name_option,
+    pulp_option,
+    repository_href_option,
+    repository_option,
+    resource_option,
     show_command,
     update_command,
     version_command,
@@ -27,18 +33,17 @@ from pulpcore.cli.container.context import (
     PulpContainerRemoteContext,
     PulpContainerRepositoryContext,
 )
+from pulpcore.cli.core.generic import task_command
 
 _ = gettext.gettext
 
 
-def _remote_callback(
-    ctx: click.Context, param: click.Parameter, value: Optional[str]
-) -> Optional[Union[str, PulpEntityContext]]:
-    # Pass None and "" verbatim
-    if value:
-        pulp_ctx: PulpContext = ctx.find_object(PulpContext)
-        return PulpContainerRemoteContext(pulp_ctx, entity={"name": value})
-    return value
+remote_option = resource_option(
+    "--remote",
+    default_plugin="container",
+    default_type="container",
+    context_table={"container:container": PulpContainerRemoteContext},
+)
 
 
 @click.group()
@@ -61,33 +66,32 @@ def repository(ctx: click.Context, pulp_ctx: PulpContext, repo_type: str) -> Non
 
 
 lookup_options = [href_option, name_option]
-create_options = [
-    click.option("--name", required=True),
-    click.option("--description"),
-    click.option("--remote", callback=_remote_callback),
-]
+nested_lookup_options = [repository_href_option, repository_option]
 update_options = [
     click.option("--description"),
-    click.option("--remote", callback=_remote_callback),
+    remote_option,
+    pulp_option("--retained-versions", needs_plugins=[PluginRequirement("core", "3.13.0.dev")]),
 ]
+create_options = update_options + [click.option("--name", required=True)]
 
 repository.add_command(list_command(decorators=[label_select_option]))
 repository.add_command(show_command(decorators=lookup_options))
 repository.add_command(create_command(decorators=create_options))
 repository.add_command(update_command(decorators=lookup_options + update_options))
 repository.add_command(destroy_command(decorators=lookup_options))
-repository.add_command(version_command())
-repository.add_command(label_command())
+repository.add_command(task_command(decorators=nested_lookup_options))
+repository.add_command(version_command(decorators=nested_lookup_options))
+repository.add_command(label_command(decorators=nested_lookup_options))
 
 
 @repository.command()
 @name_option
 @href_option
-@click.option("--remote", callback=_remote_callback)
+@remote_option
 @pass_repository_context
 def sync(
     repository_ctx: PulpRepositoryContext,
-    remote: Optional[Union[str, PulpEntityContext]],
+    remote: EntityFieldDefinition,
 ) -> None:
     if repository_ctx.SYNC_ID is None:
         raise click.ClickException(_("Repository type does not support sync."))
@@ -95,7 +99,7 @@ def sync(
     repository = repository_ctx.entity
     repository_href = repository_ctx.pulp_href
 
-    body = {}
+    body: Dict[str, Any] = {}
 
     if isinstance(remote, PulpEntityContext):
         body["remote"] = remote.pulp_href

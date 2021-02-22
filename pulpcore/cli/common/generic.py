@@ -1,12 +1,13 @@
 import gettext
 import json
-from typing import Any, Callable, Dict, List, Optional, Tuple, Type, TypeVar, Union
+from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Type, TypeVar, Union
 
 import click
 
 from pulpcore.cli.common.context import (
     DEFAULT_LIMIT,
     EntityDefinition,
+    EntityFieldDefinition,
     PluginRequirement,
     PulpContentContext,
     PulpContext,
@@ -21,6 +22,7 @@ from pulpcore.cli.common.context import (
 )
 
 _ = gettext.gettext
+
 _F = TypeVar("_F")
 
 
@@ -199,6 +201,68 @@ def create_content_json_callback(content_ctx: Type[PulpContentContext]) -> Any:
 
 def pulp_option(*args: Any, **kwargs: Any) -> Callable[[_F], _F]:
     kwargs["cls"] = PulpOption
+    return click.option(*args, **kwargs)
+
+
+def resource_option(*args: Any, **kwargs: Any) -> Callable[[_F], _F]:
+    default_plugin: Optional[str] = kwargs.pop("default_plugin", None)
+    default_type: Optional[str] = kwargs.pop("default_type", None)
+    lookup_key: str = kwargs.pop("lookup_key", "name")
+    context_table: Dict[str, Type[PulpEntityContext]] = kwargs.pop("context_table")
+
+    def _option_callback(
+        ctx: click.Context, param: click.Parameter, value: Optional[str]
+    ) -> EntityFieldDefinition:
+        # Pass None and "" verbatim
+        if not value:
+            return value
+
+        split_value = value.split(":", maxsplit=2)
+        while len(split_value) < 3:
+            split_value.insert(0, "")
+        plugin, resource_type, identifier = split_value
+
+        if resource_type == "":
+            if default_type is None:
+                raise click.ClickException(
+                    _("A resource type must be specified with the {option_name} option.").format(
+                        option_name=param.name
+                    )
+                )
+            resource_type = default_type
+        if plugin == "":
+            if default_plugin is None:
+                raise click.ClickException(
+                    _("A plugin must be specified with the {option_name} option.").format(
+                        option_name=param.name
+                    )
+                )
+            plugin = default_plugin
+
+        context_class = context_table.get(plugin + ":" + resource_type)
+        if context_class is None:
+            raise click.ClickException(
+                _(
+                    "The type '{plugin}:{resource_type}' "
+                    "is not valid for the {option_name} option."
+                ).format(plugin=plugin, resource_type=resource_type, option_name=param.name)
+            )
+        pulp_ctx: PulpContext = ctx.find_object(PulpContext)
+        return context_class(pulp_ctx, entity={lookup_key: identifier})
+
+    def _multi_option_callback(
+        ctx: click.Context, param: click.Parameter, value: Iterable[Optional[str]]
+    ) -> Iterable[EntityFieldDefinition]:
+        if value:
+            return (_option_callback(ctx, param, item) for item in value)
+        return tuple()
+
+    if "cls" not in kwargs:
+        kwargs["cls"] = PulpOption
+    if kwargs.get("multiple"):
+        kwargs["callback"] = _multi_option_callback
+    else:
+        kwargs["callback"] = _option_callback
     return click.option(*args, **kwargs)
 
 
