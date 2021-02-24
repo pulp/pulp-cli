@@ -72,7 +72,6 @@ class PulpAnsibleCollectionRemoteContext(PulpEntityContext):
         for nullable in remote_nullables + self.collection_nullable:
             if body.get(nullable) == "":
                 body[nullable] = None
-        print(body)
         return body
 
 
