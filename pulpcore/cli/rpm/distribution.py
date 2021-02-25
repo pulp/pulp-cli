@@ -4,6 +4,8 @@ import click
 
 from pulpcore.cli.common.context import PulpContext, pass_pulp_context
 from pulpcore.cli.common.generic import (
+    base_path_contains_option,
+    base_path_option,
     create_command,
     destroy_command,
     href_option,
@@ -36,6 +38,7 @@ def distribution(ctx: click.Context, pulp_ctx: PulpContext, distribution_type: s
         raise NotImplementedError()
 
 
+filter_options = [label_select_option, base_path_option, base_path_contains_option]
 lookup_options = [href_option, name_option]
 create_options = [
     click.option("--name", required=True),
@@ -47,7 +50,7 @@ update_options = [
     click.option("--publication"),
 ]
 
-distribution.add_command(list_command(decorators=[label_select_option]))
+distribution.add_command(list_command(decorators=filter_options))
 distribution.add_command(show_command(decorators=lookup_options))
 distribution.add_command(create_command(decorators=create_options))
 distribution.add_command(update_command(decorators=lookup_options + update_options))
