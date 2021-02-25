@@ -338,6 +338,7 @@ def version_command(**kwargs: Any) -> click.Command:
 
     if "name" not in kwargs:
         kwargs["name"] = "version"
+    decorators = kwargs.pop("decorators", [repository_href_option, repository_option])
 
     @click.group(**kwargs)
     @pass_repository_context
@@ -348,9 +349,9 @@ def version_command(**kwargs: Any) -> click.Command:
     ) -> None:
         ctx.obj = repository_ctx.get_version_context()
 
-    callback.add_command(list_command(decorators=[repository_option]))
-    callback.add_command(show_command(decorators=[repository_option, version_option]))
-    callback.add_command(destroy_command(decorators=[repository_option, version_option]))
+    callback.add_command(list_command(decorators=decorators))
+    callback.add_command(show_command(decorators=decorators + [version_option]))
+    callback.add_command(destroy_command(decorators=decorators + [version_option]))
 
     @callback.command()
     @repository_option

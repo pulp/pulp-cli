@@ -80,8 +80,8 @@ repository.add_command(create_command(decorators=create_options))
 repository.add_command(update_command(decorators=lookup_options + update_options))
 repository.add_command(destroy_command(decorators=lookup_options))
 repository.add_command(task_command(decorators=nested_lookup_options))
-repository.add_command(version_command())
-repository.add_command(label_command())
+repository.add_command(version_command(decorators=nested_lookup_options))
+repository.add_command(label_command(decorators=nested_lookup_options))
 
 
 @repository.command()
