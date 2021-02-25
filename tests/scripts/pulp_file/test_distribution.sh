@@ -37,6 +37,12 @@ expect_succ pulp file distribution update \
   --base-path "cli_test_file_distro" \
   --publication "$PUBLICATION_HREF"
 
+
+expect_succ pulp file distribution list --base-path "cli_test_file_distro"
+test "$(echo "$OUTPUT" | jq -r length)" -eq 1
+expect_succ pulp file distribution list --base-path-contains "CLI"
+test "$(echo "$OUTPUT" | jq -r length)" -gt 0
+
 expect_succ curl "$curl_opt" --head --fail "$PULP_BASE_URL/pulp/content/cli_test_file_distro/1.iso"
 
 expect_succ pulp file distribution destroy --name "cli_test_file_distro"

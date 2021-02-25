@@ -170,6 +170,21 @@ label_select_option = click.option(
     cls=PulpOption,
 )
 
+base_path_option = click.option(
+    "--base-path",
+    help=_("Base-path of the {entity}"),
+    type=str,
+    cls=PulpOption,
+)
+
+base_path_contains_option = click.option(
+    "--base-path-contains",
+    "base_path__icontains",
+    help=_("{entity} base-path contains search"),
+    type=str,
+    cls=PulpOption,
+)
+
 ##############################################################################
 # Generic reusable commands
 
