@@ -48,7 +48,7 @@ def my_sub_command(entity_ctx):
     entity_ctx.destroy(href)
 ```
 
-### Version dependent codepaths
+### Version dependent code paths
 
 Each pulp CLI release is designed to support multiple pulp server versions.
 The entity contexts should be used to implement necessary server version-dependent workarounds.
