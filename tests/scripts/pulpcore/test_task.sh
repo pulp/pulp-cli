@@ -18,9 +18,9 @@ expect_succ pulp task list --name $sync_task --state canceled
 #count="$(echo "$OUTPUT" | jq -r length)"
 
 expect_succ pulp file remote create --name "cli_test_file_remote" \
-  --url "https://fixtures.pulpproject.org/file/PULP_MANIFEST"
+  --url "$FILE_REMOTE_URL"
 expect_succ pulp file remote create --name "cli_test_file_large_remote" \
-  --url "https://fixtures.pulpproject.org/file-large/PULP_MANIFEST"
+  --url "$FILE_LARGE_REMOTE_URL"
 expect_succ pulp file repository create --name "cli_test_file_repository" --remote "cli_test_file_large_remote"
 
 # skip these until https://pulp.plan.io/issues/7980 is resolved
