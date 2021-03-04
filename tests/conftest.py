@@ -1,4 +1,5 @@
 import os
+from urllib.parse import urljoin
 
 import pytest
 import toml
@@ -8,10 +9,11 @@ PULP_FIXTURES_URL = os.environ.get("PULP_FIXTURES_URL", "https://fixtures.pulppr
 
 ENV_CONSTANTS = {
     "PULP_FIXTURES_URL": PULP_FIXTURES_URL,
-    "FILE_REMOTE_URL": PULP_FIXTURES_URL + "/file/PULP_MANIFEST",
+    "FILE_REMOTE_URL": urljoin(PULP_FIXTURES_URL, "/file/PULP_MANIFEST"),
+    "FILE_LARGE_REMOTE_URL": urljoin(PULP_FIXTURES_URL, "/file-large/PULP_MANIFEST"),
     "CONTAINER_REMOTE_URL": "https://quay.io",
     "CONTAINER_IMAGE": "libpod/alpine",
-    "RPM_REMOTE_URL": PULP_FIXTURES_URL + "/rpm-unsigned",
+    "RPM_REMOTE_URL": urljoin(PULP_FIXTURES_URL, "/rpm-unsigned"),
     "ANSIBLE_COLLECTION_REMOTE_URL": "https://galaxy.ansible.com/",
     "ANSIBLE_ROLE_REMOTE_URL": "https://galaxy.ansible.com/api/v1/roles/?namespace__name=elastic",
 }
