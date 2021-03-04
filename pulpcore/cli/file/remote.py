@@ -50,6 +50,8 @@ create_options = [
         "--policy", type=click.Choice(["immediate", "on_demand", "streamed"], case_sensitive=False)
     ),
     click.option("--proxy-url"),
+    click.option("--proxy-username"),
+    click.option("--proxy-password"),
     click.option("--sock-connect-timeout", type=float),
     click.option("--sock-read-timeout", type=float),
     click.option("--tls-validation", type=bool),
@@ -68,6 +70,8 @@ update_options = [
         "--policy", type=click.Choice(["immediate", "on_demand", "streamed"], case_sensitive=False)
     ),
     click.option("--proxy-url"),
+    click.option("--proxy-username"),
+    click.option("--proxy-password"),
     click.option("--sock-connect-timeout", type=float),
     click.option("--sock-read-timeout", type=float),
     click.option("--tls-validation", type=bool),

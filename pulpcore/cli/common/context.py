@@ -9,6 +9,7 @@ import click
 import yaml
 from packaging.version import parse as parse_version
 from requests import HTTPError
+from urllib3.util import parse_url
 
 from pulpcore.cli.common.openapi import OpenAPI, OpenAPIError
 
@@ -442,6 +443,39 @@ class PulpEntityContext:
 
         repo_version = search_result["results"][0]
         return repo_version
+
+
+class PulpRemoteContext(PulpEntityContext):
+    """
+    Base class for remote specific contexts.
+    """
+
+    ENTITY = "remote"
+    ENTITIES = "remotes"
+
+    def preprocess_body(self, body: EntityDefinition) -> EntityDefinition:
+        body = super().preprocess_body(body)
+        if not self.pulp_ctx.has_plugin("pulpcore", min_version="3.11.dev"):
+            # proxy_username and proxy_password are separate fields starting with 3.11
+            # https://pulp.plan.io/issues/8167
+            proxy_username = body.pop("proxy_username", None)
+            proxy_password = body.pop("proxy_password", None)
+            if proxy_username or proxy_password:
+                if "proxy_url" in body:
+                    if proxy_username and proxy_password:
+                        parsed_url = parse_url(body["proxy_url"])
+                        body["proxy_url"] = parsed_url._replace(
+                            auth=":".join([proxy_username, proxy_password])
+                        ).url
+                    else:
+                        raise click.ClickException(
+                            _("Proxy username and password can only be provided in conjunction.")
+                        )
+                else:
+                    raise click.ClickException(
+                        _("Proxy credentials can only be provided with a proxy url.")
+                    )
+        return body
 
 
 class PulpRepositoryVersionContext(PulpEntityContext):

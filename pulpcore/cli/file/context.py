@@ -3,6 +3,7 @@ import gettext
 from pulpcore.cli.common.context import (
     EntityDefinition,
     PulpEntityContext,
+    PulpRemoteContext,
     PulpRepositoryContext,
     PulpRepositoryVersionContext,
 )
@@ -57,7 +58,7 @@ class PulpFilePublicationContext(PulpEntityContext):
         return body
 
 
-class PulpFileRemoteContext(PulpEntityContext):
+class PulpFileRemoteContext(PulpRemoteContext):
     ENTITY = "file remote"
     ENTITIES = "file remotes"
     HREF = "file_file_remote_href"
