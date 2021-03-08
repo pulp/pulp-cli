@@ -209,6 +209,7 @@ def resource_option(*args: Any, **kwargs: Any) -> Callable[[_F], _F]:
     default_type: Optional[str] = kwargs.pop("default_type", None)
     lookup_key: str = kwargs.pop("lookup_key", "name")
     context_table: Dict[str, Type[PulpEntityContext]] = kwargs.pop("context_table")
+    capabilities: Optional[List[str]] = kwargs.pop("capabilities", None)
 
     def _option_callback(
         ctx: click.Context, param: click.Parameter, value: Optional[str]
@@ -248,7 +249,18 @@ def resource_option(*args: Any, **kwargs: Any) -> Callable[[_F], _F]:
                 ).format(plugin=plugin, resource_type=resource_type, option_name=param.name)
             )
         pulp_ctx: PulpContext = ctx.find_object(PulpContext)
-        return context_class(pulp_ctx, entity={lookup_key: identifier})
+        entity_ctx: PulpEntityContext = context_class(pulp_ctx, entity={lookup_key: identifier})
+
+        if capabilities is not None:
+            for capability in capabilities:
+                if not entity_ctx.capable(capability):
+                    raise click.ClickException(
+                        _(
+                            "The type '{plugin}:{resource_type}' "
+                            "does not support the '{capability}' capability."
+                        ).format(plugin=plugin, resource_type=resource_type, capability=capability)
+                    )
+        return entity_ctx
 
     def _multi_option_callback(
         ctx: click.Context, param: click.Parameter, value: Iterable[Optional[str]]

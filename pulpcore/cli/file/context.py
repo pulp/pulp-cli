@@ -7,6 +7,7 @@ from pulpcore.cli.common.context import (
     PulpRemoteContext,
     PulpRepositoryContext,
     PulpRepositoryVersionContext,
+    registered_repository_contexts,
 )
 
 _ = gettext.gettext
@@ -81,3 +82,6 @@ class PulpFileRepositoryContext(PulpRepositoryContext):
     SYNC_ID = "repositories_file_file_sync"
     MODIFY_ID = "repositories_file_file_modify"
     VERSION_CONTEXT = PulpFileRepositoryVersionContext
+
+
+registered_repository_contexts["file:file"] = PulpFileRepositoryContext

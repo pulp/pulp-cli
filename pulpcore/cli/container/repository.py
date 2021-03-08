@@ -93,7 +93,7 @@ def sync(
     repository_ctx: PulpRepositoryContext,
     remote: EntityFieldDefinition,
 ) -> None:
-    if repository_ctx.SYNC_ID is None:
+    if not repository_ctx.capable("sync"):
         raise click.ClickException(_("Repository type does not support sync."))
 
     repository = repository_ctx.entity

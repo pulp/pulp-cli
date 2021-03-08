@@ -304,6 +304,14 @@ class PulpEntityContext:
     UPDATE_ID: ClassVar[str]
     DELETE_ID: ClassVar[str]
     NULLABLES: ClassVar[Set[str]] = set()
+    # Subclasses can specify version dependent capabilities here
+    # e.g. `CAPABILITIES = {
+    #           "feature1": [
+    #               PluginRequirement("file"),
+    #               PluginRequirement("core", min_version="3.7")
+    #           ]
+    #       }
+    CAPABILITIES: ClassVar[Dict[str, List[PluginRequirement]]] = {}
 
     # Hidden values for the lazy entity lookup
     _entity: Optional[EntityDefinition]
@@ -498,6 +506,11 @@ class PulpEntityContext:
         except KeyError:
             raise click.ClickException(f"Could not find label with key '{key}'.")
 
+    def capable(self, capability: str) -> bool:
+        return capability in self.CAPABILITIES and all(
+            (self.pulp_ctx.has_plugin(pr) for pr in self.CAPABILITIES[capability])
+        )
+
     def find_repository(self, definition: RepositoryDefinition) -> Any:
         name, repo_type = definition
         if repo_type in self.REPOSITORY_FIND_IDS:
@@ -662,6 +675,8 @@ class PulpContentContext(PulpEntityContext):
 
 
 EntityFieldDefinition = Union[None, str, PulpEntityContext]
+
+
 ##############################################################################
 # Decorator to access certain contexts
 
@@ -671,3 +686,12 @@ pass_entity_context = click.make_pass_decorator(PulpEntityContext)
 pass_repository_context = click.make_pass_decorator(PulpRepositoryContext)
 pass_repository_version_context = click.make_pass_decorator(PulpRepositoryVersionContext)
 pass_content_context = click.make_pass_decorator(PulpContentContext)
+
+
+##############################################################################
+# Registries for Contexts of different sorts
+# A command can use these to identify e.g. all repository types known to the CLI
+# Note that it will only be fully populated, once all plugins are loaded.
+
+
+registered_repository_contexts: Dict[str, Type[PulpRepositoryContext]] = {}

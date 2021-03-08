@@ -6,6 +6,7 @@ from pulpcore.cli.common.context import (
     PulpRemoteContext,
     PulpRepositoryContext,
     PulpRepositoryVersionContext,
+    registered_repository_contexts,
 )
 
 _ = gettext.gettext
@@ -67,3 +68,6 @@ class PulpRpmRepositoryContext(PulpRepositoryContext):
     DELETE_ID = "repositories_rpm_rpm_delete"
     SYNC_ID = "repositories_rpm_rpm_sync"
     VERSION_CONTEXT = PulpRpmRepositoryVersionContext
+
+
+registered_repository_contexts["rpm:rpm"] = PulpRpmRepositoryContext
