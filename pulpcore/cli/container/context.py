@@ -6,10 +6,12 @@ import click
 
 from pulpcore.cli.common.context import (
     EntityDefinition,
+    PluginRequirement,
     PulpEntityContext,
     PulpRemoteContext,
     PulpRepositoryContext,
     PulpRepositoryVersionContext,
+    registered_repository_contexts,
 )
 
 _ = gettext.gettext
@@ -92,6 +94,7 @@ class PulpContainerRepositoryContext(PulpRepositoryContext):
     DELETE_ID = "repositories_container_container_delete"
     SYNC_ID = "repositories_container_container_sync"
     VERSION_CONTEXT = PulpContainerRepositoryVersionContext
+    CAPABILITIES = {"sync": [PluginRequirement("container")]}
 
 
 class PulpContainerPushRepositoryContext(PulpRepositoryContext):
@@ -101,7 +104,8 @@ class PulpContainerPushRepositoryContext(PulpRepositoryContext):
     # CREATE_ID = "repositories_container_container_push_create"
     # UPDATE_ID = "repositories_container_container_push_update"
     # DELETE_ID = "repositories_container_container_push_delete"
-    # Cannot sync a push type repository
-    # TODO Incorporate into capabilities
-    # SYNC_ID = "repositories_container_container_push_sync"
     VERSION_CONTEXT = PulpContainerPushRepositoryVersionContext
+
+
+registered_repository_contexts["container:container"] = PulpContainerRepositoryContext
+registered_repository_contexts["container:push"] = PulpContainerPushRepositoryContext
