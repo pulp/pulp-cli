@@ -2,6 +2,7 @@ import gettext
 
 from pulpcore.cli.common.context import (
     EntityDefinition,
+    PluginRequirement,
     PulpContentContext,
     PulpEntityContext,
     PulpRemoteContext,
@@ -82,6 +83,7 @@ class PulpFileRepositoryContext(PulpRepositoryContext):
     SYNC_ID = "repositories_file_file_sync"
     MODIFY_ID = "repositories_file_file_modify"
     VERSION_CONTEXT = PulpFileRepositoryVersionContext
+    CAPABILITIES = {"pulpexport": [PluginRequirement("file", "0.3.0")]}
 
 
 registered_repository_contexts["file:file"] = PulpFileRepositoryContext

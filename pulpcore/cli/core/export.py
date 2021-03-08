@@ -71,7 +71,7 @@ def run(
     exporter: str,
     full: bool,
     chunk_size: str,
-    versions: List[RepositoryVersionDefinition],
+    versions: List[RepositoryVersionDefinition],  # TODO How do we want to specify repo versions?
     start_versions: List[RepositoryVersionDefinition],
 ) -> None:
     exporter_ctx = PulpExporterContext(pulp_ctx)

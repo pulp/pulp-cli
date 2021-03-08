@@ -2,6 +2,7 @@ import gettext
 
 from pulpcore.cli.common.context import (
     EntityDefinition,
+    PluginRequirement,
     PulpEntityContext,
     PulpRemoteContext,
     PulpRepositoryContext,
@@ -68,6 +69,7 @@ class PulpRpmRepositoryContext(PulpRepositoryContext):
     DELETE_ID = "repositories_rpm_rpm_delete"
     SYNC_ID = "repositories_rpm_rpm_sync"
     VERSION_CONTEXT = PulpRpmRepositoryVersionContext
+    CAPABILITIES = {"pulpexport": [PluginRequirement("rpm", "3.3.0")]}
 
 
 registered_repository_contexts["rpm:rpm"] = PulpRpmRepositoryContext

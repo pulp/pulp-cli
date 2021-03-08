@@ -1,24 +1,35 @@
 import gettext
-from typing import List
+from typing import Iterable
 
 import click
 
 from pulpcore.cli.common.context import (
+    EntityFieldDefinition,
     PulpContext,
-    RepositoryDefinition,
+    PulpEntityContext,
     pass_entity_context,
     pass_pulp_context,
+    registered_repository_contexts,
 )
 from pulpcore.cli.common.generic import (
     destroy_command,
     href_option,
     list_command,
     name_option,
+    resource_option,
     show_command,
 )
 from pulpcore.cli.core.context import PulpExporterContext
 
 _ = gettext.gettext
+
+
+multi_repository_option = resource_option(
+    "--repository",
+    context_table=registered_repository_contexts,
+    capabilities=["pulpexport"],
+    multiple=True,
+)
 
 
 @click.group()
@@ -43,8 +54,9 @@ pulp.add_command(destroy_command(decorators=lookup_options))
 
 @pulp.command()
 @click.option("--name", required=True)
-@click.option("--path", type=str, required=True)
-@click.option("--repository", type=tuple([str, str]), multiple=True, required=True)
+@click.option("--path", required=True)
+@multi_repository_option
+@click.option("--repository-href", multiple=True)
 @pass_entity_context
 @pass_pulp_context
 def create(
@@ -52,11 +64,14 @@ def create(
     exporter_ctx: PulpExporterContext,
     name: str,
     path: str,
-    repository: List[RepositoryDefinition],
+    repository: Iterable[EntityFieldDefinition],
+    repository_href: Iterable[str],
 ) -> None:
-    repo_hrefs = []
-    for repo_tuple in repository:
-        repo_hrefs.append(exporter_ctx.find_repository(repo_tuple)["pulp_href"])
+    repo_hrefs = [
+        repository_ctx.pulp_href
+        for repository_ctx in repository
+        if isinstance(repository_ctx, PulpEntityContext)
+    ] + list(repository_href)
 
     params = {"name": name, "path": path, "repositories": repo_hrefs}
     result = exporter_ctx.create(body=params)
@@ -64,29 +79,31 @@ def create(
 
 
 @pulp.command()
-@click.option("--name", required=True)
+@name_option
+@href_option
 @click.option("--path")
-@click.option("--repository", type=tuple([str, str]), multiple=True)
+@multi_repository_option
+@click.option("--repository-href", multiple=True)
 @pass_entity_context
 @pass_pulp_context
 def update(
     pulp_ctx: PulpContext,
     exporter_ctx: PulpExporterContext,
-    name: str,
     path: str,
-    repository: List[RepositoryDefinition],
+    repository: Iterable[EntityFieldDefinition],
+    repository_href: Iterable[str],
 ) -> None:
-    the_exporter = exporter_ctx.find(name=name)
-    exporter_href = the_exporter["pulp_href"]
+    the_exporter = exporter_ctx.entity
+    exporter_href = exporter_ctx.pulp_href
 
     if path:
         the_exporter["path"] = path
 
-    if repository:
-        repo_hrefs = []
-        for repo_tuple in repository:
-            repo_hrefs.append(exporter_ctx.find_repository(repo_tuple)["pulp_href"])
-        the_exporter["repositories"] = repo_hrefs
+    if repository or repository_href:
+        the_exporter["repositories"] = [
+            repository_ctx.pulp_href
+            for repository_ctx in repository
+            if isinstance(repository_ctx, PulpEntityContext)
+        ] + list(repository_href)
 
-    result = exporter_ctx.update(exporter_href, the_exporter)
-    pulp_ctx.output_result(result)
+    exporter_ctx.update(exporter_href, the_exporter)

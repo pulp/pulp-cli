@@ -29,8 +29,8 @@ expect_succ pulp file repository sync --name $REPO1 --remote $RMOTE
 expect_succ pulp file repository create --name $REPO2
 
 # Test create
-expect_succ pulp exporter pulp create --name $NAME1 --path $PATH1 --repository $REPO1 file --repository $REPO2 file
-expect_succ pulp exporter pulp create --name $NAME2 --path $PATH1 --repository $REPO1 file
+expect_succ pulp exporter pulp create --name $NAME1 --path $PATH1 --repository file:file:$REPO1 --repository file:file:$REPO2
+expect_succ pulp exporter pulp create --name $NAME2 --path $PATH1 --repository file:file:$REPO1
 
 # Test read
 expect_succ pulp exporter pulp show --name $NAME1
