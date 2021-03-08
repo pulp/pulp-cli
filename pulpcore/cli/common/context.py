@@ -455,7 +455,7 @@ class PulpRemoteContext(PulpEntityContext):
 
     def preprocess_body(self, body: EntityDefinition) -> EntityDefinition:
         body = super().preprocess_body(body)
-        if not self.pulp_ctx.has_plugin("pulpcore", min_version="3.11.dev"):
+        if not self.pulp_ctx.has_plugin("core", min_version="3.11.dev"):
             # proxy_username and proxy_password are separate fields starting with 3.11
             # https://pulp.plan.io/issues/8167
             proxy_username = body.pop("proxy_username", None)
