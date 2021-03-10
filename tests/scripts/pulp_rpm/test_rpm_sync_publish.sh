@@ -6,9 +6,9 @@
 pulp debug has-plugin --name "rpm" || exit 3
 
 cleanup() {
-  pulp rpm remote destroy --name "cli_test_rpm_remote" || true
-  pulp rpm repository destroy --name "cli_test_rpm_repository" || true
   pulp rpm distribution destroy --name "cli_test_rpm_distro" || true
+  pulp rpm repository destroy --name "cli_test_rpm_repository" || true
+  pulp rpm remote destroy --name "cli_test_rpm_remote" || true
 }
 trap cleanup EXIT
 
@@ -39,6 +39,10 @@ expect_succ curl "$curl_opt" --head --fail "$PULP_BASE_URL/pulp/content/cli_test
 
 expect_succ pulp rpm repository version list --repository "cli_test_rpm_repository"
 expect_succ pulp rpm repository version repair --repository "cli_test_rpm_repository" --version 1
+
+expect_succ pulp rpm repository update --name "cli_test_rpm_repository" --retain-package-versions 2
+expect_succ pulp rpm repository show --name "cli_test_rpm_repository"
+test "$(echo "$OUTPUT" | jq -r '.retain_package_versions')" = "2"
 
 expect_succ pulp rpm distribution destroy --name "cli_test_rpm_distro"
 expect_succ pulp rpm publication destroy --href "$PUBLICATION_HREF"

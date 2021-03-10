@@ -58,10 +58,12 @@ lookup_options = [href_option, name_option]
 create_options = [
     click.option("--name", required=True),
     click.option("--description"),
+    click.option("--retain-package-versions", type=int),
     click.option("--remote", callback=_remote_callback),
 ]
 update_options = [
     click.option("--description"),
+    click.option("--retain-package-versions", type=int),
     click.option("--remote", callback=_remote_callback),
 ]
 
