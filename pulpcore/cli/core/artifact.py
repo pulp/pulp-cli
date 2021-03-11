@@ -1,11 +1,10 @@
 import gettext
-from copy import deepcopy
 from typing import IO
 
 import click
 
 from pulpcore.cli.common.context import PulpContext, pass_entity_context, pass_pulp_context
-from pulpcore.cli.common.generic import list_entities, show_by_href
+from pulpcore.cli.common.generic import href_option, list_command, show_command
 from pulpcore.cli.core.context import PulpArtifactContext
 
 _ = gettext.gettext
@@ -18,12 +17,11 @@ def artifact(ctx: click.Context, pulp_ctx: PulpContext) -> None:
     ctx.obj = PulpArtifactContext(pulp_ctx)
 
 
-# deepcopy to not effect other list subcommands
-list_artifacts = deepcopy(list_entities)
-click.option("--sha256")(list_artifacts)
-artifact.add_command(list_artifacts)
+filter_options = [click.option("--sha256")]
+lookup_options = [href_option]
 
-artifact.add_command(show_by_href)
+artifact.add_command(list_command(decorators=filter_options))
+artifact.add_command(show_command(decorators=lookup_options))
 
 
 @artifact.command()

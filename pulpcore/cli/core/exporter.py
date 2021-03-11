@@ -1,5 +1,4 @@
 import gettext
-from copy import deepcopy
 from typing import List
 
 import click
@@ -10,7 +9,13 @@ from pulpcore.cli.common.context import (
     pass_entity_context,
     pass_pulp_context,
 )
-from pulpcore.cli.common.generic import destroy_by_name, list_entities, show_by_name
+from pulpcore.cli.common.generic import (
+    destroy_command,
+    href_option,
+    list_command,
+    name_option,
+    show_command,
+)
 from pulpcore.cli.core.context import PulpExporterContext
 
 _ = gettext.gettext
@@ -28,10 +33,12 @@ def pulp(ctx: click.Context, pulp_ctx: PulpContext) -> None:
     ctx.obj = PulpExporterContext(pulp_ctx)
 
 
-# deepcopy to not effect other list subcommands
-list_pulp_exporters = deepcopy(list_entities)
-click.option("--name", type=str)(list_pulp_exporters)
-pulp.add_command(list_pulp_exporters)
+filter_options = [click.option("--name")]
+lookup_options = [name_option, href_option]
+
+pulp.add_command(list_command(decorators=filter_options))
+pulp.add_command(show_command(decorators=lookup_options))
+pulp.add_command(destroy_command(decorators=lookup_options))
 
 
 @pulp.command()
@@ -54,9 +61,6 @@ def create(
     params = {"name": name, "path": path, "repositories": repo_hrefs}
     result = exporter_ctx.create(body=params)
     pulp_ctx.output_result(result)
-
-
-pulp.add_command(show_by_name)
 
 
 @pulp.command(deprecated=True)
@@ -97,9 +101,6 @@ def update(
 
     result = exporter_ctx.update(exporter_href, the_exporter)
     pulp_ctx.output_result(result)
-
-
-pulp.add_command(destroy_by_name)
 
 
 @pulp.command(deprecated=True)
