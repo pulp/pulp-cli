@@ -3,13 +3,15 @@ from typing import Optional
 
 import click
 
-from pulpcore.cli.common.context import (
-    PulpContext,
-    PulpEntityContext,
-    pass_entity_context,
-    pass_pulp_context,
+from pulpcore.cli.common.context import PulpContext, pass_entity_context, pass_pulp_context
+from pulpcore.cli.common.generic import (
+    create_command,
+    destroy_command,
+    href_option,
+    list_command,
+    name_option,
+    show_command,
 )
-from pulpcore.cli.common.generic import destroy_by_name, destroy_command, list_command, show_by_name
 from pulpcore.cli.core.context import (
     PulpGroupContext,
     PulpGroupModelPermissionContext,
@@ -58,21 +60,13 @@ def group(ctx: click.Context, pulp_ctx: PulpContext) -> None:
     ctx.obj = PulpGroupContext(pulp_ctx)
 
 
+lookup_options = [name_option, href_option]
+create_options = [click.option("--name", required=True)]
+
 group.add_command(list_command())
-group.add_command(show_by_name)
-
-
-@group.command()
-@click.option("--name", required=True)
-@pass_entity_context
-@pass_pulp_context
-def create(pulp_ctx: PulpContext, entity_ctx: PulpEntityContext, name: str) -> None:
-    entity = {"name": name}
-    result = entity_ctx.create(body=entity)
-    pulp_ctx.output_result(result)
-
-
-group.add_command(destroy_by_name)
+group.add_command(show_command(decorators=lookup_options))
+group.add_command(destroy_command(decorators=lookup_options))
+group.add_command(create_command(decorators=create_options))
 
 
 @group.group()

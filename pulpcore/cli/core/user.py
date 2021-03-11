@@ -8,7 +8,7 @@ from pulpcore.cli.common.context import (
     pass_entity_context,
     pass_pulp_context,
 )
-from pulpcore.cli.common.generic import list_entities
+from pulpcore.cli.common.generic import list_command
 from pulpcore.cli.core.context import PulpUserContext
 
 _ = gettext.gettext
@@ -21,7 +21,7 @@ def user(ctx: click.Context, pulp_ctx: PulpContext) -> None:
     ctx.obj = PulpUserContext(pulp_ctx)
 
 
-user.add_command(list_entities)
+user.add_command(list_command())
 
 
 @user.command()

@@ -10,7 +10,7 @@ from pulpcore.cli.common.context import (
     pass_entity_context,
     pass_pulp_context,
 )
-from pulpcore.cli.common.generic import destroy_by_href, show_by_href
+from pulpcore.cli.common.generic import destroy_command, href_option, show_command
 from pulpcore.cli.core.context import PulpExportContext, PulpExporterContext
 
 _ = gettext.gettext
@@ -28,8 +28,10 @@ def pulp(ctx: click.Context, pulp_ctx: PulpContext) -> None:
     ctx.obj = PulpExportContext(pulp_ctx)
 
 
-pulp.add_command(show_by_href)
-pulp.add_command(destroy_by_href)
+lookup_options = [href_option]
+
+pulp.add_command(show_command(decorators=lookup_options))
+pulp.add_command(destroy_command(decorators=lookup_options))
 
 
 @pulp.command(deprecated=True)

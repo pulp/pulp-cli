@@ -130,7 +130,8 @@ class PulpContext:
             raise click.ClickException(str(e))
         except HTTPError as e:
             raise click.ClickException(str(e.response.text))
-        if "task" in result:
+        # Asynchronous tasks seem to be reported by a dict containing only one key "task"
+        if isinstance(result, dict) and ["task"] == list(result.keys()):
             task_href = result["task"]
             result = self.api.call("tasks_read", parameters={"task_href": task_href})
             click.echo(f"Started background task {task_href}", err=True)

@@ -1,11 +1,16 @@
 import gettext
-from copy import deepcopy
 from typing import Dict, List, Tuple, Union
 
 import click
 
 from pulpcore.cli.common.context import PulpContext, pass_entity_context, pass_pulp_context
-from pulpcore.cli.common.generic import destroy_by_name, list_entities, show_by_name
+from pulpcore.cli.common.generic import (
+    destroy_command,
+    href_option,
+    list_command,
+    name_option,
+    show_command,
+)
 from pulpcore.cli.core.context import PulpImporterContext
 
 _ = gettext.gettext
@@ -34,9 +39,12 @@ def pulp(ctx: click.Context, pulp_ctx: PulpContext) -> None:
     ctx.obj = PulpImporterContext(pulp_ctx)
 
 
-list_pulp_exporters = deepcopy(list_entities)
-click.option("--name", type=str)(list_pulp_exporters)
-pulp.add_command(list_pulp_exporters)
+filter_options = [click.option("--name")]
+lookup_options = [name_option, href_option]
+
+pulp.add_command(list_command(decorators=filter_options))
+pulp.add_command(show_command(decorators=lookup_options))
+pulp.add_command(destroy_command(decorators=lookup_options))
 
 
 @pulp.command()
@@ -59,9 +67,6 @@ def create(
     pulp_ctx.output_result(result)
 
 
-pulp.add_command(show_by_name)
-
-
 @pulp.command()
 @click.option("--name", required=True)
 @repo_map_option
@@ -81,6 +86,3 @@ def update(
 
     result = importer_ctx.update(importer_href, importer)
     pulp_ctx.output_result(result)
-
-
-pulp.add_command(destroy_by_name)
