@@ -39,6 +39,7 @@ new_component_names_to_pre_3_11_names: Dict[str, str] = dict(
     core="pulpcore",
     deb="pulp_deb",
     file="pulp_file",
+    python="pulp_python",
     rpm="pulp_rpm",
 )
 
