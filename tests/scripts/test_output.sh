@@ -7,16 +7,16 @@
 pip show pygments > /dev/null || exit 3
 
 # the foreground color escape sequence is "ESC[38;5"
-output=$(script -qefc "pulp status")
-if [[ "$output" != *"[38;5"* ]]
+expect_succ script -qefc "pulp status"
+if [[ "$OUTPUT" != *"[38;5"* ]]
 then
-  echo "Did not detect color output in 'pulp status'"
+  echo "FAILURE: Did not detect color output in 'pulp status'" >&2
   exit 1
 fi
 
-output=$(pulp status | cat)
-if [[ "$output" == *"[38;5"* ]]
+expect_succ pulp status
+if [[ "$OUTPUT" == *"[38;5"* ]]
 then
-  echo "Detected color output in piped 'pulp status'"
+  echo "FAILURE: Detected color output in piped 'pulp status'" >&2
   exit 1
 fi
