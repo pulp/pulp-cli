@@ -13,6 +13,26 @@ Changelog
 
 .. towncrier release notes start
 
+0.7.0 (2021-03-15)
+==================
+
+
+Features
+--------
+
+- Added the python command group.
+  `#73 <https:// github.com/pulp/pulp-cli/issues/73>`_
+- Distributions can now be listed with options --base-path and --base-path-contains
+  `#134 <https://github.com/pulp/pulp-cli/issues/134>`_
+- Taught rpm/repository about the retain-package-versions attribute.
+  `#172 <https://github.com/pulp/pulp-cli/issues/172>`_
+- Added the container namespace command group.
+  `#176 <https://github.com/pulp/pulp-cli/issues/176>`_
+
+
+----
+
+
 0.6.0 (2021-02-26)
 ==================
 
