@@ -1,4 +1,8 @@
 import gettext
+import sys
+from typing import Any
+
+import click
 
 from pulpcore.cli.common.context import (
     EntityDefinition,
@@ -8,6 +12,28 @@ from pulpcore.cli.common.context import (
 )
 
 _ = gettext.gettext
+
+
+class PulpContainerNamespaceContext(PulpEntityContext):
+    ENTITY = "container namespace"
+    ENTITIES = "container namespaces"
+    HREF = "container_container_namespace_href"
+    LIST_ID = "pulp_container_namespaces_list"
+    READ_ID = "pulp_container_namespaces_read"
+    CREATE_ID = "pulp_container_namespaces_create"
+    DELETE_ID = "pulp_container_namespaces_delete"
+
+    def find(self, **kwargs: Any) -> Any:
+        """Workaroud for the missing ability to filter"""
+        if self.pulp_ctx.has_plugin("container", min_version="2.3"):
+            # Workaround not needed anymore
+            return super().find(**kwargs)
+        search_result = self.list(limit=sys.maxsize, offset=0, parameters={})
+        for key, value in kwargs.items():
+            search_result = [res for res in search_result if res[key] == value]
+        if len(search_result) != 1:
+            raise click.ClickException(f"Could not find {self.ENTITY} with {kwargs}.")
+        return search_result[0]
 
 
 class PulpContainerDistributionContext(PulpEntityContext):
