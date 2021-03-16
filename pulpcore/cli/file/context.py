@@ -29,15 +29,7 @@ class PulpFileDistributionContext(PulpEntityContext):
     CREATE_ID = "distributions_file_file_create"
     UPDATE_ID = "distributions_file_file_partial_update"
     DELETE_ID = "distributions_file_file_delete"
-
-    def preprocess_body(self, body: EntityDefinition) -> EntityDefinition:
-        body = super().preprocess_body(body)
-        for nullable in [
-            "publication",
-        ]:
-            if body.get(nullable) == "":
-                body[nullable] = None
-        return body
+    NULLABLES = {"publication"}
 
 
 class PulpFilePublicationContext(PulpEntityContext):
@@ -68,20 +60,6 @@ class PulpFileRemoteContext(PulpRemoteContext):
     UPDATE_ID = "remotes_file_file_partial_update"
     DELETE_ID = "remotes_file_file_delete"
 
-    def preprocess_body(self, body: EntityDefinition) -> EntityDefinition:
-        body = super().preprocess_body(body)
-        for nullable in [
-            "ca_cert",
-            "client_cert",
-            "client_key",
-            "password",
-            "proxy_url",
-            "username",
-        ]:
-            if body.get(nullable) == "":
-                body[nullable] = None
-        return body
-
 
 class PulpFileRepositoryVersionContext(PulpRepositoryVersionContext):
     HREF = "file_file_repository_version_href"
@@ -102,9 +80,3 @@ class PulpFileRepositoryContext(PulpRepositoryContext):
     SYNC_ID = "repositories_file_file_sync"
     MODIFY_ID = "repositories_file_file_modify"
     VERSION_CONTEXT = PulpFileRepositoryVersionContext
-
-    def preprocess_body(self, body: EntityDefinition) -> EntityDefinition:
-        body = super().preprocess_body(body)
-        if body.get("description") == "":
-            body["description"] = None
-        return body

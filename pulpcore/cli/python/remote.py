@@ -4,6 +4,8 @@ import click
 
 from pulpcore.cli.common.context import PulpContext, pass_pulp_context
 from pulpcore.cli.common.generic import (
+    common_remote_create_options,
+    common_remote_update_options,
     create_command,
     destroy_command,
     href_option,
@@ -38,11 +40,7 @@ def remote(ctx: click.Context, pulp_ctx: PulpContext, remote_type: str) -> None:
 
 
 lookup_options = [href_option, name_option]
-create_options = [
-    click.option("--name", required=True),
-]
 python_remote_options = [
-    click.option("--url"),
     click.option("--includes", callback=load_json_callback, help=_("Package allowlist")),
     click.option("--excludes", callback=load_json_callback, help=_("Package blocklist")),
     click.option("--prereleases", type=click.BOOL, default=True),
@@ -50,8 +48,10 @@ python_remote_options = [
 remote.add_command(list_command(decorators=[label_select_option]))
 remote.add_command(show_command(decorators=lookup_options))
 remote.add_command(destroy_command(decorators=lookup_options))
-remote.add_command(create_command(decorators=create_options + python_remote_options))
-remote.add_command(update_command(decorators=lookup_options + python_remote_options))
+remote.add_command(create_command(decorators=common_remote_create_options + python_remote_options))
+remote.add_command(
+    update_command(decorators=lookup_options + common_remote_update_options + python_remote_options)
+)
 remote.add_command(label_command())
 
 # TODO Add support for 'from_bandersnatch' remote create endpoint

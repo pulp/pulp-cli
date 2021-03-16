@@ -3,6 +3,7 @@ from typing import ClassVar
 from pulpcore.cli.common.context import (
     EntityDefinition,
     PulpEntityContext,
+    PulpRemoteContext,
     PulpRepositoryContext,
     PulpRepositoryVersionContext,
 )
@@ -26,15 +27,7 @@ class PulpPythonDistributionContext(PulpEntityContext):
     CREATE_ID = "distributions_python_pypi_create"
     UPDATE_ID = "distributions_python_pypi_partial_update"
     DELETE_ID = "distributions_python_pypi_delete"
-
-    def preprocess_body(self, body: EntityDefinition) -> EntityDefinition:
-        body = super().preprocess_body(body)
-        for nullable in [
-            "publication",
-        ]:
-            if body.get(nullable) == "":
-                body[nullable] = None
-        return body
+    NULLABLES = {"publication"}
 
 
 class PulpPythonPublicationContext(PulpEntityContext):
@@ -55,7 +48,7 @@ class PulpPythonPublicationContext(PulpEntityContext):
         return body
 
 
-class PulpPythonRemoteContext(PulpEntityContext):
+class PulpPythonRemoteContext(PulpRemoteContext):
     ENTITY = "python remote"
     ENTITIES = "python remotes"
     HREF = "python_python_remote_href"
@@ -85,9 +78,3 @@ class PulpPythonRepositoryContext(PulpRepositoryContext):
     SYNC_ID = "repositories_python_python_sync"
     MODIFY_ID = "repositories_python_python_modify"
     VERSION_CONTEXT = PulpPythonRepositoryVersionContext
-
-    def preprocess_body(self, body: EntityDefinition) -> EntityDefinition:
-        body = super().preprocess_body(body)
-        if body.get("description") == "":
-            body["description"] = None
-        return body

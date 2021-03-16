@@ -3,7 +3,7 @@ import gettext
 import json
 import sys
 import time
-from typing import IO, Any, ClassVar, Dict, List, Optional, Tuple, Type, Union
+from typing import IO, Any, ClassVar, Dict, List, Optional, Set, Tuple, Type, Union
 
 import click
 import yaml
@@ -232,7 +232,9 @@ class PulpEntityContext:
     CREATE_ID: ClassVar[str]
     UPDATE_ID: ClassVar[str]
     DELETE_ID: ClassVar[str]
+    NULLABLES: ClassVar[Set[str]] = set()
 
+    # Hidden values for the lazy entity lookup
     _entity: Optional[EntityDefinition]
     _entity_lookup: EntityDefinition
 
@@ -317,9 +319,16 @@ class PulpEntityContext:
         else:
             self.pulp_href = pulp_href
 
+    def _preprocess_value(self, key: str, value: Any) -> Any:
+        if key in self.NULLABLES and value == "":
+            return None
+        if isinstance(value, PulpEntityContext):
+            return value.pulp_href
+        return value
+
     def preprocess_body(self, body: EntityDefinition) -> EntityDefinition:
         return {
-            key: value.pulp_href if isinstance(value, PulpEntityContext) else value
+            key: self._preprocess_value(key, value)
             for key, value in body.items()
             if value is not None
         }
@@ -459,6 +468,14 @@ class PulpRemoteContext(PulpEntityContext):
 
     ENTITY = "remote"
     ENTITIES = "remotes"
+    NULLABLES = {
+        "ca_cert",
+        "client_cert",
+        "client_key",
+        "password",
+        "proxy_url",
+        "username",
+    }
 
     def preprocess_body(self, body: EntityDefinition) -> EntityDefinition:
         body = super().preprocess_body(body)
@@ -525,6 +542,7 @@ class PulpRepositoryContext(PulpEntityContext):
     SYNC_ID: ClassVar[str]
     MODIFY_ID: ClassVar[str]
     VERSION_CONTEXT: ClassVar[Type[PulpRepositoryVersionContext]]
+    NULLABLES = {"description"}
 
     def get_version_context(self) -> PulpRepositoryVersionContext:
         return self.VERSION_CONTEXT(self.pulp_ctx, self)

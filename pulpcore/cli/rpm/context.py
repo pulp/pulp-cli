@@ -3,6 +3,7 @@ import gettext
 from pulpcore.cli.common.context import (
     EntityDefinition,
     PulpEntityContext,
+    PulpRemoteContext,
     PulpRepositoryContext,
     PulpRepositoryVersionContext,
 )
@@ -18,15 +19,7 @@ class PulpRpmDistributionContext(PulpEntityContext):
     CREATE_ID = "distributions_rpm_rpm_create"
     UPDATE_ID = "distributions_rpm_rpm_partial_update"
     DELETE_ID = "distributions_rpm_rpm_delete"
-
-    def preprocess_body(self, body: EntityDefinition) -> EntityDefinition:
-        body = super().preprocess_body(body)
-        for nullable in [
-            "publication",
-        ]:
-            if body.get(nullable) == "":
-                body[nullable] = None
-        return body
+    NULLABLES = {"publication"}
 
 
 class PulpRpmPublicationContext(PulpEntityContext):
@@ -46,7 +39,7 @@ class PulpRpmPublicationContext(PulpEntityContext):
         return body
 
 
-class PulpRpmRemoteContext(PulpEntityContext):
+class PulpRpmRemoteContext(PulpRemoteContext):
     ENTITY = "remote"
     HREF = "rpm_rpm_remote_href"
     LIST_ID = "remotes_rpm_rpm_list"
@@ -54,20 +47,6 @@ class PulpRpmRemoteContext(PulpEntityContext):
     CREATE_ID = "remotes_rpm_rpm_create"
     UPDATE_ID = "remotes_rpm_rpm_partial_update"
     DELETE_ID = "remotes_rpm_rpm_delete"
-
-    def preprocess_body(self, body: EntityDefinition) -> EntityDefinition:
-        body = super().preprocess_body(body)
-        for nullable in [
-            "ca_cert",
-            "client_cert",
-            "client_key",
-            "password",
-            "proxy_url",
-            "username",
-        ]:
-            if body.get(nullable) == "":
-                body[nullable] = None
-        return body
 
 
 class PulpRpmRepositoryVersionContext(PulpRepositoryVersionContext):
@@ -88,9 +67,4 @@ class PulpRpmRepositoryContext(PulpRepositoryContext):
     DELETE_ID = "repositories_rpm_rpm_delete"
     SYNC_ID = "repositories_rpm_rpm_sync"
     VERSION_CONTEXT = PulpRpmRepositoryVersionContext
-
-    def preprocess_body(self, body: EntityDefinition) -> EntityDefinition:
-        body = super().preprocess_body(body)
-        if body.get("description") == "":
-            body["description"] = None
-        return body
+    NULLABLES = {"description"}
