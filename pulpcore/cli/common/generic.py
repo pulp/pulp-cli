@@ -209,6 +209,49 @@ base_path_contains_option = click.option(
     cls=PulpOption,
 )
 
+common_remote_create_options = [
+    click.option("--name", required=True),
+    click.option("--url", required=True),
+    click.option("--ca-cert", help=_("a PEM encoded CA certificate")),
+    click.option("--client-cert", help=_("a PEM encoded client certificate")),
+    click.option("--client-key", help=_("a PEM encode private key")),
+    click.option("--connect-timeout", type=float),
+    click.option(
+        "--download-concurrency", type=int, help=_("total number of simultaneous connections")
+    ),
+    click.option("--password"),
+    click.option("--proxy-url"),
+    click.option("--proxy-username"),
+    click.option("--proxy-password"),
+    click.option("--rate-limit", type=int, help=_("limit download rate in requests per second")),
+    click.option("--sock-connect-timeout", type=float),
+    click.option("--sock-read-timeout", type=float),
+    click.option("--tls-validation", type=bool),
+    click.option("--total-timeout", type=float),
+    click.option("--username"),
+]
+
+common_remote_update_options = [
+    click.option("--url"),
+    click.option("--ca-cert", help=_("a PEM encoded CA certificate")),
+    click.option("--client-cert", help=_("a PEM encoded client certificate")),
+    click.option("--client-key", help=_("a PEM encode private key")),
+    click.option("--connect-timeout", type=float),
+    click.option(
+        "--download-concurrency", type=int, help=_("total number of simultaneous connections")
+    ),
+    click.option("--password"),
+    click.option("--proxy-url"),
+    click.option("--proxy-username"),
+    click.option("--proxy-password"),
+    click.option("--rate-limit", type=int, help=_("limit download rate in requests per second")),
+    click.option("--sock-connect-timeout", type=float),
+    click.option("--sock-read-timeout", type=float),
+    click.option("--tls-validation", type=bool),
+    click.option("--total-timeout", type=float),
+    click.option("--username"),
+]
+
 ##############################################################################
 # Generic reusable commands
 

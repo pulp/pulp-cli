@@ -10,6 +10,8 @@ from pulpcore.cli.ansible.context import (
 )
 from pulpcore.cli.common.context import PulpContext, pass_pulp_context
 from pulpcore.cli.common.generic import (
+    common_remote_create_options,
+    common_remote_update_options,
     create_command,
     destroy_command,
     href_option,
@@ -59,38 +61,7 @@ def remote(ctx: click.Context, pulp_ctx: PulpContext, remote_type: str) -> None:
 
 lookup_options = [href_option, name_option]
 remote_options = [
-    click.option("--ca-cert", help=_("a PEM encoded CA certificate")),
-    click.option("--client-cert", help=_("a PEM encoded client certificate")),
-    click.option("--client-key", help=_("a PEM encode private key")),
-    click.option("--tls-validation", help=_("if True, TLS peer validation must be performed")),
-    click.option("--proxy-url", help=_("format: scheme//user:password@host:port")),
-    click.option("--username", help=_("used for authentication when syncing")),
-    click.option("--password"),
-    click.option(
-        "--download-concurrency", type=int, help=_("total number of simultaneous connections")
-    ),
     click.option("--policy", help=_("policy to use when downloading")),
-    click.option(
-        "--total-timeout",
-        type=float,
-        help=_("aiohttp.ClientTimeout.total for download connections"),
-    ),
-    click.option(
-        "--connect-timeout",
-        type=float,
-        help=_("aiohttp.ClientTimeout.connect for download connections"),
-    ),
-    click.option(
-        "--sock-connect-timeout",
-        type=float,
-        help=_("aiohttp.ClientTimeout.sock_connect for download connections"),
-    ),
-    click.option(
-        "--sock-read-timeout",
-        type=float,
-        help=_("aiohttp.ClientTimeout.sock_read for download connections"),
-    ),
-    click.option("--rate-limit", type=int, help=_("limit download rate in requests per second")),
 ]
 collection_options = [
     click.option(
@@ -116,17 +87,12 @@ collection_options = [
     ),
 ]
 ansible_remote_options = remote_options + collection_options
-create_options = [
-    click.option("--name", required=True),
-    click.option("--url", required=True),
-] + ansible_remote_options
-update_options = (
-    lookup_options + [click.option("--url", help=_("new url"))] + ansible_remote_options
-)
+create_options = common_remote_create_options + remote_options + ansible_remote_options
+update_options = common_remote_update_options + remote_options + ansible_remote_options
 
 remote.add_command(list_command(decorators=[label_select_option]))
 remote.add_command(show_command(decorators=lookup_options))
 remote.add_command(destroy_command(decorators=lookup_options))
 remote.add_command(create_command(decorators=create_options))
-remote.add_command(update_command(decorators=update_options))
+remote.add_command(update_command(decorators=lookup_options + update_options))
 remote.add_command(label_command())
