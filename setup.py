@@ -22,6 +22,7 @@ setup(
     python_requires=">=3.6",
     install_requires=[
         "click",
+        "click-shell",
         "packaging",
         "PyYAML",
         "requests",
