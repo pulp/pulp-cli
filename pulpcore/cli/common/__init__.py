@@ -5,6 +5,7 @@ from typing import Any, Callable, Optional
 import click
 import pkg_resources
 import toml
+from click_shell import shell as _shell
 
 from pulpcore.cli.common.context import PulpContext
 from pulpcore.cli.common.debug import debug
@@ -12,6 +13,7 @@ from pulpcore.cli.common.debug import debug
 _ = gettext.gettext
 __version__ = "0.8.0.dev"
 
+shell: Callable[..., Callable[..., click.Group]] = _shell
 
 ##############################################################################
 # Main entry point
@@ -77,7 +79,7 @@ def config_options(command: Callable[..., Any]) -> Callable[..., Any]:
     return command
 
 
-@click.group()
+@shell(prompt="pulp-cli> ", intro="Starting Pulp3 CLI...")
 @click.version_option(prog_name=_("pulp3 command line interface"))
 @click.option(
     "--profile",
