@@ -392,14 +392,14 @@ class PulpEntityContext:
         )
 
     def set_label(self, href: str, key: str, value: str, non_blocking: bool = False) -> Any:
-        entity = self.show(href)
-        entity["pulp_labels"][key] = value
-        return self.update(href, body=entity, non_blocking=non_blocking)
+        labels = self.show(href)["pulp_labels"]
+        labels[key] = value
+        return self.update(href, body={"pulp_labels": labels}, non_blocking=non_blocking)
 
     def unset_label(self, href: str, key: str, non_blocking: bool = False) -> Any:
-        entity = self.show(href)
-        entity["pulp_labels"].pop(key)
-        return self.update(href, body=entity, non_blocking=non_blocking)
+        labels = self.show(href)["pulp_labels"]
+        labels.pop(key)
+        return self.update(href, body={"pulp_labels": labels}, non_blocking=non_blocking)
 
     def show_label(self, href: str, key: str) -> Any:
         entity = self.show(href)

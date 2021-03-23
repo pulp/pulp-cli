@@ -27,4 +27,13 @@ expect_succ pulp ansible distribution list
 expect_succ pulp ansible distribution show --name "cli_test_ansible_distro"
 expect_succ pulp ansible distribution update --name "cli_test_ansible_distro" --repository ""
 
+if [ "$(pulp debug has-plugin --name "core" --min-version "3.10.0")" = "true" ]
+then
+  if [ "$(pulp debug has-plugin --name "ansible" --min-version "0.8.0.dev")" = "true" ]
+  then
+    expect_succ pulp ansible distribution label set --name "cli_test_ansible_distro" --key "test" --value "success"
+  else
+    expect_fail pulp ansible distribution label set --name "cli_test_ansible_distro" --key "test" --value "fail"
+  fi
+fi
 expect_succ pulp ansible distribution destroy --name "cli_test_ansible_distro"

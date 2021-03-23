@@ -1,6 +1,6 @@
 import gettext
 import json
-from typing import Any, Optional, Tuple, Union
+from typing import Any, NamedTuple, Optional, Tuple, Union
 
 import click
 
@@ -18,6 +18,12 @@ from pulpcore.cli.common.context import (
 )
 
 _ = gettext.gettext
+
+
+class PluginRequiredVersion(NamedTuple):
+    name: str
+    min: Optional[str] = None
+    max: Optional[str] = None
 
 
 class PulpCommand(click.Command):
@@ -390,10 +396,13 @@ def label_command(**kwargs: Any) -> click.Command:
     if "name" not in kwargs:
         kwargs["name"] = "label"
     decorators = kwargs.pop("decorators", [name_option, href_option])
+    need_plugins = kwargs.pop("need_plugins", [PluginRequiredVersion("core", "3.10.0")])
 
     @click.group(**kwargs)
-    def label_group() -> None:
-        pass
+    @pass_pulp_context
+    def label_group(pulp_ctx: PulpContext) -> None:
+        for item in need_plugins:
+            pulp_ctx.needs_plugin(*item)
 
     @click.command(name="set", help=_("Add or update a label"))
     @click.option("--key", required=True, help=_("Key of the label"))
