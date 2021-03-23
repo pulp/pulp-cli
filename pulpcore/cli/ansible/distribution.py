@@ -14,12 +14,14 @@ from pulpcore.cli.common.context import (
     pass_entity_context,
     pass_pulp_context,
 )
+from pulpcore.cli.common.generic import PluginRequiredVersion as PRV
 from pulpcore.cli.common.generic import (
     base_path_contains_option,
     base_path_option,
     create_command,
     destroy_command,
     href_option,
+    label_command,
     label_select_option,
     list_command,
     name_option,
@@ -79,6 +81,9 @@ distribution.add_command(list_command(decorators=filter_options))
 distribution.add_command(show_command(decorators=lookup_options))
 distribution.add_command(destroy_command(decorators=lookup_options))
 distribution.add_command(create_command(decorators=create_options))
+distribution.add_command(
+    label_command(need_plugins=[PRV("core", "3.10.0"), PRV("ansible", "0.8.0.dev")])
+)
 
 
 # TODO Add content_guard option
