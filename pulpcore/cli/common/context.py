@@ -205,7 +205,12 @@ class PulpContext:
                     separator = ","
                 if max_version is not None:
                     specifier += f"{separator}<{max_version}"
-                raise click.ClickException(f"'{specifier} is not available")
+                raise click.ClickException(
+                    _(
+                        "The server does not have '{specifier}' installed,"
+                        " which is needed to run this command."
+                    ).format(specifier=specifier)
+                )
         else:
             # Schedule for later checking
             self._needed_plugins.append((name, min_version, max_version))

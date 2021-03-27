@@ -1,1 +1,1 @@
-Added label command to ansible distribution group
+Added label command to ansible distribution group.
