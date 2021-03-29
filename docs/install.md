@@ -41,7 +41,7 @@ format = "json"
 To generate a new configuration:
 
 ```
-pulp config create --base_url "http://localhost"
+pulp config create --base-url "http://localhost"
 pulp config create -e  # with an editor (e.g. vim)
 pulp config create -i  # interactive prompts
 ```
