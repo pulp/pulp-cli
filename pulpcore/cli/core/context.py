@@ -276,6 +276,14 @@ class PulpImporterContext(PulpEntityContext):
     LIST_ID = "importers_core_pulp_list"
 
 
+class PulpSigningServiceContext(PulpEntityContext):
+    ENTITY = "signing service"
+    ENTITIES = "signing services"
+    HREF = "signing_service_href"
+    LIST_ID = "signing_services_list"
+    READ_ID = "signing_services_read"
+
+
 class PulpTaskContext(PulpEntityContext):
     ENTITY = "task"
     HREF = "task_href"

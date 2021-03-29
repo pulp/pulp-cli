@@ -11,6 +11,7 @@ from pulpcore.cli.core.importer import importer
 from pulpcore.cli.core.orphans import orphans
 from pulpcore.cli.core.repository import repository
 from pulpcore.cli.core.show import show
+from pulpcore.cli.core.signing_service import signing_service
 from pulpcore.cli.core.status import status
 from pulpcore.cli.core.task import task
 from pulpcore.cli.core.user import user
@@ -29,6 +30,7 @@ main.add_command(importer)
 main.add_command(orphans)
 main.add_command(repository)
 main.add_command(show)
+main.add_command(signing_service)
 main.add_command(status)
 main.add_command(task)
 main.add_command(user)
