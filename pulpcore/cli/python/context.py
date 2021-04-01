@@ -3,6 +3,7 @@ from typing import ClassVar
 from pulpcore.cli.common.context import (
     EntityDefinition,
     PluginRequirement,
+    PulpContentContext,
     PulpEntityContext,
     PulpRemoteContext,
     PulpRepositoryContext,
@@ -10,9 +11,9 @@ from pulpcore.cli.common.context import (
 )
 
 
-class PulpPythonContentContext(PulpEntityContext):
-    ENTITY = "python content"
-    ENTITIES = "python content"
+class PulpPythonContentContext(PulpContentContext):
+    ENTITY = "python package"
+    ENTITIES = "python packages"
     HREF = "python_python_package_content_href"
     LIST_ID = "content_python_packages_list"
     READ_ID = "content_python_packages_read"

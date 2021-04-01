@@ -1,5 +1,5 @@
 import gettext
-from typing import Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 import click
 
@@ -11,7 +11,9 @@ from pulpcore.cli.common.context import (
     pass_repository_context,
 )
 from pulpcore.cli.common.generic import (
+    GroupOption,
     create_command,
+    create_content_json_callback,
     destroy_command,
     href_option,
     label_command,
@@ -20,6 +22,7 @@ from pulpcore.cli.common.generic import (
     load_json_callback,
     name_option,
     pulp_option,
+    repository_content_command,
     repository_href_option,
     repository_option,
     show_command,
@@ -44,6 +47,13 @@ def _remote_callback(
         pulp_ctx: PulpContext = ctx.find_object(PulpContext)
         return PulpFileRemoteContext(pulp_ctx, entity={"name": value})
     return value
+
+
+def _content_callback(ctx: click.Context, param: click.Parameter, value: Any) -> Optional[str]:
+    if value:
+        pulp_ctx: PulpContext = ctx.find_object(PulpContext)
+        ctx.obj = PulpFileContentContext(pulp_ctx, entity=value)
+    return str(value)
 
 
 @click.group()
@@ -77,6 +87,37 @@ update_options = [
 create_options = update_options + [
     click.option("--name", required=True),
 ]
+file_options = [
+    click.option("--sha256", cls=GroupOption, expose_value=False, group=["relative_path"]),
+    click.option(
+        "--relative-path",
+        cls=GroupOption,
+        expose_value=False,
+        group=["sha256"],
+        callback=_content_callback,
+    ),
+]
+content_json_callback = create_content_json_callback(PulpFileContentContext)
+modify_options = [
+    click.option(
+        "--add-content",
+        callback=content_json_callback,
+        help=_(
+            """JSON string with a list of objects to add to the repository.
+    Each object should consist of the following keys: "sha256", "relative_path"..
+    The argument prefixed with the '@' can be the path to a JSON file with a list of objects."""
+        ),
+    ),
+    click.option(
+        "--remove-content",
+        callback=content_json_callback,
+        help=_(
+            """JSON string with a list of objects to remove from the repository.
+    Each object should consist of the following keys: "sha256", "relative_path"..
+    The argument prefixed with the '@' can be the path to a JSON file with a list of objects."""
+        ),
+    ),
+]
 
 repository.add_command(list_command(decorators=[label_select_option]))
 repository.add_command(show_command(decorators=lookup_options))
@@ -86,6 +127,14 @@ repository.add_command(destroy_command(decorators=lookup_options))
 repository.add_command(task_command(decorators=nested_lookup_options))
 repository.add_command(version_command(decorators=nested_lookup_options))
 repository.add_command(label_command(decorators=nested_lookup_options))
+repository.add_command(
+    repository_content_command(
+        contexts={"file": PulpFileContentContext},
+        add_decorators=file_options,
+        remove_decorators=file_options,
+        modify_decorators=modify_options,
+    )
+)
 
 
 @repository.command()
@@ -116,7 +165,7 @@ def sync(
     )
 
 
-@repository.command()
+@repository.command(deprecated=True)
 @name_option
 @href_option
 @click.option("--sha256", required=True)
@@ -131,6 +180,7 @@ def add(
     relative_path: str,
     base_version: Optional[int],
 ) -> None:
+    """Please use 'content add' instead."""
     repository_href = repository_ctx.pulp_href
 
     base_version_href: Optional[str]
@@ -150,7 +200,7 @@ def add(
     )
 
 
-@repository.command()
+@repository.command(deprecated=True)
 @name_option
 @href_option
 @click.option("--sha256", required=True)
@@ -165,6 +215,7 @@ def remove(
     relative_path: str,
     base_version: Optional[int],
 ) -> None:
+    """Please use 'content remove' instead."""
     repository_href = repository_ctx.pulp_href
 
     base_version_href: Optional[str]
@@ -184,7 +235,7 @@ def remove(
     )
 
 
-@repository.command()
+@repository.command(deprecated=True)
 @name_option
 @href_option
 @click.option("--base-version", type=int)
@@ -219,6 +270,7 @@ def modify(
     remove_content: List[Dict[str, str]],
     base_version: Optional[int],
 ) -> None:
+    """Please use 'content modify' instead."""
     repository_href = repository_ctx.pulp_href
 
     base_version_href: Optional[str]

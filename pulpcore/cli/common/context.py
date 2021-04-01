@@ -587,6 +587,16 @@ class PulpRepositoryContext(PulpEntityContext):
         )
 
 
+class PulpContentContext(PulpEntityContext):
+    """
+    Base class for content specific contexts
+    """
+
+    ENTITY = "content"
+    ENTITIES = "content"
+    LIST_ID = "content_list"
+
+
 EntityFieldDefinition = Union[None, str, PulpEntityContext]
 ##############################################################################
 # Decorator to access certain contexts
@@ -596,3 +606,4 @@ pass_pulp_context = click.make_pass_decorator(PulpContext)
 pass_entity_context = click.make_pass_decorator(PulpEntityContext)
 pass_repository_context = click.make_pass_decorator(PulpRepositoryContext)
 pass_repository_version_context = click.make_pass_decorator(PulpRepositoryVersionContext)
+pass_content_context = click.make_pass_decorator(PulpContentContext)
