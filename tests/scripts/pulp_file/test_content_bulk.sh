@@ -28,6 +28,7 @@ expect_succ pulp file content create --sha256 "$sha256_3" --relative-path upload
 
 expect_succ pulp file repository create --name "cli_test_file_repository"
 
+# Old content commands
 # Add content using JSON string
 expect_succ pulp file repository modify --name "cli_test_file_repository" --add-content "[{\"sha256\":\"$sha256_1\",\"relative_path\":\"upload_test/test_1.txt\"},{\"sha256\":\"$sha256_2\",\"relative_path\":\"upload_test/test_2.txt\"},{\"sha256\":\"$sha256_3\",\"relative_path\":\"upload_test/test_3.txt\"}]"
 expect_succ pulp file repository modify --name "cli_test_file_repository" --remove-content "[{\"sha256\":\"$sha256_1\",\"relative_path\":\"upload_test/test_1.txt\"},{\"sha256\":\"$sha256_2\",\"relative_path\":\"upload_test/test_2.txt\"},{\"sha256\":\"$sha256_3\",\"relative_path\":\"upload_test/test_3.txt\"}]"
@@ -53,3 +54,11 @@ cp add_content.json remove_content.json
 
 expect_succ pulp file repository modify --name "cli_test_file_repository" --add-content "@-" --base-version 0 < add_content.json
 expect_succ pulp file repository modify --name "cli_test_file_repository" --remove-content "@remove_content.json"
+
+# New Content commands
+expect_succ pulp file repository content modify --repository "cli_test_file_repository" --add-content "[{\"sha256\":\"$sha256_1\",\"relative_path\":\"upload_test/test_1.txt\"},{\"sha256\":\"$sha256_2\",\"relative_path\":\"upload_test/test_2.txt\"},{\"sha256\":\"$sha256_3\",\"relative_path\":\"upload_test/test_3.txt\"}]"
+expect_succ pulp file repository content list --repository "cli_test_file_repository"
+test "$(echo "$OUTPUT" | jq -r length)" -eq "3"
+expect_succ pulp file repository content modify --repository "cli_test_file_repository" --remove-content "@remove_content.json"
+expect_succ pulp file repository content list --repository "cli_test_file_repository"
+test "$(echo "$OUTPUT" | jq -r length)" -eq "0"

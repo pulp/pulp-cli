@@ -1,6 +1,6 @@
 import gettext
 import json
-from typing import Any, Callable, Optional, Tuple, TypeVar, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type, TypeVar, Union
 
 import click
 
@@ -8,10 +8,12 @@ from pulpcore.cli.common.context import (
     DEFAULT_LIMIT,
     EntityDefinition,
     PluginRequirement,
+    PulpContentContext,
     PulpContext,
     PulpEntityContext,
     PulpRepositoryContext,
     PulpRepositoryVersionContext,
+    pass_content_context,
     pass_entity_context,
     pass_pulp_context,
     pass_repository_context,
@@ -69,6 +71,32 @@ class PulpOption(click.Option):
         return synopsis, help_text
 
 
+class GroupOption(PulpOption):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        self.group: List[str] = kwargs.pop("group")
+        assert self.group, "'group' parameter required"
+        kwargs["help"] = (
+            kwargs.get("help", "") + "Option is grouped with " + ", ".join(self.group) + "."
+        ).strip()
+        super().__init__(*args, **kwargs)
+
+    def handle_parse_result(self, ctx: click.Context, opts: Dict[str, Any], args: Any) -> Any:
+        all_options = self.group + [self.name]
+        if all(x in opts for x in all_options):
+            self.prompt = None  # type: ignore
+        else:
+            raise click.UsageError(
+                "Illegal usage, please specify all "
+                "options in the group: " + ", ".join(all_options)
+            )
+        value = opts.get(self.name)
+        if self.callback is not None:
+            value = self.callback(ctx, self, {o: opts[o] for o in all_options})  # type: ignore
+        if self.expose_value:
+            ctx.params[self.name] = value
+        return value, args
+
+
 ##############################################################################
 # Option callbacks
 
@@ -124,7 +152,7 @@ def _version_callback(
 def load_json_callback(
     ctx: click.Context,
     param: click.Parameter,
-    value: str,
+    value: Optional[str],
 ) -> Any:
     """Load JSON from input string or from file if string starts with @."""
     json_object: Any
@@ -149,6 +177,19 @@ def load_json_callback(
         raise click.ClickException("Failed to decode JSON")
     else:
         return json_object
+
+
+def create_content_json_callback(content_ctx: Type[PulpContentContext]) -> Any:
+    def _callback(
+        ctx: click.Context, param: click.Parameter, value: Optional[str]
+    ) -> Optional[List[PulpContentContext]]:
+        new_value = load_json_callback(ctx, param, value)
+        if new_value is not None:
+            pulp_ctx: PulpContext = ctx.find_object(PulpContext)
+            return [content_ctx(pulp_ctx, entity=unit) for unit in new_value]
+        return new_value
+
+    return _callback
 
 
 ##############################################################################
@@ -498,3 +539,113 @@ def label_command(**kwargs: Any) -> click.Command:
         label_group.add_command(subcmd)
 
     return label_group
+
+
+def repository_content_command(**kwargs: Any) -> click.Group:
+    """A factory that creates a repository content command group."""
+
+    content_contexts = kwargs.pop("contexts", {})
+    names = list(content_contexts.keys()) + ["all"]
+    content_contexts.update({"all": PulpContentContext})
+
+    def version_callback(
+        ctx: click.Context, param: click.Parameter, value: Optional[int]
+    ) -> PulpRepositoryVersionContext:
+        repo_ctx: PulpRepositoryContext = ctx.find_object(PulpRepositoryContext)
+        repo_ver_ctx = repo_ctx.get_version_context()
+        repo_ver_ctx.pulp_href = (
+            f"{repo_ctx.pulp_href}versions/{value}/"
+            if value
+            else repo_ctx.entity["latest_version_href"]
+        )
+        return repo_ver_ctx
+
+    @click.command("list")
+    @click.option("-t", "--type", "type", type=click.Choice(names), default=names[0])
+    @limit_option
+    @offset_option
+    @repository_option
+    @click.option("--version", type=int, callback=version_callback)
+    @pass_pulp_context
+    def content_list(
+        pulp_ctx: PulpContext,
+        version: PulpRepositoryVersionContext,
+        offset: Optional[int],
+        limit: Optional[int],
+        type: Optional[str],
+        **params: Any,
+    ) -> None:
+        if type == "all":
+            pulp_ctx.needs_plugin("core", "3.11.0")
+        parameters = {k: v for k, v in params.items() if v is not None}
+        parameters.update({"repository_version": version.pulp_href})
+        result = content_contexts[type](pulp_ctx).list(
+            limit=limit, offset=offset, parameters=parameters
+        )
+        pulp_ctx.output_result(result)
+
+    @click.command("add")
+    @repository_option
+    @click.option("--base-version", type=int, callback=version_callback)
+    @pass_content_context
+    def content_add(
+        content_ctx: PulpContentContext,
+        base_version: PulpRepositoryVersionContext,
+    ) -> None:
+        repo_ctx = base_version.repository_ctx
+        repo_ctx.modify(
+            repo_ctx.pulp_href,
+            add_content=[content_ctx.pulp_href],
+            base_version=base_version.pulp_href,
+        )
+
+    @click.command("remove")
+    @click.option("--all", is_flag=True, help=_("Remove all content from repository version"))
+    @repository_option
+    @click.option("--base-version", type=int, callback=version_callback)
+    @pass_content_context
+    def content_remove(
+        content_ctx: PulpContentContext,
+        base_version: PulpRepositoryVersionContext,
+        all: bool,
+    ) -> None:
+        repo_ctx = base_version.repository_ctx
+        remove_content = ["*" if all else content_ctx.pulp_href]
+        repo_ctx.modify(
+            repo_ctx.pulp_href, remove_content=remove_content, base_version=base_version.pulp_href
+        )
+
+    @click.command("modify")
+    @repository_option
+    @click.option("--base-version", type=int, callback=version_callback)
+    def content_modify(
+        base_version: PulpRepositoryVersionContext,
+        add_content: Optional[List[PulpContentContext]],
+        remove_content: Optional[List[PulpContentContext]],
+    ) -> None:
+        repo_ctx = base_version.repository_ctx
+        ac = [unit.pulp_href for unit in add_content] if add_content else None
+        rc = [unit.pulp_href for unit in remove_content] if remove_content else None
+        repo_ctx.modify(repo_ctx.pulp_href, ac, rc, base_version.pulp_href)
+
+    command_decorators = {
+        content_list: kwargs.pop("list_decorators", []),
+        content_add: kwargs.pop("add_decorators", []),
+        content_remove: kwargs.pop("remove_decorators", []),
+        content_modify: kwargs.pop("modify_decorators", []),
+    }
+    if not kwargs.get("name"):
+        kwargs["name"] = "content"
+
+    @click.group(**kwargs)
+    @pass_pulp_context
+    @click.pass_context
+    def content_group(ctx: click.Context, pulp_ctx: PulpContext) -> None:
+        ctx.obj = PulpContentContext(pulp_ctx)
+
+    for command, options in command_decorators.items():
+        for option in options:
+            command = option(command)
+        content_group.add_command(command)
+
+    return content_group

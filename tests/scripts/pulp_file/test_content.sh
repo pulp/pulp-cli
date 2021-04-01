@@ -30,8 +30,25 @@ sha256=$(sha256sum test.txt | cut -d' ' -f1)
 expect_succ pulp artifact upload --file test.txt
 expect_succ pulp file content create --sha256 "$sha256" --relative-path upload_test/test.txt
 
+# Old content commands
 expect_succ pulp file repository create --name "cli_test_file_repository"
 expect_succ pulp file repository add --name "cli_test_file_repository" --sha256 "$sha256" --relative-path upload_test/test.txt
 expect_succ pulp file repository add --name "cli_test_file_repository" --sha256 "$sha256" --relative-path upload_test/test.txt --base-version 0
 expect_succ pulp file repository remove --name "cli_test_file_repository" --sha256 "$sha256" --relative-path upload_test/test.txt
 expect_succ pulp file repository remove --name "cli_test_file_repository" --sha256 "$sha256" --relative-path upload_test/test.txt --base-version 1
+
+# New content commands
+expect_succ pulp file repository content add --repository "cli_test_file_repository" --sha256 "$sha256" --relative-path upload_test/test.txt
+expect_succ pulp file repository content add --repository "cli_test_file_repository" --sha256 "$sha256" --relative-path upload_test/test.txt --base-version 0
+expect_succ pulp file repository content list --repository "cli_test_file_repository" --version 1
+test "$(echo "$OUTPUT" | jq -r length)" -eq "1"
+if [ "$(pulp debug has-plugin --name "core" --min-version "3.11.0")" = "true" ]
+then
+  expect_succ pulp file repository content list --repository "cli_test_file_repository" --type "all"
+else
+  expect_fail pulp file repository content list --repository "cli_test_file_repository" --type "all"
+fi
+
+expect_succ pulp file repository content remove --repository "cli_test_file_repository" --sha256 "$sha256" --relative-path upload_test/test.txt
+expect_succ pulp file repository content list --repository "cli_test_file_repository"
+test "$(echo "$OUTPUT" | jq -r length)" -eq "0"

@@ -2,6 +2,7 @@ import gettext
 
 from pulpcore.cli.common.context import (
     EntityDefinition,
+    PulpContentContext,
     PulpEntityContext,
     PulpRemoteContext,
     PulpRepositoryContext,
@@ -11,7 +12,7 @@ from pulpcore.cli.common.context import (
 _ = gettext.gettext
 
 
-class PulpFileContentContext(PulpEntityContext):
+class PulpFileContentContext(PulpContentContext):
     ENTITY = "file content"
     ENTITIES = "file content"
     HREF = "file_file_content_href"

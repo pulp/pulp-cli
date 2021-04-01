@@ -1,3 +1,4 @@
+from gettext import gettext
 from typing import Optional, Union
 
 import click
@@ -11,6 +12,7 @@ from pulpcore.cli.common.context import (
 )
 from pulpcore.cli.common.generic import (
     create_command,
+    create_content_json_callback,
     destroy_command,
     href_option,
     label_command,
@@ -18,6 +20,7 @@ from pulpcore.cli.common.generic import (
     list_command,
     name_option,
     pulp_option,
+    repository_content_command,
     show_command,
     update_command,
     version_command,
@@ -28,6 +31,8 @@ from pulpcore.cli.python.context import (
     PulpPythonRepositoryContext,
 )
 
+_ = gettext
+
 
 def _remote_callback(
     ctx: click.Context, param: click.Parameter, value: Optional[str]
@@ -36,6 +41,15 @@ def _remote_callback(
     if value:
         pulp_ctx: PulpContext = ctx.find_object(PulpContext)
         return PulpPythonRemoteContext(pulp_ctx, entity={"name": value})
+    return value
+
+
+def _content_callback(
+    ctx: click.Context, param: click.Parameter, value: Optional[str]
+) -> Optional[str]:
+    if value:
+        pulp_ctx: PulpContext = ctx.find_object(PulpContext)
+        ctx.obj = PulpPythonContentContext(pulp_ctx, entity={"filename": value})
     return value
 
 
@@ -68,6 +82,33 @@ update_options = [
     click.option("--remote", callback=_remote_callback),
     pulp_option("--retained-versions", needs_plugin="core", min_version="3.13.0.dev"),
 ]
+package_option = click.option(
+    "--filename",
+    callback=_content_callback,
+    expose_value=False,
+    help=_("Filename of the python package"),
+)
+content_json_callback = create_content_json_callback(PulpPythonContentContext)
+modify_options = [
+    click.option(
+        "--add-content",
+        callback=content_json_callback,
+        help=_(
+            """JSON string with a list of objects to add to the repository.
+    Each object should have the key: "filename"
+    The argument prefixed with the '@' can be the path to a JSON file with a list of objects."""
+        ),
+    ),
+    click.option(
+        "--remove-content",
+        callback=content_json_callback,
+        help=_(
+            """JSON string with a list of objects to remove from the repository.
+    Each object should have the key: "filename"
+    The argument prefixed with the '@' can be the path to a JSON file with a list of objects."""
+        ),
+    ),
+]
 
 repository.add_command(list_command(decorators=[label_select_option]))
 repository.add_command(show_command(decorators=lookup_options))
@@ -76,6 +117,14 @@ repository.add_command(create_command(decorators=create_options))
 repository.add_command(update_command(decorators=lookup_options + update_options))
 repository.add_command(version_command())
 repository.add_command(label_command())
+repository.add_command(
+    repository_content_command(
+        contexts={"package": PulpPythonContentContext},
+        add_decorators=[package_option],
+        remove_decorators=[package_option],
+        modify_decorators=modify_options,
+    )
+)
 
 
 @repository.command()
@@ -108,7 +157,7 @@ def sync(
     )
 
 
-@repository.command()
+@repository.command(deprecated=True)
 @name_option
 @href_option
 @click.option("--filename", required=True)
@@ -121,6 +170,7 @@ def add(
     filename: str,
     base_version: Optional[int],
 ) -> None:
+    """Please use 'content add' instead."""
     repository_href = repository_ctx.pulp_href
 
     base_version_href: Optional[str]
@@ -138,7 +188,7 @@ def add(
     )
 
 
-@repository.command()
+@repository.command(deprecated=True)
 @name_option
 @href_option
 @click.option("--filename", required=True)
@@ -151,6 +201,7 @@ def remove(
     filename: str,
     base_version: Optional[int],
 ) -> None:
+    """Please use 'content remove' instead."""
     repository_href = repository_ctx.pulp_href
 
     base_version_href: Optional[str]
