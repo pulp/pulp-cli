@@ -1,6 +1,7 @@
 import gettext
 import os
-from typing import Any, Callable, Optional
+import sys
+from typing import Any, Callable, Dict, Optional
 
 import click
 import pkg_resources
@@ -18,6 +19,13 @@ __version__ = "0.8.0.dev"
 
 
 PROFILE_KEY = f"{__name__}.profile"
+FORMAT_CHOICES = ["json", "yaml", "none"]
+
+
+def _validate_config(config: Dict[str, Any]) -> bool:
+    if "format" in config and config["format"].lower() not in FORMAT_CHOICES:
+        raise ValueError(_("'format' is not one of {}").format(FORMAT_CHOICES))
+    return True
 
 
 def _config_profile_callback(ctx: click.Context, param: Any, value: Optional[str]) -> Optional[str]:
@@ -30,26 +38,33 @@ def _config_callback(ctx: click.Context, param: Any, value: Optional[str]) -> No
     if ctx.default_map:
         return
 
-    if value:
-        config = toml.load(value)
-    else:
-        default_config_path = os.path.join(click.utils.get_app_dir("pulp"), "settings.toml")
-
-        try:
-            config = toml.load(default_config_path)
-        except FileNotFoundError:
-            # No config, but also none requested
-            return
-
-    profile: str = "cli"
-    if PROFILE_KEY in ctx.meta:
-        profile = "cli-" + ctx.meta[PROFILE_KEY]
     try:
-        ctx.default_map = config[profile]
-    except KeyError:
-        raise click.ClickException(
-            _("Profile named '{profile}' not found.").format(profile=profile)
-        )
+        if value:
+            config = toml.load(value)
+        else:
+            default_config_path = os.path.join(click.utils.get_app_dir("pulp"), "settings.toml")
+
+            try:
+                config = toml.load(default_config_path)
+            except FileNotFoundError:
+                # No config, but also none requested
+                return
+        profile: str = "cli"
+        if PROFILE_KEY in ctx.meta:
+            profile = "cli-" + ctx.meta[PROFILE_KEY]
+        try:
+            _validate_config(config[profile])
+            ctx.default_map = config[profile]
+        except KeyError:
+            raise click.ClickException(
+                _("Profile named '{profile}' not found.").format(profile=profile)
+            )
+    except ValueError as e:
+        if sys.stdout.isatty():
+            click.echo(_("Config file failed to parse. ({}).").format(e), err=True)
+            if click.confirm(_("Continue without config?")):
+                return
+        raise click.ClickException(_("Aborted."))
 
 
 CONFIG_OPTIONS = [
@@ -64,7 +79,7 @@ CONFIG_OPTIONS = [
     click.option("--verify-ssl/--no-verify-ssl", default=True, help=_("Verify SSL connection")),
     click.option(
         "--format",
-        type=click.Choice(["json", "yaml", "none"], case_sensitive=False),
+        type=click.Choice(FORMAT_CHOICES, case_sensitive=False),
         default="json",
         help=_("Format of the response"),
     ),
