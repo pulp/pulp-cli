@@ -24,9 +24,6 @@ def config() -> None:
 @click.option("--editor", "-e", is_flag=True, help=_("Edit the config file in an editor"))
 @click.option("--overwrite", "-o", is_flag=True, help=_("Overwite any existing config file"))
 @click.option("--location", default=LOCATION, type=click.Path(resolve_path=True))
-@click.option(
-    "--format", type=click.Choice(["json", "yaml", "none"], case_sensitive=False), default="json"
-)
 @click.pass_context
 def create(
     ctx: click.Context,
@@ -68,7 +65,6 @@ def create(
         for setting in SETTINGS:
             settings[setting] = locals()[setting] or ""
 
-    output = f"[cli]\n{toml.dumps(settings)}"
     output = toml.dumps({"cli": settings})
 
     if editor:
