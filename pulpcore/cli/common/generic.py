@@ -1,6 +1,6 @@
 import gettext
 import json
-from typing import Any, NamedTuple, Optional, Tuple, Union
+from typing import Any, Dict, List, NamedTuple, Optional, Tuple, Union
 
 import click
 
@@ -208,6 +208,41 @@ base_path_contains_option = click.option(
     type=str,
     cls=PulpOption,
 )
+
+
+##############################################################################
+# Options for click.options
+
+
+# Utility code from https://stackoverflow.com/a/51235564
+class Mutex(click.Option):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        self.not_required_if: List[str] = kwargs.pop("not_required_if")
+        assert self.not_required_if, "'not_required_if' parameter required"
+        kwargs["help"] = (
+            kwargs.get("help", "")
+            + "Option is mutually exclusive with "
+            + ", ".join(self.not_required_if)
+            + "."
+        ).strip()
+        super(Mutex, self).__init__(*args, **kwargs)
+
+    def handle_parse_result(self, ctx: click.Context, opts: Dict[str, Any], args: Any) -> Any:
+        current_opt: bool = self.name in opts
+        for mutex_opt in self.not_required_if:
+            if mutex_opt in opts:
+                if current_opt:
+                    raise click.UsageError(
+                        "Illegal usage: '"
+                        + str(self.name)
+                        + "' is mutually exclusive with "
+                        + str(mutex_opt)
+                        + "."
+                    )
+                else:
+                    self.prompt = None  # type: ignore
+        return super(Mutex, self).handle_parse_result(ctx, opts, args)
+
 
 ##############################################################################
 # Generic reusable commands

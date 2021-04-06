@@ -276,6 +276,54 @@ class PulpImporterContext(PulpEntityContext):
     LIST_ID = "importers_core_pulp_list"
 
 
+class PulpImportContext(PulpEntityContext):
+    ENTITY = "PulpImport"
+    # This is replaced by a version aware property below
+    # HREF = "pulp_pulp_export_href"
+    LIST_ID = "importers_core_pulp_imports_list"
+    READ_ID = "importers_core_pulp_imports_read"
+    CREATE_ID = "importers_core_pulp_imports_create"
+    DELETE_ID = "importers_core_pulp_imports_delete"
+    importer: EntityDefinition
+
+    def list(self, limit: int, offset: int, parameters: Dict[str, Any]) -> List[Any]:
+        if not self.pulp_ctx.has_plugin("core", min_version="3.10.dev"):
+            # Workaround for improperly rendered nested resource paths and weird HREF names
+            # https://github.com/pulp/pulpcore/pull/1066
+            parameters[PulpImporterContext.HREF] = self.importer["pulp_href"]
+        return super().list(limit=limit, offset=offset, parameters=parameters)
+
+    def create(
+        self,
+        body: EntityDefinition,
+        parameters: Optional[Dict[str, Any]] = None,
+        non_blocking: bool = False,
+    ) -> Any:
+        if not self.pulp_ctx.has_plugin("core", min_version="3.10.dev"):
+            # Workaround for improperly rendered nested resource paths and weird HREF names
+            # https://github.com/pulp/pulpcore/pull/1066
+            if parameters is None:
+                parameters = {}
+            parameters[self.HREF] = self.importer["pulp_href"]
+        return super().create(parameters=parameters, body=body, non_blocking=non_blocking)
+
+    @property
+    def HREF(self) -> str:  # type: ignore
+        if not self.pulp_ctx.has_plugin("core", min_version="3.10.dev"):
+            # Workaround for improperly rendered nested resource paths and weird HREF names
+            # https://github.com/pulp/pulpcore/pull/1066
+            return "core_pulp_pulp_import_href"
+        return "pulp_pulp_import_href"
+
+    @property
+    def scope(self) -> Dict[str, Any]:
+        if not self.pulp_ctx.has_plugin("core", min_version="3.10.dev"):
+            # Workaround for improperly rendered nested resource paths and weird HREF names
+            # https://github.com/pulp/pulpcore/pull/1066
+            return {}
+        return {PulpImporterContext.HREF: self.importer["pulp_href"]}
+
+
 class PulpTaskContext(PulpEntityContext):
     ENTITY = "task"
     HREF = "task_href"

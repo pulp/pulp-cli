@@ -9,6 +9,7 @@ from pulpcore.cli.core.exporter import exporter
 from pulpcore.cli.core.group import group
 from pulpcore.cli.core.importer import importer
 from pulpcore.cli.core.orphans import orphans
+from pulpcore.cli.core.pulp_import import pulp_import
 from pulpcore.cli.core.repository import repository
 from pulpcore.cli.core.show import show
 from pulpcore.cli.core.status import status
@@ -25,6 +26,7 @@ main.add_command(config)
 main.add_command(export)
 main.add_command(exporter)
 main.add_command(group)
+main.add_command(pulp_import)
 main.add_command(importer)
 main.add_command(orphans)
 main.add_command(repository)
