@@ -46,6 +46,9 @@ python_remote_options = [
     click.option("--includes", callback=load_json_callback, help=_("Package allowlist")),
     click.option("--excludes", callback=load_json_callback, help=_("Package blocklist")),
     click.option("--prereleases", type=click.BOOL, default=True),
+    click.option("--keep-latest-packages", type=int),
+    click.option("--package-types", callback=load_json_callback),
+    click.option("--exclude-platforms", callback=load_json_callback),
 ]
 remote.add_command(list_command(decorators=[label_select_option]))
 remote.add_command(show_command(decorators=lookup_options))

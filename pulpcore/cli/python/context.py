@@ -6,6 +6,7 @@ from pulpcore.cli.common.context import (
     PulpRepositoryContext,
     PulpRepositoryVersionContext,
 )
+from pulpcore.cli.common.generic import PluginRequiredVersion as PRV
 
 
 class PulpPythonContentContext(PulpEntityContext):
@@ -64,6 +65,19 @@ class PulpPythonRemoteContext(PulpEntityContext):
     BANDERSNATCH_ID: ClassVar[str] = "remotes_python_python_from_bandersnatch"
     UPDATE_ID = "remotes_python_python_partial_update"
     DELETE_ID = "remotes_python_python_delete"
+    field_versions = {
+        "keep_latest_packages": [PRV("python", "3.2.0")],
+        "exclude_platforms": [PRV("python", "3.2.0")],
+        "package_types": [PRV("python", "3.2.0")],
+    }
+
+    def preprocess_body(self, body: EntityDefinition) -> EntityDefinition:
+        body = super().preprocess_body(body)
+        for field in body.keys():
+            if field in self.field_versions:
+                for item in self.field_versions[field]:
+                    self.pulp_ctx.needs_plugin(*item)
+        return body
 
 
 class PulpPythonRepositoryVersionContext(PulpRepositoryVersionContext):
