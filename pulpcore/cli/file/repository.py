@@ -64,14 +64,14 @@ def repository(ctx: click.Context, pulp_ctx: PulpContext, repo_type: str) -> Non
 
 lookup_options = [href_option, name_option]
 nested_lookup_options = [repository_href_option, repository_option]
-create_options = [
-    click.option("--name", required=True),
-    click.option("--description"),
-    click.option("--remote", callback=_remote_callback),
-]
 update_options = [
     click.option("--description"),
     click.option("--remote", callback=_remote_callback),
+    click.option("--manifest"),
+    click.option("--autopublish/--no-autopublish", default=None),
+]
+create_options = update_options + [
+    click.option("--name", required=True),
 ]
 
 repository.add_command(list_command(decorators=[label_select_option]))

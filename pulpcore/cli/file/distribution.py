@@ -1,8 +1,9 @@
 import gettext
+from typing import Optional, Union
 
 import click
 
-from pulpcore.cli.common.context import PulpContext, pass_pulp_context
+from pulpcore.cli.common.context import PulpContext, PulpEntityContext, pass_pulp_context
 from pulpcore.cli.common.generic import (
     base_path_contains_option,
     base_path_option,
@@ -16,9 +17,19 @@ from pulpcore.cli.common.generic import (
     show_command,
     update_command,
 )
-from pulpcore.cli.file.context import PulpFileDistributionContext
+from pulpcore.cli.file.context import PulpFileDistributionContext, PulpFileRepositoryContext
 
 _ = gettext.gettext
+
+
+def _repository_callback(
+    ctx: click.Context, param: click.Parameter, value: Optional[str]
+) -> Union[str, PulpEntityContext, None]:
+    # Pass None and "" verbatim
+    if value:
+        pulp_ctx: PulpContext = ctx.find_object(PulpContext)
+        return PulpFileRepositoryContext(pulp_ctx, entity={"name": value})
+    return value
 
 
 @click.group()
@@ -40,14 +51,13 @@ def distribution(ctx: click.Context, pulp_ctx: PulpContext, distribution_type: s
 
 filter_options = [label_select_option, base_path_option, base_path_contains_option]
 lookup_options = [href_option, name_option]
-create_options = [
-    click.option("--name", required=True),
-    click.option("--base-path", required=True),
-    click.option("--publication"),
-]
 update_options = [
     click.option("--base-path"),
     click.option("--publication"),
+    click.option("--repository", callback=_repository_callback),
+]
+create_options = update_options + [
+    click.option("--name", required=True),
 ]
 
 distribution.add_command(list_command(decorators=filter_options))

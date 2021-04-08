@@ -34,6 +34,11 @@ test "$(echo "$OUTPUT" | jq -r '.|length')" != "0"
 expect_succ pulp file repository task list --repository "cli_test_file_repo"
 test "$(echo "$OUTPUT" | jq -r '.|length')" = "3"
 
+if [ "$(pulp debug has-plugin --name "file" --min-version "1.7.0.dev")" = "true" ]
+then
+  expect_succ pulp file repository update --name "cli_test_file_repo" --manifest "manifest.csv"
+fi
+
 if pulp debug has-plugin --name "core" --min-version "3.10.dev"
 then
   expect_succ pulp repository list
