@@ -37,6 +37,12 @@ expect_succ pulp file distribution update \
   --base-path "cli_test_file_distro" \
   --publication "$PUBLICATION_HREF"
 
+if [ "$(pulp debug has-plugin --name "file" --min-version "1.7.0.dev")" = "true" ]
+then
+  expect_succ pulp file distribution update \
+    --name "cli_test_file_distro" \
+    --repository "cli_test_file_repository"
+fi
 
 expect_succ pulp file distribution list --base-path "cli_test_file_distro"
 test "$(echo "$OUTPUT" | jq -r length)" -eq 1

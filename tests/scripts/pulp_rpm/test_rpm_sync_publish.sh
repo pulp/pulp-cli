@@ -49,3 +49,19 @@ expect_succ pulp rpm publication destroy --href "$PUBLICATION_HREF"
 expect_succ pulp rpm publication destroy --href "$PUBLICATION_VER_HREF"
 expect_succ pulp rpm repository destroy --name "cli_test_rpm_repository"
 expect_succ pulp rpm remote destroy --name "cli_test_rpm_remote"
+
+# auto-publish
+if [ "$(pulp debug has-plugin --name "rpm" --min-version "3.11.0.dev")" = "true" ]
+then
+  expect_succ pulp rpm remote create --name "cli_test_rpm_remote" --url "$RPM_REMOTE_URL"
+  expect_succ pulp rpm repository create --name "cli_test_rpm_repository" --remote "cli_test_rpm_remote" --autopublish
+
+  expect_succ pulp rpm distribution create --name "cli_test_rpm_distro" \
+    --base-path "cli_test_rpm_distro" \
+    --repository "cli_test_rpm_repository"
+
+  expect_succ pulp rpm repository sync --name "cli_test_rpm_repository"
+
+  expect_succ pulp rpm distribution show --name "cli_test_rpm_distro"
+  echo "$OUTPUT" | jq -r ".publication" | grep -q '/pulp/api/v3/publications/rpm/rpm/'
+fi

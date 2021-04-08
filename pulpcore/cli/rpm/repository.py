@@ -22,6 +22,7 @@ from pulpcore.cli.common.generic import (
     update_command,
     version_command,
 )
+from pulpcore.cli.rpm.common import CHECKSUM_CHOICES
 from pulpcore.cli.rpm.context import PulpRpmRemoteContext, PulpRpmRepositoryContext
 
 _ = gettext.gettext
@@ -55,17 +56,22 @@ def repository(ctx: click.Context, pulp_ctx: PulpContext, repo_type: str) -> Non
 
 
 lookup_options = [href_option, name_option]
-create_options = [
-    click.option("--name", required=True),
-    click.option("--description"),
-    click.option("--retain-package-versions", type=int),
-    click.option("--remote", callback=_remote_callback),
-]
 update_options = [
     click.option("--description"),
     click.option("--retain-package-versions", type=int),
     click.option("--remote", callback=_remote_callback),
+    click.option(
+        "--metadata-checksum-type", type=click.Choice(CHECKSUM_CHOICES, case_sensitive=False)
+    ),
+    click.option(
+        "--package-checksum-type", type=click.Choice(CHECKSUM_CHOICES, case_sensitive=False)
+    ),
+    click.option("--gpgcheck", type=click.Choice(("0", "1"))),
+    click.option("--repo-gpgcheck", type=click.Choice(("0", "1"))),
+    click.option("--sqlite-metadata/--no-sqlite-metadata", default=None),
+    click.option("--autopublish/--no-autopublish", default=None),
 ]
+create_options = update_options + [click.option("--name", required=True)]
 
 repository.add_command(list_command(decorators=[label_select_option]))
 repository.add_command(show_command(decorators=lookup_options))
