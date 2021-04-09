@@ -19,6 +19,8 @@ jobs:
         include:
           - python: "3.9"
             image_tag: "nightly"
+          - python: "3.8"
+            image_tag: "3.12"
           - python: "3.6"
             image_tag: "3.11"
           - python: "3.6"
