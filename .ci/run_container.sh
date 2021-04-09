@@ -19,7 +19,7 @@ then
   IMAGE_TAG="latest"
 fi
 
-"${CONTAINER_RUNTIME}" run --rm --detach --name "pulp" --volume "${BASEPATH}/settings:/etc/pulp" --publish "8080:80" "pulp/pulp:$IMAGE_TAG"
+"${CONTAINER_RUNTIME}" run --detach --name "pulp" --volume "${BASEPATH}/settings:/etc/pulp" --publish "8080:80" "pulp/pulp:$IMAGE_TAG"
 
 echo "Wait for pulp to start."
 for counter in $(seq 20)
