@@ -34,25 +34,6 @@ pulp.add_command(show_command(decorators=lookup_options))
 pulp.add_command(destroy_command(decorators=lookup_options))
 
 
-@pulp.command(deprecated=True)
-@click.option("--href", required=True, help=_("HREF of the PulpExport"))
-@pass_entity_context
-@pass_pulp_context
-def read(pulp_ctx: PulpContext, export_ctx: PulpExportContext, href: str) -> None:
-    """Shows details of an artifact."""
-    entity = export_ctx.show(href)
-    pulp_ctx.output_result(entity)
-
-
-@pulp.command(deprecated=True)
-@click.option("--href", required=True)
-@pass_entity_context
-@pass_pulp_context
-def delete(pulp_ctx: PulpContext, export_ctx: PulpExportContext, href: str) -> None:
-    result = export_ctx.delete(href)
-    pulp_ctx.output_result(result)
-
-
 @pulp.command()
 @click.option("--exporter", type=str, required=True, help=_("Name of owning PulpExporter"))
 @click.option(
