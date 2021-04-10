@@ -63,17 +63,6 @@ def create(
     pulp_ctx.output_result(result)
 
 
-@pulp.command(deprecated=True)
-@click.option("--name", required=True, help=_("Name of the PulpExporter"))
-@pass_entity_context
-@pass_pulp_context
-def read(pulp_ctx: PulpContext, exporter_ctx: PulpExporterContext, name: str) -> None:
-    """Shows details of an artifact."""
-    exporter_href = exporter_ctx.find(name=name)["pulp_href"]
-    entity = exporter_ctx.show(exporter_href)
-    pulp_ctx.output_result(entity)
-
-
 @pulp.command()
 @click.option("--name", required=True)
 @click.option("--path")
@@ -100,14 +89,4 @@ def update(
         the_exporter["repositories"] = repo_hrefs
 
     result = exporter_ctx.update(exporter_href, the_exporter)
-    pulp_ctx.output_result(result)
-
-
-@pulp.command(deprecated=True)
-@click.option("--name", required=True)
-@pass_entity_context
-@pass_pulp_context
-def delete(pulp_ctx: PulpContext, exporter_ctx: PulpExporterContext, name: str) -> None:
-    exporter_href = exporter_ctx.find(name=name)["pulp_href"]
-    result = exporter_ctx.delete(exporter_href)
     pulp_ctx.output_result(result)
