@@ -1,6 +1,6 @@
 from setuptools import find_namespace_packages, setup
 
-packages = find_namespace_packages(include=["pulpcore.cli.*"])
+packages = find_namespace_packages(include=["pulpcore.cli.*"]) + ["pytest_pulp_cli"]
 
 long_description = ""
 with open("README.md") as readme:
