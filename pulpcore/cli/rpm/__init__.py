@@ -6,6 +6,7 @@ from pulpcore.cli.rpm.distribution import distribution
 from pulpcore.cli.rpm.publication import publication
 from pulpcore.cli.rpm.remote import remote
 from pulpcore.cli.rpm.repository import repository
+from pulpcore.cli.rpm.content_package import content_package
 
 _ = gettext.gettext
 
@@ -20,3 +21,4 @@ rpm.add_command(repository)
 rpm.add_command(remote)
 rpm.add_command(publication)
 rpm.add_command(distribution)
+rpm.add_command(content_package)
