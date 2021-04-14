@@ -9,7 +9,13 @@ from pulpcore.cli.common.context import (
     pass_entity_context,
     pass_pulp_context,
 )
-from pulpcore.cli.common.generic import create_command, href_option, list_command, show_command, destroy_command
+from pulpcore.cli.common.generic import (
+    create_command,
+    destroy_command,
+    href_option,
+    list_command,
+    show_command,
+)
 from pulpcore.cli.core.context import PulpArtifactContext
 from pulpcore.cli.rpm.context import PulpRpmPackageContentContext
 
@@ -27,7 +33,7 @@ content_package.add_command(
     list_command(
         decorators=[
             click.option("--arch", type=str),
-            click.option("--arch-in", "arch__in",  type=str),
+            click.option("--arch-in", "arch__in", type=str),
             click.option("--epoch", type=str),
             click.option("--epoch-in", "epoch__in", type=str),
             click.option("--fields", type=str),
@@ -42,6 +48,7 @@ content_package.add_command(
     )
 )
 content_package.add_command(show_command(decorators=[href_option]))
+
 
 @content_package.command()
 @click.option("--relative-path", required=True, help=_("Exact name of rpm"))

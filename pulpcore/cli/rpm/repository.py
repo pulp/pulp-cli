@@ -23,8 +23,8 @@ from pulpcore.cli.common.generic import (
     version_command,
 )
 from pulpcore.cli.rpm.common import CHECKSUM_CHOICES
-from pulpcore.cli.rpm.context import PulpRpmRemoteContext, PulpRpmRepositoryContext
 from pulpcore.cli.rpm.content_package import PulpRpmPackageContentContext
+from pulpcore.cli.rpm.context import PulpRpmRemoteContext, PulpRpmRepositoryContext
 
 _ = gettext.gettext
 
@@ -112,6 +112,7 @@ def sync(
         body=body,
     )
 
+
 @repository.command()
 @name_option
 @href_option
@@ -136,11 +137,11 @@ def modify(
         )
 
     if add_href is not None:
-        for href in add_href.split(','):
+        for href in add_href.split(","):
             add_content_href.append(href)
 
     if remove_href is not None:
-        for href in remove_href.split(','):
+        for href in remove_href.split(","):
             remove_content_href.append(href)
 
     repository_ctx.modify(
