@@ -24,6 +24,7 @@ from pulpcore.cli.common.generic import (
 )
 from pulpcore.cli.rpm.common import CHECKSUM_CHOICES
 from pulpcore.cli.rpm.context import PulpRpmRemoteContext, PulpRpmRepositoryContext
+from pulpcore.cli.rpm.content_package import PulpRpmPackageContentContext
 
 _ = gettext.gettext
 
@@ -109,4 +110,41 @@ def sync(
     repository_ctx.sync(
         href=repository_href,
         body=body,
+    )
+
+@repository.command()
+@name_option
+@href_option
+@click.option("--add-href", type=str, help="Comma-separated list of rpm content HREFs")
+@click.option("--remove-href", type=str, help="Comma-separated list of rpm content HREFs")
+@pass_repository_context
+@pass_pulp_context
+def modify(
+    pulp_ctx: PulpContext,
+    repository_ctx: PulpRepositoryContext,
+    add_href: str,
+    remove_href: str,
+) -> None:
+    repository_href = repository_ctx.pulp_href
+
+    add_content_href = []
+    remove_content_href = []
+
+    if add_href is None and remove_href is None:
+        raise click.ClickException(
+            f"When modifying repository, you must specify at least '--add-href' or '--remove-href' options (or both)."
+        )
+
+    if add_href is not None:
+        for href in add_href.split(','):
+            add_content_href.append(href)
+
+    if remove_href is not None:
+        for href in remove_href.split(','):
+            remove_content_href.append(href)
+
+    repository_ctx.modify(
+        href=repository_href,
+        add_content=add_content_href,
+        remove_content=remove_content_href,
     )

@@ -96,6 +96,7 @@ class PulpRpmRepositoryContext(PulpRepositoryContext):
     UPDATE_ID = "repositories_rpm_rpm_partial_update"
     DELETE_ID = "repositories_rpm_rpm_delete"
     SYNC_ID = "repositories_rpm_rpm_sync"
+    MODIFY_ID = "repositories_rpm_rpm_modify"
     VERSION_CONTEXT = PulpRpmRepositoryVersionContext
 
     def preprocess_body(self, body: EntityDefinition) -> EntityDefinition:
