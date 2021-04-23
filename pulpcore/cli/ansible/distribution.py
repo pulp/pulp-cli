@@ -10,11 +10,11 @@ from pulpcore.cli.ansible.context import (
 from pulpcore.cli.common.context import (
     EntityDefinition,
     EntityFieldDefinition,
+    PluginRequirement,
     PulpContext,
     pass_entity_context,
     pass_pulp_context,
 )
-from pulpcore.cli.common.generic import PluginRequiredVersion as PRV
 from pulpcore.cli.common.generic import (
     base_path_contains_option,
     base_path_option,
@@ -82,7 +82,12 @@ distribution.add_command(show_command(decorators=lookup_options))
 distribution.add_command(destroy_command(decorators=lookup_options))
 distribution.add_command(create_command(decorators=create_options))
 distribution.add_command(
-    label_command(need_plugins=[PRV("core", "3.10.0"), PRV("ansible", "0.8.0.dev")])
+    label_command(
+        need_plugins=[
+            PluginRequirement("core", "3.10.0"),
+            PluginRequirement("ansible", "0.8.0.dev"),
+        ]
+    )
 )
 
 

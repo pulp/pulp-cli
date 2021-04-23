@@ -6,6 +6,7 @@
 pulp debug has-plugin --name "file" || exit 3
 
 autopublish_repo="cli_test_file_repository_autopublish"
+one_version_repo="cli_test_one_version_repo"
 
 cleanup() {
   pulp file remote destroy --name "cli_test_file_remote" || true
@@ -54,4 +55,13 @@ then
   task=$(echo "$ERROUTPUT" | grep -E -o "/pulp/api/v3/tasks/[-[:xdigit:]]*/")
   created_resources=$(pulp show --href "$task" | jq -r ".created_resources")
   echo "$created_resources" | grep -q '/pulp/api/v3/publications/file/file/'
+fi
+
+# Test retained versions
+if [ "$(pulp debug has-plugin --name "core" --min-version "3.13.0.dev")" = "true" ]
+then
+  expect_succ pulp file repository create --name "$one_version_repo" --remote "cli_test_file_remote" --retained-versions 1
+  expect_succ pulp file repository sync --name "$one_version_repo"
+  expect_succ pulp file repository version list --repository "$one_version_repo"
+  test "$(echo "$OUTPUT" | jq -r length)" -eq 1
 fi

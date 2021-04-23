@@ -18,6 +18,7 @@ from pulpcore.cli.common.generic import (
     label_select_option,
     list_command,
     name_option,
+    pulp_option,
     show_command,
     update_command,
     version_command,
@@ -69,7 +70,10 @@ update_options = [
     click.option("--gpgcheck", type=click.Choice(("0", "1"))),
     click.option("--repo-gpgcheck", type=click.Choice(("0", "1"))),
     click.option("--sqlite-metadata/--no-sqlite-metadata", default=None),
-    click.option("--autopublish/--no-autopublish", default=None),
+    pulp_option(
+        "--autopublish/--no-autopublish", needs_plugin="rpm", min_version="3.11.0.dev", default=None
+    ),
+    pulp_option("--retained-versions", needs_plugin="core", min_version="3.13.0.dev"),
 ]
 create_options = update_options + [click.option("--name", required=True)]
 

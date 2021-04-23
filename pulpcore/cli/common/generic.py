@@ -1,12 +1,13 @@
 import gettext
 import json
-from typing import Any, NamedTuple, Optional, Tuple, Union
+from typing import Any, Callable, Optional, Tuple, TypeVar, Union
 
 import click
 
 from pulpcore.cli.common.context import (
     DEFAULT_LIMIT,
     EntityDefinition,
+    PluginRequirement,
     PulpContext,
     PulpEntityContext,
     PulpRepositoryContext,
@@ -18,12 +19,7 @@ from pulpcore.cli.common.context import (
 )
 
 _ = gettext.gettext
-
-
-class PluginRequiredVersion(NamedTuple):
-    name: str
-    min: Optional[str] = None
-    max: Optional[str] = None
+_F = TypeVar("_F")
 
 
 class PulpCommand(click.Command):
@@ -40,6 +36,32 @@ class PulpCommand(click.Command):
 
 
 class PulpOption(click.Option):
+    def __init__(
+        self,
+        *args: Any,
+        needs_plugin: Optional[str] = None,
+        min_version: Optional[str] = None,
+        max_version: Optional[str] = None,
+        **kwargs: Any,
+    ):
+        if min_version or max_version:
+            assert needs_plugin, "Must supply required_version if min or max_version supplied."
+        self.needs_plugin = needs_plugin
+        self.min_version = min_version
+        self.max_version = max_version
+        super().__init__(*args, **kwargs)
+
+    def process_value(self, ctx: click.Context, value: Any) -> Any:
+        if value is not None and self.needs_plugin:
+            pulp_ctx = ctx.find_object(PulpContext)
+            pulp_ctx.needs_plugin(
+                self.needs_plugin,
+                self.min_version,
+                self.max_version,
+                _("the {name} option").format(name=self.name),
+            )
+        return super().process_value(ctx, value)
+
     def get_help_record(self, ctx: click.Context) -> Tuple[str, str]:
         synopsis, help_text = super().get_help_record(ctx)
         entity_ctx: PulpEntityContext = ctx.find_object(PulpEntityContext)
@@ -133,35 +155,36 @@ def load_json_callback(
 # Decorator common options
 
 
-limit_option = click.option(
+def pulp_option(*args: Any, **kwargs: Any) -> Callable[[_F], _F]:
+    kwargs["cls"] = PulpOption
+    return click.option(*args, **kwargs)
+
+
+limit_option = pulp_option(
     "--limit",
     default=DEFAULT_LIMIT,
     type=int,
     help=_("Limit the number of {entities} to show."),
-    cls=PulpOption,
 )
-offset_option = click.option(
+offset_option = pulp_option(
     "--offset",
     default=0,
     type=int,
     help=_("Skip a number of {entities} to show."),
-    cls=PulpOption,
 )
 
-href_option = click.option(
+href_option = pulp_option(
     "--href",
     help=_("HREF of the {entity}"),
     callback=_href_callback,
     expose_value=False,
-    cls=PulpOption,
 )
 
-name_option = click.option(
+name_option = pulp_option(
     "--name",
     help=_("Name of the {entity}"),
     callback=_name_callback,
     expose_value=False,
-    cls=PulpOption,
 )
 
 repository_href_option = click.option(
@@ -186,27 +209,24 @@ version_option = click.option(
     expose_value=False,
 )
 
-label_select_option = click.option(
+label_select_option = pulp_option(
     "--label-select",
     "pulp_label_select",
     help=_("Filter {entities} by a label search query."),
     type=str,
-    cls=PulpOption,
 )
 
-base_path_option = click.option(
+base_path_option = pulp_option(
     "--base-path",
     help=_("Base-path of the {entity}"),
     type=str,
-    cls=PulpOption,
 )
 
-base_path_contains_option = click.option(
+base_path_contains_option = pulp_option(
     "--base-path-contains",
     "base_path__icontains",
     help=_("{entity} base-path contains search"),
     type=str,
-    cls=PulpOption,
 )
 
 common_remote_create_options = [
@@ -439,7 +459,7 @@ def label_command(**kwargs: Any) -> click.Command:
     if "name" not in kwargs:
         kwargs["name"] = "label"
     decorators = kwargs.pop("decorators", [name_option, href_option])
-    need_plugins = kwargs.pop("need_plugins", [PluginRequiredVersion("core", "3.10.0")])
+    need_plugins = kwargs.pop("need_plugins", [PluginRequirement("core", "3.10.0")])
 
     @click.group(**kwargs)
     @pass_pulp_context

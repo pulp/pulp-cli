@@ -17,6 +17,7 @@ from pulpcore.cli.common.generic import (
     label_select_option,
     list_command,
     name_option,
+    pulp_option,
     show_command,
     update_command,
     version_command,
@@ -60,10 +61,12 @@ create_options = [
     click.option("--name", required=True),
     click.option("--description"),
     click.option("--remote", callback=_remote_callback),
+    pulp_option("--retained-versions", needs_plugin="core", min_version="3.13.0.dev"),
 ]
 update_options = [
     click.option("--description"),
     click.option("--remote", callback=_remote_callback),
+    pulp_option("--retained-versions", needs_plugin="core", min_version="3.13.0.dev"),
 ]
 
 repository.add_command(list_command(decorators=[label_select_option]))

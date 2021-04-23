@@ -3,7 +3,7 @@ import gettext
 import json
 import sys
 import time
-from typing import IO, Any, ClassVar, Dict, List, Optional, Set, Tuple, Type, Union
+from typing import IO, Any, ClassVar, Dict, List, NamedTuple, Optional, Set, Tuple, Type, Union
 
 import click
 import yaml
@@ -32,6 +32,14 @@ BATCH_SIZE = 25
 EntityDefinition = Dict[str, Any]
 RepositoryDefinition = Tuple[str, str]  # name, pulp_type
 RepositoryVersionDefinition = Tuple[str, str, int]  # name, pulp_type, version
+
+
+class PluginRequirement(NamedTuple):
+    name: str
+    min: Optional[str] = None
+    max: Optional[str] = None
+    feature: Optional[str] = _("this command")
+
 
 new_component_names_to_pre_3_11_names: Dict[str, str] = dict(
     ansible="pulp_ansible",
@@ -74,7 +82,7 @@ class PulpContext:
     def __init__(self, api_kwargs: Dict[str, Any], format: str, background_tasks: bool) -> None:
         self._api: Optional[OpenAPI] = None
         self._api_kwargs = api_kwargs
-        self._needed_plugins: List[Tuple[str, Optional[str], Optional[str]]] = []
+        self._needed_plugins: List[PluginRequirement] = []
         self.isatty: bool = sys.stdout.isatty()
 
         self.format: str = format
@@ -90,8 +98,8 @@ class PulpContext:
             except OpenAPIError as e:
                 raise click.ClickException(str(e))
             # Rerun scheduled version checks
-            for name, min_version, max_version in self._needed_plugins:
-                self.needs_plugin(name, min_version, max_version)
+            for plugin in self._needed_plugins:
+                self.needs_plugin(plugin.name, plugin.min, plugin.max, plugin.feature)
         return self._api
 
     @property
@@ -194,7 +202,11 @@ class PulpContext:
         return True
 
     def needs_plugin(
-        self, name: str, min_version: Optional[str] = None, max_version: Optional[str] = None
+        self,
+        name: str,
+        min_version: Optional[str] = None,
+        max_version: Optional[str] = None,
+        feature: Optional[str] = _("this command"),
     ) -> None:
         if self._api is not None:
             if not self.has_plugin(name, min_version, max_version):
@@ -208,12 +220,12 @@ class PulpContext:
                 raise click.ClickException(
                     _(
                         "The server does not have '{specifier}' installed,"
-                        " which is needed to run this command."
-                    ).format(specifier=specifier)
+                        " which is needed to use {feature}."
+                    ).format(specifier=specifier, feature=feature)
                 )
         else:
             # Schedule for later checking
-            self._needed_plugins.append((name, min_version, max_version))
+            self._needed_plugins.append(PluginRequirement(name, min_version, max_version, feature))
 
 
 class PulpEntityContext:
@@ -542,7 +554,7 @@ class PulpRepositoryContext(PulpEntityContext):
     SYNC_ID: ClassVar[str]
     MODIFY_ID: ClassVar[str]
     VERSION_CONTEXT: ClassVar[Type[PulpRepositoryVersionContext]]
-    NULLABLES = {"description"}
+    NULLABLES = {"description", "retained_versions"}
 
     def get_version_context(self) -> PulpRepositoryVersionContext:
         return self.VERSION_CONTEXT(self.pulp_ctx, self)
