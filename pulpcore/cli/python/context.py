@@ -2,12 +2,12 @@ from typing import ClassVar
 
 from pulpcore.cli.common.context import (
     EntityDefinition,
+    PluginRequirement,
     PulpEntityContext,
     PulpRemoteContext,
     PulpRepositoryContext,
     PulpRepositoryVersionContext,
 )
-from pulpcore.cli.common.generic import PluginRequiredVersion as PRV
 
 
 class PulpPythonContentContext(PulpEntityContext):
@@ -59,9 +59,9 @@ class PulpPythonRemoteContext(PulpRemoteContext):
     UPDATE_ID = "remotes_python_python_partial_update"
     DELETE_ID = "remotes_python_python_delete"
     field_versions = {
-        "keep_latest_packages": [PRV("python", "3.2.0")],
-        "exclude_platforms": [PRV("python", "3.2.0")],
-        "package_types": [PRV("python", "3.2.0")],
+        "keep_latest_packages": [PluginRequirement("python", "3.2.0")],
+        "exclude_platforms": [PluginRequirement("python", "3.2.0")],
+        "package_types": [PluginRequirement("python", "3.2.0")],
     }
 
     def preprocess_body(self, body: EntityDefinition) -> EntityDefinition:

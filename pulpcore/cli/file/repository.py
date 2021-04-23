@@ -19,6 +19,7 @@ from pulpcore.cli.common.generic import (
     list_command,
     load_json_callback,
     name_option,
+    pulp_option,
     repository_href_option,
     repository_option,
     show_command,
@@ -68,7 +69,10 @@ update_options = [
     click.option("--description"),
     click.option("--remote", callback=_remote_callback),
     click.option("--manifest"),
-    click.option("--autopublish/--no-autopublish", default=None),
+    pulp_option(
+        "--autopublish/--no-autopublish", needs_plugin="file", min_version="1.7.0", default=None
+    ),
+    pulp_option("--retained-versions", needs_plugin="core", min_version="3.13.0.dev"),
 ]
 create_options = update_options + [
     click.option("--name", required=True),
