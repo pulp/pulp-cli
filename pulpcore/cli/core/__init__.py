@@ -13,6 +13,7 @@ from pulpcore.cli.core.repository import repository
 from pulpcore.cli.core.show import show
 from pulpcore.cli.core.status import status
 from pulpcore.cli.core.task import task
+from pulpcore.cli.core.task_group import task_group
 from pulpcore.cli.core.user import user
 from pulpcore.cli.core.worker import worker
 
@@ -31,5 +32,6 @@ main.add_command(repository)
 main.add_command(show)
 main.add_command(status)
 main.add_command(task)
+main.add_command(task_group)
 main.add_command(user)
 main.add_command(worker)

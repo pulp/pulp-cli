@@ -300,6 +300,13 @@ class PulpTaskContext(PulpEntityContext):
             return {}
 
 
+class PulpTaskGroupContext(PulpEntityContext):
+    ENTITY = "task group"
+    HREF = "task_group_href"
+    LIST_ID = "task_groups_list"
+    READ_ID = "task_groups_read"
+
+
 class PulpUploadContext(PulpEntityContext):
     ENTITY = "upload"
     HREF = "upload_href"
