@@ -1,5 +1,5 @@
 import gettext
-from typing import Optional, Union
+from typing import Any, Dict, Optional, Union
 
 import click
 
@@ -88,6 +88,7 @@ repository.add_command(label_command())
 
 @repository.command()
 @click.option("--name", required=True)
+@click.option("--mirror/--no-mirror", default=None)
 @click.option("--remote")
 @pass_repository_context
 @pass_pulp_context
@@ -96,11 +97,15 @@ def sync(
     repository_ctx: PulpRepositoryContext,
     name: str,
     remote: Optional[str],
+    mirror: Optional[bool],
 ) -> None:
     repository = repository_ctx.find(name=name)
     repository_href = repository["pulp_href"]
 
-    body = {}
+    body: Dict[str, Any] = {}
+
+    if mirror:
+        body["mirror"] = mirror
 
     if remote:
         remote_href: str = PulpRpmRemoteContext(pulp_ctx).find(name=remote)["pulp_href"]
