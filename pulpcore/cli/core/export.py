@@ -67,7 +67,7 @@ def list(
     exporter: str,
     limit: int,
     offset: int,
-    **kwargs: Any
+    **kwargs: Any,
 ) -> None:
     params = {k: v for k, v in kwargs.items() if v is not None}
     exporter_ctx = PulpExporterContext(pulp_ctx)
