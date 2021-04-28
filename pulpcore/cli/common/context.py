@@ -38,7 +38,7 @@ class PluginRequirement(NamedTuple):
     name: str
     min: Optional[str] = None
     max: Optional[str] = None
-    feature: Optional[str] = _("this command")
+    feature: Optional[str] = None
 
 
 new_component_names_to_pre_3_11_names: Dict[str, str] = dict(
@@ -206,7 +206,7 @@ class PulpContext:
         name: str,
         min_version: Optional[str] = None,
         max_version: Optional[str] = None,
-        feature: Optional[str] = _("this command"),
+        feature: Optional[str] = None,
     ) -> None:
         if self._api is not None:
             if not self.has_plugin(name, min_version, max_version):
@@ -217,6 +217,8 @@ class PulpContext:
                     separator = ","
                 if max_version is not None:
                     specifier += f"{separator}<{max_version}"
+                if feature is None:
+                    feature = _("this command")
                 raise click.ClickException(
                     _(
                         "The server does not have '{specifier}' installed,"

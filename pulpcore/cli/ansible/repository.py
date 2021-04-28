@@ -9,6 +9,7 @@ from pulpcore.cli.ansible.context import (
     PulpAnsibleRoleRemoteContext,
 )
 from pulpcore.cli.common.context import (
+    PluginRequirement,
     PulpContext,
     PulpRepositoryContext,
     pass_pulp_context,
@@ -66,12 +67,12 @@ create_options = [
     click.option("--name", required=True),
     click.option("--description"),
     click.option("--remote", callback=_remote_callback, help=_("an optional remote")),
-    pulp_option("--retained-versions", needs_plugin="core", min_version="3.13.0.dev"),
+    pulp_option("--retained-versions", needs_plugins=[PluginRequirement("core", "3.13.0.dev")]),
 ]
 update_options = [
     click.option("--description"),
     click.option("--remote", callback=_remote_callback, help=_("new optional remote")),
-    pulp_option("--retained-versions", needs_plugin="core", min_version="3.13.0.dev"),
+    pulp_option("--retained-versions", needs_plugins=[PluginRequirement("core", "3.13.0.dev")]),
 ]
 
 repository.add_command(show_command(decorators=lookup_options))

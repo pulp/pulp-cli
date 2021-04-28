@@ -4,6 +4,7 @@ from typing import Any, Dict, List, Optional, Union
 import click
 
 from pulpcore.cli.common.context import (
+    PluginRequirement,
     PulpContext,
     PulpEntityContext,
     PulpRepositoryContext,
@@ -80,9 +81,11 @@ update_options = [
     click.option("--remote", callback=_remote_callback),
     click.option("--manifest"),
     pulp_option(
-        "--autopublish/--no-autopublish", needs_plugin="file", min_version="1.7.0", default=None
+        "--autopublish/--no-autopublish",
+        needs_plugins=[PluginRequirement("file", "1.7.0")],
+        default=None,
     ),
-    pulp_option("--retained-versions", needs_plugin="core", min_version="3.13.0.dev"),
+    pulp_option("--retained-versions", needs_plugins=[PluginRequirement("core", "3.13.0.dev")]),
 ]
 create_options = update_options + [
     click.option("--name", required=True),

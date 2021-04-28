@@ -41,27 +41,27 @@ class PulpOption(click.Option):
     def __init__(
         self,
         *args: Any,
-        needs_plugin: Optional[str] = None,
-        min_version: Optional[str] = None,
-        max_version: Optional[str] = None,
+        needs_plugins: Optional[List[PluginRequirement]] = None,
         **kwargs: Any,
     ):
-        if min_version or max_version:
-            assert needs_plugin, "Must supply required_version if min or max_version supplied."
-        self.needs_plugin = needs_plugin
-        self.min_version = min_version
-        self.max_version = max_version
+        self.needs_plugins = needs_plugins
         super().__init__(*args, **kwargs)
 
     def process_value(self, ctx: click.Context, value: Any) -> Any:
-        if value is not None and self.needs_plugin:
+        if value is not None and self.needs_plugins:
             pulp_ctx = ctx.find_object(PulpContext)
-            pulp_ctx.needs_plugin(
-                self.needs_plugin,
-                self.min_version,
-                self.max_version,
-                _("the {name} option").format(name=self.name),
-            )
+            for plugin_requirement in self.needs_plugins:
+                if plugin_requirement.feature:
+                    feature = plugin_requirement.feature
+                else:
+                    feature = _("the {name} option").format(name=self.name)
+
+                pulp_ctx.needs_plugin(
+                    plugin_requirement.name,
+                    plugin_requirement.min,
+                    plugin_requirement.max,
+                    feature,
+                )
         return super().process_value(ctx, value)
 
     def get_help_record(self, ctx: click.Context) -> Tuple[str, str]:
