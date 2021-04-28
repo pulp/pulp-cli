@@ -4,6 +4,7 @@ from typing import Optional, Union
 import click
 
 from pulpcore.cli.common.context import (
+    PluginRequirement,
     PulpContext,
     PulpEntityContext,
     PulpRepositoryContext,
@@ -71,9 +72,11 @@ update_options = [
     click.option("--repo-gpgcheck", type=click.Choice(("0", "1"))),
     click.option("--sqlite-metadata/--no-sqlite-metadata", default=None),
     pulp_option(
-        "--autopublish/--no-autopublish", needs_plugin="rpm", min_version="3.11.0.dev", default=None
+        "--autopublish/--no-autopublish",
+        needs_plugins=[PluginRequirement("rpm", "3.11.0.dev")],
+        default=None,
     ),
-    pulp_option("--retained-versions", needs_plugin="core", min_version="3.13.0.dev"),
+    pulp_option("--retained-versions", needs_plugins=[PluginRequirement("core", "3.13.0.dev")]),
 ]
 create_options = update_options + [click.option("--name", required=True)]
 
