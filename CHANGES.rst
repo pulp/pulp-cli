@@ -13,6 +13,60 @@ Changelog
 
 .. towncrier release notes start
 
+0.8.0 (2021-04-30)
+==================
+
+
+Features
+--------
+
+- Added support for autopublish and autodistribute in pulp_file and pulp_rpm.
+  `#155 <https://github.com/pulp/pulp-cli/issues/155>`_
+- Added a confirmation whether to continue with invalid config.
+  `#156 <https://github.com/pulp/pulp-cli/issues/156>`_
+- Repository content commands are now nested under a new content subgroup.
+  `#171 <https://github.com/pulp/pulp-cli/issues/171>`_
+- Added an interactive-shell mode to pulp-cli.
+  `#181 <https://github.com/pulp/pulp-cli/issues/181>`_
+- Added label command to ansible distribution group.
+  `#185 <https://github.com/pulp/pulp-cli/issues/185>`_
+- Added signing-service list and show commands.
+  `#189 <https://github.com/pulp/pulp-cli/issues/189>`_
+- Added new python 3.2 remote options.
+  `#208 <https://github.com/pulp/pulp-cli/issues/208>`_
+- Added retained_versions option to repository commands.
+  `#210 <https://github.com/pulp/pulp-cli/issues/210>`_
+- Added the task-group subcommand.
+  `#211 <https://github.com/pulp/pulp-cli/issues/211>`_
+- Added mirror flag support for pulp rpm repository sync.
+  `#212 <https://github.com/pulp/pulp-cli/issues/212>`_
+- Added support for file paths for plan argument for miigration plan create command.
+  `#213 <https://github.com/pulp/pulp-cli/issues/213>`_
+
+
+Bugfixes
+--------
+
+- Improved the error message, when a required server component is missing.
+  `#184 <https://github.com/pulp/pulp-cli/issues/184>`_
+
+
+Deprecations and Removals
+-------------------------
+
+- Repository add/remove/modify commands have now been deprecated. Please use the new content subgroup commands.
+  `#215 <https://github.com/pulp/pulp-cli/issues/215>`_
+
+
+Misc
+----
+
+- `#190 <https://github.com/pulp/pulp-cli/issues/190>`_
+
+
+----
+
+
 0.7.0 (2021-03-15)
 ==================
 
