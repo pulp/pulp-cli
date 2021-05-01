@@ -72,17 +72,17 @@ def repository(ctx: click.Context, pulp_ctx: PulpContext, repo_type: str) -> Non
 
 
 lookup_options = [href_option, name_option]
-create_options = [
-    click.option("--name", required=True),
-    click.option("--description"),
-    click.option("--remote", callback=_remote_callback),
-    pulp_option("--retained-versions", needs_plugins=[PluginRequirement("core", "3.13.0.dev")]),
-]
 update_options = [
     click.option("--description"),
     click.option("--remote", callback=_remote_callback),
     pulp_option("--retained-versions", needs_plugins=[PluginRequirement("core", "3.13.0.dev")]),
+    pulp_option(
+        "--autopublish/--no-autopublish",
+        needs_plugins=[PluginRequirement("python", "3.3.0.dev")],
+        default=None,
+    ),
 ]
+create_options = [click.option("--name", required=True)] + update_options
 package_option = click.option(
     "--filename",
     callback=_content_callback,
