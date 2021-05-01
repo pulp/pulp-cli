@@ -1,7 +1,7 @@
 import gettext
 
 from pulpcore.cli.common import main
-from pulpcore.cli.common.context import PulpContext, pass_pulp_context
+from pulpcore.cli.common.context import PluginRequirement, PulpContext, pass_pulp_context
 from pulpcore.cli.file.content import content
 from pulpcore.cli.file.distribution import distribution
 from pulpcore.cli.file.publication import publication
@@ -14,7 +14,7 @@ _ = gettext.gettext
 @main.group(name="file")
 @pass_pulp_context
 def file_group(pulp_ctx: PulpContext) -> None:
-    pulp_ctx.needs_plugin("file")
+    pulp_ctx.needs_plugin(PluginRequirement("file"))
 
 
 file_group.add_command(repository)

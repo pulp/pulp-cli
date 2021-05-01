@@ -3,7 +3,20 @@ import gettext
 import json
 import sys
 import time
-from typing import IO, Any, ClassVar, Dict, List, NamedTuple, Optional, Set, Tuple, Type, Union
+from typing import (
+    IO,
+    Any,
+    ClassVar,
+    Dict,
+    List,
+    NamedTuple,
+    Optional,
+    Set,
+    Tuple,
+    Type,
+    Union,
+    overload,
+)
 
 import click
 import yaml
@@ -180,54 +193,98 @@ class PulpContext:
         except KeyboardInterrupt:
             raise PulpNoWait(f"Task {task_href} sent to background.")
 
+    @overload
     def has_plugin(
-        self, name: str, min_version: Optional[str] = None, max_version: Optional[str] = None
+        self,
+        plugin: str,
+        min_version: Optional[str] = None,
+        max_version: Optional[str] = None,
     ) -> bool:
+        ...
+
+    @overload
+    def has_plugin(
+        self,
+        plugin: PluginRequirement,
+        min_version: None = None,
+        max_version: None = None,
+    ) -> bool:
+        ...
+
+    def has_plugin(
+        self,
+        plugin: Union[PluginRequirement, str],
+        min_version: Optional[str] = None,
+        max_version: Optional[str] = None,
+    ) -> bool:
+        if not isinstance(plugin, PluginRequirement):
+            plugin = PluginRequirement(plugin, min_version, max_version)
         if not self.component_versions:
             # Prior to 3.9 we do not have this information
             # assume yes if no version constraint is specified
-            return (min_version is None) and (max_version is None)
-        version: Optional[str] = self.component_versions.get(name)
+            return (plugin.min is None) and (plugin.max is None)
+        version: Optional[str] = self.component_versions.get(plugin.name)
         if version is None:
-            pre_3_11_name: str = new_component_names_to_pre_3_11_names.get(name, "")
+            pre_3_11_name: str = new_component_names_to_pre_3_11_names.get(plugin.name, "")
             version = self.component_versions.get(pre_3_11_name)
             if version is None:
                 return False
-        if min_version is not None:
-            if parse_version(version) < parse_version(min_version):
+        if plugin.min is not None:
+            if parse_version(version) < parse_version(plugin.min):
                 return False
-        if max_version is not None:
-            if parse_version(version) >= parse_version(max_version):
+        if plugin.max is not None:
+            if parse_version(version) >= parse_version(plugin.max):
                 return False
         return True
 
+    @overload
     def needs_plugin(
         self,
-        name: str,
+        plugin: str,
         min_version: Optional[str] = None,
         max_version: Optional[str] = None,
         feature: Optional[str] = None,
     ) -> None:
+        ...
+
+    @overload
+    def needs_plugin(
+        self,
+        plugin: PluginRequirement,
+        min_version: None = None,
+        max_version: None = None,
+        feature: None = None,
+    ) -> None:
+        ...
+
+    def needs_plugin(
+        self,
+        plugin: Union[PluginRequirement, str],
+        min_version: Optional[str] = None,
+        max_version: Optional[str] = None,
+        feature: Optional[str] = None,
+    ) -> None:
+        if not isinstance(plugin, PluginRequirement):
+            plugin = PluginRequirement(plugin, min_version, max_version, feature)
         if self._api is not None:
-            if not self.has_plugin(name, min_version, max_version):
-                specifier = name
+            if not self.has_plugin(plugin):
+                specifier = plugin.name
                 separator = ""
-                if min_version is not None:
-                    specifier += f">={min_version}"
+                if plugin.min is not None:
+                    specifier += f">={plugin.min}"
                     separator = ","
-                if max_version is not None:
-                    specifier += f"{separator}<{max_version}"
-                if feature is None:
-                    feature = _("this command")
+                if plugin.max is not None:
+                    specifier += f"{separator}<{plugin.max}"
+                feature = plugin.feature or _("this command")
                 raise click.ClickException(
                     _(
                         "The server does not have '{specifier}' installed,"
                         " which is needed to use {feature}."
-                    ).format(specifier=specifier, feature=feature)
+                    ).format(specifier=specifier, feature=plugin.feature)
                 )
         else:
             # Schedule for later checking
-            self._needed_plugins.append(PluginRequirement(name, min_version, max_version, feature))
+            self._needed_plugins.append(plugin)
 
 
 class PulpEntityContext:
