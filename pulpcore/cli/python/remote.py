@@ -2,7 +2,7 @@ import gettext
 
 import click
 
-from pulpcore.cli.common.context import PulpContext, pass_pulp_context
+from pulpcore.cli.common.context import PluginRequirement, PulpContext, pass_pulp_context
 from pulpcore.cli.common.generic import (
     common_remote_create_options,
     common_remote_update_options,
@@ -14,6 +14,7 @@ from pulpcore.cli.common.generic import (
     list_command,
     load_json_callback,
     name_option,
+    pulp_option,
     show_command,
     update_command,
 )
@@ -41,12 +42,25 @@ def remote(ctx: click.Context, pulp_ctx: PulpContext, remote_type: str) -> None:
 
 lookup_options = [href_option, name_option]
 python_remote_options = [
+    click.option(
+        "--policy", type=click.Choice(["immediate", "on_demand", "streamed"], case_sensitive=False)
+    ),
     click.option("--includes", callback=load_json_callback, help=_("Package allowlist")),
     click.option("--excludes", callback=load_json_callback, help=_("Package blocklist")),
     click.option("--prereleases", type=click.BOOL, default=True),
-    click.option("--keep-latest-packages", type=int),
-    click.option("--package-types", callback=load_json_callback),
-    click.option("--exclude-platforms", callback=load_json_callback),
+    pulp_option(
+        "--keep-latest-packages", type=int, needs_plugins=[PluginRequirement("python", "3.2.0")]
+    ),
+    pulp_option(
+        "--package-types",
+        callback=load_json_callback,
+        needs_plugins=[PluginRequirement("python", "3.2.0")],
+    ),
+    pulp_option(
+        "--exclude-platforms",
+        callback=load_json_callback,
+        needs_plugins=[PluginRequirement("python", "3.2.0")],
+    ),
 ]
 remote.add_command(list_command(decorators=[label_select_option]))
 remote.add_command(show_command(decorators=lookup_options))
