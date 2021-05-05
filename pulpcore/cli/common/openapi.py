@@ -63,6 +63,7 @@ class OpenAPI:
             raise OpenAPIError("Cert is required if key is set.")
         self._session.headers.update(headers)
         self._session.verify = validate_certs
+        self._session.max_redirects = 0
 
         self.load_api(refresh_cache=refresh_cache)
 
@@ -219,7 +220,15 @@ class OpenAPI:
             response_spec = method_spec["responses"][str(response.status_code)]
         except KeyError:
             # Fallback 201 -> 200
-            response_spec = method_spec["responses"][str(100 * int(response.status_code / 100))]
+            try:
+                response_spec = method_spec["responses"][str(100 * int(response.status_code / 100))]
+            except KeyError:
+                raise OpenAPIError(
+                    _("Unexpected response '{code}' (expected '{expected}').").format(
+                        code=response.status_code,
+                        expected=(", ").join(method_spec["responses"].keys()),
+                    )
+                )
         if "application/json" in response_spec["content"]:
             return response.json()
         return None
@@ -277,6 +286,12 @@ class OpenAPI:
             )
         except requests.ConnectionError as e:
             raise OpenAPIError(str(e))
+        except requests.exceptions.TooManyRedirects as e:
+            raise OpenAPIError(
+                _("Received redirect to '{url}'. Please check your CLI configuration.").format(
+                    url=e.response.headers["location"]
+                )
+            )
         self.debug_callback(1, f"Response: {response.status_code}")
         if response.text:
             self.debug_callback(3, f"{response.text}")

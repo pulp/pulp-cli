@@ -157,5 +157,5 @@ def add_user(entity_ctx: PulpGroupUserContext, username: str) -> None:
 def remove_user(pulp_ctx: PulpContext, entity_ctx: PulpGroupUserContext, username: str) -> None:
     user_href = PulpUserContext(pulp_ctx).find(username=username)["pulp_href"]
     user_pk = user_href.split("/")[-2]
-    group_user_href = entity_ctx.group_ctx.pulp_href + "users/" + user_pk
+    group_user_href = f"{entity_ctx.group_ctx.pulp_href}users/{user_pk}/"
     entity_ctx.delete(group_user_href)
