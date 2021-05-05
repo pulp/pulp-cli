@@ -143,7 +143,7 @@ def _version_callback(
     entity_ctx: PulpEntityContext = ctx.find_object(PulpEntityContext)
     repository_ctx: PulpRepositoryContext = ctx.find_object(PulpRepositoryContext)
     if value is not None:
-        entity_ctx.pulp_href = repository_ctx.entity["versions_href"] + str(value)
+        entity_ctx.pulp_href = f"{repository_ctx.entity['versions_href']}{value}/"
     else:
         entity_ctx.pulp_href = repository_ctx.entity["latest_version_href"]
     return value
