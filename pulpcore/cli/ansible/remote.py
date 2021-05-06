@@ -32,7 +32,7 @@ def _requirements_callback(
     if value:
         if isinstance(ctx.obj, PulpAnsibleRoleRemoteContext):
             raise click.ClickException(f"Option {param.name} not valid for Role remote, see --help")
-        if param.name == "requirements-file":
+        if param.name == "requirements_file":
             return f"{yaml.safe_load(value)}"
         elif param.name == "requirements":
             return yaml.safe_load(f'"{value}"')
