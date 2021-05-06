@@ -8,6 +8,7 @@ pulp debug has-plugin --name "ansible" || exit 3
 cleanup() {
   pulp ansible remote -t "role" destroy --name "cli_test_ansible_role_remote" || true
   pulp ansible remote -t "collection" destroy --name "cli_test_ansible_collection_remote" || true
+  rm requirements.yml || true
 }
 trap cleanup EXIT
 
@@ -23,3 +24,11 @@ expect_fail pulp ansible remote -t "role" update --name "cli_test_ansible_role_r
 test "$ERROUTPUT" = "Error: Option requirements not valid for Role remote, see --help"
 expect_succ pulp ansible remote -t "role" destroy --name "cli_test_ansible_role_remote"
 expect_succ pulp ansible remote -t "collection" destroy --name "cli_test_ansible_collection_remote"
+
+# test requirements file
+echo "---
+collections:
+  - testing.ansible_testing_content
+  - pulp.squeezer" > requirements.yml
+expect_succ pulp ansible remote create --name "cli_test_ansible_collection_remote" \
+  --requirements-file requirements.yml --url "$ANSIBLE_COLLECTION_REMOTE_URL"
