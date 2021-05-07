@@ -1,29 +1,19 @@
 import gettext
-from typing import Optional, Union
 
 import click
 
-from pulpcore.cli.common.context import PulpContext, PulpEntityContext, pass_pulp_context
+from pulpcore.cli.common.context import PulpContext, pass_pulp_context
 from pulpcore.cli.common.generic import (
     create_command,
     destroy_command,
     href_option,
     list_command,
+    resource_option,
     show_command,
 )
 from pulpcore.cli.file.context import PulpFilePublicationContext, PulpFileRepositoryContext
 
 _ = gettext.gettext
-
-
-def _repository_callback(
-    ctx: click.Context, param: click.Parameter, value: Optional[str]
-) -> Optional[Union[str, PulpEntityContext]]:
-    # Pass None and "" verbatim
-    if value:
-        pulp_ctx: PulpContext = ctx.find_object(PulpContext)
-        return PulpFileRepositoryContext(pulp_ctx, entity={"name": value})
-    return value
 
 
 @click.group()
@@ -45,7 +35,12 @@ def publication(ctx: click.Context, pulp_ctx: PulpContext, publication_type: str
 
 lookup_options = [href_option]
 create_options = [
-    click.option("--repository", required=True, callback=_repository_callback),
+    resource_option(
+        "--repository",
+        default_plugin="file",
+        default_type="file",
+        context_table={"file:file": PulpFileRepositoryContext},
+    ),
     click.option(
         "--version", type=int, help=_("a repository version number, leave blank for latest")
     ),
