@@ -280,7 +280,7 @@ class PulpContext:
                     _(
                         "The server does not have '{specifier}' installed,"
                         " which is needed to use {feature}."
-                    ).format(specifier=specifier, feature=plugin.feature)
+                    ).format(specifier=specifier, feature=feature)
                 )
         else:
             # Schedule for later checking
