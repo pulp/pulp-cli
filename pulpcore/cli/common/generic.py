@@ -158,8 +158,9 @@ def load_json_callback(
     json_object: Any
     json_string: Union[str, bytes]
 
-    if value is None:
-        return None
+    # pass None and "" verbatim
+    if not value:
+        return value
 
     if value.startswith("@"):
         json_file = value[1:]
