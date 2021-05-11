@@ -64,6 +64,7 @@ class PulpContainerRemoteContext(PulpRemoteContext):
     CREATE_ID = "remotes_container_container_create"
     UPDATE_ID = "remotes_container_container_partial_update"
     DELETE_ID = "remotes_container_container_delete"
+    NULLABLES = PulpRemoteContext.NULLABLES | {"include_tags", "exclude_tags"}
 
 
 class PulpContainerRepositoryVersionContext(PulpRepositoryVersionContext):
