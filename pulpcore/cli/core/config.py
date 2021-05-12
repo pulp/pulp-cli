@@ -10,7 +10,7 @@ from pulpcore.cli.common import config_options
 _ = gettext.gettext
 
 LOCATION = str(Path(click.utils.get_app_dir("pulp"), "settings.toml"))
-SETTINGS = ["base_url", "username", "password", "cert", "key", "verify_ssl", "format"]
+SETTINGS = ["base_url", "username", "password", "cert", "key", "verify_ssl", "format", "dry_run"]
 
 
 @click.group(name="config", help=_("Manage pulp-cli config file"))
@@ -38,6 +38,7 @@ def create(
     key: Optional[str],
     verify_ssl: bool,
     format: str,
+    dry_run: bool,
 ) -> None:
     def _check_location(loc: str) -> None:
         if not overwrite and Path(loc).exists():

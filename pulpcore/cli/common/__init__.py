@@ -26,6 +26,8 @@ FORMAT_CHOICES = ["json", "yaml", "none"]
 def _validate_config(config: Dict[str, Any]) -> bool:
     if "format" in config and config["format"].lower() not in FORMAT_CHOICES:
         raise ValueError(_("'format' is not one of {}").format(FORMAT_CHOICES))
+    if "dry_run" in config and not isinstance(config["dry_run"], bool):
+        raise ValueError(_("'dry_run' is not a bool"))
     return True
 
 
@@ -84,6 +86,11 @@ CONFIG_OPTIONS = [
         default="json",
         help=_("Format of the response"),
     ),
+    click.option(
+        "--dry-run/--force",
+        is_flag=True,
+        help=_("Trace commands without performing any unsafe HTTP calls"),
+    ),
 ]
 
 
@@ -124,9 +131,6 @@ def config_options(command: Callable[..., Any]) -> Callable[..., Any]:
     help=_("Start tasks in the background instead of awaiting them"),
 )
 @click.option("--refresh-api", is_flag=True, help=_("Invalidate cached API docs"))
-@click.option(
-    "--dry-run", is_flag=True, help=_("Trace commands without performing any unsafe HTTP calls")
-)
 @config_options
 @click.pass_context
 def main(
