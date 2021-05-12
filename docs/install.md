@@ -87,3 +87,6 @@ key = "/etc/pki/katello/private/pulp-client.key"
 verify_ssl = false
 ```
 
+As Katello uses Pulp as a backend all modifying actions in Pulp should be performed via Katello.
+Therefore you are also strongly encourged to set `dry_run = false`, to prevent accidentally calling into dangerous commands.
+This setting can in turn be overwritten on the command-line with the `--force` flag.
