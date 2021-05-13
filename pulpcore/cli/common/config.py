@@ -1,6 +1,6 @@
 import gettext
 from pathlib import Path
-from typing import Any, Callable, Dict, Optional
+from typing import Any, Callable, Dict, List, Optional
 
 import click
 import toml
@@ -41,12 +41,22 @@ def config_options(command: Callable[..., Any]) -> Callable[..., Any]:
     return command
 
 
-def validate_config(config: Dict[str, Any]) -> bool:
+def validate_config(config: Dict[str, Any], strict: bool = False) -> bool:
     """Validate, that the config provides the proper data types"""
+    errors: List[str] = []
     if "format" in config and config["format"].lower() not in FORMAT_CHOICES:
-        raise ValueError(_("'format' is not one of {}").format(FORMAT_CHOICES))
+        errors.append(_("'format' is not one of {}").format(FORMAT_CHOICES))
     if "dry_run" in config and not isinstance(config["dry_run"], bool):
-        raise ValueError(_("'dry_run' is not a bool"))
+        errors.append(_("'dry_run' is not a bool"))
+    unknown_settings = set(config.keys()) - set(SETTINGS)
+    if unknown_settings:
+        errors.append(_("Unknown settings: '{}'.").format("','".join(unknown_settings)))
+    if strict:
+        missing_settings = set(SETTINGS) - set(config.keys())
+        if missing_settings:
+            errors.append(_("Missing settings: '{}'.").format("','".join(missing_settings)))
+    if errors:
+        raise ValueError("\n".join(errors))
     return True
 
 
@@ -147,18 +157,24 @@ def validate(location: str, strict: bool) -> None:
     try:
         settings = toml.load(location)
     except toml.TomlDecodeError:
-        raise click.ClickException(f"Invalid toml file '{location}'.")
+        raise click.ClickException(_("Invalid toml file '{location}'.").format(location=location))
 
     if "cli" not in settings:
-        raise click.ClickException(f"Could not locate cli section in '{location}'.")
+        raise click.ClickException(_("Could not locate cli section in '{location}'.").format(location=location))
 
-    for setting in settings["cli"]:
-        if setting not in SETTINGS:
-            raise click.ClickException(f"Detected unknown setting: '{setting}'.")
+    errors: List[str] = []
+    for key, profile in settings.items():
+        if key != "cli" and not key.startswith("cli-"):
+            if strict:
+                errors.append(_("Invalid profile '{}'").format(key))
+            continue
+        try:
+            validate_config(profile, strict=strict)
+        except ValueError as e:
+            errors.append(_("Profile {}:").format(key))
+            errors.append(str(e))
 
-    if strict:
-        for setting in SETTINGS:
-            if setting not in settings["cli"]:
-                raise click.ClickException(f"Missing setting: '{setting}'.")
+    if errors:
+        raise click.ClickException("\n".join(errors))
 
     click.echo(f"File '{location}' is a valid pulp-cli config.")
