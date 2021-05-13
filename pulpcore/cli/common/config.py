@@ -1,23 +1,24 @@
 import gettext
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List, MutableMapping
 
 import click
 import toml
 
 _ = gettext.gettext
 
-LOCATION = str(Path(click.utils.get_app_dir("pulp"), "settings.toml"))
+CONFIG_LOCATION = str(Path(click.utils.get_app_dir("pulp"), "settings.toml"))
 FORMAT_CHOICES = ["json", "yaml", "none"]
 SETTINGS = ["base_url", "username", "password", "cert", "key", "verify_ssl", "format", "dry_run"]
 
 CONFIG_OPTIONS = [
     click.option("--base-url", default="https://localhost", help=_("API base url")),
-    click.option("--username", help=_("Username on pulp server")),
-    click.option("--password", help=_("Password on pulp server")),
-    click.option("--cert", help=_("Path to client certificate")),
+    click.option("--username", default="", help=_("Username on pulp server")),
+    click.option("--password", default="", help=_("Password on pulp server")),
+    click.option("--cert", default="", help=_("Path to client certificate")),
     click.option(
         "--key",
+        default="",
         help=_("Path to client private key. Not required if client cert contains this."),
     ),
     click.option("--verify-ssl/--no-verify-ssl", default=True, help=_("Verify SSL connection")),
@@ -29,7 +30,7 @@ CONFIG_OPTIONS = [
     ),
     click.option(
         "--dry-run/--force",
-        is_flag=True,
+        default=False,
         help=_("Trace commands without performing any unsafe HTTP calls"),
     ),
 ]
@@ -60,6 +61,26 @@ def validate_config(config: Dict[str, Any], strict: bool = False) -> bool:
     return True
 
 
+def validate_settings(settings: MutableMapping[str, Dict[str, Any]], strict: bool = False) -> bool:
+    errors: List[str] = []
+    if "cli" not in settings:
+        errors.append(_("Could not locate default profile 'cli' setting"))
+
+    for key, profile in settings.items():
+        if key != "cli" and not key.startswith("cli-"):
+            if strict:
+                errors.append(_("Invalid profile '{}'").format(key))
+            continue
+        try:
+            validate_config(profile, strict=strict)
+        except ValueError as e:
+            errors.append(_("Profile {}:").format(key))
+            errors.append(str(e))
+    if errors:
+        raise ValueError("\n".join(errors))
+    return True
+
+
 @click.group(name="config", help=_("Manage pulp-cli config file"))
 def config() -> None:
     pass
@@ -70,7 +91,7 @@ def config() -> None:
 @click.option("--interactive", "-i", is_flag=True)
 @click.option("--editor", "-e", is_flag=True, help=_("Edit the config file in an editor"))
 @click.option("--overwrite", "-o", is_flag=True, help=_("Overwite any existing config file"))
-@click.option("--location", default=LOCATION, type=click.Path(resolve_path=True))
+@click.option("--location", default=CONFIG_LOCATION, type=click.Path(resolve_path=True))
 @click.pass_context
 def create(
     ctx: click.Context,
@@ -78,14 +99,7 @@ def create(
     editor: bool,
     overwrite: bool,
     location: str,
-    base_url: str,
-    username: Optional[str],
-    password: Optional[str],
-    cert: Optional[str],
-    key: Optional[str],
-    verify_ssl: bool,
-    format: str,
-    dry_run: bool,
+    **kwargs: Any,
 ) -> None:
     def _check_location(loc: str) -> None:
         if not overwrite and Path(loc).exists():
@@ -100,23 +114,17 @@ def create(
             help = option.help
         else:
             help = option.name
-        return click.prompt(help, default=(option.default or ""), type=option.type)
+        return click.prompt(help, default=(option.default), type=option.type)
 
-    def _default_value(option: Any) -> Any:
-        if isinstance(option, bool):
-            return False
-        return ""
+    settings: MutableMapping[str, Any] = kwargs
 
-    settings = {}
     if interactive:
-        location = click.prompt("Config file location", default=LOCATION)
+        location = click.prompt("Config file location", default=location)
         _check_location(location)
         for setting in SETTINGS:
             settings[setting] = prompt_config_option(setting)
     else:
         _check_location(location)
-        for setting in SETTINGS:
-            settings[setting] = locals()[setting] or _default_value(locals()[setting])
 
     output = toml.dumps({"cli": settings})
 
@@ -124,6 +132,11 @@ def create(
         output = click.edit(output)
         if not output:
             raise click.ClickException("No output from editor. Aborting.")
+    try:
+        settings = toml.loads(output)
+        validate_settings(settings)
+    except (ValueError, toml.TomlDecodeError) as e:
+        raise click.ClickException(str(e))
 
     Path(location).parent.mkdir(parents=True, exist_ok=True)
     with Path(location).open("w") as sfile:
@@ -133,7 +146,7 @@ def create(
 
 
 @config.command(help=_("Open the settings config file in an editor"))
-@click.option("--location", default=LOCATION, type=click.Path(resolve_path=True))
+@click.option("--location", default=CONFIG_LOCATION, type=click.Path(resolve_path=True))
 def edit(location: str) -> None:
     if not Path(location).exists():
         raise click.ClickException(
@@ -141,17 +154,25 @@ def edit(location: str) -> None:
             "create command."
         )
 
-    with Path(location).open("r+") as sfile:
-        settings = sfile.read()
-        output = click.edit(settings)
+    with Path(location).open("r") as sfile:
+        output = sfile.read()
+    while True:
+        output = click.edit(output)
         if not output:
             raise click.ClickException("No output from editor. Aborting.")
-        sfile.seek(0)
+        try:
+            settings = toml.loads(output)
+            validate_settings(settings)
+            break
+        except (ValueError, toml.TomlDecodeError) as e:
+            click.echo(str(e), err=True)
+            click.confirm(_("Retry"), abort=True)
+    with Path(location).open("w") as sfile:
         sfile.write(output)
 
 
 @config.command(help=_("Validate a pulp-cli config file"))
-@click.option("--location", default=LOCATION, type=click.Path(resolve_path=True))
+@click.option("--location", default=CONFIG_LOCATION, type=click.Path(resolve_path=True))
 @click.option("--strict", is_flag=True, help=_("Validate that all settings are present"))
 def validate(location: str, strict: bool) -> None:
     try:
@@ -159,22 +180,9 @@ def validate(location: str, strict: bool) -> None:
     except toml.TomlDecodeError:
         raise click.ClickException(_("Invalid toml file '{location}'.").format(location=location))
 
-    if "cli" not in settings:
-        raise click.ClickException(_("Could not locate cli section in '{location}'.").format(location=location))
-
-    errors: List[str] = []
-    for key, profile in settings.items():
-        if key != "cli" and not key.startswith("cli-"):
-            if strict:
-                errors.append(_("Invalid profile '{}'").format(key))
-            continue
-        try:
-            validate_config(profile, strict=strict)
-        except ValueError as e:
-            errors.append(_("Profile {}:").format(key))
-            errors.append(str(e))
-
-    if errors:
-        raise click.ClickException("\n".join(errors))
+    try:
+        validate_settings(settings, strict)
+    except ValueError as e:
+        raise click.ClickException(str(e))
 
     click.echo(f"File '{location}' is a valid pulp-cli config.")
