@@ -22,11 +22,11 @@ setup(
     python_requires=">=3.6",
     install_requires=[
         "click<8.0.0",
-        "click-shell",
+        "click-shell~=2.0",
         "packaging",
-        "PyYAML",
-        "requests",
-        "toml",
+        "PyYAML~=5.4.1",
+        "requests~=2.25.1",
+        "toml==0.10.2",
     ],
     extras_require={
         "pygments": ["pygments"],
