@@ -21,7 +21,7 @@ setup(
     package_data={package: ["py.typed"] for package in packages},
     python_requires=">=3.6",
     install_requires=[
-        "click<8.0.0",
+        "click<9.0.0",
         "click-shell~=2.0",
         "packaging",
         "PyYAML~=5.4.1",
