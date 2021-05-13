@@ -8,7 +8,7 @@ import pkg_resources
 import toml
 from click_shell import make_click_shell
 
-from pulpcore.cli.common.config import config, config_options, validate_config
+from pulpcore.cli.common.config import CONFIG_LOCATION, config, config_options, validate_config
 from pulpcore.cli.common.context import PulpContext
 from pulpcore.cli.common.debug import debug
 
@@ -37,10 +37,8 @@ def _config_callback(ctx: click.Context, param: Any, value: Optional[str]) -> No
         if value:
             config = toml.load(value)
         else:
-            default_config_path = os.path.join(click.utils.get_app_dir("pulp"), "settings.toml")
-
             try:
-                config = toml.load(default_config_path)
+                config = toml.load(CONFIG_LOCATION)
             except FileNotFoundError:
                 # No config, but also none requested
                 return
