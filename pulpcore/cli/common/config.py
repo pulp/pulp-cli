@@ -1,16 +1,53 @@
 import gettext
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Callable, Dict, Optional
 
 import click
 import toml
 
-from pulpcore.cli.common import config_options
-
 _ = gettext.gettext
 
 LOCATION = str(Path(click.utils.get_app_dir("pulp"), "settings.toml"))
+FORMAT_CHOICES = ["json", "yaml", "none"]
 SETTINGS = ["base_url", "username", "password", "cert", "key", "verify_ssl", "format", "dry_run"]
+
+CONFIG_OPTIONS = [
+    click.option("--base-url", default="https://localhost", help=_("API base url")),
+    click.option("--username", help=_("Username on pulp server")),
+    click.option("--password", help=_("Password on pulp server")),
+    click.option("--cert", help=_("Path to client certificate")),
+    click.option(
+        "--key",
+        help=_("Path to client private key. Not required if client cert contains this."),
+    ),
+    click.option("--verify-ssl/--no-verify-ssl", default=True, help=_("Verify SSL connection")),
+    click.option(
+        "--format",
+        type=click.Choice(FORMAT_CHOICES, case_sensitive=False),
+        default="json",
+        help=_("Format of the response"),
+    ),
+    click.option(
+        "--dry-run/--force",
+        is_flag=True,
+        help=_("Trace commands without performing any unsafe HTTP calls"),
+    ),
+]
+
+
+def config_options(command: Callable[..., Any]) -> Callable[..., Any]:
+    for option in reversed(CONFIG_OPTIONS):
+        command = option(command)
+    return command
+
+
+def validate_config(config: Dict[str, Any]) -> bool:
+    """Validate, that the config provides the proper data types"""
+    if "format" in config and config["format"].lower() not in FORMAT_CHOICES:
+        raise ValueError(_("'format' is not one of {}").format(FORMAT_CHOICES))
+    if "dry_run" in config and not isinstance(config["dry_run"], bool):
+        raise ValueError(_("'dry_run' is not a bool"))
+    return True
 
 
 @click.group(name="config", help=_("Manage pulp-cli config file"))

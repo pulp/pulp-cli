@@ -1,13 +1,14 @@
 import gettext
 import os
 import sys
-from typing import Any, Callable, Dict, Optional
+from typing import Any, Optional
 
 import click
 import pkg_resources
 import toml
 from click_shell import make_click_shell
 
+from pulpcore.cli.common.config import config, config_options, validate_config
 from pulpcore.cli.common.context import PulpContext
 from pulpcore.cli.common.debug import debug
 
@@ -20,15 +21,6 @@ __version__ = "0.9.0.dev"
 
 
 PROFILE_KEY = f"{__name__}.profile"
-FORMAT_CHOICES = ["json", "yaml", "none"]
-
-
-def _validate_config(config: Dict[str, Any]) -> bool:
-    if "format" in config and config["format"].lower() not in FORMAT_CHOICES:
-        raise ValueError(_("'format' is not one of {}").format(FORMAT_CHOICES))
-    if "dry_run" in config and not isinstance(config["dry_run"], bool):
-        raise ValueError(_("'dry_run' is not a bool"))
-    return True
 
 
 def _config_profile_callback(ctx: click.Context, param: Any, value: Optional[str]) -> Optional[str]:
@@ -56,7 +48,7 @@ def _config_callback(ctx: click.Context, param: Any, value: Optional[str]) -> No
         if PROFILE_KEY in ctx.meta:
             profile = "cli-" + ctx.meta[PROFILE_KEY]
         try:
-            _validate_config(config[profile])
+            validate_config(config[profile])
             ctx.default_map = config[profile]
         except KeyError:
             raise click.ClickException(
@@ -68,36 +60,6 @@ def _config_callback(ctx: click.Context, param: Any, value: Optional[str]) -> No
             if click.confirm(_("Continue without config?")):
                 return
         raise click.ClickException(_("Aborted."))
-
-
-CONFIG_OPTIONS = [
-    click.option("--base-url", default="https://localhost", help=_("API base url")),
-    click.option("--username", help=_("Username on pulp server")),
-    click.option("--password", help=_("Password on pulp server")),
-    click.option("--cert", help=_("Path to client certificate")),
-    click.option(
-        "--key",
-        help=_("Path to client private key. Not required if client cert contains this."),
-    ),
-    click.option("--verify-ssl/--no-verify-ssl", default=True, help=_("Verify SSL connection")),
-    click.option(
-        "--format",
-        type=click.Choice(FORMAT_CHOICES, case_sensitive=False),
-        default="json",
-        help=_("Format of the response"),
-    ),
-    click.option(
-        "--dry-run/--force",
-        is_flag=True,
-        help=_("Trace commands without performing any unsafe HTTP calls"),
-    ),
-]
-
-
-def config_options(command: Callable[..., Any]) -> Callable[..., Any]:
-    for option in reversed(CONFIG_OPTIONS):
-        command = option(command)
-    return command
 
 
 @click.group()
@@ -166,6 +128,7 @@ def main(
     ctx.obj = PulpContext(api_kwargs=api_kwargs, format=format, background_tasks=background)
 
 
+main.add_command(config)
 main.add_command(debug)
 
 
