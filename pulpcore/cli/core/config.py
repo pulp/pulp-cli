@@ -55,6 +55,11 @@ def create(
             help = option.name
         return click.prompt(help, default=(option.default or ""), type=option.type)
 
+    def _default_value(option: Any) -> Any:
+        if isinstance(option, bool):
+            return False
+        return ""
+
     settings = {}
     if interactive:
         location = click.prompt("Config file location", default=LOCATION)
@@ -64,7 +69,7 @@ def create(
     else:
         _check_location(location)
         for setting in SETTINGS:
-            settings[setting] = locals()[setting] or ""
+            settings[setting] = locals()[setting] or _default_value(locals()[setting])
 
     output = toml.dumps({"cli": settings})
 
