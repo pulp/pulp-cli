@@ -1,4 +1,6 @@
 import gettext
+import json
+from typing import Any, List, Optional
 
 import click
 
@@ -23,6 +25,27 @@ from pulpcore.cli.python.context import PulpPythonRemoteContext
 _ = gettext.gettext
 
 
+def _package_list_callback(ctx: click.Context, param: click.Parameter, value: Optional[str]) -> Any:
+    """Parses the requirements file or JSON list for packages."""
+    if not value:
+        return value
+
+    if value.startswith("@"):
+        json_string = f'["{value[1:]}"]'
+    else:
+        json_string = value
+
+    try:
+        json_object = json.loads(json_string)
+    except json.decoder.JSONDecodeError:
+        raise click.ClickException(_("Failed to decode JSON: {}").format(json_string))
+    else:
+        package_list = list()
+        for packages in json_object:
+            package_list += parse_requirements_string(packages)
+        return package_list
+
+
 @click.group()
 @click.option(
     "-t",
@@ -45,8 +68,8 @@ python_remote_options = [
     click.option(
         "--policy", type=click.Choice(["immediate", "on_demand", "streamed"], case_sensitive=False)
     ),
-    click.option("--includes", callback=load_json_callback, help=_("Package allowlist")),
-    click.option("--excludes", callback=load_json_callback, help=_("Package blocklist")),
+    click.option("--includes", callback=_package_list_callback, help=_("Package allowlist")),
+    click.option("--excludes", callback=_package_list_callback, help=_("Package blocklist")),
     click.option("--prereleases", type=click.BOOL, default=True),
     pulp_option(
         "--keep-latest-packages", type=int, needs_plugins=[PluginRequirement("python", "3.2.0")]
@@ -71,4 +94,29 @@ remote.add_command(
 )
 remote.add_command(label_command())
 
+
 # TODO Add support for 'from_bandersnatch' remote create endpoint
+def parse_requirements_string(requirements_string: str) -> List[str]:
+    """Parses the requirements string to find the packages listed."""
+    requirements_string = requirements_string.strip()
+    if not requirements_string or requirements_string.startswith("#"):
+        return []
+    requirements_string, *_ = requirements_string.split("#", maxsplit=1)
+    requirements_string = requirements_string.strip()
+    if requirements_string.endswith(".txt"):
+        *_, requirements_file = requirements_string.split()
+        return parse_requirements_file(requirements_file)
+    else:
+        return [requirements_string]
+
+
+def parse_requirements_file(requirements_file: str) -> List[str]:
+    """Parses the requirements.txt file."""
+    requirements = list()
+    try:
+        with click.open_file(requirements_file) as fp:
+            for line in fp.readlines():
+                requirements += parse_requirements_string(line)
+    except OSError:
+        raise click.ClickException(f"Failed to load content from {requirements_file}")
+    return requirements
