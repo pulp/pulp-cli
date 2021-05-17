@@ -1,1 +1,0 @@
-Properly truncate file before saving settings in ``config edit``.
