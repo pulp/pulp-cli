@@ -13,7 +13,7 @@ from pulpcore.cli.common.context import PulpContext
 from pulpcore.cli.common.debug import debug
 
 _ = gettext.gettext
-__version__ = "0.9.0.dev"
+__version__ = "0.9.0"
 
 
 ##############################################################################

@@ -16,7 +16,7 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/pulp/pulp-cli",
-    version="0.9.0.dev",
+    version="0.9.0",
     packages=packages,
     package_data={package: ["py.typed"] for package in packages},
     python_requires=">=3.6",
