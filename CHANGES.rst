@@ -13,6 +13,41 @@ Changelog
 
 .. towncrier release notes start
 
+0.9.0 (2021-05-17)
+==================
+
+
+Features
+--------
+
+- Disabled following of redirects and added better handling of response codes.
+  `#221 <https://github.com/pulp/pulp-cli/issues/221>`_
+- Added ``--force`` as the inverse of ``--dry-run`` and started to allow ``dry_run`` in the settings.
+  `#236 <https://github.com/pulp/pulp-cli/issues/236>`_
+- Added config validation to ``config create`` and ``config edit``.
+  `#239 <https://github.com/pulp/pulp-cli/issues/239>`_
+
+
+Bugfixes
+--------
+
+- Fixed extra request when using the repository version option.
+  `#223 <https://github.com/pulp/pulp-cli/issues/223>`_
+- Fix requirements file option for ansible collection remote commands.
+  `#226 <https://github.com/pulp/pulp-cli/issues/226>`_
+- Properly truncate file before saving settings in ``config edit``.
+  `#239 <https://github.com/pulp/pulp-cli/issues/239>`_
+
+
+Misc
+----
+
+- `#235 <https://github.com/pulp/pulp-cli/issues/235>`_
+
+
+----
+
+
 0.8.0 (2021-04-30)
 ==================
 
