@@ -4,3 +4,4 @@ build/
 tests/settings.toml
 /.ci/settings/
 !/.ci/settings/settings.py
+site/

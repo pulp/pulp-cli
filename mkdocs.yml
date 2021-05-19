@@ -1,0 +1,4 @@
+site_name: Pulp 3 CLI
+theme: readthedocs
+repo_url: https://github.com/pulp/pulp-cli
+edit_uri: edit/develop/docs/

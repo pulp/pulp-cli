@@ -17,4 +17,10 @@ tests/settings.toml:
 test: | tests/settings.toml
 	pytest -v tests
 
-.PHONY: black lint
+servedocs:
+	mkdocs serve
+
+site:
+	mkdocs build
+
+.PHONY: black lint servedocs
