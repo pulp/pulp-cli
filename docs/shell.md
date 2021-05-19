@@ -1,3 +1,9 @@
+# Interactive shell mode
+
+* To use the shell mode, you need to install the the extra requirements tagged "shell". *
+
+** Warning: currently the click-shell dependency is incompatible with the latest version of click. Please install a version of click < 8.0.0. **
+
 Starting the CLI with "pulp shell" drops you into the shell:
 ```
 (pulp) [vagrant@pulp3 ~]$ pulp shell
