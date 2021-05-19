@@ -22,7 +22,6 @@ setup(
     python_requires=">=3.6",
     install_requires=[
         "click<8.0.0",
-        "click-shell~=2.0",
         "packaging",
         "PyYAML~=5.4.1",
         "requests~=2.25.1",
@@ -30,6 +29,7 @@ setup(
     ],
     extras_require={
         "pygments": ["pygments"],
+        "shell": ["click-shell~=2.0"],
     },
     entry_points={
         "console_scripts": ["pulp=pulpcore.cli.common:main"],

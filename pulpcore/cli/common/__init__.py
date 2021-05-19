@@ -6,7 +6,13 @@ from typing import Any, Optional
 import click
 import pkg_resources
 import toml
-from click_shell import make_click_shell
+
+try:
+    from click_shell import make_click_shell
+
+    HAS_CLICK_SHELL = True
+except ImportError:
+    HAS_CLICK_SHELL = False
 
 from pulpcore.cli.common.config import CONFIG_LOCATION, config, config_options, validate_config
 from pulpcore.cli.common.context import PulpContext
@@ -130,16 +136,18 @@ main.add_command(config)
 main.add_command(debug)
 
 
-@main.command("shell")
-@click.pass_context
-def pulp_shell(ctx: click.Context) -> None:
-    """Activate an interactive shell-mode"""
-    make_click_shell(
-        ctx.parent,
-        prompt="pulp> ",
-        intro="Starting Pulp3 interactive shell...",
-        hist_file=os.path.join(click.utils.get_app_dir("pulp"), "cli-history"),
-    ).cmdloop()
+if HAS_CLICK_SHELL:
+
+    @main.command("shell")
+    @click.pass_context
+    def pulp_shell(ctx: click.Context) -> None:
+        """Activate an interactive shell-mode"""
+        make_click_shell(
+            ctx.parent,
+            prompt="pulp> ",
+            intro="Starting Pulp3 interactive shell...",
+            hist_file=os.path.join(click.utils.get_app_dir("pulp"), "cli-history"),
+        ).cmdloop()
 
 
 ##############################################################################
