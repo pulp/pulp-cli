@@ -60,6 +60,7 @@ create_options = [
 update_options = [
     click.option("--base-path"),
     click.option("--publication"),
+    click.option("--repository", callback=_repository_callback),
 ]
 
 distribution.add_command(list_command(decorators=filter_options))
