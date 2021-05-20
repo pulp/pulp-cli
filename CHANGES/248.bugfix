@@ -1,0 +1,1 @@
+Use ``find_packages`` instead of ``find_namespace_packages`` in setup to be compatible with ``setuptools<39.2.0``.
