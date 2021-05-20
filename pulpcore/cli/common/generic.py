@@ -335,6 +335,34 @@ base_path_contains_option = pulp_option(
     type=str,
 )
 
+content_in_option = pulp_option(
+    "--content",
+    "content__in",
+    help=_("Search for {entities} with these content hrefs in them (JSON list)"),
+    callback=load_json_callback,
+)
+
+pulp_created_gte_option = pulp_option(
+    "--created-after",
+    "pulp_created__gte",
+    help=_("Search for {entities} created at or after this ISO 8601 date"),
+    type=str,
+)
+
+pulp_created_lte_option = pulp_option(
+    "--created-before",
+    "pulp_created__lte",
+    help=_("Search for {entities} created at or before this ISO 8601 date"),
+    type=str,
+)
+
+publication_filter_options = [
+    content_in_option,
+    pulp_created_gte_option,
+    pulp_created_lte_option,
+    pulp_option("--repository-version", help=_("Search {entities} by repository version HREF")),
+]
+
 common_remote_create_options = [
     click.option("--name", required=True),
     click.option("--url", required=True),
