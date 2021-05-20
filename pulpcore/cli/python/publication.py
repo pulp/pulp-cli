@@ -8,6 +8,7 @@ from pulpcore.cli.common.generic import (
     destroy_command,
     href_option,
     list_command,
+    publication_filter_options,
     resource_option,
     show_command,
 )
@@ -48,7 +49,7 @@ create_options = [
         "--version", type=int, help=_("a repository version number, leave blank for latest")
     ),
 ]
-publication.add_command(list_command())
+publication.add_command(list_command(decorators=publication_filter_options))
 publication.add_command(show_command(decorators=lookup_options))
 publication.add_command(create_command(decorators=create_options))
 publication.add_command(destroy_command(decorators=lookup_options))
