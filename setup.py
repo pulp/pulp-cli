@@ -32,7 +32,7 @@ setup(
         "pygments": ["pygments"],
     },
     entry_points={
-        "console_scripts": "pulp=pulpcore.cli.common:main",
+        "console_scripts": ["pulp=pulpcore.cli.common:main"],
         "pulp_cli.plugins": [
             "ansible=pulpcore.cli.ansible",
             "container=pulpcore.cli.container",
