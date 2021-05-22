@@ -52,7 +52,8 @@ remote_option = resource_option(
 
 def _content_callback(ctx: click.Context, param: click.Parameter, value: Any) -> Any:
     if value:
-        pulp_ctx: PulpContext = ctx.find_object(PulpContext)
+        pulp_ctx = ctx.find_object(PulpContext)
+        assert pulp_ctx is not None
         ctx.obj = PulpFileContentContext(pulp_ctx, entity=value)
     return value
 

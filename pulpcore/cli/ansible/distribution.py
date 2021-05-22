@@ -36,7 +36,8 @@ def _repository_callback(
 ) -> EntityFieldDefinition:
     # Pass None and "" verbatim
     if value:
-        pulp_ctx: PulpContext = ctx.find_object(PulpContext)
+        pulp_ctx = ctx.find_object(PulpContext)
+        assert pulp_ctx is not None
         return PulpAnsibleRepositoryContext(pulp_ctx, entity={"name": value})
     return value
 

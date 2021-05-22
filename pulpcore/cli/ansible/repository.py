@@ -37,7 +37,8 @@ def _remote_callback(
 ) -> Optional[str]:
     # Pass None and "" verbatim
     if value:
-        pulp_ctx: PulpContext = ctx.find_object(PulpContext)
+        pulp_ctx = ctx.find_object(PulpContext)
+        assert pulp_ctx is not None
         try:
             return PulpAnsibleCollectionRemoteContext(pulp_ctx, entity={"name": value}).pulp_href
         except click.ClickException:

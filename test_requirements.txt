@@ -2,6 +2,11 @@
 black
 flake8
 isort
-mypy>=0.800,<0.900
+mypy
 pygments
 pytest
+
+types-requests
+types-toml
+types-setuptools
+types-PyYAML
