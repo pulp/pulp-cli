@@ -21,7 +21,8 @@ def _sha256_artifact_callback(
 ) -> Optional[Union[str, PulpEntityContext]]:
     # Pass None and "" verbatim
     if value:
-        pulp_ctx: PulpContext = ctx.find_object(PulpContext)
+        pulp_ctx = ctx.find_object(PulpContext)
+        assert pulp_ctx is not None
         return PulpArtifactContext(pulp_ctx, entity={"sha256": value})
     return value
 

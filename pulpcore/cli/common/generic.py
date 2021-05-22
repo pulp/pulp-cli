@@ -1,6 +1,18 @@
 import gettext
 import json
-from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Type, TypeVar, Union
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Iterable,
+    List,
+    Mapping,
+    Optional,
+    Tuple,
+    Type,
+    TypeVar,
+    Union,
+)
 
 import click
 
@@ -24,6 +36,7 @@ from pulpcore.cli.common.context import (
 _ = gettext.gettext
 
 _F = TypeVar("_F")
+_FC = TypeVar("_FC", Callable[..., Any], click.Command)
 
 
 class PulpCommand(click.Command):
@@ -33,7 +46,8 @@ class PulpCommand(click.Command):
     def format_help_text(
         self, ctx: click.Context, formatter: click.formatting.HelpFormatter
     ) -> None:
-        entity_ctx: PulpEntityContext = ctx.find_object(PulpEntityContext)
+        entity_ctx = ctx.find_object(PulpEntityContext)
+        assert entity_ctx is not None
         if self.help is not None:
             self.help = self.help.format(entity=entity_ctx.ENTITY, entities=entity_ctx.ENTITIES)
         super().format_help_text(ctx, formatter)
@@ -52,6 +66,7 @@ class PulpOption(click.Option):
     def process_value(self, ctx: click.Context, value: Any) -> Any:
         if value is not None and self.needs_plugins:
             pulp_ctx = ctx.find_object(PulpContext)
+            assert pulp_ctx is not None
             for plugin_requirement in self.needs_plugins:
                 if plugin_requirement.feature:
                     feature = plugin_requirement.feature
@@ -66,9 +81,13 @@ class PulpOption(click.Option):
                 )
         return super().process_value(ctx, value)
 
-    def get_help_record(self, ctx: click.Context) -> Tuple[str, str]:
-        synopsis, help_text = super().get_help_record(ctx)
-        entity_ctx: PulpEntityContext = ctx.find_object(PulpEntityContext)
+    def get_help_record(self, ctx: click.Context) -> Optional[Tuple[str, str]]:
+        tmp = super().get_help_record(ctx)
+        if tmp is None:
+            return None
+        synopsis, help_text = tmp
+        entity_ctx = ctx.find_object(PulpEntityContext)
+        assert entity_ctx is not None
         help_text = help_text.format(entity=entity_ctx.ENTITY, entities=entity_ctx.ENTITIES)
         return synopsis, help_text
 
@@ -82,10 +101,13 @@ class GroupOption(PulpOption):
         ).strip()
         super().__init__(*args, **kwargs)
 
-    def handle_parse_result(self, ctx: click.Context, opts: Dict[str, Any], args: Any) -> Any:
+    def handle_parse_result(
+        self, ctx: click.Context, opts: Mapping[str, Any], args: List[Any]
+    ) -> Any:
+        assert self.name is not None
         all_options = self.group + [self.name]
         if all(x in opts for x in all_options):
-            self.prompt = None  # type: ignore
+            self.prompt = None
         else:
             raise click.UsageError(
                 "Illegal usage, please specify all "
@@ -93,7 +115,7 @@ class GroupOption(PulpOption):
             )
         value = opts.get(self.name)
         if self.callback is not None:
-            value = self.callback(ctx, self, {o: opts[o] for o in all_options})  # type: ignore
+            value = self.callback(ctx, self, {o: opts[o] for o in all_options})
         if self.expose_value:
             ctx.params[self.name] = value
         return value, args
@@ -107,7 +129,8 @@ def _href_callback(
     ctx: click.Context, param: click.Parameter, value: Optional[str]
 ) -> Optional[str]:
     if value is not None:
-        entity_ctx: PulpEntityContext = ctx.find_object(PulpEntityContext)
+        entity_ctx = ctx.find_object(PulpEntityContext)
+        assert entity_ctx is not None
         entity_ctx.pulp_href = value
     return value
 
@@ -116,7 +139,8 @@ def _name_callback(
     ctx: click.Context, param: click.Parameter, value: Optional[str]
 ) -> Optional[str]:
     if value is not None:
-        entity_ctx: PulpEntityContext = ctx.find_object(PulpEntityContext)
+        entity_ctx = ctx.find_object(PulpEntityContext)
+        assert entity_ctx is not None
         entity_ctx.entity = {"name": value}
     return value
 
@@ -125,7 +149,8 @@ def _repository_href_callback(
     ctx: click.Context, param: click.Parameter, value: Optional[str]
 ) -> Optional[str]:
     if value is not None:
-        repository_ctx: PulpRepositoryContext = ctx.find_object(PulpRepositoryContext)
+        repository_ctx = ctx.find_object(PulpRepositoryContext)
+        assert repository_ctx is not None
         repository_ctx.pulp_href = value
     return value
 
@@ -134,7 +159,8 @@ def _repository_callback(
     ctx: click.Context, param: click.Parameter, value: Optional[str]
 ) -> Optional[str]:
     if value is not None:
-        repository_ctx: PulpRepositoryContext = ctx.find_object(PulpRepositoryContext)
+        repository_ctx = ctx.find_object(PulpRepositoryContext)
+        assert repository_ctx is not None
         repository_ctx.entity = {"name": value}
     return value
 
@@ -142,8 +168,10 @@ def _repository_callback(
 def _version_callback(
     ctx: click.Context, param: click.Parameter, value: Optional[int]
 ) -> Optional[int]:
-    entity_ctx: PulpEntityContext = ctx.find_object(PulpEntityContext)
-    repository_ctx: PulpRepositoryContext = ctx.find_object(PulpRepositoryContext)
+    entity_ctx = ctx.find_object(PulpEntityContext)
+    assert entity_ctx is not None
+    repository_ctx = ctx.find_object(PulpRepositoryContext)
+    assert repository_ctx is not None
     if value is not None:
         entity_ctx.pulp_href = f"{repository_ctx.entity['versions_href']}{value}/"
     else:
@@ -188,7 +216,8 @@ def create_content_json_callback(content_ctx: Type[PulpContentContext]) -> Any:
     ) -> Optional[List[PulpContentContext]]:
         new_value = load_json_callback(ctx, param, value)
         if new_value is not None:
-            pulp_ctx: PulpContext = ctx.find_object(PulpContext)
+            pulp_ctx = ctx.find_object(PulpContext)
+            assert pulp_ctx is not None
             return [content_ctx(pulp_ctx, entity=unit) for unit in new_value]
         return new_value
 
@@ -199,12 +228,12 @@ def create_content_json_callback(content_ctx: Type[PulpContentContext]) -> Any:
 # Decorator common options
 
 
-def pulp_option(*args: Any, **kwargs: Any) -> Callable[[_F], _F]:
+def pulp_option(*args: Any, **kwargs: Any) -> Callable[[_FC], _FC]:
     kwargs["cls"] = PulpOption
     return click.option(*args, **kwargs)
 
 
-def resource_option(*args: Any, **kwargs: Any) -> Callable[[_F], _F]:
+def resource_option(*args: Any, **kwargs: Any) -> Callable[[_FC], _FC]:
     default_plugin: Optional[str] = kwargs.pop("default_plugin", None)
     default_type: Optional[str] = kwargs.pop("default_type", None)
     lookup_key: str = kwargs.pop("lookup_key", "name")
@@ -248,7 +277,8 @@ def resource_option(*args: Any, **kwargs: Any) -> Callable[[_F], _F]:
                     "is not valid for the {option_name} option."
                 ).format(plugin=plugin, resource_type=resource_type, option_name=param.name)
             )
-        pulp_ctx: PulpContext = ctx.find_object(PulpContext)
+        pulp_ctx = ctx.find_object(PulpContext)
+        assert pulp_ctx is not None
         entity_ctx: PulpEntityContext = context_class(pulp_ctx, entity={lookup_key: identifier})
 
         if capabilities is not None:
@@ -656,7 +686,8 @@ def repository_content_command(**kwargs: Any) -> click.Group:
     def version_callback(
         ctx: click.Context, param: click.Parameter, value: Optional[int]
     ) -> PulpRepositoryVersionContext:
-        repo_ctx: PulpRepositoryContext = ctx.find_object(PulpRepositoryContext)
+        repo_ctx = ctx.find_object(PulpRepositoryContext)
+        assert repo_ctx is not None
         repo_ver_ctx = repo_ctx.get_version_context()
         repo_ver_ctx.pulp_href = (
             f"{repo_ctx.pulp_href}versions/{value}/"

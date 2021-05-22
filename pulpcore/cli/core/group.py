@@ -24,20 +24,23 @@ from pulpcore.cli.core.context import (
 
 def _groupname_callback(ctx: click.Context, param: click.Parameter, value: str) -> str:
     if value is not None:
-        entity_ctx: PulpGroupContext = ctx.find_object(PulpGroupContext)
+        entity_ctx = ctx.find_object(PulpGroupContext)
+        assert entity_ctx is not None
         entity_ctx.entity = {"name": value}
     return value
 
 
 def _permission_callback(ctx: click.Context, param: click.Parameter, value: str) -> str:
     if value is not None:
-        entity_ctx: PulpGroupPermissionContext = ctx.find_object(PulpGroupPermissionContext)
+        entity_ctx = ctx.find_object(PulpGroupPermissionContext)
+        assert entity_ctx is not None
         entity_ctx.entity = {"permission": value}
     return value
 
 
 def _object_callback(ctx: click.Context, param: click.Parameter, value: str) -> str:
-    entity_ctx: PulpGroupPermissionContext = ctx.find_object(PulpGroupPermissionContext)
+    entity_ctx = ctx.find_object(PulpGroupPermissionContext)
+    assert entity_ctx is not None
     if value is not None:
         if isinstance(entity_ctx, PulpGroupObjectPermissionContext):
             entity_ctx.entity = {"obj": value}

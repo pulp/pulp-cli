@@ -13,7 +13,8 @@ from pulpcore.cli.core.context import PulpAccessPolicyContext
 
 def _vs_name_callback(ctx: click.Context, param: click.Parameter, value: str) -> str:
     if value is not None:
-        entity_ctx: PulpEntityContext = ctx.find_object(PulpEntityContext)
+        entity_ctx = ctx.find_object(PulpEntityContext)
+        assert entity_ctx is not None
         entity_ctx.entity = {"viewset_name": value}
     return value
 

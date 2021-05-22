@@ -18,14 +18,16 @@ _ = gettext.gettext
 
 def _relative_path_callback(ctx: click.Context, param: click.Parameter, value: str) -> str:
     if value is not None:
-        entity_ctx: PulpEntityContext = ctx.find_object(PulpEntityContext)
+        entity_ctx = ctx.find_object(PulpEntityContext)
+        assert entity_ctx is not None
         entity_ctx.entity = {"relative_path": value}
     return value
 
 
 def _sha256_callback(ctx: click.Context, param: click.Parameter, value: str) -> str:
     if value is not None:
-        entity_ctx: PulpEntityContext = ctx.find_object(PulpEntityContext)
+        entity_ctx = ctx.find_object(PulpEntityContext)
+        assert entity_ctx is not None
         entity_ctx.entity = {"sha256": value}
     return value
 
@@ -35,7 +37,8 @@ def _sha256_artifact_callback(
 ) -> Optional[Union[str, PulpEntityContext]]:
     # Pass None and "" verbatim
     if value:
-        pulp_ctx: PulpContext = ctx.find_object(PulpContext)
+        pulp_ctx = ctx.find_object(PulpContext)
+        assert pulp_ctx is not None
         return PulpArtifactContext(pulp_ctx, entity={"sha256": value})
     return value
 

@@ -1,11 +1,12 @@
 import gettext
 from pathlib import Path
-from typing import Any, Callable, Dict, List, MutableMapping
+from typing import Any, Callable, Dict, List, MutableMapping, Optional, TypeVar
 
 import click
 import toml
 
 _ = gettext.gettext
+_T = TypeVar("_T")
 
 CONFIG_LOCATION = str(Path(click.utils.get_app_dir("pulp"), "settings.toml"))
 FORMAT_CHOICES = ["json", "yaml", "none"]
@@ -51,6 +52,12 @@ CONFIG_OPTIONS = [
         help=_("Time to wait for background tasks, set to 0 to wait infinitely"),
     ),
 ]
+
+
+def not_none(value: Optional[_T], exc: Optional[Exception] = None) -> _T:
+    if value is None:
+        raise exc or RuntimeError(_("Value cannot be None."))
+    return value
 
 
 def config_options(command: Callable[..., Any]) -> Callable[..., Any]:
@@ -132,7 +139,7 @@ def create(
         if isinstance(option, click.Option) and option.help:
             help = option.help
         else:
-            help = option.name
+            help = name
         return click.prompt(help, default=(option.default), type=option.type)
 
     settings: MutableMapping[str, Any] = kwargs
@@ -145,12 +152,12 @@ def create(
     else:
         _check_location(location)
 
-    output = toml.dumps({"cli": settings})
+    output: str = toml.dumps({"cli": settings})
 
     if editor:
-        output = click.edit(output)
-        if not output:
-            raise click.ClickException("No output from editor. Aborting.")
+        output = not_none(
+            click.edit(output), click.ClickException("No output from editor. Aborting.")
+        )
     try:
         settings = toml.loads(output)
         validate_settings(settings)
@@ -174,11 +181,11 @@ def edit(location: str) -> None:
         )
 
     with Path(location).open("r") as sfile:
-        output = sfile.read()
+        output: str = sfile.read()
     while True:
-        output = click.edit(output)
-        if not output:
-            raise click.ClickException("No output from editor. Aborting.")
+        output = not_none(
+            click.edit(output), click.ClickException("No output from editor. Aborting.")
+        )
         try:
             settings = toml.loads(output)
             validate_settings(settings)
