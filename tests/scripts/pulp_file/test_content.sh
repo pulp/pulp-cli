@@ -52,3 +52,9 @@ fi
 expect_succ pulp file repository content remove --repository "cli_test_file_repository" --sha256 "$sha256" --relative-path upload_test/test.txt
 expect_succ pulp file repository content list --repository "cli_test_file_repository"
 test "$(echo "$OUTPUT" | jq -r length)" -eq "0"
+
+if pulp debug has-plugin --name "core" --min-version "3.10"
+then
+  expect_succ pulp content list
+  test "$(echo "$OUTPUT" | jq -r length)" -gt "0"
+fi
