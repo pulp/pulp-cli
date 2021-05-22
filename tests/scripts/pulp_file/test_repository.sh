@@ -39,7 +39,7 @@ then
   expect_succ pulp file repository update --name "cli_test_file_repo" --manifest "manifest.csv"
 fi
 
-if pulp debug has-plugin --name "core" --min-version "3.10.dev"
+if pulp debug has-plugin --name "core" --min-version "3.10"
 then
   expect_succ pulp repository list
   test "$(echo "$OUTPUT" | jq -r '.|length')" != "0"
