@@ -94,7 +94,11 @@ class PulpContainerRepositoryContext(PulpRepositoryContext):
     DELETE_ID = "repositories_container_container_delete"
     SYNC_ID = "repositories_container_container_sync"
     VERSION_CONTEXT = PulpContainerRepositoryVersionContext
-    CAPABILITIES = {"sync": [PluginRequirement("container")]}
+    CAPABILITIES = {
+        "sync": [PluginRequirement("container")],
+        # WARNING: Do not merge before the feature in the plugin
+        "pulpexport": [PluginRequirement("container", "2.8.0.dev")],
+    }
 
 
 class PulpContainerPushRepositoryContext(PulpRepositoryContext):
