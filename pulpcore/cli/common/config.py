@@ -9,7 +9,17 @@ _ = gettext.gettext
 
 CONFIG_LOCATION = str(Path(click.utils.get_app_dir("pulp"), "settings.toml"))
 FORMAT_CHOICES = ["json", "yaml", "none"]
-SETTINGS = ["base_url", "username", "password", "cert", "key", "verify_ssl", "format", "dry_run"]
+SETTINGS = [
+    "base_url",
+    "username",
+    "password",
+    "cert",
+    "key",
+    "verify_ssl",
+    "format",
+    "dry_run",
+    "timeout",
+]
 
 CONFIG_OPTIONS = [
     click.option("--base-url", default="https://localhost", help=_("API base url")),
@@ -33,6 +43,13 @@ CONFIG_OPTIONS = [
         default=False,
         help=_("Trace commands without performing any unsafe HTTP calls"),
     ),
+    click.option(
+        "--timeout",
+        "-T",
+        type=int,
+        default=0,
+        help=_("Time to wait for background tasks, set to 0 to wait infinitely"),
+    ),
 ]
 
 
@@ -49,6 +66,8 @@ def validate_config(config: Dict[str, Any], strict: bool = False) -> bool:
         errors.append(_("'format' is not one of {}").format(FORMAT_CHOICES))
     if "dry_run" in config and not isinstance(config["dry_run"], bool):
         errors.append(_("'dry_run' is not a bool"))
+    if "timeout" in config and not isinstance(config["timeout"], int):
+        errors.append(_("'timeout' is not an integer"))
     unknown_settings = set(config.keys()) - set(SETTINGS)
     if unknown_settings:
         errors.append(_("Unknown settings: '{}'.").format("','".join(unknown_settings)))
