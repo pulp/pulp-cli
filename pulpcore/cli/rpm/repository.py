@@ -77,7 +77,7 @@ update_options = [
     click.option("--sqlite-metadata/--no-sqlite-metadata", default=None),
     pulp_option(
         "--autopublish/--no-autopublish",
-        needs_plugins=[PluginRequirement("rpm", "3.11.0.dev")],
+        needs_plugins=[PluginRequirement("rpm", "3.12.0")],
         default=None,
     ),
     pulp_option("--retained-versions", needs_plugins=[PluginRequirement("core", "3.13.0.dev")]),
