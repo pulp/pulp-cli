@@ -92,7 +92,9 @@ class PulpContext:
     It is an abstraction layer for api access and output handling.
     """
 
-    def __init__(self, api_kwargs: Dict[str, Any], format: str, background_tasks: bool) -> None:
+    def __init__(
+        self, api_kwargs: Dict[str, Any], format: str, background_tasks: bool, timeout: int
+    ) -> None:
         self._api: Optional[OpenAPI] = None
         self._api_kwargs = api_kwargs
         self._needed_plugins: List[PluginRequirement] = []
@@ -100,6 +102,7 @@ class PulpContext:
 
         self.format: str = format
         self.background_tasks: bool = background_tasks
+        self.timeout: int = timeout
 
     @property
     def api(self) -> OpenAPI:
@@ -161,11 +164,12 @@ class PulpContext:
                 result = self.wait_for_task(result)
         return result
 
-    def wait_for_task(self, task: EntityDefinition, timeout: int = 120) -> Any:
+    def wait_for_task(self, task: EntityDefinition) -> Any:
         """
         Wait for a task to finish and return the finished task object.
         Raise `click.ClickException` on timeout, background, ctrl-c, if task failed or was canceled.
         """
+        timeout: int = self.timeout
         if self.background_tasks:
             raise PulpNoWait("Not waiting for task because --background was specified.")
         task_href = task["pulp_href"]
@@ -181,10 +185,11 @@ class PulpContext:
                 elif task["state"] == "canceled":
                     raise click.ClickException("Task canceled")
                 elif task["state"] in ["waiting", "running"]:
-                    if timeout <= 0:
-                        return task
+                    if self.timeout:
+                        if timeout <= 0:
+                            raise PulpNoWait(f"Waiting for task {task_href} timed out.")
+                        timeout -= 1
                     time.sleep(1)
-                    timeout -= 1
                     click.echo(".", nl=False, err=True)
                     task = self.api.call("tasks_read", parameters={"task_href": task_href})
                 else:

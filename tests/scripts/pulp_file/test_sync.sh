@@ -12,6 +12,7 @@ cleanup() {
   pulp file remote destroy --name "cli_test_file_remote" || true
   pulp file repository destroy --name "cli_test_file_repository" || true
   pulp file repository destroy --name "$autopublish_repo" || true
+  pulp file repository destroy --name "$one_version_repo" || true
 }
 trap cleanup EXIT
 

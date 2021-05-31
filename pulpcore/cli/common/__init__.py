@@ -112,6 +112,7 @@ def main(
     background: bool,
     refresh_api: bool,
     dry_run: bool,
+    timeout: int,
 ) -> None:
     def _debug_callback(level: int, x: str) -> None:
         if verbose >= level:
@@ -129,7 +130,9 @@ def main(
         safe_calls_only=dry_run,
         debug_callback=_debug_callback,
     )
-    ctx.obj = PulpContext(api_kwargs=api_kwargs, format=format, background_tasks=background)
+    ctx.obj = PulpContext(
+        api_kwargs=api_kwargs, format=format, background_tasks=background, timeout=timeout
+    )
 
 
 main.add_command(config)
