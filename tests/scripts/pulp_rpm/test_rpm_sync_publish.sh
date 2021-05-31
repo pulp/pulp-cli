@@ -51,7 +51,7 @@ expect_succ pulp rpm repository destroy --name "cli_test_rpm_repository"
 expect_succ pulp rpm remote destroy --name "cli_test_rpm_remote"
 
 # auto-publish
-if [ "$(pulp debug has-plugin --name "rpm" --min-version "3.11.0.dev")" = "true" ]
+if [ "$(pulp debug has-plugin --name "rpm" --min-version "3.12.0")" = "true" ]
 then
   expect_succ pulp rpm remote create --name "cli_test_rpm_remote" --url "$RPM_REMOTE_URL"
   expect_succ pulp rpm repository create --name "cli_test_rpm_repository" --remote "cli_test_rpm_remote" --autopublish
