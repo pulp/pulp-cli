@@ -38,22 +38,34 @@ class PulpArtifactContext(PulpEntityContext):
     HREF = "artifact_href"
     LIST_ID = "artifacts_list"
     READ_ID = "artifacts_read"
+    CREATE_ID = "artifacts_create"
 
-    def upload(self, file: IO[bytes], chunk_size: int = 1000000, check_exists: bool = True) -> Any:
+    def upload(self, file: IO[bytes], chunk_size: int = 1000000) -> Any:
         upload_ctx = PulpUploadContext(self.pulp_ctx)
         start = 0
         size = os.path.getsize(file.name)
-        sha256 = hashlib.sha256()
 
-        if check_exists:
-            for chunk in iter(lambda: file.read(chunk_size), b""):
-                sha256.update(chunk)
-            result = self.list(limit=1, offset=0, parameters={"sha256": sha256.hexdigest()})
-            if len(result) > 0:
-                click.echo("Artifact already exists.", err=True)
-                return result[0]["pulp_href"]
+        sha256 = hashlib.sha256()
+        for chunk in iter(lambda: file.read(chunk_size), b""):
+            sha256.update(chunk)
+        sha256_digest = sha256.hexdigest()
+        file.seek(0)
+
+        # check whether the file exists before uploading
+        result = self.list(limit=1, offset=0, parameters={"sha256": sha256_digest})
+        if len(result) > 0:
+            click.echo("Artifact already exists.", err=True)
+            return result[0]["pulp_href"]
 
         click.echo(f"Uploading file {file.name}", err=True)
+
+        if chunk_size > size:
+            # if chunk_size is bigger than the file size, just upload it directly
+            artifact: Dict[str, Any] = self.create(
+                {"sha256": sha256_digest}, uploads={"file": file.read()}
+            )
+            return artifact["pulp_href"]
+
         upload_href = upload_ctx.create(body={"size": size})["pulp_href"]
 
         try:
@@ -61,8 +73,6 @@ class PulpArtifactContext(PulpEntityContext):
                 end = min(size, start + chunk_size) - 1
                 file.seek(start)
                 chunk = file.read(chunk_size)
-                if not check_exists:
-                    sha256.update(chunk)
                 range_header = f"bytes {start}-{end}/{size}"
                 upload_ctx.update(
                     href=upload_href,
@@ -76,7 +86,7 @@ class PulpArtifactContext(PulpEntityContext):
             click.echo("Upload complete. Creating artifact.", err=True)
             task = upload_ctx.commit(
                 upload_href,
-                sha256.hexdigest(),
+                sha256_digest,
             )
             result = task["created_resources"][0]
         except Exception as e:
@@ -116,6 +126,7 @@ class PulpExportContext(PulpEntityContext):
         self,
         body: EntityDefinition,
         parameters: Optional[Dict[str, Any]] = None,
+        uploads: Optional[Dict[str, Any]] = None,
         non_blocking: bool = False,
     ) -> Any:
         if not self.pulp_ctx.has_plugin("core", min_version="3.10.dev"):
@@ -239,6 +250,7 @@ class PulpGroupUserContext(PulpEntityContext):
         self,
         body: EntityDefinition,
         parameters: Optional[Dict[str, Any]] = None,
+        uploads: Optional[Dict[str, Any]] = None,
         non_blocking: bool = False,
     ) -> Any:
         if not self.pulp_ctx.has_plugin("core", min_version="3.10.dev"):

@@ -440,13 +440,18 @@ class PulpEntityContext:
         self,
         body: EntityDefinition,
         parameters: Optional[Dict[str, Any]] = None,
+        uploads: Optional[Dict[str, Any]] = None,
         non_blocking: bool = False,
     ) -> Any:
         _parameters = self.scope
         if parameters:
             _parameters.update(parameters)
         result = self.pulp_ctx.call(
-            self.CREATE_ID, parameters=_parameters, body=body, non_blocking=non_blocking
+            self.CREATE_ID,
+            parameters=_parameters,
+            body=body,
+            uploads=uploads,
+            non_blocking=non_blocking,
         )
         if not non_blocking and result["pulp_href"].startswith("/pulp/api/v3/tasks/"):
             result = self.show(result["created_resources"][0])
