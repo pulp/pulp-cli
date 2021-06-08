@@ -8,7 +8,7 @@ pulp debug has-plugin --name "python" --min-version "3.1.0.dev" || exit 3
 cleanup() {
   pulp python remote destroy --name "cli_test_python_remote" || true
   pulp python repository destroy --name "cli_test_python_repository" || true
-  pulp orpahns delete || true
+  pulp orphans delete || true
 }
 trap cleanup EXIT
 
