@@ -8,3 +8,4 @@
 1. Now tag your release commit (e.g. `git tag 0.1.0`) and push to pulp/pulp-cli
 1. Monitor the build job and then check PyPI to make sure the package has been uploaded and the docs updated
 1. Send an email to pulp-list and pulp-dev to announce the release
+1. Go to https://github.com/pulp/pulp-cli/milestones and close out the milestone
