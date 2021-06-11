@@ -2,6 +2,6 @@
 black
 flake8
 isort
-mypy>=0.800,<0.900
+mypy>=0.800,<0.903
 pygments
 pytest
