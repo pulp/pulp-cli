@@ -4,12 +4,13 @@ from typing import Any
 import click
 
 from pulpcore.cli.common.context import (
+    PluginRequirement,
     PulpContext,
     PulpEntityContext,
     pass_entity_context,
     pass_pulp_context,
 )
-from pulpcore.cli.common.generic import list_command
+from pulpcore.cli.common.generic import list_command, pulp_option
 from pulpcore.cli.core.context import PulpTaskContext
 
 _ = gettext.gettext
@@ -25,6 +26,12 @@ task_filter = [
         "--name-contains",
         "name__contains",
         help=_("List only tasks whose name contains this."),
+    ),
+    pulp_option(
+        "--cid",
+        "logging_cid__contains",
+        help=_("List only tasks with this correlation id."),
+        needs_plugins=[PluginRequirement("core", "3.14.0.dev")],
     ),
     click.option(
         "--state",
