@@ -18,7 +18,11 @@ from pulpcore.cli.common.generic import (
     show_command,
     update_command,
 )
-from pulpcore.cli.python.context import PulpPythonDistributionContext, PulpPythonRepositoryContext
+from pulpcore.cli.python.context import (
+    PulpPythonDistributionContext,
+    PulpPythonRemoteContext,
+    PulpPythonRepositoryContext,
+)
 
 _ = gettext.gettext
 
@@ -33,6 +37,14 @@ repository_option = resource_option(
         " When set, this will unset the 'publication'."
         " Specified as '[[<plugin>:]<type>:]<name>' or as href."
     ),
+)
+
+remote_option = resource_option(
+    "--remote",
+    default_plugin="python",
+    default_type="python",
+    context_table={"python:python": PulpPythonRemoteContext},
+    needs_plugins=[PluginRequirement("python", "3.6.0.dev")],
 )
 
 
@@ -69,6 +81,7 @@ update_options = [
         needs_plugins=[PluginRequirement("python", "3.4.0.dev")],
         default=None,
     ),
+    remote_option,
 ]
 create_options = update_options + [click.option("--name", required=True)]
 
