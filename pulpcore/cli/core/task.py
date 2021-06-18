@@ -28,7 +28,7 @@ task.add_command(list_command(decorators=task_filter))
 def show(pulp_ctx: PulpContext, task_ctx: PulpTaskContext, href: str, wait: bool) -> None:
     """Shows details of a task."""
     entity = task_ctx.show(href)
-    if wait and entity["state"] in ["waiting", "running"]:
+    if wait and entity["state"] in ["waiting", "running", "canceling"]:
         click.echo(f"Waiting for task {href} to finish.", err=True)
         entity = pulp_ctx.wait_for_task(entity)
     pulp_ctx.output_result(entity)
