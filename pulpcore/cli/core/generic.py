@@ -29,7 +29,7 @@ task_filter = [
     click.option(
         "--state",
         type=click.Choice(
-            ["waiting", "skipped", "running", "completed", "failed", "canceled"],
+            ["waiting", "skipped", "running", "completed", "failed", "canceled", "canceling"],
             case_sensitive=False,
         ),
         help=_("List only tasks in this state."),
