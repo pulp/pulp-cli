@@ -2,7 +2,7 @@ import gettext
 
 import click
 
-from pulpcore.cli.common.context import PulpContext, pass_pulp_context
+from pulpcore.cli.common.context import PluginRequirement, PulpContext, pass_pulp_context
 from pulpcore.cli.common.generic import (
     base_path_contains_option,
     base_path_option,
@@ -13,6 +13,7 @@ from pulpcore.cli.common.generic import (
     label_select_option,
     list_command,
     name_option,
+    pulp_option,
     resource_option,
     show_command,
     update_command,
@@ -53,6 +54,11 @@ update_options = [
     click.option("--base-path"),
     click.option("--publication"),
     repository_option,
+    pulp_option(
+        "--allow-uploads/--block-uploads",
+        needs_plugins=[PluginRequirement("python", "3.4.0.dev")],
+        default=None,
+    ),
 ]
 create_options = update_options + [click.option("--name", required=True)]
 
