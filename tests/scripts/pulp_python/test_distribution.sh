@@ -40,4 +40,12 @@ expect_succ pulp python distribution update \
 
 expect_succ curl "$curl_opt" --head --fail "$PULP_BASE_URL/pulp/content/cli_test_python_distro/simple/"
 
+if [ "$(pulp debug has-plugin --name "python" --min-version "3.4.0.dev")" = "true" ]
+then
+  expect_succ pulp python distribution update \
+  --name "cli_test_python_distro" \
+  --repository "cli_test_python_repository" \
+  --block-uploads
+fi
+
 expect_succ pulp python distribution destroy --name "cli_test_python_distro"
