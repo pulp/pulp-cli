@@ -184,7 +184,7 @@ class PulpContext:
                     )
                 elif task["state"] == "canceled":
                     raise click.ClickException("Task canceled")
-                elif task["state"] in ["waiting", "running"]:
+                elif task["state"] in ["waiting", "running", "canceling"]:
                     if self.timeout:
                         if timeout <= 0:
                             raise PulpNoWait(f"Waiting for task {task_href} timed out.")
