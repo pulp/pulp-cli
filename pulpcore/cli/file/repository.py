@@ -28,6 +28,7 @@ from pulpcore.cli.common.generic import (
     repository_href_option,
     repository_option,
     resource_option,
+    retained_versions_option,
     show_command,
     update_command,
     version_command,
@@ -86,7 +87,7 @@ update_options = [
         needs_plugins=[PluginRequirement("file", "1.7.0")],
         default=None,
     ),
-    pulp_option("--retained-versions", needs_plugins=[PluginRequirement("core", "3.13.0.dev")]),
+    retained_versions_option,
 ]
 create_options = update_options + [click.option("--name", required=True)]
 file_options = [

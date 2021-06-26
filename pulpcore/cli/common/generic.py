@@ -398,6 +398,10 @@ pulp_created_lte_option = pulp_option(
     type=str,
 )
 
+retained_versions_option = pulp_option(
+    "--retained-versions", needs_plugins=[PluginRequirement("core", "3.13.0.dev")]
+)
+
 publication_filter_options = [
     content_in_option,
     pulp_created_gte_option,
