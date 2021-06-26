@@ -6,6 +6,7 @@ from pulpcore.cli.common.context import (
     PulpRemoteContext,
     PulpRepositoryContext,
     PulpRepositoryVersionContext,
+    registered_repository_contexts,
 )
 
 _ = gettext.gettext
@@ -77,3 +78,6 @@ class PulpAnsibleRepositoryContext(PulpRepositoryContext):
     SYNC_ID = "repositories_ansible_ansible_sync"
     MODIFY_ID = "repositories_ansible_ansible_modify"
     VERSION_CONTEXT = PulpAnsibleRepositoryVersionContext
+
+
+registered_repository_contexts["ansible:ansible"] = PulpAnsibleRepositoryContext

@@ -7,6 +7,7 @@ from pulpcore.cli.common.context import (
     PulpRemoteContext,
     PulpRepositoryContext,
     PulpRepositoryVersionContext,
+    registered_repository_contexts,
 )
 
 
@@ -79,3 +80,6 @@ class PulpPythonRepositoryContext(PulpRepositoryContext):
     SYNC_ID = "repositories_python_python_sync"
     MODIFY_ID = "repositories_python_python_modify"
     VERSION_CONTEXT = PulpPythonRepositoryVersionContext
+
+
+registered_repository_contexts["python:python"] = PulpPythonRepositoryContext

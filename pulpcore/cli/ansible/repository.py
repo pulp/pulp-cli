@@ -1,5 +1,4 @@
 import gettext
-from typing import Optional
 
 import click
 
@@ -9,8 +8,10 @@ from pulpcore.cli.ansible.context import (
     PulpAnsibleRoleRemoteContext,
 )
 from pulpcore.cli.common.context import (
+    EntityFieldDefinition,
     PluginRequirement,
     PulpContext,
+    PulpEntityContext,
     PulpRepositoryContext,
     pass_pulp_context,
     pass_repository_context,
@@ -24,6 +25,7 @@ from pulpcore.cli.common.generic import (
     list_command,
     name_option,
     pulp_option,
+    resource_option,
     show_command,
     update_command,
     version_command,
@@ -32,18 +34,15 @@ from pulpcore.cli.common.generic import (
 _ = gettext.gettext
 
 
-def _remote_callback(
-    ctx: click.Context, param: click.Parameter, value: Optional[str]
-) -> Optional[str]:
-    # Pass None and "" verbatim
-    if value:
-        pulp_ctx = ctx.find_object(PulpContext)
-        assert pulp_ctx is not None
-        try:
-            return PulpAnsibleCollectionRemoteContext(pulp_ctx, entity={"name": value}).pulp_href
-        except click.ClickException:
-            return PulpAnsibleRoleRemoteContext(pulp_ctx, entity={"name": value}).pulp_href
-    return value
+remote_option = resource_option(
+    "--remote",
+    default_plugin="ansible",
+    default_type="collection",
+    context_table={
+        "ansible:collection": PulpAnsibleCollectionRemoteContext,
+        "ansible:role": PulpAnsibleRoleRemoteContext,
+    },
+)
 
 
 @click.group()
@@ -67,12 +66,12 @@ lookup_options = [href_option, name_option]
 create_options = [
     click.option("--name", required=True),
     click.option("--description"),
-    click.option("--remote", callback=_remote_callback, help=_("an optional remote")),
+    remote_option,
     pulp_option("--retained-versions", needs_plugins=[PluginRequirement("core", "3.13.0.dev")]),
 ]
 update_options = [
     click.option("--description"),
-    click.option("--remote", callback=_remote_callback, help=_("new optional remote")),
+    remote_option,
     pulp_option("--retained-versions", needs_plugins=[PluginRequirement("core", "3.13.0.dev")]),
 ]
 
@@ -88,13 +87,11 @@ repository.add_command(label_command())
 @repository.command()
 @name_option
 @href_option
-@click.option(
-    "--remote", callback=_remote_callback, help=_("optional remote name to perform sync with")
-)
+@remote_option
 @pass_repository_context
 def sync(
     repository_ctx: PulpRepositoryContext,
-    remote: Optional[str],
+    remote: EntityFieldDefinition,
 ) -> None:
     """
     If remote is not specified sync will try to use the default remote associated with
@@ -103,8 +100,8 @@ def sync(
     repository = repository_ctx.entity
     repository_href = repository["pulp_href"]
     body = {}
-    if remote:
-        body["remote"] = remote
+    if isinstance(remote, PulpEntityContext):
+        body["remote"] = remote.pulp_href
     elif repository["remote"] is None:
         name = repository["name"]
         raise click.ClickException(
