@@ -25,21 +25,19 @@ from pulpcore.cli.common.generic import (
     label_select_option,
     list_command,
     name_option,
+    resource_option,
     show_command,
 )
 
 _ = gettext.gettext
 
 
-def _repository_callback(
-    ctx: click.Context, param: click.Parameter, value: Optional[str]
-) -> EntityFieldDefinition:
-    # Pass None and "" verbatim
-    if value:
-        pulp_ctx = ctx.find_object(PulpContext)
-        assert pulp_ctx is not None
-        return PulpAnsibleRepositoryContext(pulp_ctx, entity={"name": value})
-    return value
+repository_option = resource_option(
+    "--repository",
+    default_plugin="ansible",
+    default_type="ansible",
+    context_table={"ansible:ansible": PulpAnsibleRepositoryContext},
+)
 
 
 @click.group()
@@ -68,12 +66,7 @@ create_options = [
         required=True,
         help=_("the base (relative) path component of the published url."),
     ),
-    click.option(
-        "--repository",
-        required=True,
-        callback=_repository_callback,
-        help=_("repository with content to distribute"),
-    ),
+    repository_option,
     click.option(
         "--version", type=int, help=_("a repository version number, leave blank for latest")
     ),
