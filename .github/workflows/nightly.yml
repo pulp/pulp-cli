@@ -1,6 +1,9 @@
 name: Nightly Test
 
 on:
+  push:
+    branches:
+      - develop
   schedule:
     - cron: '15 3 * * *'
 
