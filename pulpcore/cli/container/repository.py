@@ -5,7 +5,6 @@ import click
 
 from pulpcore.cli.common.context import (
     EntityFieldDefinition,
-    PluginRequirement,
     PulpContext,
     PulpEntityContext,
     PulpRepositoryContext,
@@ -20,10 +19,10 @@ from pulpcore.cli.common.generic import (
     label_select_option,
     list_command,
     name_option,
-    pulp_option,
     repository_href_option,
     repository_option,
     resource_option,
+    retained_versions_option,
     show_command,
     update_command,
     version_command,
@@ -70,7 +69,7 @@ nested_lookup_options = [repository_href_option, repository_option]
 update_options = [
     click.option("--description"),
     remote_option,
-    pulp_option("--retained-versions", needs_plugins=[PluginRequirement("core", "3.13.0.dev")]),
+    retained_versions_option,
 ]
 create_options = update_options + [click.option("--name", required=True)]
 
