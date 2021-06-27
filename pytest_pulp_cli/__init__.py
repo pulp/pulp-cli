@@ -28,7 +28,7 @@ class ScriptItem(pytest.Function):
         if path.parts()[-3].basename == "scripts":
             self.add_marker(path.parts()[-2].basename)
 
-    def _runscript(self, pulp_cli_env, tmp_path):
+    def _runscript(self, pulp_cli_env, tmp_path, pulp_container_log):
         run = subprocess.run([self.path], cwd=tmp_path)
         if run.returncode == 3:
             pytest.skip("Skipped as requested by the script.")
@@ -94,3 +94,25 @@ def pulp_cli_env(pulp_cli_settings, pulp_cli_vars, monkeypatch):
         monkeypatch.setenv(key, value)
 
     yield settings
+
+
+if "PULP_LOGGING" in os.environ:
+
+    @pytest.fixture
+    def pulp_container_log():
+        with subprocess.Popen(
+            [os.environ["PULP_LOGGING"], "logs", "-f", "--tail", "0", "pulp"],
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+        ) as proc:
+            yield
+            proc.kill()
+            print(proc.stdout.read().decode())
+
+
+else:
+
+    @pytest.fixture
+    def pulp_container_log():
+        yield
