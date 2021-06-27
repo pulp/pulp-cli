@@ -32,7 +32,7 @@ setup(
     ],
     extras_require={
         "pygments": ["pygments"],
-        "shell": ["incenp.click-shell~=2.1.0"],
+        "shell": ["click-shell~=2.1"],
     },
     entry_points={
         "console_scripts": ["pulp=pulpcore.cli.common:main"],
