@@ -8,7 +8,7 @@ import pkg_resources
 import toml
 
 try:
-    from incenp.click_shell import make_click_shell
+    from click_shell import make_click_shell
 
     HAS_CLICK_SHELL = True
 except ImportError:
