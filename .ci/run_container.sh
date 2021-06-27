@@ -59,4 +59,4 @@ then
   "${CONTAINER_RUNTIME}" exec pulp /tmp/setup_signing_service.py /root/sign_deb_release.sh /tmp/GPG-KEY-pulp-qe
 fi
 
-"$@"
+PULP_LOGGING="${CONTAINER_RUNTIME}" "$@"
