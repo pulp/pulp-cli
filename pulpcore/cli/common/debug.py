@@ -43,3 +43,19 @@ def task_summary(pulp_ctx: PulpContext) -> None:
         answer = pulp_ctx.call(PulpTaskContext.LIST_ID, parameters=payload)
         result[state] = answer["count"]
     pulp_ctx.output_result(result)
+
+
+@debug.command()
+@click.option("--count", "-c", type=int)
+@click.option("--sleep-secs", "-s", type=float)
+@click.option("--truncate-tasks", is_flag=True)
+@click.option("--failure-probability", "-p", type=float)
+@click.option("--resources-n", "-N", type=int)
+@click.option("--resources-k", "-K", type=int)
+@pass_pulp_context
+def tasking_benchmark(pulp_ctx: PulpContext, **kwargs):
+    """
+    Trigger a burst of tasks in the tasking_system.
+    """
+    result = pulp_ctx.call("herminig_tasking_benchmark_post", body={k: v for k, v in kwargs.items() if v is not None})
+    pulp_ctx.output_result(result)
