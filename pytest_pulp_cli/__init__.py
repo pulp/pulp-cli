@@ -1,52 +1,67 @@
-# type: ignore
-
 import os
 import pathlib
 import subprocess
+import typing as t
 
 import gnupg
 import pytest
 import requests
 import toml
 
+if t.TYPE_CHECKING:
+    from _pytest._code.code import ExceptionInfo, TerminalRepr
 
-def pytest_collect_file(file_path, parent):
+
+def pytest_collect_file(
+    file_path: pathlib.Path, parent: pytest.Collector
+) -> t.Optional[pytest.Collector]:
     if file_path.suffix == ".sh" and file_path.name.startswith("test_"):
-        return ScriptFile.from_parent(parent, path=file_path)
+        return ScriptFile.from_parent(parent, path=file_path)  # type: ignore
+    return None
 
 
 class ScriptFile(pytest.File):
     # To make pytest.Function happy
     obj = None
 
-    def collect(self):
+    def collect(self) -> t.Iterable[t.Union[pytest.Item, pytest.Collector]]:
         # Extract the name between "test_" and ".sh".
         name = self.path.name[5:][:-3]
-        yield ScriptItem.from_parent(self, name=name, path=self.path)
+        yield ScriptItem.from_parent(self, name=name, path=self.path)  # type: ignore
 
 
 # HACK: Inherit from `pytest.Function` to be able to use the fixtures
 class ScriptItem(pytest.Function):
-    def __init__(self, path, **kwargs):
+    def __init__(self, path: pathlib.Path, **kwargs: t.Any):
         super().__init__(callobj=self._runscript, **kwargs)
         self.path = path
         self.add_marker("script")
         if path.parts[-3] == "scripts":
             self.add_marker(path.parts[-2])
 
-    def _runscript(self, pulp_cli_env, tmp_path, pulp_container_log):
+    def _runscript(
+        self, pulp_cli_env: t.Dict[str, t.Any], tmp_path: pathlib.Path, pulp_container_log: None
+    ) -> None:
         run = subprocess.run([self.path], cwd=tmp_path)
         if run.returncode == 23:
             pytest.skip("Skipped as requested by the script.")
         if run.returncode != 0:
             raise ScriptError(f"Script returned with exit code {run.returncode}.")
 
-    def reportinfo(self):
+    def reportinfo(self) -> t.Tuple[pathlib.Path, int, str]:
         return self.path, 0, f"test script: {self.name}"
 
-    def repr_failure(self, excinfo):
+    def repr_failure(
+        self,
+        excinfo: "ExceptionInfo[BaseException]",
+        # older versions of python do not have typing.Literal ...
+        style: t.Optional[
+            't.Literal["long", "short", "line", "no", "native", "value", "auto"]'
+        ] = None,
+    ) -> t.Union[str, "TerminalRepr"]:
         if isinstance(excinfo.value, ScriptError):
             return str(excinfo.value)
+        # Weird, that the subclass Function does not like the parameter "style".
         return super().repr_failure(excinfo)
 
 
@@ -55,7 +70,7 @@ class ScriptError(Exception):
 
 
 @pytest.fixture
-def pulp_cli_vars():
+def pulp_cli_vars() -> t.Dict[str, str]:
     """
     This fixture will return a dictionary that is used by `pulp_cli_env` to setup the environment.
     To inject more environment variables, it can overwritten.
@@ -67,7 +82,7 @@ def pulp_cli_vars():
 
 
 @pytest.fixture(scope="session")
-def pulp_cli_settings(tmp_path_factory):
+def pulp_cli_settings(tmp_path_factory: pytest.TempPathFactory) -> t.Tuple[pathlib.Path, t.Any]:
     """
     This fixture will setup the config file once per session only.
     It is most likely not useful to be included standalone.
@@ -81,11 +96,11 @@ def pulp_cli_settings(tmp_path_factory):
     (settings_path / "pulp").mkdir(parents=True)
     with open(settings_path / "pulp" / "cli.toml", "w") as settings_file:
         toml.dump(settings, settings_file)
-    yield settings_path, settings
+    return settings_path, settings
 
 
 @pytest.fixture(scope="session")
-def pulp_cli_gnupghome(tmp_path_factory):
+def pulp_cli_gnupghome(tmp_path_factory: pytest.TempPathFactory) -> pathlib.Path:
     """
     This fixture will setup a GPG home directory once per session only.
     """
@@ -106,7 +121,12 @@ def pulp_cli_gnupghome(tmp_path_factory):
 
 
 @pytest.fixture
-def pulp_cli_env(pulp_cli_settings, pulp_cli_vars, pulp_cli_gnupghome, monkeypatch):
+def pulp_cli_env(
+    pulp_cli_settings: t.Tuple[pathlib.Path, t.Dict[str, t.Any]],
+    pulp_cli_vars: t.Dict[str, str],
+    pulp_cli_gnupghome: pathlib.Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> t.Dict[str, t.Any]:
     """
     This fixture will set up the environment for cli commands by:
 
@@ -124,25 +144,26 @@ def pulp_cli_env(pulp_cli_settings, pulp_cli_vars, pulp_cli_gnupghome, monkeypat
     for key, value in pulp_cli_vars.items():
         monkeypatch.setenv(key, value)
 
-    yield settings
+    return settings
 
 
 if "PULP_LOGGING" in os.environ:
 
     @pytest.fixture(scope="session")
-    def pulp_container_log_stream():
+    def pulp_container_log_stream() -> t.Iterator[t.IO[bytes]]:
         with subprocess.Popen(
             [os.environ["PULP_LOGGING"], "logs", "-f", "--tail", "0", "pulp-ephemeral"],
             stdin=subprocess.DEVNULL,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
         ) as proc:
+            assert proc.stdout is not None
             os.set_blocking(proc.stdout.fileno(), False)
             yield proc.stdout
             proc.kill()
 
     @pytest.fixture
-    def pulp_container_log(pulp_container_log_stream):
+    def pulp_container_log(pulp_container_log_stream: t.IO[bytes]) -> t.Iterator[None]:
         # Flush logs before starting the test
         pulp_container_log_stream.read()
         yield
@@ -153,5 +174,5 @@ if "PULP_LOGGING" in os.environ:
 else:
 
     @pytest.fixture
-    def pulp_container_log():
+    def pulp_container_log() -> t.Iterator[None]:
         yield
