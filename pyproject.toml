@@ -171,13 +171,14 @@ markers = [
 [tool.mypy]
 strict = true
 show_error_codes = true
-files = "pulpcore/**/*.py, pulp_cli/**/*.py, tests/*.py"
+files = "pulpcore/**/*.py, pulp_cli/**/*.py, tests/*.py, pytest_pulp_cli/**/*.py"
 namespace_packages = true
 explicit_package_bases = true
 
 [[tool.mypy.overrides]]
 module = [
   "click_shell.*",
+  "gnupg.*",
   "schema.*",
 ]
 ignore_missing_imports = true
