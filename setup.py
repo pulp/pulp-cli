@@ -5,7 +5,6 @@ try:
 
     main_entrypoint = "pulp=pulpcore.cli.common:main"
     plugin_packages = find_namespace_packages(include=["pulpcore.cli.*"])
-    extra_packages = ["pytest_pulp_cli"]
 
 except ImportError:
     # Old versions of setuptools do not provide `find_namespace_packages`
@@ -15,7 +14,8 @@ except ImportError:
     main_entrypoint = "pulp=pulp_cli:main"
     plugins = find_packages(where="pulpcore/cli")
     plugin_packages = [f"pulpcore.cli.{plugin}" for plugin in plugins]
-    extra_packages = ["pulp_cli", "pytest_pulp_cli"]
+
+extra_packages = ["pulp_cli", "pytest_pulp_cli"]
 
 plugin_entry_points = [
     (package.rsplit(".", 1)[-1], package)
