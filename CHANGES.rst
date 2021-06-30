@@ -13,6 +13,45 @@ Changelog
 
 .. towncrier release notes start
 
+0.10.0 (2021-06-30)
+
+Features
+--------
+
+- Change resource options to accept plugin and type along with the name.
+  `#158 <https://github.com/pulp/pulp-cli/issues/158>`_
+- Added missing search options to publication list commands.
+  `#207 <https://github.com/pulp/pulp-cli/issues/207>`_
+- Add a timeout parameter to specify the duration how long to wait for background tasks.
+  `#232 <https://github.com/pulp/pulp-cli/issues/232>`_
+- Python remote fields --includes/--excludes can now be specified with requirements.txt files
+  `#240 <https://github.com/pulp/pulp-cli/issues/240>`_
+- Updated RPM commands to be compatible with new 3.13 auto-publish changes
+  `#251 <https://github.com/pulp/pulp-cli/issues/251>`_
+- Added generic content list command.
+  `#254 <https://github.com/pulp/pulp-cli/issues/254>`_
+- Update the click dependency to 8.0.1.
+  `#256 <https://github.com/pulp/pulp-cli/issues/256>`_
+- Added feature to bypass chunk uploading if the chunk size exceeds the file size. This speeds up the upload by about 30-40%.
+  `#262 <https://github.com/pulp/pulp-cli/issues/262>`_
+- Added ``--cid`` option to ``task list`` command to allow fitering by correlation id.
+  `#269 <https://github.com/pulp/pulp-cli/issues/269>`_
+- Added allow-uploads/block-uploads option to python distribution commands
+  `#271 <https://github.com/pulp/pulp-cli/issues/271>`_
+
+
+Bugfixes
+--------
+
+- Properly report timed out tasks.
+  `#232 <https://github.com/pulp/pulp-cli/issues/232>`_
+- Use ``find_packages`` instead of ``find_namespace_packages`` in setup to be compatible with ``setuptools<39.2.0``.
+  `#248 <https://github.com/pulp/pulp-cli/issues/248>`_
+
+
+----
+
+
 0.9.0 (2021-05-17)
 ==================
 
