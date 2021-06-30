@@ -37,7 +37,7 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/pulp/pulp-cli",
-    version="0.10.0",
+    version="0.10.1",
     packages=plugin_packages + extra_packages,
     package_data={package: ["py.typed"] for package in plugin_packages},
     python_requires=">=3.6",
