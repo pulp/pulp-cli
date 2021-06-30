@@ -13,6 +13,20 @@ Changelog
 
 .. towncrier release notes start
 
+0.10.1 (2021-06-30)
+
+Bugfixes
+--------
+
+- Fixed a bug in the docs publishing workflow.
+  `#286 <https://github.com/pulp/pulp-cli/issues/286>`_
+- Unconditionally add the fake not namespaced pulp_cli to the distribution on pypi to make it able to be consumed by setuptools<40.
+  `#287 <https://github.com/pulp/pulp-cli/issues/287>`_
+
+
+----
+
+
 0.10.0 (2021-06-30)
 
 Features
