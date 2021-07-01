@@ -87,6 +87,8 @@ cert = "/etc/pki/katello/certs/pulp-client.crt"
 key = "/etc/pki/katello/private/pulp-client.key"
 ```
 
-As Katello uses Pulp as a backend all modifying actions in Pulp should be performed via Katello.
+Katello content-proxy servers do not possess the certificates required to communicate with Pulp; therefore you should install pulp-cli only on the primary server, and override the base_url setting on the command line when you need to connect to Pulp running on a content-proxy rather than Pulp on the primary Katello server: `--base-url https://capsule.example.com`
+
+As Katello uses Pulp as a backend, all modifying actions in Pulp should be performed via Katello.
 Therefore you are also strongly encourged to set `dry_run = true`, to prevent accidentally calling into dangerous commands.
 This setting can in turn be overwritten on the command-line with the `--force` flag.
