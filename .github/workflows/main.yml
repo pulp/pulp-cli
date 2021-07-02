@@ -49,6 +49,8 @@ jobs:
         include:
           - python: "3.9"
             image_tag: "nightly"
+          - python: "3.9"
+            image_tag: "3.14"
           - python: "3.7"
             image_tag: "3.13"
           - python: "3.8"
@@ -57,8 +59,6 @@ jobs:
             image_tag: "3.11"
           - python: "3.6"
             image_tag: "3.10"
-          - python: "3.9"
-            image_tag: "3.9"
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python
