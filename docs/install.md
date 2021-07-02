@@ -85,7 +85,6 @@ configure client certificate authentication in your `~/.config/pulp/settings.tom
 base_url = "https://<your FQDN>"
 cert = "/etc/pki/katello/certs/pulp-client.crt"
 key = "/etc/pki/katello/private/pulp-client.key"
-verify_ssl = false
 ```
 
 As Katello uses Pulp as a backend all modifying actions in Pulp should be performed via Katello.
