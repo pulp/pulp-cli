@@ -44,8 +44,8 @@ setup(
     install_requires=[
         "click>=7.1.2,<9.0.0",
         "packaging",
-        "PyYAML~=5.4.1",
-        "requests~=2.25.1",
+        "PyYAML~=5.3",
+        "requests~=2.24",
         "toml==0.10.2",
     ],
     extras_require={
