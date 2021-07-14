@@ -326,16 +326,19 @@ class PulpEntityContext:
     REPOSITORY_FIND_IDS: Dict[str, str] = {
         "file": "repositories_file_file_list",
         "rpm": "repositories_rpm_rpm_list",
+        "ansible": "repositories_ansible_ansible_list",
     }
     # { "pulp_type" : repository-version-list-id }
     REPOSITORY_VERSION_FIND_IDS: Dict[str, str] = {
         "file": "repositories_file_file_versions_list",
         "rpm": "repositories_rpm_rpm_versions_list",
+        "ansible": "repositories_ansible_ansible_versions_list",
     }
     # { "pulp_type" : repository-href-ids }
     REPOSITORY_HREF_IDS = {
         "file": "file_file_repository_href",
         "rpm": "rpm_rpm_repository_href",
+        "ansible": "ansible_ansible_repository_href",
     }
 
     # Subclasses for nested entities can define the parameters for there parent scope here
