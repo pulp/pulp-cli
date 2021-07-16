@@ -3,9 +3,9 @@
 # shellcheck source=tests/scripts/config.source
 . "$(dirname "$(realpath "$0")")"/config.source
 
-good_settings="${XDG_CONFIG_HOME}/pulp/settings.toml"
-bad_settings="bad_settings.toml"
-profile_settings="profile_settings.toml"
+good_settings="${XDG_CONFIG_HOME}/pulp/cli.toml"
+bad_settings="bad_config.toml"
+profile_settings="profile_config.toml"
 test_settings="test.toml"
 
 export XDG_CONFIG_HOME=/nowhere

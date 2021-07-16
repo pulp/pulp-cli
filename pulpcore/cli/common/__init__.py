@@ -14,7 +14,7 @@ try:
 except ImportError:
     HAS_CLICK_SHELL = False
 
-from pulpcore.cli.common.config import CONFIG_LOCATION, config, config_options, validate_config
+from pulpcore.cli.common.config import CONFIG_LOCATIONS, config, config_options, validate_config
 from pulpcore.cli.common.context import PulpContext
 from pulpcore.cli.common.debug import debug
 
@@ -43,11 +43,18 @@ def _config_callback(ctx: click.Context, param: Any, value: Optional[str]) -> No
         if value:
             config = toml.load(value)
         else:
-            try:
-                config = toml.load(CONFIG_LOCATION)
-            except FileNotFoundError:
-                # No config, but also none requested
-                return
+            config = {"cli": {}}
+            for location in CONFIG_LOCATIONS:
+                try:
+                    new_config = toml.load(location)
+                    # level 1 merge
+                    for key in new_config:
+                        if key in config:
+                            config[key].update(new_config[key])
+                        else:
+                            config[key] = new_config[key]
+                except FileNotFoundError:
+                    pass
         profile: str = "cli"
         if PROFILE_KEY in ctx.meta:
             profile = "cli-" + ctx.meta[PROFILE_KEY]

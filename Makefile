@@ -10,11 +10,11 @@ lint:
 	mypy
 	@echo "🙊 Code 🙈 LGTM 🙉 !"
 
-tests/settings.toml:
+tests/cli.toml:
 	cp $@.example $@
 	@echo "In order to configure the tests to talk to your test server, you might need to edit $@ ."
 
-test: | tests/settings.toml
+test: | tests/cli.toml
 	pytest -v tests
 
 servedocs:
