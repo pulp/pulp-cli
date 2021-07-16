@@ -2,6 +2,7 @@ import gettext
 from typing import Any, Dict, List, Optional
 
 import click
+import schema as s
 
 from pulpcore.cli.common.context import (
     EntityFieldDefinition,
@@ -59,6 +60,19 @@ def _content_callback(ctx: click.Context, param: click.Parameter, value: Any) ->
     return value
 
 
+CONTENT_LIST_SCHEMA = s.Schema([{"sha256": str, "relative_path": s.And(str, len)}])
+
+
+def _content_list_callback(ctx: click.Context, param: click.Parameter, value: Any) -> Any:
+    result = load_json_callback(ctx, param, value)
+    if result is None:
+        return None
+    try:
+        return CONTENT_LIST_SCHEMA.validate(result)
+    except s.SchemaError as e:
+        raise click.ClickException("Validation of '{}' failed: {}".format(param.name, str(e)))
+
+
 @click.group()
 @click.option(
     "-t",
@@ -100,14 +114,16 @@ file_options = [
         callback=_content_callback,
     ),
 ]
-content_json_callback = create_content_json_callback(PulpFileContentContext)
+content_json_callback = create_content_json_callback(
+    PulpFileContentContext, schema=CONTENT_LIST_SCHEMA
+)
 modify_options = [
     click.option(
         "--add-content",
         callback=content_json_callback,
         help=_(
             """JSON string with a list of objects to add to the repository.
-    Each object should consist of the following keys: "sha256", "relative_path"..
+    Each object must contain the following keys: "sha256", "relative_path".
     The argument prefixed with the '@' can be the path to a JSON file with a list of objects."""
         ),
     ),
@@ -116,7 +132,7 @@ modify_options = [
         callback=content_json_callback,
         help=_(
             """JSON string with a list of objects to remove from the repository.
-    Each object should consist of the following keys: "sha256", "relative_path"..
+    Each object must contain the following keys: "sha256", "relative_path".
     The argument prefixed with the '@' can be the path to a JSON file with a list of objects."""
         ),
     ),
@@ -247,22 +263,22 @@ def remove(
 @click.option(
     "--add-content",
     default="[]",
-    callback=load_json_callback,
+    callback=_content_list_callback,
     expose_value=True,
     help=_(
         """JSON string with a list of objects to add to the repository.
-    Each object should consist of the following keys: "sha256", "relative_path"..
+    Each object must contain the following keys: "sha256", "relative_path".
     The argument prefixed with the '@' can be the path to a JSON file with a list of objects."""
     ),
 )
 @click.option(
     "--remove-content",
     default="[]",
-    callback=load_json_callback,
+    callback=_content_list_callback,
     expose_value=True,
     help=_(
         """JSON string with a list of objects to remove from the repository.
-    Each object should consist of the following keys: "sha256", "relative_path"..
+    Each object must contain the following keys: "sha256", "relative_path".
     The argument prefixed with the '@' can be the path to a JSON file with a list of objects."""
     ),
 )
