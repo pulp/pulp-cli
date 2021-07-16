@@ -15,6 +15,7 @@ from typing import (
 )
 
 import click
+import schema as s
 
 from pulpcore.cli.common.context import (
     DEFAULT_LIMIT,
@@ -210,12 +211,21 @@ def load_json_callback(
         return json_object
 
 
-def create_content_json_callback(content_ctx: Type[PulpContentContext]) -> Any:
+def create_content_json_callback(
+    content_ctx: Type[PulpContentContext], schema: s.Schema = None
+) -> Any:
     def _callback(
         ctx: click.Context, param: click.Parameter, value: Optional[str]
     ) -> Optional[List[PulpContentContext]]:
         new_value = load_json_callback(ctx, param, value)
         if new_value is not None:
+            if schema is not None:
+                try:
+                    schema.validate(new_value)
+                except s.SchemaError as e:
+                    raise click.ClickException(
+                        "Validation of '{}' failed: {}".format(param.name, str(e))
+                    )
             pulp_ctx = ctx.find_object(PulpContext)
             assert pulp_ctx is not None
             return [content_ctx(pulp_ctx, entity=unit) for unit in new_value]

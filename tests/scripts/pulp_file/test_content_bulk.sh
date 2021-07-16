@@ -28,6 +28,18 @@ expect_succ pulp file content create --sha256 "$sha256_3" --relative-path upload
 
 expect_succ pulp file repository create --name "cli_test_file_repository"
 
+# Test invalid json input
+expect_fail pulp file repository content modify --repository "cli_test_file_repository" --add-content "{\"sha256\":\"$sha256_1\",\"relative_path\":\"upload_test/test_1.txt\"}"
+echo "${ERROUTPUT}" | grep -q "should be instance of 'list'"
+expect_fail pulp file repository content modify --repository "cli_test_file_repository" --add-content "[{\"relative_path\":\"upload_test/test_1.txt\"}]"
+echo "${ERROUTPUT}" | grep -q "Missing key: 'sha256'"
+expect_fail pulp file repository content modify --repository "cli_test_file_repository" --add-content "[{\"sha256\":\"$sha256_1\",\"relative_path\":\"upload_test/test_1.txt\", \"sha128\":\"abcd\"}]"
+echo "${ERROUTPUT}" | grep -q "Wrong key 'sha128' in"
+expect_fail pulp file repository content modify --repository "cli_test_file_repository" --add-content "[{\"sha256\":1234567890,\"relative_path\":\"upload_test/test_1.txt\"}]"
+echo "${ERROUTPUT}" | grep -q "should be instance of 'str'"
+expect_fail pulp file repository content modify --repository "cli_test_file_repository" --add-content "[{\"sha256\":\"$sha256_1\",\"relative_path\":\"\"}]"
+echo "${ERROUTPUT}" | grep -q "Key 'relative_path' error:"
+
 # Old content commands
 # Add content using JSON string
 expect_succ pulp file repository modify --name "cli_test_file_repository" --add-content "[{\"sha256\":\"$sha256_1\",\"relative_path\":\"upload_test/test_1.txt\"},{\"sha256\":\"$sha256_2\",\"relative_path\":\"upload_test/test_2.txt\"},{\"sha256\":\"$sha256_3\",\"relative_path\":\"upload_test/test_3.txt\"}]"
@@ -62,3 +74,4 @@ test "$(echo "$OUTPUT" | jq -r length)" -eq "3"
 expect_succ pulp file repository content modify --repository "cli_test_file_repository" --remove-content "@remove_content.json"
 expect_succ pulp file repository content list --repository "cli_test_file_repository"
 test "$(echo "$OUTPUT" | jq -r length)" -eq "0"
+
