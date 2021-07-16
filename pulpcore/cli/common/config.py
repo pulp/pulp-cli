@@ -8,7 +8,11 @@ import toml
 _ = gettext.gettext
 _T = TypeVar("_T")
 
-CONFIG_LOCATION = str(Path(click.utils.get_app_dir("pulp"), "settings.toml"))
+CONFIG_LOCATIONS = [
+    "/etc/pulp/cli.toml",
+    str(Path(click.utils.get_app_dir("pulp"), "settings.toml")),
+    str(Path(click.utils.get_app_dir("pulp"), "cli.toml")),
+]
 FORMAT_CHOICES = ["json", "yaml", "none"]
 SETTINGS = [
     "base_url",
@@ -117,7 +121,7 @@ def config() -> None:
 @click.option("--interactive", "-i", is_flag=True)
 @click.option("--editor", "-e", is_flag=True, help=_("Edit the config file in an editor"))
 @click.option("--overwrite", "-o", is_flag=True, help=_("Overwite any existing config file"))
-@click.option("--location", default=CONFIG_LOCATION, type=click.Path(resolve_path=True))
+@click.option("--location", default=CONFIG_LOCATIONS[-1], type=click.Path(resolve_path=True))
 @click.pass_context
 def create(
     ctx: click.Context,
@@ -172,7 +176,7 @@ def create(
 
 
 @config.command(help=_("Open the settings config file in an editor"))
-@click.option("--location", default=CONFIG_LOCATION, type=click.Path(resolve_path=True))
+@click.option("--location", default=CONFIG_LOCATIONS[-1], type=click.Path(resolve_path=True))
 def edit(location: str) -> None:
     if not Path(location).exists():
         raise click.ClickException(
@@ -198,7 +202,7 @@ def edit(location: str) -> None:
 
 
 @config.command(help=_("Validate a pulp-cli config file"))
-@click.option("--location", default=CONFIG_LOCATION, type=click.Path(resolve_path=True))
+@click.option("--location", default=CONFIG_LOCATIONS[-1], type=click.Path(resolve_path=True))
 @click.option("--strict", is_flag=True, help=_("Validate that all settings are present"))
 def validate(location: str, strict: bool) -> None:
     try:

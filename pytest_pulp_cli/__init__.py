@@ -67,10 +67,10 @@ def pulp_cli_settings(tmp_path_factory):
     It is most likely not useful to be included standalone.
     The `pulp_cli_env` fixture, however depends on it and sets $XDG_CONFIG_HOME up accordingly.
     """
-    settings = toml.load("tests/settings.toml")
+    settings = toml.load("tests/cli.toml")
     settings_path = tmp_path_factory.mktemp("config", numbered=False)
     (settings_path / "pulp").mkdir(parents=True)
-    with open(settings_path / "pulp" / "settings.toml", "w") as settings_file:
+    with open(settings_path / "pulp" / "cli.toml", "w") as settings_file:
         toml.dump(settings, settings_file)
     yield settings_path, settings
 
