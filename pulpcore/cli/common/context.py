@@ -3,7 +3,7 @@ import gettext
 import json
 import sys
 import time
-from typing import IO, Any, ClassVar, Dict, List, NamedTuple, Optional, Set, Tuple, Type, Union
+from typing import IO, Any, ClassVar, Dict, List, NamedTuple, Optional, Set, Type, Union
 
 import click
 import yaml
@@ -30,8 +30,6 @@ BATCH_SIZE = 25
 
 
 EntityDefinition = Dict[str, Any]
-RepositoryDefinition = Tuple[str, str]  # name, pulp_type
-RepositoryVersionDefinition = Tuple[str, str, int]  # name, pulp_type, version
 
 
 class PluginRequirement(NamedTuple):
@@ -271,25 +269,6 @@ class PulpEntityContext:
     _entity: Optional[EntityDefinition]
     _entity_lookup: EntityDefinition
 
-    # { "pulp_type" : repository-list-id }
-    REPOSITORY_FIND_IDS: Dict[str, str] = {
-        "file": "repositories_file_file_list",
-        "rpm": "repositories_rpm_rpm_list",
-        "ansible": "repositories_ansible_ansible_list",
-    }
-    # { "pulp_type" : repository-version-list-id }
-    REPOSITORY_VERSION_FIND_IDS: Dict[str, str] = {
-        "file": "repositories_file_file_versions_list",
-        "rpm": "repositories_rpm_rpm_versions_list",
-        "ansible": "repositories_ansible_ansible_versions_list",
-    }
-    # { "pulp_type" : repository-href-ids }
-    REPOSITORY_HREF_IDS = {
-        "file": "file_file_repository_href",
-        "rpm": "rpm_rpm_repository_href",
-        "ansible": "ansible_ansible_repository_href",
-    }
-
     # Subclasses for nested entities can define the parameters for there parent scope here
     @property
     def scope(self) -> Dict[str, Any]:
@@ -467,44 +446,6 @@ class PulpEntityContext:
         return capability in self.CAPABILITIES and all(
             (self.pulp_ctx.has_plugin(pr) for pr in self.CAPABILITIES[capability])
         )
-
-    def find_repository(self, definition: RepositoryDefinition) -> Any:
-        name, repo_type = definition
-        if repo_type in self.REPOSITORY_FIND_IDS:
-            search_result = self.pulp_ctx.call(
-                self.REPOSITORY_FIND_IDS[repo_type], parameters={"name": name, "limit": 1}
-            )
-        else:
-            raise click.ClickException(
-                f"PulpExporter 'Repository-type '{repo_type}' not supported!"
-            )
-
-        if search_result["count"] != 1:
-            raise click.ClickException(f"Repository '{name}/{repo_type}' not found.")
-
-        repository = search_result["results"][0]
-        return repository
-
-    def find_repository_version(self, definition: RepositoryVersionDefinition) -> Any:
-        name, repo_type, number = definition
-        repo_href = self.find_repository((name, repo_type))["pulp_href"]
-        if repo_type in self.REPOSITORY_VERSION_FIND_IDS:
-            params = {self.REPOSITORY_HREF_IDS[repo_type]: repo_href, "number": number, "limit": 1}
-            search_result = self.pulp_ctx.call(
-                self.REPOSITORY_VERSION_FIND_IDS[repo_type], parameters=params
-            )
-        else:
-            raise click.ClickException(
-                f"PulpExporter 'Repository-type '{repo_type}' not supported!"
-            )
-
-        if search_result["count"] != 1:
-            raise click.ClickException(
-                f"RepositoryVersion '{name}/{repo_type}/{number}' not found."
-            )
-
-        repo_version = search_result["results"][0]
-        return repo_version
 
 
 class PulpRemoteContext(PulpEntityContext):

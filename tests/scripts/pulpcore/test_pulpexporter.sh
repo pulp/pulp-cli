@@ -50,10 +50,10 @@ pulp exporter pulp list --name $NAME1
 expect_succ pulp export pulp run --exporter $NAME1
 expect_succ pulp export pulp run --exporter $NAME1 --full False
 expect_succ pulp export pulp run --exporter $NAME1 --full True --chunk-size 5KB
-expect_succ pulp export pulp run --exporter $NAME2 --full False --start-versions $REPO1 file 0
-expect_succ pulp export pulp run --exporter $NAME2 --full False --versions $REPO1 file 0
-expect_succ pulp export pulp run --exporter $NAME2 --full False --start-versions $REPO1 file 0 --versions $REPO1 file 1
-expect_succ pulp export pulp run --exporter $NAME2 --full False --start-versions $REPO1 file 0 --versions $REPO1 file 1 --chunk-size 5KB
+expect_succ pulp export pulp run --exporter $NAME2 --full False --start-versions file:file:${REPO1} 0
+expect_succ pulp export pulp run --exporter $NAME2 --full False --versions file:file:${REPO1} 0
+expect_succ pulp export pulp run --exporter $NAME2 --full False --start-versions file:file:${REPO1} 0 --versions file:file:${REPO1} 1
+expect_succ pulp export pulp run --exporter $NAME2 --full False --start-versions file:file:${REPO1} 0 --versions file:file:${REPO1} 1 --chunk-size 5KB
 
 # Test list exports
 expect_succ pulp export pulp list --exporter $NAME1
