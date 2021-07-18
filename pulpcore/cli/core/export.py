@@ -1,19 +1,56 @@
 import gettext
-from typing import Any, Dict, List
+from typing import Any, Dict, Iterable, Tuple
 
 import click
 
 from pulpcore.cli.common.context import (
     DEFAULT_LIMIT,
     PulpContext,
-    RepositoryVersionDefinition,
+    PulpRepositoryContext,
+    PulpRepositoryVersionContext,
     pass_entity_context,
     pass_pulp_context,
+    registered_repository_contexts,
 )
 from pulpcore.cli.common.generic import destroy_command, href_option, show_command
 from pulpcore.cli.core.context import PulpExportContext, PulpExporterContext
 
 _ = gettext.gettext
+
+
+def _version_list_callback(
+    ctx: click.Context, param: click.Parameter, value: Iterable[Tuple[str, int]]
+) -> Iterable[PulpRepositoryVersionContext]:
+    result = []
+    for item in value:
+        plugin, resource_type, identifier = item[0].split(":", maxsplit=2)
+        if not identifier:
+            raise click.ClickException(_("Repositories must be specified with plugin and type"))
+        context_class = registered_repository_contexts.get(plugin + ":" + resource_type)
+        if context_class is None:
+            raise click.ClickException(
+                _(
+                    "The type '{plugin}:{resource_type}' "
+                    "is not valid for the {option_name} option."
+                ).format(plugin=plugin, resource_type=resource_type, option_name=param.name)
+            )
+        pulp_ctx = ctx.find_object(PulpContext)
+        assert pulp_ctx is not None
+        repository_ctx: PulpRepositoryContext = context_class(pulp_ctx, entity={"name": identifier})
+
+        if not repository_ctx.capable("pulpexport"):
+            raise click.ClickException(
+                _(
+                    "The type '{plugin}:{resource_type}' "
+                    "does not support the '{capability}' capability."
+                ).format(plugin=plugin, resource_type=resource_type, capability="export")
+            )
+
+        entity_ctx = repository_ctx.get_version_context()
+        entity_ctx.pulp_href = f"{repository_ctx.entity['versions_href']}{item[1]}/"
+        result.append(entity_ctx)
+
+    return result
 
 
 @click.group()
@@ -61,8 +98,10 @@ def list(
 @click.option("--exporter", required=True)
 @click.option("--full", type=bool, default=True)
 @click.option("--chunk-size", type=str, help=_("Examples: 512MB, 1GB"))
-@click.option("--versions", type=tuple([str, str, int]), multiple=True)
-@click.option("--start-versions", type=tuple([str, str, int]), multiple=True)
+@click.option("--versions", type=tuple([str, int]), multiple=True, callback=_version_list_callback)
+@click.option(
+    "--start-versions", type=tuple([str, int]), multiple=True, callback=_version_list_callback
+)
 @pass_entity_context
 @pass_pulp_context
 def run(
@@ -71,8 +110,8 @@ def run(
     exporter: str,
     full: bool,
     chunk_size: str,
-    versions: List[RepositoryVersionDefinition],  # TODO How do we want to specify repo versions?
-    start_versions: List[RepositoryVersionDefinition],
+    versions: Iterable[PulpRepositoryVersionContext],
+    start_versions: Iterable[PulpRepositoryVersionContext],
 ) -> None:
     exporter_ctx = PulpExporterContext(pulp_ctx)
     export_ctx.exporter = exporter_ctx.find(name=exporter)
@@ -84,13 +123,13 @@ def run(
 
     vers_list = []
     for v in versions:
-        vers_list.append(export_ctx.find_repository_version(v)["pulp_href"])
+        vers_list.append(v.pulp_href)
     if vers_list:
         body["versions"] = vers_list
 
     start_vers_list = []
     for v in start_versions:
-        start_vers_list.append(export_ctx.find_repository_version(v)["pulp_href"])
+        start_vers_list.append(v.pulp_href)
     if start_vers_list:
         body["start_versions"] = start_vers_list
 
