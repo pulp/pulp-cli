@@ -24,6 +24,7 @@ SETTINGS = [
     "format",
     "dry_run",
     "timeout",
+    "verbose",
 ]
 
 CONFIG_OPTIONS = [
@@ -55,6 +56,13 @@ CONFIG_OPTIONS = [
         default=0,
         help=_("Time to wait for background tasks, set to 0 to wait infinitely"),
     ),
+    click.option(
+        "-v",
+        "--verbose",
+        type=int,
+        count=True,
+        help=_("Increase verbosity; explain api calls as they are made"),
+    ),
 ]
 
 
@@ -79,6 +87,8 @@ def validate_config(config: Dict[str, Any], strict: bool = False) -> bool:
         errors.append(_("'dry_run' is not a bool"))
     if "timeout" in config and not isinstance(config["timeout"], int):
         errors.append(_("'timeout' is not an integer"))
+    if "verbose" in config and not isinstance(config["verbose"], int):
+        errors.append(_("'verbose' is not an integer"))
     unknown_settings = set(config.keys()) - set(SETTINGS)
     if unknown_settings:
         errors.append(_("Unknown settings: '{}'.").format("','".join(unknown_settings)))
