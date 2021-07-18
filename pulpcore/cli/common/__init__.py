@@ -91,13 +91,6 @@ def _config_callback(ctx: click.Context, param: Any, value: Optional[str]) -> No
     expose_value=False,
 )
 @click.option(
-    "-v",
-    "--verbose",
-    type=int,
-    count=True,
-    help=_("Increase verbosity; explain api calls as they are made"),
-)
-@click.option(
     "-b",
     "--background",
     is_flag=True,
