@@ -311,7 +311,7 @@ def resource_option(*args: Any, **kwargs: Any) -> Callable[[_FC], _FC]:
 limit_option = pulp_option(
     "--limit",
     default=DEFAULT_LIMIT,
-    type=int,
+    type=click.IntRange(1),
     help=_("Limit the number of {entities} to show."),
 )
 offset_option = pulp_option(
