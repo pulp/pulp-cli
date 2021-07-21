@@ -27,3 +27,19 @@ def has_plugin(pulp_ctx: PulpContext, name: str, min_version: str, max_version: 
     available = pulp_ctx.has_plugin(name, min_version, max_version)
     pulp_ctx.output_result(available)
     sys.exit(0 if available else 1)
+
+
+@debug.command()
+@pass_pulp_context
+def task_summary(pulp_ctx: PulpContext) -> None:
+    """
+    List a summary of tasks by status.
+    """
+    from pulpcore.cli.core.context import PulpTaskContext
+
+    result = {}
+    for state in ["waiting", "skipped", "running", "completed", "failed", "canceled", "canceling"]:
+        payload = {"limit": 0, "state": state}
+        answer = pulp_ctx.call(PulpTaskContext.LIST_ID, parameters=payload)
+        result[state] = answer["count"]
+    pulp_ctx.output_result(result)
