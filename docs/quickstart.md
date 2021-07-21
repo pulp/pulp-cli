@@ -21,6 +21,7 @@ Global options include:
   * `--user`
   * `--password`
   * `--config`
+  * `--profile`
   * `--format`
   * `-v`/`-vv`/`-vvv`
 
