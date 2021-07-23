@@ -43,6 +43,7 @@ rpm_remote_options = [
     click.option(
         "--policy", type=click.Choice(["immediate", "on_demand", "streamed"], case_sensitive=False)
     ),
+    click.option("--sles-auth-token"),
 ]
 
 remote.add_command(list_command(decorators=[label_select_option]))
