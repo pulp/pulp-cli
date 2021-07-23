@@ -283,8 +283,9 @@ class PulpContext:
                 feature = plugin.feature or _("this command")
                 raise click.ClickException(
                     _(
-                        "The server does not have '{specifier}' installed,"
+                        "The server does not provide the pulp component '{specifier}',"
                         " which is needed to use {feature}."
+                        " See 'pulp status' for installed components."
                     ).format(specifier=specifier, feature=feature)
                 )
         else:
