@@ -1,5 +1,5 @@
 import gettext
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Iterable, Optional
 
 import click
 
@@ -36,6 +36,7 @@ from pulpcore.cli.rpm.context import PulpRpmRemoteContext, PulpRpmRepositoryCont
 _ = gettext.gettext
 
 
+SKIP_TYPES = ["srpm"]
 remote_option = resource_option(
     "--remote",
     default_plugin="rpm",
@@ -100,11 +101,15 @@ repository.add_command(label_command(decorators=nested_lookup_options))
 @href_option
 @remote_option
 @click.option("--mirror/--no-mirror", default=None)
+@click.option(
+    "--skip-type", "skip_types", multiple=True, type=click.Choice(SKIP_TYPES, case_sensitive=False)
+)
 @pass_repository_context
 def sync(
     repository_ctx: PulpRepositoryContext,
     remote: EntityFieldDefinition,
     mirror: Optional[bool],
+    skip_types: Iterable[str],
 ) -> None:
     repository = repository_ctx.entity
     repository_href = repository_ctx.pulp_href
@@ -113,6 +118,8 @@ def sync(
 
     if mirror:
         body["mirror"] = mirror
+    if skip_types:
+        body["skip_types"] = skip_types
 
     if isinstance(remote, PulpEntityContext):
         body["remote"] = remote.pulp_href

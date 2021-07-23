@@ -60,7 +60,7 @@ then
     --base-path "cli_test_rpm_distro" \
     --repository "cli_test_rpm_repository"
 
-  expect_succ pulp rpm repository sync --name "cli_test_rpm_repository"
+  expect_succ pulp rpm repository sync --name "cli_test_rpm_repository" --skip-type srpm
   expect_succ pulp rpm publication list
   test "$(echo "$OUTPUT" | jq -r length)" -eq 1
   if [ "$(pulp debug has-plugin --name "rpm" --max-version "3.13.0.dev")" = "true" ]
