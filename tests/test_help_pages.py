@@ -23,5 +23,5 @@ def test_access_help(_api, args):
     runner = CliRunner()
     result = runner.invoke(main, args + ["--help"])
     assert result.exit_code == 0
-    assert result.stdout.startswith("Usage:")
+    assert result.stdout.startswith("Usage:") or result.stdout.startswith("DeprecationWarning:")
     _api.assert_not_called()

@@ -1,0 +1,1 @@
+Deprecate orphans delete command in favor of orphan cleanup and use new rest interface on pulpcore>=3.14.

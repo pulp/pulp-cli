@@ -3,6 +3,6 @@
 # shellcheck source=tests/scripts/config.source
 . "$(dirname "$(dirname "$(realpath "$0")")")"/config.source
 
-expect_succ pulp orphans delete
+expect_succ pulp orphan cleanup
 
 test "$(echo "${OUTPUT}" | jq -r '.state' )" = "completed"

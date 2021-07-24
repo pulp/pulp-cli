@@ -8,6 +8,7 @@ from pulpcore.cli.core.export import export
 from pulpcore.cli.core.exporter import exporter
 from pulpcore.cli.core.group import group
 from pulpcore.cli.core.importer import importer
+from pulpcore.cli.core.orphan import orphan
 from pulpcore.cli.core.orphans import orphans
 from pulpcore.cli.core.repository import repository
 from pulpcore.cli.core.show import show
@@ -28,7 +29,8 @@ main.add_command(export)
 main.add_command(exporter)
 main.add_command(group)
 main.add_command(importer)
-main.add_command(orphans)
+main.add_command(orphan)
+main.add_command(orphans)  # This one is deprecated
 main.add_command(repository)
 main.add_command(show)
 main.add_command(signing_service)
