@@ -61,7 +61,7 @@ fi
 # Test retained versions
 if [ "$(pulp debug has-plugin --name "core" --min-version "3.13.0.dev")" = "true" ]
 then
-  expect_succ pulp file repository create --name "$one_version_repo" --remote "cli_test_file_remote" --retained-versions 1
+  expect_succ pulp file repository create --name "$one_version_repo" --remote "cli_test_file_remote" --retain-repo-versions 1
   expect_succ pulp file repository sync --name "$one_version_repo"
   expect_succ pulp file repository version list --repository "$one_version_repo"
   test "$(echo "$OUTPUT" | jq -r length)" -eq 1

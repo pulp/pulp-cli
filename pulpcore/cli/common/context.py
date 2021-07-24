@@ -639,10 +639,19 @@ class PulpRepositoryContext(PulpEntityContext):
     SYNC_ID: ClassVar[str]
     MODIFY_ID: ClassVar[str]
     VERSION_CONTEXT: ClassVar[Type[PulpRepositoryVersionContext]]
-    NULLABLES = {"description", "retained_versions"}
+    NULLABLES = {"description", "retain_repo_versions"}
 
     def get_version_context(self) -> PulpRepositoryVersionContext:
         return self.VERSION_CONTEXT(self.pulp_ctx, self)
+
+    def preprocess_body(self, body: EntityDefinition) -> EntityDefinition:
+        body = super().preprocess_body(body)
+        if self.pulp_ctx.has_plugin(PluginRequirement("core", "3.13.dev", "3.15.dev")):
+            # "retain_repo_versions" has been named "retained_versions" until pulpcore 3.15
+            # https://github.com/pulp/pulpcore/pull/1472
+            if "retain_repo_versions" in body:
+                body["retained_versions"] = body.pop("retain_repo_versions")
+        return body
 
     def sync(self, href: str, body: Dict[str, Any]) -> Any:
         return self.pulp_ctx.call(
