@@ -4,7 +4,7 @@ from pulpcore.cli.ansible.distribution import distribution
 from pulpcore.cli.ansible.remote import remote
 from pulpcore.cli.ansible.repository import repository
 from pulpcore.cli.common import main
-from pulpcore.cli.common.context import PulpContext, pass_pulp_context
+from pulpcore.cli.common.context import PluginRequirement, PulpContext, pass_pulp_context
 
 _ = gettext.gettext
 
@@ -12,7 +12,7 @@ _ = gettext.gettext
 @main.group()
 @pass_pulp_context
 def ansible(pulp_ctx: PulpContext) -> None:
-    pulp_ctx.needs_plugin("ansible")
+    pulp_ctx.needs_plugin(PluginRequirement("ansible"))
 
 
 ansible.add_command(repository)

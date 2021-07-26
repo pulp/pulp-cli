@@ -69,17 +69,16 @@ class PulpOption(click.Option):
             pulp_ctx = ctx.find_object(PulpContext)
             assert pulp_ctx is not None
             for plugin_requirement in self.needs_plugins:
-                if plugin_requirement.feature:
-                    feature = plugin_requirement.feature
-                else:
-                    feature = _("the {name} option").format(name=self.name)
+                if not plugin_requirement.feature:
+                    plugin_requirement = PluginRequirement(
+                        plugin_requirement.name,
+                        plugin_requirement.min,
+                        plugin_requirement.max,
+                        feature=_("the {name} option").format(name=self.name),
+                        inverted=plugin_requirement.inverted,
+                    )
 
-                pulp_ctx.needs_plugin(
-                    plugin_requirement.name,
-                    plugin_requirement.min,
-                    plugin_requirement.max,
-                    feature,
-                )
+                pulp_ctx.needs_plugin(plugin_requirement)
         return super().process_value(ctx, value)
 
     def get_help_record(self, ctx: click.Context) -> Optional[Tuple[str, str]]:
@@ -657,7 +656,7 @@ def label_command(**kwargs: Any) -> click.Command:
     @pass_pulp_context
     def label_group(pulp_ctx: PulpContext) -> None:
         for item in need_plugins:
-            pulp_ctx.needs_plugin(*item)
+            pulp_ctx.needs_plugin(item)
 
     @click.command(name="set", help=_("Add or update a label"))
     @click.option("--key", required=True, help=_("Key of the label"))
@@ -728,7 +727,7 @@ def repository_content_command(**kwargs: Any) -> click.Group:
         **params: Any,
     ) -> None:
         if type == "all":
-            pulp_ctx.needs_plugin("core", "3.11.0")
+            pulp_ctx.needs_plugin(PluginRequirement("core", "3.11.0"))
         parameters = {k: v for k, v in params.items() if v is not None}
         parameters.update({"repository_version": version.pulp_href})
         result = content_contexts[type](pulp_ctx).list(

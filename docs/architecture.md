@@ -53,27 +53,38 @@ def my_sub_command(entity_ctx):
 Each pulp CLI release is designed to support multiple pulp server versions.
 The entity contexts should be used to implement necessary server version-dependent workarounds.
 To facilitate this, the `PulpContext` provides the `needs_plugin` and `has_plugin` methods.
+While `has_plugin` will evaluete immediately, `needs_plugin` can be seen as a deferred assertion.
+It will raise an error, once the first access to the server is attempted.
 
 ```python
 class MyEntityContext(PulpEntityContext):
     def show(self, href):
-        if not self.pulp_ctx.has_plugin("pulp_my_content", min_version="1.2.3"):
+        if self.pulp_ctx.has_plugin(PluginRequirement("my_content", min="1.2.3", inverted=True)):
+            # Versioned workaroud
+            # see bug-tracker/12345678
             return lookup_my_content_legacy(href)
-        else:
-            return super().show(href)
+        return super().show(href)
 
 
 @main.command()
 @pass_pulp_context
 @click.pass_context
 def my_command(ctx, pulp_ctx):
-    pulp_ctx.needs_plugin("pulp_my_content", min_version="1.0.0")
+    pulp_ctx.needs_plugin(PluginRequirement("my_content", min="1.0.0"))
     ctx.obj = MyEntityContext(pulp_ctx)
 ```
 
+The named tuple `PluginRequirement` is used to describe dependence on server components.
+It needs the `name` of the plugin and accepts optionally an inclusive `min` version,
+an exclusive `max` version, and an `inverted` flag for exclusion of a version range.
+
+Additionally, the `PulpOption` provides the `needs_plugins` keyword argument.
+It accepts a list of `PluginRequirements` to error when used.
+
 ## Generics
 
-For certain often repeated patterns like listing all entities of a  particular kind, we provide generic commands that use the underlying context objects.
+For certain often repeated patterns like listing all entities of a  particular kind,
+we provide generic commands that use the underlying context objects.
 
 ```python
 from pulpcore.cli.common.generic import name_option, show_command,

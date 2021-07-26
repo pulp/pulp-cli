@@ -28,7 +28,7 @@ class PulpContainerNamespaceContext(PulpEntityContext):
 
     def find(self, **kwargs: Any) -> Any:
         """Workaroud for the missing ability to filter"""
-        if self.pulp_ctx.has_plugin("container", min_version="2.3"):
+        if self.pulp_ctx.has_plugin(PluginRequirement("container", min="2.3")):
             # Workaround not needed anymore
             return super().find(**kwargs)
         search_result = self.list(limit=sys.maxsize, offset=0, parameters={})

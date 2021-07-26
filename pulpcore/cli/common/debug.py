@@ -3,7 +3,7 @@ import sys
 
 import click
 
-from pulpcore.cli.common.context import PulpContext, pass_pulp_context
+from pulpcore.cli.common.context import PluginRequirement, PulpContext, pass_pulp_context
 
 _ = gettext.gettext
 
@@ -24,7 +24,7 @@ def has_plugin(pulp_ctx: PulpContext, name: str, min_version: str, max_version: 
     """
     Check whether a specific plugin is installed on the server.
     """
-    available = pulp_ctx.has_plugin(name, min_version, max_version)
+    available = pulp_ctx.has_plugin(PluginRequirement(name, min_version, max_version))
     pulp_ctx.output_result(available)
     sys.exit(0 if available else 1)
 

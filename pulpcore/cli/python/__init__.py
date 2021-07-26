@@ -1,5 +1,5 @@
 from pulpcore.cli.common import main
-from pulpcore.cli.common.context import PulpContext, pass_pulp_context
+from pulpcore.cli.common.context import PluginRequirement, PulpContext, pass_pulp_context
 from pulpcore.cli.python.content import content
 from pulpcore.cli.python.distribution import distribution
 from pulpcore.cli.python.publication import publication
@@ -10,7 +10,7 @@ from pulpcore.cli.python.repository import repository
 @main.group(name="python")
 @pass_pulp_context
 def python_group(pulp_ctx: PulpContext) -> None:
-    pulp_ctx.needs_plugin("python", min_version="3.1.0.dev")
+    pulp_ctx.needs_plugin(PluginRequirement("python", min="3.1.0.dev"))
 
 
 python_group.add_command(repository)
