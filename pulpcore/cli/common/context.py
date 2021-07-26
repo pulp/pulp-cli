@@ -3,20 +3,7 @@ import gettext
 import json
 import sys
 import time
-from typing import (
-    IO,
-    Any,
-    ClassVar,
-    Dict,
-    List,
-    NamedTuple,
-    Optional,
-    Set,
-    Tuple,
-    Type,
-    Union,
-    overload,
-)
+from typing import IO, Any, ClassVar, Dict, List, NamedTuple, Optional, Set, Tuple, Type, Union
 
 import click
 import yaml
@@ -52,6 +39,7 @@ class PluginRequirement(NamedTuple):
     min: Optional[str] = None
     max: Optional[str] = None
     feature: Optional[str] = None
+    inverted: bool = False
 
 
 new_component_names_to_pre_3_11_names: Dict[str, str] = dict(
@@ -115,7 +103,7 @@ class PulpContext:
                 raise click.ClickException(str(e))
             # Rerun scheduled version checks
             for plugin in self._needed_plugins:
-                self.needs_plugin(plugin.name, plugin.min, plugin.max, plugin.feature)
+                self.needs_plugin(plugin)
         return self._api
 
     @property
@@ -198,79 +186,33 @@ class PulpContext:
         except KeyboardInterrupt:
             raise PulpNoWait(f"Task {task_href} sent to background.")
 
-    @overload
-    def has_plugin(
-        self,
-        plugin: str,
-        min_version: Optional[str] = None,
-        max_version: Optional[str] = None,
-    ) -> bool:
-        ...
-
-    @overload
     def has_plugin(
         self,
         plugin: PluginRequirement,
-        min_version: None = None,
-        max_version: None = None,
     ) -> bool:
-        ...
-
-    def has_plugin(
-        self,
-        plugin: Union[PluginRequirement, str],
-        min_version: Optional[str] = None,
-        max_version: Optional[str] = None,
-    ) -> bool:
-        if not isinstance(plugin, PluginRequirement):
-            plugin = PluginRequirement(plugin, min_version, max_version)
         if not self.component_versions:
             # Prior to 3.9 we do not have this information
             # assume yes if no version constraint is specified
-            return (plugin.min is None) and (plugin.max is None)
+            # != is python weird xor
+            return ((plugin.min is None) and (plugin.max is None)) != plugin.inverted
         version: Optional[str] = self.component_versions.get(plugin.name)
         if version is None:
             pre_3_11_name: str = new_component_names_to_pre_3_11_names.get(plugin.name, "")
             version = self.component_versions.get(pre_3_11_name)
             if version is None:
-                return False
+                return plugin.inverted
         if plugin.min is not None:
             if parse_version(version) < parse_version(plugin.min):
-                return False
+                return plugin.inverted
         if plugin.max is not None:
             if parse_version(version) >= parse_version(plugin.max):
-                return False
-        return True
+                return plugin.inverted
+        return not plugin.inverted
 
-    @overload
-    def needs_plugin(
-        self,
-        plugin: str,
-        min_version: Optional[str] = None,
-        max_version: Optional[str] = None,
-        feature: Optional[str] = None,
-    ) -> None:
-        ...
-
-    @overload
     def needs_plugin(
         self,
         plugin: PluginRequirement,
-        min_version: None = None,
-        max_version: None = None,
-        feature: None = None,
     ) -> None:
-        ...
-
-    def needs_plugin(
-        self,
-        plugin: Union[PluginRequirement, str],
-        min_version: Optional[str] = None,
-        max_version: Optional[str] = None,
-        feature: Optional[str] = None,
-    ) -> None:
-        if not isinstance(plugin, PluginRequirement):
-            plugin = PluginRequirement(plugin, min_version, max_version, feature)
         if self._api is not None:
             if not self.has_plugin(plugin):
                 specifier = plugin.name
@@ -281,13 +223,19 @@ class PulpContext:
                 if plugin.max is not None:
                     specifier += f"{separator}<{plugin.max}"
                 feature = plugin.feature or _("this command")
-                raise click.ClickException(
-                    _(
+                if plugin.inverted:
+                    msg = _(
+                        "The server provides the pulp component '{specifier}',"
+                        " which prevents the use of {feature}."
+                        " See 'pulp status' for installed components."
+                    )
+                else:
+                    msg = _(
                         "The server does not provide the pulp component '{specifier}',"
                         " which is needed to use {feature}."
                         " See 'pulp status' for installed components."
-                    ).format(specifier=specifier, feature=feature)
-                )
+                    )
+                raise click.ClickException(msg.format(specifier=specifier, feature=feature))
         else:
             # Schedule for later checking
             self._needed_plugins.append(plugin)
@@ -577,7 +525,7 @@ class PulpRemoteContext(PulpEntityContext):
 
     def preprocess_body(self, body: EntityDefinition) -> EntityDefinition:
         body = super().preprocess_body(body)
-        if not self.pulp_ctx.has_plugin("core", min_version="3.11.dev"):
+        if not self.pulp_ctx.has_plugin(PluginRequirement("core", min="3.11.dev")):
             # proxy_username and proxy_password are separate fields starting with 3.11
             # https://pulp.plan.io/issues/8167
             proxy_username = body.pop("proxy_username", None)

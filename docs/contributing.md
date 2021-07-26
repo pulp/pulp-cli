@@ -17,10 +17,14 @@ In order to be able to access every (sub-)commands help page,
 it is necessary that no code outside of the final performing command callback accesses the `api` property of the `PulpContext`.
 There are some facilities that perform lazy loading to help with that requirement.
 Those include:
-  - `PulpContext.api`: When accessed, the `api.json` file for the addressed server will be read or downloaded and processed. Scheduled version checks will be reevaluated.
-  - `PulpContext.needs_version`: This function can be used at any time to declear that a the operation needs a plugin in a version range. The actual check will be performed, once `api` was accessed for the first time, or immediately afterwards.
-  - `PulpEntityContext.entity`: This property can be used to collect lookup attributes for entities by assigining dicts to it. On read access, the entity lookup will be performed though the `api` property.
-  - `PulpEntityContext.pulp_href`: This property can be used to specify an entity by its URI. It will be fetched from the server only at read access.
+  - `PulpContext.api`: When accessed, the `api.json` file for the addressed server will be read or downloaded and processed.
+    Scheduled version checks will be reevaluated.
+  - `PulpContext.needs_version`: This function can be used at any time to declear that an operation needs a plugin in a version range.
+    The actual check will be performed, once `api` was accessed for the first time, or immediately afterwards.
+  - `PulpEntityContext.entity`: This property can be used to collect lookup attributes for entities by assigining dicts to it.
+    On read access, the entity lookup will be performed though the `api` property.
+  - `PulpEntityContext.pulp_href`: This property can be used to specify an entity by its URI.
+    It will be fetched from the server only at read access.
 
 ### Compatibility to pulp versions
 This cli for Pulp 3 will be versioned independently of any version of the server components.
