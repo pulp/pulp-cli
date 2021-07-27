@@ -86,7 +86,7 @@ def _config_callback(ctx: click.Context, param: Any, value: Optional[str]) -> No
 @click.option(
     "--config",
     type=click.Path(resolve_path=True),
-    help=_("Path to the Pulp settings.toml file"),
+    help=_("Path of a Pulp CLI settings file to use instead of the default location"),
     callback=_config_callback,
     expose_value=False,
 )
