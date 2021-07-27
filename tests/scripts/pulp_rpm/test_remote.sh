@@ -10,7 +10,7 @@ cleanup() {
 }
 trap cleanup EXIT
 
-expect_succ pulp file remote list
+expect_succ pulp rpm remote list
 
 expect_succ pulp rpm remote create --name "cli_test_rpm_remote" --url "$RPM_REMOTE_URL" --proxy-url "http://proxy.org" --proxy-username "user" --proxy-password "pass"
 expect_succ pulp rpm remote show --name "cli_test_rpm_remote"
