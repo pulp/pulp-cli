@@ -42,7 +42,7 @@ i.e. make sure the cli translates to the right api calls, but do not care about 
 ### Running Tests
 
 In order to run tests, a running instance of pulp with all necessary plugins installed must be
-configured in `tests/settings.toml`.
+configured in `tests/cli.toml`.
 
 To run tests:
 
