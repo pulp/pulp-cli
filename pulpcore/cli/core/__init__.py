@@ -1,6 +1,7 @@
 import gettext
 
-from pulpcore.cli.common import main
+import click
+
 from pulpcore.cli.core.access_policy import access_policy
 from pulpcore.cli.core.artifact import artifact
 from pulpcore.cli.core.content import content
@@ -21,21 +22,23 @@ from pulpcore.cli.core.worker import worker
 
 _ = gettext.gettext
 
-# Register commands with cli
-main.add_command(access_policy)
-main.add_command(artifact)
-main.add_command(content)
-main.add_command(export)
-main.add_command(exporter)
-main.add_command(group)
-main.add_command(importer)
-main.add_command(orphan)
-main.add_command(orphans)  # This one is deprecated
-main.add_command(repository)
-main.add_command(show)
-main.add_command(signing_service)
-main.add_command(status)
-main.add_command(task)
-main.add_command(task_group)
-main.add_command(user)
-main.add_command(worker)
+
+def mount(main: click.Group) -> None:
+    # Register commands with cli
+    main.add_command(access_policy)
+    main.add_command(artifact)
+    main.add_command(content)
+    main.add_command(export)
+    main.add_command(exporter)
+    main.add_command(group)
+    main.add_command(importer)
+    main.add_command(orphan)
+    main.add_command(orphans)  # This one is deprecated
+    main.add_command(repository)
+    main.add_command(show)
+    main.add_command(signing_service)
+    main.add_command(status)
+    main.add_command(task)
+    main.add_command(task_group)
+    main.add_command(user)
+    main.add_command(worker)

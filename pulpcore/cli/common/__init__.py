@@ -1,7 +1,7 @@
 import gettext
 import os
 import sys
-from typing import Any, Optional
+from typing import Any, Mapping, Optional
 
 import click
 import pkg_resources
@@ -156,7 +156,24 @@ if HAS_CLICK_SHELL:
 ##############################################################################
 # Load plugins
 # https://packaging.python.org/guides/creating-and-discovering-plugins/#using-package-metadata
-discovered_plugins = {
-    entry_point.name: entry_point.load()
-    for entry_point in pkg_resources.iter_entry_points("pulp_cli.plugins")
-}
+def _discover_plugins() -> Mapping["str", object]:
+    include_plugins = None
+    try:
+        config = toml.load(CONFIG_LOCATIONS[0])
+        if "plugins" in config:
+            include_plugins = config["plugins"].get("include")
+    except FileNotFoundError:
+        pass
+    discovered_plugins = {
+        entry_point.name: entry_point.load()
+        for entry_point in pkg_resources.iter_entry_points("pulp_cli.plugins")
+        if include_plugins is None or entry_point.name in include_plugins
+    }
+
+    for plugin in discovered_plugins.values():
+        if hasattr(plugin, "mount"):
+            plugin.mount(main)
+    return discovered_plugins
+
+
+discovered_plugins = _discover_plugins()
