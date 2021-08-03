@@ -1,5 +1,6 @@
 import gettext
 
+from pulpcore.cli.ansible.content import content
 from pulpcore.cli.ansible.distribution import distribution
 from pulpcore.cli.ansible.remote import remote
 from pulpcore.cli.ansible.repository import repository
@@ -18,4 +19,4 @@ def ansible(pulp_ctx: PulpContext) -> None:
 ansible.add_command(repository)
 ansible.add_command(remote)
 ansible.add_command(distribution)
-# TODO add content commands
+ansible.add_command(content)
