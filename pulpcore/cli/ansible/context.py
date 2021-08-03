@@ -3,6 +3,7 @@ import gettext
 from pulpcore.cli.common.context import (
     EntityDefinition,
     PluginRequirement,
+    PulpContentContext,
     PulpEntityContext,
     PulpRemoteContext,
     PulpRepositoryContext,
@@ -12,7 +13,23 @@ from pulpcore.cli.common.context import (
 
 _ = gettext.gettext
 
-# TODO Add Role and Collection Content contexts
+
+class PulpAnsibleCollectionVersionContext(PulpContentContext):
+    ENTITY = "ansible collection version"
+    ENTITIES = "ansible collection versions"
+    HREF = "ansible_collection_version_href"
+    LIST_ID = "content_ansible_collection_versions_list"
+    READ_ID = "content_ansible_collection_versions_read"
+    CREATE_ID = "content_ansible_collection_versions_create"
+
+
+class PulpAnsibleRoleContext(PulpContentContext):
+    ENTITY = "ansible role"
+    ENTITIES = "ansible roles"
+    HREF = "ansible_role_href"
+    LIST_ID = "content_ansible_roles_list"
+    READ_ID = "content_ansible_roles_read"
+    CREATE_ID = "content_ansible_roles_create"
 
 
 class PulpAnsibleDistributionContext(PulpEntityContext):
