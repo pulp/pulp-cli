@@ -44,18 +44,18 @@ class OpenAPI:
         self._session: requests.Session = requests.session()
         if username and password:
             if cert or key:
-                raise OpenAPIError("Cannot use both username/password and cert auth.")
+                raise OpenAPIError(_("Cannot use both username/password and cert auth."))
             self._session.auth = (username, password)
         elif username:
-            raise OpenAPIError("Password is required if username is set.")
+            raise OpenAPIError(_("Password is required if username is set."))
         elif password:
-            raise OpenAPIError("Username is required if password is set.")
+            raise OpenAPIError(_("Username is required if password is set."))
         elif cert and key:
             self._session.cert = (cert, key)
         elif cert:
             self._session.cert = cert
         elif key:
-            raise OpenAPIError("Cert is required if key is set.")
+            raise OpenAPIError(_("Cert is required if key is set."))
         headers = {
             "Accept": "application/json",
         }
@@ -94,7 +94,7 @@ class OpenAPI:
         if self.api_spec.get("openapi", "").startswith("3."):
             self.openapi_version: int = 3
         else:
-            raise OpenAPIError("Unknown schema version")
+            raise OpenAPIError(_("Unknown schema version"))
         self.operations: Dict[str, Any] = {
             method_entry["operationId"]: (method, path)
             for path, path_entry in self.api_spec["paths"].items()
@@ -138,9 +138,9 @@ class OpenAPI:
             item["name"] for item in param_spec.values() if item.get("required", False)
         ]
         if any(remaining_required):
-            raise OpenAPIError(
-                "Required parameters [{0}] missing for {1}.".format(
-                    ", ".join(remaining_required), param_type
+            raise RuntimeError(
+                _("Required parameters [{required}] missing for {param_type}.").format(
+                    required=", ".join(remaining_required), param_type=param_type
                 )
             )
         return result
@@ -174,7 +174,7 @@ class OpenAPI:
                     for key, file_data in uploads.items()
                 ]
             else:
-                raise OpenAPIError("No suitable content type for file upload specified.")
+                raise OpenAPIError(_("No suitable content type for file upload specified."))
         elif body:
             if any((content_type.startswith("application/json") for content_type in content_types)):
                 json = body
@@ -186,7 +186,7 @@ class OpenAPI:
             ):
                 data = body
             else:
-                raise OpenAPIError("No suitable content type for request specified.")
+                raise OpenAPIError(_("No suitable content type for request specified."))
         return self._session.prepare_request(
             requests.Request(
                 method, url, params=params, headers=headers, data=data, json=json, files=files
@@ -231,7 +231,7 @@ class OpenAPI:
             parameters = parameters.copy()
 
         if any(self.extract_params("cookie", path_spec, method_spec, parameters)):
-            raise NotImplementedError("Cookie parameters are not implemented.")
+            raise NotImplementedError(_("Cookie parameters are not implemented."))
 
         headers = self.extract_params("header", path_spec, method_spec, parameters)
 
@@ -242,7 +242,7 @@ class OpenAPI:
 
         if any(parameters):
             raise OpenAPIError(
-                "Parameter [{names}] not available for {operation_id}.".format(
+                _("Parameter [{names}] not available for {operation_id}.").format(
                     names=", ".join(parameters.keys()), operation_id=operation_id
                 )
             )
@@ -258,7 +258,7 @@ class OpenAPI:
         if request.body:
             self.debug_callback(2, f"{request.body!r}")
         if self.safe_calls_only and method.upper() not in SAFE_METHODS:
-            raise OpenAPIError("Call aborted due to safe mode")
+            raise OpenAPIError(_("Call aborted due to safe mode"))
         try:
             response: requests.Response = self._session.send(request)
         except requests.ConnectionError as e:
@@ -269,7 +269,9 @@ class OpenAPI:
                     url=e.response.headers["location"]
                 )
             )
-        self.debug_callback(1, f"Response: {response.status_code}")
+        self.debug_callback(
+            1, _("Response: {status_code}").format(status_code=response.status_code)
+        )
         if response.text:
             self.debug_callback(3, f"{response.text}")
         response.raise_for_status()

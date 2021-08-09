@@ -119,5 +119,9 @@ def parse_requirements_file(requirements_file: str) -> List[str]:
             for line in fp.readlines():
                 requirements += parse_requirements_string(line)
     except OSError:
-        raise click.ClickException(f"Failed to load content from {requirements_file}")
+        raise click.ClickException(
+            _("Failed to load content from {requirements_file}").format(
+                requirements_file=requirements_file
+            )
+        )
     return requirements

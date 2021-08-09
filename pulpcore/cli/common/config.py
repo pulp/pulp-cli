@@ -82,7 +82,7 @@ def validate_config(config: Dict[str, Any], strict: bool = False) -> bool:
     """Validate, that the config provides the proper data types"""
     errors: List[str] = []
     if "format" in config and config["format"].lower() not in FORMAT_CHOICES:
-        errors.append(_("'format' is not one of {}").format(FORMAT_CHOICES))
+        errors.append(_("'format' is not one of {choices}").format(choices=FORMAT_CHOICES))
     if "dry_run" in config and not isinstance(config["dry_run"], bool):
         errors.append(_("'dry_run' is not a bool"))
     if "timeout" in config and not isinstance(config["timeout"], int):
@@ -109,12 +109,12 @@ def validate_settings(settings: MutableMapping[str, Dict[str, Any]], strict: boo
     for key, profile in settings.items():
         if key != "cli" and not key.startswith("cli-"):
             if strict:
-                errors.append(_("Invalid profile '{}'").format(key))
+                errors.append(_("Invalid profile '{key}'").format(key=key))
             continue
         try:
             validate_config(profile, strict=strict)
         except ValueError as e:
-            errors.append(_("Profile {}:").format(key))
+            errors.append(_("Profile {key}:").format(key=key))
             errors.append(str(e))
     if errors:
         raise ValueError("\n".join(errors))
@@ -141,10 +141,12 @@ def create(
     location: str,
     **kwargs: Any,
 ) -> None:
-    def _check_location(loc: str) -> None:
-        if not overwrite and Path(loc).exists():
+    def _check_location(location: str) -> None:
+        if not overwrite and Path(location).exists():
             raise click.ClickException(
-                f"File '{loc}' already exists. Use --overwite if you want to overwrite it."
+                _(
+                    "File '{location}' already exists. Use --overwite if you want to overwrite it."
+                ).format(location=location)
             )
 
     def prompt_config_option(name: str) -> Any:
@@ -159,7 +161,7 @@ def create(
     settings: MutableMapping[str, Any] = kwargs
 
     if interactive:
-        location = click.prompt("Config file location", default=location)
+        location = click.prompt(_("Config file location"), default=location)
         _check_location(location)
         for setting in SETTINGS:
             settings[setting] = prompt_config_option(setting)
@@ -170,7 +172,7 @@ def create(
 
     if editor:
         output = not_none(
-            click.edit(output), click.ClickException("No output from editor. Aborting.")
+            click.edit(output), click.ClickException(_("No output from editor. Aborting."))
         )
     try:
         settings = toml.loads(output)
@@ -182,7 +184,7 @@ def create(
     with Path(location).open("w") as sfile:
         sfile.write(output)
 
-    click.echo(f"Created config file at '{location}'.")
+    click.echo(_("Created config file at '{location}'.").format(location=location))
 
 
 @config.command(help=_("Open the settings config file in an editor"))
@@ -190,15 +192,17 @@ def create(
 def edit(location: str) -> None:
     if not Path(location).exists():
         raise click.ClickException(
-            f"File '{location}' does not exists. If you wish to create the file, use the pulp "
-            "create command."
+            _(
+                "File '{location}' does not exists. If you wish to create the file, use the pulp "
+                "create command."
+            ).format(location=location)
         )
 
     with Path(location).open("r") as sfile:
         output: str = sfile.read()
     while True:
         output = not_none(
-            click.edit(output), click.ClickException("No output from editor. Aborting.")
+            click.edit(output), click.ClickException(_("No output from editor. Aborting."))
         )
         try:
             settings = toml.loads(output)
@@ -225,4 +229,4 @@ def validate(location: str, strict: bool) -> None:
     except ValueError as e:
         raise click.ClickException(str(e))
 
-    click.echo(f"File '{location}' is a valid pulp-cli config.")
+    click.echo(_("File '{location}' is a valid pulp-cli config.").format(location=location))

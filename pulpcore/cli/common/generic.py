@@ -98,7 +98,9 @@ class GroupOption(PulpOption):
         self.group: List[str] = kwargs.pop("group")
         assert self.group, "'group' parameter required"
         kwargs["help"] = (
-            kwargs.get("help", "") + "Option is grouped with " + ", ".join(self.group) + "."
+            kwargs.get("help", "")
+            + " "
+            + _("Option is grouped with {option_list}.").format(option_list=", ".join(self.group))
         ).strip()
         super().__init__(*args, **kwargs)
 
@@ -111,8 +113,9 @@ class GroupOption(PulpOption):
             self.prompt = None
         else:
             raise click.UsageError(
-                "Illegal usage, please specify all "
-                "options in the group: " + ", ".join(all_options)
+                _("Illegal usage, please specify all options in the group: {option_list}").format(
+                    option_list=", ".join(all_options)
+                )
             )
         value = opts.get(self.name)
         if self.callback is not None:
@@ -199,14 +202,16 @@ def load_json_callback(
             with click.open_file(json_file, "rb") as fp:
                 json_string = fp.read()
         except OSError:
-            raise click.ClickException(f"Failed to load content from {json_file}")
+            raise click.ClickException(
+                _("Failed to load content from {json_file}").format(json_file=json_file)
+            )
     else:
         json_string = value
 
     try:
         json_object = json.loads(json_string)
     except json.decoder.JSONDecodeError:
-        raise click.ClickException("Failed to decode JSON")
+        raise click.ClickException(_("Failed to decode JSON"))
     else:
         return json_object
 
@@ -224,7 +229,9 @@ def create_content_json_callback(
                     schema.validate(new_value)
                 except s.SchemaError as e:
                     raise click.ClickException(
-                        "Validation of '{}' failed: {}".format(param.name, str(e))
+                        _("Validation of '{parameter}' failed: {error}").format(
+                            parameter=param.name, error=str(e)
+                        )
                     )
             pulp_ctx = ctx.find_object(PulpContext)
             assert pulp_ctx is not None

@@ -15,8 +15,8 @@ _ = gettext.gettext
 
 
 class PulpAnsibleCollectionVersionContext(PulpContentContext):
-    ENTITY = "ansible collection version"
-    ENTITIES = "ansible collection versions"
+    ENTITY = _("ansible collection version")
+    ENTITIES = _("ansible collection versions")
     HREF = "ansible_collection_version_href"
     LIST_ID = "content_ansible_collection_versions_list"
     READ_ID = "content_ansible_collection_versions_read"
@@ -24,8 +24,8 @@ class PulpAnsibleCollectionVersionContext(PulpContentContext):
 
 
 class PulpAnsibleRoleContext(PulpContentContext):
-    ENTITY = "ansible role"
-    ENTITIES = "ansible roles"
+    ENTITY = _("ansible role")
+    ENTITIES = _("ansible roles")
     HREF = "ansible_role_href"
     LIST_ID = "content_ansible_roles_list"
     READ_ID = "content_ansible_roles_read"
@@ -33,7 +33,8 @@ class PulpAnsibleRoleContext(PulpContentContext):
 
 
 class PulpAnsibleDistributionContext(PulpEntityContext):
-    ENTITY = "distribution"
+    ENTITY = _("ansible distribution")
+    ENTITIES = _("ansible distributions")
     HREF = "ansible_ansible_distribution_href"
     LIST_ID = "distributions_ansible_ansible_list"
     READ_ID = "distributions_ansible_ansible_read"
@@ -51,7 +52,8 @@ class PulpAnsibleDistributionContext(PulpEntityContext):
 
 
 class PulpAnsibleRoleRemoteContext(PulpRemoteContext):
-    ENTITY = "role remote"
+    ENTITY = _("role remote")
+    ENTITIES = _("role remotes")
     HREF = "ansible_role_remote_href"
     LIST_ID = "remotes_ansible_role_list"
     READ_ID = "remotes_ansible_role_read"
@@ -61,7 +63,8 @@ class PulpAnsibleRoleRemoteContext(PulpRemoteContext):
 
 
 class PulpAnsibleCollectionRemoteContext(PulpRemoteContext):
-    ENTITY = "collection remote"
+    ENTITY = _("collection remote")
+    ENTITIES = _("collection remotes")
     HREF = "ansible_collection_remote_href"
     LIST_ID = "remotes_ansible_collection_list"
     READ_ID = "remotes_ansible_collection_read"

@@ -126,7 +126,9 @@ class PulpContext:
         elif self.format == "none":
             pass
         else:
-            raise NotImplementedError(f"Format '{self.format}' not implemented.")
+            raise NotImplementedError(
+                _("Format '{format}' not implemented.").format(format=self.format)
+            )
 
     def call(self, operation_id: str, non_blocking: bool = False, *args: Any, **kwargs: Any) -> Any:
         """
@@ -145,7 +147,9 @@ class PulpContext:
         if isinstance(result, dict) and ["task"] == list(result.keys()):
             task_href = result["task"]
             result = self.api.call("tasks_read", parameters={"task_href": task_href})
-            click.echo(f"Started background task {task_href}", err=True)
+            click.echo(
+                _("Started background task {task_href}").format(task_href=task_href), err=True
+            )
             if not non_blocking:
                 result = self.wait_for_task(result)
         return result
@@ -157,7 +161,7 @@ class PulpContext:
         """
         timeout: int = self.timeout
         if self.background_tasks:
-            raise PulpNoWait("Not waiting for task because --background was specified.")
+            raise PulpNoWait(_("Not waiting for task because --background was specified."))
         task_href = task["pulp_href"]
         try:
             while True:
@@ -166,23 +170,31 @@ class PulpContext:
                     return task
                 elif task["state"] == "failed":
                     raise click.ClickException(
-                        f"Task {task_href} failed: '{task['error']['description']}'"
+                        _("Task {task_href} failed: '{description}'").format(
+                            task_href=task_href, description=task["error"]["description"]
+                        )
                     )
                 elif task["state"] == "canceled":
-                    raise click.ClickException("Task canceled")
+                    raise click.ClickException(_("Task canceled"))
                 elif task["state"] in ["waiting", "running", "canceling"]:
                     if self.timeout:
                         if timeout <= 0:
-                            raise PulpNoWait(f"Waiting for task {task_href} timed out.")
+                            raise PulpNoWait(
+                                _("Waiting for task {task_href} timed out.").format(
+                                    task_href=task_href
+                                )
+                            )
                         timeout -= 1
                     time.sleep(1)
                     click.echo(".", nl=False, err=True)
                     task = self.api.call("tasks_read", parameters={"task_href": task_href})
                 else:
-                    raise NotImplementedError(f"Unknown task state: {task['state']}")
-            raise click.ClickException("Task timed out")
+                    raise NotImplementedError(
+                        _("Unknown task state: {state}").format(state=task["state"])
+                    )
+            raise click.ClickException(_("Task timed out"))
         except KeyboardInterrupt:
-            raise PulpNoWait(f"Task {task_href} sent to background.")
+            raise PulpNoWait(_("Task {task_href} sent to background.").format(task_href=task_href))
 
     def has_plugin(
         self,
@@ -247,8 +259,8 @@ class PulpEntityContext:
     """
 
     # Subclasses should provide appropriate values here
-    ENTITY: ClassVar[str] = "entity"
-    ENTITIES: ClassVar[str] = "entities"
+    ENTITY: ClassVar[str] = _("entity")
+    ENTITIES: ClassVar[str] = _("entities")
     HREF: ClassVar[str]
     LIST_ID: ClassVar[str]
     READ_ID: ClassVar[str]
@@ -285,7 +297,9 @@ class PulpEntityContext:
         """
         if self._entity is None:
             if not self._entity_lookup:
-                raise click.ClickException(f"A {self.ENTITY} must be specified for this command.")
+                raise click.ClickException(
+                    _("A {entity} must be specified for this command.").format(entity=self.ENTITY)
+                )
             if "pulp_href" in self._entity_lookup:
                 self._entity = self.show(self._entity_lookup["pulp_href"])
             else:
@@ -368,13 +382,17 @@ class PulpEntityContext:
                 break
             payload["offset"] += payload["limit"]
         else:
-            click.echo(f"Not all {count} entries were shown.", err=True)
+            click.echo(_("Not all {count} entries were shown.").format(count=count), err=True)
         return entities
 
     def find(self, **kwargs: Any) -> Any:
         search_result = self.list(limit=1, offset=0, parameters=kwargs)
         if len(search_result) != 1:
-            raise click.ClickException(f"Could not find {self.ENTITY} with {kwargs}.")
+            raise click.ClickException(
+                _("Could not find {entity} with {kwargs}.").format(
+                    entity=self.ENTITY, kwargs=kwargs
+                )
+            )
         return search_result[0]
 
     def show(self, href: str) -> Any:
@@ -440,7 +458,7 @@ class PulpEntityContext:
         try:
             return entity["pulp_labels"][key]
         except KeyError:
-            raise click.ClickException(f"Could not find label with key '{key}'.")
+            raise click.ClickException(_("Could not find label with key '{key}'.").format(key=key))
 
     def capable(self, capability: str) -> bool:
         return capability in self.CAPABILITIES and all(
@@ -453,8 +471,8 @@ class PulpRemoteContext(PulpEntityContext):
     Base class for remote specific contexts.
     """
 
-    ENTITY = "remote"
-    ENTITIES = "remotes"
+    ENTITY = _("remote")
+    ENTITIES = _("remotes")
     HREF_PATTERN = r"^/pulp/api/v3/remotes/(?P<plugin>\w+)/(?P<resource_type>\w+)/"
     NULLABLES = {
         "ca_cert",
@@ -497,8 +515,8 @@ class PulpRepositoryVersionContext(PulpEntityContext):
     ties its instances to the global PulpContext for api access.
     """
 
-    ENTITY = "repository version"
-    ENTITIES = "repository versions"
+    ENTITY = _("repository version")
+    ENTITIES = _("repository versions")
     REPAIR_ID: ClassVar[str]
     repository_ctx: "PulpRepositoryContext"
 
@@ -524,8 +542,8 @@ class PulpRepositoryContext(PulpEntityContext):
     ties its instances to the global PulpContext for api access.
     """
 
-    ENTITY = "repository"
-    ENTITIES = "repositories"
+    ENTITY = _("repository")
+    ENTITIES = _("repositories")
     HREF_PATTERN = r"^/pulp/api/v3/repositories/(?P<plugin>\w+)/(?P<resource_type>\w+)/"
     LIST_ID = "repositories_list"
     SYNC_ID: ClassVar[str]
@@ -578,8 +596,8 @@ class PulpContentContext(PulpEntityContext):
     Base class for content specific contexts
     """
 
-    ENTITY = "content"
-    ENTITIES = "content"
+    ENTITY = _("content")
+    ENTITIES = _("content")
     LIST_ID = "content_list"
 
 

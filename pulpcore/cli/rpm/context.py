@@ -14,7 +14,8 @@ _ = gettext.gettext
 
 
 class PulpRpmDistributionContext(PulpEntityContext):
-    ENTITY = "distribution"
+    ENTITY = _("rpm distribution")
+    ENTITIES = _("rpm distributions")
     HREF = "rpm_rpm_distribution_href"
     LIST_ID = "distributions_rpm_rpm_list"
     READ_ID = "distributions_rpm_rpm_read"
@@ -25,7 +26,8 @@ class PulpRpmDistributionContext(PulpEntityContext):
 
 
 class PulpRpmPublicationContext(PulpEntityContext):
-    ENTITY = "publication"
+    ENTITY = _("rpm publication")
+    ENTITIES = _("rpm publications")
     HREF = "rpm_rpm_publication_href"
     LIST_ID = "publications_rpm_rpm_list"
     READ_ID = "publications_rpm_rpm_read"
@@ -42,7 +44,8 @@ class PulpRpmPublicationContext(PulpEntityContext):
 
 
 class PulpRpmRemoteContext(PulpRemoteContext):
-    ENTITY = "remote"
+    ENTITY = _("rpm remote")
+    ENTITIES = _("rpm remotes")
     HREF = "rpm_rpm_remote_href"
     LIST_ID = "remotes_rpm_rpm_list"
     READ_ID = "remotes_rpm_rpm_read"

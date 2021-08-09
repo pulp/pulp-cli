@@ -1,10 +1,13 @@
+import gettext
 from typing import Any
 
 from pulpcore.cli.common.context import PulpEntityContext
 
+_ = gettext.gettext
+
 
 class PulpMigrationPlanContext(PulpEntityContext):
-    ENTITY = "pulp_2to3_migration_migration_plan"
+    ENTITY = _("pulp_2to3_migration_migration_plan")
     HREF = "pulp_2to3_migration_migration_plan_href"
     LIST_ID = "migration_plans_list"
     READ_ID = "migration_plans_read"
@@ -20,14 +23,14 @@ class PulpMigrationPlanContext(PulpEntityContext):
 
 
 class PulpMigrationPulp2ContentContext(PulpEntityContext):
-    ENTITY = "pulp_2to3_migration_pulp2_content"
+    ENTITY = _("pulp_2to3_migration_pulp2_content")
     HREF = "pulp_2to3_migration_pulp2_content_href"
     LIST_ID = "pulp2content_list"
     READ_ID = "pulp2content_read"
 
 
 class PulpMigrationPulp2RepositoryContext(PulpEntityContext):
-    ENTITY = "pulp_2to3_migration_pulp2_repository"
+    ENTITY = _("pulp_2to3_migration_pulp2_repository")
     HREF = "pulp_2to3_migration_pulp2_repository_href"
     LIST_ID = "pulp2repositories_list"
     READ_ID = "pulp2repositories_read"
