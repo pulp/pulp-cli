@@ -18,8 +18,8 @@ _ = gettext.gettext
 
 
 class PulpContainerNamespaceContext(PulpEntityContext):
-    ENTITY = "container namespace"
-    ENTITIES = "container namespaces"
+    ENTITY = _("container namespace")
+    ENTITIES = _("container namespaces")
     HREF = "container_container_namespace_href"
     LIST_ID = "pulp_container_namespaces_list"
     READ_ID = "pulp_container_namespaces_read"
@@ -35,13 +35,17 @@ class PulpContainerNamespaceContext(PulpEntityContext):
         for key, value in kwargs.items():
             search_result = [res for res in search_result if res[key] == value]
         if len(search_result) != 1:
-            raise click.ClickException(f"Could not find {self.ENTITY} with {kwargs}.")
+            raise click.ClickException(
+                _("Could not find {entity} with {kwargs}.").format(
+                    entity=self.ENTITY, kwargs=kwargs
+                )
+            )
         return search_result[0]
 
 
 class PulpContainerDistributionContext(PulpEntityContext):
-    ENTITY = "container distribution"
-    ENTITIES = "container distributions"
+    ENTITY = _("container distribution")
+    ENTITIES = _("container distributions")
     HREF = "container_container_distribution_href"
     LIST_ID = "distributions_container_container_list"
     READ_ID = "distributions_container_container_read"
@@ -59,8 +63,8 @@ class PulpContainerDistributionContext(PulpEntityContext):
 
 
 class PulpContainerRemoteContext(PulpRemoteContext):
-    ENTITY = "container remote"
-    ENTITIES = "container remotes"
+    ENTITY = _("container remote")
+    ENTITIES = _("container remotes")
     HREF = "container_container_remote_href"
     LIST_ID = "remotes_container_container_list"
     CREATE_ID = "remotes_container_container_create"
@@ -96,7 +100,6 @@ class PulpContainerRepositoryContext(PulpRepositoryContext):
     VERSION_CONTEXT = PulpContainerRepositoryVersionContext
     CAPABILITIES = {
         "sync": [PluginRequirement("container")],
-        # WARNING: Do not merge before the feature in the plugin
         "pulpexport": [PluginRequirement("container", "2.8.0.dev")],
     }
 

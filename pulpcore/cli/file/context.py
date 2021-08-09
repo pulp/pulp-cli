@@ -15,8 +15,8 @@ _ = gettext.gettext
 
 
 class PulpFileACSContext(PulpEntityContext):
-    ENTITY = "file ACS"
-    ENTITIES = "file ACSes"
+    ENTITY = _("file ACS")
+    ENTITIES = _("file ACSes")
     HREF = "file_file_alternate_content_source_href"
     LIST_ID = "acs_file_file_list"
     READ_ID = "acs_file_file_read"
@@ -26,8 +26,8 @@ class PulpFileACSContext(PulpEntityContext):
 
 
 class PulpFileContentContext(PulpContentContext):
-    ENTITY = "file content"
-    ENTITIES = "file content"
+    ENTITY = _("file content")
+    ENTITIES = _("file content")
     HREF = "file_file_content_href"
     LIST_ID = "content_file_files_list"
     READ_ID = "content_file_files_read"
@@ -35,8 +35,8 @@ class PulpFileContentContext(PulpContentContext):
 
 
 class PulpFileDistributionContext(PulpEntityContext):
-    ENTITY = "file distribution"
-    ENTITIES = "file distributions"
+    ENTITY = _("file distribution")
+    ENTITIES = _("file distributions")
     HREF = "file_file_distribution_href"
     LIST_ID = "distributions_file_file_list"
     READ_ID = "distributions_file_file_read"
@@ -47,8 +47,8 @@ class PulpFileDistributionContext(PulpEntityContext):
 
 
 class PulpFilePublicationContext(PulpEntityContext):
-    ENTITY = "file publication"
-    ENTITIES = "file publications"
+    ENTITY = _("file publication")
+    ENTITIES = _("file publications")
     HREF = "file_file_publication_href"
     LIST_ID = "publications_file_file_list"
     READ_ID = "publications_file_file_read"
@@ -65,8 +65,8 @@ class PulpFilePublicationContext(PulpEntityContext):
 
 
 class PulpFileRemoteContext(PulpRemoteContext):
-    ENTITY = "file remote"
-    ENTITIES = "file remotes"
+    ENTITY = _("file remote")
+    ENTITIES = _("file remotes")
     HREF = "file_file_remote_href"
     LIST_ID = "remotes_file_file_list"
     CREATE_ID = "remotes_file_file_create"

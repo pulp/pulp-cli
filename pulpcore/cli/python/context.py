@@ -1,3 +1,4 @@
+import gettext
 from typing import ClassVar
 
 from pulpcore.cli.common.context import (
@@ -10,10 +11,12 @@ from pulpcore.cli.common.context import (
     registered_repository_contexts,
 )
 
+_ = gettext.gettext
+
 
 class PulpPythonContentContext(PulpContentContext):
-    ENTITY = "python package"
-    ENTITIES = "python packages"
+    ENTITY = _("python package")
+    ENTITIES = _("python packages")
     HREF = "python_python_package_content_href"
     LIST_ID = "content_python_packages_list"
     READ_ID = "content_python_packages_read"
@@ -21,8 +24,8 @@ class PulpPythonContentContext(PulpContentContext):
 
 
 class PulpPythonDistributionContext(PulpEntityContext):
-    ENTITY = "python distribution"
-    ENTITIES = "python distributions"
+    ENTITY = _("python distribution")
+    ENTITIES = _("python distributions")
     HREF = "python_python_distribution_href"
     LIST_ID = "distributions_python_pypi_list"
     READ_ID = "distributions_python_pypi_read"
@@ -33,8 +36,8 @@ class PulpPythonDistributionContext(PulpEntityContext):
 
 
 class PulpPythonPublicationContext(PulpEntityContext):
-    ENTITY = "python publication"
-    ENTITIES = "python publications"
+    ENTITY = _("python publication")
+    ENTITIES = _("python publications")
     HREF = "python_python_publication_href"
     LIST_ID = "publications_python_pypi_list"
     READ_ID = "publications_python_pypi_read"
@@ -51,8 +54,8 @@ class PulpPythonPublicationContext(PulpEntityContext):
 
 
 class PulpPythonRemoteContext(PulpRemoteContext):
-    ENTITY = "python remote"
-    ENTITIES = "python remotes"
+    ENTITY = _("python remote")
+    ENTITIES = _("python remotes")
     HREF = "python_python_remote_href"
     LIST_ID = "remotes_python_python_list"
     CREATE_ID = "remotes_python_python_create"

@@ -41,15 +41,15 @@ create_options = [
 plan.add_command(create_command(decorators=create_options))
 
 
-@plan.command(help="Run migration plan")
-@click.option("--href", required=True, help="HREF of the plan")
+@plan.command(help=_("Run migration plan"))
+@click.option("--href", required=True, help=_("HREF of the plan"))
 @pass_entity_context
 def run(plan_ctx: PulpMigrationPlanContext, href: str) -> None:
     plan_ctx.run(href)
 
 
-@plan.command(help="Reset Pulp 3 data for plugins specified in the migration plan")
-@click.option("--href", required=True, help="HREF of the plan")
+@plan.command(help=_("Reset Pulp 3 data for plugins specified in the migration plan"))
+@click.option("--href", required=True, help=_("HREF of the plan"))
 @pass_entity_context
 def reset(plan_ctx: PulpMigrationPlanContext, href: str) -> None:
     plan_ctx.reset(href)

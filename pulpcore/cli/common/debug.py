@@ -8,7 +8,7 @@ from pulpcore.cli.common.context import PluginRequirement, PulpContext, pass_pul
 _ = gettext.gettext
 
 
-@click.group()
+@click.group(help=_("Commands useful for debugging"))
 def debug() -> None:
     """
     Commands useful for debugging.

@@ -17,8 +17,8 @@ _ = gettext.gettext
 
 
 class PulpAccessPolicyContext(PulpEntityContext):
-    ENTITY = "access policy"
-    ENTITIES = "access_policies"
+    ENTITY = _("access policy")
+    ENTITIES = _("access policies")
     HREF = "access_policy_href"
     LIST_ID = "access_policies_list"
     READ_ID = "access_policies_read"
@@ -34,12 +34,17 @@ class PulpAccessPolicyContext(PulpEntityContext):
         for key, value in kwargs.items():
             search_result = [res for res in search_result if res[key] == value]
         if len(search_result) != 1:
-            raise click.ClickException(f"Could not find {self.ENTITY} with {kwargs}.")
+            raise click.ClickException(
+                _("Could not find {entity} with {kwargs}.").format(
+                    entity=self.ENTITY, kwargs=kwargs
+                )
+            )
         return search_result[0]
 
 
 class PulpArtifactContext(PulpEntityContext):
-    ENTITY = "artifact"
+    ENTITY = _("artifact")
+    ENTITIES = _("artifacts")
     HREF = "artifact_href"
     LIST_ID = "artifacts_list"
     READ_ID = "artifacts_read"
@@ -59,10 +64,10 @@ class PulpArtifactContext(PulpEntityContext):
         # check whether the file exists before uploading
         result = self.list(limit=1, offset=0, parameters={"sha256": sha256_digest})
         if len(result) > 0:
-            click.echo("Artifact already exists.", err=True)
+            click.echo(_("Artifact already exists."), err=True)
             return result[0]["pulp_href"]
 
-        click.echo(f"Uploading file {file.name}", err=True)
+        click.echo(_("Uploading file {filename}").format(filename=file.name), err=True)
 
         if chunk_size > size:
             # if chunk_size is bigger than the file size, just upload it directly
@@ -88,7 +93,7 @@ class PulpArtifactContext(PulpEntityContext):
                 start += chunk_size
                 click.echo(".", nl=False, err=True)
 
-            click.echo("Upload complete. Creating artifact.", err=True)
+            click.echo(_("Upload complete. Creating artifact."), err=True)
             task = upload_ctx.commit(
                 upload_href,
                 sha256_digest,
@@ -101,7 +106,8 @@ class PulpArtifactContext(PulpEntityContext):
 
 
 class PulpExporterContext(PulpEntityContext):
-    ENTITY = "PulpExporter"
+    ENTITY = _("Pulp exporter")
+    ENTITIES = _("Pulp exporters")
     HREF = "pulp_exporter_href"
     LIST_ID = "exporters_core_pulp_list"
     READ_ID = "exporters_core_pulp_read"
@@ -111,7 +117,8 @@ class PulpExporterContext(PulpEntityContext):
 
 
 class PulpExportContext(PulpEntityContext):
-    ENTITY = "PulpExport"
+    ENTITY = _("Pulp export")
+    ENTITIES = _("Pulp exports")
     # This is replaced by a version aware property below
     # HREF = "pulp_pulp_export_href"
     LIST_ID = "exporters_core_pulp_exports_list"
@@ -160,7 +167,8 @@ class PulpExportContext(PulpEntityContext):
 
 
 class PulpGroupContext(PulpEntityContext):
-    ENTITY = "group"
+    ENTITY = _("user group")
+    ENTITIES = _("user groups")
     HREF = "auth_group_href"
     LIST_ID = "groups_list"
     READ_ID = "groups_read"
@@ -178,13 +186,17 @@ class PulpGroupContext(PulpEntityContext):
         for key, value in kwargs.items():
             search_result = [res for res in search_result if res[key] == value]
         if len(search_result) != 1:
-            raise click.ClickException(f"Could not find {self.ENTITY} with {kwargs}.")
+            raise click.ClickException(
+                _("Could not find {entity} with {kwargs}.").format(
+                    entity=self.ENTITY, kwargs=kwargs
+                )
+            )
         return search_result[0]
 
 
 class PulpGroupPermissionContext(PulpEntityContext):
-    ENTITY = "group permission"
-    ENTITIES = "group permissions"
+    ENTITY = _("group permission")
+    ENTITIES = _("group permissions")
     group_ctx: PulpGroupContext
 
     def __init__(self, pulp_ctx: PulpContext, group_ctx: PulpGroupContext) -> None:
@@ -203,7 +215,11 @@ class PulpGroupPermissionContext(PulpEntityContext):
         for key, value in kwargs.items():
             search_result = [res for res in search_result if res[key] == value]
         if len(search_result) != 1:
-            raise click.ClickException(f"Could not find {self.ENTITY} with {kwargs}.")
+            raise click.ClickException(
+                _("Could not find {entity} with {kwargs}.").format(
+                    entity=self.ENTITY, kwargs=kwargs
+                )
+            )
         return search_result[0]
 
     @property
@@ -212,8 +228,8 @@ class PulpGroupPermissionContext(PulpEntityContext):
 
 
 class PulpGroupModelPermissionContext(PulpGroupPermissionContext):
-    ENTITY = "group model permission"
-    ENTITIES = "group model permissions"
+    ENTITY = _("group model permission")
+    ENTITIES = _("group model permissions")
     HREF = "auth_groups_model_permission_href"
     LIST_ID = "groups_model_permissions_list"
     READ_ID = "groups_model_permissions_read"
@@ -222,8 +238,8 @@ class PulpGroupModelPermissionContext(PulpGroupPermissionContext):
 
 
 class PulpGroupObjectPermissionContext(PulpGroupPermissionContext):
-    ENTITY = "group object permission"
-    ENTITIES = "group object permissions"
+    ENTITY = _("group object permission")
+    ENTITIES = _("group object permissions")
     HREF = "auth_groups_object_permission_href"
     LIST_ID = "groups_object_permissions_list"
     READ_ID = "groups_object_permissions_read"
@@ -232,7 +248,8 @@ class PulpGroupObjectPermissionContext(PulpGroupPermissionContext):
 
 
 class PulpGroupUserContext(PulpEntityContext):
-    ENTITY = "group user"
+    ENTITY = _("group user")
+    ENTITIES = _("group users")
     # This is replaced by a version aware property below
     # HREF = "auth_groups_user_href"
     LIST_ID = "groups_users_list"
@@ -284,7 +301,8 @@ class PulpGroupUserContext(PulpEntityContext):
 
 
 class PulpImporterContext(PulpEntityContext):
-    ENTITY = "PulpImporter"
+    ENTITY = _("Pulp importer")
+    ENTITIES = _("Pulp importers")
     HREF = "pulp_importer_href"
     CREATE_ID = "importers_core_pulp_create"
     READ_ID = "importers_core_pulp_read"
@@ -294,15 +312,16 @@ class PulpImporterContext(PulpEntityContext):
 
 
 class PulpSigningServiceContext(PulpEntityContext):
-    ENTITY = "signing service"
-    ENTITIES = "signing services"
+    ENTITY = _("signing service")
+    ENTITIES = _("signing services")
     HREF = "signing_service_href"
     LIST_ID = "signing_services_list"
     READ_ID = "signing_services_read"
 
 
 class PulpTaskContext(PulpEntityContext):
-    ENTITY = "task"
+    ENTITY = _("task")
+    ENTITIES = _("tasks")
     HREF = "task_href"
     LIST_ID = "tasks_list"
     READ_ID = "tasks_read"
@@ -327,14 +346,16 @@ class PulpTaskContext(PulpEntityContext):
 
 
 class PulpTaskGroupContext(PulpEntityContext):
-    ENTITY = "task group"
+    ENTITY = _("task group")
+    ENTITIES = _("task groups")
     HREF = "task_group_href"
     LIST_ID = "task_groups_list"
     READ_ID = "task_groups_read"
 
 
 class PulpUploadContext(PulpEntityContext):
-    ENTITY = "upload"
+    ENTITY = _("upload")
+    ENTITIES = _("uploads")
     HREF = "upload_href"
     LIST_ID = "uploads_list"
     READ_ID = "uploads_read"
@@ -352,7 +373,8 @@ class PulpUploadContext(PulpEntityContext):
 
 
 class PulpUserContext(PulpEntityContext):
-    ENTITY = "user"
+    ENTITY = _("user")
+    ENTITIES = _("users")
     HREF = "auth_user_href"
     LIST_ID = "users_list"
     READ_ID = "users_read"
@@ -367,12 +389,17 @@ class PulpUserContext(PulpEntityContext):
         for key, value in kwargs.items():
             search_result = [res for res in search_result if res[key] == value]
         if len(search_result) != 1:
-            raise click.ClickException(f"Could not find {self.ENTITY} with {kwargs}.")
+            raise click.ClickException(
+                _("Could not find {entity} with {kwargs}.").format(
+                    entity=self.ENTITY, kwargs=kwargs
+                )
+            )
         return search_result[0]
 
 
 class PulpWorkerContext(PulpEntityContext):
-    ENTITY = "worker"
+    ENTITY = _("worker")
+    ENTITIES = _("workers")
     HREF = "worker_href"
     LIST_ID = "workers_list"
     READ_ID = "workers_read"

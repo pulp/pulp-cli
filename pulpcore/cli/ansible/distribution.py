@@ -143,7 +143,9 @@ def update(
             body["repository_version"] = f"{repository_href}versions/{version}/"
         else:
             raise click.ClickException(
-                f"Distribution {name} doesn't have a repository set, "
-                f"please specify the repository to use  with --repository"
+                _(
+                    "Distribution {name} doesn't have a repository set, "
+                    "please specify the repository to use  with --repository"
+                ).format(name=name)
             )
     distribution_ctx.update(href, body=body)

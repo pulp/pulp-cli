@@ -75,7 +75,11 @@ def _content_list_callback(ctx: click.Context, param: click.Parameter, value: An
     try:
         return CONTENT_LIST_SCHEMA.validate(result)
     except s.SchemaError as e:
-        raise click.ClickException("Validation of '{}' failed: {}".format(param.name, str(e)))
+        raise click.ClickException(
+            _("Validation of '{parameter}' failed: {error}").format(
+                parameter=param.name, error=str(e)
+            )
+        )
 
 
 @click.group()

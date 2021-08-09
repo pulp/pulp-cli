@@ -109,7 +109,10 @@ def sync(
     elif repository["remote"] is None:
         name = repository["name"]
         raise click.ClickException(
-            f"Repository '{name}' does not have a default remote. Please specify with '--remote'."
+            _(
+                "Repository '{name}' does not have a default remote."
+                " Please specify with '--remote'."
+            ).format(name=name)
         )
 
     repository_ctx.sync(
