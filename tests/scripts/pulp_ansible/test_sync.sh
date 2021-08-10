@@ -56,5 +56,5 @@ expect_succ pulp ansible repository version list --repository "cli_test_ansible_
 test "$(echo "$OUTPUT" | jq -r length)" -eq 2
 expect_succ pulp ansible repository version show --repository "cli_test_ansible_repository" --version 2
 test "$(echo "$OUTPUT" | jq -r '.content_summary.present."ansible.collection_version".count')" -gt 0
-expect_succ pulp ansible content list
+expect_succ pulp ansible content list --limit 2
 test "$(echo "$OUTPUT" | jq -r length)" -gt 0
