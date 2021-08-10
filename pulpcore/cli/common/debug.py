@@ -39,7 +39,7 @@ def task_summary(pulp_ctx: PulpContext) -> None:
 
     result = {}
     for state in ["waiting", "skipped", "running", "completed", "failed", "canceled", "canceling"]:
-        payload = {"limit": 0, "state": state}
+        payload = {"limit": 1, "state": state}
         answer = pulp_ctx.call(PulpTaskContext.LIST_ID, parameters=payload)
         result[state] = answer["count"]
     pulp_ctx.output_result(result)
