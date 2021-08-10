@@ -13,6 +13,47 @@ Changelog
 
 .. towncrier release notes start
 
+0.11.0 (2021-08-10)
+
+Features
+--------
+
+- Added support to specify skip-types on rpm sync.
+  `#225 <https://github.com/pulp/pulp-cli/issues/225>`_
+- Added lookup for a global config file ``/etc/pulp/cli.toml``.
+  `#290 <https://github.com/pulp/pulp-cli/issues/290>`_
+- Changed default config location to ``<app-dir>/cli.toml``. The old file will still be read.
+  `#293 <https://github.com/pulp/pulp-cli/issues/293>`_
+- Enable exports for ansible repositories.
+  `#302 <https://github.com/pulp/pulp-cli/issues/302>`_
+- Added --sles-auth-token to rpm remote commands.
+  `#305 <https://github.com/pulp/pulp-cli/issues/305>`_
+- Added ansible content list command.
+  `#327 <https://github.com/pulp/pulp-cli/issues/327>`_
+
+
+Bugfixes
+--------
+
+- Added validation to some json input parameters.
+  `#255 <https://github.com/pulp/pulp-cli/issues/255>`_
+- Fixed a bug in the docs publishing workflow.
+  `#286 <https://github.com/pulp/pulp-cli/issues/286>`_
+- Unconditionally add the fake not namespaced pulp_cli to the distribution on pypi to make it able to be consumed by setuptools<40.
+  `#287 <https://github.com/pulp/pulp-cli/issues/287>`_
+- Deprecate orphans delete command in favor of orphan cleanup and use new rest interface on pulpcore>=3.14.
+  `#297 <https://github.com/pulp/pulp-cli/issues/297>`_
+- Changed the name of retained-versions to retain-repo-versions.
+  `#298 <https://github.com/pulp/pulp-cli/issues/298>`_
+- Improved a confusing error message around pulp components.
+  `#299 <https://github.com/pulp/pulp-cli/issues/299>`_
+- Added minimum of 1 to `--limit` option.
+  `#311 <https://github.com/pulp/pulp-cli/issues/311>`_
+
+
+----
+
+
 0.10.1 (2021-06-30)
 
 Bugfixes
