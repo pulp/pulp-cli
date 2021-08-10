@@ -6,7 +6,7 @@ lint:
 	find . -name '*.sh' -print0 | xargs -0 shellcheck -x
 	black --diff --check .
 	isort -c --diff .
-	flake8 --config flake8.cfg
+	flake8
 	mypy
 	@echo "🙊 Code 🙈 LGTM 🙉 !"
 

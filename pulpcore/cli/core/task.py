@@ -1,4 +1,5 @@
 import gettext
+from contextlib import suppress
 from typing import Optional
 
 import click
@@ -64,23 +65,48 @@ def show(pulp_ctx: PulpContext, task_ctx: PulpTaskContext, wait: bool) -> None:
 @task.command()
 @href_option
 @uuid_option
+@click.option(
+    "--all", "all_tasks", is_flag=True, help=_("Cancel all 'waiting' and 'running' tasks.")
+)
+@click.option("--waiting", "waiting_tasks", is_flag=True, help=_("Cancel all 'waiting' tasks."))
+@click.option("--running", "running_tasks", is_flag=True, help=_("Cancel all 'running' tasks."))
 @pass_entity_context
 @pass_pulp_context
-def cancel(pulp_ctx: PulpContext, task_ctx: PulpTaskContext) -> None:
+def cancel(
+    pulp_ctx: PulpContext,
+    task_ctx: PulpTaskContext,
+    all_tasks: bool,
+    waiting_tasks: bool,
+    running_tasks: bool,
+) -> None:
     """Cancels a task and waits until the cancellation is confirmed."""
-    entity = task_ctx.entity
-    if entity["state"] not in ["waiting", "running"]:
-        click.ClickException(
-            _("Task {href} is in state {state} and cannot be canceled.").format(
-                href=task_ctx.pulp_href, state=entity["state"]
+    states = []
+    if waiting_tasks or all_tasks:
+        states.append("waiting")
+    if running_tasks or all_tasks:
+        states.append("running")
+    if states:
+        tasks = task_ctx.list(limit=1 << 64, offset=0, parameters={"state__in": ",".join(states)})
+        for task in tasks:
+            with suppress(Exception):
+                task_ctx.cancel(task["pulp_href"])
+        for task in tasks:
+            with suppress(Exception):
+                pulp_ctx.wait_for_task(task)
+    else:
+        entity = task_ctx.entity
+        if entity["state"] not in ["waiting", "running"]:
+            click.ClickException(
+                _("Task {href} is in state {state} and cannot be canceled.").format(
+                    href=task_ctx.pulp_href, state=entity["state"]
+                )
             )
-        )
 
-    task_ctx.cancel(task_ctx.pulp_href)
-    click.echo(_("Waiting to cancel task {href}").format(href=task_ctx.pulp_href), err=True)
-    try:
-        pulp_ctx.wait_for_task(entity)
-    except Exception as e:
-        if str(e) != "Task canceled":
-            raise e
-    click.echo(_("Done."), err=True)
+        task_ctx.cancel(task_ctx.pulp_href)
+        click.echo(_("Waiting to cancel task {href}").format(href=task_ctx.pulp_href), err=True)
+        try:
+            pulp_ctx.wait_for_task(entity)
+        except Exception as e:
+            if str(e) != "Task canceled":
+                raise e
+        click.echo(_("Done."), err=True)
