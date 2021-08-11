@@ -57,4 +57,6 @@ test "$(echo "$OUTPUT" | jq -r length)" -eq 2
 expect_succ pulp ansible repository version show --repository "cli_test_ansible_repository" --version 2
 test "$(echo "$OUTPUT" | jq -r '.content_summary.present."ansible.collection_version".count')" -gt 0
 expect_succ pulp ansible content list
-test "$(echo "$OUTPUT" | jq -r length)" -gt 0
+# jq fails to parse the collection data
+# collection_version.docs_blob brings HTML snippets which may be adding linebreaks
+test "$(echo "$OUTPUT" | grep -c pulp_href)" -gt 0
