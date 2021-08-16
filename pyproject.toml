@@ -22,5 +22,21 @@ markers = [
   "pulp_ansible: pulp_ansible tests",
   "pulp_container: pulp_container tests",
   "pulp_rpm: pulp_rpm tests",
-  "pulp_python: pulp_python tests"
+  "pulp_python: pulp_python tests",
 ]
+
+[tool.mypy]
+strict = true
+show_error_codes = true
+files = "pulpcore/**/*.py"
+namespace_packages = true
+explicit_package_bases = true
+
+[[tool.mypy.overrides]]
+module = [
+  "urllib3.*",
+  "pygments.*",
+  "click_shell.*",
+  "schema.*",
+]
+ignore_missing_imports = true
