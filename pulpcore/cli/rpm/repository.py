@@ -8,6 +8,7 @@ from pulpcore.cli.common.context import (
     PluginRequirement,
     PulpContext,
     PulpEntityContext,
+    PulpRemoteContext,
     PulpRepositoryContext,
     pass_pulp_context,
     pass_repository_context,
@@ -42,6 +43,10 @@ remote_option = resource_option(
     default_plugin="rpm",
     default_type="rpm",
     context_table={"rpm:rpm": PulpRpmRemoteContext},
+    href_pattern=PulpRemoteContext.HREF_PATTERN,
+    help=_(
+        "Remote used for synching in the form '[[<plugin>:]<resource_type>:]<name>' or by href."
+    ),
 )
 
 

@@ -27,10 +27,11 @@ expect_succ pulp file remote create --name $RMOTE --url "$FILE_REMOTE_URL"
 expect_succ pulp file repository create --name $REPO1
 expect_succ pulp file repository sync --name $REPO1 --remote $RMOTE
 expect_succ pulp file repository create --name $REPO2
+REPO1_HREF="$(pulp file repository show --name $REPO1 | jq -r '.pulp_href')"
 
 # Test create
 expect_succ pulp exporter pulp create --name $NAME1 --path $PATH1 --repository file:file:$REPO1 --repository file:file:$REPO2
-expect_succ pulp exporter pulp create --name $NAME2 --path $PATH1 --repository file:file:$REPO1
+expect_succ pulp exporter pulp create --name $NAME2 --path $PATH1 --repository "$REPO1_HREF"
 
 # Test read
 expect_succ pulp exporter pulp show --name $NAME1
@@ -52,14 +53,14 @@ expect_succ pulp export pulp run --exporter $NAME1 --full False
 expect_succ pulp export pulp run --exporter $NAME1 --full True --chunk-size 5KB
 expect_succ pulp export pulp run --exporter $NAME2 --full False --start-versions file:file:${REPO1} 0
 expect_succ pulp export pulp run --exporter $NAME2 --full False --versions file:file:${REPO1} 0
-expect_succ pulp export pulp run --exporter $NAME2 --full False --start-versions file:file:${REPO1} 0 --versions file:file:${REPO1} 1
-expect_succ pulp export pulp run --exporter $NAME2 --full False --start-versions file:file:${REPO1} 0 --versions file:file:${REPO1} 1 --chunk-size 5KB
+expect_succ pulp export pulp run --exporter $NAME2 --full False --start-versions file:file:${REPO1} 0 --versions "${REPO1_HREF}" 1
+expect_succ pulp export pulp run --exporter $NAME2 --full False --start-versions "${REPO1_HREF}" 0 --versions file:file:${REPO1} 1 --chunk-size 5KB
 
 # Test list exports
 expect_succ pulp export pulp list --exporter $NAME1
 
 # Test delete export
-HREF=$(pulp export pulp list --exporter $NAME1 |  jq -r '.[0].pulp_href')
+HREF=$(pulp export pulp list --exporter $NAME1 | jq -r '.[0].pulp_href')
 expect_succ pulp export pulp destroy --href "$HREF"
 
 # Test delete exporter

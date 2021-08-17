@@ -1,10 +1,12 @@
 import gettext
-from typing import Any, Dict, Iterable, Tuple
+import re
+from typing import Any, Dict, Iterable, Optional, Tuple
 
 import click
 
 from pulpcore.cli.common.context import (
     DEFAULT_LIMIT,
+    EntityDefinition,
     PulpContext,
     PulpRepositoryContext,
     PulpRepositoryVersionContext,
@@ -23,9 +25,26 @@ def _version_list_callback(
 ) -> Iterable[PulpRepositoryVersionContext]:
     result = []
     for item in value:
-        plugin, resource_type, identifier = item[0].split(":", maxsplit=2)
-        if not identifier:
-            raise click.ClickException(_("Repositories must be specified with plugin and type"))
+        pulp_href: Optional[str] = None
+        entity: Optional[EntityDefinition] = None
+
+        if item[0].startswith("/"):
+            match = re.match(PulpRepositoryContext.HREF_PATTERN, item[0])
+            if match is None:
+                raise click.ClickException(
+                    _("'{value}' is not a valid href for {option_name}.").format(
+                        value=value, option_name=param.name
+                    )
+                )
+            match_groups = match.groupdict(default="")
+            plugin = match_groups.get("plugin", "")
+            resource_type = match_groups.get("resource_type", "")
+            pulp_href = item[0]
+        else:
+            plugin, resource_type, identifier = item[0].split(":", maxsplit=2)
+            if not identifier:
+                raise click.ClickException(_("Repositories must be specified with plugin and type"))
+            entity = {"name": identifier}
         context_class = registered_repository_contexts.get(plugin + ":" + resource_type)
         if context_class is None:
             raise click.ClickException(
@@ -36,7 +55,9 @@ def _version_list_callback(
             )
         pulp_ctx = ctx.find_object(PulpContext)
         assert pulp_ctx is not None
-        repository_ctx: PulpRepositoryContext = context_class(pulp_ctx, entity={"name": identifier})
+        repository_ctx: PulpRepositoryContext = context_class(
+            pulp_ctx, pulp_href=pulp_href, entity=entity
+        )
 
         if not repository_ctx.capable("pulpexport"):
             raise click.ClickException(

@@ -455,6 +455,7 @@ class PulpRemoteContext(PulpEntityContext):
 
     ENTITY = "remote"
     ENTITIES = "remotes"
+    HREF_PATTERN = r"^/pulp/api/v3/remotes/(?P<plugin>\w+)/(?P<resource_type>\w+)/"
     NULLABLES = {
         "ca_cert",
         "client_cert",
@@ -525,6 +526,7 @@ class PulpRepositoryContext(PulpEntityContext):
 
     ENTITY = "repository"
     ENTITIES = "repositories"
+    HREF_PATTERN = r"^/pulp/api/v3/repositories/(?P<plugin>\w+)/(?P<resource_type>\w+)/"
     LIST_ID = "repositories_list"
     SYNC_ID: ClassVar[str]
     MODIFY_ID: ClassVar[str]
