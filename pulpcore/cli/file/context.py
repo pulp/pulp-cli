@@ -14,6 +14,17 @@ from pulpcore.cli.common.context import (
 _ = gettext.gettext
 
 
+class PulpFileACSContext(PulpEntityContext):
+    ENTITY = "file ACS"
+    ENTITIES = "file ACSes"
+    HREF = "file_file_alternate_content_source_href"
+    LIST_ID = "acs_file_file_list"
+    READ_ID = "acs_file_file_read"
+    CREATE_ID = "acs_file_file_create"
+    UPDATE_ID = "acs_file_file_partial_update"
+    DELETE_ID = "acs_file_file_delete"
+
+
 class PulpFileContentContext(PulpContentContext):
     ENTITY = "file content"
     ENTITIES = "file content"
