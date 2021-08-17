@@ -7,6 +7,7 @@ from pulpcore.cli.common.context import (
     EntityFieldDefinition,
     PulpContext,
     PulpEntityContext,
+    PulpRepositoryContext,
     pass_entity_context,
     pass_pulp_context,
     registered_repository_contexts,
@@ -29,6 +30,11 @@ multi_repository_option = resource_option(
     context_table=registered_repository_contexts,
     capabilities=["pulpexport"],
     multiple=True,
+    href_pattern=PulpRepositoryContext.HREF_PATTERN,
+    help=_(
+        "Repository to export from in the form '[[<plugin>:]<resource_type>:]<name>' or by href."
+        " Can be called multiple times."
+    ),
 )
 
 
@@ -83,7 +89,7 @@ def create(
 @href_option
 @click.option("--path")
 @multi_repository_option
-@click.option("--repository-href", multiple=True)
+@click.option("--repository-href", multiple=True)  # This should be deprecated
 @pass_entity_context
 @pass_pulp_context
 def update(

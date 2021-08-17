@@ -1,5 +1,6 @@
 import gettext
 import json
+import re
 from typing import (
     Any,
     Callable,
@@ -248,6 +249,7 @@ def resource_option(*args: Any, **kwargs: Any) -> Callable[[_FC], _FC]:
     lookup_key: str = kwargs.pop("lookup_key", "name")
     context_table: Dict[str, Type[PulpEntityContext]] = kwargs.pop("context_table")
     capabilities: Optional[List[str]] = kwargs.pop("capabilities", None)
+    href_pattern: Optional[str] = kwargs.pop("href_pattern", None)
 
     def _option_callback(
         ctx: click.Context, param: click.Parameter, value: Optional[str]
@@ -256,10 +258,35 @@ def resource_option(*args: Any, **kwargs: Any) -> Callable[[_FC], _FC]:
         if not value:
             return value
 
-        split_value = value.split(":", maxsplit=2)
-        while len(split_value) < 3:
-            split_value.insert(0, "")
-        plugin, resource_type, identifier = split_value
+        pulp_href: Optional[str] = None
+        entity: Optional[EntityDefinition] = None
+
+        if value.startswith("/"):
+            # An href was passed
+            if href_pattern is None:
+                raise click.ClickException(
+                    _("The option {option_name} does not support href.").format(
+                        option_name=param.name
+                    )
+                )
+            match = re.match(href_pattern, value)
+            if match is None:
+                raise click.ClickException(
+                    _("'{value}' is not a valid href for {option_name}.").format(
+                        value=value, option_name=param.name
+                    )
+                )
+            match_groups = match.groupdict(default="")
+            plugin = match_groups.get("plugin", "")
+            resource_type = match_groups.get("resource_type", "")
+            pulp_href = value
+        else:
+            # A natural key identifier was passed
+            split_value = value.split(":", maxsplit=2)
+            while len(split_value) < 3:
+                split_value.insert(0, "")
+            plugin, resource_type, identifier = split_value
+            entity = {lookup_key: identifier}
 
         if resource_type == "":
             if default_type is None:
@@ -288,7 +315,7 @@ def resource_option(*args: Any, **kwargs: Any) -> Callable[[_FC], _FC]:
             )
         pulp_ctx = ctx.find_object(PulpContext)
         assert pulp_ctx is not None
-        entity_ctx: PulpEntityContext = context_class(pulp_ctx, entity={lookup_key: identifier})
+        entity_ctx: PulpEntityContext = context_class(pulp_ctx, pulp_href=pulp_href, entity=entity)
 
         if capabilities is not None:
             for capability in capabilities:

@@ -28,6 +28,9 @@ expect_succ pulp file repository update --name "cli_test_file_repo" --remote "fi
 expect_succ pulp file repository show --name "cli_test_file_repo"
 test "$(echo "$OUTPUT" | jq '.description')" = '"Test\nrepository"'
 test "$(echo "$OUTPUT" | jq -r '.remote')" = "$REMOTE2_HREF"
+expect_succ pulp file repository update --name "cli_test_file_repo" --remote "$REMOTE1_HREF"
+expect_succ pulp file repository show --name "cli_test_file_repo"
+test "$(echo "$OUTPUT" | jq -r '.remote')" = "$REMOTE1_HREF"
 expect_succ pulp file repository update --name "cli_test_file_repo" --remote ""
 expect_succ pulp file repository show --name "cli_test_file_repo"
 test "$(echo "$OUTPUT" | jq -r '.remote')" = "null"
@@ -35,7 +38,7 @@ expect_succ pulp file repository list
 test "$(echo "$OUTPUT" | jq -r '.|length')" != "0"
 
 expect_succ pulp file repository task list --repository "cli_test_file_repo"
-test "$(echo "$OUTPUT" | jq -r '.|length')" = "5"
+test "$(echo "$OUTPUT" | jq -r '.|length')" = "6"
 
 if [ "$(pulp debug has-plugin --name "file" --min-version "1.7.0")" = "true" ]
 then

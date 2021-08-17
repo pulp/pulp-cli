@@ -11,6 +11,7 @@ from pulpcore.cli.common.context import (
     EntityFieldDefinition,
     PulpContext,
     PulpEntityContext,
+    PulpRemoteContext,
     PulpRepositoryContext,
     pass_pulp_context,
     pass_repository_context,
@@ -41,6 +42,10 @@ remote_option = resource_option(
         "ansible:collection": PulpAnsibleCollectionRemoteContext,
         "ansible:role": PulpAnsibleRoleRemoteContext,
     },
+    href_pattern=PulpRemoteContext.HREF_PATTERN,
+    help=_(
+        "Remote used for synching in the form '[[<plugin>:]<resource_type>:]<name>' or by href."
+    ),
 )
 
 
