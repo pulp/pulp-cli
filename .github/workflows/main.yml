@@ -26,9 +26,10 @@ jobs:
           pip install -r test_requirements.txt
       - name: Check commit message
         env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }}
         run: |
-          for sha in $(curl $GITHUB_CONTEXT | jq '.[].sha' | sed 's/"//g')
+          for sha in $(curl -H "Authorization: token $GITHUB_TOKEN" $GITHUB_CONTEXT | jq '.[].sha' | sed 's/"//g')
           do
             python .ci/scripts/validate_commit_message.py $sha
             VALUE=$?
