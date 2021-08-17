@@ -1,3 +1,4 @@
+import os
 import re
 import subprocess
 import sys
@@ -13,7 +14,7 @@ sha = sys.argv[1]
 project = "pulp-cli"
 message = subprocess.check_output(["git", "log", "--format=%B", "-n 1", sha]).decode("utf-8")
 
-g = Github()
+g = Github(os.environ.get("GITHUB_TOKEN"))
 repo = g.get_repo("pulp/pulp-cli")
 
 
