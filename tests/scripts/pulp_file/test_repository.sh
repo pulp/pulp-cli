@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # shellcheck source=tests/scripts/config.source
 . "$(dirname "$(dirname "$(realpath "$0")")")"/config.source
@@ -20,16 +20,17 @@ expect_succ pulp file repository list
 expect_succ pulp file repository create --name "cli_test_file_repo" --description "Test repository for CLI tests"
 expect_succ pulp file repository update --name "cli_test_file_repo" --description "" --remote "cli_test_file_remote1"
 expect_succ pulp file repository show --name "cli_test_file_repo"
-expect_succ test "$(echo "$OUTPUT" | jq -r '.remote')" = "$REMOTE1_HREF"
+test "$(echo "$OUTPUT" | jq -r '.remote')" = "$REMOTE1_HREF"
+test "$(echo "$OUTPUT" | jq -r '.description')" = "null"
 expect_succ pulp file repository update --name "cli_test_file_repo" --remote "::cli:test:file:remote2"
 expect_succ pulp file repository update --name "cli_test_file_repo" --remote "file:file:cli_test_file_remote1"
-expect_succ pulp file repository update --name "cli_test_file_repo" --remote "file::cli:test:file:remote2"
+expect_succ pulp file repository update --name "cli_test_file_repo" --remote "file::cli:test:file:remote2" --description $'Test\nrepository'
 expect_succ pulp file repository show --name "cli_test_file_repo"
-expect_succ test "$(echo "$OUTPUT" | jq -r '.remote')" = "$REMOTE2_HREF"
+test "$(echo "$OUTPUT" | jq '.description')" = '"Test\nrepository"'
+test "$(echo "$OUTPUT" | jq -r '.remote')" = "$REMOTE2_HREF"
 expect_succ pulp file repository update --name "cli_test_file_repo" --remote ""
 expect_succ pulp file repository show --name "cli_test_file_repo"
-expect_succ test "$(echo "$OUTPUT" | jq -r '.description')" = "null"
-expect_succ test "$(echo "$OUTPUT" | jq -r '.remote')" = ""
+test "$(echo "$OUTPUT" | jq -r '.remote')" = "null"
 expect_succ pulp file repository list
 test "$(echo "$OUTPUT" | jq -r '.|length')" != "0"
 
