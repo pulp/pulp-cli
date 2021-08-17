@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # shellcheck source=tests/scripts/config.source
 . "$(dirname "$(realpath "$0")")"/config.source
