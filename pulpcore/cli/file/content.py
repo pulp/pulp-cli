@@ -9,7 +9,13 @@ from pulpcore.cli.common.context import (
     pass_entity_context,
     pass_pulp_context,
 )
-from pulpcore.cli.common.generic import create_command, href_option, list_command, show_command
+from pulpcore.cli.common.generic import (
+    chunk_size_option,
+    create_command,
+    href_option,
+    list_command,
+    show_command,
+)
 from pulpcore.cli.core.context import PulpArtifactContext
 from pulpcore.cli.file.context import PulpFileContentContext
 
@@ -91,9 +97,7 @@ content.add_command(create_command(decorators=create_options))
 @content.command()
 @click.option("--relative-path", required=True)
 @click.option("--file", type=click.File("rb"), required=True)
-@click.option(
-    "--chunk-size", default=1000000, type=int, help=_("Chunk size in bytes (default is 1 MB)")
-)
+@chunk_size_option
 @pass_entity_context
 @pass_pulp_context
 def upload(
