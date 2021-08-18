@@ -4,7 +4,7 @@ from typing import IO
 import click
 
 from pulpcore.cli.common.context import PulpContext, pass_entity_context, pass_pulp_context
-from pulpcore.cli.common.generic import href_option, list_command, show_command
+from pulpcore.cli.common.generic import chunk_size_option, href_option, list_command, show_command
 from pulpcore.cli.core.context import PulpArtifactContext
 
 _ = gettext.gettext
@@ -26,9 +26,7 @@ artifact.add_command(show_command(decorators=lookup_options))
 
 @artifact.command()
 @click.option("--file", type=click.File("rb"), required=True)
-@click.option(
-    "--chunk-size", default=1000000, type=int, help=_("Chunk size in bytes (default is 1 MB)")
-)
+@chunk_size_option
 @pass_entity_context
 @pass_pulp_context
 def upload(

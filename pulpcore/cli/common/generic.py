@@ -234,6 +234,22 @@ def create_content_json_callback(
     return _callback
 
 
+# based on https://stackoverflow.com/a/42865957/2002471
+units = {"B": 1, "KB": 10 ** 3, "MB": 10 ** 6, "GB": 10 ** 9, "TB": 10 ** 12}
+
+
+def parse_size_callback(ctx: click.Context, param: click.Parameter, value: str) -> int:
+    size = value.strip().upper()
+    if not size or not re.match(r"^\s*([0-9]*)\s*([KMGT]?B)?\s*$", size):
+        raise click.ClickException("Please pass in a valid size of form: [0-9] [K/M/G]B")
+    size = re.sub(r"([KMGT]?B)", r" \1", size)
+    chunk = [string.strip() for string in size.split()]
+    if len(chunk) == 1:
+        chunk.append("B")
+    number, unit = chunk
+    return int(float(number) * units[unit])
+
+
 ##############################################################################
 # Decorator common options
 
@@ -418,6 +434,13 @@ content_in_option = pulp_option(
     "content__in",
     help=_("Search for {entities} with these content hrefs in them (JSON list)"),
     callback=load_json_callback,
+)
+
+chunk_size_option = pulp_option(
+    "--chunk-size",
+    help=_("Chunk size to break up {entity} into. Defaults to 1MB"),
+    default="1MB",
+    callback=parse_size_callback,
 )
 
 pulp_created_gte_option = pulp_option(
