@@ -146,6 +146,19 @@ def _name_callback(
     return value
 
 
+def _ref_callback(
+    ctx: click.Context, param: click.Parameter, value: Optional[str]
+) -> Optional[str]:
+    if value is not None:
+        entity_ctx = ctx.find_object(PulpEntityContext)
+        assert entity_ctx is not None
+        if value.startswith("/"):
+            entity_ctx.pulp_href = value
+        else:
+            entity_ctx.entity = {"name": value}
+    return value
+
+
 def _repository_href_callback(
     ctx: click.Context, param: click.Parameter, value: Optional[str]
 ) -> Optional[str]:
@@ -384,6 +397,14 @@ name_option = pulp_option(
     "--name",
     help=_("Name of the {entity}"),
     callback=_name_callback,
+    expose_value=False,
+)
+
+ref_option = pulp_option(
+    "--ref",
+    "-r",
+    help=_("Name or pulp href of the {entity}"),
+    callback=_ref_callback,
     expose_value=False,
 )
 

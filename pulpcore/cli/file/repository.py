@@ -26,6 +26,7 @@ from pulpcore.cli.common.generic import (
     load_json_callback,
     name_option,
     pulp_option,
+    ref_option,
     repository_content_command,
     repository_href_option,
     repository_option,
@@ -95,7 +96,7 @@ def repository(ctx: click.Context, pulp_ctx: PulpContext, repo_type: str) -> Non
         raise NotImplementedError()
 
 
-lookup_options = [href_option, name_option]
+lookup_options = [href_option, name_option, ref_option]
 nested_lookup_options = [repository_href_option, repository_option]
 update_options = [
     click.option("--description"),

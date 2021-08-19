@@ -13,6 +13,7 @@ from pulpcore.cli.common.generic import (
     label_select_option,
     list_command,
     name_option,
+    ref_option,
     show_command,
     update_command,
 )
@@ -38,7 +39,7 @@ def remote(ctx: click.Context, pulp_ctx: PulpContext, remote_type: str) -> None:
         raise NotImplementedError()
 
 
-lookup_options = [href_option, name_option]
+lookup_options = [href_option, name_option, ref_option]
 file_remote_options = [
     click.option(
         "--policy", type=click.Choice(["immediate", "on_demand", "streamed"], case_sensitive=False)
