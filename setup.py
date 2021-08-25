@@ -36,6 +36,8 @@ setup(
     description="Command line interface to talk to pulpcore's REST API.",
     long_description=long_description,
     long_description_content_type="text/markdown",
+    author="Pulp Team",
+    author_email="pulp-list@redhat.com",
     url="https://github.com/pulp/pulp-cli",
     version="0.12.0.dev",
     packages=plugin_packages + extra_packages,
@@ -59,7 +61,7 @@ setup(
     },
     license="GPLv2+",
     classifiers=[
-        "Development Status :: 3 - Alpha",
+        "Development Status :: 4 - Beta",
         "Environment :: Console",
         "Intended Audience :: System Administrators",
         "License :: OSI Approved :: GNU General Public License v2 or later (GPLv2+)",
