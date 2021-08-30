@@ -240,13 +240,10 @@ units = {"B": 1, "KB": 10 ** 3, "MB": 10 ** 6, "GB": 10 ** 9, "TB": 10 ** 12}
 
 def parse_size_callback(ctx: click.Context, param: click.Parameter, value: str) -> int:
     size = value.strip().upper()
-    if not size or not re.match(r"^\s*([0-9]*)\s*([KMGT]?B)?\s*$", size):
-        raise click.ClickException("Please pass in a valid size of form: [0-9] [K/M/G]B")
-    size = re.sub(r"([KMGT]?B)", r" \1", size)
-    chunk = [string.strip() for string in size.split()]
-    if len(chunk) == 1:
-        chunk.append("B")
-    number, unit = chunk
+    match = re.match(r"^([0-9]+)\s*([KMGT]?B)?$", size)
+    if not match:
+        raise click.ClickException("Please pass in a valid size of form: [0-9] [K/M/G/T]B")
+    number, unit = match.groups(default="B")
     return int(float(number) * units[unit])
 
 
