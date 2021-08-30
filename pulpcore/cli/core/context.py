@@ -283,6 +283,13 @@ class PulpGroupUserContext(PulpEntityContext):
         return {PulpGroupContext.HREF: self.group_ctx.pulp_href}
 
 
+class PulpContentGuardContext(PulpEntityContext):
+    ENTITY = "content guard"
+    ENTITIES = "content guards"
+    HREF_PATTERN = r"^/pulp/api/v3/contentguards/(?P<plugin>\w+)/(?P<resource_type>\w+)/"
+    LIST_ID = "contentguards_list"
+
+
 class PulpImporterContext(PulpEntityContext):
     ENTITY = "PulpImporter"
     HREF = "pulp_importer_href"
@@ -291,6 +298,27 @@ class PulpImporterContext(PulpEntityContext):
     UPDATE_ID = "importers_core_pulp_partial_update"
     DELETE_ID = "importers_core_pulp_delete"
     LIST_ID = "importers_core_pulp_list"
+
+
+class PulpRbacContentGuardContext(PulpContentGuardContext):
+    ENTITY = "RBAC content guard"
+    ENTITIES = "RBAC content guards"
+    HREF = "r_b_a_c_content_guard_href"
+    LIST_ID = "contentguards_core_rbac_list"
+    CREATE_ID = "contentguards_core_rbac_create"
+    UPDATE_ID = "contentguards_core_rbac_partial_update"
+    DELETE_ID = "contentguards_core_rbac_delete"
+    READ_ID = "contentguards_core_rbac_read"
+    ASSIGN_ID: ClassVar[str] = "contentguards_core_rbac_assign_permission"
+    REMOVE_ID: ClassVar[str] = "contentguards_core_rbac_remove_permission"
+
+    def assign(self, href: str, users: Optional[List[str]], groups: Optional[List[str]]) -> Any:
+        body = self.preprocess_body({"usernames": users, "groupnames": groups})
+        return self.pulp_ctx.call(self.ASSIGN_ID, parameters={self.HREF: href}, body=body)
+
+    def remove(self, href: str, users: Optional[List[str]], groups: Optional[List[str]]) -> Any:
+        body = self.preprocess_body({"usernames": users, "groupnames": groups})
+        return self.pulp_ctx.call(self.REMOVE_ID, parameters={self.HREF: href}, body=body)
 
 
 class PulpSigningServiceContext(PulpEntityContext):
