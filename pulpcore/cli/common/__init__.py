@@ -74,7 +74,7 @@ def _config_callback(ctx: click.Context, param: Any, value: Optional[str]) -> No
 
 
 @click.group()
-@click.version_option(prog_name=_("pulp3 command line interface"))
+@click.version_option(prog_name=_("pulp3 command line interface"), package_name="pulp-cli")
 @click.option(
     "--profile",
     "-p",
