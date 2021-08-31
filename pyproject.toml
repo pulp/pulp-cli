@@ -1,6 +1,6 @@
 [tool.towncrier]
 package = "pulpcore.cli.common"
-filename = "CHANGES.md"
+filename = "docs/CHANGES.md"
 directory = "CHANGES/"
 title_format = "## {version} ({project_date})"
 template = "CHANGES/.TEMPLATE.md"

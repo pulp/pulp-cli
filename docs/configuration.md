@@ -1,27 +1,4 @@
-# Installing and configuration
-
-## Installation
-
-The pulp-cli package can be installed from a variety of sources. After installing, see the next
-section on how to configure pulp-cli.
-
-### From PyPI
-
-```
-pip install pulp-cli  # minimal dependencies
-pip install pulp-cli[pygments]  # colorized output
-pip install pulp-cli[shell]  # with interactive shell mode
-```
-
-### From a source checkout
-
-```
-git clone <your_fork_url>
-cd pulp-cli
-pip install -e .
-```
-
-## Configuration
+# Configuration
 
 The CLI can be configured by using a toml file.
 By default the location of this file is `~/.config/pulp/cli.toml`.
@@ -37,7 +14,7 @@ verify_ssl = false
 format = "json"
 ```
 
-### Config Profiles
+## Config Profiles
 
 The CLI allows you to configure additional profiles at the same time.
 If you add a `[cli-server1]` section to your config,
@@ -45,7 +22,7 @@ you can use that set of settings by specifying the `--profile server1` on the pu
 This can be helpful if you need to use different usernames for certain actions,
 or if you need to interact with several different Pulp servers.
 
-### Generate
+## Generating a new configuration
 
 To generate a new configuration:
 
@@ -55,7 +32,7 @@ pulp config create -e  # with an editor (e.g. vim)
 pulp config create -i  # interactive prompts
 ```
 
-### Validate
+## Validating the configuration
 
 The easiest way to validate your config is to call a command that interacts with your Pulp server:
 
@@ -71,7 +48,7 @@ pulp config validate
 pulp config validate --strict  # validates that all settings are present
 ```
 
-### netrc
+## Using netrc
 
 If no user/pass is supplied either in the config file or as an option,
 then the CLI will attempt to use `~/.netrc`.
@@ -83,7 +60,7 @@ login admin
 password password
 ```
 
-### Katello
+## Tips for Katello Users
 
 If you have a Katello environment and wish to use pulp-cli to connect to Pulp, you'll need to
 configure client certificate authentication in your `~/.config/pulp/cli.toml`:

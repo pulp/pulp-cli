@@ -1,4 +1,17 @@
-# Interactive shell mode
+# Advanced features
+
+## Shell Completion
+
+The CLI uses the click package which supports shell completion.
+To configure this, check out [click's
+documentation](https://click.palletsprojects.com/en/7.x/bashcomplete/).
+As an example, here is what to add to your `~/.bashrc` file if you're using bash:
+
+```bash
+eval "$(_PULP_COMPLETE=source_bash pulp)"
+```
+
+## Interactive shell mode
 
 * To use the shell mode, you need to install the the extra requirements tagged "shell". *
 

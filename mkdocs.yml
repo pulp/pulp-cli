@@ -3,7 +3,9 @@ theme: readthedocs
 repo_url: https://github.com/pulp/pulp-cli
 edit_uri: edit/develop/docs/
 nav:
-  - 'quickstart.md'
-  - 'install.md'
-  - 'shell.md'
+  - 'installation.md'
+  - 'configuration.md'
+  - 'using_the_cli.md'
+  - 'advanced_features.md'
+  - 'CHANGES.md'
   - 'contributing.md'
