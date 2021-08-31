@@ -17,15 +17,15 @@
 - Added support to specify skip-types on rpm sync.
   [#225](https://github.com/pulp/pulp-cli/issues/225)
 - Added lookup for a global config file `/etc/pulp/cli.toml`.
-  [#290](https://github.com/pulp/pulp-cli/issues/290>)
+  [#290](https://github.com/pulp/pulp-cli/issues/290)
 - Changed default config location to `<app-dir>/cli.toml`. The old file will still be read.
-  [#293](https://github.com/pulp/pulp-cli/issues/293>)
+  [#293](https://github.com/pulp/pulp-cli/issues/293)
 - Enable exports for ansible repositories.
-  [#302](https://github.com/pulp/pulp-cli/issues/302>)
+  [#302](https://github.com/pulp/pulp-cli/issues/302)
 - Added --sles-auth-token to rpm remote commands.
-  [#305](https://github.com/pulp/pulp-cli/issues/305>)
+  [#305](https://github.com/pulp/pulp-cli/issues/305)
 - Added ansible content list command.
-  [#327](https://github.com/pulp/pulp-cli/issues/327>)
+  [#327](https://github.com/pulp/pulp-cli/issues/327)
 
 
 ### Bugfixes

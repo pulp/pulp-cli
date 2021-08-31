@@ -1,4 +1,4 @@
-# Contributing
+# Contributing to the CLI
 
 There are many ways to contribute to this project, and all are welcome.
 
@@ -25,7 +25,7 @@ For each new feature, we require corresponding tests.
 
 ## Pulp CLI Architecture
 
-If you are interested in extending, patching, or contributing new Pulp CLI features, you can find information about the Pulp CLI architecture in this section.  
+If you are interested in extending, patching, or contributing new Pulp CLI features, you can find information about the Pulp CLI architecture in this section.
 
 ### Plugin system
 
