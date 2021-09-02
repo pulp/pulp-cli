@@ -1,4 +1,5 @@
 import gettext
+from typing import IO, Any
 
 from pulpcore.cli.common.context import (
     EntityDefinition,
@@ -21,6 +22,11 @@ class PulpAnsibleCollectionVersionContext(PulpContentContext):
     LIST_ID = "content_ansible_collection_versions_list"
     READ_ID = "content_ansible_collection_versions_read"
     CREATE_ID = "content_ansible_collection_versions_create"
+    UPLOAD_ID = "upload_collection"
+
+    def upload(self, file: IO[bytes], body: Any) -> Any:
+        body = self.preprocess_body(body)
+        return self.pulp_ctx.call(self.UPLOAD_ID, body=body, uploads={"file": file.read()})
 
 
 class PulpAnsibleRoleContext(PulpContentContext):
