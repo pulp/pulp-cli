@@ -109,17 +109,18 @@ class GroupOption(PulpOption):
     ) -> Any:
         assert self.name is not None
         all_options = self.group + [self.name]
-        if all(x in opts for x in all_options):
-            self.prompt = None
-        else:
+        options_present = [x for x in all_options if x in opts]
+        num_options = len(options_present)
+        if num_options != len(all_options) and (num_options != 0 or self.required):
             raise click.UsageError(
                 _("Illegal usage, please specify all options in the group: {option_list}").format(
                     option_list=", ".join(all_options)
                 )
             )
+        self.prompt = None
         value = opts.get(self.name)
-        if self.callback is not None:
-            value = self.callback(ctx, self, {o: opts[o] for o in all_options})
+        if self.callback is not None and num_options != 0:
+            value = self.callback(ctx, self, {o: opts[o] for o in options_present})
         if self.expose_value:
             ctx.params[self.name] = value
         return value, args
@@ -217,11 +218,12 @@ def load_json_callback(
 
 
 def create_content_json_callback(
-    content_ctx: Type[PulpContentContext], schema: s.Schema = None
+    context_class: Optional[Type[PulpContentContext]] = None, schema: s.Schema = None
 ) -> Any:
     def _callback(
         ctx: click.Context, param: click.Parameter, value: Optional[str]
     ) -> Optional[List[PulpContentContext]]:
+        ctx_class = context_class
         new_value = load_json_callback(ctx, param, value)
         if new_value is not None:
             if schema is not None:
@@ -235,7 +237,11 @@ def create_content_json_callback(
                     )
             pulp_ctx = ctx.find_object(PulpContext)
             assert pulp_ctx is not None
-            return [content_ctx(pulp_ctx, entity=unit) for unit in new_value]
+            if ctx_class is None:
+                context = ctx.find_object(PulpContentContext)
+                assert context is not None
+                ctx_class = type(context)
+            return [ctx_class(pulp_ctx, entity=unit) for unit in new_value]
         return new_value
 
     return _callback

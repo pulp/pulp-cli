@@ -1,10 +1,14 @@
 import gettext
+from typing import Any
 
 import click
+import schema as s
 
 from pulpcore.cli.ansible.context import (
     PulpAnsibleCollectionRemoteContext,
+    PulpAnsibleCollectionVersionContext,
     PulpAnsibleRepositoryContext,
+    PulpAnsibleRoleContext,
     PulpAnsibleRoleRemoteContext,
 )
 from pulpcore.cli.common.context import (
@@ -17,13 +21,16 @@ from pulpcore.cli.common.context import (
     pass_repository_context,
 )
 from pulpcore.cli.common.generic import (
+    GroupOption,
     create_command,
+    create_content_json_callback,
     destroy_command,
     href_option,
     label_command,
     label_select_option,
     list_command,
     name_option,
+    repository_content_command,
     resource_option,
     retained_versions_option,
     show_command,
@@ -47,6 +54,30 @@ remote_option = resource_option(
         "Remote used for synching in the form '[[<plugin>:]<resource_type>:]<name>' or by href."
     ),
 )
+
+
+CONTENT_LIST_SCHEMA = s.Schema(
+    [{"name": s.And(str, len), "namespace": s.And(str, len), "version": s.And(str, len)}]
+)
+
+
+def _content_callback(ctx: click.Context, param: click.Parameter, value: Any) -> Any:
+    if value:
+        ctx.obj.entity = value  # The context is set by the type parameter on the content commands
+    return value
+
+
+def _content_type_callback(ctx: click.Context, param: click.Parameter, value: Any) -> Any:
+    # This needs to run eagerly
+    pulp_ctx = ctx.find_object(PulpContext)
+    assert pulp_ctx is not None
+    if value == "collection-version":
+        ctx.obj = PulpAnsibleCollectionVersionContext(pulp_ctx)
+    elif value == "role":
+        ctx.obj = PulpAnsibleRoleContext(pulp_ctx)
+    else:
+        raise NotImplementedError()
+    return value
 
 
 @click.group()
@@ -78,6 +109,73 @@ update_options = [
     remote_option,
     retained_versions_option,
 ]
+content_options = [
+    click.option(
+        "--name",
+        help=_("Name of {entity}"),
+        group=["namespace", "version"],
+        expose_value=False,
+        cls=GroupOption,
+        callback=_content_callback,
+    ),
+    click.option(
+        "--namespace",
+        help=_("Namespace of {entity}"),
+        group=["name", "version"],
+        expose_value=False,
+        cls=GroupOption,
+    ),
+    click.option(
+        "--version",
+        help=_("Version of {entity}"),
+        group=["namespace", "name"],
+        expose_value=False,
+        cls=GroupOption,
+    ),
+    click.option(
+        "-t",
+        "--type",
+        "type",
+        type=click.Choice(["collection-version", "role"]),
+        default="collection-version",
+        expose_value=False,
+        callback=_content_type_callback,
+        is_eager=True,
+    ),
+    href_option,
+]
+content_json_callback = create_content_json_callback(schema=CONTENT_LIST_SCHEMA)
+modify_options = [
+    click.option(
+        "--add-content",
+        callback=content_json_callback,
+        help=_(
+            """JSON string with a list of objects to add to the repository.
+    Each object must contain the following keys: "name", "namespace", "version".
+    The argument prefixed with the '@' can be the path to a JSON file with a list of objects."""
+        ),
+    ),
+    click.option(
+        "--remove-content",
+        callback=content_json_callback,
+        help=_(
+            """JSON string with a list of objects to remove from the repository.
+    Each object must contain the following keys: "name", "namespace", "version".
+    The argument prefixed with the '@' can be the path to a JSON file with a list of objects."""
+        ),
+    ),
+    click.option(
+        "-t",
+        "--type",
+        "type",
+        type=click.Choice(["collection-version", "role"]),
+        default="collection-version",
+        expose_value=False,
+        callback=_content_type_callback,
+        is_eager=True,
+    ),
+]
+
 
 repository.add_command(show_command(decorators=lookup_options))
 repository.add_command(list_command(decorators=[label_select_option]))
@@ -86,6 +184,17 @@ repository.add_command(version_command())
 repository.add_command(create_command(decorators=create_options))
 repository.add_command(update_command(decorators=lookup_options + update_options))
 repository.add_command(label_command())
+repository.add_command(
+    repository_content_command(
+        contexts={
+            "collection-version": PulpAnsibleCollectionVersionContext,
+            "role": PulpAnsibleRoleContext,
+        },
+        add_decorators=content_options,
+        remove_decorators=content_options,
+        modify_decorators=modify_options,
+    )
+)
 
 
 @repository.command()
@@ -119,6 +228,3 @@ def sync(
         href=repository_href,
         body=body,
     )
-
-
-# TODO Finish 'add' and 'remove' commands when role and collection contexts are implemented

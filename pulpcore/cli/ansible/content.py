@@ -4,7 +4,12 @@ from typing import IO, Any, Optional, Union
 import click
 
 from pulpcore.cli.ansible.context import PulpAnsibleCollectionVersionContext, PulpAnsibleRoleContext
-from pulpcore.cli.common.context import PulpContext, pass_entity_context, pass_pulp_context
+from pulpcore.cli.common.context import (
+    PulpContext,
+    PulpEntityContext,
+    pass_entity_context,
+    pass_pulp_context,
+)
 from pulpcore.cli.common.generic import (
     GroupOption,
     chunk_size_option,
@@ -20,7 +25,9 @@ _ = gettext.gettext
 
 def _content_callback(ctx: click.Context, param: click.Parameter, value: Any) -> Any:
     if value:
-        ctx.obj.entity = value  # The context should be already set based on the type option
+        entity_ctx = ctx.find_object(PulpEntityContext)
+        assert entity_ctx is not None
+        entity_ctx.entity = value
     return value
 
 
@@ -48,7 +55,7 @@ list_options = [
     pulp_option("--namespace", help=_("Namespace of {entity}")),
     pulp_option("--version", help=_("Version of {entity}")),
     pulp_option(
-        "--only-highest",
+        "--latest",
         "is_highest",
         is_flag=True,
         default=None,
@@ -59,7 +66,7 @@ list_options = [
     pulp_option(
         "--tags",
         help=_(
-            "Comma separated list of tags that must all match (only works for collection-versions)"
+            "Comma separated list of tags that must all match (only works for collection versions)"
         ),
     ),
 ]
@@ -132,7 +139,7 @@ def upload(
         result = content_ctx.create(body=body)
         pulp_ctx.output_result(result)
     else:
-        # Collection upload uses name, namespace, and version for extra validation
+        # Collection upload uses name, namespace, and version for server side validation
         body = {"expected_name": name, "expected_namespace": namespace, "expected_version": version}
         result = content_ctx.upload(file=file, body=body)
         pulp_ctx.output_result(result)

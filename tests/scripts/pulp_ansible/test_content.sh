@@ -6,6 +6,7 @@
 pulp debug has-plugin --name "ansible" || exit 3
 
 cleanup() {
+  pulp ansible repository destroy --name "cli_test_ansible_repository" || true
   pulp orphans delete || true
 }
 trap cleanup EXIT
@@ -33,3 +34,23 @@ expect_succ pulp ansible content --type "role" list --name "kubernetes-modules" 
 test "$(echo "$OUTPUT" | jq -r length)" -eq "1"
 content2_href="$(echo "$OUTPUT" | jq -r .[0].pulp_href)"
 expect_succ pulp ansible content --type "role" show --href "$content2_href"
+
+# New content commands
+expect_succ pulp ansible repository create --name "cli_test_ansible_repository"
+expect_succ pulp ansible repository content add --repository "cli_test_ansible_repository" --name "posix" --namespace "ansible" --version "1.3.0"
+expect_succ pulp ansible repository content list --repository "cli_test_ansible_repository" --version 1
+test "$(echo "$OUTPUT" | jq -r length)" -eq "1"
+expect_succ pulp ansible repository content add --repository "cli_test_ansible_repository" --type "role" --name "kubernetes-modules" --namespace "ansible" --version "0.0.1"
+expect_succ pulp ansible repository content list --repository "cli_test_ansible_repository" --version 2 --type "role"
+test "$(echo "$OUTPUT" | jq -r length)" -eq "1"
+
+if [ "$(pulp debug has-plugin --name "core" --min-version "3.11.0")" = "true" ]
+then
+  expect_succ pulp ansible repository content list --repository "cli_test_ansible_repository" --version 2 --type "all"
+  test "$(echo "$OUTPUT" | jq -r length)" -eq "2"
+fi
+
+expect_succ pulp ansible repository content remove --repository "cli_test_ansible_repository" --href "$content_href"
+expect_succ pulp ansible repository content remove --repository "cli_test_ansible_repository" --href "$content2_href"
+expect_succ pulp ansible repository content list --repository "cli_test_ansible_repository"
+test "$(echo "$OUTPUT" | jq -r length)" -eq "0"

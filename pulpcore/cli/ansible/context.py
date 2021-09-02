@@ -1,5 +1,5 @@
 import gettext
-from typing import IO, Any
+from typing import IO, Any, ClassVar
 
 from pulpcore.cli.common.context import (
     EntityDefinition,
@@ -22,7 +22,7 @@ class PulpAnsibleCollectionVersionContext(PulpContentContext):
     LIST_ID = "content_ansible_collection_versions_list"
     READ_ID = "content_ansible_collection_versions_read"
     CREATE_ID = "content_ansible_collection_versions_create"
-    UPLOAD_ID = "upload_collection"
+    UPLOAD_ID: ClassVar[str] = "upload_collection"
 
     def upload(self, file: IO[bytes], body: Any) -> Any:
         body = self.preprocess_body(body)
