@@ -27,11 +27,19 @@ pip install pulp-cli[pygments]  # colorized output
 pip install pulp-cli[shell]  # with interactive shell mode
 ```
 
+If you want to install additional cli plugins, you can follow this example:
+```bash
+pip install pulp-cli-deb
+```
+
 ## From a source checkout
 
 If you intend to use unreleased features, or want to contribute to the CLI, you can install from source:
 ```bash
-git clone <your_fork_url>
-cd pulp-cli
-pip install -e .
+git clone git@github.com:pulp/pulp-cli.git
+pip install -e ./pulp-cli
+
+# Optionally install plugins from source
+git clone git@github.com:pulp/pulp-cli-deb.git
+pip install -e ./pulp-cli-deb
 ```
