@@ -9,3 +9,5 @@ nav:
   - 'advanced_features.md'
   - 'CHANGES.md'
   - 'contributing.md'
+markdown_extensions:
+  - admonition
