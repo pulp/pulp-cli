@@ -4,9 +4,8 @@
 import gettext
 import json
 import os
-import uuid
-from typing import Any, Callable, Dict, List, Optional
-from urllib.parse import urlencode, urljoin
+from typing import Any, Callable, Dict, List, Optional, Tuple, cast
+from urllib.parse import urljoin
 
 import requests
 import urllib3
@@ -42,10 +41,6 @@ class OpenAPI:
         self.doc_path: str = doc_path
         self.safe_calls_only: bool = safe_calls_only
 
-        headers = {
-            "Content-Type": "application/json",
-            "Accept": "application/json",
-        }
         self._session: requests.Session = requests.session()
         if username and password:
             if cert or key:
@@ -61,6 +56,9 @@ class OpenAPI:
             self._session.cert = cert
         elif key:
             raise OpenAPIError("Cert is required if key is set.")
+        headers = {
+            "Accept": "application/json",
+        }
         self._session.headers.update(headers)
         self._session.verify = validate_certs
         self._session.max_redirects = 0
@@ -147,70 +145,57 @@ class OpenAPI:
             )
         return result
 
-    def render_body(
+    def render_request(
         self,
         path_spec: Dict[str, Any],
-        method_spec: Dict[str, Any],
+        method: str,
+        url: str,
+        params: Dict[str, Any],
         headers: Dict[str, str],
         body: Optional[Dict[str, Any]] = None,
         uploads: Optional[Dict[str, bytes]] = None,
-    ) -> Optional[bytes]:
-        if not (body or uploads):
-            return None
-        content_types: List[str] = list(method_spec["requestBody"]["content"].keys())
+    ) -> requests.PreparedRequest:
+        method_spec = path_spec[method]
+        content_types: List[str] = (
+            list(method_spec["requestBody"]["content"].keys()) if body or uploads else []
+        )
+
+        data: Optional[Dict[str, Any]] = None
+        json: Optional[Dict[str, Any]] = None
+        files: Optional[List[Tuple[str, Tuple[str, bytes, str]]]] = None
+
         if uploads:
-            body = body or {}
+            data = body or {}
             if any(
                 (content_type.startswith("multipart/form-data") for content_type in content_types)
             ):
-                boundary: str = uuid.uuid4().hex
-                part_boundary: bytes = b"--" + str.encode(boundary)
-
-                form: List[bytes] = []
-                for key, value in body.items():
-                    b_key: bytes = str.encode(key)
-                    form.extend(
-                        [
-                            part_boundary,
-                            b'Content-Disposition: form-data; name="%s"' % b_key,
-                            b"",
-                            str.encode(value),
-                        ]
-                    )
-                for key, file_data in uploads.items():
-                    b_key = str.encode(key)
-                    form.extend(
-                        [
-                            part_boundary,
-                            b'Content-Disposition: file; name="%s"; filename="%s"' % (b_key, b_key),
-                            b"Content-Type: application/octet-stream",
-                            b"",
-                            file_data,
-                        ]
-                    )
-                form.append(part_boundary + b"--")
-                data = b"\r\n".join(form)
-                headers["Content-Type"] = "multipart/form-data; boundary={boundary}".format(
-                    boundary=boundary
-                )
+                files = [
+                    (key, (key, file_data, "application/octet-stream"))
+                    for key, file_data in uploads.items()
+                ]
             else:
                 raise OpenAPIError("No suitable content type for file upload specified.")
         elif body:
             if any((content_type.startswith("application/json") for content_type in content_types)):
-                data = str.encode(json.dumps(body))
-                headers["Content-Type"] = "application/json"
+                json = body
             elif any(
                 (
                     content_type.startswith("application/x-www-form-urlencoded")
                     for content_type in content_types
                 )
             ):
-                data = str.encode(urlencode(body))
-                headers["Content-Type"] = "application/x-www-form-urlencoded"
+                data = body
             else:
                 raise OpenAPIError("No suitable content type for request specified.")
-        headers["Content-Length"] = str(len(data))
-        return data
+        # "cast" and "ignore", because mypy does not find the annotation for "prepare_request"
+        return cast(
+            requests.PreparedRequest,
+            self._session.prepare_request(  # type: ignore
+                requests.Request(
+                    method, url, params=params, headers=headers, data=data, json=json, files=files
+                )
+            ),
+        )
 
     def parse_response(self, method_spec: Dict[str, Any], response: requests.Response) -> Any:
         if response.status_code == 204:
@@ -257,9 +242,7 @@ class OpenAPI:
         for name, value in self.extract_params("path", path_spec, method_spec, parameters).items():
             path = path.replace("{" + name + "}", value)
 
-        query_string = urlencode(
-            self.extract_params("query", path_spec, method_spec, parameters), doseq=True
-        )
+        query_params = self.extract_params("query", path_spec, method_spec, parameters)
 
         if any(parameters):
             raise OpenAPIError(
@@ -268,22 +251,20 @@ class OpenAPI:
                 )
             )
         url = urljoin(self.base_url, path)
-        if query_string:
-            url += "?" + query_string
 
-        data: Optional[bytes] = self.render_body(path_spec, method_spec, headers, body, uploads)
+        request: requests.PreparedRequest = self.render_request(
+            path_spec, method, url, query_params, headers, body, uploads
+        )
 
-        self.debug_callback(1, f"{method} {url}")
-        for key, value in headers.items():
+        self.debug_callback(1, f"{method} {request.url}")
+        for key, value in request.headers.items():
             self.debug_callback(2, f"  {key}: {value}")
-        if data:
-            self.debug_callback(2, f"{data!r}")
+        if request.body:
+            self.debug_callback(2, f"{request.body!r}")
         if self.safe_calls_only and method.upper() not in SAFE_METHODS:
             raise OpenAPIError("Call aborted due to safe mode")
         try:
-            response: requests.Response = self._session.request(
-                method, url, data=data, headers=headers
-            )
+            response: requests.Response = self._session.send(request)
         except requests.ConnectionError as e:
             raise OpenAPIError(str(e))
         except requests.exceptions.TooManyRedirects as e:
