@@ -3,19 +3,22 @@
 ## Shell Completion
 
 The CLI uses the click package which supports shell completion.
-To configure this, check out [click's
-documentation](https://click.palletsprojects.com/en/7.x/bashcomplete/).
+To configure this, check out [click's documentation](https://click.palletsprojects.com/en/8.0.x/shell_completion/).
 As an example, here is what to add to your `~/.bashrc` file if you're using bash:
 
 ```bash
-eval "$(_PULP_COMPLETE=source_bash pulp)"
+eval "$(LC_ALL=C _PULP_COMPLETE=bash_source pulp)"
 ```
+
+!!! note
+
+    When using `click<8.0.0` the command instead reads:
+
+    `eval "$(LC_ALL=C _PULP_COMPLETE=source_bash pulp)"`
 
 ## Interactive shell mode
 
 * To use the shell mode, you need to install the the extra requirements tagged "shell". *
-
-** Warning: currently the click-shell dependency is incompatible with the latest version of click. Please install a version of click < 8.0.0. **
 
 Starting the CLI with "pulp shell" drops you into the shell:
 ```
