@@ -89,6 +89,7 @@ class PulpContext:
         self.format: str = format
         self.background_tasks: bool = background_tasks
         self.timeout: int = timeout
+        self.start_time: Optional[datetime.datetime] = None
 
     @property
     def api(self) -> OpenAPI:
@@ -152,49 +153,118 @@ class PulpContext:
             )
             if not non_blocking:
                 result = self.wait_for_task(result)
+        if isinstance(result, dict) and ["task_group"] == list(result.keys()):
+            task_group_href = result["task_group"]
+            result = self.api.call(
+                "task_groups_read", parameters={"task_group_href": task_group_href}
+            )
+            click.echo(
+                _("Started background task group {task_group_href}").format(
+                    task_group_href=task_group_href
+                ),
+                err=True,
+            )
+            if not non_blocking:
+                result = self.wait_for_task_group(result)
         return result
+
+    @staticmethod
+    def _check_task_finished(task: EntityDefinition) -> bool:
+        task_href = task["pulp_href"]
+
+        if task["state"] == "completed":
+            return True
+        elif task["state"] == "failed":
+            raise click.ClickException(
+                _("Task {task_href} failed: '{description}'").format(
+                    task_href=task_href, description=task["error"]["description"]
+                )
+            )
+        elif task["state"] == "canceled":
+            raise click.ClickException(_("Task {task_href} canceled").format(task_href=task_href))
+        elif task["state"] in ["waiting", "running", "canceling"]:
+            return False
+        else:
+            raise NotImplementedError(_("Unknown task state: {state}").format(state=task["state"]))
+
+    def _poll_task(self, task: EntityDefinition) -> EntityDefinition:
+        while True:
+            if self._check_task_finished(task):
+                click.echo("Done.", err=True)
+                return task
+            else:
+                if self.timeout:
+                    assert isinstance(self.start_time, datetime.datetime)
+                    if (datetime.datetime.now() - self.start_time).seconds > self.timeout:
+                        raise PulpNoWait(
+                            _("Waiting for task {task_href} timed out.").format(
+                                task_href=task["pulp_href"]
+                            )
+                        )
+                time.sleep(1)
+                click.echo(".", nl=False, err=True)
+                task = self.api.call("tasks_read", parameters={"task_href": task["pulp_href"]})
 
     def wait_for_task(self, task: EntityDefinition) -> Any:
         """
         Wait for a task to finish and return the finished task object.
+
         Raise `click.ClickException` on timeout, background, ctrl-c, if task failed or was canceled.
         """
-        timeout: int = self.timeout
+        self.start_time = datetime.datetime.now()
+
         if self.background_tasks:
             raise PulpNoWait(_("Not waiting for task because --background was specified."))
         task_href = task["pulp_href"]
         try:
-            while True:
-                if task["state"] == "completed":
-                    click.echo("Done.", err=True)
-                    return task
-                elif task["state"] == "failed":
-                    raise click.ClickException(
-                        _("Task {task_href} failed: '{description}'").format(
-                            task_href=task_href, description=task["error"]["description"]
-                        )
-                    )
-                elif task["state"] == "canceled":
-                    raise click.ClickException(_("Task canceled"))
-                elif task["state"] in ["waiting", "running", "canceling"]:
-                    if self.timeout:
-                        if timeout <= 0:
-                            raise PulpNoWait(
-                                _("Waiting for task {task_href} timed out.").format(
-                                    task_href=task_href
-                                )
-                            )
-                        timeout -= 1
-                    time.sleep(1)
-                    click.echo(".", nl=False, err=True)
-                    task = self.api.call("tasks_read", parameters={"task_href": task_href})
-                else:
-                    raise NotImplementedError(
-                        _("Unknown task state: {state}").format(state=task["state"])
-                    )
-            raise click.ClickException(_("Task timed out"))
+            return self._poll_task(task)
         except KeyboardInterrupt:
             raise PulpNoWait(_("Task {task_href} sent to background.").format(task_href=task_href))
+
+    def wait_for_task_group(self, task_group: EntityDefinition) -> Any:
+        """
+        Wait for a task group to finish and return the finished task object.
+
+        Raise `click.ClickException` on timeout, background, ctrl-c, if tasks failed or were
+        canceled.
+        """
+        self.start_time = datetime.datetime.now()
+
+        if self.background_tasks:
+            raise PulpNoWait("Not waiting for task group because --background was specified.")
+        try:
+            while True:
+                if task_group["all_tasks_dispatched"] is True:
+                    for task in task_group["tasks"]:
+                        task = self.api.call(
+                            "tasks_read", parameters={"task_href": task["pulp_href"]}
+                        )
+                        click.echo(
+                            _("Waiting for task {task_href}").format(task_href=task["pulp_href"]),
+                            err=True,
+                        )
+                        self._poll_task(task)
+                    return task_group
+                else:
+                    if self.timeout:
+                        assert isinstance(self.start_time, datetime.datetime)
+                        if (datetime.datetime.now() - self.start_time).seconds > self.timeout:
+                            raise PulpNoWait(
+                                _("Waiting for task group {task_group_href} timed out.").format(
+                                    task_group_href=task_group["pulp_href"]
+                                )
+                            )
+                    time.sleep(1)
+                    click.echo(".", nl=False, err=True)
+                    task_group = self.api.call(
+                        "task_group_read", parameters={"task_group_href": task_group["pulp_href"]}
+                    )
+        except KeyboardInterrupt:
+            raise PulpNoWait(
+                _("Task group {task_group_href} sent to background.").format(
+                    task_group_href=task_group["pulp_href"]
+                )
+            )
 
     def has_plugin(
         self,

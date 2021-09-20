@@ -1,4 +1,5 @@
 import gettext
+import re
 from contextlib import suppress
 from typing import Optional
 
@@ -108,6 +109,6 @@ def cancel(
         try:
             pulp_ctx.wait_for_task(entity)
         except Exception as e:
-            if str(e) != "Task canceled":
+            if not re.match("Task /pulp/api/v3/tasks/[-0-9a-f]*/ canceled", str(e)):
                 raise e
         click.echo(_("Done."), err=True)

@@ -1,4 +1,5 @@
 import gettext
+from typing import Any, ClassVar
 
 from pulpcore.cli.common.context import (
     EntityDefinition,
@@ -23,6 +24,13 @@ class PulpFileACSContext(PulpEntityContext):
     CREATE_ID = "acs_file_file_create"
     UPDATE_ID = "acs_file_file_partial_update"
     DELETE_ID = "acs_file_file_delete"
+    REFRESH_ID: ClassVar[str] = "acs_file_file_refresh"
+
+    def refresh(self, href: str) -> Any:
+        return self.pulp_ctx.call(
+            self.REFRESH_ID,
+            parameters={self.HREF: href},
+        )
 
 
 class PulpFileContentContext(PulpContentContext):
