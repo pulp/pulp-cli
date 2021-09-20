@@ -115,3 +115,12 @@ acs.add_command(show_command(decorators=lookup_options))
 acs.add_command(create_command(decorators=create_options))
 acs.add_command(update_command(decorators=lookup_options + update_options))
 acs.add_command(destroy_command(decorators=lookup_options))
+
+
+@acs.command()
+@pass_entity_context
+@pass_pulp_context
+@href_option
+@name_option
+def refresh(pulp_ctx: PulpContext, acs_ctx: PulpFileACSContext) -> None:
+    acs_ctx.refresh(acs_ctx.pulp_href)
