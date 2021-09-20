@@ -49,6 +49,17 @@ class PulpRpmRemoteContext(PulpRemoteContext):
     CREATE_ID = "remotes_rpm_rpm_create"
     UPDATE_ID = "remotes_rpm_rpm_partial_update"
     DELETE_ID = "remotes_rpm_rpm_delete"
+    NULLABLES = {
+        "ca_cert",
+        "client_cert",
+        "client_key",
+        "username",
+        "password",
+        "proxy_url",
+        "proxy_username",
+        "proxy_password",
+        "sles_auth_token",
+    }
 
 
 class PulpRpmRepositoryVersionContext(PulpRepositoryVersionContext):
