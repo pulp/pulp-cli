@@ -10,7 +10,7 @@ from pulpcore.cli.common.context import (
     pass_entity_context,
     pass_pulp_context,
 )
-from pulpcore.cli.common.generic import href_option, list_command, pulp_option
+from pulpcore.cli.common.generic import destroy_command, href_option, list_command, pulp_option
 from pulpcore.cli.core.context import PulpTaskContext
 from pulpcore.cli.core.generic import task_filter
 
@@ -43,6 +43,7 @@ def task(ctx: click.Context, pulp_ctx: PulpContext) -> None:
 
 
 task.add_command(list_command(decorators=task_filter))
+task.add_command(destroy_command(decorators=[href_option, uuid_option]))
 
 
 @task.command()
