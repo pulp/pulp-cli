@@ -4,7 +4,7 @@
 import gettext
 import json
 import os
-from typing import Any, Callable, Dict, List, Optional, Tuple, cast
+from typing import Any, Callable, Dict, List, Optional, Tuple
 from urllib.parse import urljoin
 
 import requests
@@ -187,14 +187,10 @@ class OpenAPI:
                 data = body
             else:
                 raise OpenAPIError("No suitable content type for request specified.")
-        # "cast" and "ignore", because mypy does not find the annotation for "prepare_request"
-        return cast(
-            requests.PreparedRequest,
-            self._session.prepare_request(  # type: ignore
-                requests.Request(
-                    method, url, params=params, headers=headers, data=data, json=json, files=files
-                )
-            ),
+        return self._session.prepare_request(
+            requests.Request(
+                method, url, params=params, headers=headers, data=data, json=json, files=files
+            )
         )
 
     def parse_response(self, method_spec: Dict[str, Any], response: requests.Response) -> Any:

@@ -306,6 +306,7 @@ class PulpTaskContext(PulpEntityContext):
     HREF = "task_href"
     LIST_ID = "tasks_list"
     READ_ID = "tasks_read"
+    DELETE_ID = "tasks_delete"
     CANCEL_ID: ClassVar[str] = "tasks_cancel"
 
     resource_context: Optional[PulpEntityContext] = None
