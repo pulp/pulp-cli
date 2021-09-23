@@ -1,4 +1,5 @@
 import gettext
+from typing import Any
 
 from pulpcore.cli.common.context import (
     EntityDefinition,
@@ -12,6 +13,24 @@ from pulpcore.cli.common.context import (
 )
 
 _ = gettext.gettext
+
+
+class PulpRpmACSContext(PulpEntityContext):
+    ENTITY = _("rpm ACS")
+    ENTITIES = _("rpm ACSes")
+    HREF = "rpm_rpm_alternate_content_source_href"
+    LIST_ID = "acs_rpm_rpm_list"
+    READ_ID = "acs_rpm_rpm_read"
+    CREATE_ID = "acs_rpm_rpm_create"
+    UPDATE_ID = "acs_rpm_rpm_partial_update"
+    DELETE_ID = "acs_rpm_rpm_delete"
+    REFRESH_ID = "acs_rpm_rpm_refresh"
+
+    def refresh(self, href: str) -> Any:
+        return self.pulp_ctx.call(
+            self.REFRESH_ID,
+            parameters={self.HREF: href},
+        )
 
 
 class PulpRpmDistributionContext(PulpEntityContext):
