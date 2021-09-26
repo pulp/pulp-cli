@@ -1,19 +1,7 @@
 import gettext
 import json
 import re
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    Iterable,
-    List,
-    Mapping,
-    Optional,
-    Tuple,
-    Type,
-    TypeVar,
-    Union,
-)
+from typing import Any, Callable, Dict, Iterable, List, Mapping, Optional, Tuple, Type, TypeVar
 
 import click
 import schema as s
@@ -183,31 +171,43 @@ def _version_callback(
     return value
 
 
-def load_json_callback(
-    ctx: click.Context,
-    param: click.Parameter,
-    value: Optional[str],
+# TODO: would be great to have enable this to take a validator, rather than having
+# to build "on top of" it like I'm doing now w/ json_callback
+def load_file_or_string_callback(
+    ctx: click.Context, param: click.Parameter, value: Optional[str]
 ) -> Any:
-    """Load JSON from input string or from file if string starts with @."""
-    json_object: Any
-    json_string: Union[str, bytes]
+    """Load string from input or from file if string starts with @."""
+    the_content: str
 
     # pass None and "" verbatim
     if not value:
         return value
 
     if value.startswith("@"):
-        json_file = value[1:]
+        the_file = value[1:]
         try:
-            with click.open_file(json_file, "rb") as fp:
-                json_string = fp.read()
+            with click.open_file(the_file, "r") as fp:
+                the_content = fp.read()
         except OSError:
             raise click.ClickException(
-                _("Failed to load content from {json_file}").format(json_file=json_file)
+                _("Failed to load content from {file}").format(file=the_file)
             )
     else:
-        json_string = value
+        the_content = value
 
+    return the_content
+
+
+def load_json_callback(ctx: click.Context, param: click.Parameter, value: Optional[str]) -> Any:
+    """Load JSON from input string or from file if string starts with @."""
+
+    # None or empty-str are legal - shortcircuit here
+    if not value:
+        return value
+
+    # Now try to evaluate legal JSON
+    json_object: Any
+    json_string: str = load_file_or_string_callback(ctx, param, value)
     try:
         json_object = json.loads(json_string)
     except json.decoder.JSONDecodeError:
@@ -436,7 +436,10 @@ base_path_contains_option = pulp_option(
 content_in_option = pulp_option(
     "--content",
     "content__in",
-    help=_("Search for {entities} with these content hrefs in them (JSON list)"),
+    help=_(
+        "Search for {entities} with these content hrefs in them (JSON list or "
+        "@file containing a JSON list)"
+    ),
     callback=load_json_callback,
 )
 
@@ -477,9 +480,21 @@ publication_filter_options = [
 common_remote_create_options = [
     click.option("--name", required=True),
     click.option("--url", required=True),
-    click.option("--ca-cert", help=_("a PEM encoded CA certificate")),
-    click.option("--client-cert", help=_("a PEM encoded client certificate")),
-    click.option("--client-key", help=_("a PEM encode private key")),
+    click.option(
+        "--ca-cert",
+        help=_("a PEM encoded CA certificate or @file containing same"),
+        callback=load_file_or_string_callback,
+    ),
+    click.option(
+        "--client-cert",
+        help=_("a PEM encoded client certificate or @file containing same"),
+        callback=load_file_or_string_callback,
+    ),
+    click.option(
+        "--client-key",
+        help=_("a PEM encode private key or @file containing same"),
+        callback=load_file_or_string_callback,
+    ),
     click.option("--connect-timeout", type=float),
     click.option(
         "--download-concurrency", type=int, help=_("total number of simultaneous connections")
@@ -498,9 +513,21 @@ common_remote_create_options = [
 
 common_remote_update_options = [
     click.option("--url"),
-    click.option("--ca-cert", help=_("a PEM encoded CA certificate")),
-    click.option("--client-cert", help=_("a PEM encoded client certificate")),
-    click.option("--client-key", help=_("a PEM encode private key")),
+    click.option(
+        "--ca-cert",
+        help=_("a PEM encoded CA certificate or @file containing same"),
+        callback=load_file_or_string_callback,
+    ),
+    click.option(
+        "--client-cert",
+        help=_("a PEM encoded client certificate or @file containing same"),
+        callback=load_file_or_string_callback,
+    ),
+    click.option(
+        "--client-key",
+        help=_("a PEM encode private key or @file containing same"),
+        callback=load_file_or_string_callback,
+    ),
     click.option("--connect-timeout", type=float),
     click.option(
         "--download-concurrency", type=int, help=_("total number of simultaneous connections")

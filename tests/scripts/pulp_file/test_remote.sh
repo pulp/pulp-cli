@@ -16,3 +16,14 @@ expect_succ pulp file remote create --name "cli_test_file_remote" --url "$FILE_R
 expect_succ pulp file remote show --name "cli_test_file_remote"
 expect_succ pulp file remote list
 expect_succ pulp file remote destroy --name "cli_test_file_remote"
+
+# test cert/key fields for remotes - both @file and string args
+CERTFILE="$(dirname "$(realpath "$0")")"/mock.crt
+KEYFILE="$(dirname "$(realpath "$0")")"/mock.key
+CERT=$(cat "${CERTFILE}")
+KEY=$(cat "${KEYFILE}")
+expect_succ pulp file remote create --name "cli_test_file_remote" --url "$FILE_REMOTE_URL" --client-cert @"$CERTFILE" --client-key @"$KEYFILE" --ca-cert @"$CERTFILE"
+expect_succ pulp file remote destroy --name "cli_test_file_remote"
+
+expect_succ pulp file remote create --name "cli_test_file_remote" --url "$FILE_REMOTE_URL" --client-cert "$CERT" --client-key "$KEY" --ca-cert "$CERT"
+expect_succ pulp file remote destroy --name "cli_test_file_remote"

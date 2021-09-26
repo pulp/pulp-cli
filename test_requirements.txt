@@ -5,7 +5,7 @@ isort
 mypy
 pygments
 pytest
-
+shellcheck-py
 types-requests
 types-toml
 types-setuptools
