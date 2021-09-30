@@ -6,12 +6,7 @@ from typing import IO, Any, ClassVar, Dict, List, Optional
 
 import click
 
-from pulpcore.cli.common.context import (
-    EntityDefinition,
-    PluginRequirement,
-    PulpContext,
-    PulpEntityContext,
-)
+from pulpcore.cli.common.context import EntityDefinition, PulpContext, PulpEntityContext
 
 _ = gettext.gettext
 
@@ -23,23 +18,6 @@ class PulpAccessPolicyContext(PulpEntityContext):
     LIST_ID = "access_policies_list"
     READ_ID = "access_policies_read"
     UPDATE_ID = "access_policies_partial_update"
-
-    def find(self, **kwargs: Any) -> Any:
-        """Workaroud for the missing ability to filter"""
-        # https://pulp.plan.io/issues/8189
-        if self.pulp_ctx.has_plugin(PluginRequirement("core", min="3.10.dev")):
-            # Workaround not needed anymore
-            return super().find(**kwargs)
-        search_result = self.list(limit=sys.maxsize, offset=0, parameters={})
-        for key, value in kwargs.items():
-            search_result = [res for res in search_result if res[key] == value]
-        if len(search_result) != 1:
-            raise click.ClickException(
-                _("Could not find {entity} with {kwargs}.").format(
-                    entity=self.ENTITY, kwargs=kwargs
-                )
-            )
-        return search_result[0]
 
 
 class PulpArtifactContext(PulpEntityContext):
@@ -119,50 +97,15 @@ class PulpExporterContext(PulpEntityContext):
 class PulpExportContext(PulpEntityContext):
     ENTITY = _("Pulp export")
     ENTITIES = _("Pulp exports")
-    # This is replaced by a version aware property below
-    # HREF = "pulp_pulp_export_href"
+    HREF = "pulp_pulp_export_href"
     LIST_ID = "exporters_core_pulp_exports_list"
     READ_ID = "exporters_core_pulp_exports_read"
     CREATE_ID = "exporters_core_pulp_exports_create"
     DELETE_ID = "exporters_core_pulp_exports_delete"
     exporter: EntityDefinition
 
-    def list(self, limit: int, offset: int, parameters: Dict[str, Any]) -> List[Any]:
-        if not self.pulp_ctx.has_plugin(PluginRequirement("core", min="3.10.dev")):
-            # Workaround for improperly rendered nested resource paths and weird HREF names
-            # https://github.com/pulp/pulpcore/pull/1066
-            parameters[PulpExporterContext.HREF] = self.exporter["pulp_href"]
-        return super().list(limit=limit, offset=offset, parameters=parameters)
-
-    def create(
-        self,
-        body: EntityDefinition,
-        parameters: Optional[Dict[str, Any]] = None,
-        uploads: Optional[Dict[str, Any]] = None,
-        non_blocking: bool = False,
-    ) -> Any:
-        if not self.pulp_ctx.has_plugin(PluginRequirement("core", min="3.10.dev")):
-            # Workaround for improperly rendered nested resource paths and weird HREF names
-            # https://github.com/pulp/pulpcore/pull/1066
-            if parameters is None:
-                parameters = {}
-            parameters[self.HREF] = self.exporter["pulp_href"]
-        return super().create(parameters=parameters, body=body, non_blocking=non_blocking)
-
-    @property
-    def HREF(self) -> str:  # type: ignore
-        if not self.pulp_ctx.has_plugin(PluginRequirement("core", min="3.10.dev")):
-            # Workaround for improperly rendered nested resource paths and weird HREF names
-            # https://github.com/pulp/pulpcore/pull/1066
-            return "core_pulp_pulp_export_href"
-        return "pulp_pulp_export_href"
-
     @property
     def scope(self) -> Dict[str, Any]:
-        if not self.pulp_ctx.has_plugin(PluginRequirement("core", min="3.10.dev")):
-            # Workaround for improperly rendered nested resource paths and weird HREF names
-            # https://github.com/pulp/pulpcore/pull/1066
-            return {}
         return {PulpExporterContext.HREF: self.exporter["pulp_href"]}
 
 
@@ -176,23 +119,6 @@ class PulpGroupContext(PulpEntityContext):
     UPDATE_ID = "groups_partial_update"
     DELETE_ID = "groups_delete"
 
-    def find(self, **kwargs: Any) -> Any:
-        """Workaroud for the missing ability to filter"""
-        if self.pulp_ctx.has_plugin(PluginRequirement("core", min="3.10.dev")):
-            # Workaround not needed anymore
-            return super().find(**kwargs)
-        # See https://pulp.plan.io/issues/7975
-        search_result = self.list(limit=sys.maxsize, offset=0, parameters={})
-        for key, value in kwargs.items():
-            search_result = [res for res in search_result if res[key] == value]
-        if len(search_result) != 1:
-            raise click.ClickException(
-                _("Could not find {entity} with {kwargs}.").format(
-                    entity=self.ENTITY, kwargs=kwargs
-                )
-            )
-        return search_result[0]
-
 
 class PulpGroupPermissionContext(PulpEntityContext):
     ENTITY = _("group permission")
@@ -200,7 +126,6 @@ class PulpGroupPermissionContext(PulpEntityContext):
     group_ctx: PulpGroupContext
 
     def __init__(self, pulp_ctx: PulpContext, group_ctx: PulpGroupContext) -> None:
-        pulp_ctx.needs_plugin(PluginRequirement("core", min="3.10.dev"))
         super().__init__(pulp_ctx)
         self.group_ctx = group_ctx
 
@@ -250,8 +175,7 @@ class PulpGroupObjectPermissionContext(PulpGroupPermissionContext):
 class PulpGroupUserContext(PulpEntityContext):
     ENTITY = _("group user")
     ENTITIES = _("group users")
-    # This is replaced by a version aware property below
-    # HREF = "auth_groups_user_href"
+    HREF = "auth_groups_user_href"
     LIST_ID = "groups_users_list"
     CREATE_ID = "groups_users_create"
     DELETE_ID = "groups_users_delete"
@@ -261,42 +185,8 @@ class PulpGroupUserContext(PulpEntityContext):
         super().__init__(pulp_ctx)
         self.group_ctx = group_ctx
 
-    def list(self, limit: int, offset: int, parameters: Dict[str, Any]) -> List[Any]:
-        if not self.pulp_ctx.has_plugin(PluginRequirement("core", min="3.10.dev")):
-            # Workaround for improperly rendered nested resource paths and weird HREF names
-            # https://github.com/pulp/pulpcore/pull/1066
-            parameters[PulpGroupContext.HREF] = self.group_ctx.pulp_href
-        return super().list(limit=limit, offset=offset, parameters=parameters)
-
-    def create(
-        self,
-        body: EntityDefinition,
-        parameters: Optional[Dict[str, Any]] = None,
-        uploads: Optional[Dict[str, Any]] = None,
-        non_blocking: bool = False,
-    ) -> Any:
-        if not self.pulp_ctx.has_plugin(PluginRequirement("core", min="3.10.dev")):
-            # Workaround for improperly rendered nested resource paths and weird HREF names
-            # https://github.com/pulp/pulpcore/pull/1066
-            if parameters is None:
-                parameters = {}
-            parameters[self.HREF] = self.group_ctx.pulp_href
-        return super().create(parameters=parameters, body=body, non_blocking=non_blocking)
-
-    @property
-    def HREF(self) -> str:  # type: ignore
-        if not self.pulp_ctx.has_plugin(PluginRequirement("core", min="3.10.dev")):
-            # Workaround for improperly rendered nested resource paths and weird HREF names
-            # https://github.com/pulp/pulpcore/pull/1066
-            return "auth_auth_groups_user_href"
-        return "auth_groups_user_href"
-
     @property
     def scope(self) -> Dict[str, Any]:
-        if not self.pulp_ctx.has_plugin(PluginRequirement("core", min="3.10.dev")):
-            # Workaround for improperly rendered nested resource paths and weird HREF names
-            # https://github.com/pulp/pulpcore/pull/1066
-            return {}
         return {PulpGroupContext.HREF: self.group_ctx.pulp_href}
 
 
@@ -406,23 +296,6 @@ class PulpUserContext(PulpEntityContext):
     HREF = "auth_user_href"
     LIST_ID = "users_list"
     READ_ID = "users_read"
-
-    def find(self, **kwargs: Any) -> Any:
-        """Workaroud for the missing ability to filter"""
-        if self.pulp_ctx.has_plugin(PluginRequirement("core", min="3.10.dev")):
-            # Workaround not needed anymore
-            return super().find(**kwargs)
-        # See https://pulp.plan.io/issues/7975
-        search_result = self.list(limit=sys.maxsize, offset=0, parameters={})
-        for key, value in kwargs.items():
-            search_result = [res for res in search_result if res[key] == value]
-        if len(search_result) != 1:
-            raise click.ClickException(
-                _("Could not find {entity} with {kwargs}.").format(
-                    entity=self.ENTITY, kwargs=kwargs
-                )
-            )
-        return search_result[0]
 
 
 class PulpWorkerContext(PulpEntityContext):

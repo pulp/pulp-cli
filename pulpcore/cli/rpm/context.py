@@ -94,7 +94,7 @@ class PulpRpmRepositoryContext(PulpRepositoryContext):
     SYNC_ID = "repositories_rpm_rpm_sync"
     MODIFY_ID = "repositories_rpm_rpm_modify"
     VERSION_CONTEXT = PulpRpmRepositoryVersionContext
-    CAPABILITIES = {"pulpexport": [PluginRequirement("rpm", "3.3.0")]}
+    CAPABILITIES = {"pulpexport": [PluginRequirement("rpm")]}
 
 
 registered_repository_contexts["rpm:rpm"] = PulpRpmRepositoryContext

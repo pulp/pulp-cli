@@ -14,7 +14,7 @@ _ = gettext.gettext
 @main.group()
 @pass_pulp_context
 def rpm(pulp_ctx: PulpContext) -> None:
-    pulp_ctx.needs_plugin(PluginRequirement("rpm"))
+    pulp_ctx.needs_plugin(PluginRequirement("rpm", min="3.9"))
 
 
 rpm.add_command(repository)

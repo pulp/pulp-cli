@@ -3,7 +3,7 @@
 # shellcheck source=tests/scripts/config.source
 . "$(dirname "$(dirname "$(realpath "$0")")")"/config.source
 
-pulp debug has-plugin --name "python" --min-version "3.1.0.dev" || exit 3
+pulp debug has-plugin --name "python" || exit 3
 
 cleanup() {
   pulp python repository destroy --name "cli_test_python_repo" || true

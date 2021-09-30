@@ -9,7 +9,6 @@ import click
 import yaml
 from packaging.version import parse as parse_version
 from requests import HTTPError
-from urllib3.util import parse_url
 
 from pulpcore.cli.common.openapi import OpenAPI, OpenAPIError
 
@@ -40,15 +39,8 @@ class PluginRequirement(NamedTuple):
     inverted: bool = False
 
 
-new_component_names_to_pre_3_11_names: Dict[str, str] = dict(
-    ansible="pulp_ansible",
-    container="pulp_container",
-    core="pulpcore",
-    deb="pulp_deb",
-    file="pulp_file",
-    python="pulp_python",
-    rpm="pulp_rpm",
-)
+# This is deprecated we keep it to not break plugins immediately
+new_component_names_to_pre_3_11_names: Dict[str, str] = {}
 
 
 class PulpNoWait(click.ClickException):
@@ -271,16 +263,12 @@ class PulpContext:
         plugin: PluginRequirement,
     ) -> bool:
         if not self.component_versions:
-            # Prior to 3.9 we do not have this information
-            # assume yes if no version constraint is specified
-            # != is python weird xor
-            return ((plugin.min is None) and (plugin.max is None)) != plugin.inverted
+            # Prior to 3.9 we do not have this information.
+            # Assume we have no plugin installed.
+            return not plugin.inverted
         version: Optional[str] = self.component_versions.get(plugin.name)
         if version is None:
-            pre_3_11_name: str = new_component_names_to_pre_3_11_names.get(plugin.name, "")
-            version = self.component_versions.get(pre_3_11_name)
-            if version is None:
-                return plugin.inverted
+            return plugin.inverted
         if plugin.min is not None:
             if parse_version(version) < parse_version(plugin.min):
                 return plugin.inverted
@@ -552,30 +540,6 @@ class PulpRemoteContext(PulpEntityContext):
         "proxy_url",
         "username",
     }
-
-    def preprocess_body(self, body: EntityDefinition) -> EntityDefinition:
-        body = super().preprocess_body(body)
-        if not self.pulp_ctx.has_plugin(PluginRequirement("core", min="3.11.dev")):
-            # proxy_username and proxy_password are separate fields starting with 3.11
-            # https://pulp.plan.io/issues/8167
-            proxy_username = body.pop("proxy_username", None)
-            proxy_password = body.pop("proxy_password", None)
-            if proxy_username or proxy_password:
-                if "proxy_url" in body:
-                    if proxy_username and proxy_password:
-                        parsed_url = parse_url(body["proxy_url"])
-                        body["proxy_url"] = parsed_url._replace(
-                            auth=":".join([proxy_username, proxy_password])
-                        ).url
-                    else:
-                        raise click.ClickException(
-                            _("Proxy username and password can only be provided in conjunction.")
-                        )
-                else:
-                    raise click.ClickException(
-                        _("Proxy credentials can only be provided with a proxy url.")
-                    )
-        return body
 
 
 class PulpRepositoryVersionContext(PulpEntityContext):

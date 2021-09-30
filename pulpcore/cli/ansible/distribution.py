@@ -78,7 +78,6 @@ distribution.add_command(create_command(decorators=create_options))
 distribution.add_command(
     label_command(
         need_plugins=[
-            PluginRequirement("core", "3.10.0"),
             PluginRequirement("ansible", "0.8.0.dev"),
         ]
     )

@@ -13,7 +13,7 @@ _ = gettext.gettext
 @main.group()
 @pass_pulp_context
 def ansible(pulp_ctx: PulpContext) -> None:
-    pulp_ctx.needs_plugin(PluginRequirement("ansible"))
+    pulp_ctx.needs_plugin(PluginRequirement("ansible", min="0.7"))
 
 
 ansible.add_command(repository)
