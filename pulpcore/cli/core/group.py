@@ -3,13 +3,20 @@ from typing import Optional
 
 import click
 
-from pulpcore.cli.common.context import PulpContext, pass_entity_context, pass_pulp_context
+from pulpcore.cli.common.context import (
+    PluginRequirement,
+    PulpContext,
+    pass_entity_context,
+    pass_pulp_context,
+)
 from pulpcore.cli.common.generic import (
     create_command,
     destroy_command,
     href_option,
     list_command,
+    lookup_callback,
     name_option,
+    null_callback,
     show_command,
 )
 from pulpcore.cli.core.context import (
@@ -17,25 +24,12 @@ from pulpcore.cli.core.context import (
     PulpGroupModelPermissionContext,
     PulpGroupObjectPermissionContext,
     PulpGroupPermissionContext,
+    PulpGroupRoleContext,
     PulpGroupUserContext,
     PulpUserContext,
 )
 
-
-def _groupname_callback(ctx: click.Context, param: click.Parameter, value: str) -> str:
-    if value is not None:
-        entity_ctx = ctx.find_object(PulpGroupContext)
-        assert entity_ctx is not None
-        entity_ctx.entity = {"name": value}
-    return value
-
-
-def _permission_callback(ctx: click.Context, param: click.Parameter, value: str) -> str:
-    if value is not None:
-        entity_ctx = ctx.find_object(PulpGroupPermissionContext)
-        assert entity_ctx is not None
-        entity_ctx.entity = {"permission": value}
-    return value
+_ = gettext.gettext
 
 
 def _object_callback(ctx: click.Context, param: click.Parameter, value: str) -> str:
@@ -51,9 +45,9 @@ def _object_callback(ctx: click.Context, param: click.Parameter, value: str) -> 
     return value
 
 
-groupname_option = click.option("--groupname", callback=_groupname_callback, expose_value=False)
-
-_ = gettext.gettext
+group_option = click.option(
+    "--group", callback=lookup_callback("name", PulpGroupContext), expose_value=False
+)
 
 
 @click.group(help=_("Manage user groups and their granted permissions."))
@@ -99,13 +93,13 @@ def permission(
 
 permission.add_command(
     list_command(
-        help=_("Show a list of the permissioons granted to a group."), decorators=[groupname_option]
+        help=_("Show a list of the permissioons granted to a group."), decorators=[group_option]
     )
 )
 
 
 @permission.command(name="add", help=_("Grant a permission to the group."))
-@groupname_option
+@group_option
 @click.option("--permission", required=True)
 @click.option("--object", "obj", callback=_object_callback)
 @pass_entity_context
@@ -123,9 +117,12 @@ permission.add_command(
         name="remove",
         help=_("Revoke a permission from the group."),
         decorators=[
-            groupname_option,
+            group_option,
             click.option(
-                "--permission", required=True, callback=_permission_callback, expose_value=False
+                "--permission",
+                required=True,
+                callback=lookup_callback("permission", PulpGroupPermissionContext),
+                expose_value=False,
             ),
             click.option("--object", callback=_object_callback, expose_value=False),
         ],
@@ -141,19 +138,15 @@ def user(ctx: click.Context, pulp_ctx: PulpContext, group_ctx: PulpGroupContext)
     ctx.obj = PulpGroupUserContext(pulp_ctx, group_ctx)
 
 
-user.add_command(list_command(decorators=[groupname_option]))
-
-
-@user.command(name="add")
-@groupname_option
-@click.option("--username", required=True)
-@pass_entity_context
-def add_user(entity_ctx: PulpGroupUserContext, username: str) -> None:
-    entity_ctx.create(body={"username": username})
+user.add_command(list_command(decorators=[group_option]))
+user.add_command(
+    create_command(decorators=[group_option, click.option("--username", required=True)]),
+    name="add",
+)
 
 
 @user.command(name="remove")
-@groupname_option
+@group_option
 @click.option("--username", required=True)
 @pass_entity_context
 @pass_pulp_context
@@ -162,3 +155,58 @@ def remove_user(pulp_ctx: PulpContext, entity_ctx: PulpGroupUserContext, usernam
     user_pk = user_href.split("/")[-2]
     group_user_href = f"{entity_ctx.group_ctx.pulp_href}users/{user_pk}/"
     entity_ctx.delete(group_user_href)
+
+
+@group.group()
+@pass_entity_context
+@pass_pulp_context
+@click.pass_context
+def role(ctx: click.Context, pulp_ctx: PulpContext, group_ctx: PulpGroupContext) -> None:
+    pulp_ctx.needs_plugin(PluginRequirement("core", min="3.17.dev"))
+    ctx.obj = PulpGroupRoleContext(pulp_ctx, group_ctx)
+
+
+role.add_command(
+    list_command(
+        decorators=[
+            group_option,
+            click.option("--role"),
+            click.option("--role-in", "role__in"),
+            click.option("--role-contains", "role__contains"),
+            click.option("--role-icontains", "role__icontains"),
+            click.option("--role-startswith", "role__startswith"),
+            click.option("--object", "content_object", callback=null_callback),
+        ]
+    )
+)
+role.add_command(
+    create_command(
+        decorators=[
+            group_option,
+            click.option("--role", required=True),
+            click.option("--object", "content_object", required=True),
+        ]
+    ),
+    name="add",
+)
+role.add_command(
+    destroy_command(
+        decorators=[
+            group_option,
+            click.option(
+                "--role",
+                required=True,
+                callback=lookup_callback("role", PulpGroupRoleContext),
+                expose_value=False,
+            ),
+            click.option(
+                "--object",
+                "content_object",
+                required=True,
+                callback=lookup_callback("content_object", PulpGroupRoleContext),
+                expose_value=False,
+            ),
+        ]
+    ),
+    name="remove",
+)

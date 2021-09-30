@@ -13,13 +13,13 @@ trap cleanup EXIT
 
 expect_succ pulp group create --name "cli_test_group"
 
-expect_succ pulp group permission add --groupname "cli_test_group" --permission "core.view_task"
-expect_succ pulp group permission add --groupname "cli_test_group" --permission "auth.view_group"
-expect_succ pulp group permission list --groupname "cli_test_group"
-expect_succ pulp group permission remove --groupname "cli_test_group" --permission "core.view_task"
+expect_succ pulp group permission add --group "cli_test_group" --permission "core.view_task"
+expect_succ pulp group permission add --group "cli_test_group" --permission "auth.view_group"
+expect_succ pulp group permission list --group "cli_test_group"
+expect_succ pulp group permission remove --group "cli_test_group" --permission "core.view_task"
 
 expect_succ pulp file repository create --name "cli_group_test_repository"
 REPO_HREF="$(echo "$OUTPUT" | jq -r '.pulp_href')"
-expect_succ pulp group permission -t object add --groupname "cli_test_group" --permission "file.view_filerepository" --object "$REPO_HREF"
-expect_succ pulp group permission -t object list --groupname "cli_test_group"
-expect_succ pulp group permission -t object remove --groupname "cli_test_group" --permission "file.view_filerepository" --object "$REPO_HREF"
+expect_succ pulp group permission -t object add --group "cli_test_group" --permission "file.view_filerepository" --object "$REPO_HREF"
+expect_succ pulp group permission -t object list --group "cli_test_group"
+expect_succ pulp group permission -t object remove --group "cli_test_group" --permission "file.view_filerepository" --object "$REPO_HREF"

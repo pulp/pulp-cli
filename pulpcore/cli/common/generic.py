@@ -1,6 +1,7 @@
 import gettext
 import json
 import re
+from functools import lru_cache
 from typing import Any, Callable, Dict, Iterable, List, Mapping, Optional, Tuple, Type, TypeVar
 
 import click
@@ -34,10 +35,20 @@ class PulpCommand(click.Command):
         self,
         *args: Any,
         allowed_with_contexts: Optional[Tuple[Type[PulpEntityContext]]] = None,
+        needs_plugins: Optional[List[PluginRequirement]] = None,
         **kwargs: Any,
     ):
         self.allowed_with_contexts = allowed_with_contexts
+        self.needs_plugins = needs_plugins
         super().__init__(*args, **kwargs)
+
+    def invoke(self, ctx: click.Context) -> Any:
+        if self.needs_plugins:
+            pulp_ctx = ctx.find_object(PulpContext)
+            assert pulp_ctx is not None
+            for plugin_requirement in self.needs_plugins:
+                pulp_ctx.needs_plugin(plugin_requirement)
+        return super().invoke(ctx)
 
     def get_short_help_str(self, limit: int = 45) -> str:
         return self.short_help or ""
@@ -178,6 +189,24 @@ class GroupOption(PulpOption):
 # Option callbacks
 
 
+@lru_cache(typed=True)
+def lookup_callback(
+    attribute: str, context_class: Type[PulpEntityContext] = PulpEntityContext
+) -> Callable[[click.Context, click.Parameter, Optional[str]], Optional[str]]:
+    def _callback(
+        ctx: click.Context, param: click.Parameter, value: Optional[str]
+    ) -> Optional[str]:
+        if value is not None:
+            if value == "":
+                value = "null"
+            entity_ctx = ctx.find_object(context_class)
+            assert entity_ctx is not None
+            entity_ctx.entity = {attribute: value}
+        return value
+
+    return _callback
+
+
 def _href_callback(
     ctx: click.Context, param: click.Parameter, value: Optional[str]
 ) -> Optional[str]:
@@ -188,16 +217,6 @@ def _href_callback(
     return value
 
 
-def _name_callback(
-    ctx: click.Context, param: click.Parameter, value: Optional[str]
-) -> Optional[str]:
-    if value is not None:
-        entity_ctx = ctx.find_object(PulpEntityContext)
-        assert entity_ctx is not None
-        entity_ctx.entity = {"name": value}
-    return value
-
-
 def _repository_href_callback(
     ctx: click.Context, param: click.Parameter, value: Optional[str]
 ) -> Optional[str]:
@@ -205,16 +224,6 @@ def _repository_href_callback(
         repository_ctx = ctx.find_object(PulpRepositoryContext)
         assert repository_ctx is not None
         repository_ctx.pulp_href = value
-    return value
-
-
-def _repository_callback(
-    ctx: click.Context, param: click.Parameter, value: Optional[str]
-) -> Optional[str]:
-    if value is not None:
-        repository_ctx = ctx.find_object(PulpRepositoryContext)
-        assert repository_ctx is not None
-        repository_ctx.entity = {"name": value}
     return value
 
 
@@ -318,6 +327,14 @@ def parse_size_callback(ctx: click.Context, param: click.Parameter, value: str) 
         raise click.ClickException("Please pass in a valid size of form: [0-9] [K/M/G/T]B")
     number, unit = match.groups(default="B")
     return int(float(number) * units[unit])
+
+
+def null_callback(
+    ctx: click.Context, param: click.Parameter, value: Optional[str]
+) -> Optional[str]:
+    if value == "":
+        return "null"
+    return value
 
 
 ##############################################################################
@@ -486,7 +503,7 @@ href_option = pulp_option(
 name_option = pulp_option(
     "--name",
     help=_("Name of the {entity}"),
-    callback=_name_callback,
+    callback=lookup_callback("name"),
     expose_value=False,
 )
 
@@ -500,7 +517,7 @@ repository_href_option = click.option(
 repository_option = click.option(
     "--repository",
     help=_("Name of the repository"),
-    callback=_repository_callback,
+    callback=lookup_callback("name", PulpRepositoryContext),
     expose_value=False,
 )
 

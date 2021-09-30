@@ -37,7 +37,7 @@ expect_succ pulp file distribution update \
   --base-path "cli_test_file_distro" \
   --publication "$PUBLICATION_HREF"
 
-if [ "$(pulp debug has-plugin --name "file" --min-version "1.7.0.dev")" = "true" ]
+if pulp debug has-plugin --name "file" --min-version "1.7.0.dev"
 then
   expect_succ pulp file distribution update \
     --name "cli_test_file_distro" \

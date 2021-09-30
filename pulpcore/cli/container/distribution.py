@@ -69,6 +69,7 @@ create_options = [
     click.option(
         "--version", type=int, help=_("a repository version number, leave blank for latest")
     ),
+    click.option("--private/--public", default=None),
 ]
 
 distribution.add_command(list_command(decorators=filter_options))
@@ -84,6 +85,7 @@ distribution.add_command(label_command())
 @click.option("--base-path")
 @repository_option
 @click.option("--version", type=int, help=_("a repository version number, leave blank for latest"))
+@click.option("--private/--public", default=None)
 @pass_entity_context
 @pass_pulp_context
 def update(

@@ -44,7 +44,7 @@ expect_succ pulp ansible repository content add --repository "cli_test_ansible_r
 expect_succ pulp ansible repository content list --repository "cli_test_ansible_repository" --version 2 --type "role"
 test "$(echo "$OUTPUT" | jq -r length)" -eq "1"
 
-if [ "$(pulp debug has-plugin --name "core" --min-version "3.11.0")" = "true" ]
+if pulp debug has-plugin --name "core" --min-version "3.11.0"
 then
   expect_succ pulp ansible repository content list --repository "cli_test_ansible_repository" --version 2 --type "all"
   test "$(echo "$OUTPUT" | jq -r length)" -eq "2"
