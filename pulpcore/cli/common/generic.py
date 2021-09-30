@@ -704,7 +704,7 @@ def label_command(**kwargs: Any) -> click.Command:
     if "name" not in kwargs:
         kwargs["name"] = "label"
     decorators = kwargs.pop("decorators", [name_option, href_option])
-    need_plugins = kwargs.pop("need_plugins", [PluginRequirement("core", "3.10.0")])
+    need_plugins = kwargs.pop("need_plugins", [])
 
     @click.group(**kwargs)
     @pass_pulp_context
@@ -780,8 +780,6 @@ def repository_content_command(**kwargs: Any) -> click.Group:
         type: Optional[str],
         **params: Any,
     ) -> None:
-        if type == "all":
-            pulp_ctx.needs_plugin(PluginRequirement("core", "3.11.0"))
         parameters = {k: v for k, v in params.items() if v is not None}
         parameters.update({"repository_version": version.pulp_href})
         result = content_contexts[type](pulp_ctx).list(

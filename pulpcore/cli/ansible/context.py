@@ -99,7 +99,7 @@ class PulpAnsibleRepositoryContext(PulpRepositoryContext):
     SYNC_ID = "repositories_ansible_ansible_sync"
     MODIFY_ID = "repositories_ansible_ansible_modify"
     VERSION_CONTEXT = PulpAnsibleRepositoryVersionContext
-    CAPABILITIES = {"pulpexport": [PluginRequirement("ansible", "0.7.0")]}
+    CAPABILITIES = {"pulpexport": [PluginRequirement("ansible")]}
 
 
 registered_repository_contexts["ansible:ansible"] = PulpAnsibleRepositoryContext

@@ -102,7 +102,7 @@ class PulpFileRepositoryContext(PulpRepositoryContext):
     SYNC_ID = "repositories_file_file_sync"
     MODIFY_ID = "repositories_file_file_modify"
     VERSION_CONTEXT = PulpFileRepositoryVersionContext
-    CAPABILITIES = {"pulpexport": [PluginRequirement("file", "0.3.0")]}
+    CAPABILITIES = {"pulpexport": [PluginRequirement("file")]}
 
 
 registered_repository_contexts["file:file"] = PulpFileRepositoryContext

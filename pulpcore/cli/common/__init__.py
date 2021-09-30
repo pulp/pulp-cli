@@ -15,7 +15,7 @@ except ImportError:
     HAS_CLICK_SHELL = False
 
 from pulpcore.cli.common.config import CONFIG_LOCATIONS, config, config_options, validate_config
-from pulpcore.cli.common.context import PulpContext
+from pulpcore.cli.common.context import PluginRequirement, PulpContext
 from pulpcore.cli.common.debug import debug
 
 _ = gettext.gettext
@@ -133,6 +133,7 @@ def main(
     ctx.obj = PulpContext(
         api_kwargs=api_kwargs, format=format, background_tasks=background, timeout=timeout
     )
+    ctx.obj.needs_plugin(PluginRequirement("core", min="3.11"))
 
 
 main.add_command(config)

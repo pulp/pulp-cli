@@ -2,12 +2,7 @@ import gettext
 
 import click
 
-from pulpcore.cli.common.context import (
-    PluginRequirement,
-    PulpContext,
-    PulpRepositoryContext,
-    pass_pulp_context,
-)
+from pulpcore.cli.common.context import PulpContext, PulpRepositoryContext, pass_pulp_context
 from pulpcore.cli.common.generic import list_command
 
 _ = gettext.gettext
@@ -23,7 +18,6 @@ def repository(ctx: click.Context, pulp_ctx: PulpContext) -> None:
     Please look for the plugin specific repository commands for more detailed actions.
     i.e. 'pulp file repository <...>'
     """
-    pulp_ctx.needs_plugin(PluginRequirement("core", min="3.10"))
     ctx.obj = PulpRepositoryContext(pulp_ctx)
 
 
