@@ -46,4 +46,36 @@ expect_fail () {
   fi
 }
 
+# Expects the command to report access denied
+# Supresses all output, which is redirected to $OUTPUT and $ERROUTPUT
+# Reports verbosely on failure
+expect_deny () {
+  if {
+    "$@"
+  } 1>log.out 2>log.err
+  # TODO check for access denied message
+  then
+    echo "FAILURE [! $@]" >&3
+    echo "=== STDOUT ===" >&3
+    cat log.out >&3
+    echo "=== STDERR ===" >&3
+    cat log.err >&3
+    false
+  else
+    if grep -q "You do not have permission" log.err
+    then
+      echo "SUCCESS [! $@]" >&3
+      OUTPUT="$(cat log.out)"
+      ERROUTPUT="$(cat log.err)"
+    else
+      echo "FAILURE [! $@]" >&3
+      echo "=== STDOUT ===" >&3
+      cat log.out >&3
+      echo "=== STDERR ===" >&3
+      cat log.err >&3
+      false
+    fi
+  fi
+}
+
 set -eu

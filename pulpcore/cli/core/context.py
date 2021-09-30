@@ -209,6 +209,26 @@ class PulpGroupObjectPermissionContext(PulpGroupPermissionContext):
         return "groups_object_permission_href"
 
 
+class PulpGroupRoleContext(PulpEntityContext):
+    ENTITY = _("group role")
+    ENTITIES = _("group roles")
+    HREF = "groups_group_role_href"
+    LIST_ID = "groups_roles_list"
+    READ_ID = "groups_roles_read"
+    CREATE_ID = "groups_roles_create"
+    DELETE_ID = "groups_roles_delete"
+    NULLABLES = {"content_object"}
+    group_ctx: PulpGroupContext
+
+    def __init__(self, pulp_ctx: PulpContext, group_ctx: PulpGroupContext) -> None:
+        super().__init__(pulp_ctx)
+        self.group_ctx = group_ctx
+
+    @property
+    def scope(self) -> Dict[str, Any]:
+        return {self.group_ctx.HREF: self.group_ctx.pulp_href}
+
+
 class PulpGroupUserContext(PulpEntityContext):
     ENTITY = _("group user")
     ENTITIES = _("group users")
@@ -271,6 +291,18 @@ class PulpRbacContentGuardContext(PulpContentGuardContext):
     def remove(self, href: str, users: Optional[List[str]], groups: Optional[List[str]]) -> Any:
         body = self.preprocess_body({"usernames": users, "groupnames": groups})
         return self.pulp_ctx.call(self.REMOVE_ID, parameters={self.HREF: href}, body=body)
+
+
+class PulpRoleContext(PulpEntityContext):
+    ENTITY = _("role")
+    ENTITIES = _("roles")
+    HREF = "role_href"
+    LIST_ID = "roles_list"
+    READ_ID = "roles_read"
+    CREATE_ID = "roles_create"
+    UPDATE_ID = "roles_partial_update"
+    DELETE_ID = "roles_delete"
+    NULLABLES = {"description"}
 
 
 class PulpSigningServiceContext(PulpEntityContext):
@@ -352,6 +384,30 @@ class PulpUserContext(PulpEntityContext):
     HREF = "auth_user_href"
     LIST_ID = "users_list"
     READ_ID = "users_read"
+    CREATE_ID = "users_create"
+    UPDATE_ID = "users_partial_update"
+    DELETE_ID = "users_delete"
+    NULLABLES = {"password"}
+
+
+class PulpUserRoleContext(PulpEntityContext):
+    ENTITY = _("user role")
+    ENTITIES = _("user roles")
+    HREF = "auth_users_user_role_href"
+    LIST_ID = "users_roles_list"
+    READ_ID = "users_roles_read"
+    CREATE_ID = "users_roles_create"
+    DELETE_ID = "users_roles_delete"
+    NULLABLES = {"content_object"}
+    user_ctx: PulpUserContext
+
+    def __init__(self, pulp_ctx: PulpContext, user_ctx: PulpUserContext) -> None:
+        super().__init__(pulp_ctx)
+        self.user_ctx = user_ctx
+
+    @property
+    def scope(self) -> Dict[str, Any]:
+        return {self.user_ctx.HREF: self.user_ctx.pulp_href}
 
 
 class PulpWorkerContext(PulpEntityContext):

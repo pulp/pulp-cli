@@ -36,7 +36,7 @@ test "$(echo "$OUTPUT" | jq -r .includes[1])" = "shelf-reader"
 test "$(echo "$OUTPUT" | jq -r .includes[2])" = "pulp_python"
 expect_succ pulp python remote list
 
-if [ "$(pulp debug has-plugin --name "python" --min-version "3.2.0.dev")" = "true" ]
+if pulp debug has-plugin --name "python" --min-version "3.2.0.dev"
   then
     expect_succ pulp python remote create --name "cli_test_complex_remote" --url "$PYTHON_REMOTE_URL" --keep-latest-packages 3 --package-types '["sdist", "bdist_wheel"]' --exclude-platforms '["windows"]'
   else

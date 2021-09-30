@@ -268,7 +268,7 @@ class OpenAPI:
         self.debug_callback(1, f"{method} {request.url}")
         for key, value in request.headers.items():
             self.debug_callback(2, f"  {key}: {value}")
-        if request.body:
+        if request.body is not None:
             self.debug_callback(2, f"{request.body!r}")
         if self.safe_calls_only and method.upper() not in SAFE_METHODS:
             raise OpenAPIError(_("Call aborted due to safe mode"))
