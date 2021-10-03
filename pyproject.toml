@@ -39,5 +39,6 @@ module = [
   "pygments.*",
   "click_shell.*",
   "schema.*",
+  "jq.*",
 ]
 ignore_missing_imports = true
