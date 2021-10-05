@@ -72,6 +72,7 @@ explicit_package_bases = true
 [[tool.mypy.overrides]]
 module = [
   "click_shell.*",
+  "jq.*",
   "schema.*",
 ]
 ignore_missing_imports = true

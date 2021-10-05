@@ -13,6 +13,13 @@ from pulpcore.cli.common.i18n import get_translation
 from pulpcore.cli.common.openapi import OpenAPI, OpenAPIError
 
 try:
+    import jq
+except ImportError:
+    JQ_INSTALLED = False
+else:
+    JQ_INSTALLED = True
+
+try:
     from pygments import highlight
     from pygments.formatters import Terminal256Formatter
     from pygments.lexers import JsonLexer, YamlLexer
@@ -79,6 +86,7 @@ class PulpContext:
         self._needed_plugins: List[PluginRequirement] = []
         self.isatty: bool = sys.stdout.isatty()
 
+        self.jq_expr: Optional[str] = None
         self.format: str = format
         self.background_tasks: bool = background_tasks
         self.timeout: int = timeout
@@ -107,6 +115,9 @@ class PulpContext:
         """
         Dump the provided result to the console using the selected renderer
         """
+        if self.jq_expr is not None:
+            assert JQ_INSTALLED
+            result = jq.compile(self.jq_expr).input(result).first()
         if self.format == "json":
             output = json.dumps(result, cls=PulpJSONEncoder, indent=(2 if self.isatty else None))
             if PYGMENTS and self.isatty:
@@ -116,6 +127,9 @@ class PulpContext:
             output = yaml.dump(result)
             if PYGMENTS and self.isatty:
                 output = highlight(output, YamlLexer(), Terminal256Formatter(style=PYGMENTS_STYLE))
+            click.echo(output)
+        elif self.format == "plain":
+            output = str(result)
             click.echo(output)
         elif self.format == "none":
             pass

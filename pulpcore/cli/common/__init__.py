@@ -16,6 +16,7 @@ except ImportError:
 from pulpcore.cli.common.config import CONFIG_LOCATIONS, config, config_options, validate_config
 from pulpcore.cli.common.context import PluginRequirement, PulpContext
 from pulpcore.cli.common.debug import debug
+from pulpcore.cli.common.generic import pulp_group
 from pulpcore.cli.common.i18n import get_translation
 
 __version__ = "0.14.0.dev"
@@ -75,7 +76,7 @@ def _config_callback(ctx: click.Context, param: Any, value: Optional[str]) -> No
         raise click.ClickException(_("Aborted."))
 
 
-@click.group()
+@pulp_group()
 @click.version_option(prog_name=_("pulp3 command line interface"), package_name="pulp-cli")
 @click.option(
     "--profile",
@@ -145,7 +146,7 @@ main.add_command(debug)
 
 if HAS_CLICK_SHELL:
 
-    @main.command("shell")
+    @main.command("shell", cls=click.Command)
     @click.pass_context
     def pulp_shell(ctx: click.Context) -> None:
         """Activate an interactive shell-mode"""

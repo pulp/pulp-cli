@@ -8,6 +8,7 @@ import schema as s
 
 from pulpcore.cli.common.context import (
     DEFAULT_LIMIT,
+    JQ_INSTALLED,
     EntityDefinition,
     EntityFieldDefinition,
     PluginRequirement,
@@ -42,6 +43,8 @@ class PulpCommand(click.Command):
         self.allowed_with_contexts = allowed_with_contexts
         self.needs_plugins = needs_plugins
         super().__init__(*args, **kwargs)
+        if JQ_INSTALLED:
+            jq_option(self)
 
     def invoke(self, ctx: click.Context) -> Any:
         if self.needs_plugins:
@@ -58,8 +61,7 @@ class PulpCommand(click.Command):
         self, ctx: click.Context, formatter: click.formatting.HelpFormatter
     ) -> None:
         entity_ctx = ctx.find_object(PulpEntityContext)
-        assert entity_ctx is not None
-        if self.help is not None:
+        if entity_ctx is not None and self.help is not None:
             self.help = self.help.format(entity=entity_ctx.ENTITY, entities=entity_ctx.ENTITIES)
         super().format_help_text(ctx, formatter)
 
@@ -348,12 +350,19 @@ def null_callback(
     return value
 
 
+def _jq_callback(ctx: click.Context, param: click.Parameter, value: Optional[str]) -> Optional[str]:
+    pulp_ctx = ctx.find_object(PulpContext)
+    assert pulp_ctx is not None
+    pulp_ctx.jq_expr = value
+    return value
+
+
 ##############################################################################
 # Decorator common options
 
 
 def pulp_option(*args: Any, **kwargs: Any) -> Callable[[_FC], _FC]:
-    kwargs["cls"] = PulpOption
+    kwargs["cls"] = kwargs.get("cls", PulpOption)
     return click.option(*args, **kwargs)
 
 
@@ -597,6 +606,14 @@ retained_versions_option = pulp_option(
     help=_("Number of repository versions to keep."),
 )
 
+jq_option = click.option(
+    "--jq",
+    "jq_expr",
+    expose_value=False,
+    callback=_jq_callback,
+    help=_("Process output through jq style expression."),
+)
+
 publication_filter_options = [
     content_in_option,
     pulp_created_gte_option,
@@ -678,15 +695,13 @@ common_remote_update_options = [
 def list_command(**kwargs: Any) -> click.Command:
     """A factory that creates a list command."""
 
-    if "cls" not in kwargs:
-        kwargs["cls"] = PulpCommand
     if "name" not in kwargs:
         kwargs["name"] = "list"
     if "help" not in kwargs:
         kwargs["help"] = _("Show the list of optionally filtered {entities}.")
     decorators = kwargs.pop("decorators", [])
 
-    @click.command(**kwargs)
+    @pulp_command(**kwargs)
     @limit_option
     @offset_option
     @pass_entity_context
@@ -710,15 +725,13 @@ def list_command(**kwargs: Any) -> click.Command:
 def show_command(**kwargs: Any) -> click.Command:
     """A factory that creates a show command."""
 
-    if "cls" not in kwargs:
-        kwargs["cls"] = PulpCommand
     if "name" not in kwargs:
         kwargs["name"] = "show"
     if "help" not in kwargs:
         kwargs["help"] = _("Show details of a {entity}.")
     decorators = kwargs.pop("decorators", [])
 
-    @click.command(**kwargs)
+    @pulp_command(**kwargs)
     @pass_entity_context
     @pass_pulp_context
     def callback(pulp_ctx: PulpContext, entity_ctx: PulpEntityContext) -> None:
@@ -736,15 +749,13 @@ def show_command(**kwargs: Any) -> click.Command:
 def create_command(**kwargs: Any) -> click.Command:
     """A factory that creates a create command."""
 
-    if "cls" not in kwargs:
-        kwargs["cls"] = PulpCommand
     if "name" not in kwargs:
         kwargs["name"] = "create"
     if "help" not in kwargs:
         kwargs["help"] = _("Create a {entity}.")
     decorators = kwargs.pop("decorators", [])
 
-    @click.command(**kwargs)
+    @pulp_command(**kwargs)
     @pass_entity_context
     @pass_pulp_context
     def callback(pulp_ctx: PulpContext, entity_ctx: PulpEntityContext, **kwargs: Any) -> None:
@@ -767,15 +778,13 @@ def create_command(**kwargs: Any) -> click.Command:
 def update_command(**kwargs: Any) -> click.Command:
     """A factory that creates an update command."""
 
-    if "cls" not in kwargs:
-        kwargs["cls"] = PulpCommand
     if "name" not in kwargs:
         kwargs["name"] = "update"
     if "help" not in kwargs:
         kwargs["help"] = _("Update a {entity}.")
     decorators = kwargs.pop("decorators", [])
 
-    @click.command(**kwargs)
+    @pulp_command(**kwargs)
     @pass_entity_context
     @pass_pulp_context
     def callback(pulp_ctx: PulpContext, entity_ctx: PulpEntityContext, **kwargs: Any) -> None:
@@ -794,15 +803,13 @@ def update_command(**kwargs: Any) -> click.Command:
 def destroy_command(**kwargs: Any) -> click.Command:
     """A factory that creates a destroy command."""
 
-    if "cls" not in kwargs:
-        kwargs["cls"] = PulpCommand
     if "name" not in kwargs:
         kwargs["name"] = "destroy"
     if "help" not in kwargs:
         kwargs["help"] = _("Destroy a {entity}.")
     decorators = kwargs.pop("decorators", [])
 
-    @click.command(**kwargs)
+    @pulp_command(**kwargs)
     @pass_entity_context
     def callback(entity_ctx: PulpEntityContext) -> None:
         """
@@ -823,7 +830,7 @@ def version_command(**kwargs: Any) -> click.Command:
         kwargs["name"] = "version"
     decorators = kwargs.pop("decorators", [repository_href_option, repository_option])
 
-    @click.group(**kwargs)
+    @pulp_group(**kwargs)
     @pass_repository_context
     @click.pass_context
     def callback(
@@ -860,13 +867,13 @@ def label_command(**kwargs: Any) -> click.Command:
     decorators = kwargs.pop("decorators", [name_option, href_option])
     need_plugins = kwargs.pop("need_plugins", [])
 
-    @click.group(**kwargs)
+    @pulp_group(**kwargs)
     @pass_pulp_context
     def label_group(pulp_ctx: PulpContext) -> None:
         for item in need_plugins:
             pulp_ctx.needs_plugin(item)
 
-    @click.command(name="set", help=_("Add or update a label"))
+    @pulp_command(name="set", help=_("Add or update a label"))
     @click.option("--key", required=True, help=_("Key of the label"))
     @click.option("--value", required=True, help=_("Value of the label"))
     @pass_entity_context
@@ -875,7 +882,7 @@ def label_command(**kwargs: Any) -> click.Command:
         href = entity_ctx.entity["pulp_href"]
         entity_ctx.set_label(href, key, value)
 
-    @click.command(name="unset", help=_("Remove a label with a given key"))
+    @pulp_command(name="unset", help=_("Remove a label with a given key"))
     @click.option("--key", required=True, help=_("Key of the label"))
     @pass_entity_context
     def label_unset(entity_ctx: PulpEntityContext, key: str) -> None:
@@ -883,13 +890,14 @@ def label_command(**kwargs: Any) -> click.Command:
         href = entity_ctx.entity["pulp_href"]
         entity_ctx.unset_label(href, key)
 
-    @click.command(name="show", help=_("Show the value for a particular label key"))
+    @pulp_command(name="show", help=_("Show the value for a particular label key"))
     @click.option("--key", required=True, help=_("Key of the label"))
     @pass_entity_context
-    def label_show(entity_ctx: PulpEntityContext, key: str) -> None:
+    @pass_pulp_context
+    def label_show(ctx: PulpContext, entity_ctx: PulpEntityContext, key: str) -> None:
         """Show the value for a particular label key"""
         href = entity_ctx.entity["pulp_href"]
-        click.echo(entity_ctx.show_label(href, key))
+        ctx.output_result(entity_ctx.show_label(href, key))
 
     for subcmd in [label_set, label_unset, label_show]:
         for decorator in decorators:
@@ -986,7 +994,7 @@ def repository_content_command(**kwargs: Any) -> click.Group:
         )
         return repo_ver_ctx
 
-    @click.command("list")
+    @pulp_command("list")
     @click.option("-t", "--type", "type", type=click.Choice(names), default=names[0])
     @limit_option
     @offset_option
@@ -1008,7 +1016,7 @@ def repository_content_command(**kwargs: Any) -> click.Group:
         )
         pulp_ctx.output_result(result)
 
-    @click.command("add")
+    @pulp_command("add")
     @repository_option
     @click.option("--base-version", type=int, callback=version_callback)
     @pass_content_context
@@ -1023,7 +1031,7 @@ def repository_content_command(**kwargs: Any) -> click.Group:
             base_version=base_version.pulp_href,
         )
 
-    @click.command("remove")
+    @pulp_command("remove")
     @click.option("--all", is_flag=True, help=_("Remove all content from repository version"))
     @repository_option
     @click.option("--base-version", type=int, callback=version_callback)
@@ -1039,7 +1047,7 @@ def repository_content_command(**kwargs: Any) -> click.Group:
             repo_ctx.pulp_href, remove_content=remove_content, base_version=base_version.pulp_href
         )
 
-    @click.command("modify")
+    @pulp_command("modify")
     @repository_option
     @click.option("--base-version", type=int, callback=version_callback)
     def content_modify(
@@ -1061,7 +1069,7 @@ def repository_content_command(**kwargs: Any) -> click.Group:
     if not kwargs.get("name"):
         kwargs["name"] = "content"
 
-    @click.group(**kwargs)
+    @pulp_group(**kwargs)
     @pass_pulp_context
     @click.pass_context
     def content_group(ctx: click.Context, pulp_ctx: PulpContext) -> None:

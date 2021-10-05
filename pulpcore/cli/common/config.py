@@ -16,7 +16,7 @@ CONFIG_LOCATIONS = [
     str(Path(click.utils.get_app_dir("pulp"), "settings.toml")),
     str(Path(click.utils.get_app_dir("pulp"), "cli.toml")),
 ]
-FORMAT_CHOICES = ["json", "yaml", "none"]
+FORMAT_CHOICES = ["json", "yaml", "plain", "none"]
 SETTINGS = [
     "base_url",
     "username",
