@@ -10,6 +10,68 @@
 
 [//]: # (towncrier release notes start)
 
+## 0.12.0 (2021-10-06)
+======================
+
+
+### Features
+
+- Chunked artifact and content uploads now allow unit specifier in ``--chunk-size`` option
+  [#260](https://github.com/pulp/pulp-cli/issues/260)
+- Added rpm package content commands support.
+  [#284](https://github.com/pulp/pulp-cli/issues/284)
+- Added the ability to pass an href to a resource option.
+  [#315](https://github.com/pulp/pulp-cli/issues/315)
+- Added pulp file acs command.
+  [#324](https://github.com/pulp/pulp-cli/issues/324)
+- Added `--all`, `--waiting` and `--running` flags to allow bulk task cancel.
+  [#330](https://github.com/pulp/pulp-cli/issues/330)
+- Added commands for CRUD RBAC Content Guards.
+  [#352](https://github.com/pulp/pulp-cli/issues/352)
+- Added the ability to delete tasks.
+  [#376](https://github.com/pulp/pulp-cli/issues/376)
+- Added refresh command for pulp_file Alternate Content Sources.
+  [#377](https://github.com/pulp/pulp-cli/issues/377)
+- Added pulp_rpm Alternate Content Source commands.
+  [#378](https://github.com/pulp/pulp-cli/issues/378)
+- Added the openapi command group to debug to ease reading the schema.
+  [#384](https://github.com/pulp/pulp-cli/issues/384)
+
+
+### Bugfixes
+
+- Fixed the referenced version with the `--version` parameter.
+  [#351](https://github.com/pulp/pulp-cli/issues/351)
+- Fixed nullable fields for rpm remote.
+  [#373](https://github.com/pulp/pulp-cli/issues/373)
+
+
+### Improved Documentation
+
+- Add installation instructions for plugins and a list of known plugins.
+  [#331](https://github.com/pulp/pulp-cli/issues/331)
+- Moved CHANGES.md to publish them along with the documentation.
+  [#336](https://github.com/pulp/pulp-cli/issues/336)
+- Reformatted CHANGES with Markdown syntax.
+  [#337](https://github.com/pulp/pulp-cli/issues/337)
+- Add a tabular view to the global options.
+  [#357](https://github.com/pulp/pulp-cli/issues/357)
+
+
+### Deprecations and Removals
+
+- Bumped required pulpcore version to >=3.11 and removed legacy workarounds.
+  [#380](https://github.com/pulp/pulp-cli/issues/380)
+
+
+### Misc
+
+- [#342](https://github.com/pulp/pulp-cli/issues/342)
+
+
+---
+
+
 ## 0.11.0 (2021-08-10)
 
 ### Features
