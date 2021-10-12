@@ -27,6 +27,11 @@ repository_option = resource_option(
     default_plugin="file",
     default_type="file",
     context_table={"file:file": PulpFileRepositoryContext},
+    help=_(
+        "Repository to be used for auto-publishing."
+        " When set, this will unset the 'publication'."
+        " Specified as '[[<plugin>:]<type>:]<name>' or as href."
+    ),
 )
 
 
@@ -51,7 +56,12 @@ filter_options = [label_select_option, base_path_option, base_path_contains_opti
 lookup_options = [href_option, name_option]
 update_options = [
     click.option("--base-path"),
-    click.option("--publication"),
+    click.option(
+        "--publication",
+        help=_(
+            "Publication to be served. This will unset the 'repository' and disable auto publish."
+        ),
+    ),
     repository_option,
 ]
 create_options = update_options + [click.option("--name", required=True)]

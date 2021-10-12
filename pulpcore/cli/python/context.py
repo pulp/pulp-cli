@@ -3,6 +3,7 @@ from typing import ClassVar
 
 from pulpcore.cli.common.context import (
     EntityDefinition,
+    PluginRequirement,
     PulpContentContext,
     PulpEntityContext,
     PulpRemoteContext,
@@ -33,6 +34,15 @@ class PulpPythonDistributionContext(PulpEntityContext):
     UPDATE_ID = "distributions_python_pypi_partial_update"
     DELETE_ID = "distributions_python_pypi_delete"
     NULLABLES = {"publication", "repository"}
+
+    def preprocess_body(self, body: EntityDefinition) -> EntityDefinition:
+        body = super().preprocess_body(body)
+        if self.pulp_ctx.has_plugin(PluginRequirement("core", min="3.16.0.dev")):
+            if "repository" in body and "publication" not in body:
+                body["publication"] = None
+            if "repository" not in body and "publication" in body:
+                body["repository"] = None
+        return body
 
 
 class PulpPythonPublicationContext(PulpEntityContext):
