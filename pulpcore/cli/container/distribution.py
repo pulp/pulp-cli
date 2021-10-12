@@ -95,11 +95,14 @@ def update(
     base_path: Optional[str],
     repository: Optional[Union[str, PulpEntityContext]],
     version: Optional[int],
+    private: Optional[bool],
 ) -> None:
     distribution: EntityDefinition = distribution_ctx.entity
     href: str = distribution_ctx.pulp_href
     body: EntityDefinition = {}
 
+    if private is not None:
+        body["private"] = private
     if base_path is not None:
         body["base_path"] = base_path
     if repository is not None:
