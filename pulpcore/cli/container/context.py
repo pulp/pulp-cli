@@ -32,6 +32,7 @@ class PulpContainerDistributionContext(PulpEntityContext):
     CREATE_ID = "distributions_container_container_create"
     UPDATE_ID = "distributions_container_container_partial_update"
     DELETE_ID = "distributions_container_container_delete"
+    NULLABLES = {"repository_version", "repository"}
 
     def preprocess_body(self, body: EntityDefinition) -> EntityDefinition:
         body = super().preprocess_body(body)
