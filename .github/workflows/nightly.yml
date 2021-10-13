@@ -44,10 +44,3 @@ jobs:
         env:
           IMAGE_TAG: ${{ matrix.image_tag }}
         run: .ci/run_container.sh make test
-      - name: After failure
-        if: failure()
-        run: |
-          http --timeout 30 --check-status --pretty format --print hb http://pulp/pulp/api/v3/status/ || true
-          docker images || true
-          docker ps -a || true
-          docker logs pulp || true
