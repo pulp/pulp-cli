@@ -3,7 +3,7 @@
 # shellcheck source=tests/scripts/config.source
 . "$(dirname "$(dirname "$(realpath "$0")")")"/config.source
 
-pulp debug has-plugin --name "rpm" --min-version "3.16.0.dev" || exit 3
+pulp debug has-plugin --name "rpm" --min-version "3.17.0.dev" || exit 3
 
 acs_remote="cli_test_rpm_acs_remote"
 acs="cli_test_acs"
