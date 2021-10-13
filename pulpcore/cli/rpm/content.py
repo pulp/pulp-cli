@@ -288,6 +288,5 @@ def upload(
         uploads["file"] = file
     else:
         raise NotImplementedError()
-    body = entity_ctx.preprocess_body(body)
     result = entity_ctx.create(body=body, uploads=uploads)
     pulp_ctx.output_result(result)

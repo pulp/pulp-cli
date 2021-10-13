@@ -42,8 +42,8 @@ class PulpFileDistributionContext(PulpEntityContext):
     NULLABLES = {"publication", "repository"}
     CAPABILITIES = {"roles": [PluginRequirement("file", min="1.11.0")]}
 
-    def preprocess_body(self, body: EntityDefinition) -> EntityDefinition:
-        body = super().preprocess_body(body)
+    def preprocess_entity(self, body: EntityDefinition, partial: bool = False) -> EntityDefinition:
+        body = super().preprocess_entity(body, partial=partial)
         if self.pulp_ctx.has_plugin(PluginRequirement("core", min="3.16.0")):
             if "repository" in body and "publication" not in body:
                 body["publication"] = None
@@ -59,8 +59,8 @@ class PulpFilePublicationContext(PulpEntityContext):
     ID_PREFIX = "publications_file_file"
     CAPABILITIES = {"roles": [PluginRequirement("file", min="1.11.0")]}
 
-    def preprocess_body(self, body: EntityDefinition) -> EntityDefinition:
-        body = super().preprocess_body(body)
+    def preprocess_entity(self, body: EntityDefinition, partial: bool = False) -> EntityDefinition:
+        body = super().preprocess_entity(body, partial=partial)
         version = body.pop("version", None)
         if version is not None:
             repository_href = body.pop("repository")

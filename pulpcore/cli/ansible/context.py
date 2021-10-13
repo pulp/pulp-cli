@@ -47,8 +47,8 @@ class PulpAnsibleDistributionContext(PulpEntityContext):
     HREF = "ansible_ansible_distribution_href"
     ID_PREFIX = "distributions_ansible_ansible"
 
-    def preprocess_body(self, body: EntityDefinition) -> EntityDefinition:
-        body = super().preprocess_body(body)
+    def preprocess_entity(self, body: EntityDefinition, partial: bool = False) -> EntityDefinition:
+        body = super().preprocess_entity(body, partial=partial)
         version = body.pop("version", None)
         if version is not None:
             repository_href = body.pop("repository")
@@ -70,8 +70,8 @@ class PulpAnsibleCollectionRemoteContext(PulpRemoteContext):
     ID_PREFIX = "remotes_ansible_collection"
     collection_nullable = ["auth_url", "requirements_file", "token"]
 
-    def preprocess_body(self, body: EntityDefinition) -> EntityDefinition:
-        body = super().preprocess_body(body)
+    def preprocess_entity(self, body: EntityDefinition, partial: bool = False) -> EntityDefinition:
+        body = super().preprocess_entity(body, partial=partial)
         if "requirements" in body.keys():
             body["requirements_file"] = body.pop("requirements")
         return body

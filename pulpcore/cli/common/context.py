@@ -29,7 +29,11 @@ DEFAULT_LIMIT = 25
 BATCH_SIZE = 25
 
 
-EntityDefinition = Dict[str, Any]
+class PreprocessedEntityDefinition(Dict[str, Any]):
+    pass
+
+
+EntityDefinition = Union[Dict[str, Any], PreprocessedEntityDefinition]
 
 
 class PluginRequirement(NamedTuple):
@@ -58,6 +62,21 @@ class PulpJSONEncoder(json.JSONEncoder):
             return obj.isoformat()
         else:
             return super().default(obj)
+
+
+def _preprocess_value(key: str, value: Any) -> Any:
+    if isinstance(value, PulpEntityContext):
+        return value.pulp_href
+    return value
+
+
+def preprocess_payload(payload: EntityDefinition) -> EntityDefinition:
+    if isinstance(payload, PreprocessedEntityDefinition):
+        return payload
+
+    return PreprocessedEntityDefinition(
+        {key: _preprocess_value(key, value) for key, value in payload.items() if value is not None}
+    )
 
 
 class PulpContext:
@@ -136,7 +155,7 @@ class PulpContext:
         operation_id: str,
         non_blocking: bool = False,
         parameters: Optional[Dict[str, Any]] = None,
-        body: Optional[Dict[str, Any]] = None,
+        body: Optional[EntityDefinition] = None,
         uploads: Optional[Dict[str, bytes]] = None,
         validate_body: bool = True,
     ) -> Any:
@@ -146,6 +165,10 @@ class PulpContext:
         Returns the operation result, or the finished task.
         If non_blocking, returns unfinished tasks.
         """
+        if parameters is not None:
+            parameters = preprocess_payload(parameters)
+        if body is not None:
+            body = preprocess_payload(body)
         try:
             result = self.api.call(
                 operation_id,
@@ -430,7 +453,7 @@ class PulpEntityContext:
         operation: str,
         non_blocking: bool = False,
         parameters: Optional[Dict[str, Any]] = None,
-        body: Optional[Dict[str, Any]] = None,
+        body: Optional[EntityDefinition] = None,
         uploads: Optional[Dict[str, bytes]] = None,
         validate_body: bool = True,
     ) -> Any:
@@ -446,19 +469,31 @@ class PulpEntityContext:
             validate_body=validate_body,
         )
 
-    def _preprocess_value(self, key: str, value: Any) -> Any:
-        if key in self.NULLABLES and value == "":
+    @classmethod
+    def _preprocess_value(cls, key: str, value: Any) -> Any:
+        if key in cls.NULLABLES and value == "":
             return None
         if isinstance(value, PulpEntityContext):
             return value.pulp_href
         return value
 
     def preprocess_body(self, body: EntityDefinition) -> EntityDefinition:
-        return {
-            key: self._preprocess_value(key, value)
-            for key, value in body.items()
-            if value is not None
-        }
+        # This function is deprecated. Subclasses should subclass `preprocess_entity` instead.
+        #
+        # TODO once the transition is done, just keep this implementation as `preprocess_entity`
+        if isinstance(body, PreprocessedEntityDefinition):
+            return body
+
+        return PreprocessedEntityDefinition(
+            {
+                key: self._preprocess_value(key, value)
+                for key, value in body.items()
+                if value is not None
+            }
+        )
+
+    def preprocess_entity(self, body: EntityDefinition, partial: bool = False) -> EntityDefinition:
+        return self.preprocess_body(body)
 
     def list(self, limit: int, offset: int, parameters: Dict[str, Any]) -> List[Any]:
         count: int = -1
@@ -508,6 +543,8 @@ class PulpEntityContext:
         _parameters = self.scope
         if parameters:
             _parameters.update(parameters)
+        if body is not None:
+            body = self.preprocess_entity(body, partial=False)
         result = self.call(
             "create",
             parameters=_parameters,
@@ -534,6 +571,8 @@ class PulpEntityContext:
         _parameters = {self.HREF: href or self.pulp_href}
         if parameters:
             _parameters.update(parameters)
+        if body is not None:
+            body = self.preprocess_entity(body, partial=False)
         return self.call(
             "partial_update",
             parameters=_parameters,
@@ -664,8 +703,8 @@ class PulpRepositoryContext(PulpEntityContext):
     def get_version_context(self) -> PulpRepositoryVersionContext:
         return self.VERSION_CONTEXT(self.pulp_ctx, self)
 
-    def preprocess_body(self, body: EntityDefinition) -> EntityDefinition:
-        body = super().preprocess_body(body)
+    def preprocess_entity(self, body: EntityDefinition, partial: bool = False) -> EntityDefinition:
+        body = super().preprocess_entity(body, partial=partial)
         if self.pulp_ctx.has_plugin(PluginRequirement("core", "3.13", "3.15")):
             # "retain_repo_versions" has been named "retained_versions" until pulpcore 3.15
             # https://github.com/pulp/pulpcore/pull/1472

@@ -25,8 +25,8 @@ class PulpAccessPolicyContext(PulpEntityContext):
     def reset(self) -> Any:
         return self.call("reset", parameters={self.HREF: self.pulp_href})
 
-    def preprocess_body(self, body: EntityDefinition) -> EntityDefinition:
-        body = super().preprocess_body(body)
+    def preprocess_entity(self, body: EntityDefinition, partial: bool = False) -> EntityDefinition:
+        body = super().preprocess_entity(body, partial=partial)
         if not self.pulp_ctx.has_plugin(PluginRequirement("core", min="3.17")):
             if "creation_hooks" in body:
                 body["permissions_assignment"] = body.pop("creation_hooks")
@@ -282,20 +282,20 @@ class PulpRbacContentGuardContext(PulpContentGuardContext):
 
     def assign(self, href: str, users: Optional[List[str]], groups: Optional[List[str]]) -> Any:
         if self.pulp_ctx.has_plugin(PluginRequirement("core", min="3.17.0")):
-            body = self.preprocess_body({"users": users, "groups": groups})
+            body: EntityDefinition = {"users": users, "groups": groups}
             body["role"] = self.DOWNLOAD_ROLE
             return self.call("add_role", parameters={self.HREF: href}, body=body)
         else:
-            body = self.preprocess_body({"usernames": users, "groupnames": groups})
+            body = {"usernames": users, "groupnames": groups}
             return self.call("assign_permission", parameters={self.HREF: href}, body=body)
 
     def remove(self, href: str, users: Optional[List[str]], groups: Optional[List[str]]) -> Any:
         if self.pulp_ctx.has_plugin(PluginRequirement("core", min="3.17.0")):
-            body = self.preprocess_body({"users": users, "groups": groups})
+            body: EntityDefinition = {"users": users, "groups": groups}
             body["role"] = self.DOWNLOAD_ROLE
             return self.call("remove_role", parameters={self.HREF: href}, body=body)
         else:
-            body = self.preprocess_body({"usernames": users, "groupnames": groups})
+            body = {"usernames": users, "groupnames": groups}
             return self.call("remove_permission", parameters={self.HREF: href}, body=body)
 
 

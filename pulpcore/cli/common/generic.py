@@ -798,12 +798,7 @@ def list_command(**kwargs: Any) -> click.Command:
         """
         Show the list of optionally filtered {entities}.
         """
-        parameters = {
-            key: entity_ctx._preprocess_value(key, value)
-            for key, value in kwargs.items()
-            if value is not None
-        }
-        result = entity_ctx.list(limit=limit, offset=offset, parameters=parameters)
+        result = entity_ctx.list(limit=limit, offset=offset, parameters=kwargs)
         pulp_ctx.output_result(result)
 
     for option in decorators:
@@ -852,8 +847,7 @@ def create_command(**kwargs: Any) -> click.Command:
         """
         Create a {entity}.
         """
-        body: EntityDefinition = entity_ctx.preprocess_body(kwargs)
-        result = entity_ctx.create(body=body)
+        result = entity_ctx.create(body=kwargs)
         if "created_resources" in result:
             entity_ctx.pulp_href = result["created_resources"][0]
             result = entity_ctx.entity
@@ -881,8 +875,7 @@ def update_command(**kwargs: Any) -> click.Command:
         """
         Update a {entity}.
         """
-        body: EntityDefinition = entity_ctx.preprocess_body(kwargs)
-        entity_ctx.update(href=entity_ctx.pulp_href, body=body)
+        entity_ctx.update(href=entity_ctx.pulp_href, body=kwargs)
 
     for option in decorators:
         # Decorate callback

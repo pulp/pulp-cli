@@ -145,6 +145,5 @@ def upload(
         body["artifact"] = artifact_href
     if repository:
         body["repository"] = repository
-    body = entity_ctx.preprocess_body(body)
     result = entity_ctx.create(body=body, uploads=uploads)
     pulp_ctx.output_result(result)
