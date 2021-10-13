@@ -77,7 +77,7 @@ VERSION_HREF=$(pulp rpm repository version show --repository "${REPO2_NAME}" | j
 # test list and show for all types
 for t in package advisory distribution_tree modulemd_defaults modulemd package_category package_environment package_group package_langpack repo_metadata_file
 do
-  OUTPUT=$(pulp rpm content -t ${t} list --limit 100 --repository-version "${VERSION_HREF}")
+  expect_succ pulp rpm content -t ${t} list --limit 100 --repository-version "${VERSION_HREF}"
   FOUND=$(echo "${OUTPUT}" | jq -r length)
   case ${t} in
     package)

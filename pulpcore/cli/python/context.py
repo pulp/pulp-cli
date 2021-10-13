@@ -28,8 +28,8 @@ class PulpPythonDistributionContext(PulpEntityContext):
     ID_PREFIX = "distributions_python_pypi"
     NULLABLES = {"publication", "repository"}
 
-    def preprocess_body(self, body: EntityDefinition) -> EntityDefinition:
-        body = super().preprocess_body(body)
+    def preprocess_entity(self, body: EntityDefinition, partial: bool = False) -> EntityDefinition:
+        body = super().preprocess_entity(body, partial=partial)
         if self.pulp_ctx.has_plugin(PluginRequirement("core", min="3.16.0")):
             if "repository" in body and "publication" not in body:
                 body["publication"] = None
@@ -44,8 +44,8 @@ class PulpPythonPublicationContext(PulpEntityContext):
     HREF = "python_python_publication_href"
     ID_PREFIX = "publications_python_pypi"
 
-    def preprocess_body(self, body: EntityDefinition) -> EntityDefinition:
-        body = super().preprocess_body(body)
+    def preprocess_entity(self, body: EntityDefinition, partial: bool = False) -> EntityDefinition:
+        body = super().preprocess_entity(body, partial=partial)
         version = body.pop("version", None)
         if version is not None:
             repository_href = body.pop("repository")
