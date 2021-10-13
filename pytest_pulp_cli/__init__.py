@@ -98,17 +98,26 @@ def pulp_cli_env(pulp_cli_settings, pulp_cli_vars, monkeypatch):
 
 if "PULP_LOGGING" in os.environ:
 
-    @pytest.fixture
-    def pulp_container_log():
+    @pytest.fixture(scope="session")
+    def pulp_container_log_stream():
         with subprocess.Popen(
-            [os.environ["PULP_LOGGING"], "logs", "-f", "--tail", "0", "pulp"],
+            [os.environ["PULP_LOGGING"], "logs", "-f", "--tail", "0", "pulp-ephemeral"],
             stdin=subprocess.DEVNULL,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
         ) as proc:
-            yield
+            os.set_blocking(proc.stdout.fileno(), False)
+            yield proc.stdout
             proc.kill()
-            print(proc.stdout.read().decode())
+
+    @pytest.fixture
+    def pulp_container_log(pulp_container_log_stream):
+        # Flush logs before starting the test
+        pulp_container_log_stream.read()
+        yield
+        logs = pulp_container_log_stream.read()
+        if logs is not None:
+            print(logs.decode())
 
 
 else:
