@@ -88,8 +88,8 @@ class PulpOption(click.Option):
             return None
         synopsis, help_text = tmp
         entity_ctx = ctx.find_object(PulpEntityContext)
-        assert entity_ctx is not None
-        help_text = help_text.format(entity=entity_ctx.ENTITY, entities=entity_ctx.ENTITIES)
+        if entity_ctx is not None:
+            help_text = help_text.format(entity=entity_ctx.ENTITY, entities=entity_ctx.ENTITIES)
         return synopsis, help_text
 
 
