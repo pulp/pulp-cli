@@ -13,7 +13,7 @@ CONFIG_LOCATIONS = [
     str(Path(click.utils.get_app_dir("pulp"), "settings.toml")),
     str(Path(click.utils.get_app_dir("pulp"), "cli.toml")),
 ]
-FORMAT_CHOICES = ["json", "yaml", "none"]
+FORMAT_CHOICES = ["json", "yaml", "table", "none"]
 SETTINGS = [
     "base_url",
     "username",
@@ -40,6 +40,7 @@ CONFIG_OPTIONS = [
     click.option("--verify-ssl/--no-verify-ssl", default=True, help=_("Verify SSL connection")),
     click.option(
         "--format",
+        "-f",
         type=click.Choice(FORMAT_CHOICES, case_sensitive=False),
         default="json",
         help=_("Format of the response"),

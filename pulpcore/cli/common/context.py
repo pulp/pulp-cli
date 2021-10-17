@@ -13,6 +13,13 @@ from requests import HTTPError
 from pulpcore.cli.common.openapi import OpenAPI, OpenAPIError
 
 try:
+    from prettytable import PrettyTable
+except ImportError:
+    PRETTYTABLE_INSTALLD = False
+else:
+    PRETTYTABLE_INSTALLD = True
+
+try:
     from pygments import highlight
     from pygments.formatters import Terminal256Formatter
     from pygments.lexers import JsonLexer, YamlLexer
@@ -115,6 +122,22 @@ class PulpContext:
             output = yaml.dump(result)
             if PYGMENTS and self.isatty:
                 output = highlight(output, YamlLexer(), Terminal256Formatter(style=PYGMENTS_STYLE))
+            click.echo(output)
+        elif self.format == "table":
+            if not PRETTYTABLE_INSTALLD:
+                raise click.ClickException(_("`prettytable` is not installed."))
+            try:
+                table = PrettyTable()
+                if isinstance(result, dict):
+                    # For single results, fake a list with one element
+                    result = [result]
+                keys = list(result[0].keys())
+                table.field_names = keys
+                table.add_rows(([row[key] for key in keys] for row in result))
+                # Typing info for prettytable seems incomplete
+                output = table.get_string()  # type:ignore
+            except (KeyError, ValueError):
+                raise click.ClickException(_("Output cannot be represented in a table."))
             click.echo(output)
         elif self.format == "none":
             pass

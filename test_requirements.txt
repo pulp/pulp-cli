@@ -1,4 +1,4 @@
--e .
+-e .[shell,pygments,format]
 black
 flake8
 isort
@@ -6,7 +6,10 @@ mypy
 pygments
 pytest
 shellcheck-py
+
+types-prettytable
+types-pygments
+types-PyYAML
 types-requests
 types-toml
 types-setuptools
-types-PyYAML

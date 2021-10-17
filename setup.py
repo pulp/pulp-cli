@@ -52,6 +52,7 @@ setup(
         "toml==0.10.2",
     ],
     extras_require={
+        "format": ["prettytable"],
         "pygments": ["pygments"],
         "shell": ["click-shell~=2.1"],
     },
