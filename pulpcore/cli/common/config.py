@@ -130,7 +130,7 @@ def config() -> None:
 @config_options
 @click.option("--interactive", "-i", is_flag=True)
 @click.option("--editor", "-e", is_flag=True, help=_("Edit the config file in an editor"))
-@click.option("--overwrite", "-o", is_flag=True, help=_("Overwite any existing config file"))
+@click.option("--overwrite", "-o", is_flag=True, help=_("Overwrite any existing config file"))
 @click.option("--location", default=CONFIG_LOCATIONS[-1], type=click.Path(resolve_path=True))
 @click.pass_context
 def create(
@@ -145,7 +145,7 @@ def create(
         if not overwrite and Path(location).exists():
             raise click.ClickException(
                 _(
-                    "File '{location}' already exists. Use --overwite if you want to overwrite it."
+                    "File '{location}' already exists. Use --overwrite if you want to overwrite it."
                 ).format(location=location)
             )
 
