@@ -10,6 +10,7 @@ nav:
   - 'installation.md'
   - 'configuration.md'
   - 'using_the_cli.md'
+  - 'supported_workflows.md'
   - 'advanced_features.md'
   - 'CHANGES.md'
   - 'contributing.md'
