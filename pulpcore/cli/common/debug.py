@@ -74,7 +74,12 @@ def operation(pulp_ctx: PulpContext, operation_id: str) -> None:
     """
     method: str
     path: str
-    method, path = pulp_ctx.api.operations[operation_id]
+    try:
+        method, path = pulp_ctx.api.operations[operation_id]
+    except KeyError:
+        raise click.ClickException(
+            _("No operation with id {operation_id} found.").format(operation_id=operation_id)
+        )
     result = {
         "method": method,
         "path": path,
