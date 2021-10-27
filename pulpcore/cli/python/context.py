@@ -76,7 +76,6 @@ class PulpPythonRemoteContext(PulpRemoteContext):
 
 class PulpPythonRepositoryVersionContext(PulpRepositoryVersionContext):
     HREF = "python_python_repository_version_href"
-    REPOSITORY_HREF = "python_python_repository_href"
     LIST_ID = "repositories_python_python_versions_list"
     READ_ID = "repositories_python_python_versions_read"
     DELETE_ID = "repositories_python_python_versions_delete"
