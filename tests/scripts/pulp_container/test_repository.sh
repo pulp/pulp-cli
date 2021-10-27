@@ -18,3 +18,6 @@ expect_succ pulp container repository show --name "cli_test_container_repo"
 test "$(echo "$OUTPUT" | jq -r '.description')" = "null"
 expect_succ pulp container repository list
 expect_succ pulp container repository destroy --name "cli_test_container_repo"
+
+expect_succ pulp container repository -t "push" --help
+test "$(echo "$OUTPUT" | grep -E "create|update|destroy|sync")" = ""

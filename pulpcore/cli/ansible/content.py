@@ -1,5 +1,5 @@
 import gettext
-from typing import IO, Any, Optional, Union
+from typing import IO, Any, Union
 
 import click
 
@@ -15,6 +15,7 @@ from pulpcore.cli.common.generic import (
     chunk_size_option,
     href_option,
     list_command,
+    pulp_group,
     pulp_option,
     show_command,
 )
@@ -31,7 +32,7 @@ def _content_callback(ctx: click.Context, param: click.Parameter, value: Any) ->
     return value
 
 
-@click.group()
+@pulp_group()
 @click.option(
     "-t",
     "--type",
@@ -50,6 +51,8 @@ def content(ctx: click.Context, pulp_ctx: PulpContext, content_type: str) -> Non
         raise NotImplementedError()
 
 
+collection_context = (PulpAnsibleCollectionVersionContext,)
+role_context = (PulpAnsibleRoleContext,)
 list_options = [
     pulp_option("--name", help=_("Name of {entity}")),
     pulp_option("--namespace", help=_("Namespace of {entity}")),
@@ -59,15 +62,13 @@ list_options = [
         "is_highest",
         is_flag=True,
         default=None,
-        help=_(
-            "Only show highest version of collection version (only works for collection versions)"
-        ),
+        help=_("Only show highest version of collection version"),
+        allowed_with_contexts=collection_context,
     ),
     pulp_option(
         "--tags",
-        help=_(
-            "Comma separated list of tags that must all match (only works for collection versions)"
-        ),
+        help=_("Comma separated list of tags that must all match"),
+        allowed_with_contexts=collection_context,
     ),
 ]
 
@@ -113,9 +114,21 @@ content.add_command(show_command(decorators=lookup_options))
 @content.command()
 @click.option("--file", type=click.File("rb"), required=True)
 @chunk_size_option
-@pulp_option("--name", help=_("Name of {entity}, only required for Roles"))
-@pulp_option("--namespace", help=_("Namespace of {entity}, only required for Roles"))
-@pulp_option("--version", help=_("Version of {entity}, only required for Roles"))
+@pulp_option(
+    "--name", help=_("Name of {entity}"), allowed_with_contexts=role_context, required=True
+)
+@pulp_option(
+    "--namespace",
+    help=_("Namespace of {entity}"),
+    allowed_with_contexts=role_context,
+    required=True,
+)
+@pulp_option(
+    "--version",
+    help=_("Version of {entity}"),
+    allowed_with_contexts=role_context,
+    required=True,
+)
 @pass_entity_context
 @pass_pulp_context
 def upload(
@@ -123,23 +136,15 @@ def upload(
     content_ctx: Union[PulpAnsibleRoleContext, PulpAnsibleCollectionVersionContext],
     file: IO[bytes],
     chunk_size: int,
-    name: Optional[str],
-    namespace: Optional[str],
-    version: Optional[str],
+    **kwargs: Any,
 ) -> None:
 
     if isinstance(content_ctx, PulpAnsibleRoleContext):
-        # Check that name, namespace, and version are supplied for Role upload
-        if not all((name, namespace, version)):
-            raise click.ClickException(
-                "Please specify name, namespace, and version when uploading a Role"
-            )
         artifact_href = PulpArtifactContext(pulp_ctx).upload(file, chunk_size)
-        body = {"artifact": artifact_href, "name": name, "namespace": namespace, "version": version}
+        body = {"artifact": artifact_href}
+        body.update(kwargs)
         result = content_ctx.create(body=body)
         pulp_ctx.output_result(result)
     else:
-        # Collection upload uses name, namespace, and version for server side validation
-        body = {"expected_name": name, "expected_namespace": namespace, "expected_version": version}
-        result = content_ctx.upload(file=file, body=body)
+        result = content_ctx.upload(file=file)
         pulp_ctx.output_result(result)

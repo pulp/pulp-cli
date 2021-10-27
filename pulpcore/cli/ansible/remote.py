@@ -19,6 +19,8 @@ from pulpcore.cli.common.generic import (
     label_select_option,
     list_command,
     name_option,
+    pulp_group,
+    pulp_option,
     show_command,
     update_command,
 )
@@ -30,12 +32,6 @@ def _requirements_callback(
     ctx: click.Context, param: click.Parameter, value: Any
 ) -> Optional[Union[str, Any]]:
     if value:
-        if isinstance(ctx.obj, PulpAnsibleRoleRemoteContext):
-            raise click.ClickException(
-                _("Option {parameter} not valid for Role remote, see --help").format(
-                    parameter=param.name
-                )
-            )
         if param.name == "requirements_file":
             return f"{yaml.safe_load(value)}"
         elif param.name == "requirements":
@@ -43,7 +39,7 @@ def _requirements_callback(
     return value
 
 
-@click.group()
+@pulp_group()
 @click.option(
     "-t",
     "--type",
@@ -63,31 +59,36 @@ def remote(ctx: click.Context, pulp_ctx: PulpContext, remote_type: str) -> None:
         raise NotImplementedError()
 
 
+collection_context = (PulpAnsibleCollectionRemoteContext,)
 lookup_options = [href_option, name_option]
 remote_options = [
     click.option("--policy", help=_("policy to use when downloading")),
 ]
 collection_options = [
-    click.option(
+    pulp_option(
         "--requirements-file",
         callback=_requirements_callback,
         type=click.File(),
         help=_("Collections only: a Collection requirements yaml"),
+        allowed_with_contexts=collection_context,
     ),
-    click.option(
+    pulp_option(
         "--requirements",
         callback=_requirements_callback,
         help=_("Collections only: a string of a requirements yaml"),
+        allowed_with_contexts=collection_context,
     ),
-    click.option(
+    pulp_option(
         "--auth-url",
         callback=_requirements_callback,
         help=_("Collections only: URL to receive a session token"),
+        allowed_with_contexts=collection_context,
     ),
-    click.option(
+    pulp_option(
         "--token",
         callback=_requirements_callback,
         help=_("Collections only: token key use for authentication"),
+        allowed_with_contexts=collection_context,
     ),
 ]
 ansible_remote_options = remote_options + collection_options

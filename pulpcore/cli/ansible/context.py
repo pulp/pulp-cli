@@ -24,9 +24,8 @@ class PulpAnsibleCollectionVersionContext(PulpContentContext):
     CREATE_ID = "content_ansible_collection_versions_create"
     UPLOAD_ID: ClassVar[str] = "upload_collection"
 
-    def upload(self, file: IO[bytes], body: Any) -> Any:
-        body = self.preprocess_body(body)
-        return self.pulp_ctx.call(self.UPLOAD_ID, body=body, uploads={"file": file.read()})
+    def upload(self, file: IO[bytes]) -> Any:
+        return self.pulp_ctx.call(self.UPLOAD_ID, uploads={"file": file.read()})
 
 
 class PulpAnsibleRoleContext(PulpContentContext):

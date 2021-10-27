@@ -25,11 +25,20 @@ from pulpcore.cli.common.context import (
 
 _ = gettext.gettext
 
-_F = TypeVar("_F")
-_FC = TypeVar("_FC", Callable[..., Any], click.Command)
+_F = Callable[..., Any]
+_FC = TypeVar("_FC", _F, click.Command)
 
 
 class PulpCommand(click.Command):
+    def __init__(
+        self,
+        *args: Any,
+        allowed_with_contexts: Optional[Tuple[Type[PulpEntityContext]]] = None,
+        **kwargs: Any,
+    ):
+        self.allowed_with_contexts = allowed_with_contexts
+        super().__init__(*args, **kwargs)
+
     def get_short_help_str(self, limit: int = 45) -> str:
         return self.short_help or ""
 
@@ -42,15 +51,66 @@ class PulpCommand(click.Command):
             self.help = self.help.format(entity=entity_ctx.ENTITY, entities=entity_ctx.ENTITIES)
         super().format_help_text(ctx, formatter)
 
+    def get_params(self, ctx: click.Context) -> List[click.Parameter]:
+        params = super().get_params(ctx)
+        new_params: List[click.Parameter] = []
+        for param in params:
+            if isinstance(param, PulpOption):
+                if param.allowed_with_contexts is not None:
+                    if not isinstance(ctx.obj, param.allowed_with_contexts):
+                        continue
+            new_params.append(param)
+        return new_params
+
+
+class PulpGroup(click.Group):
+    def __init__(
+        self,
+        *args: Any,
+        allowed_with_contexts: Optional[Tuple[Type[PulpEntityContext]]] = None,
+        **kwargs: Any,
+    ):
+        self.allowed_with_contexts = allowed_with_contexts
+        super().__init__(*args, **kwargs)
+
+    def command(self, *args: Any, **kwargs: Any) -> Callable[[_F], click.Command]:
+        kwargs["cls"] = kwargs.get("cls", PulpCommand)
+        return super().command(*args, **kwargs)
+
+    def group(self, *args: Any, **kwargs: Any) -> Callable[[_F], click.Group]:
+        kwargs["cls"] = kwargs.get("cls", PulpGroup)
+        return super().group(*args, **kwargs)
+
+    def get_command(self, ctx: click.Context, cmd_name: str) -> Optional[click.Command]:
+        # Overwriting this removes the command from the help message and from being callable
+        cmd = super().get_command(ctx, cmd_name)
+        if isinstance(cmd, (PulpCommand, PulpGroup)):
+            if cmd.allowed_with_contexts is not None:
+                if not isinstance(ctx.obj, cmd.allowed_with_contexts):
+                    return None
+        return cmd
+
+
+def pulp_command(*args: Any, **kwargs: Any) -> Callable[[_F], click.Command]:
+    kwargs["cls"] = kwargs.get("cls", PulpCommand)
+    return click.command(*args, **kwargs)
+
+
+def pulp_group(*args: Any, **kwargs: Any) -> Callable[[_F], click.Group]:
+    kwargs["cls"] = kwargs.get("cls", PulpGroup)
+    return click.group(*args, **kwargs)
+
 
 class PulpOption(click.Option):
     def __init__(
         self,
         *args: Any,
         needs_plugins: Optional[List[PluginRequirement]] = None,
+        allowed_with_contexts: Optional[Tuple[Type[PulpEntityContext]]] = None,
         **kwargs: Any,
     ):
         self.needs_plugins = needs_plugins
+        self.allowed_with_contexts = allowed_with_contexts
         super().__init__(*args, **kwargs)
 
     def process_value(self, ctx: click.Context, value: Any) -> Any:
@@ -367,6 +427,39 @@ def resource_option(*args: Any, **kwargs: Any) -> Callable[[_FC], _FC]:
         kwargs["callback"] = _multi_option_callback
     else:
         kwargs["callback"] = _option_callback
+    return click.option(*args, **kwargs)
+
+
+def type_option(*args: Any, **kwargs: Any) -> _F:
+
+    choices: Dict[str, Type[PulpEntityContext]] = kwargs.pop("choices")
+    assert choices and isinstance(choices, dict)
+    type_names = list(choices.keys())
+    case_sensitive = kwargs.pop("case_sensitive", False)
+    defaults = {
+        "cls": PulpOption,
+        "default": type_names[0],
+        "is_eager": True,
+        "expose_value": False,
+    }
+
+    def _type_callback(ctx: click.Context, param: click.Parameter, value: Optional[str]) -> str:
+        pulp_ctx = ctx.find_object(PulpContext)
+        assert pulp_ctx
+        if value is not None:
+            cls = choices[value]
+            assert issubclass(cls, PulpEntityContext)
+            ctx.obj = cls(pulp_ctx)
+            return value
+        raise NotImplementedError()
+
+    for k, v in defaults.items():
+        if k not in kwargs:
+            kwargs[k] = v
+    if not args:
+        args = ("-t", "--type", "entity_type")
+    kwargs["callback"] = _type_callback
+    kwargs["type"] = click.types.Choice(type_names, case_sensitive=case_sensitive)
     return click.option(*args, **kwargs)
 
 

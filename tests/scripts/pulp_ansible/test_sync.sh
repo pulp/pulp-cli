@@ -9,6 +9,7 @@ cleanup() {
   pulp ansible remote -t "role" destroy --name "cli_test_ansible_remote" || true
   pulp ansible remote -t "collection" destroy --name "cli_test_ansible_collection_remote" || true
   pulp ansible repository destroy --name "cli_test_ansible_repository" || true
+  pulp orphan cleanup || true
 }
 trap cleanup EXIT
 
