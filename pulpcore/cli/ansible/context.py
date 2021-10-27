@@ -88,7 +88,6 @@ class PulpAnsibleCollectionRemoteContext(PulpRemoteContext):
 
 class PulpAnsibleRepositoryVersionContext(PulpRepositoryVersionContext):
     HREF = "ansible_ansible_repository_version_href"
-    REPOSITORY_HREF = "ansible_ansible_repository_href"
     LIST_ID = "repositories_ansible_ansible_versions_list"
     READ_ID = "repositories_ansible_ansible_versions_read"
     DELETE_ID = "repositories_ansible_ansible_versions_delete"

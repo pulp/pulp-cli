@@ -96,7 +96,6 @@ class PulpRpmRemoteContext(PulpRemoteContext):
 
 class PulpRpmRepositoryVersionContext(PulpRepositoryVersionContext):
     HREF = "rpm_rpm_repository_version_href"
-    REPOSITORY_HREF = "rpm_rpm_repository_href"
     LIST_ID = "repositories_rpm_rpm_versions_list"
     READ_ID = "repositories_rpm_rpm_versions_read"
     DELETE_ID = "repositories_rpm_rpm_versions_delete"

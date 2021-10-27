@@ -55,7 +55,6 @@ class PulpContainerRemoteContext(PulpRemoteContext):
 
 class PulpContainerRepositoryVersionContext(PulpRepositoryVersionContext):
     HREF = "container_container_repository_version_href"
-    REPOSITORY_HREF = "container_container_repository_href"
     LIST_ID = "repositories_container_container_versions_list"
     READ_ID = "repositories_container_container_versions_read"
     DELETE_ID = "repositories_container_container_versions_delete"
@@ -63,7 +62,6 @@ class PulpContainerRepositoryVersionContext(PulpRepositoryVersionContext):
 
 class PulpContainerPushRepositoryVersionContext(PulpRepositoryVersionContext):
     HREF = "container_container_push_repository_version_href"
-    REPOSITORY_HREF = "container_container_push_repository_href"
     LIST_ID = "repositories_container_container_push_versions_list"
     READ_ID = "repositories_container_container_push_versions_read"
     DELETE_ID = "repositories_container_container_push_versions_delete"

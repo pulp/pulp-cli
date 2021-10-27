@@ -94,7 +94,6 @@ class PulpFileRemoteContext(PulpRemoteContext):
 
 class PulpFileRepositoryVersionContext(PulpRepositoryVersionContext):
     HREF = "file_file_repository_version_href"
-    REPOSITORY_HREF = "file_file_repository_href"
     LIST_ID = "repositories_file_file_versions_list"
     READ_ID = "repositories_file_file_versions_read"
     DELETE_ID = "repositories_file_file_versions_delete"
