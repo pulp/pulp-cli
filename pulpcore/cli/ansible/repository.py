@@ -34,6 +34,7 @@ from pulpcore.cli.common.generic import (
     resource_option,
     retained_versions_option,
     show_command,
+    type_option,
     update_command,
     version_command,
 )
@@ -64,19 +65,6 @@ CONTENT_LIST_SCHEMA = s.Schema(
 def _content_callback(ctx: click.Context, param: click.Parameter, value: Any) -> Any:
     if value:
         ctx.obj.entity = value  # The context is set by the type parameter on the content commands
-    return value
-
-
-def _content_type_callback(ctx: click.Context, param: click.Parameter, value: Any) -> Any:
-    # This needs to run eagerly
-    pulp_ctx = ctx.find_object(PulpContext)
-    assert pulp_ctx is not None
-    if value == "collection-version":
-        ctx.obj = PulpAnsibleCollectionVersionContext(pulp_ctx)
-    elif value == "role":
-        ctx.obj = PulpAnsibleRoleContext(pulp_ctx)
-    else:
-        raise NotImplementedError()
     return value
 
 
@@ -132,15 +120,12 @@ content_options = [
         expose_value=False,
         cls=GroupOption,
     ),
-    click.option(
-        "-t",
-        "--type",
-        "type",
-        type=click.Choice(["collection-version", "role"]),
+    type_option(
+        choices={
+            "collection-version": PulpAnsibleCollectionVersionContext,
+            "role": PulpAnsibleRoleContext,
+        },
         default="collection-version",
-        expose_value=False,
-        callback=_content_type_callback,
-        is_eager=True,
     ),
     href_option,
 ]
@@ -164,15 +149,12 @@ modify_options = [
     The argument prefixed with the '@' can be the path to a JSON file with a list of objects."""
         ),
     ),
-    click.option(
-        "-t",
-        "--type",
-        "type",
-        type=click.Choice(["collection-version", "role"]),
+    type_option(
+        choices={
+            "collection-version": PulpAnsibleCollectionVersionContext,
+            "role": PulpAnsibleRoleContext,
+        },
         default="collection-version",
-        expose_value=False,
-        callback=_content_type_callback,
-        is_eager=True,
     ),
 ]
 

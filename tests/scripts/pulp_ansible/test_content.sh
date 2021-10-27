@@ -7,7 +7,7 @@ pulp debug has-plugin --name "ansible" || exit 3
 
 cleanup() {
   pulp ansible repository destroy --name "cli_test_ansible_repository" || true
-  pulp orphans delete || true
+  pulp orphan cleanup || true
 }
 trap cleanup EXIT
 

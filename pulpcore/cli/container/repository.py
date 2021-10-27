@@ -5,11 +5,9 @@ import click
 
 from pulpcore.cli.common.context import (
     EntityFieldDefinition,
-    PulpContext,
     PulpEntityContext,
     PulpRemoteContext,
     PulpRepositoryContext,
-    pass_pulp_context,
     pass_repository_context,
 )
 from pulpcore.cli.common.generic import (
@@ -20,11 +18,13 @@ from pulpcore.cli.common.generic import (
     label_select_option,
     list_command,
     name_option,
+    pulp_group,
     repository_href_option,
     repository_option,
     resource_option,
     retained_versions_option,
     show_command,
+    type_option,
     update_command,
     version_command,
 )
@@ -50,23 +50,16 @@ remote_option = resource_option(
 )
 
 
-@click.group()
-@click.option(
-    "-t",
-    "--type",
-    "repo_type",
-    type=click.Choice(["container", "push"], case_sensitive=False),
+@pulp_group()
+@type_option(
+    choices={
+        "container": PulpContainerRepositoryContext,
+        "push": PulpContainerPushRepositoryContext,
+    },
     default="container",
 )
-@pass_pulp_context
-@click.pass_context
-def repository(ctx: click.Context, pulp_ctx: PulpContext, repo_type: str) -> None:
-    if repo_type == "container":
-        ctx.obj = PulpContainerRepositoryContext(pulp_ctx)
-    elif repo_type == "push":
-        ctx.obj = PulpContainerPushRepositoryContext(pulp_ctx)
-    else:
-        raise NotImplementedError()
+def repository() -> None:
+    pass
 
 
 lookup_options = [href_option, name_option]
@@ -77,18 +70,27 @@ update_options = [
     retained_versions_option,
 ]
 create_options = update_options + [click.option("--name", required=True)]
+container_context = (PulpContainerRepositoryContext,)
 
 repository.add_command(list_command(decorators=[label_select_option]))
 repository.add_command(show_command(decorators=lookup_options))
-repository.add_command(create_command(decorators=create_options))
-repository.add_command(update_command(decorators=lookup_options + update_options))
-repository.add_command(destroy_command(decorators=lookup_options))
+repository.add_command(
+    create_command(decorators=create_options, allowed_with_contexts=container_context)
+)
+repository.add_command(
+    update_command(
+        decorators=lookup_options + update_options, allowed_with_contexts=container_context
+    )
+)
+repository.add_command(
+    destroy_command(decorators=lookup_options, allowed_with_contexts=container_context)
+)
 repository.add_command(task_command(decorators=nested_lookup_options))
 repository.add_command(version_command(decorators=nested_lookup_options))
 repository.add_command(label_command(decorators=nested_lookup_options))
 
 
-@repository.command()
+@repository.command(allowed_with_contexts=container_context)
 @name_option
 @href_option
 @remote_option
