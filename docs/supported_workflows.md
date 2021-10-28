@@ -3,7 +3,7 @@
 `pulp-cli` is still in beta, so the features and workflows listed here are subject to change.
 Currently `pulp-cli` supports 5 versions of `pulpcore` from 3.11-3.16 and 5 of Pulp's plugins:
 `pulp_ansible`, `pulp_container`, `pulp_file`, `pulp_python` and `pulp_rpm`. Some of Pulp's other
-plugins can be added to the CLI through CLI plugins, check out [CLI plugins](index) for more information.
+plugins can be added to the CLI through CLI plugins, check out [CLI plugins](/#cli-plugins) for more information.
 
 ## pulpcore
 
