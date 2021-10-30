@@ -1,5 +1,7 @@
 import gettext
-from typing import Any
+from typing import IO, Any, ClassVar, Optional
+
+import click
 
 from pulpcore.cli.common.context import (
     EntityDefinition,
@@ -30,6 +32,21 @@ class PulpRpmACSContext(PulpEntityContext):
         return self.pulp_ctx.call(
             self.REFRESH_ID,
             parameters={self.HREF: href},
+        )
+
+
+class PulpRpmCompsXmlContext(PulpEntityContext):
+    UPLOAD_COMPS_ID: ClassVar[str] = "rpm_comps_upload"
+
+    def upload_comps(
+        self, file: IO[bytes], repo_href: Optional[str], replace: Optional[bool]
+    ) -> Any:
+        click.echo(_("Uploading file {filename}").format(filename=file.name), err=True)
+        file.seek(0)
+        return self.pulp_ctx.call(
+            self.UPLOAD_COMPS_ID,
+            uploads={"file": file.read()},
+            body={"repository": repo_href, "replace": replace},
         )
 
 
