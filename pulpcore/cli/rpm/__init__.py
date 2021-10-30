@@ -3,6 +3,7 @@ import gettext
 from pulpcore.cli.common import main
 from pulpcore.cli.common.context import PluginRequirement, PulpContext, pass_pulp_context
 from pulpcore.cli.rpm.acs import acs
+from pulpcore.cli.rpm.comps import comps_upload
 from pulpcore.cli.rpm.content import content
 from pulpcore.cli.rpm.distribution import distribution
 from pulpcore.cli.rpm.publication import publication
@@ -24,3 +25,4 @@ rpm.add_command(publication)
 rpm.add_command(distribution)
 rpm.add_command(content)
 rpm.add_command(acs)
+rpm.add_command(comps_upload)
