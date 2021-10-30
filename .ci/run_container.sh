@@ -1,8 +1,16 @@
 #!/bin/sh
 
+# This file is shared between some projects please keep all copies in sync
+# Known places:
+#   - https://github.com/pulp/pulp-cli/blob/main/.ci/run_container.sh
+#   - https://github.com/pulp/pulp-cli-deb/blob/develop/.ci/run_container.sh
+#   - https://github.com/pulp/pulp-cli-ostree/blob/main/.ci/run_container.sh
+#   - https://github.com/pulp/squeezer/blob/develop/tests/run_container.sh
+
 set -eu
 
 BASEPATH="$(dirname "$(readlink -f "$0")")"
+export BASEPATH
 
 if [ -z "${CONTAINER_RUNTIME:+x}" ]
 then
@@ -13,6 +21,7 @@ then
     CONTAINER_RUNTIME=docker
   fi
 fi
+export CONTAINER_RUNTIME
 
 if [ -z "${KEEP_CONTAINER:+x}" ]
 then
@@ -21,7 +30,15 @@ else
   RM=""
 fi
 
-"${CONTAINER_RUNTIME}" run ${RM:+--rm} --detach --name "pulp-ephemeral" --volume "${BASEPATH}/settings:/etc/pulp" --publish "8080:80" "pulp/pulp:${IMAGE_TAG:-latest}"
+IMAGE_TAG="${IMAGE_TAG:-latest}"
+FROM_TAG="${FROM_TAG:-latest}"
+
+if [ "${CONTAINER_FILE:+x}" ]
+then
+  "${CONTAINER_RUNTIME}" build --file "${BASEPATH}/assets/${CONTAINER_FILE}" --build-arg FROM_TAG="${FROM_TAG}" --tag pulp/pulp:"${IMAGE_TAG}" .
+fi
+
+"${CONTAINER_RUNTIME}" run ${RM:+--rm} --detach --name "pulp-ephemeral" --volume "${BASEPATH}/settings:/etc/pulp" --publish "8080:80" "pulp/pulp:${IMAGE_TAG}"
 
 # shellcheck disable=SC2064
 trap "${CONTAINER_RUNTIME} stop pulp-ephemeral" EXIT
@@ -29,7 +46,7 @@ trap "${CONTAINER_RUNTIME} stop pulp-ephemeral" EXIT
 trap "${CONTAINER_RUNTIME} stop pulp-ephemeral" INT
 
 echo "Wait for pulp to start."
-for counter in $(seq 20)
+for counter in $(seq 20 -1 0)
 do
   sleep 3
   if curl --fail http://localhost:8080/pulp/api/v3/status/ > /dev/null 2>&1
@@ -54,16 +71,9 @@ curl -s http://localhost:8080/pulp/api/v3/status/ | jq '.versions|map({key: .com
 # Set admin password
 "${CONTAINER_RUNTIME}" exec "pulp-ephemeral" pulpcore-manager reset-admin-password --password password
 
-if pulp --base-url "http://localhost:8080" --username "admin" --password "password" debug has-plugin --name "core" --min-version 3.11
+if [ -d "${BASEPATH}/container_setup.d/" ]
 then
-  # Setup a signing service
-  "${CONTAINER_RUNTIME}" exec -i "pulp-ephemeral" bash -c "cat > /root/sign_deb_release.sh" < "${BASEPATH}/../tests/assets/sign_deb_release.sh"
-  "${CONTAINER_RUNTIME}" exec -i "pulp-ephemeral" bash -c "cat > /tmp/setup_signing_service.py" < "${BASEPATH}/../tests/assets/setup_signing_service.py"
-  curl -L https://github.com/pulp/pulp-fixtures/raw/master/common/GPG-KEY-pulp-qe | "${CONTAINER_RUNTIME}" exec -i "pulp-ephemeral" bash -c "cat > /tmp/GPG-KEY-pulp-qe"
-  curl -L https://github.com/pulp/pulp-fixtures/raw/master/common/GPG-PRIVATE-KEY-pulp-qe | "${CONTAINER_RUNTIME}" exec -i "pulp-ephemeral" gpg --import
-  echo "6EDF301256480B9B801EBA3D05A5E6DA269D9D98:6:" | "${CONTAINER_RUNTIME}" exec -i "pulp-ephemeral" gpg --import-ownertrust
-  "${CONTAINER_RUNTIME}" exec "pulp-ephemeral" chmod a+x /root/sign_deb_release.sh /tmp/setup_signing_service.py
-  "${CONTAINER_RUNTIME}" exec "pulp-ephemeral" /tmp/setup_signing_service.py /root/sign_deb_release.sh /tmp/GPG-KEY-pulp-qe
+  run-parts --regex '^[0-9]+-[-_[:alnum:]]*\.sh$' "${BASEPATH}/container_setup.d/"
 fi
 
 PULP_LOGGING="${CONTAINER_RUNTIME}" "$@"
