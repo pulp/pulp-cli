@@ -14,5 +14,6 @@ nav:
   - 'advanced_features.md'
   - 'CHANGES.md'
   - 'contributing.md'
+  - 'architecture.md'
 markdown_extensions:
   - admonition
