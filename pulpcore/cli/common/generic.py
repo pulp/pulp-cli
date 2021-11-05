@@ -793,7 +793,7 @@ def repository_content_command(**kwargs: Any) -> click.Group:
         repo_ver_ctx = repo_ctx.get_version_context()
         repo_ver_ctx.pulp_href = (
             f"{repo_ctx.pulp_href}versions/{value}/"
-            if value
+            if value is not None
             else repo_ctx.entity["latest_version_href"]
         )
         return repo_ver_ctx
