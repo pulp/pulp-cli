@@ -65,7 +65,7 @@ markers = [
 [tool.mypy]
 strict = true
 show_error_codes = true
-files = "pulpcore/**/*.py"
+files = "pulpcore/**/*.py, pulp_cli/**/*.py"
 namespace_packages = true
 explicit_package_bases = true
 

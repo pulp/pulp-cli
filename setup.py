@@ -3,7 +3,6 @@ from setuptools import setup
 try:
     from setuptools import find_namespace_packages
 
-    main_entrypoint = "pulp=pulpcore.cli.common:main"
     plugin_packages = find_namespace_packages(
         include=["pulpcore.cli.*"], exclude=["pulpcore.cli.*.*"]
     )
@@ -13,17 +12,12 @@ except ImportError:
     # see https://github.com/pulp/pulp-cli/issues/248
     from setuptools import find_packages
 
-    main_entrypoint = "pulp=pulp_cli:main"
     plugins = find_packages(where="pulpcore/cli")
     plugin_packages = [f"pulpcore.cli.{plugin}" for plugin in plugins]
 
 extra_packages = ["pulp_cli", "pytest_pulp_cli"]
 
-plugin_entry_points = [
-    (package.rsplit(".", 1)[-1], package)
-    for package in plugin_packages
-    if package != "pulpcore.cli.common"
-]
+plugin_entry_points = [(package.rsplit(".", 1)[-1], package) for package in plugin_packages]
 
 long_description = ""
 with open("README.md") as readme:
@@ -58,7 +52,7 @@ setup(
         "shell": ["click-shell~=2.1"],
     },
     entry_points={
-        "console_scripts": [main_entrypoint],
+        "console_scripts": ["pulp=pulp_cli:main"],
         "pulp_cli.plugins": [f"{name}={module}" for name, module in plugin_entry_points],
     },
     license="GPLv2+",

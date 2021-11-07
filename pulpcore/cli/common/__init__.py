@@ -3,7 +3,6 @@ import sys
 from typing import Any, Optional
 
 import click
-import pkg_resources
 import toml
 
 try:
@@ -160,12 +159,3 @@ if HAS_CLICK_SHELL:
             intro="Starting Pulp3 interactive shell...",
             hist_file=os.path.join(click.utils.get_app_dir("pulp"), "cli-history"),
         ).cmdloop()
-
-
-##############################################################################
-# Load plugins
-# https://packaging.python.org/guides/creating-and-discovering-plugins/#using-package-metadata
-discovered_plugins = {
-    entry_point.name: entry_point.load()
-    for entry_point in pkg_resources.iter_entry_points("pulp_cli.plugins")
-}
