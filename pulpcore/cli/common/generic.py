@@ -864,11 +864,11 @@ def repository_content_command(**kwargs: Any) -> click.Group:
         rc = [unit.pulp_href for unit in remove_content] if remove_content else None
         repo_ctx.modify(repo_ctx.pulp_href, ac, rc, base_version.pulp_href)
 
-    command_decorators = {
+    command_decorators: Dict[click.Command, Optional[List[Callable[[_FC], _FC]]]] = {
         content_list: kwargs.pop("list_decorators", []),
-        content_add: kwargs.pop("add_decorators", []),
-        content_remove: kwargs.pop("remove_decorators", []),
-        content_modify: kwargs.pop("modify_decorators", []),
+        content_add: kwargs.pop("add_decorators", None),
+        content_remove: kwargs.pop("remove_decorators", None),
+        content_modify: kwargs.pop("modify_decorators", None),
     }
     if not kwargs.get("name"):
         kwargs["name"] = "content"
@@ -880,8 +880,9 @@ def repository_content_command(**kwargs: Any) -> click.Group:
         ctx.obj = PulpContentContext(pulp_ctx)
 
     for command, options in command_decorators.items():
-        for option in options:
-            command = option(command)
-        content_group.add_command(command)
+        if options is not None:
+            for option in options:
+                command = option(command)
+            content_group.add_command(command)
 
     return content_group
