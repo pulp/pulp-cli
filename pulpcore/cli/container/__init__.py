@@ -1,6 +1,7 @@
 from pulpcore.cli.common import main
 from pulpcore.cli.common.context import PluginRequirement, PulpContext, pass_pulp_context
 from pulpcore.cli.common.i18n import get_translation
+from pulpcore.cli.container.content import content
 from pulpcore.cli.container.distribution import distribution
 from pulpcore.cli.container.namespace import namespace
 from pulpcore.cli.container.remote import remote
@@ -20,3 +21,4 @@ container.add_command(repository)
 container.add_command(remote)
 container.add_command(namespace)
 container.add_command(distribution)
+container.add_command(content)
