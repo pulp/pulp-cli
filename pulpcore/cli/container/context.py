@@ -1,6 +1,7 @@
 from pulpcore.cli.common.context import (
     EntityDefinition,
     PluginRequirement,
+    PulpContentContext,
     PulpEntityContext,
     PulpRemoteContext,
     PulpRepositoryContext,
@@ -11,6 +12,30 @@ from pulpcore.cli.common.i18n import get_translation
 
 translation = get_translation(__name__)
 _ = translation.gettext
+
+
+class PulpContainerBlobContext(PulpContentContext):
+    ENTITY = _("container blob")
+    ENTITIES = _("container blobs")
+    HREF = "container_blob_href"
+    LIST_ID = "content_container_blobs_list"
+    READ_ID = "content_container_blobs_read"
+
+
+class PulpContainerManifestContext(PulpContentContext):
+    ENTITY = _("container manifest")
+    ENTITIES = _("container manifests")
+    HREF = "container_manifest_href"
+    LIST_ID = "content_container_manifests_list"
+    READ_ID = "content_container_manifests_read"
+
+
+class PulpContainerTagContext(PulpContentContext):
+    ENTITY = _("container tag")
+    ENTITIES = _("container tags")
+    HREF = "container_tag_href"
+    LIST_ID = "content_container_tags_list"
+    READ_ID = "content_container_tags_read"
 
 
 class PulpContainerNamespaceContext(PulpEntityContext):
