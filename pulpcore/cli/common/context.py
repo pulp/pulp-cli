@@ -123,7 +123,14 @@ class PulpContext:
                 _("Format '{format}' not implemented.").format(format=self.format)
             )
 
-    def call(self, operation_id: str, non_blocking: bool = False, *args: Any, **kwargs: Any) -> Any:
+    def call(
+        self,
+        operation_id: str,
+        non_blocking: bool = False,
+        parameters: Optional[Dict[str, Any]] = None,
+        body: Optional[Dict[str, Any]] = None,
+        uploads: Optional[Dict[str, bytes]] = None,
+    ) -> Any:
         """
         Perform an API call for operation_id.
         Wait for triggered tasks to finish if not background.
@@ -131,7 +138,7 @@ class PulpContext:
         If non_blocking, returns unfinished tasks.
         """
         try:
-            result = self.api.call(operation_id, *args, **kwargs)
+            result = self.api.call(operation_id, parameters=parameters, body=body, uploads=uploads)
         except OpenAPIError as e:
             raise click.ClickException(str(e))
         except HTTPError as e:

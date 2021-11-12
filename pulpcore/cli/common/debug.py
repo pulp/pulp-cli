@@ -1,10 +1,11 @@
 import gettext
 import sys
-from typing import Optional
+from typing import IO, Any, Dict, Iterable, Optional
 
 import click
 
 from pulpcore.cli.common.context import PluginRequirement, PulpContext, pass_pulp_context
+from pulpcore.cli.common.generic import load_json_callback
 
 _ = gettext.gettext
 
@@ -66,7 +67,7 @@ def schema(pulp_ctx: PulpContext) -> None:
 
 
 @openapi_group.command()
-@click.option("--id", "operation_id", required=True)
+@click.option("--id", "operation_id", required=True, help=_("Operation ID in openapi schema"))
 @pass_pulp_context
 def operation(pulp_ctx: PulpContext, operation_id: str) -> None:
     """
@@ -91,4 +92,34 @@ def operation(pulp_ctx: PulpContext, operation_id: str) -> None:
 @openapi_group.command()
 @pass_pulp_context
 def operation_ids(pulp_ctx: PulpContext) -> None:
+    """
+    Print a list of available operation-ids.
+    """
     pulp_ctx.output_result(list(pulp_ctx.api.operations.keys()))
+
+
+@openapi_group.command()
+@click.option("--id", "operation_id", required=True, help=_("Operation ID in openapi schema"))
+@click.option("--parameter", "parameters", multiple=True)
+@click.option("--body", callback=load_json_callback)
+@click.option("--upload", "uploads", type=click.File("rb"), multiple=True)
+@pass_pulp_context
+def call(
+    pulp_ctx: PulpContext,
+    operation_id: str,
+    parameters: Iterable[str],
+    body: Any,
+    uploads: Iterable[IO[bytes]],
+) -> None:
+    """
+    Make a REST call by operation-id.
+
+    WARNING: Danger ahead!
+    """
+    try:
+        params: Dict[str, str] = dict(parameter.partition("=")[::2] for parameter in parameters)
+    except ValueError:
+        raise click.ClickException("Parameters must be in the form <key>=<value>.")
+    uploads_dict: Dict[str, bytes] = {file.name: file.read() for file in uploads}
+    result = pulp_ctx.call(operation_id, parameters=params, body=body, uploads=uploads_dict)
+    pulp_ctx.output_result(result)

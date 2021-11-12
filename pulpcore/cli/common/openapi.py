@@ -166,9 +166,12 @@ class OpenAPI:
         uploads: Optional[Dict[str, bytes]] = None,
     ) -> requests.PreparedRequest:
         method_spec = path_spec[method]
-        content_types: List[str] = (
-            list(method_spec["requestBody"]["content"].keys()) if body or uploads else []
-        )
+        try:
+            content_types: List[str] = (
+                list(method_spec["requestBody"]["content"].keys()) if body or uploads else []
+            )
+        except KeyError:
+            raise OpenAPIError(_("This operation does not expect a request body."))
 
         data: Optional[Dict[str, Any]] = None
         json: Optional[Dict[str, Any]] = None
