@@ -83,6 +83,7 @@ class PulpContainerRepositoryContext(PulpRepositoryContext):
     CAPABILITIES = {
         "sync": [PluginRequirement("container")],
         "pulpexport": [PluginRequirement("container", "2.8.0.dev")],
+        "tag": [PluginRequirement("container", "2.3.0")],
     }
 
 
@@ -90,6 +91,7 @@ class PulpContainerPushRepositoryContext(PulpRepositoryContext):
     HREF = "container_container_push_repository_href"
     ID_PREFIX = "repositories_container_container_push"
     VERSION_CONTEXT = PulpContainerPushRepositoryVersionContext
+    CAPABILITIES = {"tag": [PluginRequirement("container", "2.3.0")]}
 
 
 registered_repository_contexts["container:container"] = PulpContainerRepositoryContext
