@@ -129,6 +129,7 @@ def main(
         refresh_cache=refresh_api,
         safe_calls_only=dry_run,
         debug_callback=_debug_callback,
+        user_agent=f"Pulp-CLI/{__version__}",
     )
     ctx.obj = PulpContext(
         api_kwargs=api_kwargs, format=format, background_tasks=background, timeout=timeout

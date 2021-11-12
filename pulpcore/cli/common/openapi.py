@@ -32,6 +32,7 @@ class OpenAPI:
         refresh_cache: bool = False,
         safe_calls_only: bool = False,
         debug_callback: Optional[Callable[[int, str], Any]] = None,
+        user_agent: Optional[str] = None,
     ):
         if not validate_certs:
             urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -57,6 +58,7 @@ class OpenAPI:
         elif key:
             raise OpenAPIError(_("Cert is required if key is set."))
         headers = {
+            "User-Agent": user_agent or "Pulp-CLI openapi parser",
             "Accept": "application/json",
         }
         self._session.headers.update(headers)
