@@ -1,11 +1,13 @@
 import gettext
 import re
 from contextlib import suppress
-from typing import Optional
+from datetime import datetime
+from typing import Optional, Tuple
 
 import click
 
 from pulpcore.cli.common.context import (
+    PluginRequirement,
     PulpContext,
     PulpEntityContext,
     pass_entity_context,
@@ -112,3 +114,33 @@ def cancel(
             if not re.match("Task /pulp/api/v3/tasks/[-0-9a-f]*/ canceled", str(e)):
                 raise e
         click.echo(_("Done."), err=True)
+
+
+DATETIME_FORMATS = ["%Y-%m-%d", "%Y-%m-%dT%H:%M:%S"]
+
+
+@task.command()
+@click.option(
+    "--finished-before",
+    "finished",
+    help=_("Purge task-records whose 'finished' time is **before** the time specified."),
+    type=click.DateTime(formats=DATETIME_FORMATS),
+)
+@click.option(
+    "--state",
+    help=_("Only purge tasks in the specified state(s). Can be specified multiple times."),
+    type=click.Choice(["skipped", "completed", "failed", "canceled"]),
+    multiple=True,
+)
+@pass_entity_context
+@pass_pulp_context
+def purge(
+    pulp_ctx: PulpContext,
+    task_ctx: PulpTaskContext,
+    finished: Optional[datetime],
+    state: Optional[Tuple[str]],
+) -> None:
+    pulp_ctx.needs_plugin(PluginRequirement("core", "3.17.0.dev"))
+    state_list = list(state) if state else None
+    finished_str = finished.strftime(DATETIME_FORMATS[1]) if finished else None
+    task_ctx.purge(finished_str, state_list)

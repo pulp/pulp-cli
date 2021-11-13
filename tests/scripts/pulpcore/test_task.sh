@@ -51,3 +51,14 @@ expect_succ test "$(echo "$OUTPUT" | jq -r '.[0].state')" = "completed"
 
 expect_succ pulp task list --limit 1
 expect_succ test "$(echo "$OUTPUT" | jq -r length)" -eq 1
+
+# Test purging tasks
+if pulp debug has-plugin --name core --min-version 3.17.0.dev
+then
+  expect_succ pulp task purge
+  expect_succ pulp task purge --finished-before "2021-12-01" --state "failed"
+  expect_succ pulp task purge --finished-before "2021-12-01T12:00:00" --state "completed" --state "failed"
+  expect_fail pulp task purge --finished-before "NOT A DATE"
+  expect_fail pulp task purge --finished-before "2021-12-01T12:00:00" --state "NOT A STATE"
+  expect_fail pulp task purge --finished-before "2021-12-01T12:00:00" --state "running"
+fi

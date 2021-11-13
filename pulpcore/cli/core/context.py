@@ -278,6 +278,7 @@ class PulpTaskContext(PulpEntityContext):
     READ_ID = "tasks_read"
     DELETE_ID = "tasks_delete"
     CANCEL_ID: ClassVar[str] = "tasks_cancel"
+    PURGE_ID = "tasks_purge"
 
     resource_context: Optional[PulpEntityContext] = None
 
@@ -294,6 +295,17 @@ class PulpTaskContext(PulpEntityContext):
             return {"reserved_resources_record": self.resource_context.pulp_href}
         else:
             return {}
+
+    def purge(self, finished_before: Optional[str], states: Optional[List[str]]) -> Any:
+        body: Dict[str, Any] = {}
+        if finished_before:
+            body["finished_before"] = finished_before
+        if states:
+            body["states"] = states
+        return self.pulp_ctx.call(
+            self.PURGE_ID,
+            body=body,
+        )
 
 
 class PulpTaskGroupContext(PulpEntityContext):
