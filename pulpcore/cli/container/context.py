@@ -124,6 +124,25 @@ class PulpContainerRepositoryContext(PulpContainerBaseRepositoryContext):
         if add_content:
             self.call("add", parameters={self.HREF: href}, body={"content_units": add_content})
 
+    def copy_tag(self, source_href: str, tags: Optional[List[str]]) -> Any:
+        body = {"source_repository_version": source_href, "names": tags}
+        body = self.preprocess_body(body)
+        return self.call("copy_tags", parameters={self.HREF: self.pulp_href}, body=body)
+
+    def copy_manifest(
+        self,
+        source_href: str,
+        digests: Optional[List[str]],
+        media_types: Optional[List[str]],
+    ) -> Any:
+        body = {
+            "source_repository_version": source_href,
+            "digests": digests,
+            "media_types": media_types,
+        }
+        body = self.preprocess_body(body)
+        return self.call("copy_manifests", parameters={self.HREF: self.pulp_href}, body=body)
+
 
 class PulpContainerPushRepositoryContext(PulpContainerBaseRepositoryContext):
     HREF = "container_container_push_repository_href"
