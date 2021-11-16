@@ -1,5 +1,5 @@
 import re
-from typing import Any, Dict
+from typing import Any, Dict, List, Optional
 
 import click
 
@@ -50,12 +50,33 @@ VALID_TAG_REGEX = r"^[A-Za-z0-9][A-Za-z0-9._-]*$"
 
 def _tag_callback(ctx: click.Context, param: click.Parameter, value: str) -> str:
     if len(value) == 0:
-        raise click.ClickException("Please pass a non empty tag name.")
+        raise click.ClickException(_("Please pass a non empty tag name."))
     if re.match(VALID_TAG_REGEX, value) is None:
-        raise click.ClickException("Please pass a valid tag.")
+        raise click.ClickException(_("Please pass a valid tag."))
 
     return value
 
+
+source_option = resource_option(
+    "--source",
+    default_plugin="container",
+    default_type="container",
+    context_table={
+        "container:container": PulpContainerRepositoryContext,
+        "container:push": PulpContainerPushRepositoryContext,
+    },
+    href_pattern=PulpRepositoryContext.HREF_PATTERN,
+    help=_(
+        "Source repository to copy content from in the form `[[<plugin>:]<resource_type>:]<name>' "
+        "or by href."
+    ),
+    required=True,
+)
+
+
+version_option = click.option(
+    "--version", help=_("Version of the source repository to use"), type=int
+)
 
 remote_option = resource_option(
     "--remote",
@@ -181,3 +202,87 @@ def add_tag(
 @pass_repository_context
 def remove_tag(repository_ctx: PulpContainerBaseRepositoryContext, tag: str) -> None:
     repository_ctx.untag(tag)
+
+
+@repository.command(allowed_with_contexts=container_context)
+@name_option
+@href_option
+@source_option
+@version_option
+@click.option(
+    "--tag",
+    "tags",
+    help=_("Multiple option of tag names to copy, leave blank to copy all"),
+    multiple=True,
+)
+@pass_repository_context
+def copy_tag(
+    repository_ctx: PulpContainerRepositoryContext,
+    source: PulpRepositoryContext,
+    version: Optional[int],
+    tags: List[str],
+) -> None:
+    href = source.entity["latest_version_href"]
+    if version is not None:
+        latest_version = int(href.split("/")[-2])
+        if not (0 < int(version) <= latest_version):
+            raise click.ClickException(
+                _("Please specify a version that between 0 and the latest version {}").format(
+                    latest_version
+                )
+            )
+        href = f"{source.entity['versions_href']}{version}/"
+
+    repository_ctx.copy_tag(source_href=href, tags=tags or None)
+
+
+@repository.command(allowed_with_contexts=container_context)
+@name_option
+@href_option
+@source_option
+@version_option
+@click.option(
+    "--digest",
+    "digests",
+    help=_("Multiple option of manifest digests to copy, leave blank to copy all"),
+    multiple=True,
+)
+@click.option(
+    "--media-type",
+    "media_types",
+    help=_("Multiple option of media-types to copy, leave blank to copy all types"),
+    type=click.Choice(
+        [
+            "application/vnd.docker.distribution.manifest.v1+json",
+            "application/vnd.docker.distribution.manifest.v2+json",
+            "application/vnd.docker.distribution.manifest.list.v2+json",
+            "application/vnd.oci.image.manifest.v1+json",
+            "application/vnd.oci.image.index.v1+json",
+        ]
+    ),
+    multiple=True,
+)
+@pass_repository_context
+def copy_manifest(
+    repository_ctx: PulpContainerRepositoryContext,
+    source: PulpRepositoryContext,
+    version: Optional[int],
+    digests: List[str],
+    media_types: List[str],
+) -> None:
+    href = source.entity["latest_version_href"]
+    if version is not None:
+        latest_version = int(href.split("/")[-2])
+        if not (0 < int(version) <= latest_version):
+            raise click.ClickException(
+                _("Please specify a version that between 0 and the latest version {}").format(
+                    latest_version
+                )
+            )
+        href = f"{source.entity['versions_href']}{version}/"
+
+    repository_ctx.copy_manifest(
+        source_href=href,
+        digests=digests or None,
+        media_types=media_types or None,
+    )
