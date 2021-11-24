@@ -1,7 +1,6 @@
 import datetime
 import os
 import re
-import sys
 import time
 import typing as t
 import warnings
@@ -254,7 +253,6 @@ class PulpContext:
         self._needed_plugins: t.List[PluginRequirement] = [
             PluginRequirement("core", specifier=">=3.11.0")
         ]
-        self.isatty: bool = sys.stdout.isatty()
         self.pulp_domain: str = domain
 
         self.background_tasks: bool = background_tasks
