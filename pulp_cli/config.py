@@ -7,7 +7,7 @@ import click
 import toml
 from pulp_glue.common.i18n import get_translation
 
-from pulpcore.cli.common.generic import pulp_group
+from pulpcore.cli.common.generic import REGISTERED_OUTPUT_FORMATTERS, pulp_group
 
 translation = get_translation(__package__)
 _ = translation.gettext
@@ -21,7 +21,7 @@ CONFIG_LOCATIONS = [
     str(Path(click.utils.get_app_dir("pulp"), "settings.toml")),
     str(Path(click.utils.get_app_dir("pulp"), "cli.toml")),
 ]
-FORMAT_CHOICES = ["json", "yaml", "none"]
+FORMAT_CHOICES = list(REGISTERED_OUTPUT_FORMATTERS.keys())
 SETTINGS = [
     "base_url",
     "api_root",

@@ -1,6 +1,7 @@
 import datetime
 import json
 import re
+import sys
 import typing as t
 from contextlib import closing
 from functools import lru_cache, wraps
@@ -80,6 +81,33 @@ class PulpJSONEncoder(json.JSONEncoder):
             return super().default(obj)
 
 
+def _none_formatter(result: t.Any) -> str:
+    return ""
+
+
+def _json_formatter(result: t.Any) -> str:
+    isatty = sys.stdout.isatty()
+    output = json.dumps(result, cls=PulpJSONEncoder, indent=(2 if isatty else None))
+    if PYGMENTS and isatty:
+        output = highlight(output, JsonLexer(), Terminal256Formatter(style=PYGMENTS_STYLE))
+    return output
+
+
+def _yaml_formatter(result: t.Any) -> str:
+    isatty = sys.stdout.isatty()
+    output = yaml.dump(result)
+    if PYGMENTS and isatty:
+        output = highlight(output, YamlLexer(), Terminal256Formatter(style=PYGMENTS_STYLE))
+    return output
+
+
+REGISTERED_OUTPUT_FORMATTERS = {
+    "none": _none_formatter,
+    "json": _json_formatter,
+    "yaml": _yaml_formatter,
+}
+
+
 class PulpCLIContext(PulpContext):
     """
     Subclass of the Context that overwrites the CLI specifics.
@@ -125,22 +153,13 @@ class PulpCLIContext(PulpContext):
         arguments:
             result: JSON serializable data to be outputted.
         """
-        if self.format == "json":
-            output = json.dumps(result, cls=PulpJSONEncoder, indent=(2 if self.isatty else None))
-            if PYGMENTS and self.isatty:
-                output = highlight(output, JsonLexer(), Terminal256Formatter(style=PYGMENTS_STYLE))
-            self.echo(output)
-        elif self.format == "yaml":
-            output = yaml.dump(result)
-            if PYGMENTS and self.isatty:
-                output = highlight(output, YamlLexer(), Terminal256Formatter(style=PYGMENTS_STYLE))
-            self.echo(output)
-        elif self.format == "none":
-            pass
-        else:
+        try:
+            formatter = REGISTERED_OUTPUT_FORMATTERS[self.format]
+        except KeyError:
             raise NotImplementedError(
                 _("Format '{format}' not implemented.").format(format=self.format)
             )
+        click.echo(formatter(result))
 
 
 if SECRET_STORAGE:

@@ -1,0 +1,1 @@
+Removed unused (and undocumented) `isatty` attribute from `PulpContext`.
