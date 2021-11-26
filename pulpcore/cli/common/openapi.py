@@ -4,7 +4,7 @@
 import gettext
 import json
 import os
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 from urllib.parse import urljoin
 
 import requests
@@ -62,8 +62,16 @@ class OpenAPI:
             "Accept": "application/json",
         }
         self._session.headers.update(headers)
-        self._session.verify = validate_certs
         self._session.max_redirects = 0
+
+        verify: Optional[Union[bool, str]] = (
+            os.environ.get("PULP_CA_BUNDLE") if validate_certs is not False else False
+        )
+        session_settings = self._session.merge_environment_settings(  # type:ignore
+            base_url, {}, None, verify, None
+        )
+        self._session.verify = session_settings["verify"]
+        self._session.proxies = session_settings["proxies"]
 
         self.load_api(refresh_cache=refresh_cache)
 
