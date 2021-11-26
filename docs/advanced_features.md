@@ -1,5 +1,10 @@
 # Advanced features
 
+## Custom CA bundle
+
+You can specify a custom CA bundle for the connection to a Pulp server by providing a path in one of the following environment variables (ordered by precedence):
+`PULP_CA_BUNDLE` ,`REQUESTS_CA_BUNDLE` `CURL_CA_BUNDLE`
+
 ## Shell Completion
 
 The CLI uses the click package which supports shell completion.
