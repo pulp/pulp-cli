@@ -6,7 +6,12 @@ from typing import IO, Any, ClassVar, Dict, List, Optional
 
 import click
 
-from pulpcore.cli.common.context import EntityDefinition, PulpContext, PulpEntityContext
+from pulpcore.cli.common.context import (
+    EntityDefinition,
+    PluginRequirement,
+    PulpContext,
+    PulpEntityContext,
+)
 
 _ = gettext.gettext
 
@@ -112,12 +117,19 @@ class PulpExportContext(PulpEntityContext):
 class PulpGroupContext(PulpEntityContext):
     ENTITY = _("user group")
     ENTITIES = _("user groups")
-    HREF = "auth_group_href"
+    # Handled by a workaround
+    # HREF = "group_href"
     LIST_ID = "groups_list"
     READ_ID = "groups_read"
     CREATE_ID = "groups_create"
     UPDATE_ID = "groups_partial_update"
     DELETE_ID = "groups_delete"
+
+    @property
+    def HREF(self) -> str:  # type:ignore
+        if not self.pulp_ctx.has_plugin(PluginRequirement("core", min="3.17.dev")):
+            return "auth_group_href"
+        return "group_href"
 
 
 class PulpGroupPermissionContext(PulpEntityContext):
@@ -149,37 +161,58 @@ class PulpGroupPermissionContext(PulpEntityContext):
 
     @property
     def scope(self) -> Dict[str, Any]:
-        return {PulpGroupContext.HREF: self.group_ctx.pulp_href}
+        return {self.group_ctx.HREF: self.group_ctx.pulp_href}
 
 
 class PulpGroupModelPermissionContext(PulpGroupPermissionContext):
     ENTITY = _("group model permission")
     ENTITIES = _("group model permissions")
-    HREF = "auth_groups_model_permission_href"
+    # Handled by a workaround
+    # HREF = "groups_model_permission_href"
     LIST_ID = "groups_model_permissions_list"
     READ_ID = "groups_model_permissions_read"
     CREATE_ID = "groups_model_permissions_create"
     DELETE_ID = "groups_model_permissions_delete"
 
+    @property
+    def HREF(self) -> str:  # type:ignore
+        if not self.pulp_ctx.has_plugin(PluginRequirement("core", min="3.17.dev")):
+            return "auth_groups_model_permission_href"
+        return "groups_model_permission_href"
+
 
 class PulpGroupObjectPermissionContext(PulpGroupPermissionContext):
     ENTITY = _("group object permission")
     ENTITIES = _("group object permissions")
-    HREF = "auth_groups_object_permission_href"
+    # Handled by a workaround
+    # HREF = "groups_object_permission_href"
     LIST_ID = "groups_object_permissions_list"
     READ_ID = "groups_object_permissions_read"
     CREATE_ID = "groups_object_permissions_create"
     DELETE_ID = "groups_object_permissions_delete"
 
+    @property
+    def HREF(self) -> str:  # type:ignore
+        if not self.pulp_ctx.has_plugin(PluginRequirement("core", min="3.17.dev")):
+            return "auth_groups_object_permission_href"
+        return "groups_object_permission_href"
+
 
 class PulpGroupUserContext(PulpEntityContext):
     ENTITY = _("group user")
     ENTITIES = _("group users")
-    HREF = "auth_groups_user_href"
+    # Handled by a workaround
+    # HREF = "groups_user_href"
     LIST_ID = "groups_users_list"
     CREATE_ID = "groups_users_create"
     DELETE_ID = "groups_users_delete"
     group_ctx: PulpGroupContext
+
+    @property
+    def HREF(self) -> str:  # type:ignore
+        if not self.pulp_ctx.has_plugin(PluginRequirement("core", min="3.17.dev")):
+            return "auth_groups_user_href"
+        return "groups_user_href"
 
     def __init__(self, pulp_ctx: PulpContext, group_ctx: PulpGroupContext) -> None:
         super().__init__(pulp_ctx)
@@ -187,7 +220,7 @@ class PulpGroupUserContext(PulpEntityContext):
 
     @property
     def scope(self) -> Dict[str, Any]:
-        return {PulpGroupContext.HREF: self.group_ctx.pulp_href}
+        return {self.group_ctx.HREF: self.group_ctx.pulp_href}
 
 
 class PulpContentGuardContext(PulpEntityContext):
