@@ -46,7 +46,7 @@ setup(
     install_requires=[
         "click>=7.1.2,<9.0.0",
         "packaging",
-        "PyYAML~=5.3",
+        "PyYAML>=5.3,<7.0",
         "schema==0.7.5",
         "requests~=2.24",
         "toml==0.10.2",
