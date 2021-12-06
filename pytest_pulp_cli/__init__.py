@@ -119,7 +119,6 @@ if "PULP_LOGGING" in os.environ:
         if logs is not None:
             print(logs.decode())
 
-
 else:
 
     @pytest.fixture
