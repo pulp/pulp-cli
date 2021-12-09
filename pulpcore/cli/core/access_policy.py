@@ -1,6 +1,12 @@
 import click
 
-from pulpcore.cli.common.context import PulpContext, PulpEntityContext, pass_pulp_context
+from pulpcore.cli.common.context import (
+    PluginRequirement,
+    PulpContext,
+    PulpEntityContext,
+    pass_entity_context,
+    pass_pulp_context,
+)
 from pulpcore.cli.common.generic import (
     href_option,
     list_command,
@@ -33,9 +39,20 @@ lookup_options = [
 
 update_options = [
     click.option("--statements", callback=load_json_callback),
-    click.option("--permissions-assignment", callback=load_json_callback),
+    click.option("--creation-hooks", callback=load_json_callback),
 ]
 
 access_policy.add_command(list_command())
 access_policy.add_command(show_command(decorators=lookup_options))
 access_policy.add_command(update_command(decorators=lookup_options + update_options))
+
+
+@access_policy.command()
+@href_option
+@click.option("--viewset-name", callback=_vs_name_callback, expose_value=False)
+@pass_entity_context
+@pass_pulp_context
+def reset(pulp_ctx: PulpContext, access_policy_ctx: PulpAccessPolicyContext) -> None:
+    pulp_ctx.needs_plugin(PluginRequirement("core", min="3.17.dev"))
+    result = access_policy_ctx.reset()
+    pulp_ctx.output_result(result)
