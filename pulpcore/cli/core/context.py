@@ -23,6 +23,17 @@ class PulpAccessPolicyContext(PulpEntityContext):
     LIST_ID = "access_policies_list"
     READ_ID = "access_policies_read"
     UPDATE_ID = "access_policies_partial_update"
+    RESET_ID: ClassVar[str] = "access_policies_reset"
+
+    def reset(self) -> Any:
+        return self.pulp_ctx.call(self.RESET_ID, parameters={self.HREF: self.pulp_href})
+
+    def preprocess_body(self, body: EntityDefinition) -> EntityDefinition:
+        body = super().preprocess_body(body)
+        if self.pulp_ctx.has_plugin(PluginRequirement("core", min="3.17.dev", inverted=True)):
+            if "creation_hooks" in body:
+                body["permissions_assignment"] = body.pop("creation_hooks")
+        return body
 
 
 class PulpArtifactContext(PulpEntityContext):
