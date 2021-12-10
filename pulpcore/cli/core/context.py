@@ -282,15 +282,37 @@ class PulpRbacContentGuardContext(PulpContentGuardContext):
     UPDATE_ID = "contentguards_core_rbac_partial_update"
     DELETE_ID = "contentguards_core_rbac_delete"
     READ_ID = "contentguards_core_rbac_read"
-    ASSIGN_ID: ClassVar[str] = "contentguards_core_rbac_assign_permission"
-    REMOVE_ID: ClassVar[str] = "contentguards_core_rbac_remove_permission"
+    # Handled by workaround
+    # ASSIGN_ID: ClassVar[str] = "contentguards_core_rbac_assign_permission"
+    # REMOVE_ID: ClassVar[str] = "contentguards_core_rbac_remove_permission"
+    DOWNLOAD_ROLE: ClassVar[str] = "core.rbaccontentguard_downloader"
+
+    @property
+    def ASSIGN_ID(self) -> str:
+        if not self.pulp_ctx.has_plugin(PluginRequirement("core", min="3.17.0.dev")):
+            return "contentguards_core_rbac_assign_permission"
+        return "contentguards_core_rbac_add_role"
+
+    @property
+    def REMOVE_ID(self) -> str:
+        if not self.pulp_ctx.has_plugin(PluginRequirement("core", min="3.17.0.dev")):
+            return "contentguards_core_rbac_remove_permission"
+        return "contentguards_core_rbac_remove_role"
 
     def assign(self, href: str, users: Optional[List[str]], groups: Optional[List[str]]) -> Any:
-        body = self.preprocess_body({"usernames": users, "groupnames": groups})
+        if self.pulp_ctx.has_plugin(PluginRequirement("core", min="3.17.0.dev")):
+            body = self.preprocess_body({"users": users, "groups": groups})
+            body["role"] = self.DOWNLOAD_ROLE
+        else:
+            body = self.preprocess_body({"usernames": users, "groupnames": groups})
         return self.pulp_ctx.call(self.ASSIGN_ID, parameters={self.HREF: href}, body=body)
 
     def remove(self, href: str, users: Optional[List[str]], groups: Optional[List[str]]) -> Any:
-        body = self.preprocess_body({"usernames": users, "groupnames": groups})
+        if self.pulp_ctx.has_plugin(PluginRequirement("core", min="3.17.0.dev")):
+            body = self.preprocess_body({"users": users, "groups": groups})
+            body["role"] = self.DOWNLOAD_ROLE
+        else:
+            body = self.preprocess_body({"usernames": users, "groupnames": groups})
         return self.pulp_ctx.call(self.REMOVE_ID, parameters={self.HREF: href}, body=body)
 
 
