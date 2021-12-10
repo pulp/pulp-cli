@@ -70,7 +70,7 @@ user.add_command(
 user.add_command(destroy_command(decorators=lookup_options, needs_plugins=[req_core_3_17]))
 
 
-@user.group()
+@user.group(name="role-assignment")
 @pass_entity_context
 @pass_pulp_context
 @click.pass_context

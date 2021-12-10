@@ -333,6 +333,10 @@ class PulpEntityContext:
     CREATE_ID: ClassVar[str]
     UPDATE_ID: ClassVar[str]
     DELETE_ID: ClassVar[str]
+    MY_PERMISSIONS_ID: ClassVar[str]
+    LIST_ROLES_ID: ClassVar[str]
+    ADD_ROLE_ID: ClassVar[str]
+    REMOVE_ROLE_ID: ClassVar[str]
     NULLABLES: ClassVar[Set[str]] = set()
     # Subclasses can specify version dependent capabilities here
     # e.g. `CAPABILITIES = {
@@ -525,6 +529,26 @@ class PulpEntityContext:
             return entity["pulp_labels"][key]
         except KeyError:
             raise click.ClickException(_("Could not find label with key '{key}'.").format(key=key))
+
+    def my_permissions(self) -> Any:
+        return self.pulp_ctx.call(self.MY_PERMISSIONS_ID, parameters={self.HREF: self.pulp_href})
+
+    def list_roles(self) -> Any:
+        return self.pulp_ctx.call(self.LIST_ROLES_ID, parameters={self.HREF: self.pulp_href})
+
+    def add_role(self, role: str, users: List[str], groups: List[str]) -> Any:
+        return self.pulp_ctx.call(
+            self.ADD_ROLE_ID,
+            parameters={self.HREF: self.pulp_href},
+            body={"role": role, "users": users, "groups": groups},
+        )
+
+    def remove_role(self, role: str, users: List[str], groups: List[str]) -> Any:
+        return self.pulp_ctx.call(
+            self.REMOVE_ROLE_ID,
+            parameters={self.HREF: self.pulp_href},
+            body={"role": role, "users": users, "groups": groups},
+        )
 
     def capable(self, capability: str) -> bool:
         return capability in self.CAPABILITIES and all(

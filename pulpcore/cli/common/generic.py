@@ -79,11 +79,21 @@ class PulpGroup(click.Group):
     def __init__(
         self,
         *args: Any,
+        needs_plugins: Optional[List[PluginRequirement]] = None,
         allowed_with_contexts: Optional[Tuple[Type[PulpEntityContext]]] = None,
         **kwargs: Any,
     ):
+        self.needs_plugins = needs_plugins
         self.allowed_with_contexts = allowed_with_contexts
         super().__init__(*args, **kwargs)
+
+    def invoke(self, ctx: click.Context) -> Any:
+        if self.needs_plugins:
+            pulp_ctx = ctx.find_object(PulpContext)
+            assert pulp_ctx is not None
+            for plugin_requirement in self.needs_plugins:
+                pulp_ctx.needs_plugin(plugin_requirement)
+        return super().invoke(ctx)
 
     def command(self, *args: Any, **kwargs: Any) -> Callable[[_F], click.Command]:
         kwargs["cls"] = kwargs.get("cls", PulpCommand)
@@ -887,6 +897,73 @@ def label_command(**kwargs: Any) -> click.Command:
         label_group.add_command(subcmd)
 
     return label_group
+
+
+def role_command(**kwargs: Any) -> click.Command:
+    """A factory that creates a (object) role command group."""
+
+    if "name" not in kwargs:
+        kwargs["name"] = "role"
+    if "help" not in kwargs:
+        kwargs["help"] = _("Manage object roles.")
+    decorators = kwargs.pop("decorators", [name_option, href_option])
+
+    @pulp_group(**kwargs)
+    def role_group() -> None:
+        pass
+
+    @click.command(help=_("List my permissions on this object."))
+    @pass_entity_context
+    @pass_pulp_context
+    def my_permissions(pulp_ctx: PulpContext, entity_ctx: PulpEntityContext) -> None:
+        result = entity_ctx.my_permissions()
+        pulp_ctx.output_result(result)
+
+    @click.command(name="list", help=_("List assigned object roles."))
+    @pass_entity_context
+    @pass_pulp_context
+    def role_list(pulp_ctx: PulpContext, entity_ctx: PulpEntityContext) -> None:
+        result = entity_ctx.list_roles()
+        pulp_ctx.output_result(result)
+
+    @click.command(name="add", help=_("Add assigned object roles."))
+    @click.option("--role")
+    @click.option("--user", "users", multiple=True)
+    @click.option("--group", "groups", multiple=True)
+    @pass_entity_context
+    @pass_pulp_context
+    def role_add(
+        pulp_ctx: PulpContext,
+        entity_ctx: PulpEntityContext,
+        role: str,
+        users: List[str],
+        groups: List[str],
+    ) -> None:
+        result = entity_ctx.add_role(role, users, groups)
+        pulp_ctx.output_result(result)
+
+    @click.command(name="remove", help=_("Remove assigned object roles."))
+    @click.option("--role")
+    @click.option("--user", "users", multiple=True)
+    @click.option("--group", "groups", multiple=True)
+    @pass_entity_context
+    @pass_pulp_context
+    def role_remove(
+        pulp_ctx: PulpContext,
+        entity_ctx: PulpEntityContext,
+        role: str,
+        users: List[str],
+        groups: List[str],
+    ) -> None:
+        result = entity_ctx.remove_role(role, users, groups)
+        pulp_ctx.output_result(result)
+
+    for subcmd in [my_permissions, role_list, role_add, role_remove]:
+        for decorator in decorators:
+            subcmd = decorator(subcmd)
+        role_group.add_command(subcmd)
+
+    return role_group
 
 
 def repository_content_command(**kwargs: Any) -> click.Group:

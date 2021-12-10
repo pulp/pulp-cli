@@ -22,6 +22,8 @@ cleanup
 # Prepare
 expect_succ pulp access-policy list
 expect_succ pulp access-policy show --viewset-name "tasks"
+expect_succ pulp access-policy update --viewset-name "tasks" --statements "$SAVED_STATEMENTS"
+expect_succ pulp access-policy update --viewset-name "tasks" --creation-hooks "$SAVED_CREATION_HOOKS"
 expect_succ pulp access-policy update --viewset-name "tasks" --statements "$SAVED_STATEMENTS" --creation-hooks "$SAVED_CREATION_HOOKS"
 
 if pulp debug has-plugin --name "core" --min-version "3.17.0.dev"
