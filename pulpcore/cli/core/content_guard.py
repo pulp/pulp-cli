@@ -58,13 +58,13 @@ rbac.add_command(destroy_command(decorators=lookup_options))
 @click.option(
     "--group",
     "groups",
-    help=_("Group to remove download permission from. Can be specified multiple times."),
+    help=_("Group to add download role to. Can be specified multiple times."),
     multiple=True,
 )
 @click.option(
     "--user",
     "users",
-    help=_("User to remove download permission from. Can be specified multiple times."),
+    help=_("User to add download role to. Can be specified multiple times."),
     multiple=True,
 )
 @pass_entity_context
@@ -86,13 +86,13 @@ def assign(
 @click.option(
     "--group",
     "groups",
-    help=_("Group to remove download permission from. Can be specified multiple times."),
+    help=_("Group to remove download role from. Can be specified multiple times."),
     multiple=True,
 )
 @click.option(
     "--user",
     "users",
-    help=_("User to remove download permission from. Can be specified multiple times."),
+    help=_("User to remove download role from. Can be specified multiple times."),
     multiple=True,
 )
 @pass_entity_context
