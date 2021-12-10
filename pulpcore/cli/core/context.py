@@ -136,6 +136,10 @@ class PulpGroupContext(PulpEntityContext):
     CREATE_ID = "groups_create"
     UPDATE_ID = "groups_partial_update"
     DELETE_ID = "groups_delete"
+    MY_PERMISSIONS_ID = "groups_my_permissions"
+    LIST_ROLES_ID = "groups_list_roles"
+    ADD_ROLE_ID = "groups_add_role"
+    REMOVE_ROLE_ID = "groups_remove_role"
 
     @property
     def HREF(self) -> str:  # type:ignore
@@ -282,38 +286,31 @@ class PulpRbacContentGuardContext(PulpContentGuardContext):
     UPDATE_ID = "contentguards_core_rbac_partial_update"
     DELETE_ID = "contentguards_core_rbac_delete"
     READ_ID = "contentguards_core_rbac_read"
-    # Handled by workaround
-    # ASSIGN_ID: ClassVar[str] = "contentguards_core_rbac_assign_permission"
-    # REMOVE_ID: ClassVar[str] = "contentguards_core_rbac_remove_permission"
+    MY_PERMISSIONS_ID = "contentguards_core_rbac_my_permissions"
+    LIST_ROLES_ID = "contentguards_core_rbac_list_roles"
+    ADD_ROLE_ID = "contentguards_core_rbac_add_role"
+    REMOVE_ROLE_ID = "contentguards_core_rbac_remove_role"
+    ASSIGN_ID: ClassVar[str] = "contentguards_core_rbac_assign_permission"
+    REMOVE_ID: ClassVar[str] = "contentguards_core_rbac_remove_permission"
     DOWNLOAD_ROLE: ClassVar[str] = "core.rbaccontentguard_downloader"
-
-    @property
-    def ASSIGN_ID(self) -> str:
-        if not self.pulp_ctx.has_plugin(PluginRequirement("core", min="3.17.0.dev")):
-            return "contentguards_core_rbac_assign_permission"
-        return "contentguards_core_rbac_add_role"
-
-    @property
-    def REMOVE_ID(self) -> str:
-        if not self.pulp_ctx.has_plugin(PluginRequirement("core", min="3.17.0.dev")):
-            return "contentguards_core_rbac_remove_permission"
-        return "contentguards_core_rbac_remove_role"
 
     def assign(self, href: str, users: Optional[List[str]], groups: Optional[List[str]]) -> Any:
         if self.pulp_ctx.has_plugin(PluginRequirement("core", min="3.17.0.dev")):
             body = self.preprocess_body({"users": users, "groups": groups})
             body["role"] = self.DOWNLOAD_ROLE
+            return self.pulp_ctx.call(self.ADD_ROLE_ID, parameters={self.HREF: href}, body=body)
         else:
             body = self.preprocess_body({"usernames": users, "groupnames": groups})
-        return self.pulp_ctx.call(self.ASSIGN_ID, parameters={self.HREF: href}, body=body)
+            return self.pulp_ctx.call(self.ASSIGN_ID, parameters={self.HREF: href}, body=body)
 
     def remove(self, href: str, users: Optional[List[str]], groups: Optional[List[str]]) -> Any:
         if self.pulp_ctx.has_plugin(PluginRequirement("core", min="3.17.0.dev")):
             body = self.preprocess_body({"users": users, "groups": groups})
             body["role"] = self.DOWNLOAD_ROLE
+            return self.pulp_ctx.call(self.REMOVE_ROLE_ID, parameters={self.HREF: href}, body=body)
         else:
             body = self.preprocess_body({"usernames": users, "groupnames": groups})
-        return self.pulp_ctx.call(self.REMOVE_ID, parameters={self.HREF: href}, body=body)
+            return self.pulp_ctx.call(self.REMOVE_ID, parameters={self.HREF: href}, body=body)
 
 
 class PulpRoleContext(PulpEntityContext):
@@ -343,8 +340,12 @@ class PulpTaskContext(PulpEntityContext):
     LIST_ID = "tasks_list"
     READ_ID = "tasks_read"
     DELETE_ID = "tasks_delete"
+    MY_PERMISSIONS_ID = "tasks_my_permissions"
+    LIST_ROLES_ID = "tasks_list_roles"
+    ADD_ROLE_ID = "tasks_add_role"
+    REMOVE_ROLE_ID = "tasks_remove_role"
     CANCEL_ID: ClassVar[str] = "tasks_cancel"
-    PURGE_ID = "tasks_purge"
+    PURGE_ID: ClassVar[str] = "tasks_purge"
 
     resource_context: Optional[PulpEntityContext] = None
 

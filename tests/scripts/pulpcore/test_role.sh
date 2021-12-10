@@ -9,6 +9,7 @@ USERPASS="Yeech6ba"
 
 cleanup() {
   pulp group destroy --name "clitest" || true
+  pulp group destroy --name "clitest2" || true
   pulp user destroy --username "clitest" || true
   pulp role destroy --name "clitest.group_viewer" || true
 }
@@ -30,14 +31,18 @@ test "$(echo "${OUTPUT}" | jq -r 'length' )" = "0"
 
 expect_fail pulp -p user group show --name "clitest"
 
-expect_succ pulp user role add --username "clitest" --role "clitest.group_viewer" --object "${GROUP_HREF}"
+expect_succ pulp user role-assignment add --username "clitest" --role "clitest.group_viewer" --object "${GROUP_HREF}"
 expect_succ pulp --username clitest --password "${USERPASS}" group show --name "clitest"
-expect_succ pulp user role remove --username "clitest" --role "clitest.group_viewer" --object "${GROUP_HREF}"
+expect_succ pulp user role-assignment remove --username "clitest" --role "clitest.group_viewer" --object "${GROUP_HREF}"
 expect_fail pulp --username clitest --password "${USERPASS}" group show --name "clitest"
 
-expect_succ pulp group role add --group "clitest" --role "clitest.group_viewer" --object "${GROUP_HREF}"
+expect_succ pulp group role-assignment add --group "clitest" --role "clitest.group_viewer" --object "${GROUP_HREF}"
 expect_succ pulp --username clitest --password "${USERPASS}" group show --name "clitest"
-expect_succ pulp group role remove --group "clitest" --role "clitest.group_viewer" --object "${GROUP_HREF}"
+expect_succ pulp group role-assignment remove --group "clitest" --role "clitest.group_viewer" --object "${GROUP_HREF}"
 expect_fail pulp --username clitest --password "${USERPASS}" group show --name "clitest"
+
+expect_succ pulp user role-assignment add --username "clitest" --role "core.group_creator" --object ""
+expect_succ pulp --username clitest --password "${USERPASS}" group create --name "clitest2"
+expect_succ pulp --username clitest --password "${USERPASS}" group role my-permissions --name "clitest2"
 
 expect_succ pulp role destroy --name "clitest.group_viewer"

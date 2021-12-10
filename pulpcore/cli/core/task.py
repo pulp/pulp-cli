@@ -12,13 +12,21 @@ from pulpcore.cli.common.context import (
     pass_entity_context,
     pass_pulp_context,
 )
-from pulpcore.cli.common.generic import destroy_command, href_option, list_command, pulp_option
+from pulpcore.cli.common.generic import (
+    destroy_command,
+    href_option,
+    list_command,
+    pulp_option,
+    role_command,
+)
 from pulpcore.cli.common.i18n import get_translation
 from pulpcore.cli.core.context import PulpTaskContext
 from pulpcore.cli.core.generic import task_filter
 
 translation = get_translation(__name__)
 _ = translation.gettext
+
+DATETIME_FORMATS = ["%Y-%m-%d", "%Y-%m-%dT%H:%M:%S"]
 
 
 def _uuid_callback(
@@ -48,6 +56,11 @@ def task(ctx: click.Context, pulp_ctx: PulpContext) -> None:
 
 task.add_command(list_command(decorators=task_filter))
 task.add_command(destroy_command(decorators=[href_option, uuid_option]))
+task.add_command(
+    role_command(
+        decorators=[href_option, uuid_option], needs_plugins=[PluginRequirement("core", min="3.17")]
+    )
+)
 
 
 @task.command()
@@ -115,9 +128,6 @@ def cancel(
             if not re.match("Task /pulp/api/v3/tasks/[-0-9a-f]*/ canceled", str(e)):
                 raise e
         click.echo(_("Done."), err=True)
-
-
-DATETIME_FORMATS = ["%Y-%m-%d", "%Y-%m-%dT%H:%M:%S"]
 
 
 @task.command()

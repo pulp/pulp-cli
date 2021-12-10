@@ -16,6 +16,7 @@ from pulpcore.cli.common.generic import (
     lookup_callback,
     name_option,
     null_callback,
+    role_command,
     show_command,
 )
 from pulpcore.cli.common.i18n import get_translation
@@ -65,6 +66,9 @@ group.add_command(list_command())
 group.add_command(show_command(decorators=lookup_options))
 group.add_command(destroy_command(decorators=lookup_options))
 group.add_command(create_command(decorators=create_options))
+group.add_command(
+    role_command(decorators=lookup_options, needs_plugins=[PluginRequirement("core", min="3.17")])
+)
 
 
 @group.group()
@@ -158,7 +162,7 @@ def remove_user(pulp_ctx: PulpContext, entity_ctx: PulpGroupUserContext, usernam
     entity_ctx.delete(group_user_href)
 
 
-@group.group()
+@group.group(name="role-assignment")
 @pass_entity_context
 @pass_pulp_context
 @click.pass_context

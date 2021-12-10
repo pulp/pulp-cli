@@ -14,6 +14,7 @@ from pulpcore.cli.common.generic import (
     href_option,
     list_command,
     name_option,
+    role_command,
     show_command,
     update_command,
 )
@@ -51,6 +52,9 @@ rbac.add_command(create_command(decorators=create_options))
 rbac.add_command(show_command(decorators=lookup_options))
 rbac.add_command(update_command(decorators=lookup_options))
 rbac.add_command(destroy_command(decorators=lookup_options))
+rbac.add_command(
+    role_command(decorators=lookup_options, needs_plugins=[PluginRequirement("core", min="3.17")])
+)
 
 
 @rbac.command()
