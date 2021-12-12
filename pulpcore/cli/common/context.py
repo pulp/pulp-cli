@@ -328,15 +328,7 @@ class PulpEntityContext:
     ENTITY: ClassVar[str] = _("entity")
     ENTITIES: ClassVar[str] = _("entities")
     HREF: ClassVar[str]
-    LIST_ID: ClassVar[str]
-    READ_ID: ClassVar[str]
-    CREATE_ID: ClassVar[str]
-    UPDATE_ID: ClassVar[str]
-    DELETE_ID: ClassVar[str]
-    MY_PERMISSIONS_ID: ClassVar[str]
-    LIST_ROLES_ID: ClassVar[str]
-    ADD_ROLE_ID: ClassVar[str]
-    REMOVE_ROLE_ID: ClassVar[str]
+    ID_PREFIX: ClassVar[str]
     NULLABLES: ClassVar[Set[str]] = set()
     # Subclasses can specify version dependent capabilities here
     # e.g. `CAPABILITIES = {
@@ -418,6 +410,25 @@ class PulpEntityContext:
         else:
             self.pulp_href = pulp_href
 
+    def call(
+        self,
+        operation: str,
+        non_blocking: bool = False,
+        parameters: Optional[Dict[str, Any]] = None,
+        body: Optional[Dict[str, Any]] = None,
+        uploads: Optional[Dict[str, bytes]] = None,
+    ) -> Any:
+        operation_id: str = (
+            getattr(self, operation.upper() + "_ID", None) or self.ID_PREFIX + "_" + operation
+        )
+        return self.pulp_ctx.call(
+            operation_id,
+            non_blocking=non_blocking,
+            parameters=parameters,
+            body=body,
+            uploads=uploads,
+        )
+
     def _preprocess_value(self, key: str, value: Any) -> Any:
         if key in self.NULLABLES and value == "":
             return None
@@ -445,7 +456,7 @@ class PulpEntityContext:
             else:
                 payload["limit"] = limit
                 limit = 0
-            result: Dict[str, Any] = self.pulp_ctx.call(self.LIST_ID, parameters=payload)
+            result: Dict[str, Any] = self.call("list", parameters=payload)
             count = result["count"]
             entities.extend(result["results"])
             if result["next"] is None:
@@ -466,7 +477,7 @@ class PulpEntityContext:
         return search_result[0]
 
     def show(self, href: str) -> Any:
-        return self.pulp_ctx.call(self.READ_ID, parameters={self.HREF: href})
+        return self.call("read", parameters={self.HREF: href})
 
     def create(
         self,
@@ -478,8 +489,8 @@ class PulpEntityContext:
         _parameters = self.scope
         if parameters:
             _parameters.update(parameters)
-        result = self.pulp_ctx.call(
-            self.CREATE_ID,
+        result = self.call(
+            "create",
             parameters=_parameters,
             body=body,
             uploads=uploads,
@@ -500,8 +511,8 @@ class PulpEntityContext:
         _parameters = {self.HREF: href}
         if parameters:
             _parameters.update(parameters)
-        return self.pulp_ctx.call(
-            self.UPDATE_ID,
+        return self.call(
+            "update",
             parameters=_parameters,
             body=body,
             uploads=uploads,
@@ -509,9 +520,7 @@ class PulpEntityContext:
         )
 
     def delete(self, href: str, non_blocking: bool = False) -> Any:
-        return self.pulp_ctx.call(
-            self.DELETE_ID, parameters={self.HREF: href}, non_blocking=non_blocking
-        )
+        return self.call("delete", parameters={self.HREF: href}, non_blocking=non_blocking)
 
     def set_label(self, href: str, key: str, value: str, non_blocking: bool = False) -> Any:
         labels = self.show(href)["pulp_labels"]
@@ -531,21 +540,21 @@ class PulpEntityContext:
             raise click.ClickException(_("Could not find label with key '{key}'.").format(key=key))
 
     def my_permissions(self) -> Any:
-        return self.pulp_ctx.call(self.MY_PERMISSIONS_ID, parameters={self.HREF: self.pulp_href})
+        return self.call("my_permissions", parameters={self.HREF: self.pulp_href})
 
     def list_roles(self) -> Any:
-        return self.pulp_ctx.call(self.LIST_ROLES_ID, parameters={self.HREF: self.pulp_href})
+        return self.call("list_roles", parameters={self.HREF: self.pulp_href})
 
     def add_role(self, role: str, users: List[str], groups: List[str]) -> Any:
-        return self.pulp_ctx.call(
-            self.ADD_ROLE_ID,
+        return self.call(
+            "add_role",
             parameters={self.HREF: self.pulp_href},
             body={"role": role, "users": users, "groups": groups},
         )
 
     def remove_role(self, role: str, users: List[str], groups: List[str]) -> Any:
-        return self.pulp_ctx.call(
-            self.REMOVE_ROLE_ID,
+        return self.call(
+            "remove_role",
             parameters={self.HREF: self.pulp_href},
             body={"role": role, "users": users, "groups": groups},
         )
@@ -583,7 +592,6 @@ class PulpRepositoryVersionContext(PulpEntityContext):
 
     ENTITY = _("repository version")
     ENTITIES = _("repository versions")
-    REPAIR_ID: ClassVar[str]
     repository_ctx: "PulpRepositoryContext"
 
     def __init__(self, pulp_ctx: PulpContext, repository_ctx: "PulpRepositoryContext") -> None:
@@ -595,10 +603,7 @@ class PulpRepositoryVersionContext(PulpEntityContext):
         return {self.repository_ctx.HREF: self.repository_ctx.pulp_href}
 
     def repair(self, href: str) -> Any:
-        return self.pulp_ctx.call(
-            self.REPAIR_ID,
-            parameters={self.HREF: href},
-        )
+        return self.call("repair", parameters={self.HREF: href})
 
 
 class PulpRepositoryContext(PulpEntityContext):
@@ -611,9 +616,7 @@ class PulpRepositoryContext(PulpEntityContext):
     ENTITY = _("repository")
     ENTITIES = _("repositories")
     HREF_PATTERN = r"^/pulp/api/v3/repositories/(?P<plugin>\w+)/(?P<resource_type>\w+)/"
-    LIST_ID = "repositories_list"
-    SYNC_ID: ClassVar[str]
-    MODIFY_ID: ClassVar[str]
+    ID_PREFIX = "repositories"
     VERSION_CONTEXT: ClassVar[Type[PulpRepositoryVersionContext]]
     NULLABLES = {"description", "retain_repo_versions"}
 
@@ -630,11 +633,7 @@ class PulpRepositoryContext(PulpEntityContext):
         return body
 
     def sync(self, href: str, body: Dict[str, Any]) -> Any:
-        return self.pulp_ctx.call(
-            self.SYNC_ID,
-            parameters={self.HREF: href},
-            body=body,
-        )
+        return self.call("sync", parameters={self.HREF: href}, body=body)
 
     def modify(
         self,
@@ -650,11 +649,7 @@ class PulpRepositoryContext(PulpEntityContext):
             body["remove_content_units"] = remove_content
         if base_version is not None:
             body["base_version"] = base_version
-        return self.pulp_ctx.call(
-            self.MODIFY_ID,
-            parameters={self.HREF: href},
-            body=body,
-        )
+        return self.call("modify", parameters={self.HREF: href}, body=body)
 
 
 class PulpContentContext(PulpEntityContext):
@@ -664,7 +659,7 @@ class PulpContentContext(PulpEntityContext):
 
     ENTITY = _("content")
     ENTITIES = _("content")
-    LIST_ID = "content_list"
+    ID_PREFIX = "content"
 
 
 EntityFieldDefinition = Union[None, str, PulpEntityContext]
