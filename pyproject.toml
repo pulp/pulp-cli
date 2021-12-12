@@ -33,6 +33,11 @@ name = "Translations"
 showcontent = true
 
 [[tool.towncrier.type]]
+directory = "devel"
+name = "Developer Notes"
+showcontent = true
+
+[[tool.towncrier.type]]
 directory = "misc"
 name = "Misc"
 showcontent = false
