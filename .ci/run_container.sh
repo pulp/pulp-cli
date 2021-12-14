@@ -3,7 +3,7 @@
 # This file is shared between some projects please keep all copies in sync
 # Known places:
 #   - https://github.com/pulp/pulp-cli/blob/main/.ci/run_container.sh
-#   - https://github.com/pulp/pulp-cli-deb/blob/develop/.ci/run_container.sh
+#   - https://github.com/pulp/pulp-cli-deb/blob/main/.ci/run_container.sh
 #   - https://github.com/pulp/pulp-cli-ostree/blob/main/.ci/run_container.sh
 #   - https://github.com/pulp/squeezer/blob/develop/tests/run_container.sh
 
