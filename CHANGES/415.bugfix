@@ -1,1 +1,0 @@
-Fixed a bug where in the version lookup, where "--version 0" lead to latest.
