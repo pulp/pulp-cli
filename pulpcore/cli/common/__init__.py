@@ -18,7 +18,7 @@ from pulpcore.cli.common.context import PluginRequirement, PulpContext
 from pulpcore.cli.common.debug import debug
 from pulpcore.cli.common.i18n import get_translation
 
-__version__ = "0.13.0.dev"
+__version__ = "0.13.0"
 
 translation = get_translation(__name__)
 _ = translation.gettext
