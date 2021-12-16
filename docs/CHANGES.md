@@ -10,6 +10,65 @@
 
 [//]: # (towncrier release notes start)
 
+## 0.13.0 (2021-12-16)
+
+### Features
+
+- Allow path to certificate bundle to be specified via `PULP_CA_BUNDLE`, `REQUESTS_CA_BUNDLE` or `CURL_CA_BUNDLE` environment variables.
+  Use proxy settings from environment.
+  [#95](https://github.com/pulp/pulp-cli/issues/95)
+- Users can now specify --client-cert, --ca-cert, and --client-key using @filepath.
+  [#220](https://github.com/pulp/pulp-cli/issues/220)
+- Added facilities to create, load and distribute translations.
+  [#328](https://github.com/pulp/pulp-cli/issues/328)
+- Added upload and show commands for Ansible Roles and Collection-Version content
+  [#362](https://github.com/pulp/pulp-cli/issues/362)
+- Added content management commands for Ansible repositories
+  [#363](https://github.com/pulp/pulp-cli/issues/363)
+- Added commands to manage roles and their association with users and groups.
+  Added commands to add and remove users.
+  [#382](https://github.com/pulp/pulp-cli/issues/382)
+- Added `--content-hrefs` and `--protection-time` options to orphan cleanup command.
+  [#398](https://github.com/pulp/pulp-cli/issues/398)
+- Added support for the comps.xml upload to the rpm plugin.
+  [#406](https://github.com/pulp/pulp-cli/issues/406)
+- Added remote option for Python distributions.
+  [#417](https://github.com/pulp/pulp-cli/issues/417)
+- Added a customized user agent to api calls.
+  [#426](https://github.com/pulp/pulp-cli/issues/426)
+- Added support for "tasks purge".
+  [#430](https://github.com/pulp/pulp-cli/issues/430)
+- Added `reset` command to access_policies.
+  Changed `--permissions-assignment` to `--creation-hooks` to follow pulpcore 3.17 naming.
+  [#438](https://github.com/pulp/pulp-cli/issues/438)
+- Add a generic command group for object permission management.
+  Added object permission management to tasks, groups and RBAC content guards.
+  [#439](https://github.com/pulp/pulp-cli/issues/439)
+
+
+### Bugfixes
+
+- Fixed a bug where in the version lookup, where "--version 0" lead to latest.
+  [#415](https://github.com/pulp/pulp-cli/issues/415)
+
+
+### Improved Documentation
+
+- Updated docs home page to reflect current plugin support of the CLI.
+  [#394](https://github.com/pulp/pulp-cli/issues/394)
+- Added Supported Worklows page to detail the workflows and features of the CLI.
+  [#395](https://github.com/pulp/pulp-cli/issues/395)
+
+
+### Translations
+
+- Added some German translations.
+  [#328](https://github.com/pulp/pulp-cli/issues/328)
+
+
+---
+
+
 ## 0.12.0 (2021-10-06)
 ======================
 
