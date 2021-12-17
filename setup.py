@@ -49,6 +49,7 @@ setup(
         "packaging",
         "PyYAML~=5.3",
         "schema==0.7.5",
+        "setuptools",
         "requests~=2.24",
         "toml==0.10.2",
     ],
