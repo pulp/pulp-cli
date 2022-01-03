@@ -42,7 +42,7 @@ path_option = click.option(
 @pass_pulp_context
 @click.pass_context
 def acs(ctx: click.Context, pulp_ctx: PulpContext, acs_type: str) -> None:
-    pulp_ctx.needs_plugin(PluginRequirement("rpm", "3.16.0.dev"))
+    pulp_ctx.needs_plugin(PluginRequirement("rpm", "3.18.0.dev"))
     if acs_type == "rpm":
         ctx.obj = PulpRpmACSContext(pulp_ctx)
     else:
