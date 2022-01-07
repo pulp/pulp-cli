@@ -7,6 +7,7 @@ from pulpcore.cli.common.generic import (
     href_option,
     list_command,
     name_option,
+    role_command,
     show_command,
 )
 from pulpcore.cli.common.i18n import get_translation
@@ -42,3 +43,4 @@ namespace.add_command(list_command())
 namespace.add_command(show_command(decorators=lookup_options))
 namespace.add_command(create_command(decorators=create_options))
 namespace.add_command(destroy_command(decorators=lookup_options))
+namespace.add_command(role_command(decorators=lookup_options))
