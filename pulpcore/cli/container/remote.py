@@ -12,6 +12,7 @@ from pulpcore.cli.common.generic import (
     list_command,
     load_json_callback,
     name_option,
+    role_command,
     show_command,
     update_command,
 )
@@ -62,4 +63,5 @@ remote.add_command(show_command(decorators=lookup_options))
 remote.add_command(create_command(decorators=remote_create_options))
 remote.add_command(update_command(decorators=remote_update_options))
 remote.add_command(destroy_command(decorators=lookup_options))
+remote.add_command(role_command(decorators=lookup_options))
 remote.add_command(label_command())

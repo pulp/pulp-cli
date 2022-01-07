@@ -23,6 +23,7 @@ from pulpcore.cli.common.generic import (
     repository_option,
     resource_option,
     retained_versions_option,
+    role_command,
     show_command,
     type_option,
     update_command,
@@ -100,6 +101,7 @@ repository.add_command(
 )
 repository.add_command(task_command(decorators=nested_lookup_options))
 repository.add_command(version_command(decorators=nested_lookup_options))
+repository.add_command(role_command(decorators=lookup_options))
 repository.add_command(label_command(decorators=nested_lookup_options))
 
 
