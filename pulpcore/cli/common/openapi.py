@@ -37,7 +37,8 @@ class OpenAPI:
         user_agent: Optional[str] = None,
     ):
         if not validate_certs:
-            urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+            # types-urllib3 does not cover that function
+            urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)  # type:ignore
 
         self.debug_callback: Callable[[int, str], Any] = debug_callback or (lambda i, x: None)
         self.base_url: str = base_url

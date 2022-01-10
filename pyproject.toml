@@ -65,7 +65,6 @@ explicit_package_bases = true
 
 [[tool.mypy.overrides]]
 module = [
-  "urllib3.*",
   "click_shell.*",
   "schema.*",
 ]
