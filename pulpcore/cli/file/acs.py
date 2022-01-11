@@ -102,11 +102,6 @@ remote_option = resource_option(
     href_pattern=PulpRemoteContext.HREF_PATTERN,
     help=_("Remote to attach to ACS in the form '[[<plugin>:]<resource_type>:]<name>' or by href."),
 )
-path_option = click.option(
-    "--path",
-    "paths",
-    multiple=True,
-)
 lookup_options = [href_option, name_option]
 update_options = [remote_option]
 create_options = update_options + [click.option("--name", required=True), path_option]
