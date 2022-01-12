@@ -46,8 +46,17 @@ trap "${CONTAINER_RUNTIME} stop pulp-ephemeral" EXIT
 trap "${CONTAINER_RUNTIME} stop pulp-ephemeral" INT
 
 echo "Wait for pulp to start."
-for counter in $(seq 20 -1 0)
+for counter in $(seq 40 -1 0)
 do
+  if [ "$counter" = "0" ]
+  then
+    echo "FAIL."
+    "${CONTAINER_RUNTIME}" images
+    "${CONTAINER_RUNTIME}" ps -a
+    "${CONTAINER_RUNTIME}" logs "pulp-ephemeral"
+    exit 1
+  fi
+
   sleep 3
   if curl --fail http://localhost:8080/pulp/api/v3/status/ > /dev/null 2>&1
   then
@@ -56,14 +65,6 @@ do
   fi
   echo "."
 done
-if [ "$counter" = "0" ]
-then
-  echo "FAIL."
-  "${CONTAINER_RUNTIME}" images
-  "${CONTAINER_RUNTIME}" ps -a
-  "${CONTAINER_RUNTIME}" logs "pulp-ephemeral"
-  exit 1
-fi
 
 # show pulpcore/plugin versions we're using
 curl -s http://localhost:8080/pulp/api/v3/status/ | jq '.versions|map({key: .component, value: .version})|from_entries'
