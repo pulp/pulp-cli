@@ -51,7 +51,8 @@ line_length = 100
 
 [tool.pytest.ini_options]
 markers = [
-  "script: Marks tests provided as shell scripts",
+  "script: tests provided as shell scripts",
+  "help_page: tests that render help pages",
   "pulpcore: pulpcore tests",
   "pulp_2to3_migration: pulp-2to3-migration tests",
   "pulp_file: pulp_file tests",

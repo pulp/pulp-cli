@@ -42,14 +42,7 @@ def task_summary(pulp_ctx: PulpContext) -> None:
     """
     from pulpcore.cli.core.context import PulpTaskContext
 
-    TASK_STATES = ["waiting", "skipped", "running", "completed", "failed", "canceled"]
-    if pulp_ctx.has_plugin(PluginRequirement("core", min="3.14")):
-        TASK_STATES.append("canceling")
-    result = {}
-    for state in TASK_STATES:
-        payload = {"limit": 1, "state": state}
-        answer = pulp_ctx.call(PulpTaskContext.LIST_ID, parameters=payload)
-        result[state] = answer["count"]
+    result = PulpTaskContext(pulp_ctx).summary()
     pulp_ctx.output_result(result)
 
 

@@ -21,13 +21,10 @@ class PulpAccessPolicyContext(PulpEntityContext):
     ENTITY = _("access policy")
     ENTITIES = _("access policies")
     HREF = "access_policy_href"
-    LIST_ID = "access_policies_list"
-    READ_ID = "access_policies_read"
-    UPDATE_ID = "access_policies_partial_update"
-    RESET_ID: ClassVar[str] = "access_policies_reset"
+    ID_PREFIX = "access_policies"
 
     def reset(self) -> Any:
-        return self.pulp_ctx.call(self.RESET_ID, parameters={self.HREF: self.pulp_href})
+        return self.call("reset", parameters={self.HREF: self.pulp_href})
 
     def preprocess_body(self, body: EntityDefinition) -> EntityDefinition:
         body = super().preprocess_body(body)
@@ -41,9 +38,7 @@ class PulpArtifactContext(PulpEntityContext):
     ENTITY = _("artifact")
     ENTITIES = _("artifacts")
     HREF = "artifact_href"
-    LIST_ID = "artifacts_list"
-    READ_ID = "artifacts_read"
-    CREATE_ID = "artifacts_create"
+    ID_PREFIX = "artifacts"
 
     def upload(self, file: IO[bytes], chunk_size: int = 1000000) -> Any:
         upload_ctx = PulpUploadContext(self.pulp_ctx)
@@ -75,15 +70,12 @@ class PulpArtifactContext(PulpEntityContext):
 
         try:
             while start < size:
-                end = min(size, start + chunk_size) - 1
-                file.seek(start)
                 chunk = file.read(chunk_size)
-                range_header = f"bytes {start}-{end}/{size}"
-                upload_ctx.update(
+                upload_ctx.upload_chunk(
                     href=upload_href,
-                    parameters={"Content-Range": range_header},
-                    body={"sha256": hashlib.sha256(chunk).hexdigest()},
-                    uploads={"file": chunk},
+                    chunk=chunk,
+                    size=size,
+                    start=start,
                 )
                 start += chunk_size
                 click.echo(".", nl=False, err=True)
@@ -104,21 +96,14 @@ class PulpExporterContext(PulpEntityContext):
     ENTITY = _("Pulp exporter")
     ENTITIES = _("Pulp exporters")
     HREF = "pulp_exporter_href"
-    LIST_ID = "exporters_core_pulp_list"
-    READ_ID = "exporters_core_pulp_read"
-    CREATE_ID = "exporters_core_pulp_create"
-    UPDATE_ID = "exporters_core_pulp_partial_update"
-    DELETE_ID = "exporters_core_pulp_delete"
+    ID_PREFIX = "exporters_core_pulp"
 
 
 class PulpExportContext(PulpEntityContext):
     ENTITY = _("Pulp export")
     ENTITIES = _("Pulp exports")
     HREF = "pulp_pulp_export_href"
-    LIST_ID = "exporters_core_pulp_exports_list"
-    READ_ID = "exporters_core_pulp_exports_read"
-    CREATE_ID = "exporters_core_pulp_exports_create"
-    DELETE_ID = "exporters_core_pulp_exports_delete"
+    ID_PREFIX = "exporters_core_pulp_exports"
     exporter: EntityDefinition
 
     @property
@@ -131,15 +116,7 @@ class PulpGroupContext(PulpEntityContext):
     ENTITIES = _("user groups")
     # Handled by a workaround
     # HREF = "group_href"
-    LIST_ID = "groups_list"
-    READ_ID = "groups_read"
-    CREATE_ID = "groups_create"
-    UPDATE_ID = "groups_partial_update"
-    DELETE_ID = "groups_delete"
-    MY_PERMISSIONS_ID = "groups_my_permissions"
-    LIST_ROLES_ID = "groups_list_roles"
-    ADD_ROLE_ID = "groups_add_role"
-    REMOVE_ROLE_ID = "groups_remove_role"
+    ID_PREFIX = "groups"
 
     @property
     def HREF(self) -> str:  # type:ignore
@@ -185,10 +162,7 @@ class PulpGroupModelPermissionContext(PulpGroupPermissionContext):
     ENTITIES = _("group model permissions")
     # Handled by a workaround
     # HREF = "groups_model_permission_href"
-    LIST_ID = "groups_model_permissions_list"
-    READ_ID = "groups_model_permissions_read"
-    CREATE_ID = "groups_model_permissions_create"
-    DELETE_ID = "groups_model_permissions_delete"
+    ID_PREFIX = "groups_model_permissions"
 
     @property
     def HREF(self) -> str:  # type:ignore
@@ -202,10 +176,7 @@ class PulpGroupObjectPermissionContext(PulpGroupPermissionContext):
     ENTITIES = _("group object permissions")
     # Handled by a workaround
     # HREF = "groups_object_permission_href"
-    LIST_ID = "groups_object_permissions_list"
-    READ_ID = "groups_object_permissions_read"
-    CREATE_ID = "groups_object_permissions_create"
-    DELETE_ID = "groups_object_permissions_delete"
+    ID_PREFIX = "groups_object_permissions"
 
     @property
     def HREF(self) -> str:  # type:ignore
@@ -218,10 +189,7 @@ class PulpGroupRoleContext(PulpEntityContext):
     ENTITY = _("group role")
     ENTITIES = _("group roles")
     HREF = "groups_group_role_href"
-    LIST_ID = "groups_roles_list"
-    READ_ID = "groups_roles_read"
-    CREATE_ID = "groups_roles_create"
-    DELETE_ID = "groups_roles_delete"
+    ID_PREFIX = "groups_roles"
     NULLABLES = {"content_object"}
     group_ctx: PulpGroupContext
 
@@ -239,9 +207,7 @@ class PulpGroupUserContext(PulpEntityContext):
     ENTITIES = _("group users")
     # Handled by a workaround
     # HREF = "groups_user_href"
-    LIST_ID = "groups_users_list"
-    CREATE_ID = "groups_users_create"
-    DELETE_ID = "groups_users_delete"
+    ID_PREFIX = "groups_users"
     group_ctx: PulpGroupContext
 
     @property
@@ -263,65 +229,47 @@ class PulpContentGuardContext(PulpEntityContext):
     ENTITY = "content guard"
     ENTITIES = "content guards"
     HREF_PATTERN = r"^/pulp/api/v3/contentguards/(?P<plugin>\w+)/(?P<resource_type>\w+)/"
-    LIST_ID = "contentguards_list"
+    ID_PREFIX = "contentguards"
 
 
 class PulpImporterContext(PulpEntityContext):
     ENTITY = _("Pulp importer")
     ENTITIES = _("Pulp importers")
     HREF = "pulp_importer_href"
-    CREATE_ID = "importers_core_pulp_create"
-    READ_ID = "importers_core_pulp_read"
-    UPDATE_ID = "importers_core_pulp_partial_update"
-    DELETE_ID = "importers_core_pulp_delete"
-    LIST_ID = "importers_core_pulp_list"
+    ID_PREFIX = "importers_core_pulp"
 
 
 class PulpRbacContentGuardContext(PulpContentGuardContext):
     ENTITY = "RBAC content guard"
     ENTITIES = "RBAC content guards"
     HREF = "r_b_a_c_content_guard_href"
-    LIST_ID = "contentguards_core_rbac_list"
-    CREATE_ID = "contentguards_core_rbac_create"
-    UPDATE_ID = "contentguards_core_rbac_partial_update"
-    DELETE_ID = "contentguards_core_rbac_delete"
-    READ_ID = "contentguards_core_rbac_read"
-    MY_PERMISSIONS_ID = "contentguards_core_rbac_my_permissions"
-    LIST_ROLES_ID = "contentguards_core_rbac_list_roles"
-    ADD_ROLE_ID = "contentguards_core_rbac_add_role"
-    REMOVE_ROLE_ID = "contentguards_core_rbac_remove_role"
-    ASSIGN_ID: ClassVar[str] = "contentguards_core_rbac_assign_permission"
-    REMOVE_ID: ClassVar[str] = "contentguards_core_rbac_remove_permission"
+    ID_PREFIX = "contentguards_core_rbac"
     DOWNLOAD_ROLE: ClassVar[str] = "core.rbaccontentguard_downloader"
 
     def assign(self, href: str, users: Optional[List[str]], groups: Optional[List[str]]) -> Any:
         if self.pulp_ctx.has_plugin(PluginRequirement("core", min="3.17.0.dev")):
             body = self.preprocess_body({"users": users, "groups": groups})
             body["role"] = self.DOWNLOAD_ROLE
-            return self.pulp_ctx.call(self.ADD_ROLE_ID, parameters={self.HREF: href}, body=body)
+            return self.call("add_role", parameters={self.HREF: href}, body=body)
         else:
             body = self.preprocess_body({"usernames": users, "groupnames": groups})
-            return self.pulp_ctx.call(self.ASSIGN_ID, parameters={self.HREF: href}, body=body)
+            return self.call("assign_permission", parameters={self.HREF: href}, body=body)
 
     def remove(self, href: str, users: Optional[List[str]], groups: Optional[List[str]]) -> Any:
         if self.pulp_ctx.has_plugin(PluginRequirement("core", min="3.17.0.dev")):
             body = self.preprocess_body({"users": users, "groups": groups})
             body["role"] = self.DOWNLOAD_ROLE
-            return self.pulp_ctx.call(self.REMOVE_ROLE_ID, parameters={self.HREF: href}, body=body)
+            return self.call("remove_role", parameters={self.HREF: href}, body=body)
         else:
             body = self.preprocess_body({"usernames": users, "groupnames": groups})
-            return self.pulp_ctx.call(self.REMOVE_ID, parameters={self.HREF: href}, body=body)
+            return self.call("remove_permission", parameters={self.HREF: href}, body=body)
 
 
 class PulpRoleContext(PulpEntityContext):
     ENTITY = _("role")
     ENTITIES = _("roles")
     HREF = "role_href"
-    LIST_ID = "roles_list"
-    READ_ID = "roles_read"
-    CREATE_ID = "roles_create"
-    UPDATE_ID = "roles_partial_update"
-    DELETE_ID = "roles_delete"
+    ID_PREFIX = "roles"
     NULLABLES = {"description"}
 
 
@@ -329,29 +277,20 @@ class PulpSigningServiceContext(PulpEntityContext):
     ENTITY = _("signing service")
     ENTITIES = _("signing services")
     HREF = "signing_service_href"
-    LIST_ID = "signing_services_list"
-    READ_ID = "signing_services_read"
+    ID_PREFIX = "signing_services"
 
 
 class PulpTaskContext(PulpEntityContext):
     ENTITY = _("task")
     ENTITIES = _("tasks")
     HREF = "task_href"
-    LIST_ID = "tasks_list"
-    READ_ID = "tasks_read"
-    DELETE_ID = "tasks_delete"
-    MY_PERMISSIONS_ID = "tasks_my_permissions"
-    LIST_ROLES_ID = "tasks_list_roles"
-    ADD_ROLE_ID = "tasks_add_role"
-    REMOVE_ROLE_ID = "tasks_remove_role"
-    CANCEL_ID: ClassVar[str] = "tasks_cancel"
-    PURGE_ID: ClassVar[str] = "tasks_purge"
+    ID_PREFIX = "tasks"
 
     resource_context: Optional[PulpEntityContext] = None
 
     def cancel(self, task_href: str) -> Any:
-        return self.pulp_ctx.call(
-            self.CANCEL_ID,
+        return self.call(
+            "cancel",
             parameters={self.HREF: task_href},
             body={"state": "canceled"},
         )
@@ -369,34 +308,56 @@ class PulpTaskContext(PulpEntityContext):
             body["finished_before"] = finished_before
         if states:
             body["states"] = states
-        return self.pulp_ctx.call(
-            self.PURGE_ID,
+        return self.call(
+            "purge",
             body=body,
         )
+
+    def summary(self) -> Dict[str, int]:
+        task_states = ["waiting", "skipped", "running", "completed", "failed", "canceled"]
+        if self.pulp_ctx.has_plugin(PluginRequirement("core", min="3.14")):
+            task_states.append("canceling")
+        result = {}
+        for state in task_states:
+            payload = {"limit": 1, "state": state}
+            result[state] = self.call("list", parameters=payload)["count"]
+        return result
 
 
 class PulpTaskGroupContext(PulpEntityContext):
     ENTITY = _("task group")
     ENTITIES = _("task groups")
     HREF = "task_group_href"
-    LIST_ID = "task_groups_list"
-    READ_ID = "task_groups_read"
+    ID_PREFIX = "task_groups"
 
 
 class PulpUploadContext(PulpEntityContext):
     ENTITY = _("upload")
     ENTITIES = _("uploads")
     HREF = "upload_href"
-    LIST_ID = "uploads_list"
-    READ_ID = "uploads_read"
-    CREATE_ID = "uploads_create"
-    UPDATE_ID = "uploads_update"
-    DELETE_ID = "uploads_delete"
-    COMMIT_ID: ClassVar[str] = "uploads_commit"
+    ID_PREFIX = "uploads"
+
+    def upload_chunk(
+        self,
+        href: str,
+        chunk: bytes,
+        size: int,
+        start: int,
+        non_blocking: bool = False,
+    ) -> Any:
+        end: int = start + len(chunk) - 1
+        parameters = {self.HREF: href, "Content-Range": f"bytes {start}-{end}/{size}"}
+        return self.call(
+            "update",
+            parameters=parameters,
+            body={"sha256": hashlib.sha256(chunk).hexdigest()},
+            uploads={"file": chunk},
+            non_blocking=non_blocking,
+        )
 
     def commit(self, upload_href: str, sha256: str) -> Any:
-        return self.pulp_ctx.call(
-            self.COMMIT_ID,
+        return self.call(
+            "commit",
             parameters={self.HREF: upload_href},
             body={"sha256": sha256},
         )
@@ -406,11 +367,7 @@ class PulpUserContext(PulpEntityContext):
     ENTITY = _("user")
     ENTITIES = _("users")
     HREF = "auth_user_href"
-    LIST_ID = "users_list"
-    READ_ID = "users_read"
-    CREATE_ID = "users_create"
-    UPDATE_ID = "users_partial_update"
-    DELETE_ID = "users_delete"
+    ID_PREFIX = "users"
     NULLABLES = {"password"}
 
 
@@ -418,10 +375,7 @@ class PulpUserRoleContext(PulpEntityContext):
     ENTITY = _("user role")
     ENTITIES = _("user roles")
     HREF = "auth_users_user_role_href"
-    LIST_ID = "users_roles_list"
-    READ_ID = "users_roles_read"
-    CREATE_ID = "users_roles_create"
-    DELETE_ID = "users_roles_delete"
+    ID_PREFIX = "users_roles"
     NULLABLES = {"content_object"}
     user_ctx: PulpUserContext
 
@@ -438,5 +392,4 @@ class PulpWorkerContext(PulpEntityContext):
     ENTITY = _("worker")
     ENTITIES = _("workers")
     HREF = "worker_href"
-    LIST_ID = "workers_list"
-    READ_ID = "workers_read"
+    ID_PREFIX = "workers"

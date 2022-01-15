@@ -508,11 +508,15 @@ class PulpEntityContext:
         uploads: Optional[Dict[str, Any]] = None,
         non_blocking: bool = False,
     ) -> Any:
+        # Workaround for plugins that do not have ID_PREFIX in place
+        if not hasattr(self, "ID_PREFIX") and not hasattr(self, "PARTIAL_UPDATE_ID"):
+            self.PARTIAL_UPDATE_ID = getattr(self, "UPDATE_ID")
+        # ----------------------------------------------------------
         _parameters = {self.HREF: href}
         if parameters:
             _parameters.update(parameters)
         return self.call(
-            "update",
+            "partial_update",
             parameters=_parameters,
             body=body,
             uploads=uploads,

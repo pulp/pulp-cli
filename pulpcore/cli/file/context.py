@@ -21,7 +21,6 @@ class PulpFileACSContext(PulpEntityContext):
     ENTITIES = _("file ACSes")
     HREF = "file_file_alternate_content_source_href"
     ID_PREFIX = "acs_file_file"
-    UPDATE_ID = "acs_file_file_partial_update"
 
     def refresh(self, href: str) -> Any:
         return self.call("refresh", parameters={self.HREF: href})
@@ -39,7 +38,6 @@ class PulpFileDistributionContext(PulpEntityContext):
     ENTITIES = _("file distributions")
     HREF = "file_file_distribution_href"
     ID_PREFIX = "distributions_file_file"
-    UPDATE_ID = "distributions_file_file_partial_update"
     NULLABLES = {"publication", "repository"}
 
     def preprocess_body(self, body: EntityDefinition) -> EntityDefinition:
@@ -72,7 +70,6 @@ class PulpFileRemoteContext(PulpRemoteContext):
     ENTITIES = _("file remotes")
     HREF = "file_file_remote_href"
     ID_PREFIX = "remotes_file_file"
-    UPDATE_ID = "remotes_file_file_partial_update"
 
 
 class PulpFileRepositoryVersionContext(PulpRepositoryVersionContext):
@@ -83,7 +80,6 @@ class PulpFileRepositoryVersionContext(PulpRepositoryVersionContext):
 class PulpFileRepositoryContext(PulpRepositoryContext):
     HREF = "file_file_repository_href"
     ID_PREFIX = "repositories_file_file"
-    UPDATE_ID = "repositories_file_file_partial_update"
     VERSION_CONTEXT = PulpFileRepositoryVersionContext
     CAPABILITIES = {"pulpexport": [PluginRequirement("file")]}
 

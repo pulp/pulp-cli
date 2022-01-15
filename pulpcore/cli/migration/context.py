@@ -10,11 +10,7 @@ _ = translation.gettext
 class PulpMigrationPlanContext(PulpEntityContext):
     ENTITY = _("pulp_2to3_migration_migration_plan")
     HREF = "pulp_2to3_migration_migration_plan_href"
-    LIST_ID = "migration_plans_list"
-    READ_ID = "migration_plans_read"
-    CREATE_ID = "migration_plans_create"
-    UPDATE_ID = "migration_plans_partial_update"
-    DELETE_ID = "migration_plans_delete"
+    ID_PREFIX = "migration_plans"
 
     def run(self, href: str) -> Any:
         return self.pulp_ctx.call("migration_plans_run", parameters={self.HREF: href})
@@ -26,12 +22,10 @@ class PulpMigrationPlanContext(PulpEntityContext):
 class PulpMigrationPulp2ContentContext(PulpEntityContext):
     ENTITY = _("pulp_2to3_migration_pulp2_content")
     HREF = "pulp_2to3_migration_pulp2_content_href"
-    LIST_ID = "pulp2content_list"
-    READ_ID = "pulp2content_read"
+    ID_PREFIX = "pulp2content"
 
 
 class PulpMigrationPulp2RepositoryContext(PulpEntityContext):
     ENTITY = _("pulp_2to3_migration_pulp2_repository")
     HREF = "pulp_2to3_migration_pulp2_repository_href"
-    LIST_ID = "pulp2repositories_list"
-    READ_ID = "pulp2repositories_read"
+    ID_PREFIX = "pulp2repositories"
