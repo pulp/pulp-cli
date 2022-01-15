@@ -18,45 +18,35 @@ class PulpContainerBlobContext(PulpContentContext):
     ENTITY = _("container blob")
     ENTITIES = _("container blobs")
     HREF = "container_blob_href"
-    LIST_ID = "content_container_blobs_list"
-    READ_ID = "content_container_blobs_read"
+    ID_PREFIX = "content_container_blobs"
 
 
 class PulpContainerManifestContext(PulpContentContext):
     ENTITY = _("container manifest")
     ENTITIES = _("container manifests")
     HREF = "container_manifest_href"
-    LIST_ID = "content_container_manifests_list"
-    READ_ID = "content_container_manifests_read"
+    ID_PREFIX = "content_container_manifests"
 
 
 class PulpContainerTagContext(PulpContentContext):
     ENTITY = _("container tag")
     ENTITIES = _("container tags")
     HREF = "container_tag_href"
-    LIST_ID = "content_container_tags_list"
-    READ_ID = "content_container_tags_read"
+    ID_PREFIX = "content_container_tags"
 
 
 class PulpContainerNamespaceContext(PulpEntityContext):
     ENTITY = _("container namespace")
     ENTITIES = _("container namespaces")
     HREF = "container_container_namespace_href"
-    LIST_ID = "pulp_container_namespaces_list"
-    READ_ID = "pulp_container_namespaces_read"
-    CREATE_ID = "pulp_container_namespaces_create"
-    DELETE_ID = "pulp_container_namespaces_delete"
+    ID_PREFIX = "pulp_container_namespaces"
 
 
 class PulpContainerDistributionContext(PulpEntityContext):
     ENTITY = _("container distribution")
     ENTITIES = _("container distributions")
     HREF = "container_container_distribution_href"
-    LIST_ID = "distributions_container_container_list"
-    READ_ID = "distributions_container_container_read"
-    CREATE_ID = "distributions_container_container_create"
-    UPDATE_ID = "distributions_container_container_partial_update"
-    DELETE_ID = "distributions_container_container_delete"
+    ID_PREFIX = "distributions_container_container"
     NULLABLES = {"repository_version", "repository"}
 
     def preprocess_body(self, body: EntityDefinition) -> EntityDefinition:
@@ -72,35 +62,23 @@ class PulpContainerRemoteContext(PulpRemoteContext):
     ENTITY = _("container remote")
     ENTITIES = _("container remotes")
     HREF = "container_container_remote_href"
-    LIST_ID = "remotes_container_container_list"
-    CREATE_ID = "remotes_container_container_create"
-    UPDATE_ID = "remotes_container_container_partial_update"
-    DELETE_ID = "remotes_container_container_delete"
+    ID_PREFIX = "remotes_container_container"
     NULLABLES = PulpRemoteContext.NULLABLES | {"include_tags", "exclude_tags"}
 
 
 class PulpContainerRepositoryVersionContext(PulpRepositoryVersionContext):
     HREF = "container_container_repository_version_href"
-    LIST_ID = "repositories_container_container_versions_list"
-    READ_ID = "repositories_container_container_versions_read"
-    DELETE_ID = "repositories_container_container_versions_delete"
+    ID_PREFIX = "repositories_container_container_versions"
 
 
 class PulpContainerPushRepositoryVersionContext(PulpRepositoryVersionContext):
     HREF = "container_container_push_repository_version_href"
-    LIST_ID = "repositories_container_container_push_versions_list"
-    READ_ID = "repositories_container_container_push_versions_read"
-    DELETE_ID = "repositories_container_container_push_versions_delete"
+    ID_PREFIX = "repositories_container_container_push_versions"
 
 
 class PulpContainerRepositoryContext(PulpRepositoryContext):
     HREF = "container_container_repository_href"
-    LIST_ID = "repositories_container_container_list"
-    READ_ID = "repositories_container_container_read"
-    CREATE_ID = "repositories_container_container_create"
-    UPDATE_ID = "repositories_container_container_partial_update"
-    DELETE_ID = "repositories_container_container_delete"
-    SYNC_ID = "repositories_container_container_sync"
+    ID_PREFIX = "repositories_container_container"
     VERSION_CONTEXT = PulpContainerRepositoryVersionContext
     CAPABILITIES = {
         "sync": [PluginRequirement("container")],
@@ -110,11 +88,7 @@ class PulpContainerRepositoryContext(PulpRepositoryContext):
 
 class PulpContainerPushRepositoryContext(PulpRepositoryContext):
     HREF = "container_container_push_repository_href"
-    LIST_ID = "repositories_container_container_push_list"
-    READ_ID = "repositories_container_container_push_read"
-    # CREATE_ID = "repositories_container_container_push_create"
-    # UPDATE_ID = "repositories_container_container_push_update"
-    # DELETE_ID = "repositories_container_container_push_delete"
+    ID_PREFIX = "repositories_container_container_push"
     VERSION_CONTEXT = PulpContainerPushRepositoryVersionContext
 
 

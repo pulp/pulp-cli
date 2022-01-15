@@ -1,5 +1,3 @@
-from typing import ClassVar
-
 from pulpcore.cli.common.context import (
     EntityDefinition,
     PluginRequirement,
@@ -20,20 +18,14 @@ class PulpPythonContentContext(PulpContentContext):
     ENTITY = _("python package")
     ENTITIES = _("python packages")
     HREF = "python_python_package_content_href"
-    LIST_ID = "content_python_packages_list"
-    READ_ID = "content_python_packages_read"
-    CREATE_ID = "content_python_packages_create"
+    ID_PREFIX = "content_python_packages"
 
 
 class PulpPythonDistributionContext(PulpEntityContext):
     ENTITY = _("python distribution")
     ENTITIES = _("python distributions")
     HREF = "python_python_distribution_href"
-    LIST_ID = "distributions_python_pypi_list"
-    READ_ID = "distributions_python_pypi_read"
-    CREATE_ID = "distributions_python_pypi_create"
-    UPDATE_ID = "distributions_python_pypi_partial_update"
-    DELETE_ID = "distributions_python_pypi_delete"
+    ID_PREFIX = "distributions_python_pypi"
     NULLABLES = {"publication", "repository"}
 
     def preprocess_body(self, body: EntityDefinition) -> EntityDefinition:
@@ -50,10 +42,7 @@ class PulpPythonPublicationContext(PulpEntityContext):
     ENTITY = _("python publication")
     ENTITIES = _("python publications")
     HREF = "python_python_publication_href"
-    LIST_ID = "publications_python_pypi_list"
-    READ_ID = "publications_python_pypi_read"
-    CREATE_ID = "publications_python_pypi_create"
-    DELETE_ID = "publications_python_pypi_delete"
+    ID_PREFIX = "publications_python_pypi"
 
     def preprocess_body(self, body: EntityDefinition) -> EntityDefinition:
         body = super().preprocess_body(body)
@@ -68,30 +57,17 @@ class PulpPythonRemoteContext(PulpRemoteContext):
     ENTITY = _("python remote")
     ENTITIES = _("python remotes")
     HREF = "python_python_remote_href"
-    LIST_ID = "remotes_python_python_list"
-    CREATE_ID = "remotes_python_python_create"
-    BANDERSNATCH_ID: ClassVar[str] = "remotes_python_python_from_bandersnatch"
-    UPDATE_ID = "remotes_python_python_partial_update"
-    DELETE_ID = "remotes_python_python_delete"
+    ID_PREFIX = "remotes_python_python"
 
 
 class PulpPythonRepositoryVersionContext(PulpRepositoryVersionContext):
     HREF = "python_python_repository_version_href"
-    LIST_ID = "repositories_python_python_versions_list"
-    READ_ID = "repositories_python_python_versions_read"
-    DELETE_ID = "repositories_python_python_versions_delete"
-    REPAIR_ID = "repositories_python_python_versions_repair"
+    ID_PREFIX = "repositories_python_python_versions"
 
 
 class PulpPythonRepositoryContext(PulpRepositoryContext):
     HREF = "python_python_repository_href"
-    LIST_ID = "repositories_python_python_list"
-    READ_ID = "repositories_python_python_read"
-    CREATE_ID = "repositories_python_python_create"
-    UPDATE_ID = "repositories_python_python_partial_update"
-    DELETE_ID = "repositories_python_python_delete"
-    SYNC_ID = "repositories_python_python_sync"
-    MODIFY_ID = "repositories_python_python_modify"
+    ID_PREFIX = "repositories_python_python"
     VERSION_CONTEXT = PulpPythonRepositoryVersionContext
 
 

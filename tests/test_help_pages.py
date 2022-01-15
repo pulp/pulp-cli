@@ -16,6 +16,7 @@ def traverse_commands(command, args):
             yield from traverse_commands(sub, args + [name])
 
 
+@pytest.mark.help_page
 @pytest.mark.parametrize("args", traverse_commands(main, []), ids=" ".join)
 @patch("pulpcore.cli.common.PulpContext.api", new_callable=PropertyMock)
 def test_access_help(_api, args):
