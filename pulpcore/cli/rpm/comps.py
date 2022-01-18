@@ -10,7 +10,7 @@ from pulpcore.cli.common.context import (
     PulpEntityContext,
     pass_pulp_context,
 )
-from pulpcore.cli.common.generic import resource_option
+from pulpcore.cli.common.generic import pulp_command, resource_option
 from pulpcore.cli.rpm.context import PulpRpmCompsXmlContext, PulpRpmRepositoryContext
 
 _ = gettext.gettext
@@ -25,7 +25,7 @@ repository_option = resource_option(
 )
 
 
-@click.command()
+@pulp_command()
 @click.option("--file", type=click.File("rb"), required=True)
 @repository_option
 @click.option("--replace", type=bool, default=False)

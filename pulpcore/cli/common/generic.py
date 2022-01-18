@@ -1,7 +1,7 @@
 import json
 import re
 from functools import lru_cache
-from typing import Any, Callable, Dict, Iterable, List, Mapping, Optional, Tuple, Type
+from typing import IO, Any, Callable, Dict, Iterable, List, Mapping, Optional, Tuple, Type
 
 import click
 import schema as s
@@ -15,18 +15,51 @@ from pulpcore.cli.common.context import (
     PulpContentContext,
     PulpContext,
     PulpEntityContext,
+    PulpException,
+    PulpNoWait,
     PulpRepositoryContext,
     PulpRepositoryVersionContext,
-    pass_content_context,
-    pass_entity_context,
-    pass_pulp_context,
-    pass_repository_context,
-    pass_repository_version_context,
 )
 from pulpcore.cli.common.i18n import get_translation
 
 translation = get_translation(__name__)
 _ = translation.gettext
+
+
+##############################################################################
+# Decorator to access certain contexts
+
+
+pass_pulp_context = click.make_pass_decorator(PulpContext)
+pass_entity_context = click.make_pass_decorator(PulpEntityContext)
+pass_repository_context = click.make_pass_decorator(PulpRepositoryContext)
+pass_repository_version_context = click.make_pass_decorator(PulpRepositoryVersionContext)
+pass_content_context = click.make_pass_decorator(PulpContentContext)
+
+
+class ClickNoWait(click.ClickException):
+    exit_code = 0
+
+    def show(self, file: Optional[IO[str]] = None) -> None:
+        """
+        Format the message into file or STDERR.
+        Overwritten from base class to not print "Error: ".
+        """
+        if file is None:
+            file = click.get_text_stream("stderr")
+        click.echo(self.format_message(), file=file)
+
+
+class PulpCLIContext(PulpContext):
+    """
+    Subclass of the Context that overwrites the CLI specifics.
+    """
+
+    def echo(self, message: str, nl: bool = True, err: bool = False) -> None:
+        click.echo(message, nl=nl, err=err)
+
+    def prompt(self, text: str, hide_input: bool = False) -> Any:
+        return click.prompt(text, hide_input=hide_input)
 
 
 class PulpCommand(click.Command):
@@ -42,12 +75,17 @@ class PulpCommand(click.Command):
         super().__init__(*args, **kwargs)
 
     def invoke(self, ctx: click.Context) -> Any:
-        if self.needs_plugins:
-            pulp_ctx = ctx.find_object(PulpContext)
-            assert pulp_ctx is not None
-            for plugin_requirement in self.needs_plugins:
-                pulp_ctx.needs_plugin(plugin_requirement)
-        return super().invoke(ctx)
+        try:
+            if self.needs_plugins:
+                pulp_ctx = ctx.find_object(PulpContext)
+                assert pulp_ctx is not None
+                for plugin_requirement in self.needs_plugins:
+                    pulp_ctx.needs_plugin(plugin_requirement)
+            return super().invoke(ctx)
+        except PulpException as e:
+            raise click.ClickException(str(e))
+        except PulpNoWait as e:
+            raise ClickNoWait(str(e))
 
     def get_short_help_str(self, limit: int = 45) -> str:
         return self.short_help or ""
@@ -55,10 +93,10 @@ class PulpCommand(click.Command):
     def format_help_text(
         self, ctx: click.Context, formatter: click.formatting.HelpFormatter
     ) -> None:
-        entity_ctx = ctx.find_object(PulpEntityContext)
-        assert entity_ctx is not None
         if self.help is not None:
-            self.help = self.help.format(entity=entity_ctx.ENTITY, entities=entity_ctx.ENTITIES)
+            entity_ctx = ctx.find_object(PulpEntityContext)
+            if entity_ctx is not None:
+                self.help = self.help.format(entity=entity_ctx.ENTITY, entities=entity_ctx.ENTITIES)
         super().format_help_text(ctx, formatter)
 
     def get_params(self, ctx: click.Context) -> List[click.Parameter]:
@@ -73,29 +111,10 @@ class PulpCommand(click.Command):
         return new_params
 
 
-class PulpGroup(click.Group):
+class PulpGroup(PulpCommand, click.Group):
 
     command_class = PulpCommand
     group_class = type
-
-    def __init__(
-        self,
-        *args: Any,
-        needs_plugins: Optional[List[PluginRequirement]] = None,
-        allowed_with_contexts: Optional[Tuple[Type[PulpEntityContext]]] = None,
-        **kwargs: Any,
-    ):
-        self.needs_plugins = needs_plugins
-        self.allowed_with_contexts = allowed_with_contexts
-        super().__init__(*args, **kwargs)
-
-    def invoke(self, ctx: click.Context) -> Any:
-        if self.needs_plugins:
-            pulp_ctx = ctx.find_object(PulpContext)
-            assert pulp_ctx is not None
-            for plugin_requirement in self.needs_plugins:
-                pulp_ctx.needs_plugin(plugin_requirement)
-        return super().invoke(ctx)
 
     def get_command(self, ctx: click.Context, cmd_name: str) -> Optional[click.Command]:
         # Overwriting this removes the command from the help message and from being callable

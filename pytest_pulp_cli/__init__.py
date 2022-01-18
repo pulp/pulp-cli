@@ -5,9 +5,9 @@ import pytest
 import toml
 
 
-def pytest_collect_file(parent, path):
-    if path.ext == ".sh" and path.purebasename.startswith("test_"):
-        return ScriptFile.from_parent(parent, fspath=path)
+def pytest_collect_file(file_path, parent):
+    if file_path.suffix == ".sh" and file_path.name.startswith("test_"):
+        return ScriptFile.from_parent(parent, path=file_path)
 
 
 class ScriptFile(pytest.File):
@@ -15,8 +15,8 @@ class ScriptFile(pytest.File):
     obj = None
 
     def collect(self):
-        name = self.fspath.purebasename[5:]
-        yield ScriptItem.from_parent(self, name=name, path=self.fspath)
+        name = self.path.name[5:]
+        yield ScriptItem.from_parent(self, name=name, path=self.path)
 
 
 # HACK: Inherit from `pytest.Function` to be able to use the fixtures
@@ -25,8 +25,8 @@ class ScriptItem(pytest.Function):
         super().__init__(callobj=self._runscript, **kwargs)
         self.path = path
         self.add_marker("script")
-        if path.parts()[-3].basename == "scripts":
-            self.add_marker(path.parts()[-2].basename)
+        if path.parts[-3] == "scripts":
+            self.add_marker(path.parts[-2])
 
     def _runscript(self, pulp_cli_env, tmp_path, pulp_container_log):
         run = subprocess.run([self.path], cwd=tmp_path)
@@ -36,7 +36,7 @@ class ScriptItem(pytest.Function):
             raise ScriptError(f"Script returned with exit code {run.returncode}.")
 
     def reportinfo(self):
-        return self.fspath, 0, f"test script: {self.name}"
+        return self.path, 0, f"test script: {self.name}"
 
     def repr_failure(self, excinfo):
         if isinstance(excinfo.value, ScriptError):

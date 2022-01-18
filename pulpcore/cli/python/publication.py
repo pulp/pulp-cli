@@ -7,6 +7,7 @@ from pulpcore.cli.common.generic import (
     href_option,
     list_command,
     publication_filter_options,
+    pulp_group,
     resource_option,
     show_command,
 )
@@ -25,7 +26,7 @@ repository_option = resource_option(
 )
 
 
-@click.group()
+@pulp_group()
 @click.option(
     "-t",
     "--type",

@@ -12,6 +12,7 @@ from pulpcore.cli.common.generic import (
     list_command,
     load_json_callback,
     name_option,
+    pulp_group,
     role_command,
     show_command,
     update_command,
@@ -23,7 +24,7 @@ translation = get_translation(__name__)
 _ = translation.gettext
 
 
-@click.group()
+@pulp_group()
 @click.option(
     "-t",
     "--type",

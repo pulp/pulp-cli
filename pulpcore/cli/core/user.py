@@ -13,6 +13,7 @@ from pulpcore.cli.common.generic import (
     list_command,
     lookup_callback,
     null_callback,
+    pulp_group,
     pulp_option,
     show_command,
     update_command,
@@ -54,7 +55,7 @@ create_options = update_options + [
 ]
 
 
-@click.group()
+@pulp_group()
 @pass_pulp_context
 @click.pass_context
 def user(ctx: click.Context, pulp_ctx: PulpContext) -> None:

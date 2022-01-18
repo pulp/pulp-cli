@@ -16,6 +16,7 @@ from pulpcore.cli.common.generic import (
     href_option,
     list_command,
     name_option,
+    pulp_group,
     resource_option,
     show_command,
 )
@@ -39,7 +40,7 @@ multi_repository_option = resource_option(
 )
 
 
-@click.group()
+@pulp_group()
 def exporter() -> None:
     pass
 

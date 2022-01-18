@@ -3,13 +3,14 @@ import time
 import click
 
 from pulpcore.cli.common.context import PulpContext, pass_pulp_context
+from pulpcore.cli.common.generic import pulp_command
 from pulpcore.cli.common.i18n import get_translation
 
 translation = get_translation(__name__)
 _ = translation.gettext
 
 
-@click.command()
+@pulp_command()
 @click.option("--retries", type=int, default=0, help=_("Number of retries before failing."))
 @click.option("--retry-delay", type=int, default=1, help=_("Seconds to wait between retries."))
 @pass_pulp_context

@@ -16,6 +16,7 @@ from pulpcore.cli.common.generic import (
     destroy_command,
     href_option,
     list_command,
+    pulp_group,
     pulp_option,
     role_command,
 )
@@ -47,7 +48,7 @@ uuid_option = pulp_option(
 )
 
 
-@click.group()
+@pulp_group()
 @pass_pulp_context
 @click.pass_context
 def task(ctx: click.Context, pulp_ctx: PulpContext) -> None:

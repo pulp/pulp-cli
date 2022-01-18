@@ -3,13 +3,12 @@ import os
 import sys
 from typing import IO, Any, ClassVar, Dict, List, Optional
 
-import click
-
 from pulpcore.cli.common.context import (
     EntityDefinition,
     PluginRequirement,
     PulpContext,
     PulpEntityContext,
+    PulpException,
 )
 from pulpcore.cli.common.i18n import get_translation
 
@@ -54,10 +53,10 @@ class PulpArtifactContext(PulpEntityContext):
         # check whether the file exists before uploading
         result = self.list(limit=1, offset=0, parameters={"sha256": sha256_digest})
         if len(result) > 0:
-            click.echo(_("Artifact already exists."), err=True)
+            self.pulp_ctx.echo(_("Artifact already exists."), err=True)
             return result[0]["pulp_href"]
 
-        click.echo(_("Uploading file {filename}").format(filename=file.name), err=True)
+        self.pulp_ctx.echo(_("Uploading file {filename}").format(filename=file.name), err=True)
 
         if chunk_size > size:
             # if chunk_size is bigger than the file size, just upload it directly
@@ -78,9 +77,9 @@ class PulpArtifactContext(PulpEntityContext):
                     start=start,
                 )
                 start += chunk_size
-                click.echo(".", nl=False, err=True)
+                self.pulp_ctx.echo(".", nl=False, err=True)
 
-            click.echo(_("Upload complete. Creating artifact."), err=True)
+            self.pulp_ctx.echo(_("Upload complete. Creating artifact."), err=True)
             task = upload_ctx.commit(
                 upload_href,
                 sha256_digest,
@@ -146,7 +145,7 @@ class PulpGroupPermissionContext(PulpEntityContext):
         for key, value in kwargs.items():
             search_result = [res for res in search_result if res[key] == value]
         if len(search_result) != 1:
-            raise click.ClickException(
+            raise PulpException(
                 _("Could not find {entity} with {kwargs}.").format(
                     entity=self.ENTITY, kwargs=kwargs
                 )

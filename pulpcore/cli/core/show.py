@@ -1,13 +1,14 @@
 import click
 
 from pulpcore.cli.common.context import PulpContext, pass_pulp_context
+from pulpcore.cli.common.generic import pulp_command
 from pulpcore.cli.common.i18n import get_translation
 
 translation = get_translation(__name__)
 _ = translation.gettext
 
 
-@click.command(name="show")
+@pulp_command(name="show")
 @click.option("--href", required=True, help=_("HREF of the entry"))
 @pass_pulp_context
 def show(pulp_ctx: PulpContext, href: str) -> None:

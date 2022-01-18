@@ -13,7 +13,7 @@ from pulpcore.cli.common.context import (
     pass_pulp_context,
     registered_repository_contexts,
 )
-from pulpcore.cli.common.generic import destroy_command, href_option, show_command
+from pulpcore.cli.common.generic import destroy_command, href_option, pulp_group, show_command
 from pulpcore.cli.common.i18n import get_translation
 from pulpcore.cli.core.context import PulpExportContext, PulpExporterContext
 
@@ -76,7 +76,7 @@ def _version_list_callback(
     return result
 
 
-@click.group()
+@pulp_group()
 def export() -> None:
     pass
 

@@ -10,7 +10,7 @@ from pulpcore.cli.common.context import (
     pass_entity_context,
     pass_pulp_context,
 )
-from pulpcore.cli.common.generic import list_command, pulp_option
+from pulpcore.cli.common.generic import list_command, pulp_group, pulp_option
 from pulpcore.cli.common.i18n import get_translation
 from pulpcore.cli.core.context import PulpTaskContext
 
@@ -83,7 +83,7 @@ def task_command(**kwargs: Any) -> click.Command:
         kwargs["name"] = "task"
     decorators = kwargs.pop("decorators", [])
 
-    @click.group(**kwargs)
+    @pulp_group(**kwargs)
     @pass_entity_context
     @pass_pulp_context
     @click.pass_context

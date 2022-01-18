@@ -4,6 +4,7 @@ from typing import Any, Callable, Dict, List, MutableMapping, Optional, TypeVar
 import click
 import toml
 
+from pulpcore.cli.common.generic import pulp_group
 from pulpcore.cli.common.i18n import get_translation
 
 translation = get_translation(__name__)
@@ -132,7 +133,7 @@ def validate_settings(settings: MutableMapping[str, Dict[str, Any]], strict: boo
     return True
 
 
-@click.group(name="config", help=_("Manage pulp-cli config file"))
+@pulp_group(name="config", help=_("Manage pulp-cli config file"))
 def config() -> None:
     pass
 

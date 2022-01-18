@@ -10,6 +10,7 @@ from pulpcore.cli.common.generic import (
     list_command,
     load_file_or_string_callback,
     name_option,
+    pulp_group,
     pulp_option,
     show_command,
     update_command,
@@ -28,7 +29,7 @@ def _uln_url_callback(ctx: click.Context, param: click.Parameter, value: str) ->
     return value
 
 
-@click.group()
+@pulp_group()
 @click.option(
     "-t",
     "--type",

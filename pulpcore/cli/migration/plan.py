@@ -7,6 +7,7 @@ from pulpcore.cli.common.generic import (
     href_option,
     list_command,
     load_json_callback,
+    pulp_group,
     show_command,
 )
 from pulpcore.cli.common.i18n import get_translation
@@ -16,7 +17,7 @@ translation = get_translation(__name__)
 _ = translation.gettext
 
 
-@click.group()
+@pulp_group()
 @pass_pulp_context
 @click.pass_context
 def plan(ctx: click.Context, pulp_ctx: PulpContext) -> None:

@@ -1,7 +1,13 @@
 import click
 
 from pulpcore.cli.common.context import PulpContext, pass_pulp_context
-from pulpcore.cli.common.generic import href_option, list_command, name_option, show_command
+from pulpcore.cli.common.generic import (
+    href_option,
+    list_command,
+    name_option,
+    pulp_group,
+    show_command,
+)
 from pulpcore.cli.common.i18n import get_translation
 from pulpcore.cli.core.context import PulpWorkerContext
 
@@ -9,7 +15,7 @@ translation = get_translation(__name__)
 _ = translation.gettext
 
 
-@click.group()
+@pulp_group()
 @pass_pulp_context
 @click.pass_context
 def worker(ctx: click.Context, pulp_ctx: PulpContext) -> None:

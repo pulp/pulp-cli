@@ -8,6 +8,7 @@ from pulpcore.cli.common.generic import (
     GroupOption,
     href_option,
     list_command,
+    pulp_group,
     pulp_option,
     show_command,
 )
@@ -30,7 +31,7 @@ def _content_callback(ctx: click.Context, param: click.Parameter, value: Any) ->
             entity_ctx.entity = {"digest": value}
 
 
-@click.group()
+@pulp_group()
 @click.option(
     "-t",
     "--type",

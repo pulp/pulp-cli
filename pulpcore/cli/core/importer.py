@@ -8,6 +8,7 @@ from pulpcore.cli.common.generic import (
     href_option,
     list_command,
     name_option,
+    pulp_group,
     show_command,
 )
 from pulpcore.cli.common.i18n import get_translation
@@ -28,7 +29,7 @@ repo_map_option = click.option(
 )
 
 
-@click.group()
+@pulp_group()
 def importer() -> None:
     pass
 

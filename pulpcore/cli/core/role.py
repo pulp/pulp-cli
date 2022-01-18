@@ -10,6 +10,7 @@ from pulpcore.cli.common.generic import (
     href_option,
     list_command,
     name_option,
+    pulp_group,
     show_command,
     update_command,
 )
@@ -65,7 +66,7 @@ create_options = [
 ] + update_options
 
 
-@click.group()
+@pulp_group()
 @pass_pulp_context
 @click.pass_context
 def role(ctx: click.Context, pulp_ctx: PulpContext) -> None:
