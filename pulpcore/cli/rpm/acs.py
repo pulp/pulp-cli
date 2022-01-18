@@ -15,6 +15,7 @@ from pulpcore.cli.common.generic import (
     href_option,
     list_command,
     name_option,
+    pulp_group,
     resource_option,
     show_command,
     update_command,
@@ -31,7 +32,7 @@ path_option = click.option(
 )
 
 
-@click.group()
+@pulp_group()
 @click.option(
     "-t",
     "--type",

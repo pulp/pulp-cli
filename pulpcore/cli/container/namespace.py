@@ -7,6 +7,7 @@ from pulpcore.cli.common.generic import (
     href_option,
     list_command,
     name_option,
+    pulp_group,
     role_command,
     show_command,
 )
@@ -17,7 +18,7 @@ translation = get_translation(__name__)
 _ = translation.gettext
 
 
-@click.group()
+@pulp_group()
 @click.option(
     "-t",
     "--type",

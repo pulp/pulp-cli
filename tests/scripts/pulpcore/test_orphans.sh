@@ -22,7 +22,12 @@ then
   content_href="$(echo "$OUTPUT" | jq -r .pulp_href)"
   expect_succ pulp file content list
   count="$(echo "$OUTPUT" | jq -r length)"
-  expect_succ pulp orphan cleanup --content-hrefs "[\"$content_href\"]"
+  if pulp debug has-plugin --name "core" --min-version "3.15.0"
+  then
+    expect_succ pulp orphan cleanup --protection-time 0 --content-hrefs "[\"$content_href\"]"
+  else
+    expect_succ pulp orphan cleanup --content-hrefs "[\"$content_href\"]"
+  fi
 
   expect_succ pulp file content list
   test "$(echo "$OUTPUT" | jq -r length)" -eq "$((count-1))"

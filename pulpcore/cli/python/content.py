@@ -13,6 +13,7 @@ from pulpcore.cli.common.generic import (
     create_command,
     href_option,
     list_command,
+    pulp_group,
     show_command,
 )
 from pulpcore.cli.common.i18n import get_translation
@@ -34,7 +35,7 @@ def _sha256_artifact_callback(
     return value
 
 
-@click.group()
+@pulp_group()
 @click.option(
     "-t",
     "--type",

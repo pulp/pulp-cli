@@ -1,13 +1,12 @@
-import click
-
 from pulpcore.cli.common.context import PulpContext, pass_pulp_context
+from pulpcore.cli.common.generic import pulp_group
 from pulpcore.cli.common.i18n import get_translation
 
 translation = get_translation(__name__)
 _ = translation.gettext
 
 
-@click.group(deprecated=True)
+@pulp_group(deprecated=True)
 def orphans() -> None:
     """
     Use 'pulp orphan' instead.

@@ -21,6 +21,7 @@ from pulpcore.cli.common.generic import (
     label_select_option,
     list_command,
     name_option,
+    pulp_group,
     pulp_option,
     repository_content_command,
     repository_href_option,
@@ -65,7 +66,7 @@ def _content_callback(
     return value
 
 
-@click.group()
+@pulp_group()
 @click.option(
     "-t",
     "--type",

@@ -30,6 +30,7 @@ from pulpcore.cli.common.generic import (
     list_command,
     load_json_callback,
     name_option,
+    pulp_group,
     repository_content_command,
     resource_option,
     retained_versions_option,
@@ -78,7 +79,7 @@ def _signing_service_callback(ctx: click.Context, param: click.Parameter, value:
     return value
 
 
-@click.group()
+@pulp_group()
 @click.option(
     "-t",
     "--type",

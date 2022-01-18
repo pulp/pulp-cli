@@ -1,14 +1,14 @@
 import click
 
 from pulpcore.cli.common.context import PulpContentContext, PulpContext, pass_pulp_context
-from pulpcore.cli.common.generic import list_command
+from pulpcore.cli.common.generic import list_command, pulp_group
 from pulpcore.cli.common.i18n import get_translation
 
 translation = get_translation(__name__)
 _ = translation.gettext
 
 
-@click.group()
+@pulp_group()
 @pass_pulp_context
 @click.pass_context
 def content(ctx: click.Context, pulp_ctx: PulpContext) -> None:

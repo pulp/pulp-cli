@@ -11,6 +11,7 @@ from pulpcore.cli.common.generic import (
     href_option,
     list_command,
     load_json_callback,
+    pulp_group,
     show_command,
     update_command,
 )
@@ -29,7 +30,7 @@ def _vs_name_callback(ctx: click.Context, param: click.Parameter, value: str) ->
     return value
 
 
-@click.group()
+@pulp_group()
 @pass_pulp_context
 @click.pass_context
 def access_policy(ctx: click.Context, pulp_ctx: PulpContext) -> None:

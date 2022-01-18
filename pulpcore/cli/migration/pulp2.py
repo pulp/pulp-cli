@@ -1,14 +1,14 @@
 import click
 
 from pulpcore.cli.common.context import PulpContext, pass_pulp_context
-from pulpcore.cli.common.generic import href_option, list_command, show_command
+from pulpcore.cli.common.generic import href_option, list_command, pulp_group, show_command
 from pulpcore.cli.migration.context import (
     PulpMigrationPulp2ContentContext,
     PulpMigrationPulp2RepositoryContext,
 )
 
 
-@click.group()
+@pulp_group()
 def pulp2() -> None:
     pass
 

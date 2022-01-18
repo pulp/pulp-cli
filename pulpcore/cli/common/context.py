@@ -2,7 +2,7 @@ import datetime
 import json
 import sys
 import time
-from typing import IO, Any, ClassVar, Dict, List, NamedTuple, Optional, Set, Type, Union
+from typing import Any, ClassVar, Dict, List, NamedTuple, Optional, Set, Type, Union
 
 import click
 import yaml
@@ -44,17 +44,12 @@ class PluginRequirement(NamedTuple):
 new_component_names_to_pre_3_11_names: Dict[str, str] = {}
 
 
-class PulpNoWait(click.ClickException):
-    exit_code = 0
+class PulpException(Exception):
+    pass
 
-    def show(self, file: Optional[IO[str]] = None) -> None:
-        """
-        Format the message into file or STDERR.
-        Overwritten from base class to not print "Error: ".
-        """
-        if file is None:
-            file = click.get_text_stream("stderr")
-        click.echo(self.format_message(), file=file)
+
+class PulpNoWait(Exception):
+    pass
 
 
 class PulpJSONEncoder(json.JSONEncoder):
@@ -67,9 +62,15 @@ class PulpJSONEncoder(json.JSONEncoder):
 
 class PulpContext:
     """
-    Class for the global PulpContext object.
+    Abstract class for the global PulpContext object.
     It is an abstraction layer for api access and output handling.
     """
+
+    def echo(self, message: str, nl: bool = True, err: bool = False) -> None:
+        raise NotImplementedError("PulpContext is an abstract class.")
+
+    def prompt(self, text: str, hide_input: bool = False) -> Any:
+        raise NotImplementedError("PulpContext is an abstract class.")
 
     def __init__(
         self,
@@ -94,11 +95,11 @@ class PulpContext:
     def api(self) -> OpenAPI:
         if self._api is None:
             if self._api_kwargs.get("username") and not self._api_kwargs.get("password"):
-                self._api_kwargs["password"] = click.prompt("password", hide_input=True)
+                self._api_kwargs["password"] = self.prompt("password", hide_input=True)
             try:
                 self._api = OpenAPI(doc_path=f"{self.api_path}docs/api.json", **self._api_kwargs)
             except OpenAPIError as e:
-                raise click.ClickException(str(e))
+                raise PulpException(str(e))
             # Rerun scheduled version checks
             for plugin in self._needed_plugins:
                 self.needs_plugin(plugin)
@@ -117,12 +118,12 @@ class PulpContext:
             output = json.dumps(result, cls=PulpJSONEncoder, indent=(2 if self.isatty else None))
             if PYGMENTS and self.isatty:
                 output = highlight(output, JsonLexer(), Terminal256Formatter(style=PYGMENTS_STYLE))
-            click.echo(output)
+            self.echo(output)
         elif self.format == "yaml":
             output = yaml.dump(result)
             if PYGMENTS and self.isatty:
                 output = highlight(output, YamlLexer(), Terminal256Formatter(style=PYGMENTS_STYLE))
-            click.echo(output)
+            self.echo(output)
         elif self.format == "none":
             pass
         else:
@@ -147,14 +148,14 @@ class PulpContext:
         try:
             result = self.api.call(operation_id, parameters=parameters, body=body, uploads=uploads)
         except OpenAPIError as e:
-            raise click.ClickException(str(e))
+            raise PulpException(str(e))
         except HTTPError as e:
-            raise click.ClickException(str(e.response.text))
+            raise PulpException(str(e.response.text))
         # Asynchronous tasks seem to be reported by a dict containing only one key "task"
         if isinstance(result, dict) and ["task"] == list(result.keys()):
             task_href = result["task"]
             result = self.api.call("tasks_read", parameters={"task_href": task_href})
-            click.echo(
+            self.echo(
                 _("Started background task {task_href}").format(task_href=task_href), err=True
             )
             if not non_blocking:
@@ -164,7 +165,7 @@ class PulpContext:
             result = self.api.call(
                 "task_groups_read", parameters={"task_group_href": task_group_href}
             )
-            click.echo(
+            self.echo(
                 _("Started background task group {task_group_href}").format(
                     task_group_href=task_group_href
                 ),
@@ -174,21 +175,21 @@ class PulpContext:
                 result = self.wait_for_task_group(result)
         return result
 
-    @staticmethod
-    def _check_task_finished(task: EntityDefinition) -> bool:
+    @classmethod
+    def _check_task_finished(cls, task: EntityDefinition) -> bool:
         task_href = task["pulp_href"]
 
         if task["state"] == "completed":
             return True
         elif task["state"] == "failed":
-            raise click.ClickException(
+            raise PulpException(
                 _("Task {task_href} failed: '{description}'").format(
                     task_href=task_href,
                     description=task["error"].get("description") or task["error"].get("reason"),
                 )
             )
         elif task["state"] == "canceled":
-            raise click.ClickException(_("Task {task_href} canceled").format(task_href=task_href))
+            raise PulpException(_("Task {task_href} canceled").format(task_href=task_href))
         elif task["state"] in ["waiting", "running", "canceling"]:
             return False
         else:
@@ -197,7 +198,7 @@ class PulpContext:
     def _poll_task(self, task: EntityDefinition) -> EntityDefinition:
         while True:
             if self._check_task_finished(task):
-                click.echo("Done.", err=True)
+                self.echo("Done.", err=True)
                 return task
             else:
                 if self.timeout:
@@ -209,14 +210,14 @@ class PulpContext:
                             )
                         )
                 time.sleep(1)
-                click.echo(".", nl=False, err=True)
+                self.echo(".", nl=False, err=True)
                 task = self.api.call("tasks_read", parameters={"task_href": task["pulp_href"]})
 
     def wait_for_task(self, task: EntityDefinition) -> Any:
         """
         Wait for a task to finish and return the finished task object.
 
-        Raise `click.ClickException` on timeout, background, ctrl-c, if task failed or was canceled.
+        Raise `PulpNoWait` on timeout, background, ctrl-c, if task failed or was canceled.
         """
         self.start_time = datetime.datetime.now()
 
@@ -232,8 +233,7 @@ class PulpContext:
         """
         Wait for a task group to finish and return the finished task object.
 
-        Raise `click.ClickException` on timeout, background, ctrl-c, if tasks failed or were
-        canceled.
+        Raise `PulpNoWait` on timeout, background, ctrl-c, if tasks failed or were canceled.
         """
         self.start_time = datetime.datetime.now()
 
@@ -246,7 +246,7 @@ class PulpContext:
                         task = self.api.call(
                             "tasks_read", parameters={"task_href": task["pulp_href"]}
                         )
-                        click.echo(
+                        self.echo(
                             _("Waiting for task {task_href}").format(task_href=task["pulp_href"]),
                             err=True,
                         )
@@ -262,7 +262,7 @@ class PulpContext:
                                 )
                             )
                     time.sleep(1)
-                    click.echo(".", nl=False, err=True)
+                    self.echo(".", nl=False, err=True)
                     task_group = self.api.call(
                         "task_group_read", parameters={"task_group_href": task_group["pulp_href"]}
                     )
@@ -318,7 +318,7 @@ class PulpContext:
                         " which is needed to use {feature}."
                         " See 'pulp status' for installed components."
                     )
-                raise click.ClickException(msg.format(specifier=specifier, feature=feature))
+                raise PulpException(msg.format(specifier=specifier, feature=feature))
         else:
             # Schedule for later checking
             self._needed_plugins.append(plugin)
@@ -336,6 +336,7 @@ class PulpEntityContext:
     ENTITIES: ClassVar[str] = _("entities")
     HREF: ClassVar[str]
     ID_PREFIX: ClassVar[str]
+    # Set of fields that can be cleared by sending 'null'
     NULLABLES: ClassVar[Set[str]] = set()
     # Subclasses can specify version dependent capabilities here
     # e.g. `CAPABILITIES = {
@@ -366,7 +367,7 @@ class PulpEntityContext:
         """
         if self._entity is None:
             if not self._entity_lookup:
-                raise click.ClickException(
+                raise PulpException(
                     _("A {entity} must be specified for this command.").format(entity=self.ENTITY)
                 )
             if "pulp_href" in self._entity_lookup:
@@ -470,21 +471,23 @@ class PulpEntityContext:
                 break
             payload["offset"] += payload["limit"]
         else:
-            click.echo(_("Not all {count} entries were shown.").format(count=count), err=True)
+            self.pulp_ctx.echo(
+                _("Not all {count} entries were shown.").format(count=count), err=True
+            )
         return entities
 
     def find(self, **kwargs: Any) -> Any:
         search_result = self.list(limit=1, offset=0, parameters=kwargs)
         if len(search_result) != 1:
-            raise click.ClickException(
+            raise PulpException(
                 _("Could not find {entity} with {kwargs}.").format(
                     entity=self.ENTITY, kwargs=kwargs
                 )
             )
         return search_result[0]
 
-    def show(self, href: str) -> Any:
-        return self.call("read", parameters={self.HREF: href})
+    def show(self, href: Optional[str] = None) -> Any:
+        return self.call("read", parameters={self.HREF: href or self.pulp_href})
 
     def create(
         self,
@@ -509,8 +512,8 @@ class PulpEntityContext:
 
     def update(
         self,
-        href: str,
-        body: EntityDefinition,
+        href: Optional[str] = None,
+        body: Optional[EntityDefinition] = None,
         parameters: Optional[Dict[str, Any]] = None,
         uploads: Optional[Dict[str, Any]] = None,
         non_blocking: bool = False,
@@ -519,7 +522,7 @@ class PulpEntityContext:
         if not hasattr(self, "ID_PREFIX") and not hasattr(self, "PARTIAL_UPDATE_ID"):
             self.PARTIAL_UPDATE_ID = getattr(self, "UPDATE_ID")
         # ----------------------------------------------------------
-        _parameters = {self.HREF: href}
+        _parameters = {self.HREF: href or self.pulp_href}
         if parameters:
             _parameters.update(parameters)
         return self.call(
@@ -530,8 +533,10 @@ class PulpEntityContext:
             non_blocking=non_blocking,
         )
 
-    def delete(self, href: str, non_blocking: bool = False) -> Any:
-        return self.call("delete", parameters={self.HREF: href}, non_blocking=non_blocking)
+    def delete(self, href: Optional[str] = None, non_blocking: bool = False) -> Any:
+        return self.call(
+            "delete", parameters={self.HREF: href or self.pulp_href}, non_blocking=non_blocking
+        )
 
     def set_label(self, href: str, key: str, value: str, non_blocking: bool = False) -> Any:
         labels = self.show(href)["pulp_labels"]
@@ -548,7 +553,7 @@ class PulpEntityContext:
         try:
             return entity["pulp_labels"][key]
         except KeyError:
-            raise click.ClickException(_("Could not find label with key '{key}'.").format(key=key))
+            raise PulpException(_("Could not find label with key '{key}'.").format(key=key))
 
     def my_permissions(self) -> Any:
         self.needs_capability("roles")
@@ -584,7 +589,7 @@ class PulpEntityContext:
             for pr in self.CAPABILITIES[capability]:
                 self.pulp_ctx.needs_plugin(pr)
         else:
-            raise click.ClickException(
+            raise PulpException(
                 _("Capability '{capability}' needed on '{entity}' for this command.").format(
                     capability=capability, entity=self.ENTITY
                 )
@@ -628,8 +633,8 @@ class PulpRepositoryVersionContext(PulpEntityContext):
     def scope(self) -> Dict[str, Any]:
         return {self.repository_ctx.HREF: self.repository_ctx.pulp_href}
 
-    def repair(self, href: str) -> Any:
-        return self.call("repair", parameters={self.HREF: href})
+    def repair(self, href: Optional[str]) -> Any:
+        return self.call("repair", parameters={self.HREF: href or self.pulp_href})
 
 
 class PulpRepositoryContext(PulpEntityContext):
@@ -693,6 +698,7 @@ EntityFieldDefinition = Union[None, str, PulpEntityContext]
 
 ##############################################################################
 # Decorator to access certain contexts
+# DEPRECATED These are moved to generic.py and will be removed here.
 
 
 pass_pulp_context = click.make_pass_decorator(PulpContext)

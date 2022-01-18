@@ -1,16 +1,14 @@
 from typing import Any
 
-import click
-
 from pulpcore.cli.common.context import PluginRequirement, PulpContext, pass_pulp_context
-from pulpcore.cli.common.generic import load_json_callback, pulp_option
+from pulpcore.cli.common.generic import load_json_callback, pulp_group, pulp_option
 from pulpcore.cli.common.i18n import get_translation
 
 translation = get_translation(__name__)
 _ = translation.gettext
 
 
-@click.group()
+@pulp_group()
 def orphan() -> None:
     """
     Handle orphaned content.

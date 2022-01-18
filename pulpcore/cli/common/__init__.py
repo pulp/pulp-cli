@@ -13,8 +13,9 @@ except ImportError:
     HAS_CLICK_SHELL = False
 
 from pulpcore.cli.common.config import CONFIG_LOCATIONS, config, config_options, validate_config
-from pulpcore.cli.common.context import PluginRequirement, PulpContext
+from pulpcore.cli.common.context import PluginRequirement
 from pulpcore.cli.common.debug import debug
+from pulpcore.cli.common.generic import PulpCLIContext, pulp_group
 from pulpcore.cli.common.i18n import get_translation
 
 __version__ = "0.15.0.dev"
@@ -74,7 +75,7 @@ def _config_callback(ctx: click.Context, param: Any, value: Optional[str]) -> No
         raise click.ClickException(_("Aborted."))
 
 
-@click.group()
+@pulp_group()
 @click.version_option(prog_name=_("pulp3 command line interface"), package_name="pulp-cli")
 @click.option(
     "--profile",
@@ -133,7 +134,7 @@ def main(
         debug_callback=_debug_callback,
         user_agent=f"Pulp-CLI/{__version__}",
     )
-    ctx.obj = PulpContext(
+    ctx.obj = PulpCLIContext(
         api_root=api_root,
         api_kwargs=api_kwargs,
         format=format,
