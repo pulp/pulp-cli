@@ -7,7 +7,7 @@ pulp debug has-plugin --name "file" || exit 3
 
 cleanup() {
   pulp file repository destroy --name "cli_test_file_repository" || true
-  pulp orphans delete || true
+  pulp orphan cleanup || true
 }
 trap cleanup EXIT
 

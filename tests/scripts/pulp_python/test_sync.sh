@@ -8,7 +8,7 @@ pulp debug has-plugin --name "python" || exit 3
 cleanup() {
   pulp python remote destroy --name "cli_test_python_remote" || true
   pulp python repository destroy --name "cli_test_python_repository" || true
-  pulp orphans delete || true
+  pulp orphan cleanup || true
 }
 trap cleanup EXIT
 
