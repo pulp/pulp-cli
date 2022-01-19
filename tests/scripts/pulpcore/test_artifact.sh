@@ -4,7 +4,7 @@
 . "$(dirname "$(dirname "$(realpath "$0")")")"/config.source
 
 cleanup() {
-  pulp orphans delete
+  pulp orphan cleanup
 }
 trap cleanup EXIT
 

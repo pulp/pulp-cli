@@ -8,7 +8,7 @@ pulp debug has-plugin --name "python" || exit 3
 cleanup() {
   rm "shelf-reader-0.1.tar.gz"
   pulp python repository destroy --name "cli_test_python_repository" || true
-  pulp orphans delete || true
+  pulp orphan cleanup || true
 }
 trap cleanup EXIT
 
