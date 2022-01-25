@@ -1,4 +1,5 @@
-from typing import Any
+import re
+from typing import Any, Optional
 
 import click
 
@@ -21,6 +22,24 @@ _ = translation.gettext
 # Generic reusable commands
 
 
+def _task_group_filter_callback(
+    ctx: click.Context, param: click.Parameter, value: Optional[str]
+) -> Optional[str]:
+    if value is not None:
+        # Example: "/pulp/api/v3/task-groups/a69230d2-506e-44c7-9c46-e64a905f85e7/"
+        match = re.match(
+            r"(/pulp/api/v3/task-groups/)?"
+            r"([0-9a-f]{8})-?([0-9a-f]{4})-?([0-9a-f]{4})-?([0-9a-f]{4})-?([0-9a-f]{12})/?",
+            value,
+        )
+        if match:
+            value = "/pulp/api/v3/task-groups/{}-{}-{}-{}-{}/".format(*match.group(2, 3, 4, 5, 6))
+        else:
+            raise click.ClickException(_("Either an href or a UUID must be provided."))
+
+    return value
+
+
 task_filter = [
     click.option("--name", help=_("List only tasks with this name.")),
     click.option(
@@ -41,6 +60,11 @@ task_filter = [
             case_sensitive=False,
         ),
         help=_("List only tasks in this state."),
+    ),
+    click.option(
+        "--task-group",
+        help=_("List only tasks in this task group. Provide pulp_href or UUID."),
+        callback=_task_group_filter_callback,
     ),
 ]
 
