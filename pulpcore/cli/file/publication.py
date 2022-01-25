@@ -8,6 +8,7 @@ from pulpcore.cli.common.generic import (
     list_command,
     publication_filter_options,
     resource_option,
+    role_command,
     show_command,
 )
 from pulpcore.cli.common.i18n import get_translation
@@ -57,3 +58,4 @@ publication.add_command(list_command(decorators=publication_filter_options))
 publication.add_command(show_command(decorators=lookup_options))
 publication.add_command(create_command(decorators=create_options))
 publication.add_command(destroy_command(decorators=lookup_options))
+publication.add_command(role_command(decorators=lookup_options))

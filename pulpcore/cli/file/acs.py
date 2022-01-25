@@ -16,6 +16,7 @@ from pulpcore.cli.common.generic import (
     list_command,
     name_option,
     resource_option,
+    role_command,
     show_command,
     update_command,
 )
@@ -111,6 +112,7 @@ acs.add_command(show_command(decorators=lookup_options))
 acs.add_command(create_command(decorators=create_options))
 acs.add_command(update_command(decorators=lookup_options + update_options))
 acs.add_command(destroy_command(decorators=lookup_options))
+acs.add_command(role_command(decorators=lookup_options))
 
 
 @acs.command()

@@ -12,6 +12,7 @@ from pulpcore.cli.common.generic import (
     list_command,
     name_option,
     resource_option,
+    role_command,
     show_command,
     update_command,
 )
@@ -73,3 +74,4 @@ distribution.add_command(create_command(decorators=create_options))
 distribution.add_command(update_command(decorators=lookup_options + update_options))
 distribution.add_command(destroy_command(decorators=lookup_options))
 distribution.add_command(label_command())
+distribution.add_command(role_command(decorators=lookup_options))
