@@ -21,6 +21,7 @@ class PulpFileACSContext(PulpEntityContext):
     ENTITIES = _("file ACSes")
     HREF = "file_file_alternate_content_source_href"
     ID_PREFIX = "acs_file_file"
+    CAPABILITIES = {"roles": [PluginRequirement("file", min="1.11.0.dev")]}
 
     def refresh(self, href: str) -> Any:
         return self.call("refresh", parameters={self.HREF: href})
@@ -39,6 +40,7 @@ class PulpFileDistributionContext(PulpEntityContext):
     HREF = "file_file_distribution_href"
     ID_PREFIX = "distributions_file_file"
     NULLABLES = {"publication", "repository"}
+    CAPABILITIES = {"roles": [PluginRequirement("file", min="1.11.0.dev")]}
 
     def preprocess_body(self, body: EntityDefinition) -> EntityDefinition:
         body = super().preprocess_body(body)
@@ -55,6 +57,7 @@ class PulpFilePublicationContext(PulpEntityContext):
     ENTITIES = _("file publications")
     HREF = "file_file_publication_href"
     ID_PREFIX = "publications_file_file"
+    CAPABILITIES = {"roles": [PluginRequirement("file", min="1.11.0.dev")]}
 
     def preprocess_body(self, body: EntityDefinition) -> EntityDefinition:
         body = super().preprocess_body(body)
@@ -70,6 +73,7 @@ class PulpFileRemoteContext(PulpRemoteContext):
     ENTITIES = _("file remotes")
     HREF = "file_file_remote_href"
     ID_PREFIX = "remotes_file_file"
+    CAPABILITIES = {"roles": [PluginRequirement("file", min="1.11.0.dev")]}
 
 
 class PulpFileRepositoryVersionContext(PulpRepositoryVersionContext):
@@ -81,7 +85,10 @@ class PulpFileRepositoryContext(PulpRepositoryContext):
     HREF = "file_file_repository_href"
     ID_PREFIX = "repositories_file_file"
     VERSION_CONTEXT = PulpFileRepositoryVersionContext
-    CAPABILITIES = {"pulpexport": [PluginRequirement("file")]}
+    CAPABILITIES = {
+        "pulpexport": [PluginRequirement("file")],
+        "roles": [PluginRequirement("file", min="1.11.0.dev")],
+    }
 
 
 registered_repository_contexts["file:file"] = PulpFileRepositoryContext

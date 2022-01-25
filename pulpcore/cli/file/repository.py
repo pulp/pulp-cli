@@ -30,6 +30,7 @@ from pulpcore.cli.common.generic import (
     repository_option,
     resource_option,
     retained_versions_option,
+    role_command,
     show_command,
     update_command,
     version_command,
@@ -164,6 +165,7 @@ repository.add_command(
         modify_decorators=modify_options,
     )
 )
+repository.add_command(role_command(decorators=lookup_options))
 
 
 @repository.command()
