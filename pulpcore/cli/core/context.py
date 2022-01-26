@@ -228,8 +228,8 @@ class PulpGroupUserContext(PulpEntityContext):
 class PulpContentGuardContext(PulpEntityContext):
     ENTITY = "content guard"
     ENTITIES = "content guards"
-    HREF_PATTERN = r"^/pulp/api/v3/contentguards/(?P<plugin>\w+)/(?P<resource_type>\w+)/"
     ID_PREFIX = "contentguards"
+    HREF_PATTERN = r"contentguards/(?P<plugin>\w+)/(?P<resource_type>\w+)/"
 
 
 class PulpImporterContext(PulpEntityContext):

@@ -375,6 +375,9 @@ def resource_option(*args: Any, **kwargs: Any) -> Callable[[_FC], _FC]:
         pulp_href: Optional[str] = None
         entity: Optional[EntityDefinition] = None
 
+        pulp_ctx = ctx.find_object(PulpContext)
+        assert pulp_ctx is not None
+
         if value.startswith("/"):
             # An href was passed
             if href_pattern is None:
@@ -383,7 +386,8 @@ def resource_option(*args: Any, **kwargs: Any) -> Callable[[_FC], _FC]:
                         option_name=param.name
                     )
                 )
-            match = re.match(href_pattern, value)
+            pattern = rf"^{pulp_ctx.api_path}{href_pattern}"
+            match = re.match(pattern, value)
             if match is None:
                 raise click.ClickException(
                     _("'{value}' is not a valid href for {option_name}.").format(
@@ -427,8 +431,6 @@ def resource_option(*args: Any, **kwargs: Any) -> Callable[[_FC], _FC]:
                     "is not valid for the {option_name} option."
                 ).format(plugin=plugin, resource_type=resource_type, option_name=param.name)
             )
-        pulp_ctx = ctx.find_object(PulpContext)
-        assert pulp_ctx is not None
         entity_ctx: PulpEntityContext = context_class(pulp_ctx, pulp_href=pulp_href, entity=entity)
 
         if capabilities is not None:

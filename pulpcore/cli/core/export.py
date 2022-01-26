@@ -25,12 +25,15 @@ def _version_list_callback(
     ctx: click.Context, param: click.Parameter, value: Iterable[Tuple[str, int]]
 ) -> Iterable[PulpRepositoryVersionContext]:
     result = []
+    pulp_ctx = ctx.find_object(PulpContext)
+    assert pulp_ctx is not None
     for item in value:
         pulp_href: Optional[str] = None
         entity: Optional[EntityDefinition] = None
 
         if item[0].startswith("/"):
-            match = re.match(PulpRepositoryContext.HREF_PATTERN, item[0])
+            pattern = rf"^{pulp_ctx.api_path}{PulpRepositoryContext.HREF_PATTERN}"
+            match = re.match(pattern, item[0])
             if match is None:
                 raise click.ClickException(
                     _("'{value}' is not a valid href for {option_name}.").format(
@@ -54,8 +57,6 @@ def _version_list_callback(
                     "is not valid for the {option_name} option."
                 ).format(plugin=plugin, resource_type=resource_type, option_name=param.name)
             )
-        pulp_ctx = ctx.find_object(PulpContext)
-        assert pulp_ctx is not None
         repository_ctx: PulpRepositoryContext = context_class(
             pulp_ctx, pulp_href=pulp_href, entity=entity
         )

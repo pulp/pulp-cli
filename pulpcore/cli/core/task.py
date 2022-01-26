@@ -35,7 +35,7 @@ def _uuid_callback(
     if value is not None:
         entity_ctx = ctx.find_object(PulpEntityContext)
         assert entity_ctx is not None
-        entity_ctx.pulp_href = f"/pulp/api/v3/tasks/{value}/"
+        entity_ctx.pulp_href = f"{entity_ctx.pulp_ctx.api_path}tasks/{value}/"
     return value
 
 
@@ -125,7 +125,7 @@ def cancel(
         try:
             pulp_ctx.wait_for_task(entity)
         except Exception as e:
-            if not re.match("Task /pulp/api/v3/tasks/[-0-9a-f]*/ canceled", str(e)):
+            if not re.match(rf"Task {pulp_ctx.api_path}tasks/[-0-9a-f]*/ canceled", str(e)):
                 raise e
         click.echo(_("Done."), err=True)
 

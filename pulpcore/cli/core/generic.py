@@ -26,14 +26,19 @@ def _task_group_filter_callback(
     ctx: click.Context, param: click.Parameter, value: Optional[str]
 ) -> Optional[str]:
     if value is not None:
+        pulp_ctx = ctx.find_object(PulpContext)
+        assert pulp_ctx is not None
+
         # Example: "/pulp/api/v3/task-groups/a69230d2-506e-44c7-9c46-e64a905f85e7/"
         match = re.match(
-            r"(/pulp/api/v3/task-groups/)?"
+            rf"({pulp_ctx.api_path}task-groups/)?"
             r"([0-9a-f]{8})-?([0-9a-f]{4})-?([0-9a-f]{4})-?([0-9a-f]{4})-?([0-9a-f]{12})/?",
             value,
         )
         if match:
-            value = "/pulp/api/v3/task-groups/{}-{}-{}-{}-{}/".format(*match.group(2, 3, 4, 5, 6))
+            value = "{}task-groups/{}-{}-{}-{}-{}/".format(
+                pulp_ctx.api_path, *match.group(2, 3, 4, 5, 6)
+            )
         else:
             raise click.ClickException(_("Either an href or a UUID must be provided."))
 
