@@ -72,9 +72,15 @@ class PulpContext:
     """
 
     def __init__(
-        self, api_kwargs: Dict[str, Any], format: str, background_tasks: bool, timeout: int
+        self,
+        api_path: str,
+        api_kwargs: Dict[str, Any],
+        format: str,
+        background_tasks: bool,
+        timeout: int,
     ) -> None:
         self._api: Optional[OpenAPI] = None
+        self.api_path: str = api_path
         self._api_kwargs = api_kwargs
         self._needed_plugins: List[PluginRequirement] = []
         self.isatty: bool = sys.stdout.isatty()
@@ -90,7 +96,7 @@ class PulpContext:
             if self._api_kwargs.get("username") and not self._api_kwargs.get("password"):
                 self._api_kwargs["password"] = click.prompt("password", hide_input=True)
             try:
-                self._api = OpenAPI(**self._api_kwargs)
+                self._api = OpenAPI(doc_path=f"{self.api_path}docs/api.json", **self._api_kwargs)
             except OpenAPIError as e:
                 raise click.ClickException(str(e))
             # Rerun scheduled version checks
@@ -496,7 +502,7 @@ class PulpEntityContext:
             uploads=uploads,
             non_blocking=non_blocking,
         )
-        if not non_blocking and result["pulp_href"].startswith("/pulp/api/v3/tasks/"):
+        if not non_blocking and result["pulp_href"].startswith(self.pulp_ctx.api_path + "tasks/"):
             result = self.show(result["created_resources"][0])
         return result
 
@@ -576,7 +582,7 @@ class PulpRemoteContext(PulpEntityContext):
 
     ENTITY = _("remote")
     ENTITIES = _("remotes")
-    HREF_PATTERN = r"^/pulp/api/v3/remotes/(?P<plugin>\w+)/(?P<resource_type>\w+)/"
+    HREF_PATTERN = r"remotes/(?P<plugin>\w+)/(?P<resource_type>\w+)/"
     NULLABLES = {
         "ca_cert",
         "client_cert",
@@ -619,7 +625,7 @@ class PulpRepositoryContext(PulpEntityContext):
 
     ENTITY = _("repository")
     ENTITIES = _("repositories")
-    HREF_PATTERN = r"^/pulp/api/v3/repositories/(?P<plugin>\w+)/(?P<resource_type>\w+)/"
+    HREF_PATTERN = r"repositories/(?P<plugin>\w+)/(?P<resource_type>\w+)/"
     ID_PREFIX = "repositories"
     VERSION_CONTEXT: ClassVar[Type[PulpRepositoryVersionContext]]
     NULLABLES = {"description", "retain_repo_versions"}

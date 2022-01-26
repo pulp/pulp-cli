@@ -104,6 +104,7 @@ def _config_callback(ctx: click.Context, param: Any, value: Optional[str]) -> No
 def main(
     ctx: click.Context,
     base_url: str,
+    api_path: str,
     username: Optional[str],
     password: Optional[str],
     cert: Optional[str],
@@ -122,7 +123,6 @@ def main(
 
     api_kwargs = dict(
         base_url=base_url,
-        doc_path="/pulp/api/v3/docs/api.json",
         username=username,
         password=password,
         cert=cert,
@@ -134,7 +134,11 @@ def main(
         user_agent=f"Pulp-CLI/{__version__}",
     )
     ctx.obj = PulpContext(
-        api_kwargs=api_kwargs, format=format, background_tasks=background, timeout=timeout
+        api_path=api_path,
+        api_kwargs=api_kwargs,
+        format=format,
+        background_tasks=background,
+        timeout=timeout,
     )
     ctx.obj.needs_plugin(PluginRequirement("core", min="3.11"))
 
