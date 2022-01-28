@@ -38,7 +38,7 @@ then
   "${CONTAINER_RUNTIME}" build --file "${BASEPATH}/assets/${CONTAINER_FILE}" --build-arg FROM_TAG="${FROM_TAG}" --tag pulp/pulp:"${IMAGE_TAG}" .
 fi
 
-"${CONTAINER_RUNTIME}" run ${RM:+--rm} --detach --name "pulp-ephemeral" --volume "${BASEPATH}/settings:/etc/pulp" --publish "8080:80" "pulp/pulp:${IMAGE_TAG}"
+"${CONTAINER_RUNTIME}" run ${RM:+--rm} --detach --name "pulp-ephemeral" --volume "${BASEPATH}/settings:/etc/pulp" --publish "8080:80" "ghcr.io/pulp/pulp:${IMAGE_TAG}"
 
 # shellcheck disable=SC2064
 trap "${CONTAINER_RUNTIME} stop pulp-ephemeral" EXIT
