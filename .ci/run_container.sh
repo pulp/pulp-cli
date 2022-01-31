@@ -35,7 +35,7 @@ FROM_TAG="${FROM_TAG:-latest}"
 
 if [ "${CONTAINER_FILE:+x}" ]
 then
-  "${CONTAINER_RUNTIME}" build --file "${BASEPATH}/assets/${CONTAINER_FILE}" --build-arg FROM_TAG="${FROM_TAG}" --tag pulp/pulp:"${IMAGE_TAG}" .
+  "${CONTAINER_RUNTIME}" build --file "${BASEPATH}/assets/${CONTAINER_FILE}" --build-arg FROM_TAG="${FROM_TAG}" --tag ghcr.io/pulp/pulp:"${IMAGE_TAG}" .
 fi
 
 "${CONTAINER_RUNTIME}" run ${RM:+--rm} --detach --name "pulp-ephemeral" --volume "${BASEPATH}/settings:/etc/pulp" --publish "8080:80" "ghcr.io/pulp/pulp:${IMAGE_TAG}"
