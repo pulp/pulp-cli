@@ -328,7 +328,7 @@ def create_content_json_callback(
 
 
 # based on https://stackoverflow.com/a/42865957/2002471
-units = {"B": 1, "KB": 10 ** 3, "MB": 10 ** 6, "GB": 10 ** 9, "TB": 10 ** 12}
+units = {"B": 1, "KB": 10**3, "MB": 10**6, "GB": 10**9, "TB": 10**12}
 
 
 def parse_size_callback(ctx: click.Context, param: click.Parameter, value: str) -> int:
