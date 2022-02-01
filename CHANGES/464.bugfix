@@ -1,0 +1,1 @@
+Fixed a bug in reporting the failure of a task if the reason was not an exception in the task code.
