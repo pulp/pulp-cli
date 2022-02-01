@@ -183,7 +183,8 @@ class PulpContext:
         elif task["state"] == "failed":
             raise click.ClickException(
                 _("Task {task_href} failed: '{description}'").format(
-                    task_href=task_href, description=task["error"]["description"]
+                    task_href=task_href,
+                    description=task["error"].get("description") or task["error"].get("reason"),
                 )
             )
         elif task["state"] == "canceled":
