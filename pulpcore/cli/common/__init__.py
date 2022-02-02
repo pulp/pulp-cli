@@ -80,6 +80,7 @@ def _config_callback(ctx: click.Context, param: Any, value: Optional[str]) -> No
 @click.option(
     "--profile",
     "-p",
+    envvar="PULP_CLI_PROFILE",
     help=_("Config profile to use"),
     callback=_config_profile_callback,
     expose_value=False,
