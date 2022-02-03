@@ -30,6 +30,7 @@ from pulpcore.cli.common.generic import (
 )
 from pulpcore.cli.common.i18n import get_translation
 from pulpcore.cli.container.context import (
+    PulpContainerBaseRepositoryContext,
     PulpContainerPushRepositoryContext,
     PulpContainerRemoteContext,
     PulpContainerRepositoryContext,
@@ -142,24 +143,17 @@ def sync(
 @click.option("--digest", help=_("SHA256 digest of the Manifest file"), required=True)
 @pass_repository_context
 def add_tag(
-    repository_ctx: PulpRepositoryContext,
+    repository_ctx: PulpContainerBaseRepositoryContext,
     digest: str,
     tag: str,
 ) -> None:
-    if not repository_ctx.capable("tag"):
-        raise click.ClickException(_("pulp_container 2.3.0 is required to tag images"))
-
     digest = digest.strip()
     if not digest.startswith("sha256:"):
         digest = f"sha256:{digest}"
     if len(digest) != 71:  # len("sha256:") + 64
         raise click.ClickException("Improper SHA256, please provide a valid 64 digit digest.")
 
-    repository_ctx.call(
-        "tag",
-        parameters={repository_ctx.HREF: repository_ctx.pulp_href},
-        body={"tag": tag, "digest": digest},
-    )
+    repository_ctx.tag(tag, digest)
 
 
 @repository.command(name="untag")
@@ -167,12 +161,5 @@ def add_tag(
 @href_option
 @click.option("--tag", help=_("Name of tag to remove"), required=True, callback=_tag_callback)
 @pass_repository_context
-def remove_tag(repository_ctx: PulpRepositoryContext, tag: str) -> None:
-    if not repository_ctx.capable("tag"):
-        raise click.ClickException(_("pulp_container 2.3.0 is required to untag images"))
-
-    repository_ctx.call(
-        "untag",
-        parameters={repository_ctx.HREF: repository_ctx.pulp_href},
-        body={"tag": tag},
-    )
+def remove_tag(repository_ctx: PulpContainerBaseRepositoryContext, tag: str) -> None:
+    repository_ctx.untag(tag)

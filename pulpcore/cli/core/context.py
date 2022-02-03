@@ -117,6 +117,7 @@ class PulpGroupContext(PulpEntityContext):
     # Handled by a workaround
     # HREF = "group_href"
     ID_PREFIX = "groups"
+    CAPABILITIES = {"roles": [PluginRequirement("core", "3.17.0")]}
 
     @property
     def HREF(self) -> str:  # type:ignore
@@ -245,6 +246,7 @@ class PulpRbacContentGuardContext(PulpContentGuardContext):
     HREF = "r_b_a_c_content_guard_href"
     ID_PREFIX = "contentguards_core_rbac"
     DOWNLOAD_ROLE: ClassVar[str] = "core.rbaccontentguard_downloader"
+    CAPABILITIES = {"roles": [PluginRequirement("core", "3.17.0")]}
 
     def assign(self, href: str, users: Optional[List[str]], groups: Optional[List[str]]) -> Any:
         if self.pulp_ctx.has_plugin(PluginRequirement("core", min="3.17.0.dev")):
@@ -285,6 +287,7 @@ class PulpTaskContext(PulpEntityContext):
     ENTITIES = _("tasks")
     HREF = "task_href"
     ID_PREFIX = "tasks"
+    CAPABILITIES = {"roles": [PluginRequirement("core", "3.17.0")]}
 
     resource_context: Optional[PulpEntityContext] = None
 

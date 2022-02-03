@@ -1,3 +1,5 @@
+from typing import Any
+
 from pulpcore.cli.common.context import (
     EntityDefinition,
     PluginRequirement,
@@ -76,7 +78,25 @@ class PulpContainerPushRepositoryVersionContext(PulpRepositoryVersionContext):
     ID_PREFIX = "repositories_container_container_push_versions"
 
 
-class PulpContainerRepositoryContext(PulpRepositoryContext):
+class PulpContainerBaseRepositoryContext(PulpRepositoryContext):
+    def tag(self, tag: str, digest: str) -> Any:
+        self.needs_capability("tag")
+        return self.call(
+            "tag",
+            parameters={self.HREF: self.pulp_href},
+            body={"tag": tag, "digest": digest},
+        )
+
+    def untag(self, tag: str) -> Any:
+        self.needs_capability("tag")
+        return self.call(
+            "untag",
+            parameters={self.HREF: self.pulp_href},
+            body={"tag": tag},
+        )
+
+
+class PulpContainerRepositoryContext(PulpContainerBaseRepositoryContext):
     HREF = "container_container_repository_href"
     ID_PREFIX = "repositories_container_container"
     VERSION_CONTEXT = PulpContainerRepositoryVersionContext
@@ -87,7 +107,7 @@ class PulpContainerRepositoryContext(PulpRepositoryContext):
     }
 
 
-class PulpContainerPushRepositoryContext(PulpRepositoryContext):
+class PulpContainerPushRepositoryContext(PulpContainerBaseRepositoryContext):
     HREF = "container_container_push_repository_href"
     ID_PREFIX = "repositories_container_container_push"
     VERSION_CONTEXT = PulpContainerPushRepositoryVersionContext

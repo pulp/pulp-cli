@@ -551,12 +551,15 @@ class PulpEntityContext:
             raise click.ClickException(_("Could not find label with key '{key}'.").format(key=key))
 
     def my_permissions(self) -> Any:
+        self.needs_capability("roles")
         return self.call("my_permissions", parameters={self.HREF: self.pulp_href})
 
     def list_roles(self) -> Any:
+        self.needs_capability("roles")
         return self.call("list_roles", parameters={self.HREF: self.pulp_href})
 
     def add_role(self, role: str, users: List[str], groups: List[str]) -> Any:
+        self.needs_capability("roles")
         return self.call(
             "add_role",
             parameters={self.HREF: self.pulp_href},
@@ -564,6 +567,7 @@ class PulpEntityContext:
         )
 
     def remove_role(self, role: str, users: List[str], groups: List[str]) -> Any:
+        self.needs_capability("roles")
         return self.call(
             "remove_role",
             parameters={self.HREF: self.pulp_href},
@@ -574,6 +578,17 @@ class PulpEntityContext:
         return capability in self.CAPABILITIES and all(
             (self.pulp_ctx.has_plugin(pr) for pr in self.CAPABILITIES[capability])
         )
+
+    def needs_capability(self, capability: str) -> None:
+        if capability in self.CAPABILITIES:
+            for pr in self.CAPABILITIES[capability]:
+                self.pulp_ctx.needs_plugin(pr)
+        else:
+            raise click.ClickException(
+                _("Capability '{capability}' needed on '{entity}' for this command.").format(
+                    capability=capability, entity=self.ENTITY
+                )
+            )
 
 
 class PulpRemoteContext(PulpEntityContext):
