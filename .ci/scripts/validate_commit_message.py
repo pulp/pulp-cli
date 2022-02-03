@@ -8,7 +8,17 @@ from github import Github
 
 KEYWORDS = ["fixes", "closes"]
 NO_ISSUE = "[noissue]"
-CHANGELOG_EXTS = [".feature", ".bugfix", ".doc", ".removal", ".misc", ".deprecation"]
+# TODO (On a rainy afternoon) Fetch the extensions from pyproject.toml
+CHANGELOG_EXTS = [
+    ".feature",
+    ".bugfix",
+    ".doc",
+    ".removal",
+    ".misc",
+    ".deprecation",
+    ".translation",
+    ".devel",
+]
 
 sha = sys.argv[1]
 project = "pulp-cli"

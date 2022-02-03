@@ -1,0 +1,1 @@
+Added `needs_capability` to `EntityContext` so context member function can require capabilities.
