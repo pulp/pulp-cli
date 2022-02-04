@@ -73,14 +73,14 @@ class PulpContext:
 
     def __init__(
         self,
-        api_path: str,
+        api_root: str,
         api_kwargs: Dict[str, Any],
         format: str,
         background_tasks: bool,
         timeout: int,
     ) -> None:
         self._api: Optional[OpenAPI] = None
-        self.api_path: str = api_path
+        self.api_path: str = api_root + "api/v3/"
         self._api_kwargs = api_kwargs
         self._needed_plugins: List[PluginRequirement] = []
         self.isatty: bool = sys.stdout.isatty()

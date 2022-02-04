@@ -84,8 +84,7 @@ class OpenAPI:
         apidoc_cache: str = os.path.join(
             os.path.expanduser(xdg_cache_home),
             "squeezer",
-            self.base_url.replace(":", "_").replace("/", "_"),
-            "api.json",
+            (self.base_url + "_" + self.doc_path).replace(":", "_").replace("/", "_") + "api.json",
         )
         try:
             if refresh_cache:

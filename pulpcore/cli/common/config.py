@@ -19,7 +19,7 @@ CONFIG_LOCATIONS = [
 FORMAT_CHOICES = ["json", "yaml", "none"]
 SETTINGS = [
     "base_url",
-    "api_path",
+    "api_root",
     "username",
     "password",
     "cert",
@@ -33,7 +33,11 @@ SETTINGS = [
 
 CONFIG_OPTIONS = [
     click.option("--base-url", default="https://localhost", help=_("API base url")),
-    click.option("--api-path", default="/pulp/api/v3/", help=_("Absolute API base path on server")),
+    click.option(
+        "--api-root",
+        default="/pulp/",
+        help=_("Absolute API base path on server (not including 'api/v3/')"),
+    ),
     click.option("--username", default="", help=_("Username on pulp server")),
     click.option("--password", default="", help=_("Password on pulp server")),
     click.option("--cert", default="", help=_("Path to client certificate")),
@@ -86,8 +90,8 @@ def config_options(command: Callable[..., Any]) -> Callable[..., Any]:
 def validate_config(config: Dict[str, Any], strict: bool = False) -> bool:
     """Validate, that the config provides the proper data types"""
     errors: List[str] = []
-    if "api_path" in config and (config["api_path"][0] != "/" or config["api_path"][-1] != "/"):
-        errors.append(_("'api_path' must begin and end with '/'"))
+    if "api_root" in config and (config["api_root"][0] != "/" or config["api_root"][-1] != "/"):
+        errors.append(_("'api_root' must begin and end with '/'"))
     if "format" in config and config["format"].lower() not in FORMAT_CHOICES:
         errors.append(_("'format' is not one of {choices}").format(choices=FORMAT_CHOICES))
     if "dry_run" in config and not isinstance(config["dry_run"], bool):

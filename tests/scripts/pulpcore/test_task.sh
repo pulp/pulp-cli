@@ -27,7 +27,7 @@ expect_succ pulp file repository create --name "cli_test_file_repository" --remo
 if pulp debug has-plugin --name "core" --min-version "3.12.0"
 then
   expect_succ pulp --background file repository sync --name "cli_test_file_repository"
-  task="$(echo "$ERROUTPUT" | grep -E -o "/pulp/api/v3/tasks/[-[:xdigit:]]*/")"
+  task="$(echo "$ERROUTPUT" | grep -E -o "${PULP_API_ROOT}api/v3/tasks/[-[:xdigit:]]*/")"
   expect_succ pulp task cancel --href "$task"
   expect_succ pulp task list --name $sync_task --state canceled
   expect_succ test "$(echo "$OUTPUT" | jq -r length)" -eq $((count + 1))
@@ -37,7 +37,7 @@ fi
 
 # Test waiting for a task
 expect_succ pulp --background file repository sync --name "cli_test_file_repository" --remote "cli_test_file_remote"
-task=$(echo "$ERROUTPUT" | grep -E -o "/pulp/api/v3/tasks/[-[:xdigit:]]*/")
+task=$(echo "$ERROUTPUT" | grep -E -o "${PULP_API_ROOT}api/v3/tasks/[-[:xdigit:]]*/")
 task_uuid="${task%/}"
 task_uuid="${task_uuid##*/}"
 expect_succ pulp task show --wait --uuid "$task_uuid"

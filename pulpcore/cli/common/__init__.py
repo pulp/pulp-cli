@@ -105,7 +105,7 @@ def _config_callback(ctx: click.Context, param: Any, value: Optional[str]) -> No
 def main(
     ctx: click.Context,
     base_url: str,
-    api_path: str,
+    api_root: str,
     username: Optional[str],
     password: Optional[str],
     cert: Optional[str],
@@ -135,7 +135,7 @@ def main(
         user_agent=f"Pulp-CLI/{__version__}",
     )
     ctx.obj = PulpContext(
-        api_path=api_path,
+        api_root=api_root,
         api_kwargs=api_kwargs,
         format=format,
         background_tasks=background,

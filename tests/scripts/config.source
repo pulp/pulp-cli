@@ -1,5 +1,7 @@
 # Library for test helper functions
 
+: "${PULP_API_ROOT:="/pulp/"}"
+
 # open fd 3 as a copy of stderr
 exec 3<&2
 

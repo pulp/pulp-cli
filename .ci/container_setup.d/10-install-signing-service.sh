@@ -2,7 +2,7 @@
 
 set -eu
 
-if pulp --base-url "http://localhost:8080" --username "admin" --password "password" debug has-plugin --name "core" --min-version 3.11
+if pulp --format none --refresh-api --base-url "http://localhost:8080" ${PULP_API_ROOT:+--api-root "${PULP_API_ROOT}"} --username "admin" --password "password" debug has-plugin --name "deb"
 then
   echo "Setup a signing service"
   "${CONTAINER_RUNTIME}" exec -i "pulp-ephemeral" bash -c "cat > /root/sign_deb_release.sh" < "${BASEPATH}/../tests/assets/sign_deb_release.sh"

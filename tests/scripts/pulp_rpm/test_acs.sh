@@ -37,7 +37,7 @@ test "$(echo "$OUTPUT" | jq ".paths | length")" -eq 2
 
 # test refresh
 expect_succ pulp rpm acs refresh --name $acs
-task_group=$(echo "$ERROUTPUT" | grep -E -o "/pulp/api/v3/task-groups/[-[:xdigit:]]*/")
+task_group=$(echo "$ERROUTPUT" | grep -E -o "${PULP_API_ROOT}api/v3/task-groups/[-[:xdigit:]]*/")
 expect_succ pulp task-group show --href "$task_group"
 test "$(echo "$OUTPUT" | jq ".tasks | length")" -eq 2
 

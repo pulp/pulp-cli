@@ -35,10 +35,11 @@ FROM_TAG="${FROM_TAG:-latest}"
 
 if [ "${CONTAINER_FILE:+x}" ]
 then
+  IMAGE_TAG="ephemeral-build"
   "${CONTAINER_RUNTIME}" build --file "${BASEPATH}/assets/${CONTAINER_FILE}" --build-arg FROM_TAG="${FROM_TAG}" --tag ghcr.io/pulp/pulp:"${IMAGE_TAG}" .
 fi
 
-"${CONTAINER_RUNTIME}" run ${RM:+--rm} --detach --name "pulp-ephemeral" --volume "${BASEPATH}/settings:/etc/pulp" --publish "8080:80" "ghcr.io/pulp/pulp:${IMAGE_TAG}"
+"${CONTAINER_RUNTIME}" run ${RM:+--rm} --env S6_KEEP_ENV=1 --env PULP_API_ROOT --detach --name "pulp-ephemeral" --volume "${BASEPATH}/settings:/etc/pulp" --publish "8080:80" "ghcr.io/pulp/pulp:${IMAGE_TAG}"
 
 # shellcheck disable=SC2064
 trap "${CONTAINER_RUNTIME} stop pulp-ephemeral" EXIT
@@ -58,7 +59,7 @@ do
   fi
 
   sleep 3
-  if curl --fail http://localhost:8080/pulp/api/v3/status/ > /dev/null 2>&1
+  if curl --fail "http://localhost:8080${PULP_API_ROOT:-/pulp/}api/v3/status/" > /dev/null 2>&1
   then
     echo "SUCCESS."
     break
@@ -67,7 +68,7 @@ do
 done
 
 # show pulpcore/plugin versions we're using
-curl -s http://localhost:8080/pulp/api/v3/status/ | jq '.versions|map({key: .component, value: .version})|from_entries'
+curl -s "http://localhost:8080${PULP_API_ROOT:-/pulp/}api/v3/status/" | jq '.versions|map({key: .component, value: .version})|from_entries'
 
 # Set admin password
 "${CONTAINER_RUNTIME}" exec "pulp-ephemeral" pulpcore-manager reset-admin-password --password password
