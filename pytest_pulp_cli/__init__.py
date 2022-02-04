@@ -68,6 +68,9 @@ def pulp_cli_settings(tmp_path_factory):
     The `pulp_cli_env` fixture, however depends on it and sets $XDG_CONFIG_HOME up accordingly.
     """
     settings = toml.load("tests/cli.toml")
+    if os.environ.get("PULP_API_ROOT"):
+        for key in settings:
+            settings[key]["api_root"] = os.environ["PULP_API_ROOT"]
     settings_path = tmp_path_factory.mktemp("config", numbered=False)
     (settings_path / "pulp").mkdir(parents=True)
     with open(settings_path / "pulp" / "cli.toml", "w") as settings_file:
