@@ -457,6 +457,22 @@ def resource_option(*args: Any, **kwargs: Any) -> Callable[[_FC], _FC]:
         kwargs["callback"] = _multi_option_callback
     else:
         kwargs["callback"] = _option_callback
+
+    if "help" not in kwargs:
+        kwargs["help"] = _(
+            "Referenced resource, in the form {plugin_form}{type_form}<name> or by href. "
+            "{plugin_default}{type_default}"
+        ).format(
+            plugin_form=_("[<plugin>:]") if default_plugin else _("<plugin>:"),
+            type_form=_("[<resource_type>:]") if default_type else _("<resource_type>:"),
+            plugin_default=_("'<plugin>' defaults to {plugin}. ").format(plugin=default_plugin)
+            if default_plugin
+            else "",
+            type_default=_("'<resource_type>' defaults to {type}. ").format(type=default_type)
+            if default_type
+            else "",
+        )
+
     return click.option(*args, **kwargs)
 
 
