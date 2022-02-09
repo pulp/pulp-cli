@@ -33,7 +33,7 @@ repository_option = resource_option(
     default_type="python",
     context_table={"python:python": PulpPythonRepositoryContext},
     help=_(
-        "Repository to be used for auto-publishing."
+        "Repository to be used for auto-distributing."
         " When set, this will unset the 'publication'."
         " Specified as '[[<plugin>:]<type>:]<name>' or as href."
     ),
@@ -72,7 +72,8 @@ update_options = [
     click.option(
         "--publication",
         help=_(
-            "Publication to be served. This will unset the 'repository' and disable auto publish."
+            "Publication to be served. This will unset the 'repository' and disable "
+            "auto-distribute."
         ),
     ),
     repository_option,
