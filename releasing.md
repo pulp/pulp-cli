@@ -1,6 +1,6 @@
 # Releasing (for internal use)
 
-1. Generate the changelog (eg `towncrier --yes --version 0.1.0`) and commit
+1. Generate the changelog (eg `towncrier build --yes --version 0.1.0`) and commit
 1. Run `bumpversion release`, commit your local changes, and note the commit sha
 1. Run `bumpversion minor` to update the version to the next dev release version
 1. Push your commits, open a PR, and get it merged
