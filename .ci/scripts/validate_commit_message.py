@@ -7,6 +7,13 @@ from pathlib import Path
 from github import Github
 
 KEYWORDS = ["fixes", "closes"]
+BLOCKING_REGEX = [
+    "DRAFT",
+    "WIP",
+    "NOMERGE",
+    r"DO\s*NOT\s*MERGE",
+    "EXPERIMENT",
+]
 NO_ISSUE = "[noissue]"
 # TODO (On a rainy afternoon) Fetch the extensions from pyproject.toml
 CHANGELOG_EXTS = [
@@ -23,6 +30,9 @@ CHANGELOG_EXTS = [
 sha = sys.argv[1]
 project = "pulp-cli"
 message = subprocess.check_output(["git", "log", "--format=%B", "-n 1", sha]).decode("utf-8")
+
+if any((re.match(pattern, message) for pattern in BLOCKING_REGEX)):
+    sys.exit("This PR is not ready for consumption.")
 
 g = Github(os.environ.get("GITHUB_TOKEN"))
 repo = g.get_repo("pulp/pulp-cli")
