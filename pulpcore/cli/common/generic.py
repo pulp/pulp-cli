@@ -1,10 +1,11 @@
 import json
 import re
 from functools import lru_cache
-from typing import Any, Callable, Dict, Iterable, List, Mapping, Optional, Tuple, Type, TypeVar
+from typing import Any, Callable, Dict, Iterable, List, Mapping, Optional, Tuple, Type
 
 import click
 import schema as s
+from click.decorators import FC, F
 
 from pulpcore.cli.common.context import (
     DEFAULT_LIMIT,
@@ -26,9 +27,6 @@ from pulpcore.cli.common.i18n import get_translation
 
 translation = get_translation(__name__)
 _ = translation.gettext
-
-_F = Callable[..., Any]
-_FC = TypeVar("_FC", _F, click.Command)
 
 
 class PulpCommand(click.Command):
@@ -95,11 +93,11 @@ class PulpGroup(click.Group):
                 pulp_ctx.needs_plugin(plugin_requirement)
         return super().invoke(ctx)
 
-    def command(self, *args: Any, **kwargs: Any) -> Callable[[_F], click.Command]:
+    def command(self, *args: Any, **kwargs: Any) -> Callable[[F], click.Command]:
         kwargs["cls"] = kwargs.get("cls", PulpCommand)
         return super().command(*args, **kwargs)
 
-    def group(self, *args: Any, **kwargs: Any) -> Callable[[_F], click.Group]:
+    def group(self, *args: Any, **kwargs: Any) -> Callable[[F], click.Group]:
         kwargs["cls"] = kwargs.get("cls", PulpGroup)
         return super().group(*args, **kwargs)
 
@@ -113,12 +111,12 @@ class PulpGroup(click.Group):
         return cmd
 
 
-def pulp_command(*args: Any, **kwargs: Any) -> Callable[[_F], click.Command]:
+def pulp_command(*args: Any, **kwargs: Any) -> Callable[[F], click.Command]:
     kwargs["cls"] = kwargs.get("cls", PulpCommand)
     return click.command(*args, **kwargs)
 
 
-def pulp_group(*args: Any, **kwargs: Any) -> Callable[[_F], click.Group]:
+def pulp_group(*args: Any, **kwargs: Any) -> Callable[[F], click.Group]:
     kwargs["cls"] = kwargs.get("cls", PulpGroup)
     return click.group(*args, **kwargs)
 
@@ -352,12 +350,12 @@ def null_callback(
 # Decorator common options
 
 
-def pulp_option(*args: Any, **kwargs: Any) -> Callable[[_FC], _FC]:
+def pulp_option(*args: Any, **kwargs: Any) -> Callable[[FC], FC]:
     kwargs["cls"] = PulpOption
     return click.option(*args, **kwargs)
 
 
-def resource_option(*args: Any, **kwargs: Any) -> Callable[[_FC], _FC]:
+def resource_option(*args: Any, **kwargs: Any) -> Callable[[FC], FC]:
     default_plugin: Optional[str] = kwargs.pop("default_plugin", None)
     default_type: Optional[str] = kwargs.pop("default_type", None)
     lookup_key: str = kwargs.pop("lookup_key", "name")
@@ -476,7 +474,7 @@ def resource_option(*args: Any, **kwargs: Any) -> Callable[[_FC], _FC]:
     return click.option(*args, **kwargs)
 
 
-def type_option(*args: Any, **kwargs: Any) -> _F:
+def type_option(*args: Any, **kwargs: Any) -> Callable[[FC], FC]:
 
     choices: Dict[str, Type[PulpEntityContext]] = kwargs.pop("choices")
     assert choices and isinstance(choices, dict)
@@ -1070,7 +1068,7 @@ def repository_content_command(**kwargs: Any) -> click.Group:
         rc = [unit.pulp_href for unit in remove_content] if remove_content else None
         repo_ctx.modify(repo_ctx.pulp_href, ac, rc, base_version.pulp_href)
 
-    command_decorators: Dict[click.Command, Optional[List[Callable[[_FC], _FC]]]] = {
+    command_decorators: Dict[click.Command, Optional[List[Callable[[FC], FC]]]] = {
         content_list: kwargs.pop("list_decorators", []),
         content_add: kwargs.pop("add_decorators", None),
         content_remove: kwargs.pop("remove_decorators", None),
