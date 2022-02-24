@@ -38,7 +38,7 @@
   [#426](https://github.com/pulp/pulp-cli/issues/426)
 - Added support for "tasks purge".
   [#430](https://github.com/pulp/pulp-cli/issues/430)
-- Added `reset` command to access_policies.
+- Added `reset` command to access policies.
   Changed `--permissions-assignment` to `--creation-hooks` to follow pulpcore 3.17 naming.
   [#438](https://github.com/pulp/pulp-cli/issues/438)
 - Add a generic command group for object permission management.
@@ -89,9 +89,9 @@
   [#352](https://github.com/pulp/pulp-cli/issues/352)
 - Added the ability to delete tasks.
   [#376](https://github.com/pulp/pulp-cli/issues/376)
-- Added refresh command for pulp_file Alternate Content Sources.
+- Added refresh command for pulp\_file Alternate Content Sources.
   [#377](https://github.com/pulp/pulp-cli/issues/377)
-- Added pulp_rpm Alternate Content Source commands.
+- Added pulp\_rpm Alternate Content Source commands.
   [#378](https://github.com/pulp/pulp-cli/issues/378)
 - Added the openapi command group to debug to ease reading the schema.
   [#384](https://github.com/pulp/pulp-cli/issues/384)
@@ -403,7 +403,7 @@
 
 ### Bugfixes
 
-- Fixed missing READ_ID error for pulp file remote show.
+- Fixed missing `READ_ID` error for pulp file remote show.
   [#107](https://github.com/pulp/pulp-cli/issues/107)
 
 
