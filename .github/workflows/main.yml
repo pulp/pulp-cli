@@ -47,7 +47,8 @@ jobs:
           - python: "3.8"
             image_tag: "3.14"
           - python: "3.9"
-            image_tag: "3.13"
+            image_tag: "3.18"
+            pulp_api_root: "/relocated/djnd/"
           - python: "3.10"
             image_tag: "3.17"
     steps:
