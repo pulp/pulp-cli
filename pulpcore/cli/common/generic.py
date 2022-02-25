@@ -853,6 +853,26 @@ def version_command(**kwargs: Any) -> click.Command:
     callback.add_command(destroy_command(decorators=decorators + [version_option]))
 
     @callback.command()
+    @limit_option
+    @offset_option
+    @repository_option
+    @version_option
+    @pass_repository_version_context
+    @pass_pulp_context
+    def list_content(
+        pulp_ctx: PulpContext,
+        repository_version_ctx: PulpRepositoryVersionContext,
+        offset: Optional[int],
+        limit: Optional[int],
+    ) -> None:
+        href = repository_version_ctx.pulp_href
+        content_ctx = PulpContentContext(pulp_ctx)
+        result = content_ctx.list(
+            limit=limit, offset=offset, parameters={"repository_version": href}
+        )
+        pulp_ctx.output_result(result)
+
+    @callback.command()
     @repository_option
     @version_option
     @pass_repository_version_context
