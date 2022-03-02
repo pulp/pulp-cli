@@ -40,7 +40,7 @@ setup(
     author="Pulp Team",
     author_email="pulp-list@redhat.com",
     url="https://github.com/pulp/pulp-cli",
-    version="0.14.0",
+    version="0.15.0.dev",
     packages=plugin_packages + extra_packages,
     package_data={"": ["py.typed", "locale/*/LC_MESSAGES/*.mo"]},
     python_requires=">=3.6",
