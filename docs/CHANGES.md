@@ -10,6 +10,49 @@
 
 [//]: # (towncrier release notes start)
 
+## 0.14.0 (2022-03-02)
+
+### Features
+
+- Added content list/show commands for container blob/manifest/tag content types.
+  [#421](https://github.com/pulp/pulp-cli/issues/421)
+- Added tag/untag commands to add and remove tags from images in container repositories.
+  [#423](https://github.com/pulp/pulp-cli/issues/423)
+- Added a `--task-group` filter parameter to `task list`.
+  [#451](https://github.com/pulp/pulp-cli/issues/451)
+- Added the `api_root` setting to allow communicating with a pulp installation on a nonstandard path.
+  [#453](https://github.com/pulp/pulp-cli/issues/453)
+- Allow to fetch the config profile from the environment variable `PULP_CLI_PROFILE`.
+  [#463](https://github.com/pulp/pulp-cli/issues/463)
+
+
+### Bugfixes
+
+- Fixed missing help text on path option for ACS create commands.
+  [#446](https://github.com/pulp/pulp-cli/issues/446)
+- Fixed a bug in reporting the failure of a task if the reason was not an exception in the task code.
+  [#464](https://github.com/pulp/pulp-cli/issues/464)
+- Fix rpm distribution update command failing when trying to enable/disable auto-distribute.
+  [#472](https://github.com/pulp/pulp-cli/issues/472)
+
+
+### Improved Documentation
+
+- Add default help text for options taking a generic resource argument.
+  [#387](https://github.com/pulp/pulp-cli/issues/387)
+
+
+### Developer Notes
+
+- Introduced `ID_PREFIX` on `PulpEntityContext` to generate most operation ids.
+  [#444](https://github.com/pulp/pulp-cli/issues/444)
+- Added `needs_capability` to `EntityContext` so context member function can require capabilities.
+  [#465](https://github.com/pulp/pulp-cli/issues/465)
+
+
+---
+
+
 ## 0.13.0 (2021-12-16)
 
 ### Features
