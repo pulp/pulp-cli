@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, List, Optional
 
 import click
 import schema as s
@@ -28,6 +28,7 @@ from pulpcore.cli.common.generic import (
     label_command,
     label_select_option,
     list_command,
+    load_json_callback,
     name_option,
     repository_content_command,
     resource_option,
@@ -38,6 +39,7 @@ from pulpcore.cli.common.generic import (
     version_command,
 )
 from pulpcore.cli.common.i18n import get_translation
+from pulpcore.cli.core.context import PulpSigningServiceContext
 
 translation = get_translation(__name__)
 _ = translation.gettext
@@ -66,6 +68,14 @@ CONTENT_LIST_SCHEMA = s.Schema(
 def _content_callback(ctx: click.Context, param: click.Parameter, value: Any) -> Any:
     if value:
         ctx.obj.entity = value  # The context is set by the type parameter on the content commands
+    return value
+
+
+def _signing_service_callback(ctx: click.Context, param: click.Parameter, value: Any) -> Any:
+    if value:
+        pulp_ctx = ctx.find_object(PulpContext)
+        assert pulp_ctx is not None
+        value = PulpSigningServiceContext(pulp_ctx, entity={"name": value})
     return value
 
 
@@ -211,3 +221,22 @@ def sync(
         href=repository_href,
         body=body,
     )
+
+
+@repository.command()
+@name_option
+@href_option
+@click.option("--signing-service", required=True, callback=_signing_service_callback)
+@click.option("--content-units", callback=load_json_callback)
+@pass_repository_context
+def sign(
+    repository_ctx: PulpRepositoryContext,
+    signing_service: PulpSigningServiceContext,
+    content_units: Optional[List[str]],
+) -> None:
+    """Sign the collections in the repository using the signing service specified."""
+    if content_units is None:
+        content_units = ["*"]
+    body = {"content_units": content_units, "signing_service": signing_service.pulp_href}
+    parameters = {repository_ctx.HREF: repository_ctx.pulp_href}
+    repository_ctx.call("sign", parameters=parameters, body=body)

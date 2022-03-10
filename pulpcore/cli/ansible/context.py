@@ -34,6 +34,13 @@ class PulpAnsibleRoleContext(PulpContentContext):
     ID_PREFIX = "content_ansible_roles"
 
 
+class PulpAnsibleCollectionVersionSignatureContext(PulpContentContext):
+    ENTITY = _("ansible collection version signature")
+    ENTITIES = _("ansible collection version signatures")
+    HREF = _("ansible_collection_version_signature_href")
+    ID_PREFIX = "content_ansible_collection_signatures"
+
+
 class PulpAnsibleDistributionContext(PulpEntityContext):
     ENTITY = _("ansible distribution")
     ENTITIES = _("ansible distributions")
