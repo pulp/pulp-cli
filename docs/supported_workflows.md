@@ -52,10 +52,10 @@ The CLI currently supports the following workflows:
 The CLI currently supports the following operations on these `pulp_ansible` objects
 (C = Create, R = Read, U = Update, D = Delete):
 
-* Role/Collection Version Content - **CR**
+* Role/Collection Version/Signature Content - **CR**
 * Ansible Distributions - **CRUD**
 * Role/Collection Version Remotes - **CRUD**
-* Ansible Repositories - **CRUD, Modify, Sync**
+* Ansible Repositories - **CRUD, Modify, Sync, Sign**
 
 
 ## pulp_container
