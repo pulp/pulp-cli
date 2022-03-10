@@ -48,6 +48,7 @@ _ = translation.gettext
 
 
 SKIP_TYPES = ["srpm"]
+SYNC_TYPES = ["additive", "mirror_complete", "mirror_content_only"]
 remote_option = resource_option(
     "--remote",
     default_plugin="rpm",
@@ -165,16 +166,49 @@ repository.add_command(
 @name_option
 @href_option
 @remote_option
-@click.option("--mirror/--no-mirror", default=None)
 @click.option(
-    "--skip-type", "skip_types", multiple=True, type=click.Choice(SKIP_TYPES, case_sensitive=False)
+    "--mirror/--no-mirror",
+    default=None,
+    help="""
+    DEPRECATED: If True, sync_policy will default to 'mirror_complete' instead
+    of 'additive'.
+    """,
+)
+@pulp_option(
+    "--optimize/--no-optimize",
+    default=None,
+    help="Whether or not to optimize sync.",
+    needs_plugins=[PluginRequirement("rpm", min="3.3.0")],
+)
+@click.option(
+    "--skip-type",
+    "skip_types",
+    multiple=True,
+    type=click.Choice(SKIP_TYPES, case_sensitive=False),
+    help="List of content types to skip during sync.",
+)
+@pulp_option(
+    "--sync-policy",
+    "sync_policy",
+    type=click.Choice(SYNC_TYPES, case_sensitive=False),
+    help="""
+    Modifies how the sync is performed. 'mirror_complete' will clone the original metadata
+    and create an automatic publication from it, but comes with some limitations and does
+    not work for certain repositories. 'mirror_content_only' will change the repository
+    contents to match the remote but the metadata will be regenerated and will not be
+    bit-for-bit identical. 'additive' will retain the existing contents of the repository
+    and add the contents of the repository being synced.
+    """,
+    needs_plugins=[PluginRequirement("rpm", "3.16.0")],
 )
 @pass_repository_context
 def sync(
     repository_ctx: PulpRepositoryContext,
     remote: EntityFieldDefinition,
     mirror: Optional[bool],
-    skip_types: Iterable[str],
+    optimize: Optional[bool],
+    skip_types: Optional[Iterable[str]],
+    sync_policy: Optional[str],
 ) -> None:
     repository = repository_ctx.entity
     repository_href = repository_ctx.pulp_href
@@ -183,8 +217,12 @@ def sync(
 
     if mirror:
         body["mirror"] = mirror
+    if optimize:
+        body["optimize"] = optimize
     if skip_types:
         body["skip_types"] = skip_types
+    if sync_policy:
+        body["sync_policy"] = sync_policy
 
     if isinstance(remote, PulpEntityContext):
         body["remote"] = remote.pulp_href
