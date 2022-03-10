@@ -33,6 +33,7 @@ then
 else
   expect_succ pulp rpm repository sync --name "cli_test_rpm_repository" --skip-type srpm
 fi
+expect_succ pulp rpm repository sync --name "cli_test_rpm_repository"
 
 expect_succ pulp rpm publication create --repository "cli_test_rpm_repository"
 PUBLICATION_HREF=$(echo "$OUTPUT" | jq -r .pulp_href)
@@ -51,6 +52,21 @@ expect_succ pulp rpm repository version repair --repository "cli_test_rpm_reposi
 expect_succ pulp rpm repository update --name "cli_test_rpm_repository" --retain-package-versions 2
 expect_succ pulp rpm repository show --name "cli_test_rpm_repository"
 test "$(echo "$OUTPUT" | jq -r '.retain_package_versions')" = "2"
+
+if pulp debug has-plugin --name "rpm" --min-version "3.3.0"
+then
+  expect_succ pulp rpm repository sync --name "cli_test_rpm_repository" --optimize
+  expect_succ pulp rpm repository sync --name "cli_test_rpm_repository" --no-optimize
+fi
+
+if pulp debug has-plugin --name "rpm" --min-version "3.16.0"
+then
+  expect_succ pulp rpm repository update --name "cli_test_rpm_repository" --retain-package-versions 0
+  expect_succ pulp rpm repository sync --name "cli_test_rpm_repository" --sync-policy additive
+  expect_succ pulp rpm repository sync --name "cli_test_rpm_repository" --sync-policy mirror_complete
+  expect_succ pulp rpm repository sync --name "cli_test_rpm_repository" --sync-policy mirror_content_only
+  expect_fail pulp rpm repository sync --name "cli_test_rpm_repository" --sync-policy foobar
+fi
 
 expect_succ pulp rpm distribution destroy --name "cli_test_rpm_distro"
 expect_succ pulp rpm publication destroy --href "$PUBLICATION_HREF"
