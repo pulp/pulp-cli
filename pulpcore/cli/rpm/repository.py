@@ -39,6 +39,7 @@ from pulpcore.cli.rpm.context import (
     PulpRpmPackageContext,
     PulpRpmRemoteContext,
     PulpRpmRepositoryContext,
+    PulpUlnRemoteContext,
 )
 
 translation = get_translation(__name__)
@@ -50,7 +51,7 @@ remote_option = resource_option(
     "--remote",
     default_plugin="rpm",
     default_type="rpm",
-    context_table={"rpm:rpm": PulpRpmRemoteContext},
+    context_table={"rpm:rpm": PulpRpmRemoteContext, "rpm:uln": PulpUlnRemoteContext},
     href_pattern=PulpRemoteContext.HREF_PATTERN,
     help=_(
         "Remote used for synching in the form '[[<plugin>:]<resource_type>:]<name>' or by href."

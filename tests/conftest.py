@@ -20,6 +20,7 @@ def pulp_cli_vars(pulp_cli_vars):
             "ANSIBLE_COLLECTION_REMOTE_URL": "https://galaxy.ansible.com/",
             "ANSIBLE_ROLE_REMOTE_URL": "https://galaxy.ansible.com/api/v1/roles/?namespace__name=elastic",  # noqa
             "PYTHON_REMOTE_URL": PULP_FIXTURES_URL + "/python-pypi/",
+            "ULN_REMOTE_URL": "uln://ovm2_2.1.1_i386_patch",
         }
     )
     return result
