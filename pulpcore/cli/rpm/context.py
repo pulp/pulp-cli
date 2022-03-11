@@ -103,6 +103,14 @@ class PulpRpmRemoteContext(PulpRemoteContext):
     }
 
 
+class PulpUlnRemoteContext(PulpRemoteContext):
+    ENTITY = _("uln remote")
+    ENTITIES = _("uln remotes")
+    HREF = "rpm_uln_remote_href"
+    ID_PREFIX = "remotes_rpm_uln"
+    NULLABLES = PulpRemoteContext.NULLABLES | {"uln-server-base-url"}
+
+
 class PulpRpmRepositoryVersionContext(PulpRepositoryVersionContext):
     HREF = "rpm_rpm_repository_version_href"
     ID_PREFIX = "repositories_rpm_rpm_versions"

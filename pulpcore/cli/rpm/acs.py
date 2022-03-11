@@ -20,7 +20,7 @@ from pulpcore.cli.common.generic import (
     update_command,
 )
 from pulpcore.cli.common.i18n import get_translation
-from pulpcore.cli.rpm.context import PulpRpmACSContext, PulpRpmRemoteContext
+from pulpcore.cli.rpm.context import PulpRpmACSContext, PulpRpmRemoteContext, PulpUlnRemoteContext
 
 translation = get_translation(__name__)
 _ = translation.gettext
@@ -98,7 +98,7 @@ remote_option = resource_option(
     "--remote",
     default_plugin="rpm",
     default_type="rpm",
-    context_table={"rpm:rpm": PulpRpmRemoteContext},
+    context_table={"rpm:rpm": PulpRpmRemoteContext, "rpm:uln": PulpUlnRemoteContext},
     href_pattern=PulpRemoteContext.HREF_PATTERN,
     help=_("Remote to attach to ACS in the form '[[<plugin>:]<resource_type>:]<name>' or by href."),
 )
