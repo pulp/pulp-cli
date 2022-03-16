@@ -1,7 +1,7 @@
 ---
 name: 🐛 Bug report
 about: Create a report to help us improve the cli
-labels: bug
+labels: bug, Triage-Needed
 
 ---
 
