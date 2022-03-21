@@ -16,10 +16,15 @@ def signing_service(ctx: click.Context, pulp_ctx: PulpContext) -> None:
     ctx.obj = PulpSigningServiceContext(pulp_ctx)
 
 
+signing_service_filter = [
+    click.option("--name"),
+]
+
+
 lookup_options = [
     name_option,
     href_option,
 ]
 
-signing_service.add_command(list_command())
+signing_service.add_command(list_command(decorators=signing_service_filter))
 signing_service.add_command(show_command(decorators=lookup_options))
