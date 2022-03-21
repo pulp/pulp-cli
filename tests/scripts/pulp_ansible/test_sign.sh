@@ -4,6 +4,7 @@
 . "$(dirname "$(dirname "$(realpath "$0")")")"/config.source
 
 pulp debug has-plugin --name "ansible" --min-version "0.12.0" || exit 3
+[ "$(pulp signing-service list --name "sign_ansible" | jq 'length')" = "1" ] || exit 3
 
 cleanup() {
   pulp ansible remote -t "collection" destroy --name "cli_test_ansible_collection_remote" || true
