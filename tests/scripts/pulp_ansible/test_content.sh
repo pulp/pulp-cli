@@ -35,6 +35,20 @@ test "$(echo "$OUTPUT" | jq -r length)" -eq "1"
 content2_href="$(echo "$OUTPUT" | jq -r .[0].pulp_href)"
 expect_succ pulp ansible content --type "role" show --href "$content2_href"
 
+# Test ansible signature upload
+if pulp debug has-plugin --name "ansible" --min-version "0.13.0.dev"
+then
+  expect_succ pulp ansible content --type "signature" list
+  tar --extract --file="ansible-posix-1.3.0.tar.gz" "MANIFEST.json"
+  collection_path="$(realpath 'MANIFEST.json')"
+  signature_path="$("$(dirname "$(dirname "$(dirname "$(realpath "$0")")")")"/assets/sign_detached.sh "$collection_path" | jq -r .signature)"
+  expect_succ pulp ansible content --type "signature" upload --file "$signature_path" --collection "$content_href"
+  expect_succ pulp ansible content --type "signature" list --collection "$content_href" --pubkey-fingerprint "6EDF301256480B9B801EBA3D05A5E6DA269D9D98"
+  test "$(echo "$OUTPUT" | jq -r length)" -eq "1"
+  content3_href="$(echo "$OUTPUT" | jq -r .[0].pulp_href)"
+  expect_succ pulp ansible content --type "signature" show --href "$content3_href"
+fi
+
 # New content commands
 expect_succ pulp ansible repository create --name "cli_test_ansible_repository"
 expect_succ pulp ansible repository content add --repository "cli_test_ansible_repository" --name "posix" --namespace "ansible" --version "1.3.0"

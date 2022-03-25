@@ -2,7 +2,11 @@ from typing import IO, Any, Union
 
 import click
 
-from pulpcore.cli.ansible.context import PulpAnsibleCollectionVersionContext, PulpAnsibleRoleContext
+from pulpcore.cli.ansible.context import (
+    PulpAnsibleCollectionVersionContext,
+    PulpAnsibleCollectionVersionSignatureContext,
+    PulpAnsibleRoleContext,
+)
 from pulpcore.cli.common.context import (
     PulpContext,
     PulpEntityContext,
@@ -11,9 +15,9 @@ from pulpcore.cli.common.context import (
 )
 from pulpcore.cli.common.generic import (
     GroupOption,
-    chunk_size_option,
     href_option,
     list_command,
+    parse_size_callback,
     pulp_group,
     pulp_option,
     show_command,
@@ -38,7 +42,7 @@ def _content_callback(ctx: click.Context, param: click.Parameter, value: Any) ->
     "-t",
     "--type",
     "content_type",
-    type=click.Choice(["collection-version", "role"], case_sensitive=False),
+    type=click.Choice(["collection-version", "role", "signature"], case_sensitive=False),
     default="collection-version",
 )
 @pass_pulp_context
@@ -48,16 +52,22 @@ def content(ctx: click.Context, pulp_ctx: PulpContext, content_type: str) -> Non
         ctx.obj = PulpAnsibleCollectionVersionContext(pulp_ctx)
     elif content_type == "role":
         ctx.obj = PulpAnsibleRoleContext(pulp_ctx)
+    elif content_type == "signature":
+        ctx.obj = PulpAnsibleCollectionVersionSignatureContext(pulp_ctx)
     else:
         raise NotImplementedError()
 
 
 collection_context = (PulpAnsibleCollectionVersionContext,)
 role_context = (PulpAnsibleRoleContext,)
+content_context = (PulpAnsibleRoleContext, PulpAnsibleCollectionVersionContext)
+signature_context = (PulpAnsibleCollectionVersionSignatureContext,)
 list_options = [
-    pulp_option("--name", help=_("Name of {entity}")),
-    pulp_option("--namespace", help=_("Namespace of {entity}")),
-    pulp_option("--version", help=_("Version of {entity}")),
+    pulp_option("--name", help=_("Name of {entity}"), allowed_with_contexts=content_context),
+    pulp_option(
+        "--namespace", help=_("Namespace of {entity}"), allowed_with_contexts=content_context
+    ),
+    pulp_option("--version", help=_("Version of {entity}"), allowed_with_contexts=content_context),
     pulp_option(
         "--latest",
         "is_highest",
@@ -70,6 +80,22 @@ list_options = [
         "--tags",
         help=_("Comma separated list of tags that must all match"),
         allowed_with_contexts=collection_context,
+    ),
+    pulp_option(
+        "--pubkey-fingerprint",
+        help=_("Public key fingerprint of the {entity}"),
+        allowed_with_contexts=signature_context,
+    ),
+    pulp_option(
+        "--collection",
+        "signed_collection",
+        help=_("Collection of {entity}"),
+        allowed_with_contexts=signature_context,
+    ),
+    pulp_option(
+        "--signing-service",
+        help=_("Signing service used to create {entity}"),
+        allowed_with_contexts=signature_context,
     ),
 ]
 
@@ -88,6 +114,7 @@ lookup_options = [
         help=_("Name of {entity}"),
         group=["namespace", "version"],
         expose_value=False,
+        allowed_with_contexts=(PulpAnsibleRoleContext, PulpAnsibleCollectionVersionContext),
         cls=GroupOption,
         callback=_content_callback,
     ),
@@ -96,6 +123,7 @@ lookup_options = [
         help=_("Namespace of {entity}"),
         group=["name", "version"],
         expose_value=False,
+        allowed_with_contexts=(PulpAnsibleRoleContext, PulpAnsibleCollectionVersionContext),
         cls=GroupOption,
     ),
     click.option(
@@ -103,6 +131,25 @@ lookup_options = [
         help=_("Version of {entity}"),
         group=["namespace", "name"],
         expose_value=False,
+        allowed_with_contexts=(PulpAnsibleRoleContext, PulpAnsibleCollectionVersionContext),
+        cls=GroupOption,
+    ),
+    click.option(
+        "--pubkey-fingerprint",
+        help=_("Public key fingerprint of the {entity}"),
+        group=["collection"],
+        expose_value=False,
+        allowed_with_contexts=signature_context,
+        callback=_content_callback,
+        cls=GroupOption,
+    ),
+    click.option(
+        "--collection",
+        "signed_collection",
+        help=_("Collection of {entity}"),
+        group=["pubkey_fingerprint"],
+        expose_value=False,
+        allowed_with_contexts=signature_context,
         cls=GroupOption,
     ),
     href_option,
@@ -114,7 +161,13 @@ content.add_command(show_command(decorators=lookup_options))
 
 @content.command()
 @click.option("--file", type=click.File("rb"), required=True)
-@chunk_size_option
+@pulp_option(
+    "--chunk-size",
+    help=_("Chunk size to break up {entity} into. Defaults to 1MB"),
+    default="1MB",
+    callback=parse_size_callback,
+    allowed_with_contexts=role_context,
+)
 @pulp_option(
     "--name", help=_("Name of {entity}"), allowed_with_contexts=role_context, required=True
 )
@@ -130,22 +183,38 @@ content.add_command(show_command(decorators=lookup_options))
     allowed_with_contexts=role_context,
     required=True,
 )
+@pulp_option(
+    "--collection",
+    help=_("Collection for this {entity}"),
+    allowed_with_contexts=signature_context,
+    required=True,
+)
 @pass_entity_context
 @pass_pulp_context
 def upload(
     pulp_ctx: PulpContext,
-    content_ctx: Union[PulpAnsibleRoleContext, PulpAnsibleCollectionVersionContext],
+    content_ctx: Union[
+        PulpAnsibleRoleContext,
+        PulpAnsibleCollectionVersionContext,
+        PulpAnsibleCollectionVersionSignatureContext,
+    ],
     file: IO[bytes],
-    chunk_size: int,
     **kwargs: Any,
 ) -> None:
 
     if isinstance(content_ctx, PulpAnsibleRoleContext):
+        chunk_size = kwargs.pop("chunk_size")
         artifact_href = PulpArtifactContext(pulp_ctx).upload(file, chunk_size)
         body = {"artifact": artifact_href}
         body.update(kwargs)
         result = content_ctx.create(body=body)
         pulp_ctx.output_result(result)
-    else:
+    elif isinstance(content_ctx, PulpAnsibleCollectionVersionSignatureContext):
+        body = {"signed_collection": kwargs.get("collection")}
+        uploads = {"file": file.read()}
+        pulp_ctx.output_result(content_ctx.create(body=body, uploads=uploads))
+    elif isinstance(content_ctx, PulpAnsibleCollectionVersionContext):
         result = content_ctx.upload(file=file)
         pulp_ctx.output_result(result)
+    else:
+        raise NotImplementedError()

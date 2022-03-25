@@ -29,7 +29,7 @@ expect_succ pulp group user add --group "clitest" --username "clitest"
 expect_succ pulp --username clitest --password "${USERPASS}" task list
 test "$(echo "${OUTPUT}" | jq -r 'length' )" = "0"
 
-expect_fail pulp -p user group show --name "clitest"
+expect_fail pulp --username clitest --password "${USERPASS}" group show --name "clitest"
 
 expect_succ pulp user role-assignment add --username "clitest" --role "clitest.group_viewer" --object "${GROUP_HREF}"
 expect_succ pulp --username clitest --password "${USERPASS}" group show --name "clitest"

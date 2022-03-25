@@ -15,13 +15,25 @@ If you are using the Pulp CLI and have written end-to-end steps for Pulp workflo
 
 ## Code conventions
 
-If you are interested in contributing code, note that we have some styling and formatting conventions:
+If you are interested in contributing code, note that we have styling and formatting
+conventions for both the code and our PRs:
+* `pulp-cli` utilizes python type annotations and black and isort code formatting.
+  To run the auto-formatting features, execute `make black`.
+* Please run `make lint` before committing changes to check for compliance. This executes the following checks:
+  * shellcheck
+  * black
+  * isort
+  * flake8
+  * mypy
+* If your PR is in response to an open issue, add `fixes #<ISSUE-NUMBER>` as its own line
+in your commit message. If you do **not** have an issue, use `[noissue]`.
 
-`pulp-cli` comes with python type annotations and black code formatting.
-To run the auto-formatting features, execute `make black`.
-Please run `make lint` before committing changes to check for compliance.
+!!!note
+
+   PRs need to pass these checks before they can be merged.
+
 Also please follow [The seven rules of a great Git commit message](https://chris.beams.io/posts/git-commit/).
-For each new feature, we require corresponding tests.
+And finally, for each new feature, we require corresponding tests.
 
 ## Global help accessibility
 

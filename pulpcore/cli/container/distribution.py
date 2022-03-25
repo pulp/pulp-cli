@@ -20,6 +20,7 @@ from pulpcore.cli.common.generic import (
     list_command,
     name_option,
     resource_option,
+    role_command,
     show_command,
 )
 from pulpcore.cli.common.i18n import get_translation
@@ -77,6 +78,7 @@ distribution.add_command(list_command(decorators=filter_options))
 distribution.add_command(show_command(decorators=lookup_options))
 distribution.add_command(create_command(decorators=create_options))
 distribution.add_command(destroy_command(decorators=lookup_options))
+distribution.add_command(role_command(decorators=lookup_options))
 distribution.add_command(label_command())
 
 
