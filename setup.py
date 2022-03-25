@@ -45,7 +45,7 @@ setup(
     package_data={"": ["py.typed", "locale/*/LC_MESSAGES/*.mo"]},
     python_requires=">=3.6",
     install_requires=[
-        "click>=7.1.2,<9.0.0",
+        "click>=8.0.0,<9.0.0",
         "packaging",
         "PyYAML~=5.3",
         "schema==0.7.5",
