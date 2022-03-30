@@ -14,6 +14,7 @@ lint:
 	black --diff --check .
 	isort -c --diff .
 	flake8
+	.ci/scripts/check_click_for_mypy.py
 	mypy
 	@echo "🙊 Code 🙈 LGTM 🙉 !"
 
