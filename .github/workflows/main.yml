@@ -26,7 +26,7 @@ jobs:
           python-version: ${{ matrix.python }}
       - name: Install python dependencies
         run: |
-          pip install -r test_requirements.txt click~=8.0.0
+          pip install -r test_requirements.txt
       - name: Lint code
         run: make lint
   test:

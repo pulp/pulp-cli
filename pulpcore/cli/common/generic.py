@@ -74,6 +74,9 @@ class PulpCommand(click.Command):
 
 
 class PulpGroup(click.Group):
+
+    command_class = PulpCommand
+
     def __init__(
         self,
         *args: Any,
@@ -93,14 +96,6 @@ class PulpGroup(click.Group):
                 pulp_ctx.needs_plugin(plugin_requirement)
         return super().invoke(ctx)
 
-    def command(self, *args: Any, **kwargs: Any) -> Callable[[F], click.Command]:
-        kwargs["cls"] = kwargs.get("cls", PulpCommand)
-        return super().command(*args, **kwargs)
-
-    def group(self, *args: Any, **kwargs: Any) -> Callable[[F], click.Group]:
-        kwargs["cls"] = kwargs.get("cls", PulpGroup)
-        return super().group(*args, **kwargs)
-
     def get_command(self, ctx: click.Context, cmd_name: str) -> Optional[click.Command]:
         # Overwriting this removes the command from the help message and from being callable
         cmd = super().get_command(ctx, cmd_name)
@@ -111,14 +106,12 @@ class PulpGroup(click.Group):
         return cmd
 
 
-def pulp_command(*args: Any, **kwargs: Any) -> Callable[[F], click.Command]:
-    kwargs["cls"] = kwargs.get("cls", PulpCommand)
-    return click.command(*args, **kwargs)
+def pulp_command(name: Optional[str] = None, **kwargs: Any) -> Callable[[F], click.Command]:
+    return click.command(name=name, cls=PulpCommand, **kwargs)
 
 
-def pulp_group(*args: Any, **kwargs: Any) -> Callable[[F], click.Group]:
-    kwargs["cls"] = kwargs.get("cls", PulpGroup)
-    return click.group(*args, **kwargs)
+def pulp_group(name: Optional[str] = None, **kwargs: Any) -> Callable[[F], click.Group]:
+    return click.group(name=name, cls=PulpGroup, **kwargs)
 
 
 class PulpOption(click.Option):
@@ -694,15 +687,11 @@ common_remote_update_options = [
 def list_command(**kwargs: Any) -> click.Command:
     """A factory that creates a list command."""
 
-    if "cls" not in kwargs:
-        kwargs["cls"] = PulpCommand
-    if "name" not in kwargs:
-        kwargs["name"] = "list"
-    if "help" not in kwargs:
-        kwargs["help"] = _("Show the list of optionally filtered {entities}.")
+    kwargs.setdefault("name", "list")
+    kwargs.setdefault("help", _("Show the list of optionally filtered {entities}."))
     decorators = kwargs.pop("decorators", [])
 
-    @click.command(**kwargs)
+    @pulp_command(**kwargs)
     @limit_option
     @offset_option
     @pass_entity_context
@@ -726,15 +715,13 @@ def list_command(**kwargs: Any) -> click.Command:
 def show_command(**kwargs: Any) -> click.Command:
     """A factory that creates a show command."""
 
-    if "cls" not in kwargs:
-        kwargs["cls"] = PulpCommand
     if "name" not in kwargs:
         kwargs["name"] = "show"
     if "help" not in kwargs:
         kwargs["help"] = _("Show details of a {entity}.")
     decorators = kwargs.pop("decorators", [])
 
-    @click.command(**kwargs)
+    @pulp_command(**kwargs)
     @pass_entity_context
     @pass_pulp_context
     def callback(pulp_ctx: PulpContext, entity_ctx: PulpEntityContext) -> None:
@@ -752,15 +739,13 @@ def show_command(**kwargs: Any) -> click.Command:
 def create_command(**kwargs: Any) -> click.Command:
     """A factory that creates a create command."""
 
-    if "cls" not in kwargs:
-        kwargs["cls"] = PulpCommand
     if "name" not in kwargs:
         kwargs["name"] = "create"
     if "help" not in kwargs:
         kwargs["help"] = _("Create a {entity}.")
     decorators = kwargs.pop("decorators", [])
 
-    @click.command(**kwargs)
+    @pulp_command(**kwargs)
     @pass_entity_context
     @pass_pulp_context
     def callback(pulp_ctx: PulpContext, entity_ctx: PulpEntityContext, **kwargs: Any) -> None:
@@ -783,15 +768,13 @@ def create_command(**kwargs: Any) -> click.Command:
 def update_command(**kwargs: Any) -> click.Command:
     """A factory that creates an update command."""
 
-    if "cls" not in kwargs:
-        kwargs["cls"] = PulpCommand
     if "name" not in kwargs:
         kwargs["name"] = "update"
     if "help" not in kwargs:
         kwargs["help"] = _("Update a {entity}.")
     decorators = kwargs.pop("decorators", [])
 
-    @click.command(**kwargs)
+    @pulp_command(**kwargs)
     @pass_entity_context
     @pass_pulp_context
     def callback(pulp_ctx: PulpContext, entity_ctx: PulpEntityContext, **kwargs: Any) -> None:
@@ -810,15 +793,11 @@ def update_command(**kwargs: Any) -> click.Command:
 def destroy_command(**kwargs: Any) -> click.Command:
     """A factory that creates a destroy command."""
 
-    if "cls" not in kwargs:
-        kwargs["cls"] = PulpCommand
-    if "name" not in kwargs:
-        kwargs["name"] = "destroy"
-    if "help" not in kwargs:
-        kwargs["help"] = _("Destroy a {entity}.")
+    kwargs.setdefault("name", "destroy")
+    kwargs.setdefault("help", _("Destroy a {entity}."))
     decorators = kwargs.pop("decorators", [])
 
-    @click.command(**kwargs)
+    @pulp_command(**kwargs)
     @pass_entity_context
     def callback(entity_ctx: PulpEntityContext) -> None:
         """
@@ -835,11 +814,10 @@ def destroy_command(**kwargs: Any) -> click.Command:
 def version_command(**kwargs: Any) -> click.Command:
     """A factory that creates a repository version command group."""
 
-    if "name" not in kwargs:
-        kwargs["name"] = "version"
+    kwargs.setdefault("name", "version")
     decorators = kwargs.pop("decorators", [repository_href_option, repository_option])
 
-    @click.group(**kwargs)
+    @pulp_group(**kwargs)
     @pass_repository_context
     @click.pass_context
     def callback(
@@ -871,18 +849,17 @@ def version_command(**kwargs: Any) -> click.Command:
 def label_command(**kwargs: Any) -> click.Command:
     """A factory that creates a label command group."""
 
-    if "name" not in kwargs:
-        kwargs["name"] = "label"
+    kwargs.setdefault("name", "label")
     decorators = kwargs.pop("decorators", [name_option, href_option])
     need_plugins = kwargs.pop("need_plugins", [])
 
-    @click.group(**kwargs)
+    @pulp_group(**kwargs)
     @pass_pulp_context
     def label_group(pulp_ctx: PulpContext) -> None:
         for item in need_plugins:
             pulp_ctx.needs_plugin(item)
 
-    @click.command(name="set", help=_("Add or update a label"))
+    @pulp_command(name="set", help=_("Add or update a label"))
     @click.option("--key", required=True, help=_("Key of the label"))
     @click.option("--value", required=True, help=_("Value of the label"))
     @pass_entity_context
@@ -891,7 +868,7 @@ def label_command(**kwargs: Any) -> click.Command:
         href = entity_ctx.entity["pulp_href"]
         entity_ctx.set_label(href, key, value)
 
-    @click.command(name="unset", help=_("Remove a label with a given key"))
+    @pulp_command(name="unset", help=_("Remove a label with a given key"))
     @click.option("--key", required=True, help=_("Key of the label"))
     @pass_entity_context
     def label_unset(entity_ctx: PulpEntityContext, key: str) -> None:
@@ -899,7 +876,7 @@ def label_command(**kwargs: Any) -> click.Command:
         href = entity_ctx.entity["pulp_href"]
         entity_ctx.unset_label(href, key)
 
-    @click.command(name="show", help=_("Show the value for a particular label key"))
+    @pulp_command(name="show", help=_("Show the value for a particular label key"))
     @click.option("--key", required=True, help=_("Key of the label"))
     @pass_entity_context
     def label_show(entity_ctx: PulpEntityContext, key: str) -> None:
@@ -918,31 +895,29 @@ def label_command(**kwargs: Any) -> click.Command:
 def role_command(**kwargs: Any) -> click.Command:
     """A factory that creates a (object) role command group."""
 
-    if "name" not in kwargs:
-        kwargs["name"] = "role"
-    if "help" not in kwargs:
-        kwargs["help"] = _("Manage object roles.")
+    kwargs.setdefault("name", "role")
+    kwargs.setdefault("help", _("Manage object roles."))
     decorators = kwargs.pop("decorators", [name_option, href_option])
 
     @pulp_group(**kwargs)
     def role_group() -> None:
         pass
 
-    @click.command(help=_("List my permissions on this object."))
+    @pulp_command(help=_("List my permissions on this object."))
     @pass_entity_context
     @pass_pulp_context
     def my_permissions(pulp_ctx: PulpContext, entity_ctx: PulpEntityContext) -> None:
         result = entity_ctx.my_permissions()
         pulp_ctx.output_result(result)
 
-    @click.command(name="list", help=_("List assigned object roles."))
+    @pulp_command(name="list", help=_("List assigned object roles."))
     @pass_entity_context
     @pass_pulp_context
     def role_list(pulp_ctx: PulpContext, entity_ctx: PulpEntityContext) -> None:
         result = entity_ctx.list_roles()
         pulp_ctx.output_result(result)
 
-    @click.command(name="add", help=_("Add assigned object roles."))
+    @pulp_command(name="add", help=_("Add assigned object roles."))
     @click.option("--role")
     @click.option("--user", "users", multiple=True)
     @click.option("--group", "groups", multiple=True)
@@ -958,7 +933,7 @@ def role_command(**kwargs: Any) -> click.Command:
         result = entity_ctx.add_role(role, users, groups)
         pulp_ctx.output_result(result)
 
-    @click.command(name="remove", help=_("Remove assigned object roles."))
+    @pulp_command(name="remove", help=_("Remove assigned object roles."))
     @click.option("--role")
     @click.option("--user", "users", multiple=True)
     @click.option("--group", "groups", multiple=True)
@@ -1073,8 +1048,7 @@ def repository_content_command(**kwargs: Any) -> click.Group:
         content_remove: kwargs.pop("remove_decorators", None),
         content_modify: kwargs.pop("modify_decorators", None),
     }
-    if not kwargs.get("name"):
-        kwargs["name"] = "content"
+    kwargs.setdefault("name", "content")
 
     @pulp_group(**kwargs)
     @type_option(choices=content_contexts)
