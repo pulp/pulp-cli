@@ -986,8 +986,6 @@ def repository_content_command(**kwargs: Any) -> click.Group:
     """A factory that creates a repository content command group."""
 
     content_contexts = kwargs.pop("contexts", {})
-    names = list(content_contexts.keys()) + ["all"]
-    content_contexts.update({"all": PulpContentContext})
 
     def version_callback(
         ctx: click.Context, param: click.Parameter, value: Optional[int]
@@ -1002,29 +1000,30 @@ def repository_content_command(**kwargs: Any) -> click.Group:
         )
         return repo_ver_ctx
 
-    @click.command("list")
-    @click.option("-t", "--type", "type", type=click.Choice(names), default=names[0])
+    @pulp_command("list")
+    @click.option("--all-types", is_flag=True)
     @limit_option
     @offset_option
     @repository_option
     @click.option("--version", type=int, callback=version_callback)
     @pass_pulp_context
+    @pass_content_context
     def content_list(
+        content_ctx: PulpContentContext,
         pulp_ctx: PulpContext,
         version: PulpRepositoryVersionContext,
-        offset: Optional[int],
-        limit: Optional[int],
-        type: Optional[str],
+        offset: int,
+        limit: int,
+        all_types: bool,
         **params: Any,
     ) -> None:
         parameters = {k: v for k, v in params.items() if v is not None}
         parameters.update({"repository_version": version.pulp_href})
-        result = content_contexts[type](pulp_ctx).list(
-            limit=limit, offset=offset, parameters=parameters
-        )
+        content_ctx = PulpContentContext(pulp_ctx) if all_types else content_ctx
+        result = content_ctx.list(limit=limit, offset=offset, parameters=parameters)
         pulp_ctx.output_result(result)
 
-    @click.command("add")
+    @pulp_command("add")
     @repository_option
     @click.option("--base-version", type=int, callback=version_callback)
     @pass_content_context
@@ -1039,7 +1038,7 @@ def repository_content_command(**kwargs: Any) -> click.Group:
             base_version=base_version.pulp_href,
         )
 
-    @click.command("remove")
+    @pulp_command("remove")
     @click.option("--all", is_flag=True, help=_("Remove all content from repository version"))
     @repository_option
     @click.option("--base-version", type=int, callback=version_callback)
@@ -1055,7 +1054,7 @@ def repository_content_command(**kwargs: Any) -> click.Group:
             repo_ctx.pulp_href, remove_content=remove_content, base_version=base_version.pulp_href
         )
 
-    @click.command("modify")
+    @pulp_command("modify")
     @repository_option
     @click.option("--base-version", type=int, callback=version_callback)
     def content_modify(
@@ -1077,11 +1076,12 @@ def repository_content_command(**kwargs: Any) -> click.Group:
     if not kwargs.get("name"):
         kwargs["name"] = "content"
 
-    @click.group(**kwargs)
+    @pulp_group(**kwargs)
+    @type_option(choices=content_contexts)
     @pass_pulp_context
     @click.pass_context
     def content_group(ctx: click.Context, pulp_ctx: PulpContext) -> None:
-        ctx.obj = PulpContentContext(pulp_ctx)
+        pass
 
     for command, options in command_decorators.items():
         if options is not None:

@@ -54,13 +54,13 @@ expect_succ pulp ansible repository create --name "cli_test_ansible_repository"
 expect_succ pulp ansible repository content add --repository "cli_test_ansible_repository" --name "posix" --namespace "ansible" --version "1.3.0"
 expect_succ pulp ansible repository content list --repository "cli_test_ansible_repository" --version 1
 test "$(echo "$OUTPUT" | jq -r length)" -eq "1"
-expect_succ pulp ansible repository content add --repository "cli_test_ansible_repository" --type "role" --name "kubernetes-modules" --namespace "ansible" --version "0.0.1"
-expect_succ pulp ansible repository content list --repository "cli_test_ansible_repository" --version 2 --type "role"
+expect_succ pulp ansible repository content --type "role" add --repository "cli_test_ansible_repository" --name "kubernetes-modules" --namespace "ansible" --version "0.0.1"
+expect_succ pulp ansible repository content --type "role" list --repository "cli_test_ansible_repository" --version 2
 test "$(echo "$OUTPUT" | jq -r length)" -eq "1"
 
 if pulp debug has-plugin --name "core" --min-version "3.11.0"
 then
-  expect_succ pulp ansible repository content list --repository "cli_test_ansible_repository" --version 2 --type "all"
+  expect_succ pulp ansible repository content list --repository "cli_test_ansible_repository" --version 2 --all-types
   test "$(echo "$OUTPUT" | jq -r length)" -eq "2"
 fi
 

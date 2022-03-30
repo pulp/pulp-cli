@@ -42,7 +42,7 @@ expect_succ pulp file repository content add --repository "cli_test_file_reposit
 expect_succ pulp file repository content add --repository "cli_test_file_repository" --sha256 "$sha256" --relative-path upload_test/test.txt --base-version 0
 expect_succ pulp file repository content list --repository "cli_test_file_repository" --version 1
 test "$(echo "$OUTPUT" | jq -r length)" -eq "1"
-expect_succ pulp file repository content list --repository "cli_test_file_repository" --type "all"
+expect_succ pulp file repository content list --repository "cli_test_file_repository" --all-types
 
 expect_succ pulp file repository content remove --repository "cli_test_file_repository" --sha256 "$sha256" --relative-path upload_test/test.txt
 expect_succ pulp file repository content list --repository "cli_test_file_repository"
