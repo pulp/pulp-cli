@@ -34,7 +34,6 @@ from pulpcore.cli.common.generic import (
     resource_option,
     retained_versions_option,
     show_command,
-    type_option,
     update_command,
     version_command,
 )
@@ -131,13 +130,6 @@ content_options = [
         expose_value=False,
         cls=GroupOption,
     ),
-    type_option(
-        choices={
-            "collection-version": PulpAnsibleCollectionVersionContext,
-            "role": PulpAnsibleRoleContext,
-        },
-        default="collection-version",
-    ),
     href_option,
 ]
 content_json_callback = create_content_json_callback(schema=CONTENT_LIST_SCHEMA)
@@ -159,13 +151,6 @@ modify_options = [
     Each object must contain the following keys: "name", "namespace", "version".
     The argument prefixed with the '@' can be the path to a JSON file with a list of objects."""
         ),
-    ),
-    type_option(
-        choices={
-            "collection-version": PulpAnsibleCollectionVersionContext,
-            "role": PulpAnsibleRoleContext,
-        },
-        default="collection-version",
     ),
 ]
 
