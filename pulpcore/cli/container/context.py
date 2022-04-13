@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, List, Optional
 
 from pulpcore.cli.common.context import (
     EntityDefinition,
@@ -109,6 +109,20 @@ class PulpContainerRepositoryContext(PulpContainerBaseRepositoryContext):
         "tag": [PluginRequirement("container", "2.3.0")],
         "roles": [PluginRequirement("container", "2.11.0.dev")],
     }
+
+    def modify(
+        self,
+        href: str,
+        add_content: Optional[List[str]] = None,
+        remove_content: Optional[List[str]] = None,
+        base_version: Optional[str] = None,
+    ) -> Any:
+        if remove_content:
+            self.call(
+                "remove", parameters={self.HREF: href}, body={"content_units": remove_content}
+            )
+        if add_content:
+            self.call("add", parameters={self.HREF: href}, body={"content_units": add_content})
 
 
 class PulpContainerPushRepositoryContext(PulpContainerBaseRepositoryContext):
