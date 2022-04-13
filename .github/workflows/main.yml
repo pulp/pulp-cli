@@ -46,7 +46,7 @@ jobs:
             image_tag: "3.15"
             click_version: "8.0.0"
           - python: "3.8"
-            image_tag: "3.14"
+            image_tag: "3.19"
           - python: "3.9"
             image_tag: "3.18"
             pulp_api_root: "/relocated/djnd/"
