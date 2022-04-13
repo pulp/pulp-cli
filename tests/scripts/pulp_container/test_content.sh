@@ -45,3 +45,17 @@ tag_digest="$(echo "$OUTPUT" | jq -r .digest)"
 
 expect_succ pulp container content -t tag show --name "$tag_name" --digest "$tag_digest"
 test "$(echo "$OUTPUT" | jq -r .pulp_href)" = "$tag_href"
+
+# Test repository content commands
+expect_succ pulp container repository content list --repository "cli_test_container_repository" --all-types
+expect_succ pulp container repository content --type "tag" list --repository "cli_test_container_repository"
+expect_succ pulp container repository content --type "manifest" list --repository "cli_test_container_repository"
+expect_succ pulp container repository content --type "blob" list --repository "cli_test_container_repository"
+
+expect_succ pulp container repository content --type "blob" remove --repository "cli_test_container_repository" --digest "$blob_digest"
+expect_succ pulp container repository content --type "manifest" remove --repository "cli_test_container_repository" --digest "$manifest_digest"
+expect_succ pulp container repository content --type "tag" remove --repository "cli_test_container_repository" --name "$tag_name" --digest "$tag_digest"
+
+expect_succ pulp container repository content add --repository "cli_test_container_repository" --href "$blob_href"
+expect_succ pulp container repository content add --repository "cli_test_container_repository" --href "$manifest_href"
+expect_succ pulp container repository content add --repository "cli_test_container_repository" --href "$tag_href"

@@ -19,6 +19,7 @@ from pulpcore.cli.common.generic import (
     list_command,
     name_option,
     pulp_group,
+    repository_content_command,
     repository_href_option,
     repository_option,
     resource_option,
@@ -30,11 +31,15 @@ from pulpcore.cli.common.generic import (
     version_command,
 )
 from pulpcore.cli.common.i18n import get_translation
+from pulpcore.cli.container.content import show_options
 from pulpcore.cli.container.context import (
     PulpContainerBaseRepositoryContext,
+    PulpContainerBlobContext,
+    PulpContainerManifestContext,
     PulpContainerPushRepositoryContext,
     PulpContainerRemoteContext,
     PulpContainerRepositoryContext,
+    PulpContainerTagContext,
 )
 from pulpcore.cli.core.generic import task_command
 
@@ -58,9 +63,7 @@ remote_option = resource_option(
     default_type="container",
     context_table={"container:container": PulpContainerRemoteContext},
     href_pattern=PulpRemoteContext.HREF_PATTERN,
-    help=_(
-        "Remote used for synching in the form '[[<plugin>:]<resource_type>:]<name>' or by href."
-    ),
+    help=_("Remote used for syncing in the form '[[<plugin>:]<resource_type>:]<name>' or by href."),
 )
 
 
@@ -84,6 +87,11 @@ update_options = [
     retained_versions_option,
 ]
 create_options = update_options + [click.option("--name", required=True)]
+contexts = {
+    "tag": PulpContainerTagContext,
+    "manifest": PulpContainerManifestContext,
+    "blob": PulpContainerBlobContext,
+}
 container_context = (PulpContainerRepositoryContext,)
 
 repository.add_command(list_command(decorators=[label_select_option]))
@@ -103,6 +111,14 @@ repository.add_command(task_command(decorators=nested_lookup_options))
 repository.add_command(version_command(decorators=nested_lookup_options))
 repository.add_command(role_command(decorators=lookup_options))
 repository.add_command(label_command(decorators=nested_lookup_options))
+repository.add_command(
+    repository_content_command(
+        contexts=contexts,
+        add_decorators=show_options,
+        remove_decorators=show_options,
+        allowed_with_contexts=container_context,
+    )
+)
 
 
 @repository.command(allowed_with_contexts=container_context)
