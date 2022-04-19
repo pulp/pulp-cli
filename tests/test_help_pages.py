@@ -6,7 +6,9 @@ import click
 import pytest
 from click.testing import CliRunner
 
-from pulpcore.cli.common import main
+from pulp_cli import load_plugins
+
+main = load_plugins()
 
 
 def traverse_commands(command, args):
@@ -18,7 +20,7 @@ def traverse_commands(command, args):
 
 @pytest.mark.help_page
 @pytest.mark.parametrize("args", traverse_commands(main, []), ids=" ".join)
-@patch("pulpcore.cli.common.PulpContext.api", new_callable=PropertyMock)
+@patch("pulpcore.cli.common.context.PulpContext.api", new_callable=PropertyMock)
 def test_access_help(_api, args):
     """Test, that all help screens are accessible without touching the api property."""
     runner = CliRunner()
