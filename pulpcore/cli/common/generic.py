@@ -76,6 +76,7 @@ class PulpCommand(click.Command):
 class PulpGroup(click.Group):
 
     command_class = PulpCommand
+    group_class = type
 
     def __init__(
         self,
