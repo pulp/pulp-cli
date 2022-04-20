@@ -16,6 +16,7 @@ from pulpcore.cli.common.generic import (
     lookup_callback,
     name_option,
     null_callback,
+    pulp_group,
     role_command,
     show_command,
 )
@@ -52,7 +53,7 @@ group_option = click.option(
 )
 
 
-@click.group(help=_("Manage user groups and their granted permissions."))
+@pulp_group(help=_("Manage user groups."))
 @pass_pulp_context
 @click.pass_context
 def group(ctx: click.Context, pulp_ctx: PulpContext) -> None:
@@ -71,7 +72,7 @@ group.add_command(
 )
 
 
-@group.group()
+@group.group(needs_plugins=[PluginRequirement("core", max="3.20-dev")])
 @click.option(
     "-t",
     "--type",
