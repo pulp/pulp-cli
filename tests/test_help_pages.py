@@ -1,7 +1,5 @@
 # type: ignore
 
-from unittest.mock import PropertyMock, patch
-
 import click
 import pytest
 from click.testing import CliRunner
@@ -18,13 +16,20 @@ def traverse_commands(command, args):
             yield from traverse_commands(sub, args + [name])
 
 
+@pytest.fixture
+def no_api(monkeypatch):
+    @property
+    def getter(self):
+        pytest.fail("Invalid access to 'PulpContext.api'.", pytrace=False)
+
+    monkeypatch.setattr("pulpcore.cli.common.context.PulpContext.api", getter)
+
+
 @pytest.mark.help_page
 @pytest.mark.parametrize("args", traverse_commands(main, []), ids=" ".join)
-@patch("pulpcore.cli.common.context.PulpContext.api", new_callable=PropertyMock)
-def test_access_help(_api, args):
+def test_access_help(no_api, args):
     """Test, that all help screens are accessible without touching the api property."""
     runner = CliRunner()
-    result = runner.invoke(main, args + ["--help"])
+    result = runner.invoke(main, args + ["--help"], catch_exceptions=False)
     assert result.exit_code == 0
     assert result.stdout.startswith("Usage:") or result.stdout.startswith("DeprecationWarning:")
-    _api.assert_not_called()
