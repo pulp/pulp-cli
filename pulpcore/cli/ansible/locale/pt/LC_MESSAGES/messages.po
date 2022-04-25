@@ -1,0 +1,194 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-11-06 20:29+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Fabricio Aguiar <faguiard@redhat.com>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: pt\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: pulpcore/cli/ansible/content.py:55 pulpcore/cli/ansible/content.py:87
+#: pulpcore/cli/ansible/repository.py:116
+#, python-brace-format
+msgid "Name of {entity}"
+msgstr ""
+
+#: pulpcore/cli/ansible/content.py:56 pulpcore/cli/ansible/content.py:95
+#: pulpcore/cli/ansible/repository.py:124
+#, python-brace-format
+msgid "Namespace of {entity}"
+msgstr ""
+
+#: pulpcore/cli/ansible/content.py:57 pulpcore/cli/ansible/content.py:102
+#: pulpcore/cli/ansible/repository.py:131
+#, python-brace-format
+msgid "Version of {entity}"
+msgstr ""
+
+#: pulpcore/cli/ansible/content.py:64
+msgid ""
+"Only show highest version of collection version (only works for collection "
+"versions)"
+msgstr ""
+
+#: pulpcore/cli/ansible/content.py:70
+msgid ""
+"Comma separated list of tags that must all match (only works for collection "
+"versions)"
+msgstr ""
+
+#: pulpcore/cli/ansible/content.py:76
+msgid "String list of fields to include in the result"
+msgstr ""
+
+#: pulpcore/cli/ansible/content.py:80
+msgid "String list of fields to exclude from result"
+msgstr ""
+
+#: pulpcore/cli/ansible/content.py:117
+#, python-brace-format
+msgid "Name of {entity}, only required for Roles"
+msgstr ""
+
+#: pulpcore/cli/ansible/content.py:118
+#, python-brace-format
+msgid "Namespace of {entity}, only required for Roles"
+msgstr ""
+
+#: pulpcore/cli/ansible/content.py:119
+#, python-brace-format
+msgid "Version of {entity}, only required for Roles"
+msgstr ""
+
+#: pulpcore/cli/ansible/context.py:20
+msgid "ansible collection version"
+msgstr ""
+
+#: pulpcore/cli/ansible/context.py:21
+msgid "ansible collection versions"
+msgstr ""
+
+#: pulpcore/cli/ansible/context.py:34
+msgid "ansible role"
+msgstr ""
+
+#: pulpcore/cli/ansible/context.py:35
+msgid "ansible roles"
+msgstr ""
+
+#: pulpcore/cli/ansible/context.py:43
+msgid "ansible distribution"
+msgstr ""
+
+#: pulpcore/cli/ansible/context.py:44
+msgid "ansible distributions"
+msgstr ""
+
+#: pulpcore/cli/ansible/context.py:62
+msgid "role remote"
+msgstr ""
+
+#: pulpcore/cli/ansible/context.py:63
+msgid "role remotes"
+msgstr ""
+
+#: pulpcore/cli/ansible/context.py:73
+msgid "collection remote"
+msgstr ""
+
+#: pulpcore/cli/ansible/context.py:74
+msgid "collection remotes"
+msgstr ""
+
+#: pulpcore/cli/ansible/distribution.py:68
+msgid "the base (relative) path component of the published url."
+msgstr ""
+
+#: pulpcore/cli/ansible/distribution.py:72
+msgid "a repository version number, leave blank for latest"
+msgstr ""
+
+#: pulpcore/cli/ansible/distribution.py:92
+msgid "new base_path"
+msgstr ""
+
+#: pulpcore/cli/ansible/distribution.py:93
+msgid "new repository to be served"
+msgstr ""
+
+#: pulpcore/cli/ansible/distribution.py:98
+msgid "version of new repository to be served, leave blank for always latest"
+msgstr ""
+
+#: pulpcore/cli/ansible/distribution.py:147
+#, python-brace-format
+msgid ""
+"Distribution {name} doesn't have a repository set, please specify the "
+"repository to use  with --repository"
+msgstr ""
+
+#: pulpcore/cli/ansible/remote.py:36
+#, python-brace-format
+msgid "Option {parameter} not valid for Role remote, see --help"
+msgstr ""
+
+#: pulpcore/cli/ansible/remote.py:69
+msgid "policy to use when downloading"
+msgstr ""
+
+#: pulpcore/cli/ansible/remote.py:76
+msgid "Collections only: a Collection requirements yaml"
+msgstr ""
+
+#: pulpcore/cli/ansible/remote.py:81
+msgid "Collections only: a string of a requirements yaml"
+msgstr ""
+
+#: pulpcore/cli/ansible/remote.py:86
+msgid "Collections only: URL to receive a session token"
+msgstr ""
+
+#: pulpcore/cli/ansible/remote.py:91
+msgid "Collections only: token key use for authentication"
+msgstr ""
+
+#: pulpcore/cli/ansible/repository.py:55
+msgid ""
+"Remote used for synching in the form '[[<plugin>:]<resource_type>:]<name>' "
+"or by href."
+msgstr ""
+
+#: pulpcore/cli/ansible/repository.py:154
+msgid ""
+"JSON string with a list of objects to add to the repository.\n"
+"    Each object must contain the following keys: \"name\", \"namespace\", "
+"\"version\".\n"
+"    The argument prefixed with the '@' can be the path to a JSON file with a "
+"list of objects."
+msgstr ""
+
+#: pulpcore/cli/ansible/repository.py:163
+msgid ""
+"JSON string with a list of objects to remove from the repository.\n"
+"    Each object must contain the following keys: \"name\", \"namespace\", "
+"\"version\".\n"
+"    The argument prefixed with the '@' can be the path to a JSON file with a "
+"list of objects."
+msgstr ""
+
+#: pulpcore/cli/ansible/repository.py:223
+#, python-brace-format
+msgid ""
+"Repository '{name}' does not have a default remote. Please specify with '--"
+"remote'."
+msgstr ""

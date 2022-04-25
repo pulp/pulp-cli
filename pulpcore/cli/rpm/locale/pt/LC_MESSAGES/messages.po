@@ -1,0 +1,118 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-12-06 11:10+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Fabricio Aguiar <faguiard@redhat.com>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: pt\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: pulpcore/cli/rpm/acs.py:30
+msgid "path to add to ACS; can be specified multiple times."
+msgstr ""
+
+#: pulpcore/cli/rpm/acs.py:71
+msgid "ACS already has path '{}'."
+msgstr ""
+
+#: pulpcore/cli/rpm/acs.py:91
+msgid "ACS does not have path(s): {}."
+msgstr ""
+
+#: pulpcore/cli/rpm/acs.py:103
+msgid ""
+"Remote to attach to ACS in the form '[[<plugin>:]<resource_type>:]<name>' or "
+"by href."
+msgstr ""
+
+#: pulpcore/cli/rpm/comps.py:24
+msgid "Repository to associate the comps-units to, takes <name> or href."
+msgstr ""
+
+#: pulpcore/cli/rpm/content.py:96
+msgid "Digest of the artifact to use"
+msgstr ""
+
+#: pulpcore/cli/rpm/context.py:22
+msgid "rpm ACS"
+msgstr ""
+
+#: pulpcore/cli/rpm/context.py:23
+msgid "rpm ACSes"
+msgstr ""
+
+#: pulpcore/cli/rpm/context.py:45
+#, python-brace-format
+msgid "Uploading file {filename}"
+msgstr ""
+
+#: pulpcore/cli/rpm/context.py:55
+msgid "rpm distribution"
+msgstr ""
+
+#: pulpcore/cli/rpm/context.py:56
+msgid "rpm distributions"
+msgstr ""
+
+#: pulpcore/cli/rpm/context.py:76
+msgid "rpm publication"
+msgstr ""
+
+#: pulpcore/cli/rpm/context.py:77
+msgid "rpm publications"
+msgstr ""
+
+#: pulpcore/cli/rpm/context.py:94
+msgid "rpm remote"
+msgstr ""
+
+#: pulpcore/cli/rpm/context.py:95
+msgid "rpm remotes"
+msgstr ""
+
+#: pulpcore/cli/rpm/publication.py:46
+msgid "a repository version number, leave blank for latest"
+msgstr ""
+
+#: pulpcore/cli/rpm/repository.py:56
+msgid ""
+"Remote used for synching in the form '[[<plugin>:]<resource_type>:]<name>' "
+"or by href."
+msgstr ""
+
+#: pulpcore/cli/rpm/repository.py:94
+msgid "Href of the rpm package to use"
+msgstr ""
+
+#: pulpcore/cli/rpm/repository.py:107
+msgid ""
+"JSON string with a list of objects to add to the repository.\n"
+"    Each object must contain the following keys: \"pulp_href\".\n"
+"    The argument prefixed with the '@' can be the path to a JSON file with a "
+"list of objects."
+msgstr ""
+
+#: pulpcore/cli/rpm/repository.py:116
+msgid ""
+"JSON string with a list of objects to remove from the repository.\n"
+"    Each object must contain the following keys: \"pulp_href\".\n"
+"    The argument prefixed with the '@' can be the path to a JSON file with a "
+"list of objects."
+msgstr ""
+
+#: pulpcore/cli/rpm/repository.py:192
+#, python-brace-format
+msgid ""
+"Repository '{name}' does not have a default remote. Please specify with '--"
+"remote'."
+msgstr ""

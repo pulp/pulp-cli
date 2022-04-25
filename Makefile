@@ -1,4 +1,4 @@
-LANGUAGES=de
+LANGUAGES=de pt
 PLUGINS=$(notdir $(wildcard pulpcore/cli/*))
 
 info:

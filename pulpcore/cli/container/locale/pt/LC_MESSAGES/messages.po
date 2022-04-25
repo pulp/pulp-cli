@@ -1,0 +1,71 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-11-06 20:29+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Fabricio Aguiar <faguiard@redhat.com>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: pt\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: pulpcore/cli/container/context.py:17
+msgid "container namespace"
+msgstr ""
+
+#: pulpcore/cli/container/context.py:18
+msgid "container namespaces"
+msgstr ""
+
+#: pulpcore/cli/container/context.py:27
+msgid "container distribution"
+msgstr ""
+
+#: pulpcore/cli/container/context.py:28
+msgid "container distributions"
+msgstr ""
+
+#: pulpcore/cli/container/context.py:46
+msgid "container remote"
+msgstr ""
+
+#: pulpcore/cli/container/context.py:47
+msgid "container remotes"
+msgstr ""
+
+#: pulpcore/cli/container/distribution.py:71
+#: pulpcore/cli/container/distribution.py:87
+msgid "a repository version number, leave blank for latest"
+msgstr ""
+
+#: pulpcore/cli/container/distribution.py:133
+#, python-brace-format
+msgid ""
+"Distribution {distribution} doesn't have a repository set, please specify "
+"the repository to use  with --repository"
+msgstr ""
+
+#: pulpcore/cli/container/repository.py:49
+msgid ""
+"Remote used for synching in the form '[[<plugin>:]<resource_type>:]<name>' "
+"or by href."
+msgstr ""
+
+#: pulpcore/cli/container/repository.py:102
+msgid "Repository type does not support sync."
+msgstr ""
+
+#: pulpcore/cli/container/repository.py:114
+#, python-brace-format
+msgid ""
+"Repository '{name}' does not have a default remote. Please specify with '--"
+"remote'."
+msgstr ""
