@@ -168,6 +168,11 @@ class PulpContext:
                 python_remote_serializer["properties"][prop]["items"] = {"type": "string"}
                 patched_python_remote_serializer["properties"][prop]["type"] = "array"
                 patched_python_remote_serializer["properties"][prop]["items"] = {"type": "string"}
+        if self.has_plugin(PluginRequirement("container", min="1.1.0")):
+            # TODO Add upper bound when fixed
+            oci_build_schema = api_spec["components"]["schemas"]["OCIBuildImage"]
+            oci_artifacts = oci_build_schema["properties"]["artifacts"]
+            oci_artifacts["type"] = "string"
 
     @property
     def domain_enabled(self) -> bool:
