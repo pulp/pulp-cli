@@ -70,6 +70,69 @@ class PulpRpmPackageContext(PulpContentContext):
     ID_PREFIX = "content_rpm_packages"
 
 
+class PulpRpmAdvisoryContext(PulpContentContext):
+    ENTITY = "rpm advisory"
+    ENTITIES = "rpm advisories"
+    HREF = "rpm_update_record_href"
+    ID_PREFIX = "content_rpm_advisories"
+
+
+class PulpRpmDistributionTreeContext(PulpContentContext):
+    ENTITY = "rpm distribution tree"
+    ENTITIES = "rpm distribution trees"
+    HREF = "rpm_distribution_tree_href"
+    ID_PREFIX = "content_rpm_distribution_trees"
+
+
+class PulpRpmModulemdDefaultsContext(PulpContentContext):
+    ENTITY = "rpm modulemd defaults"
+    ENTITIES = "rpm modulemd defaults"
+    HREF = "rpm_modulemd_defaults_href"
+    ID_PREFIX = "content_rpm_modulemd_defaults"
+
+
+class PulpRpmModulemdContext(PulpContentContext):
+    ENTITY = "rpm modulemd"
+    ENTITIES = "rpm modulemds"
+    HREF = "rpm_modulemd_href"
+    ID_PREFIX = "content_rpm_modulemds"
+
+
+class PulpRpmPackageCategoryContext(PulpContentContext):
+    ENTITY = "rpm package category"
+    ENTITIES = "rpm package categories"
+    HREF = "rpm_package_category_href"
+    ID_PREFIX = "content_rpm_packagecategories"
+
+
+class PulpRpmPackageEnvironmentContext(PulpContentContext):
+    ENTITY = "rpm package environment"
+    ENTITIES = "rpm package environments"
+    HREF = "rpm_package_environment_href"
+    ID_PREFIX = "content_rpm_packageenvironments"
+
+
+class PulpRpmPackageGroupContext(PulpContentContext):
+    ENTITY = "rpm package group"
+    ENTITIES = "rpm package groups"
+    HREF = "rpm_package_group_href"
+    ID_PREFIX = "content_rpm_packagegroups"
+
+
+class PulpRpmPackageLangpacksContext(PulpContentContext):
+    ENTITY = "rpm package langpack"
+    ENTITIES = "rpm package langpacks"
+    HREF = "rpm_package_langpacks_href"
+    ID_PREFIX = "content_rpm_packagelangpacks"
+
+
+class PulpRpmRepoMetadataFileContext(PulpContentContext):
+    ENTITY = "rpm repo metadata file"
+    ENTITIES = "rpm repo metadata files"
+    HREF = "rpm_repo_metadata_file_href"
+    ID_PREFIX = "content_rpm_repo_metadata_files"
+
+
 class PulpRpmPublicationContext(PulpEntityContext):
     ENTITY = _("rpm publication")
     ENTITIES = _("rpm publications")

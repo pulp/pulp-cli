@@ -1,0 +1,33 @@
+{
+    "issued": "2020-03-08 20:04:01",
+    "id": "CEBA-2022-124387",
+    "type": "Bug Fix Advisory",
+    "release": "1",
+    "version": "1",
+    "pkglist": [
+        {
+            "packages": [
+                {
+                    "arch": "noarch",
+                    "epoch": "0",
+                    "filename": "bear-4.1-1.noarch.rpm",
+                    "name": "bear",
+                    "reboot_suggested": false,
+                    "relogin_suggested": false,
+                    "restart_suggested": false,
+                    "release": "1",
+                    "src": "http://www.fedoraproject.org",
+                    "sum": "",
+                    "sum_type": "",
+                    "version": "4.1"
+                }
+            ]
+        }
+    ],
+    "severity":  "",
+    "description":  "Not available",
+    "reboot_suggested":  false,
+    "updated":  "2022-03-08 20:04:01",
+    "solution":  "Not available",
+    "fromstr":  "centos-announce@centos.org"
+}

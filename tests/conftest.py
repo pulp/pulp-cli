@@ -17,6 +17,8 @@ def pulp_cli_vars(pulp_cli_vars):
             "CONTAINER_REMOTE_URL": "https://quay.io",
             "CONTAINER_IMAGE": "libpod/alpine",
             "RPM_REMOTE_URL": urljoin(PULP_FIXTURES_URL, "/rpm-unsigned"),
+            "RPM_WEAK_DEPS_URL": urljoin(PULP_FIXTURES_URL, "/rpm-richnweak-deps"),
+            "RPM_MODULES_REMOTE_URL": urljoin(PULP_FIXTURES_URL, "/rpm-with-modules"),
             "ANSIBLE_COLLECTION_REMOTE_URL": "https://galaxy.ansible.com/",
             "ANSIBLE_ROLE_REMOTE_URL": "https://galaxy.ansible.com/api/v1/roles/?namespace__name=elastic",  # noqa
             "PYTHON_REMOTE_URL": PULP_FIXTURES_URL + "/python-pypi/",

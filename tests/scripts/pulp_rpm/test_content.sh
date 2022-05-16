@@ -5,51 +5,115 @@
 
 pulp debug has-plugin --name "rpm" || exit 3
 
+TEST_ADVISORY="$(dirname "$(realpath "$0")")"/test_advisory.json
+RPM_NAME="lemon-0-1.noarch.rpm"
+REPO1_NAME="cli_test_rpm"
+REPO2_NAME="cli_test_modular"
+PACKAGE_HREF=
+ADVISORY_HREF=
 cleanup() {
-  pulp rpm repository destroy --name "cli_test_rpm_repository" || true
-  pulp rpm remote destroy --name "cli_test_rpm_remote" || true
+  pulp rpm repository destroy --name "${REPO1_NAME}" || true
+  pulp rpm remote destroy --name "${REPO1_NAME}" || true
+  pulp rpm repository destroy --name "${REPO2_NAME}" || true
+  pulp rpm remote destroy --name "${REPO2_NAME}" || true
+  # clean up everything else "asap"
+  pulp orphan cleanup --protection-time 0 || true
 }
 trap cleanup EXIT
+cleanup
 
 # Test rpm package upload
+wget --no-check-certificate "${RPM_WEAK_DEPS_URL}/${RPM_NAME}"
+expect_succ pulp rpm content upload --file "${RPM_NAME}" --relative-path "${RPM_NAME}"
+PACKAGE_HREF=$(echo "${OUTPUT}" | jq -r .pulp_href)
+expect_succ pulp rpm content show --href "${PACKAGE_HREF}"
 
-wget "https://fixtures.pulpproject.org/rpm-modules-static-context/bear-4.1-1.noarch.rpm"
-expect_succ pulp rpm content upload --file "bear-4.1-1.noarch.rpm" --relative-path "bear-4.1-1.noarch.rpm"
-PACKAGE_HREF=$(echo "$OUTPUT" | jq -r .pulp_href)
-expect_succ pulp rpm content show --href "$PACKAGE_HREF"
-
-expect_succ pulp rpm remote create --name "cli_test_rpm_remote" --url "$RPM_REMOTE_URL"
-expect_succ pulp rpm remote show --name "cli_test_rpm_remote"
-REMOTE_HREF=$(echo "$OUTPUT" | jq -r .pulp_href)
-expect_succ pulp rpm repository create --name "cli_test_rpm_repository" --remote "$REMOTE_HREF"
-expect_succ pulp rpm repository show --name "cli_test_rpm_repository"
+expect_succ pulp rpm remote create --name "${REPO1_NAME}" --url "$RPM_REMOTE_URL"
+expect_succ pulp rpm remote show --name "${REPO1_NAME}"
+expect_succ pulp rpm repository create --name "${REPO1_NAME}" --remote "${REPO1_NAME}"
+expect_succ pulp rpm repository show --name "${REPO1_NAME}"
 
 expect_succ pulp rpm repository content modify \
---repository "cli_test_rpm_repository" \
---add-content "[{\"pulp_href\": \"$PACKAGE_HREF\"}]"
-expect_succ pulp rpm repository content list --repository "cli_test_rpm_repository"
-test "$(echo "$OUTPUT" | jq -r '.[0].pulp_href')" = "$PACKAGE_HREF"
+--repository "${REPO1_NAME}" \
+--add-content "[{\"pulp_href\": \"${PACKAGE_HREF}\"}]"
+expect_succ pulp rpm repository content list --repository "${REPO1_NAME}"
+test "$(echo "${OUTPUT}" | jq -r '.[0].pulp_href')" = "${PACKAGE_HREF}"
 
 expect_succ pulp rpm repository content modify \
---repository "cli_test_rpm_repository" \
---remove-content "[{\"pulp_href\": \"$PACKAGE_HREF\"}]"
-expect_succ pulp rpm repository content list --repository "cli_test_rpm_repository"
-test "$(echo "$OUTPUT" | jq -r length)" -eq "0"
+--repository "${REPO1_NAME}" \
+--remove-content "[{\"pulp_href\": \"${PACKAGE_HREF}\"}]"
+expect_succ pulp rpm repository content list --repository "${REPO1_NAME}"
+test "$(echo "${OUTPUT}" | jq -r length)" -eq "0"
 
 expect_succ pulp rpm repository content add \
---repository "cli_test_rpm_repository" \
---package-href "$PACKAGE_HREF"
-expect_succ pulp rpm repository content list --repository "cli_test_rpm_repository"
-test "$(echo "$OUTPUT" | jq -r '.[0].pulp_href')" = "$PACKAGE_HREF"
+--repository "${REPO1_NAME}" \
+--package-href "${PACKAGE_HREF}"
+expect_succ pulp rpm repository content list --repository "${REPO1_NAME}"
+test "$(echo "${OUTPUT}" | jq -r '.[0].pulp_href')" = "${PACKAGE_HREF}"
 
 expect_succ pulp rpm repository content remove \
---repository "cli_test_rpm_repository" \
---package-href "$PACKAGE_HREF"
-expect_succ pulp rpm repository content list --repository "cli_test_rpm_repository"
-test "$(echo "$OUTPUT" | jq -r length)" -eq "0"
+--repository "${REPO1_NAME}" \
+--package-href "${PACKAGE_HREF}"
+expect_succ pulp rpm repository content list --repository "${REPO1_NAME}"
+test "$(echo "${OUTPUT}" | jq -r length)" -eq "0"
 
 expect_succ pulp rpm repository content modify \
---repository "cli_test_rpm_repository" \
---remove-content "[{\"pulp_href\": \"$PACKAGE_HREF\"}]"
-expect_succ pulp rpm repository destroy --name "cli_test_rpm_repository"
-expect_succ pulp rpm remote destroy --name "cli_test_rpm_remote"
+--repository "${REPO1_NAME}" \
+--remove-content "[{\"pulp_href\": \"${PACKAGE_HREF}\"}]"
+
+expect_succ pulp rpm remote create --name "${REPO2_NAME}" --url "$RPM_MODULES_REMOTE_URL"
+expect_succ pulp rpm repository create --name "${REPO2_NAME}" --remote "${REPO2_NAME}"
+expect_succ pulp rpm repository sync --name "${REPO2_NAME}"
+VERSION_HREF=$(pulp rpm repository version show --repository "${REPO2_NAME}" | jq -r .pulp_href)
+
+# test list and show for all types
+for t in package advisory distribution_tree modulemd_defaults modulemd package_category package_environment package_group package_langpack repo_metadata_file
+do
+  OUTPUT=$(pulp rpm content -t ${t} list --limit 100 --repository-version "${VERSION_HREF}")
+  FOUND=$(echo "${OUTPUT}" | jq -r length)
+  case ${t} in
+    package)
+      test "${FOUND}" -eq "35"
+      ;;
+    advisory)
+      test "${FOUND}" -eq "6"
+      ;;
+    distribution_tree)
+      test "${FOUND}" -eq "0"
+      ;;
+    modulemd_defaults)
+      test "${FOUND}" -eq "3"
+      ;;
+    modulemd)
+      test "${FOUND}" -eq "10"
+      ;;
+    package_category)
+      test "${FOUND}" -eq "1"
+      ;;
+    package_environment)
+      test "${FOUND}" -eq "0"
+      ;;
+    package_group)
+      test "${FOUND}" -eq "2"
+      ;;
+    package_langpack)
+      test "${FOUND}" -eq "1"
+      ;;
+    repo_metadata_file)
+      test "${FOUND}" -eq "0"
+      ;;
+    *)
+      ;;
+  esac
+  if test "${FOUND}" -gt "0"
+  then
+    ENTITY_HREF=$(echo "${OUTPUT}" | jq -r '.[0] | .pulp_href')
+    expect_succ pulp rpm content -t ${t} show --href "${ENTITY_HREF}"
+  fi
+done
+
+# test upload for advisory, package-upload is tested at the start
+expect_succ pulp rpm content -t advisory upload --file "${TEST_ADVISORY}"
+ADVISORY_HREF=$(echo "${OUTPUT}" | jq -r .pulp_href)
+# make sure the package/advisory we've been playing with are cleaned up immediately
+expect_succ pulp orphan cleanup --content-hrefs "[\"${PACKAGE_HREF}\",\"${ADVISORY_HREF}\"]" --protection-time 0 || true

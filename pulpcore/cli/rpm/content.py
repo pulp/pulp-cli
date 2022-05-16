@@ -1,4 +1,4 @@
-from typing import IO, Optional, Union
+from typing import Any, Optional, Union
 
 import click
 
@@ -14,11 +14,24 @@ from pulpcore.cli.common.generic import (
     href_option,
     list_command,
     pulp_group,
+    pulp_option,
     show_command,
+    type_option,
 )
 from pulpcore.cli.common.i18n import get_translation
 from pulpcore.cli.core.context import PulpArtifactContext
-from pulpcore.cli.rpm.context import PulpRpmPackageContext
+from pulpcore.cli.rpm.context import (
+    PulpRpmAdvisoryContext,
+    PulpRpmDistributionTreeContext,
+    PulpRpmModulemdContext,
+    PulpRpmModulemdDefaultsContext,
+    PulpRpmPackageCategoryContext,
+    PulpRpmPackageContext,
+    PulpRpmPackageEnvironmentContext,
+    PulpRpmPackageGroupContext,
+    PulpRpmPackageLangpacksContext,
+    PulpRpmRepoMetadataFileContext,
+)
 
 translation = get_translation(__name__)
 _ = translation.gettext
@@ -52,74 +65,196 @@ def _sha256_artifact_callback(
 
 
 @pulp_group()
-@click.option(
-    "-t",
-    "--type",
-    "content_type",
-    type=click.Choice(["package"], case_sensitive=False),
+@type_option(
+    choices={
+        "package": PulpRpmPackageContext,
+        "advisory": PulpRpmAdvisoryContext,
+        "distribution_tree": PulpRpmDistributionTreeContext,
+        "modulemd_defaults": PulpRpmModulemdDefaultsContext,
+        "modulemd": PulpRpmModulemdContext,
+        "package_category": PulpRpmPackageCategoryContext,
+        "package_environment": PulpRpmPackageEnvironmentContext,
+        "package_group": PulpRpmPackageGroupContext,
+        "package_langpack": PulpRpmPackageLangpacksContext,
+        "repo_metadata_file": PulpRpmRepoMetadataFileContext,
+    },
     default="package",
+    case_sensitive=False,
 )
-@pass_pulp_context
-@click.pass_context
-def content(ctx: click.Context, pulp_ctx: PulpContext, content_type: str) -> None:
-    if content_type == "package":
-        ctx.obj = PulpRpmPackageContext(pulp_ctx)
-    else:
-        raise NotImplementedError()
+def content() -> None:
+    pass
 
 
 list_options = [
-    click.option("--arch"),
-    click.option("--arch-in", "arch__in"),
-    click.option("--epoch"),
-    click.option("--epoch-in", "epoch__in"),
-    click.option("--fields"),
-    click.option("--name"),
-    click.option("--name-in", "name__in"),
-    click.option("--package-href"),
-    click.option("--release"),
-    click.option("--release-in", "release__in"),
-    click.option("--repository-version"),
-    click.option("--version"),
-    click.option("--version-in", "version__in"),
+    pulp_option("--exclude_fields"),
+    pulp_option("--fields"),
+    pulp_option("--repository-version"),
+    pulp_option("--arch", allowed_with_contexts=(PulpRpmPackageContext,)),
+    pulp_option("--arch-in", "arch__in", allowed_with_contexts=(PulpRpmPackageContext,)),
+    pulp_option("--arch-ne", "arch__ne", allowed_with_contexts=(PulpRpmPackageContext,)),
+    pulp_option("--epoch", allowed_with_contexts=(PulpRpmPackageContext,)),
+    pulp_option("--epoch-in", "epoch__in", allowed_with_contexts=(PulpRpmPackageContext,)),
+    pulp_option("--epoch-ne", "epoch__ne", allowed_with_contexts=(PulpRpmPackageContext,)),
+    pulp_option("--id", allowed_with_contexts=(PulpRpmPackageContext, PulpRpmAdvisoryContext)),
+    pulp_option(
+        "--id-in", "id__in", allowed_with_contexts=(PulpRpmPackageContext, PulpRpmAdvisoryContext)
+    ),
+    pulp_option("--module", allowed_with_contexts=(PulpRpmModulemdDefaultsContext,)),
+    pulp_option(
+        "--module-in", "module__in", allowed_with_contexts=(PulpRpmModulemdDefaultsContext,)
+    ),
+    pulp_option("--name", allowed_with_contexts=(PulpRpmPackageContext, PulpRpmModulemdContext)),
+    pulp_option(
+        "--name-in",
+        "name__in",
+        allowed_with_contexts=(PulpRpmPackageContext, PulpRpmModulemdContext),
+    ),
+    pulp_option(
+        "--name-ne",
+        "name__ne",
+        allowed_with_contexts=(PulpRpmPackageContext, PulpRpmModulemdContext),
+    ),
+    pulp_option("--package-href", allowed_with_contexts=(PulpRpmPackageContext,)),
+    pulp_option("--pkgId", allowed_with_contexts=(PulpRpmPackageContext, PulpRpmModulemdContext)),
+    pulp_option(
+        "--pkgId-in",
+        "pkgId__in",
+        allowed_with_contexts=(PulpRpmPackageContext, PulpRpmModulemdContext),
+    ),
+    pulp_option("--release", allowed_with_contexts=(PulpRpmPackageContext,)),
+    pulp_option("--release-in", "release__in", allowed_with_contexts=(PulpRpmPackageContext,)),
+    pulp_option("--release-ne", "release__ne", allowed_with_contexts=(PulpRpmPackageContext,)),
+    pulp_option("--severity", allowed_with_contexts=(PulpRpmAdvisoryContext,)),
+    pulp_option("--severity-in", "severity__in", allowed_with_contexts=(PulpRpmAdvisoryContext,)),
+    pulp_option("--severity-ne", "severity__ne", allowed_with_contexts=(PulpRpmAdvisoryContext,)),
+    pulp_option(
+        "--sha256",
+        allowed_with_contexts=(
+            PulpRpmPackageContext,
+            PulpRpmModulemdDefaultsContext,
+            PulpRpmModulemdContext,
+        ),
+    ),
+    pulp_option("--status", allowed_with_contexts=(PulpRpmAdvisoryContext,)),
+    pulp_option("--status-in", "status__in", allowed_with_contexts=(PulpRpmAdvisoryContext,)),
+    pulp_option("--status-ne", "status__ne", allowed_with_contexts=(PulpRpmAdvisoryContext,)),
+    pulp_option(
+        "--stream", allowed_with_contexts=(PulpRpmModulemdDefaultsContext, PulpRpmModulemdContext)
+    ),
+    pulp_option(
+        "--stream-in",
+        "stream__in",
+        allowed_with_contexts=(PulpRpmModulemdDefaultsContext, PulpRpmModulemdContext),
+    ),
+    pulp_option("--type", allowed_with_contexts=(PulpRpmAdvisoryContext,)),
+    pulp_option("--type-in", "type__in", allowed_with_contexts=(PulpRpmAdvisoryContext,)),
+    pulp_option("--type-ne", "type__ne", allowed_with_contexts=(PulpRpmAdvisoryContext,)),
+    pulp_option("--version", allowed_with_contexts=(PulpRpmPackageContext,)),
+    pulp_option("--version-in", "version__in", allowed_with_contexts=(PulpRpmPackageContext,)),
+    pulp_option("--version-ne", "version__ne", allowed_with_contexts=(PulpRpmPackageContext,)),
 ]
 lookup_options = [
     href_option,
-    click.option("--relative-path", callback=_relative_path_callback, expose_value=False),
-    click.option("--sha256", callback=_sha256_callback, expose_value=False),
+    pulp_option(
+        "--relative-path",
+        callback=_relative_path_callback,
+        expose_value=False,
+        allowed_with_contexts=(PulpRpmPackageContext,),
+    ),
+    pulp_option(
+        "--sha256",
+        callback=_sha256_callback,
+        expose_value=False,
+        allowed_with_contexts=(
+            PulpRpmPackageContext,
+            PulpRpmModulemdDefaultsContext,
+            PulpRpmModulemdContext,
+        ),
+    ),
 ]
+
+content.add_command(list_command(decorators=list_options))
+content.add_command(show_command(decorators=lookup_options))
+# create assumes "there exists an Artifact..."
+# create is defined for package, modulemd and modulemd_defaults.  The implications for modulemd
+# and modulemd_defaults are generally not what the user expects. Therefore, leaving those two
+# endpoints hidden until we have a better handle on what we should really be doing.
+# See https://github.com/pulp/pulp_rpm/issues/2229 and https://github.com/pulp/pulp_rpm/issues/2534
 create_options = [
-    click.option("--relative-path", required=True),
-    click.option(
+    pulp_option(
+        "--relative-path",
+        required=True,
+        allowed_with_contexts=(PulpRpmPackageContext,),
+    ),
+    pulp_option(
         "--sha256",
         "artifact",
         required=True,
         help=_("Digest of the artifact to use"),
         callback=_sha256_artifact_callback,
+        allowed_with_contexts=(PulpRpmPackageContext,),
     ),
 ]
+content.add_command(
+    create_command(
+        decorators=create_options,
+        allowed_with_contexts=(PulpRpmPackageContext,),
+    )
+)
 
 
-content.add_command(list_command(decorators=list_options))
-content.add_command(show_command(decorators=lookup_options))
-content.add_command(create_command(decorators=create_options))
-
-
-@content.command()
-@click.option("--relative-path", required=True)
-@click.option("--file", type=click.File("rb"), required=True)
+# upload takes a file-argument and creates the entity from it.
+# upload currently only works for advisory/package,
+# see https://github.com/pulp/pulp_rpm/issues/2534
+@content.command(
+    allowed_with_contexts=(
+        PulpRpmPackageContext,
+        PulpRpmAdvisoryContext,
+    )
+)
 @chunk_size_option
+@pulp_option(
+    "--relative-path",
+    required=True,
+    help=_("Relative path within a distribution of the entity"),
+    allowed_with_contexts=(PulpRpmPackageContext,),
+)
+@pulp_option(
+    "--file",
+    type=click.File("rb"),
+    required=True,
+    help=_("An RPM binary"),
+    allowed_with_contexts=(PulpRpmPackageContext,),
+)
+@pulp_option(
+    "--file",
+    type=click.File("rb"),
+    required=True,
+    help=_("An advisory JSON file."),
+    allowed_with_contexts=(PulpRpmAdvisoryContext,),
+)
 @pass_entity_context
 @pass_pulp_context
 def upload(
     pulp_ctx: PulpContext,
-    entity_ctx: PulpRpmPackageContext,
-    relative_path: str,
-    file: IO[bytes],
-    chunk_size: int,
+    entity_ctx: Union[
+        PulpRpmPackageContext,
+        PulpRpmAdvisoryContext,
+    ],
+    **kwargs: Any,
 ) -> None:
-    """Create an rpm package content unit by uploading a file"""
-    artifact_href = PulpArtifactContext(pulp_ctx).upload(file, chunk_size)
-    content = {"relative_path": relative_path, "artifact": artifact_href}
-    result = entity_ctx.create(body=content)
+    """Create a content unit by uploading a file"""
+    file = kwargs.pop("file")
+    body = {}
+    if isinstance(entity_ctx, PulpRpmPackageContext):
+        chunk_size = kwargs.pop("chunk_size")
+        artifact_ctx = PulpArtifactContext(pulp_ctx)
+        artifact_href = artifact_ctx.upload(file, chunk_size)
+        body["artifact"] = artifact_href
+        body.update(kwargs)
+        result = entity_ctx.create(body=body)
+    elif isinstance(entity_ctx, PulpRpmAdvisoryContext):
+        result = entity_ctx.create(body=body, uploads={"file": file.read()})
+    else:
+        raise NotImplementedError()
     pulp_ctx.output_result(result)
