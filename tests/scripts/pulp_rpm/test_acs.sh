@@ -13,7 +13,7 @@ cleanup() {
   pulp rpm remote destroy --name $acs_remote || true
   pulp rpm repository destroy --name "cli-repo-metadata-only" || true
   pulp rpm remote destroy --name "cli-remote-metadata-only" || true
-  pulp orphan cleanup || true
+  pulp orphan cleanup --protection-time 0 || true
 }
 trap cleanup EXIT
 
