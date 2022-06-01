@@ -655,10 +655,20 @@ common_remote_create_options = [
     click.option(
         "--download-concurrency", type=int, help=_("total number of simultaneous connections")
     ),
-    click.option("--password"),
+    click.option(
+        "--password",
+        help=_(
+            "The password to authenticate to the remote (can contain leading and trailing spaces)."
+        ),
+    ),
     click.option("--proxy-url"),
     click.option("--proxy-username"),
-    click.option("--proxy-password"),
+    click.option(
+        "--proxy-password",
+        help=_(
+            "The password to authenticate to the proxy (can contain leading and trailing spaces)."
+        ),
+    ),
     click.option("--rate-limit", type=int, help=_("limit download rate in requests per second")),
     click.option("--sock-connect-timeout", type=float),
     click.option("--sock-read-timeout", type=float),
@@ -688,10 +698,20 @@ common_remote_update_options = [
     click.option(
         "--download-concurrency", type=int, help=_("total number of simultaneous connections")
     ),
-    click.option("--password"),
+    click.option(
+        "--password",
+        help=_(
+            "The password to authenticate to the remote (can contain leading and trailing spaces)."
+        ),
+    ),
     click.option("--proxy-url"),
     click.option("--proxy-username"),
-    click.option("--proxy-password"),
+    click.option(
+        "--proxy-password",
+        help=_(
+            "The password to authenticate to the proxy (can contain leading and trailing spaces)."
+        ),
+    ),
     click.option("--rate-limit", type=int, help=_("limit download rate in requests per second")),
     click.option("--sock-connect-timeout", type=float),
     click.option("--sock-read-timeout", type=float),

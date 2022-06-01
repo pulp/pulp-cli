@@ -71,13 +71,23 @@ rpm_remote_options = [
     click.option(
         "--download-concurrency", type=int, help=_("total number of simultaneous connections")
     ),
-    click.option("--password"),
+    click.option(
+        "--password",
+        help=_(
+            "The password to authenticate to the remote (can contain leading and trailing spaces)."
+        ),
+    ),
     click.option(
         "--policy", type=click.Choice(["immediate", "on_demand", "streamed"], case_sensitive=False)
     ),
     click.option("--proxy-url"),
     click.option("--proxy-username"),
-    click.option("--proxy-password"),
+    click.option(
+        "--proxy-password",
+        help=_(
+            "The password to authenticate to the proxy (can contain leading and trailing spaces)."
+        ),
+    ),
     click.option("--rate-limit", type=int, help=_("limit download rate in requests per second")),
     pulp_option("--sles-auth-token", allowed_with_contexts=(PulpRpmRemoteContext,)),
     click.option("--sock-connect-timeout", type=float),
