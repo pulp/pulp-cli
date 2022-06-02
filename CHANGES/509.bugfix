@@ -1,0 +1,2 @@
+Fixed bug, where the failure to load config file due to the lack of file permissions lead to a crash.
+Now those files are simply ignored.
