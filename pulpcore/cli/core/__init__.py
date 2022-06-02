@@ -19,6 +19,7 @@ from pulpcore.cli.core.signing_service import signing_service
 from pulpcore.cli.core.status import status
 from pulpcore.cli.core.task import task
 from pulpcore.cli.core.task_group import task_group
+from pulpcore.cli.core.upload import upload
 from pulpcore.cli.core.user import user
 from pulpcore.cli.core.worker import worker
 
@@ -41,5 +42,6 @@ def mount(main: click.Group, **kwargs: Any) -> None:
     main.add_command(status)
     main.add_command(task)
     main.add_command(task_group)
+    main.add_command(upload)
     main.add_command(user)
     main.add_command(worker)

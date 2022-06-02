@@ -41,7 +41,6 @@ class PulpArtifactContext(PulpEntityContext):
 
     def upload(self, file: IO[bytes], chunk_size: int = 1000000) -> Any:
         upload_ctx = PulpUploadContext(self.pulp_ctx)
-        start = 0
         size = os.path.getsize(file.name)
 
         sha256 = hashlib.sha256()
@@ -65,21 +64,10 @@ class PulpArtifactContext(PulpEntityContext):
             )
             return artifact["pulp_href"]
 
-        upload_href = upload_ctx.create(body={"size": size})["pulp_href"]
+        upload_href = upload_ctx.upload_file(file, chunk_size)
 
+        self.pulp_ctx.echo(_("Creating artifact."), err=True)
         try:
-            while start < size:
-                chunk = file.read(chunk_size)
-                upload_ctx.upload_chunk(
-                    href=upload_href,
-                    chunk=chunk,
-                    size=size,
-                    start=start,
-                )
-                start += chunk_size
-                self.pulp_ctx.echo(".", nl=False, err=True)
-
-            self.pulp_ctx.echo(_("Upload complete. Creating artifact."), err=True)
             task = upload_ctx.commit(
                 upload_href,
                 sha256_digest,
@@ -370,6 +358,29 @@ class PulpUploadContext(PulpEntityContext):
             parameters={self.HREF: upload_href},
             body={"sha256": sha256},
         )
+
+    def upload_file(self, file: IO[bytes], chunk_size: int = 1000000) -> Any:
+        """Upload a file and return the uncommitted upload_href."""
+        start = 0
+        size = os.path.getsize(file.name)
+        upload_href = self.create(body={"size": size})["pulp_href"]
+        try:
+            self.pulp_href = upload_href
+            while start < size:
+                chunk = file.read(chunk_size)
+                self.upload_chunk(
+                    href=upload_href,
+                    chunk=chunk,
+                    size=size,
+                    start=start,
+                )
+                start += chunk_size
+                self.pulp_ctx.echo(".", nl=False, err=True)
+        except Exception as e:
+            self.delete(upload_href)
+            raise e
+        self.pulp_ctx.echo(_("Upload complete."), err=True)
+        return upload_href
 
 
 class PulpUserContext(PulpEntityContext):

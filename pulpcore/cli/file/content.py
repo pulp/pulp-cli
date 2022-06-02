@@ -1,8 +1,10 @@
-from typing import IO, Optional, Union
+import os
+from typing import IO, Any, Dict, Optional, Union
 
 import click
 
 from pulpcore.cli.common.context import (
+    PluginRequirement,
     PulpContext,
     PulpEntityContext,
     pass_entity_context,
@@ -17,7 +19,7 @@ from pulpcore.cli.common.generic import (
     show_command,
 )
 from pulpcore.cli.common.i18n import get_translation
-from pulpcore.cli.core.context import PulpArtifactContext
+from pulpcore.cli.core.context import PulpArtifactContext, PulpUploadContext
 from pulpcore.cli.file.context import PulpFileContentContext
 
 translation = get_translation(__name__)
@@ -110,7 +112,15 @@ def upload(
     chunk_size: int,
 ) -> None:
     """Create a file content unit by uploading a file"""
-    artifact_href = PulpArtifactContext(pulp_ctx).upload(file, chunk_size)
-    content = {"relative_path": relative_path, "artifact": artifact_href}
+    size = os.path.getsize(file.name)
+    content: Dict[str, Any] = {"relative_path": relative_path}
+    if chunk_size > size:
+        content["file"] = file
+    elif pulp_ctx.has_plugin(PluginRequirement("core", min="3.20.dev")):
+        upload_href = PulpUploadContext(pulp_ctx).upload_file(file, chunk_size)
+        content["upload"] = upload_href
+    else:
+        artifact_href = PulpArtifactContext(pulp_ctx).upload(file, chunk_size)
+        content["artifact"] = artifact_href
     result = entity_ctx.create(body=content)
     pulp_ctx.output_result(result)
