@@ -57,6 +57,8 @@ def _config_callback(ctx: click.Context, param: Any, value: Optional[str]) -> No
                             config[key] = new_config[key]
                 except FileNotFoundError:
                     pass
+                except PermissionError:
+                    pass
         profile: str = "cli"
         if PROFILE_KEY in ctx.meta:
             profile = "cli-" + ctx.meta[PROFILE_KEY]
