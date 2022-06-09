@@ -12,7 +12,7 @@ cleanup() {
 }
 trap cleanup EXIT
 
-pulp python remote create --name "cli_test_python_remote" --url "$FILE_REMOTE_URL"
+pulp python remote create --name "cli_test_python_remote" --url "$PYTHON_REMOTE_URL"
 pulp python repository create --name "cli_test_python_repository" --remote "cli_test_python_remote"
 pulp python repository sync --name "cli_test_python_repository"
 
