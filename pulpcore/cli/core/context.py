@@ -232,6 +232,13 @@ class PulpContentGuardContext(PulpEntityContext):
     HREF_PATTERN = r"contentguards/(?P<plugin>\w+)/(?P<resource_type>\w+)/"
 
 
+class PulpContentRedirectContentGuardContext(PulpEntityContext):
+    ENTITY = "content redirect content guard"
+    ENTITIES = "content redirect content guards"
+    HREF = "content_redirect_content_guard_href"
+    ID_PREFIX = "contentguards_core_content_redirect"
+
+
 class PulpImporterContext(PulpEntityContext):
     ENTITY = _("Pulp importer")
     ENTITIES = _("Pulp importers")
