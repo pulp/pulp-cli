@@ -20,7 +20,11 @@ from pulpcore.cli.common.generic import (
     update_command,
 )
 from pulpcore.cli.common.i18n import get_translation
-from pulpcore.cli.core.context import PulpContentGuardContext, PulpRbacContentGuardContext
+from pulpcore.cli.core.context import (
+    PulpContentGuardContext,
+    PulpContentRedirectContentGuardContext,
+    PulpRbacContentGuardContext,
+)
 
 translation = get_translation(__name__)
 _ = translation.gettext
@@ -44,7 +48,7 @@ content_guard.add_command(list_command(decorators=filter_options))
 @pass_pulp_context
 @click.pass_context
 def rbac(ctx: click.Context, pulp_ctx: PulpContext) -> None:
-    pulp_ctx.needs_plugin(PluginRequirement("core", "3.15.0.dev"))
+    pulp_ctx.needs_plugin(PluginRequirement("core", "3.15.0"))
     ctx.obj = PulpRbacContentGuardContext(pulp_ctx)
 
 
@@ -110,3 +114,19 @@ def remove(
     href = guard_ctx.entity["pulp_href"]
     result = guard_ctx.remove(href=href, users=users, groups=groups)
     pulp_ctx.output_result(result)
+
+
+@content_guard.group()
+@pass_pulp_context
+@click.pass_context
+def redirect(ctx: click.Context, pulp_ctx: PulpContext) -> None:
+    pulp_ctx.needs_plugin(PluginRequirement("core", "3.18.0"))
+    ctx.obj = PulpContentRedirectContentGuardContext(pulp_ctx)
+
+
+redirect.add_command(list_command(decorators=filter_options))
+redirect.add_command(create_command(decorators=create_options))
+redirect.add_command(show_command(decorators=lookup_options))
+redirect.add_command(update_command(decorators=lookup_options))
+redirect.add_command(destroy_command(decorators=lookup_options))
+redirect.add_command(role_command(decorators=lookup_options))
