@@ -25,7 +25,7 @@ translation = get_translation(__name__)
 _ = translation.gettext
 
 
-req_core_3_17 = PluginRequirement("core", min="3.17.dev")
+req_core_3_17 = PluginRequirement("core", min="3.17")
 
 username_option = pulp_option(
     "--username",
@@ -89,7 +89,12 @@ role.add_command(
             click.option("--role-contains", "role__contains"),
             click.option("--role-icontains", "role__icontains"),
             click.option("--role-startswith", "role__startswith"),
-            click.option("--object", "content_object", callback=null_callback),
+            click.option(
+                "--object",
+                "content_object",
+                callback=null_callback,
+                help=_('Filter roles by the associated object. Use "" to list global assignments.'),
+            ),
         ]
     )
 )
@@ -98,7 +103,12 @@ role.add_command(
         decorators=[
             username_option,
             click.option("--role", required=True),
-            click.option("--object", "content_object", required=True),
+            click.option(
+                "--object",
+                "content_object",
+                required=True,
+                help=_('Associated object; use "" for global assignments.'),
+            ),
         ]
     ),
     name="add",
@@ -119,6 +129,7 @@ role.add_command(
                 required=True,
                 callback=lookup_callback("content_object", PulpUserRoleContext),
                 expose_value=False,
+                help=_('Associated object; use "" for global assignments.'),
             ),
         ]
     ),
