@@ -234,6 +234,13 @@ class PulpImporterContext(PulpEntityContext):
     ID_PREFIX = "importers_core_pulp"
 
 
+class PulpPublicationContext(PulpEntityContext):
+    ENTITY = _("Pulp publication")
+    ENTITIES = _("Pulp publications")
+    ID_PREFIX = "publications"
+    HREF_PATTERN = r"publications/(?P<plugin>\w+)/(?P<resource_type>\w+)/"
+
+
 class PulpRbacContentGuardContext(PulpContentGuardContext):
     ENTITY = "RBAC content guard"
     ENTITIES = "RBAC content guards"
