@@ -792,7 +792,11 @@ def list_command(**kwargs: Any) -> click.Command:
         """
         Show the list of optionally filtered {entities}.
         """
-        parameters = {k: v for k, v in kwargs.items() if v is not None}
+        parameters = {
+            key: entity_ctx._preprocess_value(key, value)
+            for key, value in kwargs.items()
+            if value is not None
+        }
         result = entity_ctx.list(limit=limit, offset=offset, parameters=parameters)
         pulp_ctx.output_result(result)
 

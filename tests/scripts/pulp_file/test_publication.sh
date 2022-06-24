@@ -20,4 +20,11 @@ PUBLICATION_HREF="$(echo "$OUTPUT" | jq -r .pulp_href)"
 expect_succ pulp file publication destroy --href "$PUBLICATION_HREF"
 expect_succ pulp file publication create --repository "cli_test_file_repository" --version 0
 PUBLICATION_HREF="$(echo "$OUTPUT" | jq -r .pulp_href)"
+if pulp debug has-plugin --name "core" --min "3.20.0"
+then
+  expect_succ pulp file publication list --repository "cli_test_file_repository"
+  test "$(echo "$OUTPUT" | jq -r length)" -eq 1
+  expect_succ pulp publication list --repository "file:file:cli_test_file_repository"
+  test "$(echo "$OUTPUT" | jq -r length)" -eq 1
+fi
 expect_succ pulp file publication destroy --href "$PUBLICATION_HREF"

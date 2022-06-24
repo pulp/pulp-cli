@@ -1,6 +1,6 @@
 import click
 
-from pulpcore.cli.common.context import PulpContext, pass_pulp_context
+from pulpcore.cli.common.context import PluginRequirement, PulpContext, pass_pulp_context
 from pulpcore.cli.common.generic import (
     create_command,
     destroy_command,
@@ -16,6 +16,14 @@ from pulpcore.cli.rpm.context import PulpRpmPublicationContext, PulpRpmRepositor
 
 translation = get_translation(__name__)
 _ = translation.gettext
+
+
+repository_option = resource_option(
+    "--repository",
+    default_plugin="rpm",
+    default_type="rpm",
+    context_table={"rpm:rpm": PulpRpmRepositoryContext},
+)
 
 
 @pulp_group()
@@ -37,18 +45,21 @@ def publication(ctx: click.Context, pulp_ctx: PulpContext, publication_type: str
 
 lookup_options = [href_option]
 create_options = [
+    repository_option,
+    click.option(
+        "--version", type=int, help=_("a repository version number, leave blank for latest")
+    ),
+]
+filter_options = publication_filter_options + [
     resource_option(
         "--repository",
         default_plugin="rpm",
         default_type="rpm",
         context_table={"rpm:rpm": PulpRpmRepositoryContext},
-    ),
-    click.option(
-        "--version", type=int, help=_("a repository version number, leave blank for latest")
-    ),
+        needs_plugins=[PluginRequirement("core", min="3.20.0")],
+    )
 ]
-
-publication.add_command(list_command(decorators=publication_filter_options))
+publication.add_command(list_command(decorators=filter_options))
 publication.add_command(show_command(decorators=lookup_options))
 publication.add_command(create_command(decorators=create_options))
 publication.add_command(destroy_command(decorators=lookup_options))
