@@ -70,7 +70,7 @@ create_options = [
 @pass_pulp_context
 @click.pass_context
 def role(ctx: click.Context, pulp_ctx: PulpContext) -> None:
-    pulp_ctx.needs_plugin(PluginRequirement("core", min="3.17.dev"))
+    pulp_ctx.needs_plugin(PluginRequirement("core", min="3.17"))
     ctx.obj = PulpRoleContext(pulp_ctx)
 
 

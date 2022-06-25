@@ -38,7 +38,7 @@ expect_succ pulp python distribution update \
   --base-path "cli_test_python_distro" \
   --publication "$PUBLICATION_HREF"
 
-if pulp debug has-plugin --name "python" --min-version "3.4.0.dev"
+if pulp debug has-plugin --name "python" --min-version "3.4.0"
 then
   expect_succ curl "$curl_opt" --head --fail "$PULP_BASE_URL/pypi/cli_test_python_distro/simple/"
   expect_succ pulp python distribution update \
@@ -49,7 +49,7 @@ else
   expect_succ curl "$curl_opt" --head --fail "$PULP_BASE_URL/pulp/content/cli_test_python_distro/simple/"
 fi
 
-if pulp debug has-plugin --name "python" --min-version "3.6.0.dev"
+if pulp debug has-plugin --name "python" --min-version "3.6.0"
 then
   expect_succ pulp python distribution update \
   --name "cli_test_python_distro" \

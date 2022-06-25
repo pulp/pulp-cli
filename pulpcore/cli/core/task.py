@@ -152,7 +152,7 @@ def purge(
     finished: Optional[datetime],
     state: Optional[Tuple[str]],
 ) -> None:
-    pulp_ctx.needs_plugin(PluginRequirement("core", "3.17.0.dev"))
+    pulp_ctx.needs_plugin(PluginRequirement("core", "3.17.0"))
     state_list = list(state) if state else None
     finished_str = finished.strftime(DATETIME_FORMATS[1]) if finished else None
     task_ctx.purge(finished_str, state_list)

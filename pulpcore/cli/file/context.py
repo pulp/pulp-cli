@@ -21,7 +21,7 @@ class PulpFileACSContext(PulpEntityContext):
     ENTITIES = _("file ACSes")
     HREF = "file_file_alternate_content_source_href"
     ID_PREFIX = "acs_file_file"
-    CAPABILITIES = {"roles": [PluginRequirement("file", min="1.11.0.dev")]}
+    CAPABILITIES = {"roles": [PluginRequirement("file", min="1.11.0")]}
 
     def refresh(self, href: str) -> Any:
         return self.call("refresh", parameters={self.HREF: href})
@@ -40,11 +40,11 @@ class PulpFileDistributionContext(PulpEntityContext):
     HREF = "file_file_distribution_href"
     ID_PREFIX = "distributions_file_file"
     NULLABLES = {"publication", "repository"}
-    CAPABILITIES = {"roles": [PluginRequirement("file", min="1.11.0.dev")]}
+    CAPABILITIES = {"roles": [PluginRequirement("file", min="1.11.0")]}
 
     def preprocess_body(self, body: EntityDefinition) -> EntityDefinition:
         body = super().preprocess_body(body)
-        if self.pulp_ctx.has_plugin(PluginRequirement("core", min="3.16.0.dev")):
+        if self.pulp_ctx.has_plugin(PluginRequirement("core", min="3.16.0")):
             if "repository" in body and "publication" not in body:
                 body["publication"] = None
             if "repository" not in body and "publication" in body:
@@ -57,7 +57,7 @@ class PulpFilePublicationContext(PulpEntityContext):
     ENTITIES = _("file publications")
     HREF = "file_file_publication_href"
     ID_PREFIX = "publications_file_file"
-    CAPABILITIES = {"roles": [PluginRequirement("file", min="1.11.0.dev")]}
+    CAPABILITIES = {"roles": [PluginRequirement("file", min="1.11.0")]}
 
     def preprocess_body(self, body: EntityDefinition) -> EntityDefinition:
         body = super().preprocess_body(body)
@@ -73,7 +73,7 @@ class PulpFileRemoteContext(PulpRemoteContext):
     ENTITIES = _("file remotes")
     HREF = "file_file_remote_href"
     ID_PREFIX = "remotes_file_file"
-    CAPABILITIES = {"roles": [PluginRequirement("file", min="1.11.0.dev")]}
+    CAPABILITIES = {"roles": [PluginRequirement("file", min="1.11.0")]}
 
 
 class PulpFileRepositoryVersionContext(PulpRepositoryVersionContext):
@@ -87,7 +87,7 @@ class PulpFileRepositoryContext(PulpRepositoryContext):
     VERSION_CONTEXT = PulpFileRepositoryVersionContext
     CAPABILITIES = {
         "pulpexport": [PluginRequirement("file")],
-        "roles": [PluginRequirement("file", min="1.11.0.dev")],
+        "roles": [PluginRequirement("file", min="1.11.0")],
     }
 
 

@@ -44,7 +44,7 @@ path_option = click.option(
 @pass_pulp_context
 @click.pass_context
 def acs(ctx: click.Context, pulp_ctx: PulpContext, acs_type: str) -> None:
-    pulp_ctx.needs_plugin(PluginRequirement("file", "1.9.0.dev"))
+    pulp_ctx.needs_plugin(PluginRequirement("file", "1.9.0"))
     if acs_type == "file":
         ctx.obj = PulpFileACSContext(pulp_ctx)
     else:

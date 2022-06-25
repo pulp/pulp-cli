@@ -27,7 +27,7 @@ expect_succ pulp container distribution list
 expect_succ pulp container distribution show --name "cli_test_container_distro"
 
 # see https://pulp.plan.io/issues/9497
-if pulp debug has-plugin --name "container" --min-version "2.10.0.dev"
+if pulp debug has-plugin --name "container" --min-version "2.10.0"
 
 then
   expect_succ pulp container distribution update --name "cli_test_container_distro" --version 0

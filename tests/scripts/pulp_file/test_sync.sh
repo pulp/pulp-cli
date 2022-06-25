@@ -49,7 +49,7 @@ test "$(echo "$OUTPUT" | jq -r '.state')" = "completed"
 expect_succ pulp file repository version destroy --repository "cli_test_file_repository" --version 1
 
 # Test autopublish
-if pulp debug has-plugin --name "file" --min-version "1.7.0.dev"
+if pulp debug has-plugin --name "file" --min-version "1.7.0"
 then
   expect_succ pulp file repository create --name "$autopublish_repo" --remote "cli_test_file_remote" --autopublish
   expect_succ pulp file repository sync --name "$autopublish_repo"
@@ -59,7 +59,7 @@ then
 fi
 
 # Test retained versions
-if pulp debug has-plugin --name "core" --min-version "3.13.0.dev"
+if pulp debug has-plugin --name "core" --min-version "3.13.0"
 then
   expect_succ pulp file repository create --name "$one_version_repo" --remote "cli_test_file_remote" --retain-repo-versions 1
   expect_succ pulp file repository sync --name "$one_version_repo"

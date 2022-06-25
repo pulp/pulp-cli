@@ -42,7 +42,7 @@ class PulpContainerNamespaceContext(PulpEntityContext):
     ENTITIES = _("container namespaces")
     HREF = "container_container_namespace_href"
     ID_PREFIX = "pulp_container_namespaces"
-    CAPABILITIES = {"roles": [PluginRequirement("container", "2.11.0.dev")]}
+    CAPABILITIES = {"roles": [PluginRequirement("container", "2.11.0")]}
 
 
 class PulpContainerDistributionContext(PulpEntityContext):
@@ -51,7 +51,7 @@ class PulpContainerDistributionContext(PulpEntityContext):
     HREF = "container_container_distribution_href"
     ID_PREFIX = "distributions_container_container"
     NULLABLES = {"repository_version", "repository"}
-    CAPABILITIES = {"roles": [PluginRequirement("container", "2.11.0.dev")]}
+    CAPABILITIES = {"roles": [PluginRequirement("container", "2.11.0")]}
 
     def preprocess_body(self, body: EntityDefinition) -> EntityDefinition:
         body = super().preprocess_body(body)
@@ -68,7 +68,7 @@ class PulpContainerRemoteContext(PulpRemoteContext):
     HREF = "container_container_remote_href"
     ID_PREFIX = "remotes_container_container"
     NULLABLES = PulpRemoteContext.NULLABLES | {"include_tags", "exclude_tags"}
-    CAPABILITIES = {"roles": [PluginRequirement("container", "2.11.0.dev")]}
+    CAPABILITIES = {"roles": [PluginRequirement("container", "2.11.0")]}
 
 
 class PulpContainerRepositoryVersionContext(PulpRepositoryVersionContext):
@@ -105,9 +105,9 @@ class PulpContainerRepositoryContext(PulpContainerBaseRepositoryContext):
     VERSION_CONTEXT = PulpContainerRepositoryVersionContext
     CAPABILITIES = {
         "sync": [PluginRequirement("container")],
-        "pulpexport": [PluginRequirement("container", "2.8.0.dev")],
+        "pulpexport": [PluginRequirement("container", "2.8.0")],
         "tag": [PluginRequirement("container", "2.3.0")],
-        "roles": [PluginRequirement("container", "2.11.0.dev")],
+        "roles": [PluginRequirement("container", "2.11.0")],
     }
 
     def modify(
@@ -150,7 +150,7 @@ class PulpContainerPushRepositoryContext(PulpContainerBaseRepositoryContext):
     VERSION_CONTEXT = PulpContainerPushRepositoryVersionContext
     CAPABILITIES = {
         "tag": [PluginRequirement("container", "2.3.0")],
-        "roles": [PluginRequirement("container", "2.11.0.dev")],
+        "roles": [PluginRequirement("container", "2.11.0")],
     }
 
 

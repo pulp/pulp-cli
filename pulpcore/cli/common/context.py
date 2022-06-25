@@ -656,7 +656,7 @@ class PulpRepositoryContext(PulpEntityContext):
 
     def preprocess_body(self, body: EntityDefinition) -> EntityDefinition:
         body = super().preprocess_body(body)
-        if self.pulp_ctx.has_plugin(PluginRequirement("core", "3.13.dev", "3.15.dev")):
+        if self.pulp_ctx.has_plugin(PluginRequirement("core", "3.13", "3.15")):
             # "retain_repo_versions" has been named "retained_versions" until pulpcore 3.15
             # https://github.com/pulp/pulpcore/pull/1472
             if "retain_repo_versions" in body:

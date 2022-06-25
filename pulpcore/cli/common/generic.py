@@ -622,7 +622,7 @@ pulp_created_lte_option = pulp_option(
 
 retained_versions_option = pulp_option(
     "--retain-repo-versions",
-    needs_plugins=[PluginRequirement("core", "3.13.0.dev")],
+    needs_plugins=[PluginRequirement("core", "3.13.0")],
     help=_("Number of repository versions to keep."),
 )
 

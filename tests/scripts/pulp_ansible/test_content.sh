@@ -36,7 +36,7 @@ content2_href="$(echo "$OUTPUT" | jq -r .[0].pulp_href)"
 expect_succ pulp ansible content --type "role" show --href "$content2_href"
 
 # Test ansible signature upload
-if pulp debug has-plugin --name "ansible" --min-version "0.13.0.dev"
+if pulp debug has-plugin --name "ansible" --min-version "0.13.0"
 then
   expect_succ pulp ansible content --type "signature" list
   tar --extract --file="ansible-posix-1.3.0.tar.gz" "MANIFEST.json"
