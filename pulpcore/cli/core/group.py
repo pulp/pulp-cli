@@ -168,7 +168,7 @@ def remove_user(pulp_ctx: PulpContext, entity_ctx: PulpGroupUserContext, usernam
 @pass_pulp_context
 @click.pass_context
 def role(ctx: click.Context, pulp_ctx: PulpContext, group_ctx: PulpGroupContext) -> None:
-    pulp_ctx.needs_plugin(PluginRequirement("core", min="3.17.dev"))
+    pulp_ctx.needs_plugin(PluginRequirement("core", min="3.17"))
     ctx.obj = PulpGroupRoleContext(pulp_ctx, group_ctx)
 
 

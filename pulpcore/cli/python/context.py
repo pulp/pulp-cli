@@ -30,7 +30,7 @@ class PulpPythonDistributionContext(PulpEntityContext):
 
     def preprocess_body(self, body: EntityDefinition) -> EntityDefinition:
         body = super().preprocess_body(body)
-        if self.pulp_ctx.has_plugin(PluginRequirement("core", min="3.16.0.dev")):
+        if self.pulp_ctx.has_plugin(PluginRequirement("core", min="3.16.0")):
             if "repository" in body and "publication" not in body:
                 body["publication"] = None
             if "repository" not in body and "publication" in body:

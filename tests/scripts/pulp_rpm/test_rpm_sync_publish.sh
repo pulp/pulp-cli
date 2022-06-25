@@ -71,7 +71,7 @@ then
   expect_succ pulp rpm repository sync --name "cli_test_rpm_repository"
   expect_succ pulp rpm publication list
   test "$(echo "$OUTPUT" | jq -r length)" -eq "1"
-  if pulp debug has-plugin --name "rpm" --max-version "3.13.0.dev"
+  if pulp debug has-plugin --name "rpm" --max-version "3.13.0"
   then
     expect_succ pulp rpm distribution show --name "cli_test_rpm_distro"
     echo "$OUTPUT" | jq -r ".publication" | grep -q '/pulp/api/v3/publications/rpm/rpm/'

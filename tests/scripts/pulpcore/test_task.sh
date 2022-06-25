@@ -53,7 +53,7 @@ expect_succ pulp task list --limit 1
 expect_succ test "$(echo "$OUTPUT" | jq -r length)" -eq 1
 
 # Test purging tasks
-if pulp debug has-plugin --name core --min-version 3.17.0.dev
+if pulp debug has-plugin --name core --min-version 3.17.0
 then
   expect_succ pulp task purge
   expect_succ pulp task purge --finished-before "2021-12-01" --state "failed"

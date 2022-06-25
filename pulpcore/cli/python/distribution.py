@@ -45,7 +45,7 @@ remote_option = resource_option(
     default_plugin="python",
     default_type="python",
     context_table={"python:python": PulpPythonRemoteContext},
-    needs_plugins=[PluginRequirement("python", "3.6.0.dev")],
+    needs_plugins=[PluginRequirement("python", "3.6.0")],
 )
 
 
@@ -80,7 +80,7 @@ update_options = [
     repository_option,
     pulp_option(
         "--allow-uploads/--block-uploads",
-        needs_plugins=[PluginRequirement("python", "3.4.0.dev")],
+        needs_plugins=[PluginRequirement("python", "3.4.0")],
         default=None,
     ),
     remote_option,

@@ -27,7 +27,7 @@ class PulpAccessPolicyContext(PulpEntityContext):
 
     def preprocess_body(self, body: EntityDefinition) -> EntityDefinition:
         body = super().preprocess_body(body)
-        if self.pulp_ctx.has_plugin(PluginRequirement("core", min="3.17.dev", inverted=True)):
+        if not self.pulp_ctx.has_plugin(PluginRequirement("core", min="3.17")):
             if "creation_hooks" in body:
                 body["permissions_assignment"] = body.pop("creation_hooks")
         return body
@@ -108,7 +108,7 @@ class PulpGroupContext(PulpEntityContext):
 
     @property
     def HREF(self) -> str:  # type:ignore
-        if not self.pulp_ctx.has_plugin(PluginRequirement("core", min="3.17.dev")):
+        if not self.pulp_ctx.has_plugin(PluginRequirement("core", min="3.17")):
             return "auth_group_href"
         return "group_href"
 
@@ -154,7 +154,7 @@ class PulpGroupModelPermissionContext(PulpGroupPermissionContext):
 
     @property
     def HREF(self) -> str:  # type:ignore
-        if not self.pulp_ctx.has_plugin(PluginRequirement("core", min="3.17.dev")):
+        if not self.pulp_ctx.has_plugin(PluginRequirement("core", min="3.17")):
             return "auth_groups_model_permission_href"
         return "groups_model_permission_href"
 
@@ -168,7 +168,7 @@ class PulpGroupObjectPermissionContext(PulpGroupPermissionContext):
 
     @property
     def HREF(self) -> str:  # type:ignore
-        if not self.pulp_ctx.has_plugin(PluginRequirement("core", min="3.17.dev")):
+        if not self.pulp_ctx.has_plugin(PluginRequirement("core", min="3.17")):
             return "auth_groups_object_permission_href"
         return "groups_object_permission_href"
 
@@ -200,7 +200,7 @@ class PulpGroupUserContext(PulpEntityContext):
 
     @property
     def HREF(self) -> str:  # type:ignore
-        if not self.pulp_ctx.has_plugin(PluginRequirement("core", min="3.17.dev")):
+        if not self.pulp_ctx.has_plugin(PluginRequirement("core", min="3.17")):
             return "auth_groups_user_href"
         return "groups_user_href"
 
@@ -250,7 +250,7 @@ class PulpRbacContentGuardContext(PulpContentGuardContext):
     CAPABILITIES = {"roles": [PluginRequirement("core", "3.17.0")]}
 
     def assign(self, href: str, users: Optional[List[str]], groups: Optional[List[str]]) -> Any:
-        if self.pulp_ctx.has_plugin(PluginRequirement("core", min="3.17.0.dev")):
+        if self.pulp_ctx.has_plugin(PluginRequirement("core", min="3.17.0")):
             body = self.preprocess_body({"users": users, "groups": groups})
             body["role"] = self.DOWNLOAD_ROLE
             return self.call("add_role", parameters={self.HREF: href}, body=body)
@@ -259,7 +259,7 @@ class PulpRbacContentGuardContext(PulpContentGuardContext):
             return self.call("assign_permission", parameters={self.HREF: href}, body=body)
 
     def remove(self, href: str, users: Optional[List[str]], groups: Optional[List[str]]) -> Any:
-        if self.pulp_ctx.has_plugin(PluginRequirement("core", min="3.17.0.dev")):
+        if self.pulp_ctx.has_plugin(PluginRequirement("core", min="3.17.0")):
             body = self.preprocess_body({"users": users, "groups": groups})
             body["role"] = self.DOWNLOAD_ROLE
             return self.call("remove_role", parameters={self.HREF: href}, body=body)

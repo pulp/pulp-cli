@@ -56,7 +56,7 @@ task_filter = [
         "--cid",
         "logging_cid__contains",
         help=_("List only tasks with this correlation id."),
-        needs_plugins=[PluginRequirement("core", "3.14.0.dev")],
+        needs_plugins=[PluginRequirement("core", "3.14.0")],
     ),
     click.option(
         "--state",
