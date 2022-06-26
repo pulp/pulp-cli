@@ -53,7 +53,7 @@ def openapi_group() -> None:
 
 @openapi_group.command()
 @pass_pulp_context
-def schema(pulp_ctx: PulpContext) -> None:
+def spec(pulp_ctx: PulpContext) -> None:
     """
     Print the openapi schema of the server.
     """
@@ -65,7 +65,7 @@ def schema(pulp_ctx: PulpContext) -> None:
 @pass_pulp_context
 def operation(pulp_ctx: PulpContext, operation_id: str) -> None:
     """
-    Print the openapi schema of the server.
+    Print the spec of the operation.
     """
     method: str
     path: str
@@ -117,3 +117,30 @@ def call(
     uploads_dict: Dict[str, bytes] = {file.name: file.read() for file in uploads}
     result = pulp_ctx.call(operation_id, parameters=params, body=body, uploads=uploads_dict)
     pulp_ctx.output_result(result)
+
+
+@openapi_group.command()
+@click.option(
+    "--name", "schema_name", required=True, help=_("Component schema name in openapi schema")
+)
+@pass_pulp_context
+def schema(pulp_ctx: PulpContext, schema_name: str) -> None:
+    """
+    Print the spec of the schema component.
+    """
+    try:
+        result = pulp_ctx.api.api_spec["components"]["schemas"][schema_name]
+    except KeyError:
+        raise click.ClickException(
+            _("No schema component with name {schema_name} found.").format(schema_name=schema_name)
+        )
+    pulp_ctx.output_result(result)
+
+
+@openapi_group.command()
+@pass_pulp_context
+def schema_names(pulp_ctx: PulpContext) -> None:
+    """
+    Print a list of available schema component names.
+    """
+    pulp_ctx.output_result(list(pulp_ctx.api.api_spec["components"]["schemas"].keys()))

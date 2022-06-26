@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import Any, Dict, Iterable
 
 import click
 
@@ -101,17 +101,17 @@ def update(
     repository: Iterable[EntityFieldDefinition],
     repository_href: Iterable[str],
 ) -> None:
-    the_exporter = exporter_ctx.entity
     exporter_href = exporter_ctx.pulp_href
+    payload: Dict[str, Any] = {}
 
     if path:
-        the_exporter["path"] = path
+        payload["path"] = path
 
     if repository or repository_href:
-        the_exporter["repositories"] = [
+        payload["repositories"] = [
             repository_ctx.pulp_href
             for repository_ctx in repository
             if isinstance(repository_ctx, PulpEntityContext)
         ] + list(repository_href)
 
-    exporter_ctx.update(exporter_href, the_exporter)
+    exporter_ctx.update(exporter_href, payload)

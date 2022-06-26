@@ -156,6 +156,27 @@ class OpenAPI:
             )
         return result
 
+    def validate_body(self, schema: Any, body: Dict[str, Any], uploads: Dict[str, bytes]) -> None:
+        schema_ref = schema.get("$ref")
+        if schema_ref:
+            if not schema_ref.startswith("#/components/schemas/"):
+                raise OpenAPIError(_("Api spec is invalid."))
+            # len("#/components/schemas/") == 21
+            schema_name = schema_ref[21:]
+            schema = self.api_spec["components"]["schemas"][schema_name]
+        for key, value in body.items():
+            field_spec = schema["properties"].get(key)
+            if not field_spec:
+                raise OpenAPIError(_("Unexpected field '{key}' provided.").format(key=key))
+        if "required" in schema:
+            missing_fields = set(schema["required"]) - set(body.keys()) - set(uploads.keys())
+            if missing_fields:
+                raise OpenAPIError(
+                    _("Required field(s) '{missing_field}' missing.").format(
+                        missing_fields=missing_fields
+                    )
+                )
+
     def render_request(
         self,
         path_spec: Dict[str, Any],
@@ -165,6 +186,7 @@ class OpenAPI:
         headers: Dict[str, str],
         body: Optional[Dict[str, Any]] = None,
         uploads: Optional[Dict[str, bytes]] = None,
+        validate_body: bool = True,
     ) -> requests.PreparedRequest:
         method_spec = path_spec[method]
         try:
@@ -174,15 +196,22 @@ class OpenAPI:
         except KeyError:
             raise OpenAPIError(_("This operation does not expect a request body."))
 
+        content_type: Optional[str] = None
         data: Optional[Dict[str, Any]] = None
         json: Optional[Dict[str, Any]] = None
         files: Optional[List[Tuple[str, Tuple[str, bytes, str]]]] = None
 
         if uploads:
-            data = body or {}
-            if any(
-                (content_type.startswith("multipart/form-data") for content_type in content_types)
-            ):
+            content_type = next(
+                (
+                    content_type
+                    for content_type in content_types
+                    if content_type.startswith("multipart/form-data")
+                ),
+                None,
+            )
+            if content_type:
+                data = body
                 files = [
                     (key, (key, file_data, "application/octet-stream"))
                     for key, file_data in uploads.items()
@@ -190,17 +219,35 @@ class OpenAPI:
             else:
                 raise OpenAPIError(_("No suitable content type for file upload specified."))
         elif body:
-            if any((content_type.startswith("application/json") for content_type in content_types)):
-                json = body
-            elif any(
+            content_type = next(
                 (
-                    content_type.startswith("application/x-www-form-urlencoded")
+                    content_type
                     for content_type in content_types
-                )
-            ):
-                data = body
+                    if content_type.startswith("application/json")
+                ),
+                None,
+            )
+            if content_type:
+                json = body
             else:
-                raise OpenAPIError(_("No suitable content type for request specified."))
+                content_type = next(
+                    (
+                        content_type
+                        for content_type in content_types
+                        if content_type.startswith("application/x-www-form-urlencoded")
+                    ),
+                    None,
+                )
+                if content_type:
+                    data = body
+                else:
+                    raise OpenAPIError(_("No suitable content type for request specified."))
+        if content_type and validate_body:
+            self.validate_body(
+                method_spec["requestBody"]["content"][content_type]["schema"],
+                body or {},
+                uploads or {},
+            )
         return self._session.prepare_request(
             requests.Request(
                 method, url, params=params, headers=headers, data=data, json=json, files=files
@@ -234,6 +281,7 @@ class OpenAPI:
         parameters: Optional[Dict[str, Any]] = None,
         body: Optional[Dict[str, Any]] = None,
         uploads: Optional[Dict[str, bytes]] = None,
+        validate_body: bool = True,
     ) -> Any:
         method, path = self.operations[operation_id]
         path_spec = self.api_spec["paths"][path]
@@ -263,7 +311,14 @@ class OpenAPI:
         url = urljoin(self.base_url, path)
 
         request: requests.PreparedRequest = self.render_request(
-            path_spec, method, url, query_params, headers, body, uploads
+            path_spec,
+            method,
+            url,
+            query_params,
+            headers,
+            body,
+            uploads,
+            validate_body=validate_body,
         )
 
         self.debug_callback(1, f"{method} {request.url}")

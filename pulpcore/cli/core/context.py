@@ -119,8 +119,32 @@ class PulpGroupPermissionContext(PulpEntityContext):
     group_ctx: PulpGroupContext
 
     def __init__(self, pulp_ctx: PulpContext, group_ctx: PulpGroupContext) -> None:
+        pulp_ctx.needs_plugin(PluginRequirement("core", max="3.20", feature=_("group permissions")))
         super().__init__(pulp_ctx)
         self.group_ctx = group_ctx
+
+    def call(
+        self,
+        operation: str,
+        non_blocking: bool = False,
+        parameters: Optional[Dict[str, Any]] = None,
+        body: Optional[Dict[str, Any]] = None,
+        uploads: Optional[Dict[str, bytes]] = None,
+        validate_body: bool = False,
+    ) -> Any:
+        """Workaroud because the openapi spec for GroupPermissions has always been broken.
+
+        This will probably not be fixed upstream, and GroupPermissions are removed from pulpcore.
+        So we just skip linting here.
+        """
+        return super().call(
+            operation,
+            non_blocking=non_blocking,
+            parameters=parameters,
+            body=body,
+            uploads=uploads,
+            validate_body=validate_body,
+        )
 
     def find(self, **kwargs: Any) -> Any:
         """Workaroud for the missing ability to filter"""

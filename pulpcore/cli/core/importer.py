@@ -70,21 +70,21 @@ def create(
 
 
 @pulp.command()
-@click.option("--name", required=True)
+@name_option
+@href_option
 @repo_map_option
 @pass_entity_context
 @pass_pulp_context
 def update(
     pulp_ctx: PulpContext,
     importer_ctx: PulpImporterContext,
-    name: str,
     repo_map: List[RepositoryMap],
 ) -> None:
-    importer = importer_ctx.find(name=name)
-    importer_href = importer["pulp_href"]
+    importer_href = importer_ctx.pulp_href
+    payload = {}
 
     if repo_map:
-        importer["repo_mapping"] = {source: dest for source, dest in repo_map}
+        payload["repo_mapping"] = {source: dest for source, dest in repo_map}
 
-    result = importer_ctx.update(importer_href, importer)
+    result = importer_ctx.update(importer_href, payload)
     pulp_ctx.output_result(result)

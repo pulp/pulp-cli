@@ -138,6 +138,7 @@ class PulpContext:
         parameters: Optional[Dict[str, Any]] = None,
         body: Optional[Dict[str, Any]] = None,
         uploads: Optional[Dict[str, bytes]] = None,
+        validate_body: bool = True,
     ) -> Any:
         """
         Perform an API call for operation_id.
@@ -146,7 +147,13 @@ class PulpContext:
         If non_blocking, returns unfinished tasks.
         """
         try:
-            result = self.api.call(operation_id, parameters=parameters, body=body, uploads=uploads)
+            result = self.api.call(
+                operation_id,
+                parameters=parameters,
+                body=body,
+                uploads=uploads,
+                validate_body=validate_body,
+            )
         except OpenAPIError as e:
             raise PulpException(str(e))
         except HTTPError as e:
@@ -425,6 +432,7 @@ class PulpEntityContext:
         parameters: Optional[Dict[str, Any]] = None,
         body: Optional[Dict[str, Any]] = None,
         uploads: Optional[Dict[str, bytes]] = None,
+        validate_body: bool = True,
     ) -> Any:
         operation_id: str = (
             getattr(self, operation.upper() + "_ID", None) or self.ID_PREFIX + "_" + operation
@@ -435,6 +443,7 @@ class PulpEntityContext:
             parameters=parameters,
             body=body,
             uploads=uploads,
+            validate_body=validate_body,
         )
 
     def _preprocess_value(self, key: str, value: Any) -> Any:
