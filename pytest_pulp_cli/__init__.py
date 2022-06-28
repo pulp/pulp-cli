@@ -1,7 +1,9 @@
 import os
 import subprocess
 
+import gnupg
 import pytest
+import requests
 import toml
 
 
@@ -78,8 +80,24 @@ def pulp_cli_settings(tmp_path_factory):
     yield settings_path, settings
 
 
+@pytest.fixture(scope="session")
+def pulp_cli_gnupghome(tmp_path_factory):
+    """
+    This fixture will setup a GPG home directory once per session only.
+    """
+    gnupghome = tmp_path_factory.mktemp("gnupghome")
+    gpg = gnupg.GPG(gnupghome=str(gnupghome))
+    private_key_url = (
+        "https://github.com/pulp/pulp-fixtures/raw/master/common/GPG-PRIVATE-KEY-pulp-qe"
+    )
+    private_key_data = requests.get(private_key_url).text
+    import_result = gpg.import_keys(private_key_data)
+    gpg.trust_keys(import_result.fingerprints[0], "TRUST_ULTIMATE")
+    return gnupghome
+
+
 @pytest.fixture
-def pulp_cli_env(pulp_cli_settings, pulp_cli_vars, monkeypatch):
+def pulp_cli_env(pulp_cli_settings, pulp_cli_vars, pulp_cli_gnupghome, monkeypatch):
     """
     This fixture will set up the environment for cli commands by:
 
@@ -92,6 +110,7 @@ def pulp_cli_env(pulp_cli_settings, pulp_cli_vars, monkeypatch):
     monkeypatch.setenv("XDG_CONFIG_HOME", str(settings_path))
     monkeypatch.setenv("PULP_BASE_URL", settings["cli"]["base_url"])
     monkeypatch.setenv("VERIFY_SSL", str(settings["cli"].get("verify_ssl", True)).lower())
+    monkeypatch.setenv("GNUPGHOME", str(pulp_cli_gnupghome))
 
     for key, value in pulp_cli_vars.items():
         monkeypatch.setenv(key, value)

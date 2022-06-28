@@ -5,7 +5,7 @@ SIGNATURE_PATH="$1.asc"
 : "${PULP_SIGNING_KEY_FINGERPRINT:="Pulp QE"}"
 
 # Create a detached signature
-gpg --quiet --batch --homedir ~/.gnupg/ --detach-sign --default-key "${PULP_SIGNING_KEY_FINGERPRINT}" \
+gpg --quiet --batch --detach-sign --local-user "${PULP_SIGNING_KEY_FINGERPRINT}" \
    --armor --output "${SIGNATURE_PATH}" "${FILE_PATH}"
 
 # Check the exit status
