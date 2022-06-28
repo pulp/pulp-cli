@@ -5,6 +5,7 @@ isort
 mypy
 pygments
 pytest
+python-gnupg
 shellcheck-py
 
 types-pygments

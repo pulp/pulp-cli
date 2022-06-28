@@ -8,13 +8,8 @@ if [ "$HAS_DEB" ] || [ "$HAS_ANSIBLE" ]
 then
   echo "Setup the signing services"
   # Setup key on the Pulp container
-  curl -L https://github.com/pulp/pulp-fixtures/raw/master/common/GPG-KEY-pulp-qe | "${CONTAINER_RUNTIME}" exec -i "pulp-ephemeral" bash -c "cat > /tmp/GPG-KEY-pulp-qe"
   curl -L https://github.com/pulp/pulp-fixtures/raw/master/common/GPG-PRIVATE-KEY-pulp-qe | "${CONTAINER_RUNTIME}" exec -i "pulp-ephemeral" gpg --import
   echo "6EDF301256480B9B801EBA3D05A5E6DA269D9D98:6:" | "${CONTAINER_RUNTIME}" exec -i "pulp-ephemeral" gpg --import-ownertrust
-  # Setup key on the test machine
-  curl -L https://github.com/pulp/pulp-fixtures/raw/master/common/GPG-KEY-pulp-qe | cat > /tmp/GPG-KEY-pulp-qe
-  curl -L https://github.com/pulp/pulp-fixtures/raw/master/common/GPG-PRIVATE-KEY-pulp-qe | gpg --import
-  echo "6EDF301256480B9B801EBA3D05A5E6DA269D9D98:6:" | gpg --import-ownertrust
   if [ "$HAS_DEB" ]
   then
     echo "Setup deb release signing service"
