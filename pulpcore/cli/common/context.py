@@ -603,6 +603,7 @@ class PulpRemoteContext(PulpEntityContext):
 
     ENTITY = _("remote")
     ENTITIES = _("remotes")
+    ID_PREFIX = "remotes"
     HREF_PATTERN = r"remotes/(?P<plugin>\w+)/(?P<resource_type>\w+)/"
     NULLABLES = {
         "ca_cert",

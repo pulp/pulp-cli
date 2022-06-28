@@ -547,6 +547,29 @@ name_option = pulp_option(
     expose_value=False,
 )
 
+name_filter_option = pulp_option(
+    "--name",
+    help=_("Filter {entity} by exact name"),
+)
+
+name_contains_option = pulp_option(
+    "--name-contains",
+    "name__contains",
+    help=_("Filter {entity} results where name contains value"),
+)
+
+name_icontains_option = pulp_option(
+    "--name-icontains",
+    "name__icontains",
+    help=_("Filter {entity} results where name contains value, case insensitive"),
+)
+
+name_in_option = pulp_option(
+    "--name-in",
+    "name__in",
+    help=_("Filter {entity} results where name is in comma separated list of values"),
+)
+
 repository_href_option = click.option(
     "--repository-href",
     help=_("HREF of the repository"),
@@ -620,11 +643,38 @@ pulp_created_lte_option = pulp_option(
     type=str,
 )
 
+pulp_last_updated_gte_option = pulp_option(
+    "--updated-after",
+    "pulp_last_updated__gte",
+    help=_("Search for {entities} last updated at or after this ISO 8601 date"),
+    type=str,
+)
+
+pulp_last_updated_lte_option = pulp_option(
+    "--updated-before",
+    "pulp_last_updated__lte",
+    help=_("Search for {entities} last updated at or before this ISO 8601 date"),
+    type=str,
+)
+
 retained_versions_option = pulp_option(
     "--retain-repo-versions",
     needs_plugins=[PluginRequirement("core", "3.13.0.dev")],
     help=_("Number of repository versions to keep."),
 )
+
+name_filter_options = [
+    name_filter_option,
+    name_contains_option,
+    name_icontains_option,
+    name_in_option,
+]
+
+remote_filter_options = name_filter_options + [
+    label_select_option,
+    pulp_last_updated_gte_option,
+    pulp_last_updated_lte_option,
+]
 
 publication_filter_options = [
     content_in_option,

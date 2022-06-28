@@ -12,6 +12,7 @@ from pulpcore.cli.core.group import group
 from pulpcore.cli.core.importer import importer
 from pulpcore.cli.core.orphan import orphan
 from pulpcore.cli.core.orphans import orphans
+from pulpcore.cli.core.remote import remote
 from pulpcore.cli.core.repository import repository
 from pulpcore.cli.core.role import role
 from pulpcore.cli.core.show import show
@@ -34,6 +35,7 @@ def mount(main: click.Group, **kwargs: Any) -> None:
     main.add_command(importer)
     main.add_command(orphan)
     main.add_command(orphans)  # This one is deprecated
+    main.add_command(remote)
     main.add_command(repository)
     main.add_command(role)
     main.add_command(show)

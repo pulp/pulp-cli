@@ -15,11 +15,11 @@ from pulpcore.cli.common.generic import (
     destroy_command,
     href_option,
     label_command,
-    label_select_option,
     list_command,
     name_option,
     pulp_group,
     pulp_option,
+    remote_filter_options,
     show_command,
     update_command,
 )
@@ -96,7 +96,7 @@ ansible_remote_options = remote_options + collection_options
 create_options = common_remote_create_options + remote_options + ansible_remote_options
 update_options = common_remote_update_options + remote_options + ansible_remote_options
 
-remote.add_command(list_command(decorators=[label_select_option]))
+remote.add_command(list_command(decorators=remote_filter_options))
 remote.add_command(show_command(decorators=lookup_options))
 remote.add_command(destroy_command(decorators=lookup_options))
 remote.add_command(create_command(decorators=create_options))
