@@ -11,12 +11,12 @@ from pulpcore.cli.common.generic import (
     destroy_command,
     href_option,
     label_command,
-    label_select_option,
     list_command,
     load_json_callback,
     name_option,
     pulp_group,
     pulp_option,
+    remote_filter_options,
     show_command,
     update_command,
 )
@@ -88,7 +88,7 @@ python_remote_options = [
     ),
 ]
 
-remote.add_command(list_command(decorators=[label_select_option]))
+remote.add_command(list_command(decorators=remote_filter_options))
 remote.add_command(show_command(decorators=lookup_options))
 remote.add_command(create_command(decorators=common_remote_create_options + python_remote_options))
 remote.add_command(

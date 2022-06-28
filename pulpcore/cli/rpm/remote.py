@@ -6,12 +6,12 @@ from pulpcore.cli.common.generic import (
     destroy_command,
     href_option,
     label_command,
-    label_select_option,
     list_command,
     load_file_or_string_callback,
     name_option,
     pulp_group,
     pulp_option,
+    remote_filter_options,
     show_command,
     update_command,
 )
@@ -132,7 +132,7 @@ rpm_remote_update_options = [
     ),
 ]
 
-remote.add_command(list_command(decorators=[label_select_option]))
+remote.add_command(list_command(decorators=remote_filter_options))
 remote.add_command(show_command(decorators=lookup_options))
 remote.add_command(create_command(decorators=rpm_remote_create_options + rpm_remote_options))
 remote.add_command(
