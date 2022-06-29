@@ -39,7 +39,13 @@ then
   "${CONTAINER_RUNTIME}" build --file "${BASEPATH}/assets/${CONTAINER_FILE}" --build-arg FROM_TAG="${FROM_TAG}" --tag ghcr.io/pulp/pulp:"${IMAGE_TAG}" .
 fi
 
-"${CONTAINER_RUNTIME}" run ${RM:+--rm} --env S6_KEEP_ENV=1 ${PULP_API_ROOT:+--env PULP_API_ROOT} --detach --name "pulp-ephemeral" --volume "${BASEPATH}/settings:/etc/pulp" --publish "8080:80" "ghcr.io/pulp/pulp:${IMAGE_TAG}"
+if [ "$(getenforce)" = "Enforcing" ]; then
+    SELINUX="yes"
+else
+    SELINUX=""
+fi;
+
+"${CONTAINER_RUNTIME}" run ${RM:+--rm} --env S6_KEEP_ENV=1 ${PULP_API_ROOT:+--env PULP_API_ROOT} --detach --name "pulp-ephemeral" --volume "${BASEPATH}/settings:/etc/pulp${SELINUX:+:Z}" --publish "8080:80" "ghcr.io/pulp/pulp:${IMAGE_TAG}"
 
 # shellcheck disable=SC2064
 trap "${CONTAINER_RUNTIME} stop pulp-ephemeral" EXIT
