@@ -1,15 +1,17 @@
-from typing import IO, Any, Union
+from typing import IO, Any, Optional, Union
 
 import click
 
 from pulpcore.cli.ansible.context import (
     PulpAnsibleCollectionVersionContext,
     PulpAnsibleCollectionVersionSignatureContext,
+    PulpAnsibleRepositoryContext,
     PulpAnsibleRoleContext,
 )
 from pulpcore.cli.common.context import (
     PulpContext,
     PulpEntityContext,
+    PulpRepositoryContext,
     pass_entity_context,
     pass_pulp_context,
 )
@@ -20,6 +22,7 @@ from pulpcore.cli.common.generic import (
     parse_size_callback,
     pulp_group,
     pulp_option,
+    resource_option,
     show_command,
 )
 from pulpcore.cli.common.i18n import get_translation
@@ -29,12 +32,33 @@ translation = get_translation(__name__)
 _ = translation.gettext
 
 
+collection_context = (PulpAnsibleCollectionVersionContext,)
+role_context = (PulpAnsibleRoleContext,)
+content_context = (PulpAnsibleRoleContext, PulpAnsibleCollectionVersionContext)
+signature_context = (PulpAnsibleCollectionVersionSignatureContext,)
+
+
 def _content_callback(ctx: click.Context, param: click.Parameter, value: Any) -> Any:
     if value:
         entity_ctx = ctx.find_object(PulpEntityContext)
         assert entity_ctx is not None
         entity_ctx.entity = value
     return value
+
+
+repository_option = resource_option(
+    "--repository",
+    default_plugin="ansible",
+    default_type="ansible",
+    context_table={
+        "ansible:ansible": PulpAnsibleRepositoryContext,
+    },
+    href_pattern=PulpRepositoryContext.HREF_PATTERN,
+    allowed_with_contexts=signature_context,
+    help=_(
+        "Repository to upload into in the form '[[<plugin>:]<resource_type>:]<name>' or by href."
+    ),
+)
 
 
 @pulp_group()
@@ -58,10 +82,6 @@ def content(ctx: click.Context, pulp_ctx: PulpContext, content_type: str) -> Non
         raise NotImplementedError()
 
 
-collection_context = (PulpAnsibleCollectionVersionContext,)
-role_context = (PulpAnsibleRoleContext,)
-content_context = (PulpAnsibleRoleContext, PulpAnsibleCollectionVersionContext)
-signature_context = (PulpAnsibleCollectionVersionSignatureContext,)
 list_options = [
     pulp_option("--name", help=_("Name of {entity}"), allowed_with_contexts=content_context),
     pulp_option(
@@ -161,6 +181,7 @@ content.add_command(show_command(decorators=lookup_options))
 
 @content.command()
 @click.option("--file", type=click.File("rb"), required=True)
+@repository_option
 @pulp_option(
     "--chunk-size",
     help=_("Chunk size to break up {entity} into. Defaults to 1MB"),
@@ -201,7 +222,6 @@ def upload(
     file: IO[bytes],
     **kwargs: Any,
 ) -> None:
-
     if isinstance(content_ctx, PulpAnsibleRoleContext):
         chunk_size = kwargs.pop("chunk_size")
         artifact_href = PulpArtifactContext(pulp_ctx).upload(file, chunk_size)
@@ -210,7 +230,10 @@ def upload(
         result = content_ctx.create(body=body)
         pulp_ctx.output_result(result)
     elif isinstance(content_ctx, PulpAnsibleCollectionVersionSignatureContext):
-        body = {"signed_collection": kwargs.get("collection")}
+        body = {"signed_collection": kwargs["collection"]}
+        repository: Optional[PulpRepositoryContext] = kwargs["repository"]
+        if repository:
+            body["repository"] = repository.pulp_href
         uploads = {"file": file.read()}
         pulp_ctx.output_result(content_ctx.create(body=body, uploads=uploads))
     elif isinstance(content_ctx, PulpAnsibleCollectionVersionContext):

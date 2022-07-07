@@ -12,6 +12,7 @@ from pulpcore.cli.ansible.context import (
 )
 from pulpcore.cli.common.context import (
     EntityFieldDefinition,
+    PluginRequirement,
     PulpContext,
     PulpEntityContext,
     PulpRemoteContext,
@@ -28,9 +29,11 @@ from pulpcore.cli.common.generic import (
     label_command,
     label_select_option,
     list_command,
+    load_file_or_string_callback,
     load_json_callback,
     name_option,
     pulp_group,
+    pulp_option,
     repository_content_command,
     resource_option,
     retained_versions_option,
@@ -100,6 +103,15 @@ lookup_options = [href_option, name_option]
 create_options = [
     click.option("--name", required=True),
     click.option("--description"),
+    pulp_option(
+        "--gpgkey",
+        callback=load_file_or_string_callback,
+        needs_plugins=[
+            PluginRequirement(
+                "ansible", min="0.15.0.dev", feature="gpgkeys on ansible repositories"
+            )
+        ],
+    ),
     remote_option,
     retained_versions_option,
 ]

@@ -87,6 +87,7 @@ class PulpAnsibleRepositoryContext(PulpRepositoryContext):
     ID_PREFIX = "repositories_ansible_ansible"
     VERSION_CONTEXT = PulpAnsibleRepositoryVersionContext
     CAPABILITIES = {"pulpexport": [PluginRequirement("ansible")]}
+    NULLABLES = PulpRepositoryContext.NULLABLES | {"gpgkey"}
 
 
 registered_repository_contexts["ansible:ansible"] = PulpAnsibleRepositoryContext
