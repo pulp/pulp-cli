@@ -15,13 +15,11 @@ from pulpcore.cli.common.context import (
     pass_pulp_context,
 )
 from pulpcore.cli.common.generic import (
-    base_path_contains_option,
-    base_path_option,
     create_command,
     destroy_command,
+    distribution_filter_options,
     href_option,
     label_command,
-    label_select_option,
     list_command,
     name_option,
     pulp_group,
@@ -59,7 +57,6 @@ def distribution(ctx: click.Context, pulp_ctx: PulpContext, distribution_type: s
         raise NotImplementedError()
 
 
-filter_options = [label_select_option, base_path_option, base_path_contains_option]
 lookup_options = [href_option, name_option]
 create_options = [
     click.option("--name", required=True),
@@ -73,7 +70,7 @@ create_options = [
         "--version", type=int, help=_("a repository version number, leave blank for latest")
     ),
 ]
-distribution.add_command(list_command(decorators=filter_options))
+distribution.add_command(list_command(decorators=distribution_filter_options))
 distribution.add_command(show_command(decorators=lookup_options))
 distribution.add_command(destroy_command(decorators=lookup_options))
 distribution.add_command(create_command(decorators=create_options))

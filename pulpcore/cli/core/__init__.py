@@ -6,6 +6,7 @@ from pulpcore.cli.core.access_policy import access_policy
 from pulpcore.cli.core.artifact import artifact
 from pulpcore.cli.core.content import content
 from pulpcore.cli.core.content_guard import content_guard
+from pulpcore.cli.core.distribution import distribution
 from pulpcore.cli.core.export import export
 from pulpcore.cli.core.exporter import exporter
 from pulpcore.cli.core.group import group
@@ -34,6 +35,7 @@ def mount(main: click.Group, **kwargs: Any) -> None:
     main.add_command(exporter)
     main.add_command(group)
     main.add_command(content_guard)
+    main.add_command(distribution)
     main.add_command(importer)
     main.add_command(orphan)
     main.add_command(orphans)  # This one is deprecated
