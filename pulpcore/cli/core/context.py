@@ -227,6 +227,13 @@ class PulpContentRedirectContentGuardContext(PulpEntityContext):
     ID_PREFIX = "contentguards_core_content_redirect"
 
 
+class PulpDistributionContext(PulpEntityContext):
+    ENTITY = _("distribution")
+    ENTITIES = _("distributions")
+    ID_PREFIX = "distributions"
+    HREF_PATTERN = r"distributions/(?P<plugin>\w+)/(?P<resource_type>\w+)/"
+
+
 class PulpImporterContext(PulpEntityContext):
     ENTITY = _("Pulp importer")
     ENTITIES = _("Pulp importers")

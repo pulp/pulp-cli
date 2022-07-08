@@ -676,6 +676,12 @@ remote_filter_options = name_filter_options + [
     pulp_last_updated_lte_option,
 ]
 
+distribution_filter_options = name_filter_options + [
+    label_select_option,
+    base_path_option,
+    base_path_contains_option,
+]
+
 publication_filter_options = [
     content_in_option,
     pulp_created_gte_option,
