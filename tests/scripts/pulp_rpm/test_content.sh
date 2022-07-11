@@ -7,6 +7,7 @@ pulp debug has-plugin --name "rpm" || exit 3
 
 TEST_ADVISORY="$(dirname "$(realpath "$0")")"/test_advisory.json
 RPM_NAME="lemon-0-1.noarch.rpm"
+RPM2_NAME="icecubes-2-3.noarch.rpm"
 REPO1_NAME="cli_test_rpm"
 REPO2_NAME="cli_test_modular"
 PACKAGE_HREF=
@@ -60,6 +61,13 @@ test "$(echo "${OUTPUT}" | jq -r length)" -eq "0"
 expect_succ pulp rpm repository content modify \
 --repository "${REPO1_NAME}" \
 --remove-content "[{\"pulp_href\": \"${PACKAGE_HREF}\"}]"
+
+wget --no-check-certificate "${RPM_WEAK_DEPS_URL}/${RPM2_NAME}"
+expect_succ pulp rpm content upload --file "${RPM2_NAME}" --relative-path "${RPM2_NAME}" --repository "${REPO1_NAME}"
+expect_succ pulp rpm repository content list --repository "${REPO1_NAME}"
+test "$(echo "${OUTPUT}" | jq -r length)" -eq "1"
+
+# Test list commands with synced repository
 
 expect_succ pulp rpm remote create --name "${REPO2_NAME}" --url "$RPM_MODULES_REMOTE_URL"
 expect_succ pulp rpm repository create --name "${REPO2_NAME}" --remote "${REPO2_NAME}"

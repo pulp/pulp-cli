@@ -8,7 +8,8 @@ pulp debug has-plugin --name "python" || exit 3
 cleanup() {
   rm "shelf-reader-0.1.tar.gz"
   pulp python repository destroy --name "cli_test_python_repository" || true
-  pulp orphan cleanup || true
+  pulp python repository destroy --name "cli_test_python_upload_repository" || true
+  pulp orphan cleanup --protection-time 0 || true
 }
 trap cleanup EXIT
 
@@ -16,7 +17,8 @@ trap cleanup EXIT
 wget "https://fixtures.pulpproject.org/python-pypi/packages/shelf-reader-0.1.tar.gz"
 sha256=$(sha256sum "shelf-reader-0.1.tar.gz" | cut -d' ' -f1)
 
-expect_succ pulp python content upload --file "shelf-reader-0.1.tar.gz" --relative-path "shelf-reader-0.1.tar.gz"
+expect_succ pulp python repository create --name "cli_test_python_upload_repository"
+expect_succ pulp python content upload --file "shelf-reader-0.1.tar.gz" --relative-path "shelf-reader-0.1.tar.gz" --repository "cli_test_python_upload_repository"
 expect_succ pulp artifact list --sha256 "$sha256"
 expect_succ pulp python content list --filename "shelf-reader-0.1.tar.gz"
 content_href="$(echo "$OUTPUT" | tr '\r\n' ' ' | jq -r .[0].pulp_href)"

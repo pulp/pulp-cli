@@ -56,5 +56,11 @@ expect_succ pulp file repository content remove --repository "cli_test_file_repo
 expect_succ pulp file repository content list --repository "cli_test_file_repository"
 test "$(echo "$OUTPUT" | jq -r length)" -eq "0"
 
+# Create and add to repository in one command
+expect_succ pulp file content create --sha256 "$sha256" --relative-path upload_test/test2.txt --repository "cli_test_file_repository"
+expect_succ pulp file content upload --file test.txt --relative-path upload_test/test3.txt --repository "cli_test_file_repository"
+expect_succ pulp file repository content list --repository "cli_test_file_repository"
+test "$(echo "$OUTPUT" | jq -r '[.[]|.relative_path]|sort|join(" ")')" = "upload_test/test2.txt upload_test/test3.txt"
+
 expect_succ pulp content list
 test "$(echo "$OUTPUT" | jq -r length)" -gt "0"
