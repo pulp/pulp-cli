@@ -7,6 +7,7 @@ from pulpcore.cli.common.context import (
     PluginRequirement,
     PulpContext,
     PulpEntityContext,
+    PulpRepositoryContext,
     pass_entity_context,
     pass_pulp_context,
 )
@@ -16,11 +17,12 @@ from pulpcore.cli.common.generic import (
     href_option,
     list_command,
     pulp_group,
+    resource_option,
     show_command,
 )
 from pulpcore.cli.common.i18n import get_translation
 from pulpcore.cli.core.context import PulpArtifactContext, PulpUploadContext
-from pulpcore.cli.python.context import PulpPythonContentContext
+from pulpcore.cli.python.context import PulpPythonContentContext, PulpPythonRepositoryContext
 
 translation = get_translation(__name__)
 _ = translation.gettext
@@ -35,6 +37,21 @@ def _sha256_artifact_callback(
         assert pulp_ctx is not None
         return PulpArtifactContext(pulp_ctx, entity={"sha256": value})
     return value
+
+
+repository_option = resource_option(
+    "--repository",
+    default_plugin="python",
+    default_type="python",
+    context_table={
+        "python:python": PulpPythonRepositoryContext,
+    },
+    href_pattern=PulpRepositoryContext.HREF_PATTERN,
+    help=_(
+        "Repository to add the content to in the form '[[<plugin>:]<resource_type>:]<name>' or by "
+        "href."
+    ),
+)
 
 
 @pulp_group()
@@ -79,6 +96,7 @@ content.add_command(create_command(decorators=create_options))
 @click.option("--relative-path", required=True, help=_("Exact name of file"))
 @click.option("--file", type=click.File("rb"), required=True, help=_("Path to file"))
 @chunk_size_option
+@repository_option
 @pass_entity_context
 @pass_pulp_context
 def upload(
@@ -87,6 +105,7 @@ def upload(
     relative_path: str,
     file: IO[bytes],
     chunk_size: int,
+    repository: Optional[PulpEntityContext],
 ) -> None:
     """Create a Python package content unit through uploading a file"""
     size = os.path.getsize(file.name)
@@ -100,5 +119,8 @@ def upload(
     else:
         artifact_href = PulpArtifactContext(pulp_ctx).upload(file, chunk_size)
         body["artifact"] = artifact_href
+    if repository:
+        body["repository"] = repository
+    body = entity_ctx.preprocess_body(body)
     result = entity_ctx.create(body=body, uploads=uploads)
     pulp_ctx.output_result(result)

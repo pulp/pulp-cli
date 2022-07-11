@@ -7,6 +7,7 @@ from pulpcore.cli.common.context import (
     PluginRequirement,
     PulpContext,
     PulpEntityContext,
+    PulpRepositoryContext,
     pass_entity_context,
     pass_pulp_context,
 )
@@ -17,6 +18,7 @@ from pulpcore.cli.common.generic import (
     list_command,
     pulp_group,
     pulp_option,
+    resource_option,
     show_command,
     type_option,
 )
@@ -33,6 +35,7 @@ from pulpcore.cli.rpm.context import (
     PulpRpmPackageGroupContext,
     PulpRpmPackageLangpacksContext,
     PulpRpmRepoMetadataFileContext,
+    PulpRpmRepositoryContext,
 )
 
 translation = get_translation(__name__)
@@ -64,6 +67,22 @@ def _sha256_artifact_callback(
         assert pulp_ctx is not None
         return PulpArtifactContext(pulp_ctx, entity={"sha256": value})
     return value
+
+
+repository_option = resource_option(
+    "--repository",
+    default_plugin="rpm",
+    default_type="rpm",
+    context_table={
+        "rpm:rpm": PulpRpmRepositoryContext,
+    },
+    href_pattern=PulpRepositoryContext.HREF_PATTERN,
+    help=_(
+        "Repository to add the content to in the form '[[<plugin>:]<resource_type>:]<name>' or by "
+        "href."
+    ),
+    allowed_with_contexts=(PulpRpmPackageContext,),
+)
 
 
 @pulp_group()
@@ -196,6 +215,7 @@ create_options = [
         callback=_sha256_artifact_callback,
         allowed_with_contexts=(PulpRpmPackageContext,),
     ),
+    repository_option,
 ]
 content.add_command(
     create_command(
@@ -235,6 +255,7 @@ content.add_command(
     help=_("An advisory JSON file."),
     allowed_with_contexts=(PulpRpmAdvisoryContext,),
 )
+@repository_option
 @pass_entity_context
 @pass_pulp_context
 def upload(
@@ -248,10 +269,10 @@ def upload(
     **kwargs: Any,
 ) -> None:
     """Create a content unit by uploading a file"""
-    size = os.path.getsize(file.name)
     body: Dict[str, Any] = {}
     uploads: Dict[str, IO[bytes]] = {}
     if isinstance(entity_ctx, PulpRpmPackageContext):
+        size = os.path.getsize(file.name)
         if chunk_size > size:
             uploads["file"] = file
         elif pulp_ctx.has_plugin(PluginRequirement("core", min="3.20")):
@@ -265,5 +286,6 @@ def upload(
         uploads["file"] = file
     else:
         raise NotImplementedError()
+    body = entity_ctx.preprocess_body(body)
     result = entity_ctx.create(body=body, uploads=uploads)
     pulp_ctx.output_result(result)
