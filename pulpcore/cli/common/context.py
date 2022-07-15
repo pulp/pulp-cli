@@ -519,7 +519,7 @@ class PulpEntityContext:
         non_blocking: bool = False,
     ) -> Any:
         # Workaround for plugins that do not have ID_PREFIX in place
-        if not hasattr(self, "ID_PREFIX") and not hasattr(self, "PARTIAL_UPDATE_ID"):
+        if hasattr(self, "UPDATE_ID") and not hasattr(self, "PARTIAL_UPDATE_ID"):
             self.PARTIAL_UPDATE_ID = getattr(self, "UPDATE_ID")
         # ----------------------------------------------------------
         _parameters = {self.HREF: href or self.pulp_href}
