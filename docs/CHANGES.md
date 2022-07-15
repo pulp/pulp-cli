@@ -10,6 +10,18 @@
 
 [//]: # (towncrier release notes start)
 
+
+## 0.14.1 (2022-07-15)
+
+### Bugfixes
+
+- Fixed the heuristics for the `PARTIAL_UPDATE_ID` workaround.
+  [#529](https://github.com/pulp/pulp-cli/issues/529)
+
+
+---
+
+
 ## 0.14.0 (2022-03-02)
 
 ### Features
