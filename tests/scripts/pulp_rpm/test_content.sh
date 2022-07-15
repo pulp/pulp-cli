@@ -13,7 +13,7 @@ trap cleanup EXIT
 
 # Test rpm package upload
 
-wget "https://fixtures.pulpproject.org/rpm-modules-static-context/bear-4.1-1.noarch.rpm"
+wget "https://fixtures.pulpproject.org/rpm-unsigned/bear-4.1-1.noarch.rpm"
 expect_succ pulp rpm content upload --file "bear-4.1-1.noarch.rpm" --relative-path "bear-4.1-1.noarch.rpm"
 PACKAGE_HREF=$(echo "$OUTPUT" | jq -r .pulp_href)
 expect_succ pulp rpm content show --href "$PACKAGE_HREF"
