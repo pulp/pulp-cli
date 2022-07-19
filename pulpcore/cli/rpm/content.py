@@ -1,8 +1,10 @@
-from typing import Any, Optional, Union
+import os
+from typing import IO, Any, Dict, Optional, Union
 
 import click
 
 from pulpcore.cli.common.context import (
+    PluginRequirement,
     PulpContext,
     PulpEntityContext,
     pass_entity_context,
@@ -19,7 +21,7 @@ from pulpcore.cli.common.generic import (
     type_option,
 )
 from pulpcore.cli.common.i18n import get_translation
-from pulpcore.cli.core.context import PulpArtifactContext
+from pulpcore.cli.core.context import PulpArtifactContext, PulpUploadContext
 from pulpcore.cli.rpm.context import (
     PulpRpmAdvisoryContext,
     PulpRpmDistributionTreeContext,
@@ -241,20 +243,27 @@ def upload(
         PulpRpmPackageContext,
         PulpRpmAdvisoryContext,
     ],
+    file: IO[bytes],
+    chunk_size: int,
     **kwargs: Any,
 ) -> None:
     """Create a content unit by uploading a file"""
-    file = kwargs.pop("file")
-    body = {}
+    size = os.path.getsize(file.name)
+    body: Dict[str, Any] = {}
+    uploads: Dict[str, IO[bytes]] = {}
     if isinstance(entity_ctx, PulpRpmPackageContext):
-        chunk_size = kwargs.pop("chunk_size")
-        artifact_ctx = PulpArtifactContext(pulp_ctx)
-        artifact_href = artifact_ctx.upload(file, chunk_size)
-        body["artifact"] = artifact_href
+        if chunk_size > size:
+            uploads["file"] = file
+        elif pulp_ctx.has_plugin(PluginRequirement("core", min="3.20")):
+            upload_href = PulpUploadContext(pulp_ctx).upload_file(file, chunk_size)
+            body["upload"] = upload_href
+        else:
+            artifact_href = PulpArtifactContext(pulp_ctx).upload(file, chunk_size)
+            body["artifact"] = artifact_href
         body.update(kwargs)
-        result = entity_ctx.create(body=body)
     elif isinstance(entity_ctx, PulpRpmAdvisoryContext):
-        result = entity_ctx.create(body=body, uploads={"file": file.read()})
+        uploads["file"] = file
     else:
         raise NotImplementedError()
+    result = entity_ctx.create(body=body, uploads=uploads)
     pulp_ctx.output_result(result)

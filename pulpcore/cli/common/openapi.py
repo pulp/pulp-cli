@@ -70,7 +70,7 @@ class OpenAPI:
         verify: Optional[Union[bool, str]] = (
             os.environ.get("PULP_CA_BUNDLE") if validate_certs is not False else False
         )
-        session_settings = self._session.merge_environment_settings(  # type:ignore
+        session_settings = self._session.merge_environment_settings(
             base_url, {}, None, verify, None
         )
         self._session.verify = session_settings["verify"]
