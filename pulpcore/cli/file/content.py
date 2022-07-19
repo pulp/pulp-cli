@@ -113,14 +113,15 @@ def upload(
 ) -> None:
     """Create a file content unit by uploading a file"""
     size = os.path.getsize(file.name)
-    content: Dict[str, Any] = {"relative_path": relative_path}
+    body: Dict[str, Any] = {"relative_path": relative_path}
+    uploads: Dict[str, IO[bytes]] = {}
     if chunk_size > size:
-        content["file"] = file
+        uploads["file"] = file
     elif pulp_ctx.has_plugin(PluginRequirement("core", min="3.20")):
         upload_href = PulpUploadContext(pulp_ctx).upload_file(file, chunk_size)
-        content["upload"] = upload_href
+        body["upload"] = upload_href
     else:
         artifact_href = PulpArtifactContext(pulp_ctx).upload(file, chunk_size)
-        content["artifact"] = artifact_href
-    result = entity_ctx.create(body=content)
+        body["artifact"] = artifact_href
+    result = entity_ctx.create(body=body, uploads=uploads)
     pulp_ctx.output_result(result)

@@ -23,6 +23,14 @@ test "$(echo "$OUTPUT" | jq -r length)" -eq "1"
 content_href="$(echo "$OUTPUT" | jq -r .[0].pulp_href)"
 expect_succ pulp file content show --href "$content_href"
 
+# Test small file upload
+dd if=/dev/urandom of=test.txt bs=64 count=1
+sha256=$(sha256sum test.txt | cut -d' ' -f1)
+
+expect_succ pulp file content upload --file test.txt --relative-path upload_test/test.txt
+expect_succ pulp file content list --sha256 "$sha256"
+test "$(echo "$OUTPUT" | jq -r length)" -eq "1"
+
 # Test creation from artifact
 dd if=/dev/urandom of=test.txt bs=2MiB count=1
 sha256=$(sha256sum test.txt | cut -d' ' -f1)

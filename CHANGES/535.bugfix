@@ -1,0 +1,1 @@
+Fixed uploading content for files smaller than the chunk size.
