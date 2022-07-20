@@ -204,7 +204,6 @@ content.add_command(show_command(decorators=lookup_options))
 create_options = [
     pulp_option(
         "--relative-path",
-        required=True,
         allowed_with_contexts=(PulpRpmPackageContext,),
     ),
     pulp_option(
@@ -237,7 +236,6 @@ content.add_command(
 @chunk_size_option
 @pulp_option(
     "--relative-path",
-    required=True,
     help=_("Relative path within a distribution of the entity"),
     allowed_with_contexts=(PulpRpmPackageContext,),
 )
@@ -272,6 +270,10 @@ def upload(
     body: Dict[str, Any] = {}
     uploads: Dict[str, IO[bytes]] = {}
     if isinstance(entity_ctx, PulpRpmPackageContext):
+        if kwargs.get("relative_path") is None:
+            pulp_ctx.needs_plugin(PluginRequirement("rpm", min="3.18"))
+        else:
+            ValueError("--relative-path must be provided")
         size = os.path.getsize(file.name)
         if chunk_size > size:
             uploads["file"] = file
