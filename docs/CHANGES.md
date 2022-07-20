@@ -10,6 +10,72 @@
 
 [//]: # (towncrier release notes start)
 
+
+## 0.15.0 (2022-07-20)
+
+
+### Features
+
+- Added `pulp_container` repository list/add/remove content commands.
+  [#422](https://github.com/pulp/pulp-cli/issues/422)
+- Added role management commands to file commands.
+  [#454](https://github.com/pulp/pulp-cli/issues/454)
+- Added role management to container subcommands.
+  [#468](https://github.com/pulp/pulp-cli/issues/468)
+- Added support for ULN remotes.
+  [#470](https://github.com/pulp/pulp-cli/issues/470)
+- Added ansible signature command.
+  [#481](https://github.com/pulp/pulp-cli/issues/481)
+- Added ansible signature list/read/upload commands.
+  [#484](https://github.com/pulp/pulp-cli/issues/484)
+- The `--type` option on the repository content subgroup has moved back one spot.
+  To list all the content types in a repository use the `--all-types` flag on the list command.
+  [#492](https://github.com/pulp/pulp-cli/issues/492)
+- Added container repository copy-tag and copy-manifest commands.
+  [#497](https://github.com/pulp/pulp-cli/issues/497)
+- Extended "rpm content" to cover all of the RPM content-types.
+  [#505](https://github.com/pulp/pulp-cli/issues/505)
+- Added commands for the redirecting content guard.
+  [#512](https://github.com/pulp/pulp-cli/issues/512)
+- Started using uploads directly to create file content of a bigger size with pulpcore >= 3.20.
+  [#514](https://github.com/pulp/pulp-cli/issues/514)
+- Added global publication list command.
+
+  Also, added new --repository filter for publication list available for pulpcore>=3.20.
+  [#515](https://github.com/pulp/pulp-cli/issues/515)
+- Added global distribution list command.
+  [#517](https://github.com/pulp/pulp-cli/issues/517)
+- Added global remote list command.
+  [#518](https://github.com/pulp/pulp-cli/issues/518)
+- Added `--repository` option to ansible collection signature upload and `--gpgkey` to ansible repository.
+  [#532](https://github.com/pulp/pulp-cli/issues/532)
+
+
+### Bugfixes
+
+- Fixed bug, where the failure to load config file due to the lack of file permissions lead to a crash.
+  Now those files are simply ignored.
+  [#509](https://github.com/pulp/pulp-cli/issues/509)
+- Fixed the heuristics for the `PARTIAL_UPDATE_ID` workaround.
+  [#529](https://github.com/pulp/pulp-cli/issues/529)
+- Fixed uploading content for files smaller than the chunk size.
+  [#535](https://github.com/pulp/pulp-cli/issues/535)
+
+
+### Deprecations and Removals
+
+- Marked `group permission` command unusable with pulpcore 3.20.
+  [#501](https://github.com/pulp/pulp-cli/issues/501)
+
+
+### Misc
+
+- [#499](https://github.com/pulp/pulp-cli/issues/499), [#520](https://github.com/pulp/pulp-cli/issues/520)
+
+
+---
+
+
 ## 0.14.0 (2022-03-02)
 
 ### Features
