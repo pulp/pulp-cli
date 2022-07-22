@@ -40,7 +40,6 @@
 - Started using uploads directly to create file content of a bigger size with pulpcore >= 3.20.
   [#514](https://github.com/pulp/pulp-cli/issues/514)
 - Added global publication list command.
-
   Also, added new --repository filter for publication list available for pulpcore>=3.20.
   [#515](https://github.com/pulp/pulp-cli/issues/515)
 - Added global distribution list command.
@@ -71,6 +70,17 @@
 ### Misc
 
 - [#499](https://github.com/pulp/pulp-cli/issues/499), [#520](https://github.com/pulp/pulp-cli/issues/520)
+
+
+---
+
+
+## 0.14.1 (2022-07-15)
+
+### Bugfixes
+
+- Fixed the heuristics for the `PARTIAL_UPDATE_ID` workaround.
+  [#529](https://github.com/pulp/pulp-cli/issues/529)
 
 
 ---

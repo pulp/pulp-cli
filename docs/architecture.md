@@ -16,14 +16,18 @@ entry_points={
 }
 ```
 
-The plugin can then attach subcommands to the `pulpcore.cli.common.main` command.
+The plugin can then attach subcommands to the `pulpcore.cli.common.main` command by providing a `mount` method in the main module.
 
 ```python
-from pulpcore.cli.common import main
+from pulpcore.cli.common.generic import pulp_command
 
-@main.command()
+@pulp_command()
 def my_command():
     pass
+
+
+def mount(main: click.Group, **kwargs: Any) -> None:
+    main.add_command(my_command)
 ```
 
 ### Contexts
@@ -36,7 +40,7 @@ By attaching them to the contexts of certain command groups, they are accessible
 Those entity contexts should provide a common interface to the layer of `click` commands that define the user interaction.
 
 ```python
-@main.command()
+@pulp_group()
 @pass_pulp_context
 @click.pass_context
 def my_command(ctx, pulp_ctx):
