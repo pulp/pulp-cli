@@ -1,0 +1,2 @@
+The `openapi` layer now handles all instances of `requests.RequestException`.
+This will help to give a better error message for e.g. missing schema in the `--base-url` parameter.

@@ -117,7 +117,7 @@ class OpenAPI:
     def _download_api(self) -> bytes:
         try:
             r: requests.Response = self._session.get(urljoin(self.base_url, self.doc_path))
-        except requests.exceptions.ConnectionError as e:
+        except requests.RequestException as e:
             raise OpenAPIError(str(e))
         r.raise_for_status()
         return r.content
@@ -276,14 +276,14 @@ class OpenAPI:
             raise OpenAPIError(_("Call aborted due to safe mode"))
         try:
             response: requests.Response = self._session.send(request)
-        except requests.ConnectionError as e:
-            raise OpenAPIError(str(e))
-        except requests.exceptions.TooManyRedirects as e:
+        except requests.TooManyRedirects as e:
             raise OpenAPIError(
                 _("Received redirect to '{url}'. Please check your CLI configuration.").format(
                     url=e.response.headers["location"]
                 )
             )
+        except requests.RequestException as e:
+            raise OpenAPIError(str(e))
         self.debug_callback(
             1, _("Response: {status_code}").format(status_code=response.status_code)
         )
