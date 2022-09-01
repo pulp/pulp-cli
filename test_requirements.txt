@@ -1,5 +1,5 @@
 -e .
-black~=22.6
+black~=22.8
 flake8
 isort
 mypy
