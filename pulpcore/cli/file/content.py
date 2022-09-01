@@ -137,7 +137,7 @@ def upload(
     uploads: Dict[str, IO[bytes]] = {}
     if chunk_size > size:
         uploads["file"] = file
-    elif pulp_ctx.has_plugin(PluginRequirement("core", min="3.20")):
+    elif pulp_ctx.has_plugin(PluginRequirement("core", min="3.20.0")):
         upload_href = PulpUploadContext(pulp_ctx).upload_file(file, chunk_size)
         body["upload"] = upload_href
     else:

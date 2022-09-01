@@ -21,6 +21,7 @@ class PulpFileACSContext(PulpEntityContext):
     ENTITIES = _("file ACSes")
     HREF = "file_file_alternate_content_source_href"
     ID_PREFIX = "acs_file_file"
+    NEEDS_PLUGINS = [PluginRequirement("file", "1.9.0")]
     CAPABILITIES = {"roles": [PluginRequirement("file", min="1.11.0")]}
 
     def refresh(self, href: str) -> Any:

@@ -68,11 +68,11 @@ group.add_command(show_command(decorators=lookup_options))
 group.add_command(destroy_command(decorators=lookup_options))
 group.add_command(create_command(decorators=create_options))
 group.add_command(
-    role_command(decorators=lookup_options, needs_plugins=[PluginRequirement("core", min="3.17")])
+    role_command(decorators=lookup_options, needs_plugins=[PluginRequirement("core", min="3.17.0")])
 )
 
 
-@group.group(needs_plugins=[PluginRequirement("core", max="3.20-dev")])
+@group.group(needs_plugins=[PluginRequirement("core", max="3.20.0")])
 @click.option(
     "-t",
     "--type",
@@ -168,7 +168,6 @@ def remove_user(pulp_ctx: PulpContext, entity_ctx: PulpGroupUserContext, usernam
 @pass_pulp_context
 @click.pass_context
 def role(ctx: click.Context, pulp_ctx: PulpContext, group_ctx: PulpGroupContext) -> None:
-    pulp_ctx.needs_plugin(PluginRequirement("core", min="3.17"))
     ctx.obj = PulpGroupRoleContext(pulp_ctx, group_ctx)
 
 

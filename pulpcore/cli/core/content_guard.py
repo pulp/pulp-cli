@@ -2,12 +2,7 @@ from typing import List, Optional
 
 import click
 
-from pulpcore.cli.common.context import (
-    PluginRequirement,
-    PulpContext,
-    pass_entity_context,
-    pass_pulp_context,
-)
+from pulpcore.cli.common.context import PulpContext, pass_entity_context, pass_pulp_context
 from pulpcore.cli.common.generic import (
     create_command,
     destroy_command,
@@ -48,7 +43,6 @@ content_guard.add_command(list_command(decorators=filter_options))
 @pass_pulp_context
 @click.pass_context
 def rbac(ctx: click.Context, pulp_ctx: PulpContext) -> None:
-    pulp_ctx.needs_plugin(PluginRequirement("core", "3.15.0"))
     ctx.obj = PulpRbacContentGuardContext(pulp_ctx)
 
 
@@ -120,7 +114,6 @@ def remove(
 @pass_pulp_context
 @click.pass_context
 def redirect(ctx: click.Context, pulp_ctx: PulpContext) -> None:
-    pulp_ctx.needs_plugin(PluginRequirement("core", "3.18.0"))
     ctx.obj = PulpContentRedirectContentGuardContext(pulp_ctx)
 
 

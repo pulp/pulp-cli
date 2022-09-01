@@ -18,7 +18,7 @@ _ = translation.gettext
 @pulp_group()
 @pass_pulp_context
 def container(pulp_ctx: PulpContext) -> None:
-    pulp_ctx.needs_plugin(PluginRequirement("container", min="2.3"))
+    pulp_ctx.needs_plugin(PluginRequirement("container", min="2.3.0"))
 
 
 def mount(main: click.Group, **kwargs: Any) -> None:
