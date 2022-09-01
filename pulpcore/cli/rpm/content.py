@@ -270,14 +270,10 @@ def upload(
     body: Dict[str, Any] = {}
     uploads: Dict[str, IO[bytes]] = {}
     if isinstance(entity_ctx, PulpRpmPackageContext):
-        if kwargs.get("relative_path") is None:
-            pulp_ctx.needs_plugin(PluginRequirement("rpm", min="3.18"))
-        else:
-            ValueError("--relative-path must be provided")
         size = os.path.getsize(file.name)
         if chunk_size > size:
             uploads["file"] = file
-        elif pulp_ctx.has_plugin(PluginRequirement("core", min="3.20")):
+        elif pulp_ctx.has_plugin(PluginRequirement("core", min="3.20.0")):
             upload_href = PulpUploadContext(pulp_ctx).upload_file(file, chunk_size)
             body["upload"] = upload_href
         else:

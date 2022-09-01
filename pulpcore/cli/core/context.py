@@ -23,11 +23,12 @@ class PulpAccessPolicyContext(PulpEntityContext):
     ID_PREFIX = "access_policies"
 
     def reset(self) -> Any:
+        self.pulp_ctx.needs_plugin(PluginRequirement("core", min="3.17.0"))
         return self.call("reset", parameters={self.HREF: self.pulp_href})
 
     def preprocess_entity(self, body: EntityDefinition, partial: bool = False) -> EntityDefinition:
         body = super().preprocess_entity(body, partial=partial)
-        if not self.pulp_ctx.has_plugin(PluginRequirement("core", min="3.17")):
+        if not self.pulp_ctx.has_plugin(PluginRequirement("core", min="3.17.0")):
             if "creation_hooks" in body:
                 body["permissions_assignment"] = body.pop("creation_hooks")
         return body
@@ -108,7 +109,7 @@ class PulpGroupContext(PulpEntityContext):
 
     @property
     def HREF(self) -> str:  # type:ignore
-        if not self.pulp_ctx.has_plugin(PluginRequirement("core", min="3.17")):
+        if not self.pulp_ctx.has_plugin(PluginRequirement("core", min="3.17.0")):
             return "auth_group_href"
         return "group_href"
 
@@ -116,10 +117,10 @@ class PulpGroupContext(PulpEntityContext):
 class PulpGroupPermissionContext(PulpEntityContext):
     ENTITY = _("group permission")
     ENTITIES = _("group permissions")
+    NEEDS_PLUGINS = [PluginRequirement("core", max="3.20.0", feature=_("group permissions"))]
     group_ctx: PulpGroupContext
 
     def __init__(self, pulp_ctx: PulpContext, group_ctx: PulpGroupContext) -> None:
-        pulp_ctx.needs_plugin(PluginRequirement("core", max="3.20", feature=_("group permissions")))
         super().__init__(pulp_ctx)
         self.group_ctx = group_ctx
 
@@ -178,7 +179,7 @@ class PulpGroupModelPermissionContext(PulpGroupPermissionContext):
 
     @property
     def HREF(self) -> str:  # type:ignore
-        if not self.pulp_ctx.has_plugin(PluginRequirement("core", min="3.17")):
+        if not self.pulp_ctx.has_plugin(PluginRequirement("core", min="3.17.0")):
             return "auth_groups_model_permission_href"
         return "groups_model_permission_href"
 
@@ -192,7 +193,7 @@ class PulpGroupObjectPermissionContext(PulpGroupPermissionContext):
 
     @property
     def HREF(self) -> str:  # type:ignore
-        if not self.pulp_ctx.has_plugin(PluginRequirement("core", min="3.17")):
+        if not self.pulp_ctx.has_plugin(PluginRequirement("core", min="3.17.0")):
             return "auth_groups_object_permission_href"
         return "groups_object_permission_href"
 
@@ -224,7 +225,7 @@ class PulpGroupUserContext(PulpEntityContext):
 
     @property
     def HREF(self) -> str:  # type:ignore
-        if not self.pulp_ctx.has_plugin(PluginRequirement("core", min="3.17")):
+        if not self.pulp_ctx.has_plugin(PluginRequirement("core", min="3.17.0")):
             return "auth_groups_user_href"
         return "groups_user_href"
 
@@ -249,6 +250,7 @@ class PulpContentRedirectContentGuardContext(PulpEntityContext):
     ENTITIES = "content redirect content guards"
     HREF = "content_redirect_content_guard_href"
     ID_PREFIX = "contentguards_core_content_redirect"
+    NEEDS_PLUGINS = [PluginRequirement("core", "3.18.0")]
 
 
 class PulpDistributionContext(PulpEntityContext):
@@ -279,6 +281,7 @@ class PulpRbacContentGuardContext(PulpContentGuardContext):
     ID_PREFIX = "contentguards_core_rbac"
     DOWNLOAD_ROLE: ClassVar[str] = "core.rbaccontentguard_downloader"
     CAPABILITIES = {"roles": [PluginRequirement("core", "3.17.0")]}
+    NEEDS_PLUGINS = [PluginRequirement("core", "3.15.0")]
 
     def assign(self, href: str, users: Optional[List[str]], groups: Optional[List[str]]) -> Any:
         if self.pulp_ctx.has_plugin(PluginRequirement("core", min="3.17.0")):
@@ -305,6 +308,7 @@ class PulpRoleContext(PulpEntityContext):
     HREF = "role_href"
     ID_PREFIX = "roles"
     NULLABLES = {"description"}
+    NEEDS_PLUGINS = [PluginRequirement("core", "3.17.0")]
 
 
 class PulpSigningServiceContext(PulpEntityContext):
@@ -350,7 +354,7 @@ class PulpTaskContext(PulpEntityContext):
 
     def summary(self) -> Dict[str, int]:
         task_states = ["waiting", "skipped", "running", "completed", "failed", "canceled"]
-        if self.pulp_ctx.has_plugin(PluginRequirement("core", min="3.14")):
+        if self.pulp_ctx.has_plugin(PluginRequirement("core", min="3.14.0")):
             task_states.append("canceling")
         result = {}
         for state in task_states:

@@ -5,7 +5,6 @@ import click
 
 from pulpcore.cli.common.context import (
     EntityFieldDefinition,
-    PluginRequirement,
     PulpContext,
     PulpEntityContext,
     pass_pulp_context,
@@ -37,7 +36,6 @@ def comps_upload(
     replace: Optional[bool],
 ) -> None:
     """Create comps.xml content-units by uploading a comps.xml-formatted file"""
-    pulp_ctx.needs_plugin(PluginRequirement("rpm", min="3.17.0dev"))
     entity_ctx = PulpRpmCompsXmlContext(pulp_ctx)
     href = None
     if isinstance(repository, PulpEntityContext):

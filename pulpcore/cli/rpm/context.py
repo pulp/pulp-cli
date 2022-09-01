@@ -7,6 +7,7 @@ from pulpcore.cli.common.context import (
     PluginRequirement,
     PulpContentContext,
     PulpEntityContext,
+    PulpException,
     PulpRemoteContext,
     PulpRepositoryContext,
     PulpRepositoryVersionContext,
@@ -23,6 +24,7 @@ class PulpRpmACSContext(PulpEntityContext):
     ENTITIES = _("rpm ACSes")
     HREF = "rpm_rpm_alternate_content_source_href"
     ID_PREFIX = "acs_rpm_rpm"
+    NEEDS_PLUGINS = [PluginRequirement("rpm", "3.18.0")]
 
     def refresh(self, href: str) -> Any:
         return self.call(
@@ -33,6 +35,7 @@ class PulpRpmACSContext(PulpEntityContext):
 
 class PulpRpmCompsXmlContext(PulpEntityContext):
     UPLOAD_COMPS_ID: ClassVar[str] = "rpm_comps_upload"
+    NEEDS_PLUGINS = [PluginRequirement("rpm", min="3.17.0")]
 
     def upload_comps(
         self, file: IO[bytes], repo_href: Optional[str], replace: Optional[bool]
@@ -68,6 +71,15 @@ class PulpRpmPackageContext(PulpContentContext):
     ENTITIES = "rpm packages"
     HREF = "rpm_package_href"
     ID_PREFIX = "content_rpm_packages"
+
+    def preprocess_entity(self, body: EntityDefinition, partial: bool = False) -> EntityDefinition:
+        body = super().preprocess_entity(body, partial=partial)
+        if partial is False:
+            if body.get("relative_path") is None:
+                self.pulp_ctx.needs_plugin(PluginRequirement("rpm", min="3.18.0"))
+            else:
+                PulpException(_("--relative-path must be provided"))
+        return body
 
 
 class PulpRpmAdvisoryContext(PulpContentContext):
@@ -172,6 +184,7 @@ class PulpUlnRemoteContext(PulpRemoteContext):
     HREF = "rpm_uln_remote_href"
     ID_PREFIX = "remotes_rpm_uln"
     NULLABLES = PulpRemoteContext.NULLABLES | {"uln-server-base-url"}
+    NEEDS_PLUGINS = [PluginRequirement("rpm", "3.12.0")]
 
 
 class PulpRpmRepositoryVersionContext(PulpRepositoryVersionContext):

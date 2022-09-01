@@ -3,7 +3,6 @@ from typing import Iterable
 import click
 
 from pulpcore.cli.common.context import (
-    PluginRequirement,
     PulpContext,
     PulpRemoteContext,
     pass_entity_context,
@@ -43,7 +42,6 @@ path_option = click.option(
 @pass_pulp_context
 @click.pass_context
 def acs(ctx: click.Context, pulp_ctx: PulpContext, acs_type: str) -> None:
-    pulp_ctx.needs_plugin(PluginRequirement("rpm", "3.18.0"))
     if acs_type == "rpm":
         ctx.obj = PulpRpmACSContext(pulp_ctx)
     else:

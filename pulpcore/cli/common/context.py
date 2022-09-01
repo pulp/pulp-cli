@@ -368,11 +368,13 @@ class PulpEntityContext:
     ID_PREFIX: ClassVar[str]
     # Set of fields that can be cleared by sending 'null'
     NULLABLES: ClassVar[Set[str]] = set()
+    # List of necessary plugin to operate such an entity in the server
+    NEEDS_PLUGINS: ClassVar[List[PluginRequirement]] = []
     # Subclasses can specify version dependent capabilities here
     # e.g. `CAPABILITIES = {
     #           "feature1": [
     #               PluginRequirement("file"),
-    #               PluginRequirement("core", min_version="3.7")
+    #               PluginRequirement("core", min_version="3.7.0")
     #           ]
     #       }
     CAPABILITIES: ClassVar[Dict[str, List[PluginRequirement]]] = {}
@@ -442,6 +444,11 @@ class PulpEntityContext:
 
         self.meta: Dict[str, str] = {}
         self.pulp_ctx: PulpContext = pulp_ctx
+
+        # Add requirements to the lazy evaluated list
+        for req in self.NEEDS_PLUGINS:
+            self.pulp_ctx.needs_plugin(req)
+
         self._entity = None
         if pulp_href is None:
             self._entity_lookup = entity or {}
@@ -705,7 +712,7 @@ class PulpRepositoryContext(PulpEntityContext):
 
     def preprocess_entity(self, body: EntityDefinition, partial: bool = False) -> EntityDefinition:
         body = super().preprocess_entity(body, partial=partial)
-        if self.pulp_ctx.has_plugin(PluginRequirement("core", "3.13", "3.15")):
+        if self.pulp_ctx.has_plugin(PluginRequirement("core", "3.13.0", "3.15.0")):
             # "retain_repo_versions" has been named "retained_versions" until pulpcore 3.15
             # https://github.com/pulp/pulpcore/pull/1472
             if "retain_repo_versions" in body:

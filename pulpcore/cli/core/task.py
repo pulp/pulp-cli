@@ -59,7 +59,8 @@ task.add_command(list_command(decorators=task_filter))
 task.add_command(destroy_command(decorators=[href_option, uuid_option]))
 task.add_command(
     role_command(
-        decorators=[href_option, uuid_option], needs_plugins=[PluginRequirement("core", min="3.17")]
+        decorators=[href_option, uuid_option],
+        needs_plugins=[PluginRequirement("core", min="3.17.0")],
     )
 )
 

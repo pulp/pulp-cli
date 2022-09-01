@@ -141,7 +141,7 @@ def main(
         background_tasks=background,
         timeout=timeout,
     )
-    ctx.obj.needs_plugin(PluginRequirement("core", min="3.11"))
+    ctx.obj.needs_plugin(PluginRequirement("core", min="3.11.0"))
 
 
 main.add_command(config)

@@ -17,7 +17,7 @@ _ = translation.gettext
 @pulp_group()
 @pass_pulp_context
 def ansible(pulp_ctx: PulpContext) -> None:
-    pulp_ctx.needs_plugin(PluginRequirement("ansible", min="0.7"))
+    pulp_ctx.needs_plugin(PluginRequirement("ansible", min="0.7.0"))
 
 
 def mount(main: click.Group, **kwargs: Any) -> None:

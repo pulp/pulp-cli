@@ -25,7 +25,7 @@ translation = get_translation(__name__)
 _ = translation.gettext
 
 
-req_core_3_17 = PluginRequirement("core", min="3.17")
+req_core_3_17 = PluginRequirement("core", min="3.17.0")
 
 username_option = pulp_option(
     "--username",

@@ -20,7 +20,7 @@ _ = translation.gettext
 @pulp_group()
 @pass_pulp_context
 def rpm(pulp_ctx: PulpContext) -> None:
-    pulp_ctx.needs_plugin(PluginRequirement("rpm", min="3.9"))
+    pulp_ctx.needs_plugin(PluginRequirement("rpm", min="3.9.0"))
 
 
 def mount(main: click.Group, **kwargs: Any) -> None:

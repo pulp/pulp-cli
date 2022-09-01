@@ -1,6 +1,6 @@
 import click
 
-from pulpcore.cli.common.context import PluginRequirement, PulpContext, pass_pulp_context
+from pulpcore.cli.common.context import PulpContext, pass_pulp_context
 from pulpcore.cli.common.generic import (
     create_command,
     destroy_command,
@@ -43,7 +43,6 @@ def remote(ctx: click.Context, pulp_ctx: PulpContext, remote_type: str) -> None:
     if remote_type == "rpm":
         ctx.obj = PulpRpmRemoteContext(pulp_ctx)
     elif remote_type == "uln":
-        pulp_ctx.needs_plugin(PluginRequirement("rpm", "3.12.0"))
         ctx.obj = PulpUlnRemoteContext(pulp_ctx)
     else:
         raise NotImplementedError()

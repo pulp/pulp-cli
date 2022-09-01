@@ -1,7 +1,6 @@
 import click
 
 from pulpcore.cli.common.context import (
-    PluginRequirement,
     PulpContext,
     PulpEntityContext,
     pass_entity_context,
@@ -58,6 +57,5 @@ access_policy.add_command(update_command(decorators=lookup_options + update_opti
 @pass_entity_context
 @pass_pulp_context
 def reset(pulp_ctx: PulpContext, access_policy_ctx: PulpAccessPolicyContext) -> None:
-    pulp_ctx.needs_plugin(PluginRequirement("core", min="3.17"))
     result = access_policy_ctx.reset()
     pulp_ctx.output_result(result)
