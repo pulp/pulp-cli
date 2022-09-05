@@ -10,8 +10,8 @@ acs="cli_test_acs"
 
 cleanup() {
   pulp file acs destroy --name $acs || true
-  pulp file remote destroy --name $acs_remote || true
   pulp file repository destroy --name "cli-repo-manifest-only" || true
+  pulp file remote destroy --name $acs_remote || true
   pulp file remote destroy --name "cli-remote-manifest-only" || true
 }
 trap cleanup EXIT

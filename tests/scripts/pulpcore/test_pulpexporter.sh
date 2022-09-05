@@ -14,9 +14,9 @@ PATH1="/tmp/exports"
 PATH2="/tmp/export-path-changed"
 
 cleanup() {
-  pulp file remote destroy --name $RMOTE || true
   pulp file repository destroy --name $REPO1 || true
   pulp file repository destroy --name $REPO2 || true
+  pulp file remote destroy --name $RMOTE || true
   pulp exporter pulp destroy --name $NAME1 || true
   pulp exporter pulp destroy --name $NAME2 || true
 }

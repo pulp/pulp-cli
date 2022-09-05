@@ -6,9 +6,9 @@
 pulp debug has-plugin --name "file" || exit 3
 
 cleanup() {
+  pulp file repository destroy --name "cli_test_file_repository" || true
   pulp file remote destroy --name "cli_test_file_remote" || true
   pulp file remote destroy --name "cli_test_file_large_remote" || true
-  pulp file repository destroy --name "cli_test_file_repository" || true
   pulp orphan cleanup || true
 }
 trap cleanup EXIT
