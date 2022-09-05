@@ -14,8 +14,8 @@ PACKAGE_HREF=
 ADVISORY_HREF=
 cleanup() {
   pulp rpm repository destroy --name "${REPO1_NAME}" || true
-  pulp rpm remote destroy --name "${REPO1_NAME}" || true
   pulp rpm repository destroy --name "${REPO2_NAME}" || true
+  pulp rpm remote destroy --name "${REPO1_NAME}" || true
   pulp rpm remote destroy --name "${REPO2_NAME}" || true
   # clean up everything else "asap"
   pulp orphan cleanup --protection-time 0 || true

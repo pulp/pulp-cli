@@ -9,10 +9,10 @@ autopublish_repo="cli_test_file_repository_autopublish"
 one_version_repo="cli_test_one_version_repo"
 
 cleanup() {
-  pulp file remote destroy --name "cli_test_file_remote" || true
   pulp file repository destroy --name "cli_test_file_repository" || true
   pulp file repository destroy --name "$autopublish_repo" || true
   pulp file repository destroy --name "$one_version_repo" || true
+  pulp file remote destroy --name "cli_test_file_remote" || true
 }
 trap cleanup EXIT
 

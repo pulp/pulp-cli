@@ -9,9 +9,9 @@ acs_remote="cli_test_rpm_acs_remote"
 acs="cli_test_acs"
 
 cleanup() {
+  pulp rpm repository destroy --name "cli-repo-metadata-only" || true
   pulp rpm acs destroy --name $acs || true
   pulp rpm remote destroy --name $acs_remote || true
-  pulp rpm repository destroy --name "cli-repo-metadata-only" || true
   pulp rpm remote destroy --name "cli-remote-metadata-only" || true
   pulp orphan cleanup --protection-time 0 || true
 }

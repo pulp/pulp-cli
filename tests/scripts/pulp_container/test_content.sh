@@ -6,8 +6,8 @@
 pulp debug has-plugin --name "container" || exit 3
 
 cleanup() {
-  pulp container remote destroy --name "cli_test_container_remote" || true
   pulp container repository destroy --name "cli_test_container_repository" || true
+  pulp container remote destroy --name "cli_test_container_remote" || true
   pulp orphan cleanup || true
 }
 trap cleanup EXIT
