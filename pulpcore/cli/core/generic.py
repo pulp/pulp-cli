@@ -4,15 +4,16 @@ from typing import Any, Optional
 import click
 
 from pulpcore.cli.common.context import (
+    DATETIME_FORMATS,
     PluginRequirement,
     PulpContext,
     PulpEntityContext,
     pass_entity_context,
     pass_pulp_context,
 )
-from pulpcore.cli.common.generic import list_command, pulp_group, pulp_option
+from pulpcore.cli.common.generic import list_command, pulp_group, pulp_option, resource_option
 from pulpcore.cli.common.i18n import get_translation
-from pulpcore.cli.core.context import PulpTaskContext
+from pulpcore.cli.core.context import PulpTaskContext, PulpWorkerContext
 
 translation = get_translation(__name__)
 _ = translation.gettext
@@ -22,27 +23,31 @@ _ = translation.gettext
 # Generic reusable commands
 
 
-def _task_group_filter_callback(
-    ctx: click.Context, param: click.Parameter, value: Optional[str]
-) -> Optional[str]:
-    if value is not None:
-        pulp_ctx = ctx.find_object(PulpContext)
-        assert pulp_ctx is not None
+class HrefOrUuidCallback:
+    def __init__(self, base_href: str) -> None:
+        self.base_href = base_href
 
-        # Example: "/pulp/api/v3/task-groups/a69230d2-506e-44c7-9c46-e64a905f85e7/"
-        match = re.match(
-            rf"({pulp_ctx.api_path}task-groups/)?"
-            r"([0-9a-f]{8})-?([0-9a-f]{4})-?([0-9a-f]{4})-?([0-9a-f]{4})-?([0-9a-f]{12})/?",
-            value,
-        )
-        if match:
-            value = "{}task-groups/{}-{}-{}-{}-{}/".format(
-                pulp_ctx.api_path, *match.group(2, 3, 4, 5, 6)
+    def __call__(
+        self, ctx: click.Context, param: click.Parameter, value: Optional[str]
+    ) -> Optional[str]:
+        if value is not None:
+            pulp_ctx = ctx.find_object(PulpContext)
+            assert pulp_ctx is not None
+
+            # Example: "/pulp/api/v3/tasks/a69230d2-506e-44c7-9c46-e64a905f85e7/"
+            href_match = re.match(
+                rf"({pulp_ctx.api_path}{self.base_href}/)?"
+                r"([0-9a-f]{8})-?([0-9a-f]{4})-?([0-9a-f]{4})-?([0-9a-f]{4})-?([0-9a-f]{12})/?",
+                value,
             )
-        else:
-            raise click.ClickException(_("Either an href or a UUID must be provided."))
+            if href_match:
+                value = "{}{}/{}-{}-{}-{}-{}/".format(
+                    pulp_ctx.api_path, self.base_href, *href_match.group(2, 3, 4, 5, 6)
+                )
+            else:
+                raise click.ClickException(_("Either an href or a UUID must be provided."))
 
-    return value
+        return value
 
 
 task_filter = [
@@ -79,7 +84,49 @@ task_filter = [
     click.option(
         "--task-group",
         help=_("List only tasks in this task group. Provide pulp_href or UUID."),
-        callback=_task_group_filter_callback,
+        callback=HrefOrUuidCallback("task-groups"),
+    ),
+    click.option(
+        "--parent-task",
+        help=_("Parent task by uuid or href."),
+        callback=HrefOrUuidCallback("tasks"),
+    ),
+    resource_option(
+        "--worker",
+        default_plugin="core",
+        default_type="none",
+        context_table={"core:none": PulpWorkerContext},
+        href_pattern=PulpWorkerContext.HREF_PATTERN,
+        help=_("Worker used to execute the task by name or href."),
+    ),
+    click.option(
+        "--created-resource",
+        "created_resources",
+        help=_("Href of a resource created in the task."),
+    ),
+    click.option(
+        "--started-after",
+        "started_at__gte",
+        help=_("Filter for tasks started at or after this date"),
+        type=click.DateTime(formats=DATETIME_FORMATS),
+    ),
+    click.option(
+        "--started-before",
+        "started_at__lte",
+        help=_("Filter for tasks started at or before this date"),
+        type=click.DateTime(formats=DATETIME_FORMATS),
+    ),
+    click.option(
+        "--finished-after",
+        "finished_at__gte",
+        help=_("Filter for tasks finished at or after this date"),
+        type=click.DateTime(formats=DATETIME_FORMATS),
+    ),
+    click.option(
+        "--finished-before",
+        "finished_at__lte",
+        help=_("Filter for tasks finished at or before this date"),
+        type=click.DateTime(formats=DATETIME_FORMATS),
     ),
 ]
 

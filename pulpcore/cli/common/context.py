@@ -3,7 +3,7 @@ import json
 import re
 import sys
 import time
-from typing import Any, ClassVar, Dict, List, NamedTuple, Optional, Set, Type, Union
+from typing import Any, ClassVar, Dict, Iterable, List, NamedTuple, Optional, Set, Type, Union
 
 import click
 import yaml
@@ -28,6 +28,21 @@ _ = translation.gettext
 
 DEFAULT_LIMIT = 25
 BATCH_SIZE = 25
+DATETIME_FORMATS = [
+    "%Y-%m-%dT%H:%M:%S.%fZ",  # Pulp format
+    "%Y-%m-%d",  # intl. format
+    "%Y-%m-%d %H:%M:%S",  # ... with time
+    "%Y-%m-%dT%H:%M:%S",  # ... with time and T as a separator
+    "%y/%m/%d",  # US format
+    "%y/%m/%d %h:%M:%S %p",  # ... with time
+    "%y/%m/%dT%h:%M:%S %p",  # ... with time and T as a separator
+    "%y/%m/%d %H:%M:%S",  # ... with time 24h
+    "%y/%m/%dT%H:%M:%S",  # ... with time 24h and T as a separator
+    "%x",  # local format
+    "%x %X",  # ... with time
+    "%xT%X",  # ... with time and T as a separator
+]
+
 href_regex = re.compile(r"\/([a-z0-9-_]+\/)+", flags=re.IGNORECASE)
 
 
@@ -66,9 +81,15 @@ class PulpJSONEncoder(json.JSONEncoder):
             return super().default(obj)
 
 
-def _preprocess_value(key: str, value: Any) -> Any:
+def _preprocess_value(value: Any) -> Any:
+    if isinstance(value, str):
+        return value
     if isinstance(value, PulpEntityContext):
         return value.pulp_href
+    if isinstance(value, datetime.datetime):
+        return value.strftime(DATETIME_FORMATS[0])
+    if isinstance(value, Iterable):
+        return [_preprocess_value(item) for item in value]
     return value
 
 
@@ -77,7 +98,7 @@ def preprocess_payload(payload: EntityDefinition) -> EntityDefinition:
         return payload
 
     return PreprocessedEntityDefinition(
-        {key: _preprocess_value(key, value) for key, value in payload.items() if value is not None}
+        {key: _preprocess_value(value) for key, value in payload.items() if value is not None}
     )
 
 
@@ -514,8 +535,8 @@ class PulpEntityContext:
     def list(self, limit: int, offset: int, parameters: Dict[str, Any]) -> List[Any]:
         count: int = -1
         entities: List[Any] = []
-        payload: Dict[str, Any] = self.scope
-        payload.update(parameters.copy())
+        payload: Dict[str, Any] = parameters.copy()
+        payload.update(self.scope)
         payload["offset"] = offset
         payload["limit"] = BATCH_SIZE
         while limit != 0:
