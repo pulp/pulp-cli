@@ -8,6 +8,7 @@ import schema as s
 from click.decorators import FC, F
 
 from pulpcore.cli.common.context import (
+    DATETIME_FORMATS,
     DEFAULT_LIMIT,
     EntityDefinition,
     EntityFieldDefinition,
@@ -526,6 +527,7 @@ limit_option = pulp_option(
     type=click.IntRange(1),
     help=_("Limit the number of {entities} to show."),
 )
+
 offset_option = pulp_option(
     "--offset",
     default=0,
@@ -656,29 +658,29 @@ chunk_size_option = pulp_option(
 pulp_created_gte_option = pulp_option(
     "--created-after",
     "pulp_created__gte",
-    help=_("Search for {entities} created at or after this ISO 8601 date"),
-    type=str,
+    help=_("Search for {entities} created at or after this date"),
+    type=click.DateTime(formats=DATETIME_FORMATS),
 )
 
 pulp_created_lte_option = pulp_option(
     "--created-before",
     "pulp_created__lte",
-    help=_("Search for {entities} created at or before this ISO 8601 date"),
-    type=str,
+    help=_("Search for {entities} created at or before this date"),
+    type=click.DateTime(formats=DATETIME_FORMATS),
 )
 
 pulp_last_updated_gte_option = pulp_option(
     "--updated-after",
     "pulp_last_updated__gte",
-    help=_("Search for {entities} last updated at or after this ISO 8601 date"),
-    type=str,
+    help=_("Search for {entities} last updated at or after this date"),
+    type=click.DateTime(formats=DATETIME_FORMATS),
 )
 
 pulp_last_updated_lte_option = pulp_option(
     "--updated-before",
     "pulp_last_updated__lte",
-    help=_("Search for {entities} last updated at or before this ISO 8601 date"),
-    type=str,
+    help=_("Search for {entities} last updated at or before this date"),
+    type=click.DateTime(formats=DATETIME_FORMATS),
 )
 
 retained_versions_option = pulp_option(

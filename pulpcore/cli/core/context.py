@@ -1,3 +1,4 @@
+import datetime
 import hashlib
 import os
 import sys
@@ -327,6 +328,34 @@ class PulpTaskContext(PulpEntityContext):
 
     resource_context: Optional[PulpEntityContext] = None
 
+    def list(self, limit: int, offset: int, parameters: Dict[str, Any]) -> List[Any]:
+        if not self.pulp_ctx.has_plugin(PluginRequirement("core", min="3.22.0dev")):
+            parameters = parameters.copy()
+            reserved_resources = parameters.pop("reserved_resources", None)
+            exclusive_resources = parameters.pop("exclusive_resources", None)
+            shared_resources = parameters.pop("shared_resources", None)
+            parameters.pop("reserved_resources__in", None)
+            parameters.pop("exclusive_resources__in", None)
+            parameters.pop("shared_resources__in", None)
+            reserved_resources_record = []
+            if reserved_resources:
+                reserved_resources_record.append(reserved_resources)
+            if exclusive_resources:
+                reserved_resources_record.append(exclusive_resources)
+            if shared_resources:
+                reserved_resources_record.append("shared:" + shared_resources)
+            if len(reserved_resources_record) > 1:
+                self.pulp_ctx.needs_plugin(
+                    PluginRequirement(
+                        "core",
+                        min="3.22.0dev",
+                        feature=_("specify multiple reserved resources"),
+                    ),
+                )
+            parameters["reserved_resources_record"] = reserved_resources_record
+
+        return super().list(limit=limit, offset=offset, parameters=parameters)
+
     def cancel(self, task_href: str) -> Any:
         return self.call(
             "cancel",
@@ -337,11 +366,18 @@ class PulpTaskContext(PulpEntityContext):
     @property
     def scope(self) -> Dict[str, Any]:
         if self.resource_context:
-            return {"reserved_resources_record": [self.resource_context.pulp_href]}
+            if self.pulp_ctx.has_plugin(PluginRequirement("core", min="3.22.0dev")):
+                return {"reserved_resources": self.resource_context.pulp_href}
+            else:
+                return {"reserved_resources_record": [self.resource_context.pulp_href]}
         else:
             return {}
 
-    def purge(self, finished_before: Optional[str], states: Optional[List[str]]) -> Any:
+    def purge(
+        self,
+        finished_before: Optional[datetime.datetime],
+        states: Optional[List[str]],
+    ) -> Any:
         body: Dict[str, Any] = {}
         if finished_before:
             body["finished_before"] = finished_before
@@ -455,3 +491,4 @@ class PulpWorkerContext(PulpEntityContext):
     ENTITIES = _("workers")
     HREF = "worker_href"
     ID_PREFIX = "workers"
+    HREF_PATTERN = r"workers/"

@@ -5,4 +5,4 @@
 
 expect_succ pulp -v status
 
-echo "${ERROUTPUT}" | grep -q "^get https\?://\w.*/api/v3/status/$"
+echo "${ERROUTPUT}" | grep -q "^status_read : get https\?://\w.*/api/v3/status/$"

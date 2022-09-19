@@ -123,7 +123,7 @@ class OpenAPI:
 
     def extract_params(
         self,
-        param_type: str,
+        param_in: str,
         path_spec: Dict[str, Any],
         method_spec: Dict[str, Any],
         params: Dict[str, Any],
@@ -131,13 +131,13 @@ class OpenAPI:
         param_specs = {
             entry["name"]: entry
             for entry in path_spec.get("parameters", [])
-            if entry["in"] == param_type
+            if entry["in"] == param_in
         }
         param_specs.update(
             {
                 entry["name"]: entry
                 for entry in method_spec.get("parameters", [])
-                if entry["in"] == param_type
+                if entry["in"] == param_in
             }
         )
         result: Dict[str, Any] = {}
@@ -145,9 +145,6 @@ class OpenAPI:
             if name in param_specs:
                 param = params.pop(name)
                 param_spec = param_specs.pop(name)
-                style = param_spec.get(
-                    "style", "form" if param_type in ("query", "cookie") else "simple"
-                )
                 param_schema = param_spec.get("schema")
                 if param_schema:
                     param_type = param_schema.get("type", "string")
@@ -157,7 +154,12 @@ class OpenAPI:
                         assert isinstance(param, Iterable) and not isinstance(
                             param, str
                         ), f"Parameter {name} is expected to be a list."
-                        if not param_spec.get("explode", style == "form"):
+                        style = param_spec.get(
+                            "style", "form" if param_in in ("query", "cookie") else "simple"
+                        )
+                        explode = param_spec.get("explode", style == "form")
+                        if not explode:
+                            # Not exploding means comma separated list
                             param = ",".join(param)
                     elif param_type == "integer":
                         assert isinstance(param, int)
@@ -338,7 +340,7 @@ class OpenAPI:
             validate_body=validate_body,
         )
 
-        self.debug_callback(1, f"{method} {request.url}")
+        self.debug_callback(1, f"{operation_id} : {method} {request.url}")
         for key, value in request.headers.items():
             self.debug_callback(2, f"  {key}: {value}")
         if request.body is not None:

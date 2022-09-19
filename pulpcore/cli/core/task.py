@@ -6,6 +6,7 @@ from typing import Optional, Tuple
 import click
 
 from pulpcore.cli.common.context import (
+    DATETIME_FORMATS,
     PluginRequirement,
     PulpContext,
     PulpEntityContext,
@@ -26,8 +27,6 @@ from pulpcore.cli.core.generic import task_filter
 
 translation = get_translation(__name__)
 _ = translation.gettext
-
-DATETIME_FORMATS = ["%Y-%m-%d", "%Y-%m-%dT%H:%M:%S"]
 
 
 def _uuid_callback(
@@ -55,7 +54,52 @@ def task(ctx: click.Context, pulp_ctx: PulpContext) -> None:
     ctx.obj = PulpTaskContext(pulp_ctx)
 
 
-task.add_command(list_command(decorators=task_filter))
+task.add_command(
+    list_command(
+        decorators=task_filter
+        + [
+            pulp_option(
+                "--reserved-resource",
+                "reserved_resources",
+                help=_("Href of a resource reserved by the task."),
+            ),
+            pulp_option(
+                "--reserved-resource-in",
+                "reserved_resources__in",
+                multiple=True,
+                help=_("Href of a resource reserved by the task. May be specified multiple times."),
+                needs_plugins=[PluginRequirement("core", min="3.22.0dev")],
+            ),
+            pulp_option(
+                "--exclusive-resource",
+                "exclusive_resources",
+                help=_("Href of a resource reserved exclusively by the task."),
+            ),
+            pulp_option(
+                "--exclusive-resource-in",
+                "exclusive_resources__in",
+                multiple=True,
+                help=_(
+                    "Href of a resource reserved exclusively by the task."
+                    " May be specified multiple times."
+                ),
+                needs_plugins=[PluginRequirement("core", min="3.22.0dev")],
+            ),
+            pulp_option(
+                "--shared-resource",
+                "shared_resources",
+                help=_("Href of a resource shared by the task."),
+            ),
+            pulp_option(
+                "--shared-resource-in",
+                "shared_resources__in",
+                multiple=True,
+                help=_("Href of a resource shared by the task. May be specified multiple times."),
+                needs_plugins=[PluginRequirement("core", min="3.22.0dev")],
+            ),
+        ]
+    )
+)
 task.add_command(destroy_command(decorators=[href_option, uuid_option]))
 task.add_command(
     role_command(
@@ -155,5 +199,4 @@ def purge(
 ) -> None:
     pulp_ctx.needs_plugin(PluginRequirement("core", "3.17.0"))
     state_list = list(state) if state else None
-    finished_str = finished.strftime(DATETIME_FORMATS[1]) if finished else None
-    task_ctx.purge(finished_str, state_list)
+    task_ctx.purge(finished, state_list)
