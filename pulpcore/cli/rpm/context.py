@@ -195,6 +195,8 @@ class PulpRpmRepositoryVersionContext(PulpRepositoryVersionContext):
 class PulpRpmRepositoryContext(PulpRepositoryContext):
     HREF = "rpm_rpm_repository_href"
     ID_PREFIX = "repositories_rpm_rpm"
+    ENTITY = _("rpm repository")
+    ENTITIES = _("rpm repositories")
     VERSION_CONTEXT = PulpRpmRepositoryVersionContext
     CAPABILITIES = {"pulpexport": [PluginRequirement("rpm")]}
 

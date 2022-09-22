@@ -84,6 +84,8 @@ class PulpFileRepositoryVersionContext(PulpRepositoryVersionContext):
 
 class PulpFileRepositoryContext(PulpRepositoryContext):
     HREF = "file_file_repository_href"
+    ENTITY = _("file repository")
+    ENTITIES = _("file repositories")
     ID_PREFIX = "repositories_file_file"
     VERSION_CONTEXT = PulpFileRepositoryVersionContext
     CAPABILITIES = {
