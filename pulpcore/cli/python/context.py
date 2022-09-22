@@ -67,6 +67,8 @@ class PulpPythonRepositoryVersionContext(PulpRepositoryVersionContext):
 
 class PulpPythonRepositoryContext(PulpRepositoryContext):
     HREF = "python_python_repository_href"
+    ENTITY = _("python repository")
+    ENTITIES = _("python repositories")
     ID_PREFIX = "repositories_python_python"
     VERSION_CONTEXT = PulpPythonRepositoryVersionContext
 

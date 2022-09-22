@@ -1,5 +1,6 @@
 import datetime
 import json
+import re
 import sys
 import time
 from typing import Any, ClassVar, Dict, List, NamedTuple, Optional, Set, Type, Union
@@ -27,6 +28,7 @@ _ = translation.gettext
 
 DEFAULT_LIMIT = 25
 BATCH_SIZE = 25
+href_regex = re.compile(r"\/([a-z0-9-_]+\/)+", flags=re.IGNORECASE)
 
 
 class PreprocessedEntityDefinition(Dict[str, Any]):
@@ -402,7 +404,7 @@ class PulpEntityContext:
                 raise PulpException(
                     _("A {entity} must be specified for this command.").format(entity=self.ENTITY)
                 )
-            if "pulp_href" in self._entity_lookup:
+            if self._entity_lookup.get("pulp_href"):
                 self._entity = self.show(self._entity_lookup["pulp_href"])
             else:
                 self._entity = self.find(**self._entity_lookup)
@@ -430,6 +432,13 @@ class PulpEntityContext:
 
     @pulp_href.setter
     def pulp_href(self, value: str) -> None:
+        if not href_regex.fullmatch(value):
+            raise PulpException(
+                _("'{value}' is not a valid HREF value for a {context_id}").format(
+                    value=value, context_id=self.ENTITY
+                )
+            )
+
         # Setting this property will always (lazily) retrigger retrieving the entity.
         self._entity_lookup = {"pulp_href": value}
         self._entity = None
