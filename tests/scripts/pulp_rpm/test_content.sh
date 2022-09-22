@@ -6,8 +6,10 @@
 pulp debug has-plugin --name "rpm" || exit 3
 
 TEST_ADVISORY="$(dirname "$(realpath "$0")")"/test_advisory.json
-RPM_NAME="lemon-0-1.noarch.rpm"
-RPM2_NAME="icecubes-2-3.noarch.rpm"
+RPM_FILENAME="lemon-0-1.noarch.rpm"
+RPM2_FILENAME="icecubes-2-3.noarch.rpm"
+RPM_NAME="lemon"
+RPM2_NAME="icecubes"
 REPO1_NAME="cli_test_rpm"
 REPO2_NAME="cli_test_modular"
 PACKAGE_HREF=
@@ -24,8 +26,8 @@ trap cleanup EXIT
 cleanup
 
 # Test rpm package upload
-wget --no-check-certificate "${RPM_WEAK_DEPS_URL}/${RPM_NAME}"
-expect_succ pulp rpm content upload --file "${RPM_NAME}" --relative-path "${RPM_NAME}"
+wget --no-check-certificate "${RPM_WEAK_DEPS_URL}/${RPM_FILENAME}"
+expect_succ pulp rpm content upload --file "${RPM_FILENAME}" --relative-path "${RPM_FILENAME}"
 PACKAGE_HREF=$(echo "${OUTPUT}" | jq -r .pulp_href)
 expect_succ pulp rpm content show --href "${PACKAGE_HREF}"
 
@@ -62,8 +64,8 @@ expect_succ pulp rpm repository content modify \
 --repository "${REPO1_NAME}" \
 --remove-content "[{\"pulp_href\": \"${PACKAGE_HREF}\"}]"
 
-wget --no-check-certificate "${RPM_WEAK_DEPS_URL}/${RPM2_NAME}"
-expect_succ pulp rpm content upload --file "${RPM2_NAME}" --relative-path "${RPM2_NAME}" --repository "${REPO1_NAME}"
+wget --no-check-certificate "${RPM_WEAK_DEPS_URL}/${RPM2_FILENAME}"
+expect_succ pulp rpm content upload --file "${RPM2_FILENAME}" --relative-path "${RPM2_FILENAME}" --repository "${REPO1_NAME}"
 expect_succ pulp rpm repository content list --repository "${REPO1_NAME}"
 test "$(echo "${OUTPUT}" | jq -r length)" -eq "1"
 
@@ -119,6 +121,10 @@ do
     expect_succ pulp rpm content -t ${t} show --href "${ENTITY_HREF}"
   fi
 done
+
+expect_succ pulp rpm content list --name-in "${RPM_NAME}" --name-in "${RPM2_NAME}"
+pulp rpm content list
+expect_succ test "$(echo "${OUTPUT}" | jq -r 'length')" -eq 2
 
 # test upload for advisory, package-upload is tested at the start
 expect_succ pulp rpm content -t advisory upload --file "${TEST_ADVISORY}"

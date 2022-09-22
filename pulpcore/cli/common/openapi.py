@@ -3,7 +3,7 @@
 
 import json
 import os
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 from urllib.parse import urljoin
 
 import requests
@@ -128,12 +128,12 @@ class OpenAPI:
         method_spec: Dict[str, Any],
         params: Dict[str, Any],
     ) -> Dict[str, Any]:
-        param_spec = {
+        param_specs = {
             entry["name"]: entry
             for entry in path_spec.get("parameters", [])
             if entry["in"] == param_type
         }
-        param_spec.update(
+        param_specs.update(
             {
                 entry["name"]: entry
                 for entry in method_spec.get("parameters", [])
@@ -142,11 +142,26 @@ class OpenAPI:
         )
         result: Dict[str, Any] = {}
         for name in list(params.keys()):
-            if name in param_spec:
-                param_spec.pop(name)
-                result[name] = params.pop(name)
+            if name in param_specs:
+                param = params.pop(name)
+                param_spec = param_specs.pop(name)
+                style = param_spec.get(
+                    "style", "form" if param_type in ("query", "cookie") else "simple"
+                )
+                param_schema = param_spec.get("schema")
+                if param_schema:
+                    param_type = param_schema.get("type", "string")
+                    if param_type == "array":
+                        if not param:
+                            continue
+                        assert isinstance(param, Iterable) and not isinstance(param, str)
+                        if not param_spec.get("explode", style == "form"):
+                            param = ",".join(param)
+                    elif param_type == "integer":
+                        assert isinstance(param, int)
+                result[name] = param
         remaining_required = [
-            item["name"] for item in param_spec.values() if item.get("required", False)
+            item["name"] for item in param_specs.values() if item.get("required", False)
         ]
         if any(remaining_required):
             raise RuntimeError(

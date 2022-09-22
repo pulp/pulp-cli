@@ -36,6 +36,11 @@ class PulpContainerTagContext(PulpContentContext):
     HREF = "container_tag_href"
     ID_PREFIX = "content_container_tags"
 
+    def find(self, **kwargs: Any) -> Any:
+        if "digest" in kwargs and isinstance(kwargs["digest"], str):
+            kwargs["digest"] = [kwargs["digest"]]
+        return super().find(**kwargs)
+
 
 class PulpContainerNamespaceContext(PulpEntityContext):
     ENTITY = _("container namespace")
