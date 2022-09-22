@@ -85,7 +85,7 @@ role.add_command(
         decorators=[
             username_option,
             click.option("--role"),
-            click.option("--role-in", "role__in"),
+            click.option("--role-in", "role__in", multiple=True),
             click.option("--role-contains", "role__contains"),
             click.option("--role-icontains", "role__icontains"),
             click.option("--role-startswith", "role__startswith"),

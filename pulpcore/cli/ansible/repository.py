@@ -35,6 +35,8 @@ from pulpcore.cli.common.generic import (
     pulp_group,
     pulp_option,
     repository_content_command,
+    repository_href_option,
+    repository_option,
     resource_option,
     retained_versions_option,
     show_command,
@@ -43,6 +45,7 @@ from pulpcore.cli.common.generic import (
 )
 from pulpcore.cli.common.i18n import get_translation
 from pulpcore.cli.core.context import PulpSigningServiceContext
+from pulpcore.cli.core.generic import task_command
 
 translation = get_translation(__name__)
 _ = translation.gettext
@@ -100,6 +103,7 @@ def repository(ctx: click.Context, pulp_ctx: PulpContext, repo_type: str) -> Non
 
 
 lookup_options = [href_option, name_option]
+nested_lookup_options = [repository_href_option, repository_option]
 create_options = [
     click.option("--name", required=True),
     click.option("--description"),
@@ -168,12 +172,13 @@ modify_options = [
 ]
 
 
-repository.add_command(show_command(decorators=lookup_options))
 repository.add_command(list_command(decorators=[label_select_option]))
-repository.add_command(destroy_command(decorators=lookup_options))
-repository.add_command(version_command())
+repository.add_command(show_command(decorators=lookup_options))
 repository.add_command(create_command(decorators=create_options))
 repository.add_command(update_command(decorators=lookup_options + update_options))
+repository.add_command(destroy_command(decorators=lookup_options))
+repository.add_command(task_command(decorators=nested_lookup_options))
+repository.add_command(version_command())
 repository.add_command(label_command())
 repository.add_command(
     repository_content_command(

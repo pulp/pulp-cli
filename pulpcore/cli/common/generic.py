@@ -535,9 +535,11 @@ offset_option = pulp_option(
 
 ordering_option = pulp_option(
     "--ordering",
+    multiple=True,
     required=False,
-    help=_("A field that will be used to order the results."),
+    help=_("A field that will be used to order the results. Can be specified multiple times."),
 )
+
 field_option = pulp_option(
     "--field",
     "fields",
@@ -545,6 +547,7 @@ field_option = pulp_option(
     required=False,
     help=_("A field that is to be selected from a result. Can be specified multiple times."),
 )
+
 exclude_field_option = pulp_option(
     "--exclude-field",
     "exclude_fields",
@@ -587,7 +590,8 @@ name_icontains_option = pulp_option(
 name_in_option = pulp_option(
     "--name-in",
     "name__in",
-    help=_("Filter {entity} results where name is in comma separated list of values"),
+    multiple=True,
+    help=_("Filter {entity} by name. Can be specified multiple times"),
 )
 
 repository_href_option = click.option(
@@ -821,6 +825,10 @@ def list_command(**kwargs: Any) -> click.Command:
         """
         Show the list of optionally filtered {entities}.
         """
+        if "ordering" in kwargs:
+            # Workaround for missing ordering filter
+            if not kwargs["ordering"]:
+                kwargs["ordering"] = None
         result = entity_ctx.list(limit=limit, offset=offset, parameters=kwargs)
         pulp_ctx.output_result(result)
 

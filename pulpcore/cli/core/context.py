@@ -337,7 +337,7 @@ class PulpTaskContext(PulpEntityContext):
     @property
     def scope(self) -> Dict[str, Any]:
         if self.resource_context:
-            return {"reserved_resources_record": self.resource_context.pulp_href}
+            return {"reserved_resources_record": [self.resource_context.pulp_href]}
         else:
             return {}
 

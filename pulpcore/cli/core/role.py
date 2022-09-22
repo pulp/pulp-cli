@@ -9,6 +9,7 @@ from pulpcore.cli.common.generic import (
     destroy_command,
     href_option,
     list_command,
+    name_filter_options,
     name_option,
     pulp_group,
     show_command,
@@ -35,12 +36,8 @@ def _permission_callback(
     return value or None
 
 
-filters = [
+filters = name_filter_options + [
     click.option("--locked/--unlocked", default=None),
-    click.option("--name"),
-    click.option("--name-in", "name__in"),
-    click.option("--name-contains", "name__contains"),
-    click.option("--name-icontains", "name__icontains"),
     click.option("--name-startswith", "name__startswith"),
 ]
 lookup_options = [href_option, name_option]

@@ -54,7 +54,10 @@ def content(ctx: click.Context, pulp_ctx: PulpContext, content_type: str) -> Non
 
 list_options = [
     pulp_option("--media-type"),
-    pulp_option("--names", "name__in", allowed_with_contexts=(PulpContainerTagContext,)),
+    pulp_option("--name", "name", allowed_with_contexts=(PulpContainerTagContext,)),
+    pulp_option(
+        "--name-in", "name__in", multiple=True, allowed_with_contexts=(PulpContainerTagContext,)
+    ),
 ]
 
 show_options = [
