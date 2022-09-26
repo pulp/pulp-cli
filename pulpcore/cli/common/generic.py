@@ -533,6 +533,26 @@ offset_option = pulp_option(
     help=_("Skip a number of {entities} to show."),
 )
 
+ordering_option = pulp_option(
+    "--ordering",
+    required=False,
+    help=_("A field that will be used to order the results."),
+)
+field_option = pulp_option(
+    "--field",
+    "fields",
+    multiple=True,
+    required=False,
+    help=_("A field that is to be selected from a result. Can be specified multiple times."),
+)
+exclude_field_option = pulp_option(
+    "--exclude-field",
+    "exclude_fields",
+    multiple=True,
+    required=False,
+    help=_("A field that is to be excluded from a result. Can be specified multiple times."),
+)
+
 href_option = pulp_option(
     "--href",
     help=_("HREF of the {entity}"),
@@ -790,6 +810,9 @@ def list_command(**kwargs: Any) -> click.Command:
     @pulp_command(**kwargs)
     @limit_option
     @offset_option
+    @ordering_option
+    @field_option
+    @exclude_field_option
     @pass_entity_context
     @pass_pulp_context
     def callback(
