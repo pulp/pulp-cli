@@ -32,13 +32,13 @@ expect_succ pulp python repository sync --name "cli_test_python_repository"
 
 # Verify sync
 expect_succ pulp python repository version list --repository "cli_test_python_repository"
-test "$(echo "$OUTPUT" | jq -r length)" -eq 2
+expect_succ test "$(echo "$OUTPUT" | jq -r length)" -eq 2
 expect_succ pulp python repository version show --repository "cli_test_python_repository" --version 1
-test "$(echo "$OUTPUT" | jq -r '.content_summary.present."python.python".count')" -eq 34
+expect_succ test "$(echo "$OUTPUT" | jq -r '.content_summary.present."python.python".count')" -eq 34
 
 # Test repair the version
 expect_succ pulp python repository version repair --repository "cli_test_python_repository" --version 1
-test "$(echo "$OUTPUT" | jq -r '.state')" = "completed"
+expect_succ test "$(echo "$OUTPUT" | jq -r '.state')" = "completed"
 
 # Delete version again
 expect_succ pulp python repository version destroy --repository "cli_test_python_repository" --version 1
