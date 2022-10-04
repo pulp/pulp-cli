@@ -59,6 +59,7 @@ class PulpFilePublicationContext(PulpEntityContext):
     HREF = "file_file_publication_href"
     ID_PREFIX = "publications_file_file"
     CAPABILITIES = {"roles": [PluginRequirement("file", min="1.11.0")]}
+    NULLABLES = {"manifest"}
 
     def preprocess_entity(self, body: EntityDefinition, partial: bool = False) -> EntityDefinition:
         body = super().preprocess_entity(body, partial=partial)
@@ -92,6 +93,7 @@ class PulpFileRepositoryContext(PulpRepositoryContext):
         "pulpexport": [PluginRequirement("file")],
         "roles": [PluginRequirement("file", min="1.11.0")],
     }
+    NULLABLES = PulpRepositoryContext.NULLABLES.union({"manifest"})
 
 
 registered_repository_contexts["file:file"] = PulpFileRepositoryContext
