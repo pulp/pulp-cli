@@ -5,6 +5,7 @@ edit_uri: edit/main/docs/
 markdown_extensions:
   - toc:
       permalink: True
+  - admonition
 nav:
   - 'Overview': 'index.md'
   - 'installation.md'
@@ -15,5 +16,3 @@ nav:
   - 'CHANGES.md'
   - 'contributing.md'
   - 'architecture.md'
-markdown_extensions:
-  - admonition
