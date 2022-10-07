@@ -1,0 +1,13 @@
+# Lint requirements
+black~=22.10 ; python_version > "3.6"
+flake8 ; python_version > "3.6"
+isort ; python_version > "3.6"
+mypy ; python_version > "3.6"
+shellcheck-py ; python_version > "3.6"
+
+# Type annotation stubs
+types-pygments ; python_version > "3.6"
+types-PyYAML ; python_version > "3.6"
+types-requests ; python_version > "3.6"
+types-setuptools ; python_version > "3.6"
+types-toml ; python_version > "3.6"
