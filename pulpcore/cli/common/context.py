@@ -296,7 +296,7 @@ class PulpContext:
                     time.sleep(1)
                     self.echo(".", nl=False, err=True)
                     task_group = self.api.call(
-                        "task_group_read", parameters={"task_group_href": task_group["pulp_href"]}
+                        "task_groups_read", parameters={"task_group_href": task_group["pulp_href"]}
                     )
         except KeyboardInterrupt:
             raise PulpNoWait(

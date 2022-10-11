@@ -1,7 +1,16 @@
+from typing import Optional
+
 import click
 
-from pulpcore.cli.common.context import PulpContext, pass_pulp_context
-from pulpcore.cli.common.generic import href_option, list_command, pulp_group, show_command
+from pulpcore.cli.common.context import PulpContext, PulpEntityContext
+from pulpcore.cli.common.generic import (
+    href_option,
+    list_command,
+    pass_entity_context,
+    pass_pulp_context,
+    pulp_group,
+    pulp_option,
+)
 from pulpcore.cli.common.i18n import get_translation
 from pulpcore.cli.core.context import PulpTaskGroupContext
 
@@ -17,4 +26,49 @@ def task_group(ctx: click.Context, pulp_ctx: PulpContext) -> None:
 
 
 task_group.add_command(list_command())
-task_group.add_command(show_command(decorators=[href_option]))
+
+
+def _uuid_callback(
+    ctx: click.Context, param: click.Parameter, value: Optional[str]
+) -> Optional[str]:
+    if value is not None:
+        entity_ctx = ctx.find_object(PulpEntityContext)
+        assert entity_ctx is not None
+        entity_ctx.pulp_href = f"{entity_ctx.pulp_ctx.api_path}task-groups/{value}/"
+    return value
+
+
+uuid_option = pulp_option(
+    "--uuid",
+    help=_("UUID of the {entity}"),
+    callback=_uuid_callback,
+    expose_value=False,
+)
+
+
+@task_group.command()
+@href_option
+@uuid_option
+@click.option("-w", "--wait", is_flag=True, help=_("Wait for the group-task to finish"))
+@pass_entity_context
+@pass_pulp_context
+def show(pulp_ctx: PulpContext, task_group_ctx: PulpTaskGroupContext, wait: bool) -> None:
+    """Shows details of a group-task."""
+    entity = task_group_ctx.entity
+    if wait:
+        if not entity["all_tasks_dispatched"]:
+            click.echo(_("Waiting for all tasks to be dispatched"), err=True)
+        else:
+            unfinished_tasks = []
+            for task in entity["tasks"]:
+                if task["state"] in ["waiting", "running", "canceling"]:
+                    unfinished_tasks.append(task["pulp_href"])
+
+            if unfinished_tasks:
+                click.echo(
+                    _("Waiting for the following tasks to finish: {}").format(unfinished_tasks),
+                    err=True,
+                )
+
+        entity = pulp_ctx.wait_for_task_group(entity)
+    pulp_ctx.output_result(entity)
