@@ -106,7 +106,7 @@ def cancel(
     if running_tasks or all_tasks:
         states.append("running")
     if states:
-        tasks = task_ctx.list(limit=1 << 64, offset=0, parameters={"state__in": ",".join(states)})
+        tasks = task_ctx.list(limit=1 << 64, offset=0, parameters={"state__in": states})
         for task in tasks:
             with suppress(Exception):
                 task_ctx.cancel(task["pulp_href"])

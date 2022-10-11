@@ -1,0 +1,1 @@
+Fixed an assertion error when canceling tasks by state.
