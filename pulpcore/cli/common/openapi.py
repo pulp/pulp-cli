@@ -154,7 +154,9 @@ class OpenAPI:
                     if param_type == "array":
                         if not param:
                             continue
-                        assert isinstance(param, Iterable) and not isinstance(param, str)
+                        assert isinstance(param, Iterable) and not isinstance(
+                            param, str
+                        ), f"Parameter {name} is expected to be a list."
                         if not param_spec.get("explode", style == "form"):
                             param = ",".join(param)
                     elif param_type == "integer":

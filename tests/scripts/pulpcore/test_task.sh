@@ -33,6 +33,7 @@ then
   expect_succ test "$(echo "$OUTPUT" | jq -r length)" -eq $((count + 1))
   expect_succ pulp task show --href "$task"
   expect_succ test "$(echo "$OUTPUT" | jq -r '.state')" = "canceled"
+  expect_succ pulp --dry-run task cancel --all
 fi
 
 # Test waiting for a task

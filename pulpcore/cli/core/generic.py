@@ -67,6 +67,16 @@ task_filter = [
         help=_("List only tasks in this state."),
     ),
     click.option(
+        "--state-in",
+        "state__in",
+        type=click.Choice(
+            ["waiting", "skipped", "running", "completed", "failed", "canceled", "canceling"],
+            case_sensitive=False,
+        ),
+        multiple=True,
+        help=_("List only tasks in one of these states. Can be specified multiple times."),
+    ),
+    click.option(
         "--task-group",
         help=_("List only tasks in this task group. Provide pulp_href or UUID."),
         callback=_task_group_filter_callback,
