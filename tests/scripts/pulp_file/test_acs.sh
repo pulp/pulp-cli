@@ -35,9 +35,14 @@ expect_succ pulp file acs show --name $acs
 test "$(echo "$OUTPUT" | jq ".paths | length")" -eq 2
 
 # test refresh
-expect_succ pulp file acs refresh --name $acs
+expect_succ pulp --background file acs refresh --name $acs
 task_group=$(echo "$ERROUTPUT" | grep -E -o "${PULP_API_ROOT}api/v3/task-groups/[-[:xdigit:]]*/")
-expect_succ pulp task-group show --href "$task_group"
+expect_succ pulp task-group show --href "$task_group" --wait
+
+group_task_uuid="${task_group%/}"
+group_task_uuid="${group_task_uuid##*/}"
+expect_succ pulp task-group show --uuid "$group_task_uuid"
+
 test "$(echo "$OUTPUT" | jq ".tasks | length")" -eq 2
 
 # create a remote with manifest only and sync it
