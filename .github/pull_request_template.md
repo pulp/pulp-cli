@@ -1,2 +1,4 @@
-Please be sure you have read our documentation on code contributions:
-https://docs.pulpproject.org/pulp_cli/contributing/#code-conventions
+Review Checklist:
+- [ ] An issue is properly linked. [feature and bugfix only]
+- [ ] Tests are present or not feasible.
+- [ ] Commits are split in a logical way (not historically).
