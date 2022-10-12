@@ -115,6 +115,7 @@ contexts = {
     "blob": PulpContainerBlobContext,
 }
 container_context = (PulpContainerRepositoryContext,)
+push_container_context = (PulpContainerPushRepositoryContext,)
 
 repository.add_command(list_command(decorators=[label_select_option]))
 repository.add_command(show_command(decorators=lookup_options))
@@ -292,3 +293,21 @@ def copy_manifest(
         digests=digests or None,
         media_types=media_types or None,
     )
+
+
+@repository.command(allowed_with_contexts=push_container_context)
+@name_option
+@href_option
+@click.option("--digest", help=_("SHA256 digest of the Manifest file"), required=True)
+@pass_repository_context
+def remove_image(
+    repository_ctx: PulpContainerPushRepositoryContext,
+    digest: str,
+) -> None:
+    digest = digest.strip()
+    if not digest.startswith("sha256:"):
+        digest = f"sha256:{digest}"
+    if len(digest) != 71:  # len("sha256:") + 64
+        raise click.ClickException("Improper SHA256, please provide a valid 64 digit digest.")
+
+    repository_ctx.remove_image(digest)
