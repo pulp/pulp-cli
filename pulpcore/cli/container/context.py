@@ -168,7 +168,13 @@ class PulpContainerPushRepositoryContext(PulpContainerBaseRepositoryContext):
     CAPABILITIES = {
         "tag": [PluginRequirement("container", "2.3.0")],
         "roles": [PluginRequirement("container", "2.11.0")],
+        "remove": [PluginRequirement("container", "2.4.0")],
     }
+
+    def remove_image(self, digest: str) -> Any:
+        self.needs_capability("remove")
+        body = {"digest": digest}
+        return self.call("remove_image", parameters={self.HREF: self.pulp_href}, body=body)
 
 
 registered_repository_contexts["container:container"] = PulpContainerRepositoryContext
