@@ -17,10 +17,14 @@ expect_succ pulp file repository create --name bbbbbbbbbb
 expect_succ pulp file repository create --name cccccccccc
 
 expect_succ pulp file repository list --ordering -name
-ORDERED_RESULTS=$(echo "$OUTPUT" | jq -r .[].name | tr "\n" " " | xargs)
-EXPECTED_RESULTS="cccccccccc bbbbbbbbbb aaaaaaaaaa"
-if [[ "$ORDERED_RESULTS" != "$EXPECTED_RESULTS" ]]; then
-  echo "Ordered results do not match: {$ORDERED_RESULTS} != {$EXPECTED_RESULTS}"
+if ! (echo "$OUTPUT" | jq -r .[].name | sort -r -C -); then
+  echo -e "Ordered results are not in a reverse alphabetical order.\n$(echo "$OUTPUT" | jq -r .[].name)"
+  exit 1
+fi
+
+expect_succ pulp file repository list --ordering name
+if ! (echo "$OUTPUT" | jq -r .[].name | sort -C -); then
+  echo -e "Ordered results are not in an alphabetical order.\n$(echo "$OUTPUT" | jq -r .[].name)"
   exit 1
 fi
 
