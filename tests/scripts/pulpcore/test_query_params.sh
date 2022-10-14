@@ -29,8 +29,8 @@ if ! (echo "$OUTPUT" | jq -r .[].name | sort -C -); then
 fi
 
 expect_succ pulp file repository list --field name --field remote
-SELECTED_FIELDS=$(echo "$OUTPUT" | jq -r ".[] | keys[]" | sort| tr "\n" " " | xargs)
-EXPECTED_FIELDS="name name name remote remote remote"
+SELECTED_FIELDS=$(echo "$OUTPUT" | jq -r ".[] | keys[]" | sort -u | tr "\n" " " | xargs)
+EXPECTED_FIELDS="name remote"
 if [[ "$SELECTED_FIELDS" != "$EXPECTED_FIELDS" ]]; then
   echo "Selected fields do not match: {$SELECTED_FIELDS} != {$EXPECTED_FIELDS}"
   exit 1
