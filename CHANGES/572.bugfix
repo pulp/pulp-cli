@@ -1,0 +1,1 @@
+Fixed ``KeyError: 'missing_field'`` error when required fields are not supplied.
