@@ -191,7 +191,7 @@ class OpenAPI:
             missing_fields = set(schema["required"]) - set(body.keys()) - set(uploads.keys())
             if missing_fields:
                 raise OpenAPIError(
-                    _("Required field(s) '{missing_field}' missing.").format(
+                    _("Required field(s) '{missing_fields}' missing.").format(
                         missing_fields=missing_fields
                     )
                 )
