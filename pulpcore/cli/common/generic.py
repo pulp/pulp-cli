@@ -1,7 +1,7 @@
 import json
 import re
 from functools import lru_cache
-from typing import IO, Any, Callable, Dict, Iterable, List, Mapping, Optional, Tuple, Type
+from typing import IO, Any, Callable, Dict, Iterable, List, Mapping, Optional, Tuple, Type, Union
 
 import click
 import schema as s
@@ -36,6 +36,34 @@ pass_entity_context = click.make_pass_decorator(PulpEntityContext)
 pass_repository_context = click.make_pass_decorator(PulpRepositoryContext)
 pass_repository_version_context = click.make_pass_decorator(PulpRepositoryVersionContext)
 pass_content_context = click.make_pass_decorator(PulpContentContext)
+
+
+##############################################################################
+# Custom types for parameters
+
+
+def int_or_empty(value: str) -> Union[str, int]:
+    if value == "":
+        return ""
+    else:
+        return int(value)
+
+
+int_or_empty.__name__ = "int or empty"
+
+
+def float_or_empty(value: str) -> Union[str, float]:
+    if value == "":
+        return ""
+    else:
+        return float(value)
+
+
+float_or_empty.__name__ = "float or empty"
+
+
+##############################################################################
+# Custom classes for commands and parameters
 
 
 class ClickNoWait(click.ClickException):
@@ -715,6 +743,7 @@ publication_filter_options = [
     pulp_option("--repository-version", help=_("Search {entities} by repository version HREF")),
 ]
 
+
 common_remote_create_options = [
     click.option("--name", required=True),
     click.option("--url", required=True),
@@ -757,7 +786,13 @@ common_remote_create_options = [
     click.option("--tls-validation", type=bool),
     click.option("--total-timeout", type=float),
     click.option("--username"),
+    click.option(
+        "--max-retries",
+        type=int,
+        help=_("maximum number of retry attemts after a download failure"),
+    ),
 ]
+
 
 common_remote_update_options = [
     click.option("--url"),
@@ -776,9 +811,11 @@ common_remote_update_options = [
         help=_("a PEM encode private key or @file containing same"),
         callback=load_file_or_string_callback,
     ),
-    click.option("--connect-timeout", type=float),
+    click.option("--connect-timeout", type=float_or_empty),
     click.option(
-        "--download-concurrency", type=int, help=_("total number of simultaneous connections")
+        "--download-concurrency",
+        type=int_or_empty,
+        help=_("total number of simultaneous connections"),
     ),
     click.option(
         "--password",
@@ -794,12 +831,19 @@ common_remote_update_options = [
             "The password to authenticate to the proxy (can contain leading and trailing spaces)."
         ),
     ),
-    click.option("--rate-limit", type=int, help=_("limit download rate in requests per second")),
-    click.option("--sock-connect-timeout", type=float),
-    click.option("--sock-read-timeout", type=float),
+    click.option(
+        "--rate-limit", type=int_or_empty, help=_("limit download rate in requests per second")
+    ),
+    click.option("--sock-connect-timeout", type=float_or_empty),
+    click.option("--sock-read-timeout", type=float_or_empty),
     click.option("--tls-validation", type=bool),
-    click.option("--total-timeout", type=float),
+    click.option("--total-timeout", type=float_or_empty),
     click.option("--username"),
+    click.option(
+        "--max-retries",
+        type=int_or_empty,
+        help=_("maximum number of retry attemts after a download failure"),
+    ),
 ]
 
 ##############################################################################
