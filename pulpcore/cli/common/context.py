@@ -694,9 +694,18 @@ class PulpRemoteContext(PulpEntityContext):
         "ca_cert",
         "client_cert",
         "client_key",
+        "username",
         "password",
         "proxy_url",
-        "username",
+        "proxy_username",
+        "proxy_password",
+        "download_concurrency",
+        "max_retries",
+        "total_timeout",
+        "connect_timeout",
+        "sock_connect_timeout",
+        "sock_read_timeout",
+        "rate_limit",
     }
 
 
