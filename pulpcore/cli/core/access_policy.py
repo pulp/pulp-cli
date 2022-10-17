@@ -1,15 +1,11 @@
 import click
 
-from pulpcore.cli.common.context import (
-    PulpContext,
-    PulpEntityContext,
-    pass_entity_context,
-    pass_pulp_context,
-)
+from pulpcore.cli.common.context import PulpContext, pass_entity_context, pass_pulp_context
 from pulpcore.cli.common.generic import (
     href_option,
     list_command,
     load_json_callback,
+    lookup_callback,
     pulp_group,
     show_command,
     update_command,
@@ -21,14 +17,6 @@ translation = get_translation(__name__)
 _ = translation.gettext
 
 
-def _vs_name_callback(ctx: click.Context, param: click.Parameter, value: str) -> str:
-    if value is not None:
-        entity_ctx = ctx.find_object(PulpEntityContext)
-        assert entity_ctx is not None
-        entity_ctx.entity = {"viewset_name": value}
-    return value
-
-
 @pulp_group()
 @pass_pulp_context
 @click.pass_context
@@ -38,7 +26,7 @@ def access_policy(ctx: click.Context, pulp_ctx: PulpContext) -> None:
 
 lookup_options = [
     href_option,
-    click.option("--viewset-name", callback=_vs_name_callback, expose_value=False),
+    click.option("--viewset-name", callback=lookup_callback("viewset_name"), expose_value=False),
 ]
 
 update_options = [
@@ -53,7 +41,7 @@ access_policy.add_command(update_command(decorators=lookup_options + update_opti
 
 @access_policy.command()
 @href_option
-@click.option("--viewset-name", callback=_vs_name_callback, expose_value=False)
+@click.option("--viewset-name", callback=lookup_callback("viewset_name"), expose_value=False)
 @pass_entity_context
 @pass_pulp_context
 def reset(pulp_ctx: PulpContext, access_policy_ctx: PulpAccessPolicyContext) -> None:

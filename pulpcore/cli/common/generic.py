@@ -230,24 +230,19 @@ def lookup_callback(
     return _callback
 
 
-def _href_callback(
-    ctx: click.Context, param: click.Parameter, value: Optional[str]
-) -> Optional[str]:
-    if value is not None:
-        entity_ctx = ctx.find_object(PulpEntityContext)
-        assert entity_ctx is not None
-        entity_ctx.pulp_href = value
-    return value
+def href_callback(
+    context_class: Type[PulpEntityContext] = PulpEntityContext,
+) -> Callable[[click.Context, click.Parameter, Optional[str]], Optional[str]]:
+    def _href_callback(
+        ctx: click.Context, param: click.Parameter, value: Optional[str]
+    ) -> Optional[str]:
+        if value is not None:
+            entity_ctx = ctx.find_object(context_class)
+            assert entity_ctx is not None
+            entity_ctx.pulp_href = value
+        return value
 
-
-def _repository_href_callback(
-    ctx: click.Context, param: click.Parameter, value: Optional[str]
-) -> Optional[str]:
-    if value is not None:
-        repository_ctx = ctx.find_object(PulpRepositoryContext)
-        assert repository_ctx is not None
-        repository_ctx.pulp_href = value
-    return value
+    return _href_callback
 
 
 def _version_callback(
@@ -561,7 +556,7 @@ exclude_field_option = pulp_option(
 href_option = pulp_option(
     "--href",
     help=_("HREF of the {entity}"),
-    callback=_href_callback,
+    callback=href_callback(),
     expose_value=False,
 )
 
@@ -599,7 +594,7 @@ name_in_option = pulp_option(
 repository_href_option = click.option(
     "--repository-href",
     help=_("HREF of the repository"),
-    callback=_repository_href_callback,
+    callback=href_callback(PulpRepositoryContext),
     expose_value=False,
 )
 
