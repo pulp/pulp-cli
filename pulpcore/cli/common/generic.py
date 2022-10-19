@@ -332,6 +332,21 @@ def load_json_callback(ctx: click.Context, param: click.Parameter, value: Option
         return json_object
 
 
+def labels_callback(
+    ctx: click.Context, param: click.Parameter, value: Optional[str]
+) -> Optional[Dict[str, str]]:
+    # None is legal - shortcircuit here
+    if value is None:
+        return value
+
+    value = load_json_callback(ctx, param, value)
+    if isinstance(value, dict) and all(
+        (isinstance(key, str) and isinstance(val, str) for key, val in value.items())
+    ):
+        return value
+    raise click.ClickException(_("Labels must be provided as a dictionary of strings."))
+
+
 def create_content_json_callback(
     context_class: Optional[Type[PulpContentContext]] = None, schema: s.Schema = None
 ) -> Any:
@@ -712,6 +727,15 @@ retained_versions_option = pulp_option(
     help=_("Number of repository versions to keep."),
 )
 
+pulp_labels_option = pulp_option(
+    "--labels",
+    "pulp_labels",
+    help=_(
+        "JSON dictionary of labels to set on {entity} (or " "@file containing a JSON dictionary)"
+    ),
+    callback=labels_callback,
+)
+
 name_filter_options = [
     name_filter_option,
     name_contains_option,
@@ -786,6 +810,7 @@ common_remote_create_options = [
         type=int,
         help=_("maximum number of retry attemts after a download failure"),
     ),
+    pulp_labels_option,
 ]
 
 
@@ -839,6 +864,7 @@ common_remote_update_options = [
         type=int_or_empty,
         help=_("maximum number of retry attemts after a download failure"),
     ),
+    pulp_labels_option,
 ]
 
 ##############################################################################

@@ -11,8 +11,7 @@ cleanup() {
 trap cleanup EXIT
 
 name="cli_test_file_repo"
-expect_succ pulp file repository create --name "$name"
-expect_succ pulp file repository label set --repository "$name" --key "atani" --value "hurin"
+expect_succ pulp file repository create --name "$name" --labels '{"atani": "hurin"}'
 expect_succ pulp file repository label set --repository "$name" --key "ainur" --value "ulmo"
 
 expect_succ pulp file repository show --name "$name"
