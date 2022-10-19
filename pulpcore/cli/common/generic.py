@@ -1030,24 +1030,21 @@ def label_command(**kwargs: Any) -> click.Command:
     @pass_entity_context
     def label_set(entity_ctx: PulpEntityContext, key: str, value: str) -> None:
         """Add or update a label"""
-        href = entity_ctx.entity["pulp_href"]
-        entity_ctx.set_label(href, key, value)
+        entity_ctx.set_label(key, value)
 
     @pulp_command(name="unset", help=_("Remove a label with a given key"))
     @click.option("--key", required=True, help=_("Key of the label"))
     @pass_entity_context
     def label_unset(entity_ctx: PulpEntityContext, key: str) -> None:
         """Remove a label with a given key"""
-        href = entity_ctx.entity["pulp_href"]
-        entity_ctx.unset_label(href, key)
+        entity_ctx.unset_label(key)
 
     @pulp_command(name="show", help=_("Show the value for a particular label key"))
     @click.option("--key", required=True, help=_("Key of the label"))
     @pass_entity_context
     def label_show(entity_ctx: PulpEntityContext, key: str) -> None:
         """Show the value for a particular label key"""
-        href = entity_ctx.entity["pulp_href"]
-        click.echo(entity_ctx.show_label(href, key))
+        click.echo(entity_ctx.show_label(key))
 
     for subcmd in [label_set, label_unset, label_show]:
         for decorator in decorators:
