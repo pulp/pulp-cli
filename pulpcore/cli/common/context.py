@@ -623,20 +623,26 @@ class PulpEntityContext:
             "delete", parameters={self.HREF: href or self.pulp_href}, non_blocking=non_blocking
         )
 
-    def set_label(self, href: str, key: str, value: str, non_blocking: bool = False) -> Any:
-        labels = self.show(href)["pulp_labels"]
+    def set_label(self, key: str, value: str, non_blocking: bool = False) -> Any:
+        # We would have a dedicated api for this ideally.
+        labels = self.entity["pulp_labels"]
         labels[key] = value
-        return self.update(href, body={"pulp_labels": labels}, non_blocking=non_blocking)
+        return self.update(self.pulp_href, body={"pulp_labels": labels}, non_blocking=non_blocking)
 
-    def unset_label(self, href: str, key: str, non_blocking: bool = False) -> Any:
-        labels = self.show(href)["pulp_labels"]
-        labels.pop(key)
-        return self.update(href, body={"pulp_labels": labels}, non_blocking=non_blocking)
-
-    def show_label(self, href: str, key: str) -> Any:
-        entity = self.show(href)
+    def unset_label(self, key: str, non_blocking: bool = False) -> Any:
+        # We would have a dedicated api for this ideally.
+        labels = self.entity["pulp_labels"]
         try:
-            return entity["pulp_labels"][key]
+            labels.pop(key)
+        except KeyError:
+            raise PulpException(_("Could not find label with key '{key}'.").format(key=key))
+        return self.update(self.pulp_href, body={"pulp_labels": labels}, non_blocking=non_blocking)
+
+    def show_label(self, key: str) -> Any:
+        # We would have a dedicated api for this ideally.
+        labels = self.entity["pulp_labels"]
+        try:
+            return labels[key]
         except KeyError:
             raise PulpException(_("Could not find label with key '{key}'.").format(key=key))
 
