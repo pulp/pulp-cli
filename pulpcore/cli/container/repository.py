@@ -19,6 +19,7 @@ from pulpcore.cli.common.generic import (
     list_command,
     name_option,
     pulp_group,
+    pulp_labels_option,
     repository_content_command,
     repository_href_option,
     repository_option,
@@ -106,6 +107,7 @@ update_options = [
     click.option("--description"),
     remote_option,
     retained_versions_option,
+    pulp_labels_option,
 ]
 create_options = update_options + [click.option("--name", required=True)]
 contexts = {

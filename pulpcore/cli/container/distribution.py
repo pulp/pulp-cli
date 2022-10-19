@@ -1,4 +1,4 @@
-from typing import Optional, Union, cast
+from typing import Dict, Optional, Union, cast
 
 import click
 
@@ -18,6 +18,7 @@ from pulpcore.cli.common.generic import (
     list_command,
     name_option,
     pulp_group,
+    pulp_labels_option,
     resource_option,
     role_command,
     show_command,
@@ -70,6 +71,7 @@ create_options = [
         "--version", type=int, help=_("a repository version number, leave blank for latest")
     ),
     click.option("--private/--public", default=None),
+    pulp_labels_option,
 ]
 
 distribution.add_command(list_command(decorators=distribution_filter_options))
@@ -87,15 +89,15 @@ distribution.add_command(label_command())
 @repository_option
 @click.option("--version", type=int, help=_("a repository version number, leave blank for latest"))
 @click.option("--private/--public", default=None)
+@pulp_labels_option
 @pass_entity_context
-@pass_pulp_context
 def update(
-    pulp_ctx: PulpContext,
     distribution_ctx: PulpContainerDistributionContext,
     base_path: Optional[str],
     repository: Optional[Union[str, PulpEntityContext]],
     version: Optional[int],
     private: Optional[bool],
+    pulp_labels: Optional[Dict[str, str]],
 ) -> None:
     distribution: EntityDefinition = distribution_ctx.entity
     href: str = distribution_ctx.pulp_href
@@ -105,6 +107,8 @@ def update(
         body["private"] = private
     if base_path is not None:
         body["base_path"] = base_path
+    if pulp_labels is not None:
+        body["pulp_labels"] = pulp_labels
     if repository is not None:
         if repository == "":
             # unset repository or repository version

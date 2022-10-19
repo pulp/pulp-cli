@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Dict, Optional
 
 import click
 
@@ -23,6 +23,7 @@ from pulpcore.cli.common.generic import (
     list_command,
     name_option,
     pulp_group,
+    pulp_labels_option,
     resource_option,
     show_command,
 )
@@ -69,6 +70,7 @@ create_options = [
     click.option(
         "--version", type=int, help=_("a repository version number, leave blank for latest")
     ),
+    pulp_labels_option,
 ]
 distribution.add_command(list_command(decorators=distribution_filter_options))
 distribution.add_command(show_command(decorators=lookup_options))
@@ -95,12 +97,14 @@ distribution.add_command(
     default=None,
     help=_("version of new repository to be served, leave blank for always latest"),
 )
+@pulp_labels_option
 @pass_entity_context
 def update(
     distribution_ctx: PulpAnsibleDistributionContext,
     base_path: Optional[str],
     repository: EntityFieldDefinition,
     version: Optional[int],
+    pulp_labels: Optional[Dict[str, str]],
 ) -> None:
     """
     To remove repository or repository_version fields set --repository to ""
@@ -112,6 +116,8 @@ def update(
 
     if base_path:
         body["base_path"] = base_path
+    if pulp_labels is not None:
+        body["pulp_labels"] = pulp_labels
     if repository is not None:
         if repository == "":
             # unset repository or repository version
