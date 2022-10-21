@@ -35,6 +35,7 @@ class OpenAPI:
         safe_calls_only: bool = False,
         debug_callback: Optional[Callable[[int, str], Any]] = None,
         user_agent: Optional[str] = None,
+        cid: Optional[str] = None,
     ):
         if not validate_certs:
             urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -59,11 +60,14 @@ class OpenAPI:
             self._session.cert = cert
         elif key:
             raise OpenAPIError(_("Cert is required if key is set."))
-        headers = {
-            "User-Agent": user_agent or "Pulp-CLI openapi parser",
-            "Accept": "application/json",
-        }
-        self._session.headers.update(headers)
+        self._session.headers.update(
+            {
+                "User-Agent": user_agent or "Pulp-CLI openapi parser",
+                "Accept": "application/json",
+            }
+        )
+        if cid:
+            self._session.headers["Correlation-Id"] = cid
         self._session.max_redirects = 0
 
         verify: Optional[Union[bool, str]] = (
@@ -115,11 +119,24 @@ class OpenAPI:
 
     def _download_api(self) -> bytes:
         try:
-            r: requests.Response = self._session.get(urljoin(self.base_url, self.doc_path))
+            response: requests.Response = self._session.get(urljoin(self.base_url, self.doc_path))
         except requests.RequestException as e:
             raise OpenAPIError(str(e))
-        r.raise_for_status()
-        return r.content
+        response.raise_for_status()
+        if "Correlation-ID" in response.headers:
+            self._set_correlation_id(response.headers["Correlation-ID"])
+        return response.content
+
+    def _set_correlation_id(self, correlation_id: str) -> None:
+        if "Correlation-ID" in self._session.headers:
+            if self._session.headers["Correlation-ID"] != correlation_id:
+                raise OpenAPIError(
+                    _("Correlation ID returned from server did not match. {} != {}").format(
+                        self._session.headers["Correlaton-ID"], correlation_id
+                    )
+                )
+        else:
+            self._session.headers["Correlation-ID"] = correlation_id
 
     def extract_params(
         self,
@@ -344,7 +361,7 @@ class OpenAPI:
         for key, value in request.headers.items():
             self.debug_callback(2, f"  {key}: {value}")
         if request.body is not None:
-            self.debug_callback(2, f"{request.body!r}")
+            self.debug_callback(3, f"{request.body!r}")
         if self.safe_calls_only and method.upper() not in SAFE_METHODS:
             raise OpenAPIError(_("Call aborted due to safe mode"))
         try:
@@ -360,7 +377,11 @@ class OpenAPI:
         self.debug_callback(
             1, _("Response: {status_code}").format(status_code=response.status_code)
         )
+        for key, value in response.headers.items():
+            self.debug_callback(2, f"  {key}: {value}")
         if response.text:
             self.debug_callback(3, f"{response.text}")
+        if "Correlation-ID" in response.headers:
+            self._set_correlation_id(response.headers["Correlation-ID"])
         response.raise_for_status()
         return self.parse_response(method_spec, response)

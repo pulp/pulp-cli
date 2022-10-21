@@ -100,6 +100,13 @@ def _config_callback(ctx: click.Context, param: Any, value: Optional[str]) -> No
     help=_("Start tasks in the background instead of awaiting them"),
 )
 @click.option("--refresh-api", is_flag=True, help=_("Invalidate cached API docs"))
+@click.option(
+    "--cid",
+    help=_(
+        "Logging CID to send on requests"
+        " (note: server configuration may require a valid GUID and ignore CIDs that aren't)"
+    ),
+)
 @config_options
 @click.pass_context
 def main(
@@ -117,6 +124,7 @@ def main(
     refresh_api: bool,
     dry_run: bool,
     timeout: int,
+    cid: str,
 ) -> None:
     def _debug_callback(level: int, x: str) -> None:
         if verbose >= level:
@@ -133,6 +141,7 @@ def main(
         safe_calls_only=dry_run,
         debug_callback=_debug_callback,
         user_agent=f"Pulp-CLI/{__version__}",
+        cid=cid,
     )
     ctx.obj = PulpCLIContext(
         api_root=api_root,
