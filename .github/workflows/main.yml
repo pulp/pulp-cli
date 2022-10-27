@@ -19,7 +19,7 @@ jobs:
           - "3.7"
           - "3.10"
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -54,7 +54,7 @@ jobs:
             image_tag: "3.17"
             click_version: "8.0.0"
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -83,7 +83,7 @@ jobs:
         python:
           - "3.10"
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - run: |
           git fetch --prune --unshallow
       - name: Set up Python
