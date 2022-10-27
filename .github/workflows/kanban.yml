@@ -57,7 +57,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Get Linked Issues Action
-        uses: kin/gh-action-get-linked-issues@v1.0
+        uses: kin/gh-action-get-linked-issues@v2.0
         id: linked-issues
         with:
           access-token: ${{ secrets.RELEASE_TOKEN }}
