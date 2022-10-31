@@ -2,6 +2,7 @@ import click
 
 from pulpcore.cli.common.context import PulpContext, pass_pulp_context
 from pulpcore.cli.common.generic import (
+    common_distribution_create_options,
     create_command,
     destroy_command,
     distribution_filter_options,
@@ -55,7 +56,6 @@ def distribution(ctx: click.Context, pulp_ctx: PulpContext, distribution_type: s
 
 lookup_options = [href_option, name_option]
 update_options = [
-    click.option("--base-path"),
     click.option(
         "--publication",
         help=_(
@@ -66,12 +66,14 @@ update_options = [
     repository_option,
     pulp_labels_option,
 ]
-create_options = update_options + [click.option("--name", required=True)]
+create_options = common_distribution_create_options + update_options
 
 distribution.add_command(list_command(decorators=distribution_filter_options))
 distribution.add_command(show_command(decorators=lookup_options))
 distribution.add_command(create_command(decorators=create_options))
-distribution.add_command(update_command(decorators=lookup_options + update_options))
+distribution.add_command(
+    update_command(decorators=lookup_options + update_options + [click.option("--base-path")])
+)
 distribution.add_command(destroy_command(decorators=lookup_options))
 distribution.add_command(label_command())
 distribution.add_command(role_command(decorators=lookup_options))
