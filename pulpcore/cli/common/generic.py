@@ -755,6 +755,11 @@ distribution_filter_options = name_filter_options + [
     base_path_contains_option,
 ]
 
+common_distribution_create_options = [
+    click.option("--name", required=True),
+    click.option("--base-path", required=True),
+]
+
 publication_filter_options = [
     content_in_option,
     pulp_created_gte_option,
