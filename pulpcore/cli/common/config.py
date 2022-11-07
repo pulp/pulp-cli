@@ -1,3 +1,4 @@
+import re
 from pathlib import Path
 from typing import Any, Callable, Dict, List, MutableMapping, Optional, TypeVar
 
@@ -30,6 +31,7 @@ SETTINGS = [
     "dry_run",
     "timeout",
     "verbose",
+    "domain",
 ]
 
 CONFIG_OPTIONS = [
@@ -39,6 +41,7 @@ CONFIG_OPTIONS = [
         default="/pulp/",
         help=_("Absolute API base path on server (not including 'api/v3/')"),
     ),
+    click.option("--domain", default="default", help=_("Domain to work in if feature is enabled")),
     click.option("--username", default="", help=_("Username on pulp server")),
     click.option("--password", default="", help=_("Password on pulp server")),
     click.option("--cert", default="", help=_("Path to client certificate")),
@@ -101,6 +104,8 @@ def validate_config(config: Dict[str, Any], strict: bool = False) -> bool:
         errors.append(_("'timeout' is not an integer"))
     if "verbose" in config and not isinstance(config["verbose"], int):
         errors.append(_("'verbose' is not an integer"))
+    if "domain" in config and not re.match(r"^[-a-zA-Z0-9_]+\Z", config["domain"]):
+        errors.append(_("'domain' must be a slug string"))
     unknown_settings = set(config.keys()) - set(SETTINGS)
     if unknown_settings:
         errors.append(_("Unknown settings: '{}'.").format("','".join(unknown_settings)))

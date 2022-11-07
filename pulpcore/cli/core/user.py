@@ -1,7 +1,9 @@
+from typing import Optional
+
 import click
 from pulp_glue.common.context import PluginRequirement
 from pulp_glue.common.i18n import get_translation
-from pulp_glue.core.context import PulpUserContext, PulpUserRoleContext
+from pulp_glue.core.context import PulpDomainContext, PulpUserContext, PulpUserRoleContext
 
 from pulpcore.cli.common.generic import (
     PulpCLIContext,
@@ -15,12 +17,32 @@ from pulpcore.cli.common.generic import (
     pass_pulp_context,
     pulp_group,
     pulp_option,
+    resource_option,
     show_command,
     update_command,
 )
 
 translation = get_translation(__name__)
 _ = translation.gettext
+
+
+def _object_required_callback(ctx: click.Context, param: click.Parameter, value: str) -> str:
+    # Ensure --object is specified with "" when --domain is not being used
+    if value is None:
+        if ctx.get_parameter_source("domain") is None:
+            raise click.ClickException(
+                _('--object must be set when not using --domain. Use "" to specify a global role.')
+            )
+        value = ""
+    return value
+
+
+def _object_required_userrole_lookup_callback(
+    ctx: click.Context, param: click.Parameter, value: str
+) -> Optional[str]:
+    value = _object_required_callback(ctx, param, value)
+    userrole_lookup_callback = lookup_callback("content_object", PulpUserRoleContext)
+    return userrole_lookup_callback(ctx, param, value)
 
 
 req_core_3_17 = PluginRequirement("core", min="3.17.0")
@@ -30,6 +52,22 @@ username_option = pulp_option(
     help=_("Username of the {entity}"),
     expose_value=False,
     callback=lookup_callback("username", PulpUserContext),
+)
+domain_field_options = {
+    "default_plugin": "core",
+    "default_type": "domain",
+    "context_table": {
+        "core:domain": PulpDomainContext,
+    },
+    "help": _("Domain the role is applied in"),
+    "needs_plugins": (PluginRequirement("core", "3.23.dev"),),
+}
+domain_option = resource_option("--domain", **domain_field_options)
+domain_user_lookup_option = resource_option(
+    "--domain",
+    parent_resource_lookup=("domain", PulpUserRoleContext),
+    expose_value=False,
+    **domain_field_options,
 )
 lookup_options = [
     href_option,
@@ -93,6 +131,7 @@ role.add_command(
                 callback=null_callback,
                 help=_('Filter roles by the associated object. Use "" to list global assignments.'),
             ),
+            domain_option,
         ]
     )
 )
@@ -104,9 +143,10 @@ role.add_command(
             click.option(
                 "--object",
                 "content_object",
-                required=True,
+                callback=_object_required_callback,
                 help=_('Associated object; use "" for global assignments.'),
             ),
+            domain_option,
         ]
     ),
     name="add",
@@ -124,11 +164,11 @@ role.add_command(
             click.option(
                 "--object",
                 "content_object",
-                required=True,
-                callback=lookup_callback("content_object", PulpUserRoleContext),
+                callback=_object_required_userrole_lookup_callback,
                 expose_value=False,
                 help=_('Associated object; use "" for global assignments.'),
             ),
+            domain_user_lookup_option,
         ]
     ),
     name="remove",

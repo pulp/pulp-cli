@@ -53,9 +53,9 @@ if pulp debug has-plugin --name "file" --min-version "1.7.0"
 then
   expect_succ pulp file repository create --name "$autopublish_repo" --remote "cli_test_file_remote" --autopublish
   expect_succ pulp file repository sync --repository "$autopublish_repo"
-  task=$(echo "$ERROUTPUT" | grep -E -o "${PULP_API_ROOT}api/v3/tasks/[-[:xdigit:]]*/")
+  task=$(echo "$ERROUTPUT" | grep -E -o "${PULP_API_ROOT}([-_a-zA-Z0-9]+/)?api/v3/tasks/[-[:xdigit:]]*/")
   created_resources=$(pulp show --href "$task" | jq -r ".created_resources")
-  echo "$created_resources" | grep -q "${PULP_API_ROOT}api/v3/publications/file/file/"
+  echo "$created_resources" | grep -q -E "${PULP_API_ROOT}([-_a-zA-Z0-9]+/)?api/v3/publications/file/file/"
 fi
 
 # Test retained versions

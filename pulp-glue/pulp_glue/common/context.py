@@ -3,7 +3,20 @@ import os
 import re
 import sys
 import time
-from typing import IO, Any, ClassVar, Dict, List, Mapping, NamedTuple, Optional, Set, Type, Union
+from typing import (
+    IO,
+    Any,
+    ClassVar,
+    Dict,
+    List,
+    Mapping,
+    NamedTuple,
+    Optional,
+    Set,
+    Type,
+    Union,
+    cast,
+)
 
 from packaging.version import parse as parse_version
 from requests import HTTPError
@@ -95,12 +108,14 @@ class PulpContext:
         format: str,
         background_tasks: bool,
         timeout: int,
+        domain: str = "default",
     ) -> None:
         self._api: Optional[OpenAPI] = None
-        self.api_path: str = api_root + "api/v3/"
+        self._api_root: str = api_root
         self._api_kwargs = api_kwargs
         self._needed_plugins: List[PluginRequirement] = [PluginRequirement("core", min="3.11.0")]
         self.isatty: bool = sys.stdout.isatty()
+        self.pulp_domain: str = domain
 
         self.format: str = format
         self.background_tasks: bool = background_tasks
@@ -156,12 +171,24 @@ class PulpContext:
                 patched_python_remote_serializer["properties"][prop]["items"] = {"type": "string"}
 
     @property
+    def domain_enabled(self) -> bool:
+        return cast(bool, self.api.api_spec.get("info", {}).get("x-pulp-domain-enabled", False))
+
+    @property
+    def api_path(self) -> str:
+        if self.domain_enabled:
+            return self._api_root + self.pulp_domain + "/api/v3/"
+        return self._api_root + "api/v3/"
+
+    @property
     def api(self) -> OpenAPI:
         if self._api is None:
             if self._api_kwargs.get("username") and not self._api_kwargs.get("password"):
                 self._api_kwargs["password"] = self.prompt("password", hide_input=True)
             try:
-                self._api = OpenAPI(doc_path=f"{self.api_path}docs/api.json", **self._api_kwargs)
+                self._api = OpenAPI(
+                    doc_path=f"{self._api_root}api/v3/docs/api.json", **self._api_kwargs
+                )
             except OpenAPIError as e:
                 raise PulpException(str(e))
             # Rerun scheduled version checks
@@ -189,8 +216,13 @@ class PulpContext:
         Returns the operation result, or the finished task.
         If non_blocking, returns unfinished tasks.
         """
-        if parameters is not None:
-            parameters = preprocess_payload(parameters)
+        if parameters is None:
+            parameters = {}
+        if self.domain_enabled:
+            # Validation will fail if path doesn't need domain parameter
+            if "pulp_domain" in self.api.param_spec(operation_id, "path", required=True):
+                parameters["pulp_domain"] = self.pulp_domain
+        parameters = preprocess_payload(parameters)
         if body is not None:
             body = preprocess_payload(body)
         try:

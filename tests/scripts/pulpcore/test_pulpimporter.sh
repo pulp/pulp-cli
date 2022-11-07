@@ -5,6 +5,8 @@
 
 pulp debug has-plugin --name "file" || exit 23
 
+eval "$(pulp status | jq -r '.domain_enabled // false | not')" || exit 23
+
 cleanup() {
   pulp importer pulp destroy --name "cli_test_importer" || true
   pulp file repository destroy --name dest1 || true

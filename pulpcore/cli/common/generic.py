@@ -470,6 +470,9 @@ def pulp_option(*args: Any, **kwargs: Any) -> Callable[[FC], FC]:
     return click.option(*args, **kwargs)
 
 
+domain_pattern = r"(?P<pulp_domain>[-a-zA-Z0-9_]+)"
+
+
 def resource_lookup_option(*args: Any, **kwargs: Any) -> Callable[[FC], FC]:
     lookup_key: str = kwargs.pop("lookup_key", "name")
     context_class: Type[PulpEntityContext] = kwargs.pop("context_class")
@@ -489,7 +492,11 @@ def resource_lookup_option(*args: Any, **kwargs: Any) -> Callable[[FC], FC]:
 
         if value.startswith("/"):
             # The HREF of a resource was passed
-            pattern = rf"^{pulp_ctx.api_path}{entity_ctx.HREF_PATTERN}"
+            href_pattern = entity_ctx.HREF_PATTERN
+            if pulp_ctx.domain_enabled:
+                pattern = rf"^{pulp_ctx._api_root}{domain_pattern}/api/v3/{href_pattern}"
+            else:
+                pattern = rf"^{pulp_ctx.api_path}{href_pattern}"
             match = re.match(pattern, value)
             if match:
                 entity_ctx.pulp_href = value
@@ -524,6 +531,9 @@ def resource_option(*args: Any, **kwargs: Any) -> Callable[[FC], FC]:
     context_table: Dict[str, Type[PulpEntityContext]] = kwargs.pop("context_table")
     capabilities: Optional[List[str]] = kwargs.pop("capabilities", None)
     href_pattern: Optional[str] = kwargs.pop("href_pattern", None)
+    parent_resource_lookup: Optional[Tuple[str, Type[PulpEntityContext]]] = kwargs.pop(
+        "parent_resource_lookup", None
+    )
 
     def _option_callback(
         ctx: click.Context, param: click.Parameter, value: Optional[str]
@@ -546,7 +556,10 @@ def resource_option(*args: Any, **kwargs: Any) -> Callable[[FC], FC]:
                         option_name=param.name
                     )
                 )
-            pattern = rf"^{pulp_ctx.api_path}{href_pattern}"
+            if pulp_ctx.domain_enabled:
+                pattern = rf"^{pulp_ctx._api_root}{domain_pattern}/api/v3/{href_pattern}"
+            else:
+                pattern = rf"^{pulp_ctx.api_path}{href_pattern}"
             match = re.match(pattern, value)
             if match is None:
                 raise click.ClickException(
@@ -602,6 +615,13 @@ def resource_option(*args: Any, **kwargs: Any) -> Callable[[FC], FC]:
                             "does not support the '{capability}' capability."
                         ).format(plugin=plugin, resource_type=resource_type, capability=capability)
                     )
+
+        if parent_resource_lookup:
+            parent_lookup_key, parent_context_type = parent_resource_lookup
+            parent_ctx = ctx.find_object(parent_context_type)
+            assert parent_ctx is not None
+            parent_ctx.entity = {parent_lookup_key: entity_ctx}
+
         return entity_ctx
 
     def _multi_option_callback(
