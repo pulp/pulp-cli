@@ -150,6 +150,29 @@ class OpenAPI:
         else:
             self._session.headers["Correlation-ID"] = correlation_id
 
+    def param_spec(
+        self, operation_id: str, param_type: str, required: bool = False
+    ) -> Dict[str, Any]:
+        method, path = self.operations[operation_id]
+        path_spec = self.api_spec["paths"][path]
+        method_spec = path_spec[method]
+
+        param_spec = {
+            entry["name"]: entry
+            for entry in path_spec.get("parameters", [])
+            if entry["in"] == param_type
+        }
+        param_spec.update(
+            {
+                entry["name"]: entry
+                for entry in method_spec.get("parameters", [])
+                if entry["in"] == param_type
+            }
+        )
+        if required:
+            param_spec = {k: v for k, v in param_spec.items() if v.get("required", False)}
+        return param_spec
+
     def extract_params(
         self,
         param_in: str,

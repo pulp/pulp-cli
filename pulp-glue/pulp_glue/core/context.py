@@ -86,6 +86,14 @@ class PulpArtifactContext(PulpEntityContext):
         return task["created_resources"][0]
 
 
+class PulpDomainContext(PulpEntityContext):
+    ENTITY = _("Pulp domain")
+    ENTITIES = _("Pulp domains")
+    HREF = "domain_href"
+    ID_PREFIX = "domains"
+    NEEDS_PLUGINS = [PluginRequirement("core", "3.23.0.dev")]
+
+
 class PulpExporterContext(PulpEntityContext):
     ENTITY = _("Pulp exporter")
     ENTITIES = _("Pulp exporters")

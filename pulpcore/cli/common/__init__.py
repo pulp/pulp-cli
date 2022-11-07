@@ -113,6 +113,7 @@ def main(
     ctx: click.Context,
     base_url: str,
     api_root: str,
+    domain: str,
     username: Optional[str],
     password: Optional[str],
     cert: Optional[str],
@@ -146,6 +147,7 @@ def main(
     ctx.obj = PulpCLIContext(
         api_root=api_root,
         api_kwargs=api_kwargs,
+        domain=domain,
         format=format,
         background_tasks=background,
         timeout=timeout,

@@ -4,6 +4,7 @@ import click
 from pulp_glue.common.context import PluginRequirement
 from pulp_glue.common.i18n import get_translation
 from pulp_glue.core.context import (
+    PulpDomainContext,
     PulpGroupContext,
     PulpGroupModelPermissionContext,
     PulpGroupObjectPermissionContext,
@@ -25,6 +26,7 @@ from pulpcore.cli.common.generic import (
     pass_entity_context,
     pass_pulp_context,
     pulp_group,
+    resource_option,
     role_command,
     show_command,
 )
@@ -46,8 +48,43 @@ def _object_callback(ctx: click.Context, param: click.Parameter, value: str) -> 
     return value
 
 
+def _object_required_callback(ctx: click.Context, param: click.Parameter, value: str) -> str:
+    # Ensure --object is specified with "" when --domain is not being used
+    if value is None:
+        if ctx.get_parameter_source("domain") is None:
+            raise click.ClickException(
+                _('--object must be set when not using --domain. Use "" to specify a global role.')
+            )
+        value = ""
+    return value
+
+
+def _object_required_grouprole_lookup_callback(
+    ctx: click.Context, param: click.Parameter, value: str
+) -> Optional[str]:
+    value = _object_required_callback(ctx, param, value)
+    grouprole_lookup_callback = lookup_callback("content_object", PulpGroupRoleContext)
+    return grouprole_lookup_callback(ctx, param, value)
+
+
 group_option = click.option(
     "--group", callback=lookup_callback("name", PulpGroupContext), expose_value=False
+)
+domain_field_options = {
+    "default_plugin": "core",
+    "default_type": "domain",
+    "context_table": {
+        "core:domain": PulpDomainContext,
+    },
+    "help": _("Domain the role is applied in"),
+    "needs_plugins": (PluginRequirement("core", "3.23.dev"),),
+}
+domain_option = resource_option("--domain", **domain_field_options)
+domain_group_lookup_option = resource_option(
+    "--domain",
+    parent_resource_lookup=("domain", PulpGroupRoleContext),
+    expose_value=False,
+    **domain_field_options,
 )
 
 
@@ -185,6 +222,7 @@ role.add_command(
                 callback=null_callback,
                 help=_('Filter roles by the associated object. Use "" to list global assignments.'),
             ),
+            domain_option,
         ]
     )
 )
@@ -193,13 +231,13 @@ role.add_command(
         decorators=[
             group_option,
             click.option("--role", required=True),
-            click.option("--object", "content_object", required=True),
             click.option(
                 "--object",
                 "content_object",
-                required=True,
+                callback=_object_required_callback,
                 help=_('Associated object; use "" for global assignments.'),
             ),
+            domain_option,
         ]
     ),
     name="add",
@@ -217,11 +255,11 @@ role.add_command(
             click.option(
                 "--object",
                 "content_object",
-                required=True,
-                callback=lookup_callback("content_object", PulpGroupRoleContext),
+                callback=_object_required_grouprole_lookup_callback,
                 expose_value=False,
                 help=_('Associated object; use "" for global assignments.'),
             ),
+            domain_group_lookup_option,
         ]
     ),
     name="remove",
