@@ -132,7 +132,7 @@ class OpenAPI:
             if self._session.headers["Correlation-ID"] != correlation_id:
                 raise OpenAPIError(
                     _("Correlation ID returned from server did not match. {} != {}").format(
-                        self._session.headers["Correlaton-ID"], correlation_id
+                        self._session.headers["Correlation-ID"], correlation_id
                     )
                 )
         else:
