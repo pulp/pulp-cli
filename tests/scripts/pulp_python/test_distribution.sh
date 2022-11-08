@@ -22,7 +22,7 @@ fi
 
 expect_succ pulp python remote create --name "cli_test_python_remote" --url "$PYTHON_REMOTE_URL" --includes '["shelf-reader"]'
 expect_succ pulp python repository create --name "cli_test_python_repository" --remote "cli_test_python_remote"
-expect_succ pulp python repository sync --name "cli_test_python_repository"
+expect_succ pulp python repository sync --repository "cli_test_python_repository"
 expect_succ pulp python publication create --repository "cli_test_python_repository"
 PUBLICATION_HREF=$(echo "$OUTPUT" | jq -r .pulp_href)
 
@@ -30,11 +30,12 @@ expect_succ pulp python distribution create \
   --name "cli_test_python_distro" \
   --base-path "wrong_path" \
   --publication "$PUBLICATION_HREF"
+HREF="$(echo "$OUTPUT" | jq -r "pulp_href")"
 expect_succ pulp python distribution update \
-  --name "cli_test_python_distro" \
+  --distribution "$HREF" \
   --publication ""
 expect_succ pulp python distribution update \
-  --name "cli_test_python_distro" \
+  --distribution "cli_test_python_distro" \
   --base-path "cli_test_python_distro" \
   --publication "$PUBLICATION_HREF"
 
@@ -56,4 +57,4 @@ then
   --remote "cli_test_python_remote"
 fi
 
-expect_succ pulp python distribution destroy --name "cli_test_python_distro"
+expect_succ pulp python distribution destroy --distribution "cli_test_python_distro"

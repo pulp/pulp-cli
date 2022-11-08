@@ -9,6 +9,7 @@ from pulpcore.cli.common.generic import (
     name_option,
     pass_pulp_context,
     pulp_group,
+    resource_lookup_option,
     role_command,
     show_command,
 )
@@ -17,6 +18,12 @@ from pulpcore.cli.container.context import PulpContainerNamespaceContext
 
 translation = get_translation(__name__)
 _ = translation.gettext
+
+
+namespace_lookup_option = resource_lookup_option(
+    "--namespace",
+    context_class=PulpContainerNamespaceContext,
+)
 
 
 @pulp_group()
@@ -36,7 +43,7 @@ def namespace(ctx: click.Context, pulp_ctx: PulpCLIContext, namespace_type: str)
         raise NotImplementedError()
 
 
-lookup_options = [href_option, name_option]
+lookup_options = [href_option, name_option, namespace_lookup_option]
 create_options = [
     click.option("--name", required=True),
 ]

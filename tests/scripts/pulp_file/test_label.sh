@@ -15,19 +15,19 @@ name="cli_test_file_repo"
 expect_succ pulp file repository create --name "$name" --labels '{"atani": "hurin"}'
 expect_succ pulp file repository label set --repository "$name" --key "ainur" --value "ulmo"
 
-expect_succ pulp file repository show --name "$name"
+expect_succ pulp file repository show --repository "$name"
 test "$(echo "$OUTPUT" | jq -Src .pulp_labels)" = '{"ainur":"ulmo","atani":"hurin"}'
 
 # update a label
 expect_succ pulp file repository label set --repository "$name" --key "atani" --value "beor"
-expect_succ pulp file repository show --name "$name"
+expect_succ pulp file repository show --repository "$name"
 test "$(echo "$OUTPUT" | jq -Src .pulp_labels)" = '{"ainur":"ulmo","atani":"beor"}'
 expect_succ pulp file repository label show --repository "$name" --key "atani"
 test "$OUTPUT" = "beor"
 
 # remove a label
 expect_succ pulp file repository label unset --repository "$name" --key "atani"
-expect_succ pulp file repository show --name "$name"
+expect_succ pulp file repository show --repository "$name"
 test "$(echo "$OUTPUT" | jq -Src .pulp_labels)" = '{"ainur":"ulmo"}'
 expect_fail pulp file repository label show --repository "$name"
 

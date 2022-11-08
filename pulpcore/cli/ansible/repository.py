@@ -36,7 +36,7 @@ from pulpcore.cli.common.generic import (
     pulp_option,
     repository_content_command,
     repository_href_option,
-    repository_option,
+    repository_lookup_option,
     resource_option,
     retained_versions_option,
     show_command,
@@ -102,8 +102,8 @@ def repository(ctx: click.Context, pulp_ctx: PulpCLIContext, repo_type: str) -> 
         raise NotImplementedError()
 
 
-lookup_options = [href_option, name_option]
-nested_lookup_options = [repository_href_option, repository_option]
+lookup_options = [href_option, name_option, repository_lookup_option]
+nested_lookup_options = [repository_href_option, repository_lookup_option]
 update_options = [
     click.option("--description"),
     pulp_option(
@@ -174,8 +174,8 @@ repository.add_command(create_command(decorators=create_options))
 repository.add_command(update_command(decorators=lookup_options + update_options))
 repository.add_command(destroy_command(decorators=lookup_options))
 repository.add_command(task_command(decorators=nested_lookup_options))
-repository.add_command(version_command())
-repository.add_command(label_command())
+repository.add_command(version_command(decorators=nested_lookup_options))
+repository.add_command(label_command(decorators=nested_lookup_options))
 repository.add_command(
     repository_content_command(
         contexts={
@@ -192,6 +192,7 @@ repository.add_command(
 @repository.command()
 @name_option
 @href_option
+@repository_lookup_option
 @remote_option
 @pass_repository_context
 def sync(
@@ -223,6 +224,7 @@ def sync(
 @repository.command()
 @name_option
 @href_option
+@repository_lookup_option
 @click.option("--signing-service", required=True, callback=_signing_service_callback)
 @click.option("--content-units", callback=load_json_callback)
 @pass_repository_context

@@ -25,6 +25,7 @@ repository_option = resource_option(
     default_plugin="rpm",
     default_type="rpm",
     context_table={"rpm:rpm": PulpRpmRepositoryContext},
+    href_pattern=PulpRpmRepositoryContext.HREF_PATTERN,
 )
 
 

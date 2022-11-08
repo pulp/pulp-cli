@@ -42,8 +42,8 @@ echo "${ERROUTPUT}" | grep -q "Key 'relative_path' error:"
 
 # Old content commands
 # Add content using JSON string
-expect_succ pulp file repository modify --name "cli_test_file_repository" --add-content "[{\"sha256\":\"$sha256_1\",\"relative_path\":\"upload_test/test_1.txt\"},{\"sha256\":\"$sha256_2\",\"relative_path\":\"upload_test/test_2.txt\"},{\"sha256\":\"$sha256_3\",\"relative_path\":\"upload_test/test_3.txt\"}]"
-expect_succ pulp file repository modify --name "cli_test_file_repository" --remove-content "[{\"sha256\":\"$sha256_1\",\"relative_path\":\"upload_test/test_1.txt\"},{\"sha256\":\"$sha256_2\",\"relative_path\":\"upload_test/test_2.txt\"},{\"sha256\":\"$sha256_3\",\"relative_path\":\"upload_test/test_3.txt\"}]"
+expect_succ pulp file repository modify --repository "cli_test_file_repository" --add-content "[{\"sha256\":\"$sha256_1\",\"relative_path\":\"upload_test/test_1.txt\"},{\"sha256\":\"$sha256_2\",\"relative_path\":\"upload_test/test_2.txt\"},{\"sha256\":\"$sha256_3\",\"relative_path\":\"upload_test/test_3.txt\"}]"
+expect_succ pulp file repository modify --repository "cli_test_file_repository" --remove-content "[{\"sha256\":\"$sha256_1\",\"relative_path\":\"upload_test/test_1.txt\"},{\"sha256\":\"$sha256_2\",\"relative_path\":\"upload_test/test_2.txt\"},{\"sha256\":\"$sha256_3\",\"relative_path\":\"upload_test/test_3.txt\"}]"
 
 # Add content using JSON file
 cat <<EOT >> add_content.json

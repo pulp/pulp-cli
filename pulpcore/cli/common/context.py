@@ -412,6 +412,7 @@ class PulpEntityContext:
     #           ]
     #       }
     CAPABILITIES: ClassVar[Dict[str, List[PluginRequirement]]] = {}
+    HREF_PATTERN: str
 
     # Hidden values for the lazy entity lookup
     _entity: Optional[EntityDefinition]
@@ -704,7 +705,7 @@ class PulpRemoteContext(PulpEntityContext):
     ENTITY = _("remote")
     ENTITIES = _("remotes")
     ID_PREFIX = "remotes"
-    HREF_PATTERN = r"remotes/(?P<plugin>\w+)/(?P<resource_type>\w+)/"
+    HREF_PATTERN = r"remotes/(?P<plugin>[\w\-_]+)/(?P<resource_type>[\w\-_]+)/"
     NULLABLES = {
         "ca_cert",
         "client_cert",
@@ -722,6 +723,13 @@ class PulpRemoteContext(PulpEntityContext):
         "sock_read_timeout",
         "rate_limit",
     }
+
+
+class PulpDistributionContext(PulpEntityContext):
+    ENTITY = _("distribution")
+    ENTITIES = _("distributions")
+    ID_PREFIX = "distributions"
+    HREF_PATTERN = r"distributions/(?P<plugin>[\w\-_]+)/(?P<resource_type>[\w\-_]+)/"
 
 
 class PulpRepositoryVersionContext(PulpEntityContext):
@@ -756,7 +764,7 @@ class PulpRepositoryContext(PulpEntityContext):
 
     ENTITY = _("repository")
     ENTITIES = _("repositories")
-    HREF_PATTERN = r"repositories/(?P<plugin>\w+)/(?P<resource_type>\w+)/"
+    HREF_PATTERN = r"repositories/(?P<plugin>[\w\-_]+)/(?P<resource_type>[\w\-_]+)/"
     ID_PREFIX = "repositories"
     VERSION_CONTEXT: ClassVar[Type[PulpRepositoryVersionContext]]
     NULLABLES = {"description", "retain_repo_versions"}
@@ -806,6 +814,8 @@ class PulpContentContext(PulpEntityContext):
 class PulpACSContext(PulpEntityContext):
     ENTITY = _("ACS")
     ENTITIES = _("ACSes")
+    HREF_PATTERN = r"acs/(?P<plugin>[\w\-_]+)/(?P<resource_type>[\w\-_]+)/"
+    ID_PREFIX = "acs"
 
     def refresh(self, href: Optional[str] = None) -> Any:
         return self.call("refresh", parameters={self.HREF: href or self.pulp_href})

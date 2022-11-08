@@ -2,12 +2,13 @@ from typing import Dict, Optional, Union, cast
 
 import click
 
-from pulpcore.cli.common.context import EntityDefinition, PulpEntityContext
+from pulpcore.cli.common.context import EntityDefinition, PulpEntityContext, PulpRepositoryContext
 from pulpcore.cli.common.generic import (
     PulpCLIContext,
     create_command,
     destroy_command,
     distribution_filter_options,
+    distribution_lookup_option,
     href_option,
     label_command,
     list_command,
@@ -39,6 +40,7 @@ repository_option = resource_option(
         "container:container": PulpContainerRepositoryContext,
         "container:push": PulpContainerPushRepositoryContext,
     },
+    href_pattern=PulpRepositoryContext.HREF_PATTERN,
 )
 
 
@@ -59,7 +61,8 @@ def distribution(ctx: click.Context, pulp_ctx: PulpCLIContext, distribution_type
         raise NotImplementedError()
 
 
-lookup_options = [href_option, name_option]
+lookup_options = [href_option, name_option, distribution_lookup_option]
+nested_lookup_options = [distribution_lookup_option]
 create_options = [
     click.option("--name", required=True),
     click.option("--base-path", required=True),
@@ -76,12 +79,13 @@ distribution.add_command(show_command(decorators=lookup_options))
 distribution.add_command(create_command(decorators=create_options))
 distribution.add_command(destroy_command(decorators=lookup_options))
 distribution.add_command(role_command(decorators=lookup_options))
-distribution.add_command(label_command())
+distribution.add_command(label_command(decorators=nested_lookup_options))
 
 
 @distribution.command()
 @href_option
 @name_option
+@distribution_lookup_option
 @click.option("--base-path")
 @repository_option
 @click.option("--version", type=int, help=_("a repository version number, leave blank for latest"))

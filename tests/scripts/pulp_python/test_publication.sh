@@ -14,7 +14,7 @@ trap cleanup EXIT
 
 pulp python remote create --name "cli_test_python_remote" --url "$PYTHON_REMOTE_URL"
 pulp python repository create --name "cli_test_python_repository" --remote "cli_test_python_remote"
-pulp python repository sync --name "cli_test_python_repository"
+pulp python repository sync --repository "cli_test_python_repository"
 
 expect_succ pulp python publication create --repository "cli_test_python_repository"
 PUBLICATION_HREF="$(echo "$OUTPUT" | jq -r .pulp_href)"

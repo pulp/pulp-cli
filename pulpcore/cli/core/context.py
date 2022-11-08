@@ -249,7 +249,7 @@ class PulpContentGuardContext(PulpEntityContext):
     ENTITY = "content guard"
     ENTITIES = "content guards"
     ID_PREFIX = "contentguards"
-    HREF_PATTERN = r"contentguards/(?P<plugin>\w+)/(?P<resource_type>\w+)/"
+    HREF_PATTERN = r"contentguards/(?P<plugin>[\w\-_]+)/(?P<resource_type>[\w\-_]+)/"
 
 
 class PulpContentRedirectContentGuardContext(PulpEntityContext):
@@ -258,13 +258,6 @@ class PulpContentRedirectContentGuardContext(PulpEntityContext):
     HREF = "content_redirect_content_guard_href"
     ID_PREFIX = "contentguards_core_content_redirect"
     NEEDS_PLUGINS = [PluginRequirement("core", "3.18.0")]
-
-
-class PulpDistributionContext(PulpEntityContext):
-    ENTITY = _("distribution")
-    ENTITIES = _("distributions")
-    ID_PREFIX = "distributions"
-    HREF_PATTERN = r"distributions/(?P<plugin>\w+)/(?P<resource_type>\w+)/"
 
 
 class PulpImporterContext(PulpEntityContext):
@@ -278,7 +271,7 @@ class PulpPublicationContext(PulpEntityContext):
     ENTITY = _("Pulp publication")
     ENTITIES = _("Pulp publications")
     ID_PREFIX = "publications"
-    HREF_PATTERN = r"publications/(?P<plugin>\w+)/(?P<resource_type>\w+)/"
+    HREF_PATTERN = r"publications/(?P<plugin>[\w\-_]+)/(?P<resource_type>[\w\-_]+)/"
 
 
 class PulpRbacContentGuardContext(PulpContentGuardContext):

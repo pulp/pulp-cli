@@ -22,18 +22,18 @@ fi
 expect_succ pulp rpm remote create --name "cli_test_rpm_remote" --url "$RPM_REMOTE_URL"
 expect_succ pulp rpm remote show --name "cli_test_rpm_remote"
 expect_succ pulp rpm repository create --name "cli_test_rpm_repository" --remote "cli_test_rpm_remote" --description "cli test repository"
-expect_succ pulp rpm repository update --name "cli_test_rpm_repository" --description ""
-expect_succ pulp rpm repository show --name "cli_test_rpm_repository"
+expect_succ pulp rpm repository update --repository "cli_test_rpm_repository" --description ""
+expect_succ pulp rpm repository show --repository "cli_test_rpm_repository"
 test "$(echo "$OUTPUT" | jq -r '.description')" = "null"
 
 # skip-types is broken in 3.12.0
 if pulp debug has-plugin --name "rpm" --min-version "3.12.0" --max-version "3.12.1"
 then
-  expect_succ pulp rpm repository sync --name "cli_test_rpm_repository"
+  expect_succ pulp rpm repository sync --repository "cli_test_rpm_repository"
 else
-  expect_succ pulp rpm repository sync --name "cli_test_rpm_repository" --skip-type srpm
+  expect_succ pulp rpm repository sync --repository "cli_test_rpm_repository" --skip-type srpm
 fi
-expect_succ pulp rpm repository sync --name "cli_test_rpm_repository"
+expect_succ pulp rpm repository sync --repository "cli_test_rpm_repository"
 
 expect_succ pulp rpm publication create --repository "cli_test_rpm_repository"
 PUBLICATION_HREF=$(echo "$OUTPUT" | jq -r .pulp_href)
@@ -55,24 +55,24 @@ test "$(echo "$OUTPUT" | jq -r '.retain_package_versions')" = "2"
 
 if pulp debug has-plugin --name "rpm" --min-version "3.3.0"
 then
-  expect_succ pulp rpm repository sync --name "cli_test_rpm_repository" --optimize
-  expect_succ pulp rpm repository sync --name "cli_test_rpm_repository" --no-optimize
+  expect_succ pulp rpm repository sync --repository "cli_test_rpm_repository" --optimize
+  expect_succ pulp rpm repository sync --repository "cli_test_rpm_repository" --no-optimize
 fi
 
 if pulp debug has-plugin --name "rpm" --min-version "3.16.0"
 then
-  expect_succ pulp rpm repository update --name "cli_test_rpm_repository" --retain-package-versions 0
-  expect_succ pulp rpm repository sync --name "cli_test_rpm_repository" --sync-policy additive
-  expect_succ pulp rpm repository sync --name "cli_test_rpm_repository" --sync-policy mirror_complete
-  expect_succ pulp rpm repository sync --name "cli_test_rpm_repository" --sync-policy mirror_content_only
-  expect_fail pulp rpm repository sync --name "cli_test_rpm_repository" --sync-policy foobar
+  expect_succ pulp rpm repository update --repository "cli_test_rpm_repository" --retain-package-versions 0
+  expect_succ pulp rpm repository sync --repository "cli_test_rpm_repository" --sync-policy additive
+  expect_succ pulp rpm repository sync --repository "cli_test_rpm_repository" --sync-policy mirror_complete
+  expect_succ pulp rpm repository sync --repository "cli_test_rpm_repository" --sync-policy mirror_content_only
+  expect_fail pulp rpm repository sync --repository "cli_test_rpm_repository" --sync-policy foobar
 fi
 
 expect_succ pulp rpm distribution destroy --name "cli_test_rpm_distro"
 expect_succ pulp rpm publication destroy --href "$PUBLICATION_HREF"
 expect_succ pulp rpm publication destroy --href "$PUBLICATION_VER_HREF"
-expect_succ pulp rpm repository destroy --name "cli_test_rpm_repository"
-expect_succ pulp rpm remote destroy --name "cli_test_rpm_remote"
+expect_succ pulp rpm repository destroy --repository "cli_test_rpm_repository"
+expect_succ pulp rpm remote destroy --remote "cli_test_rpm_remote"
 
 # auto-publish
 if pulp debug has-plugin --name "rpm" --min-version "3.12.0"
@@ -84,12 +84,12 @@ then
     --base-path "cli_test_rpm_distro" \
     --repository "cli_test_rpm_repository"
 
-  expect_succ pulp rpm repository sync --name "cli_test_rpm_repository"
+  expect_succ pulp rpm repository sync --repository "cli_test_rpm_repository"
   expect_succ pulp rpm publication list
   test "$(echo "$OUTPUT" | jq -r length)" -eq "1"
   if pulp debug has-plugin --name "rpm" --max-version "3.13.0"
   then
-    expect_succ pulp rpm distribution show --name "cli_test_rpm_distro"
+    expect_succ pulp rpm distribution show --distribution "cli_test_rpm_distro"
     echo "$OUTPUT" | jq -r ".publication" | grep -q '/pulp/api/v3/publications/rpm/rpm/'
   fi
 fi

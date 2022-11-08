@@ -24,11 +24,11 @@ test "$(echo "${OUTPUT}" | jq -r 'length' )" = "0"
 expect_deny pulp --username clitest --password "${USERPASS}" container repository create --name "clitest"
 expect_succ pulp container repository create --name "clitest"
 REPOSITORY_HREF=$(jq -r '.pulp_href' <<<"${OUTPUT}")
-expect_fail pulp --username clitest --password "${USERPASS}" container repository show --name "clitest"
-expect_fail pulp --username clitest --password "${USERPASS}" container repository show --href "${REPOSITORY_HREF}"
+expect_fail pulp --username clitest --password "${USERPASS}" container repository show --repository "clitest"
+expect_fail pulp --username clitest --password "${USERPASS}" container repository show --repository "${REPOSITORY_HREF}"
 
 expect_succ pulp container repository role add --name "clitest" --user "clitest" --role "container.containerrepository_viewer"
-expect_succ pulp --username clitest --password "${USERPASS}" container repository show --name "clitest"
-expect_succ pulp --username clitest --password "${USERPASS}" container repository show --href "${REPOSITORY_HREF}"
+expect_succ pulp --username clitest --password "${USERPASS}" container repository show --repository "clitest"
+expect_succ pulp --username clitest --password "${USERPASS}" container repository show --repository "${REPOSITORY_HREF}"
 
 expect_deny pulp --username clitest --password "${USERPASS}" container repository update --href "${REPOSITORY_HREF}" --retain-repo-versions 1

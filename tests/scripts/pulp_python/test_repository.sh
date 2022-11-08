@@ -18,14 +18,14 @@ REMOTE2_HREF="$(pulp python remote create --name "cli_test_python_remote2" --url
 expect_succ pulp python repository list
 
 expect_succ pulp python repository create --name "cli_test_python_repo" --description "Test repository for CLI tests"
-expect_succ pulp python repository update --name "cli_test_python_repo" --description "" --remote "cli_test_python_remote1"
-expect_succ pulp python repository show --name "cli_test_python_repo"
+expect_succ pulp python repository update --repository "cli_test_python_repo" --description "" --remote "cli_test_python_remote1"
+expect_succ pulp python repository show --repository "cli_test_python_repo"
 expect_succ test "$(echo "$OUTPUT" | jq -r '.remote')" = "$REMOTE1_HREF"
-expect_succ pulp python repository update --name "cli_test_python_repo" --remote "cli_test_python_remote2"
-expect_succ pulp python repository show --name "cli_test_python_repo"
+expect_succ pulp python repository update --repository "cli_test_python_repo" --remote "cli_test_python_remote2"
+expect_succ pulp python repository show --repository "cli_test_python_repo"
 expect_succ test "$(echo "$OUTPUT" | jq -r '.remote')" = "$REMOTE2_HREF"
-expect_succ pulp python repository update --name "cli_test_python_repo" --remote ""
-expect_succ pulp python repository show --name "cli_test_python_repo"
+expect_succ pulp python repository update --repository "cli_test_python_repo" --remote ""
+expect_succ pulp python repository show --repository "cli_test_python_repo"
 expect_succ test "$(echo "$OUTPUT" | jq -r '.description')" = "null"
 expect_succ test "$(echo "$OUTPUT" | jq -r '.remote')" = ""
 expect_succ pulp python repository list

@@ -1,6 +1,6 @@
 import click
 
-from pulpcore.cli.common.context import PluginRequirement
+from pulpcore.cli.common.context import PluginRequirement, PulpDistributionContext
 from pulpcore.cli.common.generic import (
     PulpCLIContext,
     distribution_filter_options,
@@ -8,7 +8,6 @@ from pulpcore.cli.common.generic import (
     pass_pulp_context,
     pulp_group,
 )
-from pulpcore.cli.core.context import PulpDistributionContext
 
 
 @pulp_group()

@@ -3,7 +3,7 @@ from typing import IO, Any, Dict, Optional, Union
 
 import click
 
-from pulpcore.cli.common.context import PluginRequirement, PulpEntityContext, PulpRepositoryContext
+from pulpcore.cli.common.context import PluginRequirement, PulpEntityContext
 from pulpcore.cli.common.generic import (
     PulpCLIContext,
     chunk_size_option,
@@ -42,7 +42,7 @@ repository_option = resource_option(
     context_table={
         "python:python": PulpPythonRepositoryContext,
     },
-    href_pattern=PulpRepositoryContext.HREF_PATTERN,
+    href_pattern=PulpPythonRepositoryContext.HREF_PATTERN,
     help=_(
         "Repository to add the content to in the form '[[<plugin>:]<resource_type>:]<name>' or by "
         "href."

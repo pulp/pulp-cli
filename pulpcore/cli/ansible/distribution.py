@@ -16,6 +16,7 @@ from pulpcore.cli.common.generic import (
     create_command,
     destroy_command,
     distribution_filter_options,
+    distribution_lookup_option,
     href_option,
     label_command,
     list_command,
@@ -38,6 +39,7 @@ repository_option = resource_option(
     default_plugin="ansible",
     default_type="ansible",
     context_table={"ansible:ansible": PulpAnsibleRepositoryContext},
+    href_pattern=PulpAnsibleRepositoryContext.HREF_PATTERN,
 )
 
 
@@ -58,7 +60,8 @@ def distribution(ctx: click.Context, pulp_ctx: PulpContext, distribution_type: s
         raise NotImplementedError()
 
 
-lookup_options = [href_option, name_option]
+lookup_options = [href_option, name_option, distribution_lookup_option]
+nested_lookup_options = [distribution_lookup_option]
 create_options = [
     click.option("--name", required=True),
     click.option(
@@ -78,9 +81,10 @@ distribution.add_command(destroy_command(decorators=lookup_options))
 distribution.add_command(create_command(decorators=create_options))
 distribution.add_command(
     label_command(
+        decorators=nested_lookup_options,
         need_plugins=[
             PluginRequirement("ansible", "0.8.0"),
-        ]
+        ],
     )
 )
 
@@ -89,8 +93,9 @@ distribution.add_command(
 @distribution.command()
 @name_option
 @href_option
+@distribution_lookup_option
 @click.option("--base-path", help=_("new base_path"))
-@click.option("--repository", type=str, default=None, help=_("new repository to be served"))
+@repository_option
 @click.option(
     "--version",
     type=int,

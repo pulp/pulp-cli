@@ -25,7 +25,8 @@ content_href="$(echo "$OUTPUT" | tr '\r\n' ' ' | jq -r .[0].pulp_href)"
 expect_succ pulp python content show --href "$content_href"
 
 expect_succ pulp python repository create --name "cli_test_python_repository"
-expect_succ pulp python repository add --name "cli_test_python_repository" --filename "shelf-reader-0.1.tar.gz"
-expect_succ pulp python repository add --name "cli_test_python_repository" --filename "shelf-reader-0.1.tar.gz" --base-version 0
-expect_succ pulp python repository remove --name "cli_test_python_repository" --filename "shelf-reader-0.1.tar.gz"
-expect_succ pulp python repository remove --name "cli_test_python_repository" --filename "shelf-reader-0.1.tar.gz" --base-version 1
+HREF="$(echo "$OUTPUT" | jq -r "pulp_href")"
+expect_succ pulp python repository add --repository "cli_test_python_repository" --filename "shelf-reader-0.1.tar.gz"
+expect_succ pulp python repository add --repository "$HREF" --filename "shelf-reader-0.1.tar.gz" --base-version 0
+expect_succ pulp python repository remove --repository "cli_test_python_repository" --filename "shelf-reader-0.1.tar.gz"
+expect_succ pulp python repository remove --repository "$HREF" --filename "shelf-reader-0.1.tar.gz" --base-version 1

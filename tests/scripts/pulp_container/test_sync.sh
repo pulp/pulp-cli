@@ -16,9 +16,9 @@ pulp container remote create --name "cli_test_container_remote" --url "$CONTAINE
 pulp container repository create --name "cli_test_container_repository"
 
 # Test without remote (should fail)
-expect_fail pulp container repository sync --name "cli_test_container_repository"
+expect_fail pulp container repository sync --repository "cli_test_container_repository"
 # Test with remote
-expect_succ pulp container repository sync --name "cli_test_container_repository" --remote "cli_test_container_remote"
+expect_succ pulp container repository sync --repository "cli_test_container_repository" --remote "cli_test_container_remote"
 
 # Preconfigure remote
 # TBD
