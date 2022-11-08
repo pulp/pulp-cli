@@ -3,6 +3,7 @@ from pulpcore.cli.common.context import (
     PluginRequirement,
     PulpACSContext,
     PulpContentContext,
+    PulpDistributionContext,
     PulpEntityContext,
     PulpRemoteContext,
     PulpRepositoryContext,
@@ -31,7 +32,7 @@ class PulpFileContentContext(PulpContentContext):
     ID_PREFIX = "content_file_files"
 
 
-class PulpFileDistributionContext(PulpEntityContext):
+class PulpFileDistributionContext(PulpDistributionContext):
     ENTITY = _("file distribution")
     ENTITIES = _("file distributions")
     HREF = "file_file_distribution_href"

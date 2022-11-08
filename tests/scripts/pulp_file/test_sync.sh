@@ -23,17 +23,17 @@ expect_succ pulp file remote create --name "cli_test_file_remote" --url "$FILE_R
 expect_succ pulp file repository create --name "cli_test_file_repository"
 
 # Test without remote (should fail)
-expect_fail pulp file repository sync --name "cli_test_file_repository"
+expect_fail pulp file repository sync --repository "cli_test_file_repository"
 # Test with remote
-expect_succ pulp file repository sync --name "cli_test_file_repository" --remote "cli_test_file_remote"
+expect_succ pulp file repository sync --repository "cli_test_file_repository" --remote "cli_test_file_remote"
 
 # Preconfigure remote
-expect_succ pulp file repository update --name "cli_test_file_repository" --remote "cli_test_file_remote"
+expect_succ pulp file repository update --repository "cli_test_file_repository" --remote "cli_test_file_remote"
 
 # Test with remote
-expect_succ pulp file repository sync --name "cli_test_file_repository"
+expect_succ pulp file repository sync --repository "cli_test_file_repository"
 # Test without remote
-expect_succ pulp file repository sync --name "cli_test_file_repository" --remote "cli_test_file_remote"
+expect_succ pulp file repository sync --repository "cli_test_file_repository" --remote "cli_test_file_remote"
 
 # Verify sync
 expect_succ pulp file repository version list --repository "cli_test_file_repository"
@@ -52,7 +52,7 @@ expect_succ pulp file repository version destroy --repository "cli_test_file_rep
 if pulp debug has-plugin --name "file" --min-version "1.7.0"
 then
   expect_succ pulp file repository create --name "$autopublish_repo" --remote "cli_test_file_remote" --autopublish
-  expect_succ pulp file repository sync --name "$autopublish_repo"
+  expect_succ pulp file repository sync --repository "$autopublish_repo"
   task=$(echo "$ERROUTPUT" | grep -E -o "${PULP_API_ROOT}api/v3/tasks/[-[:xdigit:]]*/")
   created_resources=$(pulp show --href "$task" | jq -r ".created_resources")
   echo "$created_resources" | grep -q "${PULP_API_ROOT}api/v3/publications/file/file/"
@@ -62,7 +62,7 @@ fi
 if pulp debug has-plugin --name "core" --min-version "3.13.0"
 then
   expect_succ pulp file repository create --name "$one_version_repo" --remote "cli_test_file_remote" --retain-repo-versions 1
-  expect_succ pulp file repository sync --name "$one_version_repo"
+  expect_succ pulp file repository sync --repository "$one_version_repo"
   expect_succ pulp file repository version list --repository "$one_version_repo"
   test "$(echo "$OUTPUT" | jq -r length)" -eq 1
 fi

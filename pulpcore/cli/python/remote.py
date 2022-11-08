@@ -19,6 +19,7 @@ from pulpcore.cli.common.generic import (
     pulp_group,
     pulp_option,
     remote_filter_options,
+    resource_lookup_option,
     show_command,
     update_command,
 )
@@ -27,6 +28,12 @@ from pulpcore.cli.python.context import PulpPythonRemoteContext
 
 translation = get_translation(__name__)
 _ = translation.gettext
+
+
+remote_lookup_option = resource_lookup_option(
+    "--remote",
+    context_class=PulpPythonRemoteContext,
+)
 
 
 def _package_list_callback(ctx: click.Context, param: click.Parameter, value: Optional[str]) -> Any:
@@ -67,7 +74,8 @@ def remote(ctx: click.Context, pulp_ctx: PulpCLIContext, remote_type: str) -> No
         raise NotImplementedError()
 
 
-lookup_options = [href_option, name_option]
+lookup_options = [href_option, name_option, remote_lookup_option]
+nested_lookup_options = [remote_lookup_option]
 python_remote_options = [
     click.option(
         "--policy", type=click.Choice(["immediate", "on_demand", "streamed"], case_sensitive=False)
@@ -97,7 +105,7 @@ remote.add_command(
     update_command(decorators=lookup_options + common_remote_update_options + python_remote_options)
 )
 remote.add_command(destroy_command(decorators=lookup_options))
-remote.add_command(label_command())
+remote.add_command(label_command(decorators=nested_lookup_options))
 
 
 # TODO Add support for 'from_bandersnatch' remote create endpoint

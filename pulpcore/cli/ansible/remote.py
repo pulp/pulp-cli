@@ -21,6 +21,7 @@ from pulpcore.cli.common.generic import (
     pulp_group,
     pulp_option,
     remote_filter_options,
+    remote_lookup_option,
     show_command,
     update_command,
 )
@@ -62,7 +63,8 @@ def remote(ctx: click.Context, pulp_ctx: PulpCLIContext, remote_type: str) -> No
 
 
 collection_context = (PulpAnsibleCollectionRemoteContext,)
-lookup_options = [href_option, name_option]
+lookup_options = [href_option, name_option, remote_lookup_option]
+nested_lookup_options = [remote_lookup_option]
 remote_options = [
     click.option("--policy", help=_("policy to use when downloading")),
 ]
@@ -102,4 +104,4 @@ remote.add_command(show_command(decorators=lookup_options))
 remote.add_command(destroy_command(decorators=lookup_options))
 remote.add_command(create_command(decorators=create_options))
 remote.add_command(update_command(decorators=lookup_options + update_options))
-remote.add_command(label_command())
+remote.add_command(label_command(decorators=nested_lookup_options))

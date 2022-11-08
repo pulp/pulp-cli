@@ -20,15 +20,15 @@ expect_succ pulp python remote create --name "cli_test_python_remote" --url "$PY
 expect_succ pulp python repository create --name "cli_test_python_repository"
 
 # Test without remote (should fail)
-expect_fail pulp python repository sync --name "cli_test_python_repository"
+expect_fail pulp python repository sync --repository "cli_test_python_repository"
 # Test with remote
-expect_succ pulp python repository sync --name "cli_test_python_repository" --remote "cli_test_python_remote"
+expect_succ pulp python repository sync --repository "cli_test_python_repository" --remote "cli_test_python_remote"
 
 # Preconfigure remote
-expect_succ pulp python repository update --name "cli_test_python_repository" --remote "cli_test_python_remote"
+expect_succ pulp python repository update --repository "cli_test_python_repository" --remote "cli_test_python_remote"
 
 # Test with remote
-expect_succ pulp python repository sync --name "cli_test_python_repository"
+expect_succ pulp python repository sync --repository "cli_test_python_repository"
 
 # Verify sync
 expect_succ pulp python repository version list --repository "cli_test_python_repository"

@@ -18,7 +18,7 @@ trap cleanup EXIT
 expect_succ pulp rpm remote --type uln list
 
 expect_succ pulp rpm remote --type uln create --name "cli_test_uln_remote" --url "$ULN_REMOTE_URL" --username "$USERNAME" --password "$USERPASS"
-expect_succ pulp rpm remote --type uln show --name "cli_test_uln_remote"
+expect_succ pulp rpm remote --type uln show --remote "cli_test_uln_remote"
 expect_succ pulp rpm remote --type uln list
-expect_succ pulp rpm remote --type uln update --name "cli_test_uln_remote" --uln-server-base-url "https://linux.com/"
-expect_succ pulp rpm remote --type uln destroy --name "cli_test_uln_remote"
+expect_succ pulp rpm remote --type uln update --remote "cli_test_uln_remote" --uln-server-base-url "https://linux.com/"
+expect_succ pulp rpm remote --type uln destroy --remote "cli_test_uln_remote"

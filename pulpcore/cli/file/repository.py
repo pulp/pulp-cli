@@ -28,7 +28,7 @@ from pulpcore.cli.common.generic import (
     pulp_option,
     repository_content_command,
     repository_href_option,
-    repository_option,
+    repository_lookup_option,
     resource_option,
     retained_versions_option,
     role_command,
@@ -54,9 +54,7 @@ remote_option = resource_option(
     default_type="file",
     context_table={"file:file": PulpFileRemoteContext},
     href_pattern=PulpRemoteContext.HREF_PATTERN,
-    help=_(
-        "Remote used for synching in the form '[[<plugin>:]<resource_type>:]<name>' or by href."
-    ),
+    help=_("Remote used for syncing in the form '[[<plugin>:]<resource_type>:]<name>' or by href."),
 )
 
 
@@ -102,8 +100,8 @@ def repository(ctx: click.Context, pulp_ctx: PulpCLIContext, repo_type: str) -> 
         raise NotImplementedError()
 
 
-lookup_options = [href_option, name_option]
-nested_lookup_options = [repository_href_option, repository_option]
+lookup_options = [href_option, name_option, repository_lookup_option]
+nested_lookup_options = [repository_href_option, repository_lookup_option]
 update_options = [
     click.option("--description"),
     remote_option,
@@ -173,6 +171,7 @@ repository.add_command(role_command(decorators=lookup_options))
 @repository.command()
 @name_option
 @href_option
+@repository_lookup_option
 @remote_option
 @pass_repository_context
 def sync(
@@ -203,6 +202,7 @@ def sync(
 @repository.command(deprecated=True)
 @name_option
 @href_option
+@repository_lookup_option
 @click.option("--sha256", required=True)
 @click.option("--relative-path", required=True)
 @click.option("--base-version", type=int)
@@ -237,6 +237,7 @@ def add(
 @repository.command(deprecated=True)
 @name_option
 @href_option
+@repository_lookup_option
 @click.option("--sha256", required=True)
 @click.option("--relative-path", required=True)
 @click.option("--base-version", type=int)
@@ -271,6 +272,7 @@ def remove(
 @repository.command(deprecated=True)
 @name_option
 @href_option
+@repository_lookup_option
 @click.option("--base-version", type=int)
 @click.option(
     "--add-content",

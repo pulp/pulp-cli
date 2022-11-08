@@ -29,8 +29,8 @@ cat <<EOT >> python_test_requirements2.txt
 pulp_python
 EOT
 
-expect_succ pulp python remote update --name "cli_test_python_remote" --includes "@python_test_requirements.txt"
-expect_succ pulp python remote show --name "cli_test_python_remote"
+expect_succ pulp python remote update --remote "cli_test_python_remote" --includes "@python_test_requirements.txt"
+expect_succ pulp python remote show --remote "cli_test_python_remote"
 test "$(echo "$OUTPUT" | jq -r .includes[0])" = "Django>=4.0"
 test "$(echo "$OUTPUT" | jq -r .includes[1])" = "shelf-reader"
 test "$(echo "$OUTPUT" | jq -r .includes[2])" = "pulp_python"
@@ -42,4 +42,4 @@ if pulp debug has-plugin --name "python" --min-version "3.2.0"
   else
     expect_fail pulp python remote create --name "cli_test_complex_remote" --url "$PYTHON_REMOTE_URL" --keep-latest-packages 3 --package-types '["sdist", "bdist_wheel"]' --exclude-platforms '["windows"]'
 fi
-expect_succ pulp python remote destroy --name "cli_test_python_remote"
+expect_succ pulp python remote destroy --remote "cli_test_python_remote"

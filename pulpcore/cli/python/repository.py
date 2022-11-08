@@ -25,7 +25,7 @@ from pulpcore.cli.common.generic import (
     pulp_option,
     repository_content_command,
     repository_href_option,
-    repository_option,
+    repository_lookup_option,
     resource_option,
     retained_versions_option,
     show_command,
@@ -83,8 +83,8 @@ def repository(ctx: click.Context, pulp_ctx: PulpCLIContext, repo_type: str) -> 
         raise NotImplementedError()
 
 
-lookup_options = [href_option, name_option]
-nested_lookup_options = [repository_href_option, repository_option]
+lookup_options = [href_option, name_option, repository_lookup_option]
+nested_lookup_options = [repository_href_option, repository_lookup_option]
 update_options = [
     click.option("--description"),
     remote_option,
@@ -146,6 +146,7 @@ repository.add_command(
 @repository.command()
 @name_option
 @href_option
+@repository_lookup_option
 @remote_option
 @pass_repository_context
 def sync(
@@ -176,6 +177,7 @@ def sync(
 @repository.command(deprecated=True)
 @name_option
 @href_option
+@repository_lookup_option
 @click.option("--filename", required=True)
 @click.option("--base-version", type=int)
 @pass_repository_context
@@ -206,6 +208,7 @@ def add(
 @repository.command(deprecated=True)
 @name_option
 @href_option
+@repository_lookup_option
 @click.option("--filename", required=True)
 @click.option("--base-version", type=int)
 @pass_repository_context

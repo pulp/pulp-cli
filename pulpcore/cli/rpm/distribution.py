@@ -6,6 +6,7 @@ from pulpcore.cli.common.generic import (
     create_command,
     destroy_command,
     distribution_filter_options,
+    distribution_lookup_option,
     href_option,
     label_command,
     list_command,
@@ -33,6 +34,7 @@ repository_option = resource_option(
         " When set, this will unset the 'publication'."
         " Specified as '[[<plugin>:]<type>:]<name>' or as href."
     ),
+    href_pattern=PulpRpmRepositoryContext.HREF_PATTERN,
 )
 
 
@@ -53,7 +55,8 @@ def distribution(ctx: click.Context, pulp_ctx: PulpCLIContext, distribution_type
         raise NotImplementedError()
 
 
-lookup_options = [href_option, name_option]
+lookup_options = [href_option, name_option, distribution_lookup_option]
+nested_lookup_options = [distribution_lookup_option]
 update_options = [
     click.option(
         "--publication",
@@ -74,4 +77,4 @@ distribution.add_command(
     update_command(decorators=lookup_options + update_options + [click.option("--base-path")])
 )
 distribution.add_command(destroy_command(decorators=lookup_options))
-distribution.add_command(label_command())
+distribution.add_command(label_command(decorators=nested_lookup_options))

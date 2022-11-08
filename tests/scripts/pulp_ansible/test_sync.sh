@@ -22,17 +22,17 @@ expect_succ pulp ansible remote -t "collection" create --name "cli_test_ansible_
 expect_succ pulp ansible repository create --name "cli_test_ansible_repository"
 
 # Test without remote (should fail)
-expect_fail pulp ansible repository sync --name "cli_test_ansible_repository"
+expect_fail pulp ansible repository sync --repository "cli_test_ansible_repository"
 # Test with remote
-expect_succ pulp ansible repository sync --name "cli_test_ansible_repository" --remote "role:cli_test_ansible_remote"
+expect_succ pulp ansible repository sync --repository "cli_test_ansible_repository" --remote "role:cli_test_ansible_remote"
 
 # Preconfigure remote
-expect_succ pulp ansible repository update --name "cli_test_ansible_repository" --remote "role:cli_test_ansible_remote"
+expect_succ pulp ansible repository update --repository "cli_test_ansible_repository" --remote "role:cli_test_ansible_remote"
 
 # Test with remote
-expect_succ pulp ansible repository sync --name "cli_test_ansible_repository"
+expect_succ pulp ansible repository sync --repository "cli_test_ansible_repository"
 # Test without remote
-expect_succ pulp ansible repository sync --name "cli_test_ansible_repository" --remote "role:cli_test_ansible_remote"
+expect_succ pulp ansible repository sync --repository "cli_test_ansible_repository" --remote "role:cli_test_ansible_remote"
 
 # Verify sync
 expect_succ pulp ansible repository version list --repository "cli_test_ansible_repository"

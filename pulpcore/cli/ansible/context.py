@@ -4,7 +4,7 @@ from pulpcore.cli.common.context import (
     EntityDefinition,
     PluginRequirement,
     PulpContentContext,
-    PulpEntityContext,
+    PulpDistributionContext,
     PulpRemoteContext,
     PulpRepositoryContext,
     PulpRepositoryVersionContext,
@@ -41,7 +41,7 @@ class PulpAnsibleCollectionVersionSignatureContext(PulpContentContext):
     ID_PREFIX = "content_ansible_collection_signatures"
 
 
-class PulpAnsibleDistributionContext(PulpEntityContext):
+class PulpAnsibleDistributionContext(PulpDistributionContext):
     ENTITY = _("ansible distribution")
     ENTITIES = _("ansible distributions")
     HREF = "ansible_ansible_distribution_href"
@@ -61,6 +61,7 @@ class PulpAnsibleRoleRemoteContext(PulpRemoteContext):
     ENTITIES = _("role remotes")
     HREF = "ansible_role_remote_href"
     ID_PREFIX = "remotes_ansible_role"
+    HREF_PATTERN = r"remotes/(?P<plugin>ansible)/(?P<resource_type>role)/"
 
 
 class PulpAnsibleCollectionRemoteContext(PulpRemoteContext):
@@ -68,7 +69,7 @@ class PulpAnsibleCollectionRemoteContext(PulpRemoteContext):
     ENTITIES = _("collection remotes")
     HREF = "ansible_collection_remote_href"
     ID_PREFIX = "remotes_ansible_collection"
-    collection_nullable = ["auth_url", "requirements_file", "token"]
+    HREF_PATTERN = r"remotes/(?P<plugin>ansible)/(?P<resource_type>collection)/"
 
     def preprocess_entity(self, body: EntityDefinition, partial: bool = False) -> EntityDefinition:
         body = super().preprocess_entity(body, partial=partial)

@@ -21,7 +21,7 @@ from pulpcore.cli.common.generic import (
     pulp_labels_option,
     repository_content_command,
     repository_href_option,
-    repository_option,
+    repository_lookup_option,
     resource_option,
     retained_versions_option,
     role_command,
@@ -100,8 +100,8 @@ def repository() -> None:
     pass
 
 
-lookup_options = [href_option, name_option]
-nested_lookup_options = [repository_href_option, repository_option]
+lookup_options = [href_option, name_option, repository_lookup_option]
+nested_lookup_options = [repository_href_option, repository_lookup_option]
 update_options = [
     click.option("--description"),
     remote_option,
@@ -146,6 +146,7 @@ repository.add_command(
 @repository.command(allowed_with_contexts=container_context)
 @name_option
 @href_option
+@repository_lookup_option
 @remote_option
 @pass_repository_context
 def sync(
@@ -179,6 +180,7 @@ def sync(
 @repository.command(name="tag")
 @name_option
 @href_option
+@repository_lookup_option
 @click.option("--tag", help=_("Name to tag an image with"), required=True, callback=_tag_callback)
 @click.option("--digest", help=_("SHA256 digest of the Manifest file"), required=True)
 @pass_repository_context
@@ -199,6 +201,7 @@ def add_tag(
 @repository.command(name="untag")
 @name_option
 @href_option
+@repository_lookup_option
 @click.option("--tag", help=_("Name of tag to remove"), required=True, callback=_tag_callback)
 @pass_repository_context
 def remove_tag(repository_ctx: PulpContainerBaseRepositoryContext, tag: str) -> None:
@@ -208,6 +211,7 @@ def remove_tag(repository_ctx: PulpContainerBaseRepositoryContext, tag: str) -> 
 @repository.command(allowed_with_contexts=container_context)
 @name_option
 @href_option
+@repository_lookup_option
 @source_option
 @version_option
 @click.option(
@@ -240,6 +244,7 @@ def copy_tag(
 @repository.command(allowed_with_contexts=container_context)
 @name_option
 @href_option
+@repository_lookup_option
 @source_option
 @version_option
 @click.option(

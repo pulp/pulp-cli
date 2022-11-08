@@ -21,7 +21,7 @@ fi
 
 expect_succ pulp file remote create --name "cli_test_file_remote" --url "$FILE_REMOTE_URL"
 expect_succ pulp file repository create --name "cli_test_file_repository" --remote "cli_test_file_remote"
-expect_succ pulp file repository sync --name "cli_test_file_repository"
+expect_succ pulp file repository sync --repository "cli_test_file_repository"
 expect_succ pulp file publication create --repository "cli_test_file_repository"
 PUBLICATION_HREF=$(echo "$OUTPUT" | jq -r .pulp_href)
 
@@ -40,7 +40,7 @@ expect_succ pulp file distribution update \
 if pulp debug has-plugin --name "file" --min-version "1.7.0"
 then
   expect_succ pulp file distribution update \
-    --name "cli_test_file_distro" \
+    --distribution "cli_test_file_distro" \
     --repository "cli_test_file_repository"
 fi
 
@@ -51,4 +51,4 @@ test "$(echo "$OUTPUT" | jq -r length)" -gt 0
 
 expect_succ curl "$curl_opt" --head --fail "$PULP_BASE_URL/pulp/content/cli_test_file_distro/1.iso"
 
-expect_succ pulp file distribution destroy --name "cli_test_file_distro"
+expect_succ pulp file distribution destroy --distribution "cli_test_file_distro"

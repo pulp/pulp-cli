@@ -16,4 +16,4 @@ expect_succ pulp container remote list
 
 expect_succ pulp container remote create --name "cli_test_container_remote" --upstream-name "hello" --url "$FILE_REMOTE_URL"
 expect_succ pulp container remote list
-expect_succ pulp container remote destroy --name "cli_test_container_remote"
+expect_succ pulp container remote destroy --remote "cli_test_container_remote"

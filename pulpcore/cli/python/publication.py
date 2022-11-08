@@ -25,6 +25,7 @@ repository_option = resource_option(
     default_plugin="python",
     default_type="python",
     context_table={"python:python": PulpPythonRepositoryContext},
+    href_pattern=PulpPythonRepositoryContext.HREF_PATTERN,
 )
 
 

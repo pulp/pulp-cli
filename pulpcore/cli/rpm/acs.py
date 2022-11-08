@@ -5,6 +5,7 @@ import click
 from pulpcore.cli.common.context import PulpRemoteContext
 from pulpcore.cli.common.generic import (
     PulpCLIContext,
+    acs_lookup_option,
     create_command,
     destroy_command,
     href_option,
@@ -55,6 +56,7 @@ def path() -> None:
 @path.command()
 @name_option
 @href_option
+@acs_lookup_option
 @path_option
 @pass_entity_context
 def add(acs_ctx: PulpRpmACSContext, paths: Iterable[str]) -> None:
@@ -74,6 +76,7 @@ def add(acs_ctx: PulpRpmACSContext, paths: Iterable[str]) -> None:
 @path.command()
 @name_option
 @href_option
+@acs_lookup_option
 @path_option
 @pass_entity_context
 def remove(acs_ctx: PulpRpmACSContext, paths: Iterable[str]) -> None:
@@ -97,7 +100,7 @@ remote_option = resource_option(
     href_pattern=PulpRemoteContext.HREF_PATTERN,
     help=_("Remote to attach to ACS in the form '[[<plugin>:]<resource_type>:]<name>' or by href."),
 )
-lookup_options = [href_option, name_option]
+lookup_options = [href_option, name_option, acs_lookup_option]
 update_options = [remote_option]
 create_options = update_options + [click.option("--name", required=True), path_option]
 
@@ -112,6 +115,7 @@ acs.add_command(destroy_command(decorators=lookup_options))
 @pass_entity_context
 @pass_pulp_context
 @href_option
+@acs_lookup_option
 @name_option
 def refresh(pulp_ctx: PulpCLIContext, acs_ctx: PulpRpmACSContext) -> None:
     acs_ctx.refresh()

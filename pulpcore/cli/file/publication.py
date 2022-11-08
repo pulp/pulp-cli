@@ -26,6 +26,7 @@ repository_option = resource_option(
     default_plugin="file",
     default_type="file",
     context_table={"file:file": PulpFileRepositoryContext},
+    href_pattern=PulpFileRepositoryContext.HREF_PATTERN,
 )
 
 

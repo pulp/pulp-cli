@@ -15,11 +15,14 @@ from pulpcore.cli.common.context import (
     EntityDefinition,
     EntityFieldDefinition,
     PluginRequirement,
+    PulpACSContext,
     PulpContentContext,
     PulpContext,
+    PulpDistributionContext,
     PulpEntityContext,
     PulpException,
     PulpNoWait,
+    PulpRemoteContext,
     PulpRepositoryContext,
     PulpRepositoryVersionContext,
 )
@@ -448,6 +451,53 @@ def pulp_option(*args: Any, **kwargs: Any) -> Callable[[FC], FC]:
     return click.option(*args, **kwargs)
 
 
+def resource_lookup_option(*args: Any, **kwargs: Any) -> Callable[[FC], FC]:
+    lookup_key: str = kwargs.pop("lookup_key", "name")
+    context_class: Type[PulpEntityContext] = kwargs.pop("context_class")
+
+    def _option_callback(
+        ctx: click.Context, param: click.Parameter, value: Optional[str]
+    ) -> EntityFieldDefinition:
+        # Pass None and "" verbatim
+        if not value:
+            return value
+
+        pulp_ctx = ctx.find_object(PulpCLIContext)
+        assert pulp_ctx is not None
+
+        entity_ctx = ctx.find_object(context_class)
+        assert entity_ctx is not None
+
+        if value.startswith("/"):
+            # The HREF of a resource was passed
+            pattern = rf"^{pulp_ctx.api_path}{entity_ctx.HREF_PATTERN}"
+            match = re.match(pattern, value)
+            if match:
+                entity_ctx.pulp_href = value
+            else:
+                raise click.ClickException(
+                    _("'{value}' is not a valid href for {option_name}.").format(
+                        value=value, option_name=param.name
+                    )
+                )
+        else:
+            # The named identity of a resource was passed
+            entity_ctx.entity = {lookup_key: value}
+
+        return entity_ctx
+
+    if "cls" not in kwargs:
+        kwargs["cls"] = PulpOption
+    kwargs["callback"] = _option_callback
+
+    kwargs["expose_value"] = False
+
+    if "help" not in kwargs:
+        kwargs["help"] = _("A resource to look for identified by <name> or by <href>.")
+
+    return click.option(*args, **kwargs)
+
+
 def resource_option(*args: Any, **kwargs: Any) -> Callable[[FC], FC]:
     default_plugin: Optional[str] = kwargs.pop("default_plugin", None)
     default_type: Optional[str] = kwargs.pop("default_type", None)
@@ -687,6 +737,23 @@ repository_option = click.option(
     help=_("Name of the repository"),
     callback=lookup_callback("name", PulpRepositoryContext),
     expose_value=False,
+)
+
+repository_lookup_option = resource_lookup_option(
+    "--repository",
+    context_class=PulpRepositoryContext,
+)
+remote_lookup_option = resource_lookup_option(
+    "--remote",
+    context_class=PulpRemoteContext,
+)
+distribution_lookup_option = resource_lookup_option(
+    "--distribution",
+    context_class=PulpDistributionContext,
+)
+acs_lookup_option = resource_lookup_option(
+    "--acs",
+    context_class=PulpACSContext,
 )
 
 version_option = click.option(

@@ -26,7 +26,7 @@ from pulpcore.cli.common.generic import (
     pulp_option,
     repository_content_command,
     repository_href_option,
-    repository_option,
+    repository_lookup_option,
     resource_option,
     retained_versions_option,
     show_command,
@@ -97,8 +97,8 @@ package_options = [
         help=_("Href of the rpm package to use"),
     )
 ]
-lookup_options = [href_option, name_option]
-nested_lookup_options = [repository_href_option, repository_option]
+lookup_options = [href_option, name_option, repository_lookup_option]
+nested_lookup_options = [repository_href_option, repository_lookup_option]
 content_json_callback = create_content_json_callback(
     PulpRpmPackageContext, schema=CONTENT_LIST_SCHEMA
 )
@@ -166,6 +166,7 @@ repository.add_command(
 @repository.command()
 @name_option
 @href_option
+@repository_lookup_option
 @remote_option
 @click.option(
     "--mirror/--no-mirror",

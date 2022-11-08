@@ -7,6 +7,7 @@ from pulpcore.cli.common.context import (
     PluginRequirement,
     PulpACSContext,
     PulpContentContext,
+    PulpDistributionContext,
     PulpEntityContext,
     PulpException,
     PulpRemoteContext,
@@ -43,7 +44,7 @@ class PulpRpmCompsXmlContext(PulpEntityContext):
         )
 
 
-class PulpRpmDistributionContext(PulpEntityContext):
+class PulpRpmDistributionContext(PulpDistributionContext):
     ENTITY = _("rpm distribution")
     ENTITIES = _("rpm distributions")
     HREF = "rpm_rpm_distribution_href"

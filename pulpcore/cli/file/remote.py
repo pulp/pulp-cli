@@ -13,6 +13,7 @@ from pulpcore.cli.common.generic import (
     pass_pulp_context,
     pulp_group,
     remote_filter_options,
+    remote_lookup_option,
     role_command,
     show_command,
     update_command,
@@ -41,7 +42,8 @@ def remote(ctx: click.Context, pulp_ctx: PulpCLIContext, remote_type: str) -> No
         raise NotImplementedError()
 
 
-lookup_options = [href_option, name_option]
+lookup_options = [href_option, name_option, remote_lookup_option]
+nested_lookup_options = [remote_lookup_option]
 file_remote_options = [
     click.option(
         "--policy", type=click.Choice(["immediate", "on_demand", "streamed"], case_sensitive=False)
@@ -55,5 +57,5 @@ remote.add_command(
     update_command(decorators=lookup_options + common_remote_update_options + file_remote_options)
 )
 remote.add_command(destroy_command(decorators=lookup_options))
-remote.add_command(label_command())
+remote.add_command(label_command(decorators=nested_lookup_options))
 remote.add_command(role_command(decorators=lookup_options))

@@ -2,6 +2,7 @@ from pulpcore.cli.common.context import (
     EntityDefinition,
     PluginRequirement,
     PulpContentContext,
+    PulpDistributionContext,
     PulpEntityContext,
     PulpRemoteContext,
     PulpRepositoryContext,
@@ -21,7 +22,7 @@ class PulpPythonContentContext(PulpContentContext):
     ID_PREFIX = "content_python_packages"
 
 
-class PulpPythonDistributionContext(PulpEntityContext):
+class PulpPythonDistributionContext(PulpDistributionContext):
     ENTITY = _("python distribution")
     ENTITIES = _("python distributions")
     HREF = "python_python_distribution_href"

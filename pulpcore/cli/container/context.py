@@ -4,6 +4,7 @@ from pulpcore.cli.common.context import (
     EntityDefinition,
     PluginRequirement,
     PulpContentContext,
+    PulpDistributionContext,
     PulpEntityContext,
     PulpRemoteContext,
     PulpRepositoryContext,
@@ -48,9 +49,10 @@ class PulpContainerNamespaceContext(PulpEntityContext):
     HREF = "container_container_namespace_href"
     ID_PREFIX = "pulp_container_namespaces"
     CAPABILITIES = {"roles": [PluginRequirement("container", "2.11.0")]}
+    HREF_PATTERN = r"(?P<plugin>pulp_container)/(?P<resource_type>namespaces)/"
 
 
-class PulpContainerDistributionContext(PulpEntityContext):
+class PulpContainerDistributionContext(PulpDistributionContext):
     ENTITY = _("container distribution")
     ENTITIES = _("container distributions")
     HREF = "container_container_distribution_href"
@@ -110,6 +112,7 @@ class PulpContainerRepositoryContext(PulpContainerBaseRepositoryContext):
     ENTITY = _("container repository")
     ENTITIES = _("container repositories")
     VERSION_CONTEXT = PulpContainerRepositoryVersionContext
+    HREF_PATTERN = r"repositories/(?P<plugin>container)/(?P<resource_type>container)/"
     CAPABILITIES = {
         "sync": [PluginRequirement("container")],
         "pulpexport": [PluginRequirement("container", "2.8.0")],
@@ -161,6 +164,7 @@ class PulpContainerPushRepositoryContext(PulpContainerBaseRepositoryContext):
     ENTITY = _("push container repository")
     ENTITIES = _("push container repositories")
     VERSION_CONTEXT = PulpContainerPushRepositoryVersionContext
+    HREF_PATTERN = r"repositories/(?P<plugin>container)/(?P<resource_type>container-push)/"
     CAPABILITIES = {
         "tag": [PluginRequirement("container", "2.3.0")],
         "roles": [PluginRequirement("container", "2.11.0")],
