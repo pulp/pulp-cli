@@ -52,7 +52,6 @@
 - Fixed ``KeyError: 'missing_field'`` error when required fields are not supplied.
   [#572](https://github.com/pulp/pulp-cli/issues/572)
 - Correctly identified base_path as required when creating a Distribution.
-
   (affected rpm, file, and python distribution create)
   [#574](https://github.com/pulp/pulp-cli/issues/574)
 
