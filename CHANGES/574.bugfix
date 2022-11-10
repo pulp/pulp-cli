@@ -1,3 +1,0 @@
-Correctly identified base_path as required when creating a Distribution.
-
-(affected rpm, file, and python distribution create)

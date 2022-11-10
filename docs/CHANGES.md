@@ -10,6 +10,60 @@
 
 [//]: # (towncrier release notes start)
 
+## 0.16.0 (2022-11-10)
+
+
+
+### Features
+
+- Added `--max-retries` option to remotes.
+  [#227](https://github.com/pulp/pulp-cli/issues/227)
+- Added the ability to set labels directly on create and update.
+  [#274](https://github.com/pulp/pulp-cli/issues/274)
+- Added the `--repository` parameter to some upload commands.
+  [#385](https://github.com/pulp/pulp-cli/issues/385)
+- Introduced the option `--wait` for the `pulp task-group show` command.
+  By using this option, details of the task group will be shown only after waiting for all related tasks to finish.
+  [#459](https://github.com/pulp/pulp-cli/issues/459)
+- Added `--optimize` and `--sync-options` to the `rpm repository sync` subcommand.
+  [#462](https://github.com/pulp/pulp-cli/issues/462)
+- Added `pulp debug openapi schema` and `pulp debug openapi schema-names` to investigate reusable schemas in the api.
+  Renamed the original `pulp debug openapi schema` command to `pulp debug openapi spec`.
+  [#534](https://github.com/pulp/pulp-cli/issues/534)
+- Added support for adjusting list output: `--ordering`, `--field`, `--exclude-field`.
+  [#542](https://github.com/pulp/pulp-cli/issues/542)
+- Added task filtering options.
+  [#543](https://github.com/pulp/pulp-cli/issues/543)
+- Added `--cid` option and started reusing a recieved correlation id in all requests made by the same command.
+  [#568](https://github.com/pulp/pulp-cli/issues/568)
+
+
+### Bugfixes
+
+- Allowed remote timeout and rate limiting parameters to be nulled by passing `""`.
+  [#227](https://github.com/pulp/pulp-cli/issues/227)
+- The `openapi` layer now handles all instances of `requests.RequestException`.
+  This will help to give a better error message for e.g. missing schema in the `--base-url` parameter.
+  [#466](https://github.com/pulp/pulp-cli/issues/466)
+- Fixed an error raised when specifying no HREF value for some of the commands.
+  [#545](https://github.com/pulp/pulp-cli/issues/545)
+- Fixed an assertion error when canceling tasks by state.
+  [#561](https://github.com/pulp/pulp-cli/issues/561)
+- Fixed ``KeyError: 'missing_field'`` error when required fields are not supplied.
+  [#572](https://github.com/pulp/pulp-cli/issues/572)
+- Correctly identified base_path as required when creating a Distribution.
+
+  (affected rpm, file, and python distribution create)
+  [#574](https://github.com/pulp/pulp-cli/issues/574)
+
+
+### Misc
+
+- [#569](https://github.com/pulp/pulp-cli/issues/569), [#589](https://github.com/pulp/pulp-cli/issues/589)
+
+
+---
+
 
 ## 0.15.0 (2022-07-20)
 
