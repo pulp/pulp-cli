@@ -1,1 +1,0 @@
-Added task filtering options.
