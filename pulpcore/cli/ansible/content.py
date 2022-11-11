@@ -273,7 +273,7 @@ def upload(
         repository: Optional[PulpRepositoryContext] = kwargs["repository"]
         if repository:
             body["repository"] = repository.pulp_href
-        uploads = {"file": file.read()}
+        uploads = {"file": file}
         pulp_ctx.output_result(content_ctx.create(body=body, uploads=uploads))
     elif isinstance(content_ctx, PulpAnsibleCollectionVersionContext):
         result = content_ctx.upload(file=file)

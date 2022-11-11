@@ -12,6 +12,7 @@ from pulpcore.cli.common.context import (
     PulpException,
 )
 from pulpcore.cli.common.i18n import get_translation
+from pulpcore.cli.common.openapi import UploadsMap
 
 translation = get_translation(__name__)
 _ = translation.gettext
@@ -41,15 +42,19 @@ class PulpArtifactContext(PulpEntityContext):
     HREF = "artifact_href"
     ID_PREFIX = "artifacts"
 
-    def upload(self, file: IO[bytes], chunk_size: int = 1000000) -> Any:
-        upload_ctx = PulpUploadContext(self.pulp_ctx)
+    def upload(
+        self, file: IO[bytes], chunk_size: int = 1000000, sha256: Optional[str] = None
+    ) -> Any:
         size = os.path.getsize(file.name)
 
-        sha256 = hashlib.sha256()
+        sha256_hasher = hashlib.sha256()
         for chunk in iter(lambda: file.read(chunk_size), b""):
-            sha256.update(chunk)
-        sha256_digest = sha256.hexdigest()
+            sha256_hasher.update(chunk)
+        sha256_digest = sha256_hasher.hexdigest()
         file.seek(0)
+
+        if sha256 is not None and sha256_digest != sha256:
+            raise PulpException(_("File digest does not match."))
 
         # check whether the file exists before uploading
         result = self.list(limit=1, offset=0, parameters={"sha256": sha256_digest})
@@ -66,6 +71,7 @@ class PulpArtifactContext(PulpEntityContext):
             )
             return artifact["pulp_href"]
 
+        upload_ctx = PulpUploadContext(self.pulp_ctx)
         upload_href = upload_ctx.upload_file(file, chunk_size)
 
         self.pulp_ctx.echo(_("Creating artifact."), err=True)
@@ -131,7 +137,7 @@ class PulpGroupPermissionContext(PulpEntityContext):
         non_blocking: bool = False,
         parameters: Optional[Dict[str, Any]] = None,
         body: Optional[Dict[str, Any]] = None,
-        uploads: Optional[Dict[str, bytes]] = None,
+        uploads: Optional[UploadsMap] = None,
         validate_body: bool = False,
     ) -> Any:
         """Workaroud because the openapi spec for GroupPermissions has always been broken.

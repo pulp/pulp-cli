@@ -1,5 +1,5 @@
 import sys
-from typing import IO, Any, Dict, Iterable, Optional
+from typing import IO, Any, Dict, Iterable, Mapping, Optional
 
 import click
 
@@ -119,7 +119,7 @@ def call(
         params: Dict[str, str] = dict(parameter.partition("=")[::2] for parameter in parameters)
     except ValueError:
         raise click.ClickException("Parameters must be in the form <key>=<value>.")
-    uploads_dict: Dict[str, bytes] = {file.name: file.read() for file in uploads}
+    uploads_dict: Mapping[str, IO[bytes]] = {file.name: file for file in uploads}
     result = pulp_ctx.call(operation_id, parameters=params, body=body, uploads=uploads_dict)
     pulp_ctx.output_result(result)
 

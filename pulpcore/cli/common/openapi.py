@@ -1,9 +1,12 @@
 # copyright (c) 2020, Matthias Dellweg
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 
+import base64
+import datetime
 import json
 import os
-from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
+from io import BufferedReader
+from typing import IO, Any, Callable, Dict, List, Mapping, Optional, Tuple, Union
 from urllib.parse import urljoin
 
 import requests
@@ -14,7 +17,12 @@ from pulpcore.cli.common.i18n import get_translation
 translation = get_translation(__name__)
 _ = translation.gettext
 
+UploadType = Union[bytes, IO[bytes]]
+UploadsMap = Mapping[str, UploadType]
+
 SAFE_METHODS = ["GET", "HEAD", "OPTIONS"]
+ISO_DATE_FORMAT = "%Y-%m-%d"
+ISO_DATETIME_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 
 
 class OpenAPIError(Exception):
@@ -164,35 +172,33 @@ class OpenAPI:
                 param_spec = param_specs.pop(name)
                 param_schema = param_spec.get("schema")
                 if param_schema:
-                    param_type = param_schema.get("type", "string")
-                    if param_type == "array":
-                        if not param:
-                            continue
-                        assert isinstance(param, Iterable) and not isinstance(
-                            param, str
-                        ), f"Parameter {name} is expected to be a list."
-                        style = param_spec.get(
-                            "style", "form" if param_in in ("query", "cookie") else "simple"
-                        )
-                        explode = param_spec.get("explode", style == "form")
-                        if not explode:
-                            # Not exploding means comma separated list
-                            param = ",".join(param)
-                    elif param_type == "integer":
-                        assert isinstance(param, int)
+                    param = self.validate_schema(param_schema, name, param)
+
+                if isinstance(param, List):
+                    # Check if we need to implode the list
+                    style = (
+                        param_spec.get("style") or "form"
+                        if param_in in ("query", "cookie")
+                        else "simple"
+                    )
+                    explode: bool = param_spec.get("explode", style == "form")
+                    if not explode:
+                        # Not exploding means comma separated list
+                        param = ",".join(param)
                 result[name] = param
         remaining_required = [
             item["name"] for item in param_specs.values() if item.get("required", False)
         ]
         if any(remaining_required):
             raise RuntimeError(
-                _("Required parameters [{required}] missing for {param_type}.").format(
-                    required=", ".join(remaining_required), param_type=param_type
+                _("Required parameters [{required}] missing in {param_in}.").format(
+                    required=", ".join(remaining_required), param_in=param_in
                 )
             )
         return result
 
-    def validate_body(self, schema: Any, body: Dict[str, Any], uploads: Dict[str, bytes]) -> None:
+    def validate_schema(self, schema: Any, name: str, value: Any) -> Any:
+        # Look if the schema is provided by reference
         schema_ref = schema.get("$ref")
         if schema_ref:
             if not schema_ref.startswith("#/components/schemas/"):
@@ -200,18 +206,103 @@ class OpenAPI:
             # len("#/components/schemas/") == 21
             schema_name = schema_ref[21:]
             schema = self.api_spec["components"]["schemas"][schema_name]
-        for key, value in body.items():
-            field_spec = schema["properties"].get(key)
-            if not field_spec:
-                raise OpenAPIError(_("Unexpected field '{key}' provided.").format(key=key))
+
+        if value is None and schema.get("nullable", False):
+            return None
+
+        schema_type = schema.get("type", "string")
+        if schema_type == "object":
+            value = self.validate_object(schema, name, value)
+        elif schema_type == "array":
+            value = self.validate_array(schema, name, value)
+        elif schema_type == "string":
+            value = self.validate_string(schema, name, value)
+        elif schema_type == "integer":
+            value = self.validate_integer(schema, name, value)
+        elif schema_type == "number":
+            value = self.validate_number(schema, name, value)
+        elif schema_type == "boolean":
+            if not isinstance(value, bool):
+                raise OpenAPIError(_("'{name}' is expected to be a boolean.").format(name=name))
+        # TODO: Add more types here.
+        else:
+            raise OpenAPIError(
+                _("Type `{schema_type}` is not implemented yet.").format(schema_type=schema_type)
+            )
+        return value
+
+    def validate_object(self, schema: Any, name: str, value: Any) -> Dict[str, Any]:
+        if not isinstance(value, Dict):
+            raise OpenAPIError(_("'{name}' is expected to be an object.").format(name=name))
+        properties = schema.get("properties")
+        if properties is not None:
+            for property_name, property_value in value.items():
+                property_schema = properties.get(property_name)
+                if not property_schema:
+                    raise OpenAPIError(
+                        _("Unexpected property '{property_name}' for '{name}' provided.").format(
+                            name=name, property_name=property_name
+                        )
+                    )
+                value[property_name] = self.validate_schema(
+                    property_schema, property_name, property_value
+                )
         if "required" in schema:
-            missing_fields = set(schema["required"]) - set(body.keys()) - set(uploads.keys())
-            if missing_fields:
+            missing_properties = set(schema["required"]) - set(value.keys())
+            if missing_properties:
                 raise OpenAPIError(
-                    _("Required field(s) '{missing_fields}' missing.").format(
-                        missing_fields=missing_fields
+                    _("Required properties(s) '{missing_properties}' of '{name}' missing.").format(
+                        name=name, missing_properties=missing_properties
                     )
                 )
+        return value
+
+    def validate_array(self, schema: Any, name: str, value: Any) -> List[Any]:
+        if not isinstance(value, List):
+            raise OpenAPIError(_("'{name}' is expected to be a list.").format(name=name))
+        item_schema = schema["items"]
+        return [self.validate_schema(item_schema, name, item) for item in value]
+
+    def validate_string(self, schema: Any, name: str, value: Any) -> Union[str, UploadType]:
+        schema_format = schema.get("format")
+        if schema_format == "date":
+            if not isinstance(value, datetime.date):
+                raise OpenAPIError(_("'{name}' is expected to be a date.").format(name=name))
+            return value.strftime(ISO_DATE_FORMAT)
+        elif schema_format == "date-time":
+            if not isinstance(value, datetime.datetime):
+                raise OpenAPIError(_("'{name}' is expected to be a datetime.").format(name=name))
+            return value.strftime(ISO_DATETIME_FORMAT)
+        elif schema_format == "bytes":
+            if not isinstance(value, bytes):
+                raise OpenAPIError(_("'{name}' is expected to be bytes.").format(name=name))
+            return base64.b64encode(value)
+        elif schema_format == "binary":
+            if not isinstance(value, (bytes, BufferedReader)):
+                raise OpenAPIError(_("'{name}' is expected to be binary.").format(name=name))
+            return value
+        else:
+            if not isinstance(value, str):
+                raise OpenAPIError(_("'{name}' is expected to be a string.").format(name=name))
+            return value
+
+    def validate_integer(self, schema: Any, name: str, value: Any) -> int:
+        if not isinstance(value, int):
+            raise OpenAPIError(_("'{name}' is expected to be an integer.").format(name=name))
+        minimum = schema.get("minimum")
+        if minimum is not None and value < minimum:
+            raise OpenAPIError(_("'{name}' is violating the minimum constraint").format(name=name))
+        maximum = schema.get("maximum")
+        if maximum is not None and value > maximum:
+            raise OpenAPIError(_("'{name}' is violating the maximum constraint").format(name=name))
+        return value
+
+    def validate_number(self, schema: Any, name: str, value: Any) -> float:
+        # https://swagger.io/specification/#data-types describes float and double.
+        # Python does not distinguish them.
+        if not isinstance(value, float):
+            raise OpenAPIError(_("'{name}' is expected to be an integer.").format(name=name))
+        return value
 
     def render_request(
         self,
@@ -221,7 +312,7 @@ class OpenAPI:
         params: Dict[str, Any],
         headers: Dict[str, str],
         body: Optional[Dict[str, Any]] = None,
-        uploads: Optional[Dict[str, bytes]] = None,
+        uploads: Optional[UploadsMap] = None,
         validate_body: bool = True,
     ) -> requests.PreparedRequest:
         method_spec = path_spec[method]
@@ -235,7 +326,7 @@ class OpenAPI:
         content_type: Optional[str] = None
         data: Optional[Dict[str, Any]] = None
         json: Optional[Dict[str, Any]] = None
-        files: Optional[List[Tuple[str, Tuple[str, bytes, str]]]] = None
+        files: Optional[List[Tuple[str, Tuple[str, UploadType, str]]]] = None
 
         if uploads:
             content_type = next(
@@ -279,11 +370,21 @@ class OpenAPI:
                 else:
                     raise OpenAPIError(_("No suitable content type for request specified."))
         if content_type and validate_body:
-            self.validate_body(
+            body = body or {}
+            if uploads:
+                # Add uploads for validation (CRAZY HACK)
+                body.update(uploads)
+            # This only works, because data or json will be the same object as body...
+            body = self.validate_schema(
                 method_spec["requestBody"]["content"][content_type]["schema"],
-                body or {},
-                uploads or {},
+                "body",
+                body,
             )
+            assert isinstance(body, Dict)
+            if uploads:
+                # Remove uploads again
+                for key in uploads:
+                    body.pop(key)
         return self._session.prepare_request(
             requests.Request(
                 method, url, params=params, headers=headers, data=data, json=json, files=files
@@ -316,7 +417,7 @@ class OpenAPI:
         operation_id: str,
         parameters: Optional[Dict[str, Any]] = None,
         body: Optional[Dict[str, Any]] = None,
-        uploads: Optional[Dict[str, bytes]] = None,
+        uploads: Optional[UploadsMap] = None,
         validate_body: bool = True,
     ) -> Any:
         method, path = self.operations[operation_id]
