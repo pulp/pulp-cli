@@ -3,11 +3,13 @@ from typing import Any
 
 import click
 
-from pulpcore.cli.common.context import PulpContext, PulpEntityContext, pass_pulp_context
+from pulpcore.cli.common.context import PulpEntityContext
 from pulpcore.cli.common.generic import (
     GroupOption,
+    PulpCLIContext,
     href_option,
     list_command,
+    pass_pulp_context,
     pulp_group,
     pulp_option,
     show_command,
@@ -41,7 +43,7 @@ def _content_callback(ctx: click.Context, param: click.Parameter, value: Any) ->
 )
 @pass_pulp_context
 @click.pass_context
-def content(ctx: click.Context, pulp_ctx: PulpContext, content_type: str) -> None:
+def content(ctx: click.Context, pulp_ctx: PulpCLIContext, content_type: str) -> None:
     if content_type == "manifest":
         ctx.obj = PulpContainerManifestContext(pulp_ctx)
     elif content_type == "tag":

@@ -5,18 +5,14 @@ from typing import Optional, Tuple
 
 import click
 
-from pulpcore.cli.common.context import (
-    DATETIME_FORMATS,
-    PluginRequirement,
-    PulpContext,
-    PulpEntityContext,
-    pass_entity_context,
-    pass_pulp_context,
-)
+from pulpcore.cli.common.context import DATETIME_FORMATS, PluginRequirement, PulpEntityContext
 from pulpcore.cli.common.generic import (
+    PulpCLIContext,
     destroy_command,
     href_option,
     list_command,
+    pass_entity_context,
+    pass_pulp_context,
     pulp_group,
     pulp_option,
     role_command,
@@ -50,7 +46,7 @@ uuid_option = pulp_option(
 @pulp_group()
 @pass_pulp_context
 @click.pass_context
-def task(ctx: click.Context, pulp_ctx: PulpContext) -> None:
+def task(ctx: click.Context, pulp_ctx: PulpCLIContext) -> None:
     ctx.obj = PulpTaskContext(pulp_ctx)
 
 
@@ -115,7 +111,7 @@ task.add_command(
 @click.option("-w", "--wait", is_flag=True, help=_("Wait for the task to finish"))
 @pass_entity_context
 @pass_pulp_context
-def show(pulp_ctx: PulpContext, task_ctx: PulpTaskContext, wait: bool) -> None:
+def show(pulp_ctx: PulpCLIContext, task_ctx: PulpTaskContext, wait: bool) -> None:
     """Shows details of a task."""
     entity = task_ctx.entity
     if wait and entity["state"] in ["waiting", "running", "canceling"]:
@@ -137,7 +133,7 @@ def show(pulp_ctx: PulpContext, task_ctx: PulpTaskContext, wait: bool) -> None:
 @pass_entity_context
 @pass_pulp_context
 def cancel(
-    pulp_ctx: PulpContext,
+    pulp_ctx: PulpCLIContext,
     task_ctx: PulpTaskContext,
     all_tasks: bool,
     waiting_tasks: bool,
@@ -192,7 +188,7 @@ def cancel(
 @pass_entity_context
 @pass_pulp_context
 def purge(
-    pulp_ctx: PulpContext,
+    pulp_ctx: PulpCLIContext,
     task_ctx: PulpTaskContext,
     finished: Optional[datetime],
     state: Optional[Tuple[str]],

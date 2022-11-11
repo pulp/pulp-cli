@@ -3,8 +3,9 @@ from typing import Any, List, Optional
 
 import click
 
-from pulpcore.cli.common.context import PluginRequirement, PulpContext, pass_pulp_context
+from pulpcore.cli.common.context import PluginRequirement
 from pulpcore.cli.common.generic import (
+    PulpCLIContext,
     common_remote_create_options,
     common_remote_update_options,
     create_command,
@@ -14,6 +15,7 @@ from pulpcore.cli.common.generic import (
     list_command,
     load_json_callback,
     name_option,
+    pass_pulp_context,
     pulp_group,
     pulp_option,
     remote_filter_options,
@@ -58,7 +60,7 @@ def _package_list_callback(ctx: click.Context, param: click.Parameter, value: Op
 )
 @pass_pulp_context
 @click.pass_context
-def remote(ctx: click.Context, pulp_ctx: PulpContext, remote_type: str) -> None:
+def remote(ctx: click.Context, pulp_ctx: PulpCLIContext, remote_type: str) -> None:
     if remote_type == "python":
         ctx.obj = PulpPythonRemoteContext(pulp_ctx)
     else:

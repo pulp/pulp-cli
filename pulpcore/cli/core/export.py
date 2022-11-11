@@ -6,14 +6,19 @@ import click
 from pulpcore.cli.common.context import (
     DEFAULT_LIMIT,
     EntityDefinition,
-    PulpContext,
     PulpRepositoryContext,
     PulpRepositoryVersionContext,
-    pass_entity_context,
-    pass_pulp_context,
     registered_repository_contexts,
 )
-from pulpcore.cli.common.generic import destroy_command, href_option, pulp_group, show_command
+from pulpcore.cli.common.generic import (
+    PulpCLIContext,
+    destroy_command,
+    href_option,
+    pass_entity_context,
+    pass_pulp_context,
+    pulp_group,
+    show_command,
+)
 from pulpcore.cli.common.i18n import get_translation
 from pulpcore.cli.core.context import PulpExportContext, PulpExporterContext
 
@@ -25,7 +30,7 @@ def _version_list_callback(
     ctx: click.Context, param: click.Parameter, value: Iterable[Tuple[str, int]]
 ) -> Iterable[PulpRepositoryVersionContext]:
     result = []
-    pulp_ctx = ctx.find_object(PulpContext)
+    pulp_ctx = ctx.find_object(PulpCLIContext)
     assert pulp_ctx is not None
     for item in value:
         pulp_href: Optional[str] = None
@@ -84,7 +89,7 @@ def export() -> None:
 @export.group()
 @pass_pulp_context
 @click.pass_context
-def pulp(ctx: click.Context, pulp_ctx: PulpContext) -> None:
+def pulp(ctx: click.Context, pulp_ctx: PulpCLIContext) -> None:
     ctx.obj = PulpExportContext(pulp_ctx)
 
 
@@ -103,7 +108,7 @@ pulp.add_command(destroy_command(decorators=lookup_options))
 @pass_entity_context
 @pass_pulp_context
 def list(
-    pulp_ctx: PulpContext,
+    pulp_ctx: PulpCLIContext,
     export_ctx: PulpExportContext,
     exporter: str,
     limit: int,
@@ -128,7 +133,7 @@ def list(
 @pass_entity_context
 @pass_pulp_context
 def run(
-    pulp_ctx: PulpContext,
+    pulp_ctx: PulpCLIContext,
     export_ctx: PulpExportContext,
     exporter: str,
     full: bool,

@@ -3,14 +3,16 @@ from typing import Iterable, Optional
 
 import click
 
-from pulpcore.cli.common.context import PluginRequirement, PulpContext, pass_pulp_context
+from pulpcore.cli.common.context import PluginRequirement
 from pulpcore.cli.common.generic import (
+    PulpCLIContext,
     create_command,
     destroy_command,
     href_option,
     list_command,
     name_filter_options,
     name_option,
+    pass_pulp_context,
     pulp_group,
     show_command,
     update_command,
@@ -66,7 +68,7 @@ create_options = [
 @pulp_group()
 @pass_pulp_context
 @click.pass_context
-def role(ctx: click.Context, pulp_ctx: PulpContext) -> None:
+def role(ctx: click.Context, pulp_ctx: PulpCLIContext) -> None:
     pulp_ctx.needs_plugin(PluginRequirement("core", min="3.17.0"))
     ctx.obj = PulpRoleContext(pulp_ctx)
 

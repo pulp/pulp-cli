@@ -1,27 +1,14 @@
 import datetime
-import json
 import re
 import sys
 import time
 from typing import Any, ClassVar, Dict, Iterable, List, NamedTuple, Optional, Set, Type, Union
 
-import click
-import yaml
 from packaging.version import parse as parse_version
 from requests import HTTPError
 
 from pulpcore.cli.common.i18n import get_translation
 from pulpcore.cli.common.openapi import OpenAPI, OpenAPIError
-
-try:
-    from pygments import highlight
-    from pygments.formatters import Terminal256Formatter
-    from pygments.lexers import JsonLexer, YamlLexer
-except ImportError:
-    PYGMENTS = False
-else:
-    PYGMENTS = True
-    PYGMENTS_STYLE = "solarized-dark"
 
 translation = get_translation(__name__)
 _ = translation.gettext
@@ -61,24 +48,12 @@ class PluginRequirement(NamedTuple):
     inverted: bool = False
 
 
-# This is deprecated we keep it to not break plugins immediately
-new_component_names_to_pre_3_11_names: Dict[str, str] = {}
-
-
 class PulpException(Exception):
     pass
 
 
 class PulpNoWait(Exception):
     pass
-
-
-class PulpJSONEncoder(json.JSONEncoder):
-    def default(self, obj: Any) -> Any:
-        if isinstance(obj, datetime.datetime):
-            return obj.isoformat()
-        else:
-            return super().default(obj)
 
 
 def _preprocess_value(value: Any) -> Any:
@@ -151,27 +126,6 @@ class PulpContext:
     def component_versions(self) -> Dict[str, str]:
         result: Dict[str, str] = self.api.api_spec.get("info", {}).get("x-pulp-app-versions", {})
         return result
-
-    def output_result(self, result: Any) -> None:
-        """
-        Dump the provided result to the console using the selected renderer
-        """
-        if self.format == "json":
-            output = json.dumps(result, cls=PulpJSONEncoder, indent=(2 if self.isatty else None))
-            if PYGMENTS and self.isatty:
-                output = highlight(output, JsonLexer(), Terminal256Formatter(style=PYGMENTS_STYLE))
-            self.echo(output)
-        elif self.format == "yaml":
-            output = yaml.dump(result)
-            if PYGMENTS and self.isatty:
-                output = highlight(output, YamlLexer(), Terminal256Formatter(style=PYGMENTS_STYLE))
-            self.echo(output)
-        elif self.format == "none":
-            pass
-        else:
-            raise NotImplementedError(
-                _("Format '{format}' not implemented.").format(format=self.format)
-            )
 
     def call(
         self,
@@ -795,18 +749,6 @@ class PulpContentContext(PulpEntityContext):
 
 
 EntityFieldDefinition = Union[None, str, PulpEntityContext]
-
-
-##############################################################################
-# Decorator to access certain contexts
-# DEPRECATED These are moved to generic.py and will be removed here.
-
-
-pass_pulp_context = click.make_pass_decorator(PulpContext)
-pass_entity_context = click.make_pass_decorator(PulpEntityContext)
-pass_repository_context = click.make_pass_decorator(PulpRepositoryContext)
-pass_repository_version_context = click.make_pass_decorator(PulpRepositoryVersionContext)
-pass_content_context = click.make_pass_decorator(PulpContentContext)
 
 
 ##############################################################################

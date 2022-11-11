@@ -2,11 +2,13 @@ from typing import IO
 
 import click
 
-from pulpcore.cli.common.context import PulpContext, pass_entity_context, pass_pulp_context
 from pulpcore.cli.common.generic import (
+    PulpCLIContext,
     chunk_size_option,
     href_option,
     list_command,
+    pass_entity_context,
+    pass_pulp_context,
     pulp_group,
     show_command,
 )
@@ -20,7 +22,7 @@ _ = translation.gettext
 @pulp_group()
 @pass_pulp_context
 @click.pass_context
-def artifact(ctx: click.Context, pulp_ctx: PulpContext) -> None:
+def artifact(ctx: click.Context, pulp_ctx: PulpCLIContext) -> None:
     ctx.obj = PulpArtifactContext(pulp_ctx)
 
 
@@ -37,7 +39,7 @@ artifact.add_command(show_command(decorators=lookup_options))
 @pass_entity_context
 @pass_pulp_context
 def upload(
-    pulp_ctx: PulpContext,
+    pulp_ctx: PulpCLIContext,
     artifact_ctx: PulpArtifactContext,
     file: IO[bytes],
     chunk_size: int,

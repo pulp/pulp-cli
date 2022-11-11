@@ -1,7 +1,13 @@
 from typing import Any
 
-from pulpcore.cli.common.context import PluginRequirement, PulpContext, pass_pulp_context
-from pulpcore.cli.common.generic import load_json_callback, pulp_group, pulp_option
+from pulpcore.cli.common.context import PluginRequirement
+from pulpcore.cli.common.generic import (
+    PulpCLIContext,
+    load_json_callback,
+    pass_pulp_context,
+    pulp_group,
+    pulp_option,
+)
 from pulpcore.cli.common.i18n import get_translation
 
 translation = get_translation(__name__)
@@ -34,7 +40,7 @@ def orphan() -> None:
     needs_plugins=[PluginRequirement("core", "3.15.0")],
 )
 @pass_pulp_context
-def cleanup(pulp_ctx: PulpContext, **kwargs: Any) -> None:
+def cleanup(pulp_ctx: PulpCLIContext, **kwargs: Any) -> None:
     """
     Cleanup orphaned content.
     """

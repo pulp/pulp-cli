@@ -1,12 +1,14 @@
 import click
 
-from pulpcore.cli.common.context import PulpContext, pass_entity_context, pass_pulp_context
 from pulpcore.cli.common.generic import (
+    PulpCLIContext,
     create_command,
     destroy_command,
     href_option,
     list_command,
     load_json_callback,
+    pass_entity_context,
+    pass_pulp_context,
     pulp_group,
     show_command,
 )
@@ -20,7 +22,7 @@ _ = translation.gettext
 @pulp_group()
 @pass_pulp_context
 @click.pass_context
-def plan(ctx: click.Context, pulp_ctx: PulpContext) -> None:
+def plan(ctx: click.Context, pulp_ctx: PulpCLIContext) -> None:
     ctx.obj = PulpMigrationPlanContext(pulp_ctx)
 
 

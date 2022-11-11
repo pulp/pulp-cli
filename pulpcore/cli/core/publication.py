@@ -1,13 +1,10 @@
 import click
 
-from pulpcore.cli.common.context import (
-    PluginRequirement,
-    PulpContext,
-    pass_pulp_context,
-    registered_repository_contexts,
-)
+from pulpcore.cli.common.context import PluginRequirement, registered_repository_contexts
 from pulpcore.cli.common.generic import (
+    PulpCLIContext,
     list_command,
+    pass_pulp_context,
     publication_filter_options,
     pulp_group,
     resource_option,
@@ -24,7 +21,7 @@ repository_option = resource_option(
 @pulp_group()
 @pass_pulp_context
 @click.pass_context
-def publication(ctx: click.Context, pulp_ctx: PulpContext) -> None:
+def publication(ctx: click.Context, pulp_ctx: PulpCLIContext) -> None:
     """
     Perform actions on all publications.
 

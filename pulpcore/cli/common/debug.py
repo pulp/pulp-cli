@@ -3,8 +3,13 @@ from typing import IO, Any, Dict, Iterable, Optional
 
 import click
 
-from pulpcore.cli.common.context import PluginRequirement, PulpContext, pass_pulp_context
-from pulpcore.cli.common.generic import load_json_callback, pulp_group
+from pulpcore.cli.common.context import PluginRequirement
+from pulpcore.cli.common.generic import (
+    PulpCLIContext,
+    load_json_callback,
+    pass_pulp_context,
+    pulp_group,
+)
 from pulpcore.cli.common.i18n import get_translation
 
 translation = get_translation(__name__)
@@ -24,7 +29,7 @@ def debug() -> None:
 @click.option("--max-version", help=_("Succeed only if the installed version is smaller."))
 @pass_pulp_context
 def has_plugin(
-    pulp_ctx: PulpContext, name: str, min_version: Optional[str], max_version: Optional[str]
+    pulp_ctx: PulpCLIContext, name: str, min_version: Optional[str], max_version: Optional[str]
 ) -> None:
     """
     Check whether a specific plugin is installed on the server.
@@ -36,7 +41,7 @@ def has_plugin(
 
 @debug.command()
 @pass_pulp_context
-def task_summary(pulp_ctx: PulpContext) -> None:
+def task_summary(pulp_ctx: PulpCLIContext) -> None:
     """
     List a summary of tasks by status.
     """
@@ -53,7 +58,7 @@ def openapi_group() -> None:
 
 @openapi_group.command()
 @pass_pulp_context
-def spec(pulp_ctx: PulpContext) -> None:
+def spec(pulp_ctx: PulpCLIContext) -> None:
     """
     Print the openapi schema of the server.
     """
@@ -63,7 +68,7 @@ def spec(pulp_ctx: PulpContext) -> None:
 @openapi_group.command()
 @click.option("--id", "operation_id", required=True, help=_("Operation ID in openapi schema"))
 @pass_pulp_context
-def operation(pulp_ctx: PulpContext, operation_id: str) -> None:
+def operation(pulp_ctx: PulpCLIContext, operation_id: str) -> None:
     """
     Print the spec of the operation.
     """
@@ -85,7 +90,7 @@ def operation(pulp_ctx: PulpContext, operation_id: str) -> None:
 
 @openapi_group.command()
 @pass_pulp_context
-def operation_ids(pulp_ctx: PulpContext) -> None:
+def operation_ids(pulp_ctx: PulpCLIContext) -> None:
     """
     Print a list of available operation-ids.
     """
@@ -99,7 +104,7 @@ def operation_ids(pulp_ctx: PulpContext) -> None:
 @click.option("--upload", "uploads", type=click.File("rb"), multiple=True)
 @pass_pulp_context
 def call(
-    pulp_ctx: PulpContext,
+    pulp_ctx: PulpCLIContext,
     operation_id: str,
     parameters: Iterable[str],
     body: Any,
@@ -124,7 +129,7 @@ def call(
     "--name", "schema_name", required=True, help=_("Component schema name in openapi schema")
 )
 @pass_pulp_context
-def schema(pulp_ctx: PulpContext, schema_name: str) -> None:
+def schema(pulp_ctx: PulpCLIContext, schema_name: str) -> None:
     """
     Print the spec of the schema component.
     """
@@ -139,7 +144,7 @@ def schema(pulp_ctx: PulpContext, schema_name: str) -> None:
 
 @openapi_group.command()
 @pass_pulp_context
-def schema_names(pulp_ctx: PulpContext) -> None:
+def schema_names(pulp_ctx: PulpCLIContext) -> None:
     """
     Print a list of available schema component names.
     """

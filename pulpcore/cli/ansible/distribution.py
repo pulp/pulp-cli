@@ -11,8 +11,6 @@ from pulpcore.cli.common.context import (
     EntityFieldDefinition,
     PluginRequirement,
     PulpContext,
-    pass_entity_context,
-    pass_pulp_context,
 )
 from pulpcore.cli.common.generic import (
     create_command,
@@ -22,6 +20,8 @@ from pulpcore.cli.common.generic import (
     label_command,
     list_command,
     name_option,
+    pass_entity_context,
+    pass_pulp_context,
     pulp_group,
     pulp_labels_option,
     resource_option,

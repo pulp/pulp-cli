@@ -1,7 +1,7 @@
 import click
 
-from pulpcore.cli.common.context import PulpContext, pass_pulp_context
 from pulpcore.cli.common.generic import (
+    PulpCLIContext,
     common_distribution_create_options,
     create_command,
     destroy_command,
@@ -10,6 +10,7 @@ from pulpcore.cli.common.generic import (
     label_command,
     list_command,
     name_option,
+    pass_pulp_context,
     pulp_group,
     pulp_labels_option,
     resource_option,
@@ -45,7 +46,7 @@ repository_option = resource_option(
 )
 @pass_pulp_context
 @click.pass_context
-def distribution(ctx: click.Context, pulp_ctx: PulpContext, distribution_type: str) -> None:
+def distribution(ctx: click.Context, pulp_ctx: PulpCLIContext, distribution_type: str) -> None:
     if distribution_type == "rpm":
         ctx.obj = PulpRpmDistributionContext(pulp_ctx)
     else:

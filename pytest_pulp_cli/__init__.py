@@ -17,6 +17,7 @@ class ScriptFile(pytest.File):
     obj = None
 
     def collect(self):
+        # Extract the name between "test_" and ".sh".
         name = self.path.name[5:][:-3]
         yield ScriptItem.from_parent(self, name=name, path=self.path)
 

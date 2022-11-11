@@ -1,11 +1,13 @@
 import click
 
-from pulpcore.cli.common.context import PluginRequirement, PulpContext, pass_pulp_context
+from pulpcore.cli.common.context import PluginRequirement
 from pulpcore.cli.common.generic import (
+    PulpCLIContext,
     create_command,
     destroy_command,
     href_option,
     list_command,
+    pass_pulp_context,
     publication_filter_options,
     pulp_group,
     resource_option,
@@ -36,7 +38,7 @@ repository_option = resource_option(
 )
 @pass_pulp_context
 @click.pass_context
-def publication(ctx: click.Context, pulp_ctx: PulpContext, publication_type: str) -> None:
+def publication(ctx: click.Context, pulp_ctx: PulpCLIContext, publication_type: str) -> None:
     if publication_type == "rpm":
         ctx.obj = PulpRpmPublicationContext(pulp_ctx)
     else:

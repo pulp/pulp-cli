@@ -1,7 +1,6 @@
 import click
 
-from pulpcore.cli.common.context import PulpContext, pass_pulp_context
-from pulpcore.cli.common.generic import pulp_command
+from pulpcore.cli.common.generic import PulpCLIContext, pass_pulp_context, pulp_command
 from pulpcore.cli.common.i18n import get_translation
 
 translation = get_translation(__name__)
@@ -11,7 +10,7 @@ _ = translation.gettext
 @pulp_command(name="show")
 @click.option("--href", required=True, help=_("HREF of the entry"))
 @pass_pulp_context
-def show(pulp_ctx: PulpContext, href: str) -> None:
+def show(pulp_ctx: PulpCLIContext, href: str) -> None:
     """Show any resource given its href."""
     # use a random read operation to call the href
     entity = pulp_ctx.call("artifacts_read", parameters={"artifact_href": href})

@@ -8,7 +8,6 @@ from pulpcore.cli.common.context import (
     PulpEntityContext,
     PulpRemoteContext,
     PulpRepositoryContext,
-    pass_repository_context,
 )
 from pulpcore.cli.common.generic import (
     create_command,
@@ -18,6 +17,7 @@ from pulpcore.cli.common.generic import (
     label_select_option,
     list_command,
     name_option,
+    pass_repository_context,
     pulp_group,
     pulp_labels_option,
     repository_content_command,

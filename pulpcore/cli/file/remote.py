@@ -1,7 +1,7 @@
 import click
 
-from pulpcore.cli.common.context import PulpContext, pass_pulp_context
 from pulpcore.cli.common.generic import (
+    PulpCLIContext,
     common_remote_create_options,
     common_remote_update_options,
     create_command,
@@ -10,6 +10,7 @@ from pulpcore.cli.common.generic import (
     label_command,
     list_command,
     name_option,
+    pass_pulp_context,
     pulp_group,
     remote_filter_options,
     role_command,
@@ -33,7 +34,7 @@ _ = translation.gettext
 )
 @pass_pulp_context
 @click.pass_context
-def remote(ctx: click.Context, pulp_ctx: PulpContext, remote_type: str) -> None:
+def remote(ctx: click.Context, pulp_ctx: PulpCLIContext, remote_type: str) -> None:
     if remote_type == "file":
         ctx.obj = PulpFileRemoteContext(pulp_ctx)
     else:
