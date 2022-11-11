@@ -17,7 +17,7 @@ class ScriptFile(pytest.File):
     obj = None
 
     def collect(self):
-        name = self.path.name[5:]
+        name = self.path.name[5:][:-3]
         yield ScriptItem.from_parent(self, name=name, path=self.path)
 
 

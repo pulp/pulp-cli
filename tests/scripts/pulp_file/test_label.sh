@@ -4,6 +4,7 @@
 . "$(dirname "$(dirname "$(realpath "$0")")")"/config.source
 
 pulp debug has-plugin --name "core" --min-version "3.10.0" || exit 3
+pulp debug has-plugin --name "file" --min-version "1.6.0" || exit 3
 
 cleanup() {
   pulp file repository destroy --name "cli_test_file_repo" || true

@@ -14,20 +14,20 @@ export XDG_CONFIG_HOME=/nowhere
 
 sed -e '/base_url/c\base_url = "http://badurl"' "$good_settings" > "$bad_settings"
 
-expect_succ pulp --config "$good_settings" file repository list
-expect_succ pulp --config "$bad_settings" --base-url "$PULP_BASE_URL" file repository list
+expect_succ pulp --config "$good_settings" task list
+expect_succ pulp --config "$bad_settings" --base-url "$PULP_BASE_URL" task list
 
-expect_fail pulp --config "$bad_settings" file repository list
-expect_fail pulp --config "$good_settings" --base-url "http://badurl" file repository list
+expect_fail pulp --config "$bad_settings" task list
+expect_fail pulp --config "$good_settings" --base-url "http://badurl" task list
 
 # fail as both username and password are required together
-expect_fail pulp --password test file repository list
+expect_fail pulp --password test task list
 
 # fail when using basic auth and cert auth
 expect_fail pulp --username test --password test --client "/some/path" status
 
 # fail when using basic auth and cert auth
-expect_fail pulp --key "/some/path" file remote list
+expect_fail pulp --key "/some/path" task list
 
 
 # CONFIG PROFILE
@@ -35,8 +35,8 @@ expect_fail pulp --key "/some/path" file remote list
 cp "$bad_settings" "$profile_settings"
 sed -e 's/\[cli\]/[cli-profile1]/' "$good_settings" >> "$profile_settings"
 
-expect_fail pulp --config "$profile_settings" file repository list
-expect_succ pulp --config "$profile_settings" --profile profile1 file repository list
+expect_fail pulp --config "$profile_settings" task list
+expect_succ pulp --config "$profile_settings" --profile profile1 task list
 
 # CONFIG COMMAND
 
