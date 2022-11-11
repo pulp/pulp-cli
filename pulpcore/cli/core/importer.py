@@ -2,12 +2,14 @@ from typing import Dict, List, Tuple, Union
 
 import click
 
-from pulpcore.cli.common.context import PulpContext, pass_entity_context, pass_pulp_context
 from pulpcore.cli.common.generic import (
+    PulpCLIContext,
     destroy_command,
     href_option,
     list_command,
     name_option,
+    pass_entity_context,
+    pass_pulp_context,
     pulp_group,
     show_command,
 )
@@ -37,7 +39,7 @@ def importer() -> None:
 @importer.group()
 @pass_pulp_context
 @click.pass_context
-def pulp(ctx: click.Context, pulp_ctx: PulpContext) -> None:
+def pulp(ctx: click.Context, pulp_ctx: PulpCLIContext) -> None:
     ctx.obj = PulpImporterContext(pulp_ctx)
 
 
@@ -55,7 +57,7 @@ pulp.add_command(destroy_command(decorators=lookup_options))
 @pass_entity_context
 @pass_pulp_context
 def create(
-    pulp_ctx: PulpContext,
+    pulp_ctx: PulpCLIContext,
     importer_ctx: PulpImporterContext,
     name: str,
     repo_map: List[RepositoryMap],
@@ -76,7 +78,7 @@ def create(
 @pass_entity_context
 @pass_pulp_context
 def update(
-    pulp_ctx: PulpContext,
+    pulp_ctx: PulpCLIContext,
     importer_ctx: PulpImporterContext,
     repo_map: List[RepositoryMap],
 ) -> None:

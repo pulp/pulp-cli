@@ -13,15 +13,13 @@ from pulpcore.cli.ansible.context import (
 from pulpcore.cli.common.context import (
     EntityFieldDefinition,
     PluginRequirement,
-    PulpContext,
     PulpEntityContext,
     PulpRemoteContext,
     PulpRepositoryContext,
-    pass_pulp_context,
-    pass_repository_context,
 )
 from pulpcore.cli.common.generic import (
     GroupOption,
+    PulpCLIContext,
     create_command,
     create_content_json_callback,
     destroy_command,
@@ -32,6 +30,8 @@ from pulpcore.cli.common.generic import (
     load_file_or_string_callback,
     load_json_callback,
     name_option,
+    pass_pulp_context,
+    pass_repository_context,
     pulp_group,
     pulp_labels_option,
     pulp_option,
@@ -80,7 +80,7 @@ def _content_callback(ctx: click.Context, param: click.Parameter, value: Any) ->
 
 def _signing_service_callback(ctx: click.Context, param: click.Parameter, value: Any) -> Any:
     if value:
-        pulp_ctx = ctx.find_object(PulpContext)
+        pulp_ctx = ctx.find_object(PulpCLIContext)
         assert pulp_ctx is not None
         value = PulpSigningServiceContext(pulp_ctx, entity={"name": value})
     return value
@@ -96,7 +96,7 @@ def _signing_service_callback(ctx: click.Context, param: click.Parameter, value:
 )
 @pass_pulp_context
 @click.pass_context
-def repository(ctx: click.Context, pulp_ctx: PulpContext, repo_type: str) -> None:
+def repository(ctx: click.Context, pulp_ctx: PulpCLIContext, repo_type: str) -> None:
     if repo_type == "ansible":
         ctx.obj = PulpAnsibleRepositoryContext(pulp_ctx)
     else:

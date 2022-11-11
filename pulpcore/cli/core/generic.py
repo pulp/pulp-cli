@@ -3,15 +3,16 @@ from typing import Any, Optional
 
 import click
 
-from pulpcore.cli.common.context import (
-    DATETIME_FORMATS,
-    PluginRequirement,
-    PulpContext,
-    PulpEntityContext,
+from pulpcore.cli.common.context import DATETIME_FORMATS, PluginRequirement, PulpEntityContext
+from pulpcore.cli.common.generic import (
+    PulpCLIContext,
+    list_command,
     pass_entity_context,
     pass_pulp_context,
+    pulp_group,
+    pulp_option,
+    resource_option,
 )
-from pulpcore.cli.common.generic import list_command, pulp_group, pulp_option, resource_option
 from pulpcore.cli.common.i18n import get_translation
 from pulpcore.cli.core.context import PulpTaskContext, PulpWorkerContext
 
@@ -31,7 +32,7 @@ class HrefOrUuidCallback:
         self, ctx: click.Context, param: click.Parameter, value: Optional[str]
     ) -> Optional[str]:
         if value is not None:
-            pulp_ctx = ctx.find_object(PulpContext)
+            pulp_ctx = ctx.find_object(PulpCLIContext)
             assert pulp_ctx is not None
 
             # Example: "/pulp/api/v3/tasks/a69230d2-506e-44c7-9c46-e64a905f85e7/"
@@ -146,7 +147,7 @@ def task_command(**kwargs: Any) -> click.Command:
     @click.pass_context
     def callback(
         ctx: click.Context,
-        pulp_ctx: PulpContext,
+        pulp_ctx: PulpCLIContext,
         entity_ctx: PulpEntityContext,
     ) -> None:
         ctx.obj = PulpTaskContext(pulp_ctx)

@@ -6,14 +6,12 @@ import schema as s
 from pulpcore.cli.common.context import (
     EntityFieldDefinition,
     PluginRequirement,
-    PulpContext,
     PulpEntityContext,
     PulpRemoteContext,
     PulpRepositoryContext,
-    pass_pulp_context,
-    pass_repository_context,
 )
 from pulpcore.cli.common.generic import (
+    PulpCLIContext,
     create_command,
     create_content_json_callback,
     destroy_command,
@@ -22,6 +20,8 @@ from pulpcore.cli.common.generic import (
     label_select_option,
     list_command,
     name_option,
+    pass_pulp_context,
+    pass_repository_context,
     pulp_group,
     pulp_labels_option,
     pulp_option,
@@ -64,7 +64,7 @@ remote_option = resource_option(
 
 def _content_callback(ctx: click.Context, param: click.Parameter, value: Any) -> Any:
     if value:
-        pulp_ctx = ctx.find_object(PulpContext)
+        pulp_ctx = ctx.find_object(PulpCLIContext)
         assert pulp_ctx is not None
         ctx.obj = PulpRpmPackageContext(pulp_ctx, pulp_href=value)
     return value
@@ -83,7 +83,7 @@ CONTENT_LIST_SCHEMA = s.Schema([{"pulp_href": str}])
 )
 @pass_pulp_context
 @click.pass_context
-def repository(ctx: click.Context, pulp_ctx: PulpContext, repo_type: str) -> None:
+def repository(ctx: click.Context, pulp_ctx: PulpCLIContext, repo_type: str) -> None:
     if repo_type == "rpm":
         ctx.obj = PulpRpmRepositoryContext(pulp_ctx)
     else:

@@ -5,14 +5,12 @@ import click
 from pulpcore.cli.common.context import (
     EntityFieldDefinition,
     PluginRequirement,
-    PulpContext,
     PulpEntityContext,
     PulpRemoteContext,
     PulpRepositoryContext,
-    pass_pulp_context,
-    pass_repository_context,
 )
 from pulpcore.cli.common.generic import (
+    PulpCLIContext,
     create_command,
     create_content_json_callback,
     destroy_command,
@@ -21,6 +19,8 @@ from pulpcore.cli.common.generic import (
     label_select_option,
     list_command,
     name_option,
+    pass_pulp_context,
+    pass_repository_context,
     pulp_group,
     pulp_labels_option,
     pulp_option,
@@ -61,7 +61,7 @@ def _content_callback(
     ctx: click.Context, param: click.Parameter, value: Optional[str]
 ) -> Optional[str]:
     if value:
-        pulp_ctx = ctx.find_object(PulpContext)
+        pulp_ctx = ctx.find_object(PulpCLIContext)
         assert pulp_ctx is not None
         ctx.obj = PulpPythonContentContext(pulp_ctx, entity={"filename": value})
     return value
@@ -77,7 +77,7 @@ def _content_callback(
 )
 @pass_pulp_context
 @click.pass_context
-def repository(ctx: click.Context, pulp_ctx: PulpContext, repo_type: str) -> None:
+def repository(ctx: click.Context, pulp_ctx: PulpCLIContext, repo_type: str) -> None:
     if repo_type == "python":
         ctx.obj = PulpPythonRepositoryContext(pulp_ctx)
     else:
@@ -182,7 +182,7 @@ def sync(
 @pass_repository_context
 @pass_pulp_context
 def add(
-    pulp_ctx: PulpContext,
+    pulp_ctx: PulpCLIContext,
     repository_ctx: PulpRepositoryContext,
     filename: str,
     base_version: Optional[int],
@@ -213,7 +213,7 @@ def add(
 @pass_repository_context
 @pass_pulp_context
 def remove(
-    pulp_ctx: PulpContext,
+    pulp_ctx: PulpCLIContext,
     repository_ctx: PulpRepositoryContext,
     filename: str,
     base_version: Optional[int],

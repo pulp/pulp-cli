@@ -2,8 +2,9 @@ from typing import Optional
 
 import click
 
-from pulpcore.cli.common.context import PulpContext, PulpEntityContext
+from pulpcore.cli.common.context import PulpEntityContext
 from pulpcore.cli.common.generic import (
+    PulpCLIContext,
     href_option,
     list_command,
     pass_entity_context,
@@ -21,7 +22,7 @@ _ = translation.gettext
 @pulp_group()
 @pass_pulp_context
 @click.pass_context
-def task_group(ctx: click.Context, pulp_ctx: PulpContext) -> None:
+def task_group(ctx: click.Context, pulp_ctx: PulpCLIContext) -> None:
     ctx.obj = PulpTaskGroupContext(pulp_ctx)
 
 
@@ -52,7 +53,7 @@ uuid_option = pulp_option(
 @click.option("-w", "--wait", is_flag=True, help=_("Wait for the group-task to finish"))
 @pass_entity_context
 @pass_pulp_context
-def show(pulp_ctx: PulpContext, task_group_ctx: PulpTaskGroupContext, wait: bool) -> None:
+def show(pulp_ctx: PulpCLIContext, task_group_ctx: PulpTaskGroupContext, wait: bool) -> None:
     """Shows details of a group-task."""
     entity = task_group_ctx.entity
     if wait:

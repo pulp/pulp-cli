@@ -1,12 +1,13 @@
 import click
 
-from pulpcore.cli.common.context import PulpContext, pass_pulp_context
 from pulpcore.cli.common.generic import (
+    PulpCLIContext,
     create_command,
     destroy_command,
     href_option,
     list_command,
     name_option,
+    pass_pulp_context,
     pulp_group,
     role_command,
     show_command,
@@ -28,7 +29,7 @@ _ = translation.gettext
 )
 @pass_pulp_context
 @click.pass_context
-def namespace(ctx: click.Context, pulp_ctx: PulpContext, namespace_type: str) -> None:
+def namespace(ctx: click.Context, pulp_ctx: PulpCLIContext, namespace_type: str) -> None:
     if namespace_type == "container":
         ctx.obj = PulpContainerNamespaceContext(pulp_ctx)
     else:

@@ -2,18 +2,16 @@ from typing import Iterable
 
 import click
 
-from pulpcore.cli.common.context import (
-    PulpContext,
-    PulpRemoteContext,
-    pass_entity_context,
-    pass_pulp_context,
-)
+from pulpcore.cli.common.context import PulpRemoteContext
 from pulpcore.cli.common.generic import (
+    PulpCLIContext,
     create_command,
     destroy_command,
     href_option,
     list_command,
     name_option,
+    pass_entity_context,
+    pass_pulp_context,
     pulp_group,
     resource_option,
     role_command,
@@ -42,7 +40,7 @@ path_option = click.option(
 )
 @pass_pulp_context
 @click.pass_context
-def acs(ctx: click.Context, pulp_ctx: PulpContext, acs_type: str) -> None:
+def acs(ctx: click.Context, pulp_ctx: PulpCLIContext, acs_type: str) -> None:
     if acs_type == "file":
         ctx.obj = PulpFileACSContext(pulp_ctx)
     else:
@@ -119,5 +117,5 @@ acs.add_command(role_command(decorators=lookup_options))
 @pass_pulp_context
 @href_option
 @name_option
-def refresh(pulp_ctx: PulpContext, acs_ctx: PulpFileACSContext) -> None:
+def refresh(pulp_ctx: PulpCLIContext, acs_ctx: PulpFileACSContext) -> None:
     acs_ctx.refresh(acs_ctx.pulp_href)

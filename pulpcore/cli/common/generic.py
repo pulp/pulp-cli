@@ -1,3 +1,4 @@
+import datetime
 import json
 import re
 from functools import lru_cache
@@ -5,6 +6,7 @@ from typing import IO, Any, Callable, Dict, Iterable, List, Mapping, Optional, T
 
 import click
 import schema as s
+import yaml
 from click.decorators import FC, F
 
 from pulpcore.cli.common.context import (
@@ -23,15 +25,79 @@ from pulpcore.cli.common.context import (
 )
 from pulpcore.cli.common.i18n import get_translation
 
+try:
+    from pygments import highlight
+    from pygments.formatters import Terminal256Formatter
+    from pygments.lexers import JsonLexer, YamlLexer
+except ImportError:
+    PYGMENTS = False
+else:
+    PYGMENTS = True
+    PYGMENTS_STYLE = "solarized-dark"
+
 translation = get_translation(__name__)
 _ = translation.gettext
+
+
+class ClickNoWait(click.ClickException):
+    exit_code = 0
+
+    def show(self, file: Optional[IO[str]] = None) -> None:
+        """
+        Format the message into file or STDERR.
+        Overwritten from base class to not print "Error: ".
+        """
+        if file is None:
+            file = click.get_text_stream("stderr")
+        click.echo(self.format_message(), file=file)
+
+
+class PulpJSONEncoder(json.JSONEncoder):
+    def default(self, obj: Any) -> Any:
+        if isinstance(obj, datetime.datetime):
+            return obj.isoformat()
+        else:
+            return super().default(obj)
+
+
+class PulpCLIContext(PulpContext):
+    """
+    Subclass of the Context that overwrites the CLI specifics.
+    """
+
+    def echo(self, message: str, nl: bool = True, err: bool = False) -> None:
+        click.echo(message, nl=nl, err=err)
+
+    def prompt(self, text: str, hide_input: bool = False) -> Any:
+        return click.prompt(text, hide_input=hide_input)
+
+    def output_result(self, result: Any) -> None:
+        """
+        Dump the provided result to the console using the selected renderer
+        """
+        if self.format == "json":
+            output = json.dumps(result, cls=PulpJSONEncoder, indent=(2 if self.isatty else None))
+            if PYGMENTS and self.isatty:
+                output = highlight(output, JsonLexer(), Terminal256Formatter(style=PYGMENTS_STYLE))
+            self.echo(output)
+        elif self.format == "yaml":
+            output = yaml.dump(result)
+            if PYGMENTS and self.isatty:
+                output = highlight(output, YamlLexer(), Terminal256Formatter(style=PYGMENTS_STYLE))
+            self.echo(output)
+        elif self.format == "none":
+            pass
+        else:
+            raise NotImplementedError(
+                _("Format '{format}' not implemented.").format(format=self.format)
+            )
 
 
 ##############################################################################
 # Decorator to access certain contexts
 
 
-pass_pulp_context = click.make_pass_decorator(PulpContext)
+pass_pulp_context = click.make_pass_decorator(PulpCLIContext)
 pass_entity_context = click.make_pass_decorator(PulpEntityContext)
 pass_repository_context = click.make_pass_decorator(PulpRepositoryContext)
 pass_repository_version_context = click.make_pass_decorator(PulpRepositoryVersionContext)
@@ -66,31 +132,6 @@ float_or_empty.__name__ = "float or empty"
 # Custom classes for commands and parameters
 
 
-class ClickNoWait(click.ClickException):
-    exit_code = 0
-
-    def show(self, file: Optional[IO[str]] = None) -> None:
-        """
-        Format the message into file or STDERR.
-        Overwritten from base class to not print "Error: ".
-        """
-        if file is None:
-            file = click.get_text_stream("stderr")
-        click.echo(self.format_message(), file=file)
-
-
-class PulpCLIContext(PulpContext):
-    """
-    Subclass of the Context that overwrites the CLI specifics.
-    """
-
-    def echo(self, message: str, nl: bool = True, err: bool = False) -> None:
-        click.echo(message, nl=nl, err=err)
-
-    def prompt(self, text: str, hide_input: bool = False) -> Any:
-        return click.prompt(text, hide_input=hide_input)
-
-
 class PulpCommand(click.Command):
     def __init__(
         self,
@@ -106,7 +147,7 @@ class PulpCommand(click.Command):
     def invoke(self, ctx: click.Context) -> Any:
         try:
             if self.needs_plugins:
-                pulp_ctx = ctx.find_object(PulpContext)
+                pulp_ctx = ctx.find_object(PulpCLIContext)
                 assert pulp_ctx is not None
                 for plugin_requirement in self.needs_plugins:
                     pulp_ctx.needs_plugin(plugin_requirement)
@@ -177,7 +218,7 @@ class PulpOption(click.Option):
 
     def process_value(self, ctx: click.Context, value: Any) -> Any:
         if value is not None and self.needs_plugins:
-            pulp_ctx = ctx.find_object(PulpContext)
+            pulp_ctx = ctx.find_object(PulpCLIContext)
             assert pulp_ctx is not None
             for plugin_requirement in self.needs_plugins:
                 if not plugin_requirement.feature:
@@ -365,7 +406,7 @@ def create_content_json_callback(
                             parameter=param.name, error=str(e)
                         )
                     )
-            pulp_ctx = ctx.find_object(PulpContext)
+            pulp_ctx = ctx.find_object(PulpCLIContext)
             assert pulp_ctx is not None
             if ctx_class is None:
                 context = ctx.find_object(PulpContentContext)
@@ -425,7 +466,7 @@ def resource_option(*args: Any, **kwargs: Any) -> Callable[[FC], FC]:
         pulp_href: Optional[str] = None
         entity: Optional[EntityDefinition] = None
 
-        pulp_ctx = ctx.find_object(PulpContext)
+        pulp_ctx = ctx.find_object(PulpCLIContext)
         assert pulp_ctx is not None
 
         if value.startswith("/"):
@@ -540,7 +581,7 @@ def type_option(*args: Any, **kwargs: Any) -> Callable[[FC], FC]:
     }
 
     def _type_callback(ctx: click.Context, param: click.Parameter, value: Optional[str]) -> str:
-        pulp_ctx = ctx.find_object(PulpContext)
+        pulp_ctx = ctx.find_object(PulpCLIContext)
         assert pulp_ctx
         if value is not None:
             cls = choices[value]
@@ -892,7 +933,11 @@ def list_command(**kwargs: Any) -> click.Command:
     @pass_entity_context
     @pass_pulp_context
     def callback(
-        pulp_ctx: PulpContext, entity_ctx: PulpEntityContext, limit: int, offset: int, **kwargs: Any
+        pulp_ctx: PulpCLIContext,
+        entity_ctx: PulpEntityContext,
+        limit: int,
+        offset: int,
+        **kwargs: Any,
     ) -> None:
         """
         Show the list of optionally filtered {entities}.
@@ -922,7 +967,7 @@ def show_command(**kwargs: Any) -> click.Command:
     @pulp_command(**kwargs)
     @pass_entity_context
     @pass_pulp_context
-    def callback(pulp_ctx: PulpContext, entity_ctx: PulpEntityContext) -> None:
+    def callback(pulp_ctx: PulpCLIContext, entity_ctx: PulpEntityContext) -> None:
         """
         Show details of a {entity}.
         """
@@ -946,7 +991,7 @@ def create_command(**kwargs: Any) -> click.Command:
     @pulp_command(**kwargs)
     @pass_entity_context
     @pass_pulp_context
-    def callback(pulp_ctx: PulpContext, entity_ctx: PulpEntityContext, **kwargs: Any) -> None:
+    def callback(pulp_ctx: PulpCLIContext, entity_ctx: PulpEntityContext, **kwargs: Any) -> None:
         """
         Create a {entity}.
         """
@@ -974,7 +1019,7 @@ def update_command(**kwargs: Any) -> click.Command:
     @pulp_command(**kwargs)
     @pass_entity_context
     @pass_pulp_context
-    def callback(pulp_ctx: PulpContext, entity_ctx: PulpEntityContext, **kwargs: Any) -> None:
+    def callback(pulp_ctx: PulpCLIContext, entity_ctx: PulpEntityContext, **kwargs: Any) -> None:
         """
         Update a {entity}.
         """
@@ -1032,7 +1077,7 @@ def version_command(**kwargs: Any) -> click.Command:
     @pass_repository_version_context
     @pass_pulp_context
     def repair(
-        pulp_ctx: PulpContext,
+        pulp_ctx: PulpCLIContext,
         repository_version_ctx: PulpRepositoryVersionContext,
     ) -> None:
         href = repository_version_ctx.pulp_href
@@ -1051,7 +1096,7 @@ def label_command(**kwargs: Any) -> click.Command:
 
     @pulp_group(**kwargs)
     @pass_pulp_context
-    def label_group(pulp_ctx: PulpContext) -> None:
+    def label_group(pulp_ctx: PulpCLIContext) -> None:
         for item in need_plugins:
             pulp_ctx.needs_plugin(item)
 
@@ -1099,14 +1144,14 @@ def role_command(**kwargs: Any) -> click.Command:
     @pulp_command(help=_("List my permissions on this object."))
     @pass_entity_context
     @pass_pulp_context
-    def my_permissions(pulp_ctx: PulpContext, entity_ctx: PulpEntityContext) -> None:
+    def my_permissions(pulp_ctx: PulpCLIContext, entity_ctx: PulpEntityContext) -> None:
         result = entity_ctx.my_permissions()
         pulp_ctx.output_result(result)
 
     @pulp_command(name="list", help=_("List assigned object roles."))
     @pass_entity_context
     @pass_pulp_context
-    def role_list(pulp_ctx: PulpContext, entity_ctx: PulpEntityContext) -> None:
+    def role_list(pulp_ctx: PulpCLIContext, entity_ctx: PulpEntityContext) -> None:
         result = entity_ctx.list_roles()
         pulp_ctx.output_result(result)
 
@@ -1117,7 +1162,7 @@ def role_command(**kwargs: Any) -> click.Command:
     @pass_entity_context
     @pass_pulp_context
     def role_add(
-        pulp_ctx: PulpContext,
+        pulp_ctx: PulpCLIContext,
         entity_ctx: PulpEntityContext,
         role: str,
         users: List[str],
@@ -1133,7 +1178,7 @@ def role_command(**kwargs: Any) -> click.Command:
     @pass_entity_context
     @pass_pulp_context
     def role_remove(
-        pulp_ctx: PulpContext,
+        pulp_ctx: PulpCLIContext,
         entity_ctx: PulpEntityContext,
         role: str,
         users: List[str],
@@ -1178,7 +1223,7 @@ def repository_content_command(**kwargs: Any) -> click.Group:
     @pass_content_context
     def content_list(
         content_ctx: PulpContentContext,
-        pulp_ctx: PulpContext,
+        pulp_ctx: PulpCLIContext,
         version: PulpRepositoryVersionContext,
         offset: int,
         limit: int,
@@ -1247,7 +1292,7 @@ def repository_content_command(**kwargs: Any) -> click.Group:
     @type_option(choices=content_contexts)
     @pass_pulp_context
     @click.pass_context
-    def content_group(ctx: click.Context, pulp_ctx: PulpContext) -> None:
+    def content_group(ctx: click.Context, pulp_ctx: PulpCLIContext) -> None:
         pass
 
     for command, options in command_decorators.items():

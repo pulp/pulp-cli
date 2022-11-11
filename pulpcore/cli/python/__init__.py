@@ -2,8 +2,8 @@ from typing import Any
 
 import click
 
-from pulpcore.cli.common.context import PluginRequirement, PulpContext, pass_pulp_context
-from pulpcore.cli.common.generic import pulp_group
+from pulpcore.cli.common.context import PluginRequirement
+from pulpcore.cli.common.generic import PulpCLIContext, pass_pulp_context, pulp_group
 from pulpcore.cli.python.content import content
 from pulpcore.cli.python.distribution import distribution
 from pulpcore.cli.python.publication import publication
@@ -13,7 +13,7 @@ from pulpcore.cli.python.repository import repository
 
 @pulp_group(name="python")
 @pass_pulp_context
-def python_group(pulp_ctx: PulpContext) -> None:
+def python_group(pulp_ctx: PulpCLIContext) -> None:
     pulp_ctx.needs_plugin(PluginRequirement("python", min="3.1.0"))
 
 

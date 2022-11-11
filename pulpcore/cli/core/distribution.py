@@ -1,14 +1,20 @@
 import click
 
-from pulpcore.cli.common.context import PluginRequirement, PulpContext, pass_pulp_context
-from pulpcore.cli.common.generic import distribution_filter_options, list_command, pulp_group
+from pulpcore.cli.common.context import PluginRequirement
+from pulpcore.cli.common.generic import (
+    PulpCLIContext,
+    distribution_filter_options,
+    list_command,
+    pass_pulp_context,
+    pulp_group,
+)
 from pulpcore.cli.core.context import PulpDistributionContext
 
 
 @pulp_group()
 @pass_pulp_context
 @click.pass_context
-def distribution(ctx: click.Context, pulp_ctx: PulpContext) -> None:
+def distribution(ctx: click.Context, pulp_ctx: PulpCLIContext) -> None:
     """
     Perform actions on all distribution.
 

@@ -2,13 +2,9 @@ from typing import Optional
 
 import click
 
-from pulpcore.cli.common.context import (
-    PluginRequirement,
-    PulpContext,
-    pass_entity_context,
-    pass_pulp_context,
-)
+from pulpcore.cli.common.context import PluginRequirement
 from pulpcore.cli.common.generic import (
+    PulpCLIContext,
     create_command,
     destroy_command,
     href_option,
@@ -16,6 +12,8 @@ from pulpcore.cli.common.generic import (
     lookup_callback,
     name_option,
     null_callback,
+    pass_entity_context,
+    pass_pulp_context,
     pulp_group,
     role_command,
     show_command,
@@ -56,7 +54,7 @@ group_option = click.option(
 @pulp_group(help=_("Manage user groups."))
 @pass_pulp_context
 @click.pass_context
-def group(ctx: click.Context, pulp_ctx: PulpContext) -> None:
+def group(ctx: click.Context, pulp_ctx: PulpCLIContext) -> None:
     ctx.obj = PulpGroupContext(pulp_ctx)
 
 
@@ -85,7 +83,7 @@ group.add_command(
 @click.pass_context
 def permission(
     ctx: click.Context,
-    pulp_ctx: PulpContext,
+    pulp_ctx: PulpCLIContext,
     group_ctx: PulpGroupContext,
     perm_type: str,
 ) -> None:
@@ -140,7 +138,7 @@ permission.add_command(
 @pass_entity_context
 @pass_pulp_context
 @click.pass_context
-def user(ctx: click.Context, pulp_ctx: PulpContext, group_ctx: PulpGroupContext) -> None:
+def user(ctx: click.Context, pulp_ctx: PulpCLIContext, group_ctx: PulpGroupContext) -> None:
     ctx.obj = PulpGroupUserContext(pulp_ctx, group_ctx)
 
 
@@ -156,7 +154,7 @@ user.add_command(
 @click.option("--username", required=True)
 @pass_entity_context
 @pass_pulp_context
-def remove_user(pulp_ctx: PulpContext, entity_ctx: PulpGroupUserContext, username: str) -> None:
+def remove_user(pulp_ctx: PulpCLIContext, entity_ctx: PulpGroupUserContext, username: str) -> None:
     user_href = PulpUserContext(pulp_ctx).find(username=username)["pulp_href"]
     user_pk = user_href.split("/")[-2]
     group_user_href = f"{entity_ctx.group_ctx.pulp_href}users/{user_pk}/"
@@ -167,7 +165,7 @@ def remove_user(pulp_ctx: PulpContext, entity_ctx: PulpGroupUserContext, usernam
 @pass_entity_context
 @pass_pulp_context
 @click.pass_context
-def role(ctx: click.Context, pulp_ctx: PulpContext, group_ctx: PulpGroupContext) -> None:
+def role(ctx: click.Context, pulp_ctx: PulpCLIContext, group_ctx: PulpGroupContext) -> None:
     ctx.obj = PulpGroupRoleContext(pulp_ctx, group_ctx)
 
 

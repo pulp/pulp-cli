@@ -2,13 +2,15 @@ from typing import List, Optional
 
 import click
 
-from pulpcore.cli.common.context import PulpContext, pass_entity_context, pass_pulp_context
 from pulpcore.cli.common.generic import (
+    PulpCLIContext,
     create_command,
     destroy_command,
     href_option,
     list_command,
     name_option,
+    pass_entity_context,
+    pass_pulp_context,
     pulp_group,
     role_command,
     show_command,
@@ -28,7 +30,7 @@ _ = translation.gettext
 @pulp_group()
 @pass_pulp_context
 @click.pass_context
-def content_guard(ctx: click.Context, pulp_ctx: PulpContext) -> None:
+def content_guard(ctx: click.Context, pulp_ctx: PulpCLIContext) -> None:
     ctx.obj = PulpContentGuardContext(pulp_ctx)
 
 
@@ -42,7 +44,7 @@ content_guard.add_command(list_command(decorators=filter_options))
 @content_guard.group()
 @pass_pulp_context
 @click.pass_context
-def rbac(ctx: click.Context, pulp_ctx: PulpContext) -> None:
+def rbac(ctx: click.Context, pulp_ctx: PulpCLIContext) -> None:
     ctx.obj = PulpRbacContentGuardContext(pulp_ctx)
 
 
@@ -72,7 +74,7 @@ rbac.add_command(role_command(decorators=lookup_options))
 @pass_entity_context
 @pass_pulp_context
 def assign(
-    pulp_ctx: PulpContext,
+    pulp_ctx: PulpCLIContext,
     guard_ctx: PulpRbacContentGuardContext,
     users: Optional[List[str]],
     groups: Optional[List[str]],
@@ -100,7 +102,7 @@ def assign(
 @pass_entity_context
 @pass_pulp_context
 def remove(
-    pulp_ctx: PulpContext,
+    pulp_ctx: PulpCLIContext,
     guard_ctx: PulpRbacContentGuardContext,
     users: Optional[List[str]],
     groups: Optional[List[str]],
@@ -113,7 +115,7 @@ def remove(
 @content_guard.group()
 @pass_pulp_context
 @click.pass_context
-def redirect(ctx: click.Context, pulp_ctx: PulpContext) -> None:
+def redirect(ctx: click.Context, pulp_ctx: PulpCLIContext) -> None:
     ctx.obj = PulpContentRedirectContentGuardContext(pulp_ctx)
 
 

@@ -4,18 +4,18 @@ import click
 
 from pulpcore.cli.common.context import (
     EntityFieldDefinition,
-    PulpContext,
     PulpEntityContext,
     PulpRepositoryContext,
-    pass_entity_context,
-    pass_pulp_context,
     registered_repository_contexts,
 )
 from pulpcore.cli.common.generic import (
+    PulpCLIContext,
     destroy_command,
     href_option,
     list_command,
     name_option,
+    pass_entity_context,
+    pass_pulp_context,
     pulp_group,
     resource_option,
     show_command,
@@ -48,7 +48,7 @@ def exporter() -> None:
 @exporter.group()
 @pass_pulp_context
 @click.pass_context
-def pulp(ctx: click.Context, pulp_ctx: PulpContext) -> None:
+def pulp(ctx: click.Context, pulp_ctx: PulpCLIContext) -> None:
     ctx.obj = PulpExporterContext(pulp_ctx)
 
 
@@ -68,7 +68,7 @@ pulp.add_command(destroy_command(decorators=lookup_options))
 @pass_entity_context
 @pass_pulp_context
 def create(
-    pulp_ctx: PulpContext,
+    pulp_ctx: PulpCLIContext,
     exporter_ctx: PulpExporterContext,
     name: str,
     path: str,
@@ -95,7 +95,7 @@ def create(
 @pass_entity_context
 @pass_pulp_context
 def update(
-    pulp_ctx: PulpContext,
+    pulp_ctx: PulpCLIContext,
     exporter_ctx: PulpExporterContext,
     path: str,
     repository: Iterable[EntityFieldDefinition],

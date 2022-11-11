@@ -1,10 +1,11 @@
 import click
 
-from pulpcore.cli.common.context import PulpContext, pass_pulp_context
 from pulpcore.cli.common.generic import (
+    PulpCLIContext,
     destroy_command,
     href_option,
     list_command,
+    pass_pulp_context,
     pulp_group,
     show_command,
 )
@@ -18,7 +19,7 @@ _ = translation.gettext
 @pulp_group()
 @pass_pulp_context
 @click.pass_context
-def upload(ctx: click.Context, pulp_ctx: PulpContext) -> None:
+def upload(ctx: click.Context, pulp_ctx: PulpCLIContext) -> None:
     ctx.obj = PulpUploadContext(pulp_ctx)
 
 

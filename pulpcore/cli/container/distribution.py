@@ -2,14 +2,9 @@ from typing import Dict, Optional, Union, cast
 
 import click
 
-from pulpcore.cli.common.context import (
-    EntityDefinition,
-    PulpContext,
-    PulpEntityContext,
-    pass_entity_context,
-    pass_pulp_context,
-)
+from pulpcore.cli.common.context import EntityDefinition, PulpEntityContext
 from pulpcore.cli.common.generic import (
+    PulpCLIContext,
     create_command,
     destroy_command,
     distribution_filter_options,
@@ -17,6 +12,8 @@ from pulpcore.cli.common.generic import (
     label_command,
     list_command,
     name_option,
+    pass_entity_context,
+    pass_pulp_context,
     pulp_group,
     pulp_labels_option,
     resource_option,
@@ -55,7 +52,7 @@ repository_option = resource_option(
 )
 @pass_pulp_context
 @click.pass_context
-def distribution(ctx: click.Context, pulp_ctx: PulpContext, distribution_type: str) -> None:
+def distribution(ctx: click.Context, pulp_ctx: PulpCLIContext, distribution_type: str) -> None:
     if distribution_type == "container":
         ctx.obj = PulpContainerDistributionContext(pulp_ctx)
     else:

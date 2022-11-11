@@ -3,19 +3,15 @@ from typing import IO, Any, Dict, Optional, Union
 
 import click
 
-from pulpcore.cli.common.context import (
-    PluginRequirement,
-    PulpContext,
-    PulpEntityContext,
-    PulpRepositoryContext,
-    pass_entity_context,
-    pass_pulp_context,
-)
+from pulpcore.cli.common.context import PluginRequirement, PulpEntityContext, PulpRepositoryContext
 from pulpcore.cli.common.generic import (
+    PulpCLIContext,
     chunk_size_option,
     create_command,
     href_option,
     list_command,
+    pass_entity_context,
+    pass_pulp_context,
     pulp_group,
     resource_option,
     show_command,
@@ -49,7 +45,7 @@ def _sha256_artifact_callback(
 ) -> Optional[Union[str, PulpEntityContext]]:
     # Pass None and "" verbatim
     if value:
-        pulp_ctx = ctx.find_object(PulpContext)
+        pulp_ctx = ctx.find_object(PulpCLIContext)
         assert pulp_ctx is not None
         return PulpArtifactContext(pulp_ctx, entity={"sha256": value})
     return value
@@ -80,7 +76,7 @@ repository_option = resource_option(
 )
 @pass_pulp_context
 @click.pass_context
-def content(ctx: click.Context, pulp_ctx: PulpContext, content_type: str) -> None:
+def content(ctx: click.Context, pulp_ctx: PulpCLIContext, content_type: str) -> None:
     if content_type == "file":
         ctx.obj = PulpFileContentContext(pulp_ctx)
     else:
@@ -124,7 +120,7 @@ content.add_command(create_command(decorators=create_options))
 @pass_entity_context
 @pass_pulp_context
 def upload(
-    pulp_ctx: PulpContext,
+    pulp_ctx: PulpCLIContext,
     entity_ctx: PulpFileContentContext,
     relative_path: str,
     file: IO[bytes],

@@ -1,10 +1,11 @@
 import click
 
-from pulpcore.cli.common.context import PulpContext, pass_pulp_context
 from pulpcore.cli.common.generic import (
+    PulpCLIContext,
     href_option,
     list_command,
     name_option,
+    pass_pulp_context,
     pulp_group,
     show_command,
 )
@@ -18,7 +19,7 @@ _ = translation.gettext
 @pulp_group()
 @pass_pulp_context
 @click.pass_context
-def worker(ctx: click.Context, pulp_ctx: PulpContext) -> None:
+def worker(ctx: click.Context, pulp_ctx: PulpCLIContext) -> None:
     ctx.obj = PulpWorkerContext(pulp_ctx)
 
 

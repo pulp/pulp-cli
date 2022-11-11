@@ -7,8 +7,8 @@ from pulpcore.cli.ansible.context import (
     PulpAnsibleCollectionRemoteContext,
     PulpAnsibleRoleRemoteContext,
 )
-from pulpcore.cli.common.context import PulpContext, pass_pulp_context
 from pulpcore.cli.common.generic import (
+    PulpCLIContext,
     common_remote_create_options,
     common_remote_update_options,
     create_command,
@@ -17,6 +17,7 @@ from pulpcore.cli.common.generic import (
     label_command,
     list_command,
     name_option,
+    pass_pulp_context,
     pulp_group,
     pulp_option,
     remote_filter_options,
@@ -51,7 +52,7 @@ def _requirements_callback(
 )
 @pass_pulp_context
 @click.pass_context
-def remote(ctx: click.Context, pulp_ctx: PulpContext, remote_type: str) -> None:
+def remote(ctx: click.Context, pulp_ctx: PulpCLIContext, remote_type: str) -> None:
     if remote_type == "role":
         ctx.obj = PulpAnsibleRoleRemoteContext(pulp_ctx)
     elif remote_type == "collection":

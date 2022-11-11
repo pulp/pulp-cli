@@ -1,7 +1,7 @@
 import click
 
-from pulpcore.cli.common.context import PulpContext, pass_pulp_context
 from pulpcore.cli.common.generic import (
+    PulpCLIContext,
     create_command,
     destroy_command,
     href_option,
@@ -9,6 +9,7 @@ from pulpcore.cli.common.generic import (
     list_command,
     load_file_or_string_callback,
     name_option,
+    pass_pulp_context,
     pulp_group,
     pulp_option,
     remote_filter_options,
@@ -39,7 +40,7 @@ def _uln_url_callback(ctx: click.Context, param: click.Parameter, value: str) ->
 )
 @pass_pulp_context
 @click.pass_context
-def remote(ctx: click.Context, pulp_ctx: PulpContext, remote_type: str) -> None:
+def remote(ctx: click.Context, pulp_ctx: PulpCLIContext, remote_type: str) -> None:
     if remote_type == "rpm":
         ctx.obj = PulpRpmRemoteContext(pulp_ctx)
     elif remote_type == "uln":

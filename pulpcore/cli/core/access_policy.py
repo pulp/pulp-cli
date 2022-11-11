@@ -1,11 +1,13 @@
 import click
 
-from pulpcore.cli.common.context import PulpContext, pass_entity_context, pass_pulp_context
 from pulpcore.cli.common.generic import (
+    PulpCLIContext,
     href_option,
     list_command,
     load_json_callback,
     lookup_callback,
+    pass_entity_context,
+    pass_pulp_context,
     pulp_group,
     show_command,
     update_command,
@@ -20,7 +22,7 @@ _ = translation.gettext
 @pulp_group()
 @pass_pulp_context
 @click.pass_context
-def access_policy(ctx: click.Context, pulp_ctx: PulpContext) -> None:
+def access_policy(ctx: click.Context, pulp_ctx: PulpCLIContext) -> None:
     ctx.obj = PulpAccessPolicyContext(pulp_ctx)
 
 
@@ -44,6 +46,6 @@ access_policy.add_command(update_command(decorators=lookup_options + update_opti
 @click.option("--viewset-name", callback=lookup_callback("viewset_name"), expose_value=False)
 @pass_entity_context
 @pass_pulp_context
-def reset(pulp_ctx: PulpContext, access_policy_ctx: PulpAccessPolicyContext) -> None:
+def reset(pulp_ctx: PulpCLIContext, access_policy_ctx: PulpAccessPolicyContext) -> None:
     result = access_policy_ctx.reset()
     pulp_ctx.output_result(result)

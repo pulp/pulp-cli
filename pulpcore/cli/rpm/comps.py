@@ -3,13 +3,13 @@ from typing import IO, Optional
 
 import click
 
-from pulpcore.cli.common.context import (
-    EntityFieldDefinition,
-    PulpContext,
-    PulpEntityContext,
+from pulpcore.cli.common.context import EntityFieldDefinition, PulpEntityContext
+from pulpcore.cli.common.generic import (
+    PulpCLIContext,
     pass_pulp_context,
+    pulp_command,
+    resource_option,
 )
-from pulpcore.cli.common.generic import pulp_command, resource_option
 from pulpcore.cli.rpm.context import PulpRpmCompsXmlContext, PulpRpmRepositoryContext
 
 _ = gettext.gettext
@@ -30,7 +30,7 @@ repository_option = resource_option(
 @click.option("--replace", type=bool, default=False)
 @pass_pulp_context
 def comps_upload(
-    pulp_ctx: PulpContext,
+    pulp_ctx: PulpCLIContext,
     file: IO[bytes],
     repository: Optional[EntityFieldDefinition],
     replace: Optional[bool],

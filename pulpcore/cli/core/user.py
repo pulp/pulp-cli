@@ -2,17 +2,17 @@ import click
 
 from pulpcore.cli.common.context import (  # PulpEntityContext,; pass_entity_context,
     PluginRequirement,
-    PulpContext,
-    pass_entity_context,
-    pass_pulp_context,
 )
 from pulpcore.cli.common.generic import (
+    PulpCLIContext,
     create_command,
     destroy_command,
     href_option,
     list_command,
     lookup_callback,
     null_callback,
+    pass_entity_context,
+    pass_pulp_context,
     pulp_group,
     pulp_option,
     show_command,
@@ -58,7 +58,7 @@ create_options = update_options + [
 @pulp_group()
 @pass_pulp_context
 @click.pass_context
-def user(ctx: click.Context, pulp_ctx: PulpContext) -> None:
+def user(ctx: click.Context, pulp_ctx: PulpCLIContext) -> None:
     ctx.obj = PulpUserContext(pulp_ctx)
 
 
@@ -75,7 +75,7 @@ user.add_command(destroy_command(decorators=lookup_options, needs_plugins=[req_c
 @pass_entity_context
 @pass_pulp_context
 @click.pass_context
-def role(ctx: click.Context, pulp_ctx: PulpContext, user_ctx: PulpUserContext) -> None:
+def role(ctx: click.Context, pulp_ctx: PulpCLIContext, user_ctx: PulpUserContext) -> None:
     pulp_ctx.needs_plugin(req_core_3_17)
     ctx.obj = PulpUserRoleContext(pulp_ctx, user_ctx)
 

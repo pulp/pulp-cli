@@ -8,18 +8,15 @@ from pulpcore.cli.ansible.context import (
     PulpAnsibleRepositoryContext,
     PulpAnsibleRoleContext,
 )
-from pulpcore.cli.common.context import (
-    PulpContext,
-    PulpEntityContext,
-    PulpRepositoryContext,
-    pass_entity_context,
-    pass_pulp_context,
-)
+from pulpcore.cli.common.context import PulpEntityContext, PulpRepositoryContext
 from pulpcore.cli.common.generic import (
     GroupOption,
+    PulpCLIContext,
     href_option,
     list_command,
     parse_size_callback,
+    pass_entity_context,
+    pass_pulp_context,
     pulp_group,
     pulp_option,
     resource_option,
@@ -105,7 +102,7 @@ repository_option = resource_option(
 )
 @pass_pulp_context
 @click.pass_context
-def content(ctx: click.Context, pulp_ctx: PulpContext, content_type: str) -> None:
+def content(ctx: click.Context, pulp_ctx: PulpCLIContext, content_type: str) -> None:
     if content_type == "collection-version":
         ctx.obj = PulpAnsibleCollectionVersionContext(pulp_ctx)
     elif content_type == "role":
@@ -255,7 +252,7 @@ content.add_command(show_command(decorators=lookup_options))
 @pass_entity_context
 @pass_pulp_context
 def upload(
-    pulp_ctx: PulpContext,
+    pulp_ctx: PulpCLIContext,
     content_ctx: Union[
         PulpAnsibleRoleContext,
         PulpAnsibleCollectionVersionContext,
