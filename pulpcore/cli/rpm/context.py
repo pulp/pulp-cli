@@ -44,7 +44,7 @@ class PulpRpmCompsXmlContext(PulpEntityContext):
         file.seek(0)
         return self.call(
             "upload_comps",
-            uploads={"file": file.read()},
+            uploads={"file": file},
             body={"repository": repo_href, "replace": replace},
         )
 

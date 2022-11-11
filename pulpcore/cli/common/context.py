@@ -2,13 +2,25 @@ import datetime
 import re
 import sys
 import time
-from typing import Any, ClassVar, Dict, Iterable, List, NamedTuple, Optional, Set, Type, Union
+from typing import (
+    Any,
+    ClassVar,
+    Dict,
+    Iterable,
+    List,
+    Mapping,
+    NamedTuple,
+    Optional,
+    Set,
+    Type,
+    Union,
+)
 
 from packaging.version import parse as parse_version
 from requests import HTTPError
 
 from pulpcore.cli.common.i18n import get_translation
-from pulpcore.cli.common.openapi import OpenAPI, OpenAPIError
+from pulpcore.cli.common.openapi import OpenAPI, OpenAPIError, UploadsMap
 
 translation = get_translation(__name__)
 _ = translation.gettext
@@ -61,8 +73,8 @@ def _preprocess_value(value: Any) -> Any:
         return value
     if isinstance(value, PulpEntityContext):
         return value.pulp_href
-    if isinstance(value, datetime.datetime):
-        return value.strftime(DATETIME_FORMATS[0])
+    if isinstance(value, Mapping):
+        return {k: _preprocess_value(v) for k, v in value.items()}
     if isinstance(value, Iterable):
         return [_preprocess_value(item) for item in value]
     return value
@@ -108,6 +120,49 @@ class PulpContext:
         self.timeout: int = timeout
         self.start_time: Optional[datetime.datetime] = None
 
+    def _patch_api_spec(self) -> None:
+        # A place for last minute fixes to the api_spec.
+        # WARNING: Operations are already indexed at this point.
+        api_spec = self.api.api_spec
+        if self.has_plugin(PluginRequirement("core", max="3.20.0")):
+            for method, path in self.api.operations.values():
+                operation = api_spec["paths"][path][method]
+                if method == "get" and "parameters" in operation:
+                    for parameter in operation["parameters"]:
+                        if (
+                            parameter["name"] == "ordering"
+                            and parameter["in"] == "query"
+                            and "schema" in parameter
+                            and parameter["schema"]["type"] == "string"
+                        ):
+                            parameter["schema"] = {"type": "array", "items": {"type": "string"}}
+                            parameter["explode"] = False
+                            parameter["style"] = "form"
+        if self.has_plugin(PluginRequirement("core", max="3.22.0.dev")):
+            for method, path in self.api.operations.values():
+                operation = api_spec["paths"][path][method]
+                if method == "get" and "parameters" in operation:
+                    for parameter in operation["parameters"]:
+                        if (
+                            parameter["name"] in ["fields", "exclude_fields"]
+                            and parameter["in"] == "query"
+                            and "schema" in parameter
+                            and parameter["schema"]["type"] == "string"
+                        ):
+                            parameter["schema"] = {"type": "array", "items": {"type": "string"}}
+        if self.has_plugin(
+            PluginRequirement("python", max="99.99.0.dev")
+        ):  # TODO Add version bounds
+            python_remote_serializer = api_spec["components"]["schemas"]["python.PythonRemote"]
+            patched_python_remote_serializer = api_spec["components"]["schemas"][
+                "Patchedpython.PythonRemote"
+            ]
+            for prop in ("includes", "excludes"):
+                python_remote_serializer["properties"][prop]["type"] = "array"
+                python_remote_serializer["properties"][prop]["items"] = {"type": "string"}
+                patched_python_remote_serializer["properties"][prop]["type"] = "array"
+                patched_python_remote_serializer["properties"][prop]["items"] = {"type": "string"}
+
     @property
     def api(self) -> OpenAPI:
         if self._api is None:
@@ -120,6 +175,7 @@ class PulpContext:
             # Rerun scheduled version checks
             for plugin in self._needed_plugins:
                 self.needs_plugin(plugin)
+            self._patch_api_spec()
         return self._api
 
     @property
@@ -133,7 +189,7 @@ class PulpContext:
         non_blocking: bool = False,
         parameters: Optional[Dict[str, Any]] = None,
         body: Optional[EntityDefinition] = None,
-        uploads: Optional[Dict[str, bytes]] = None,
+        uploads: Optional[UploadsMap] = None,
         validate_body: bool = True,
     ) -> Any:
         """
@@ -445,7 +501,7 @@ class PulpEntityContext:
         non_blocking: bool = False,
         parameters: Optional[Dict[str, Any]] = None,
         body: Optional[EntityDefinition] = None,
-        uploads: Optional[Dict[str, bytes]] = None,
+        uploads: Optional[UploadsMap] = None,
         validate_body: bool = True,
     ) -> Any:
         operation_id: str = (
@@ -464,9 +520,7 @@ class PulpEntityContext:
     def _preprocess_value(cls, key: str, value: Any) -> Any:
         if key in cls.NULLABLES and value == "":
             return None
-        if isinstance(value, PulpEntityContext):
-            return value.pulp_href
-        return value
+        return _preprocess_value(value)
 
     def preprocess_body(self, body: EntityDefinition) -> EntityDefinition:
         # This function is deprecated. Subclasses should subclass `preprocess_entity` instead.
@@ -499,7 +553,7 @@ class PulpEntityContext:
             else:
                 payload["limit"] = limit
                 limit = 0
-            result: Dict[str, Any] = self.call("list", parameters=payload)
+            result: Mapping[str, Any] = self.call("list", parameters=payload)
             count = result["count"]
             entities.extend(result["results"])
             if result["next"] is None:
@@ -527,8 +581,8 @@ class PulpEntityContext:
     def create(
         self,
         body: EntityDefinition,
-        parameters: Optional[Dict[str, Any]] = None,
-        uploads: Optional[Dict[str, Any]] = None,
+        parameters: Optional[Mapping[str, Any]] = None,
+        uploads: Optional[UploadsMap] = None,
         non_blocking: bool = False,
     ) -> Any:
         _parameters = self.scope
@@ -551,8 +605,8 @@ class PulpEntityContext:
         self,
         href: Optional[str] = None,
         body: Optional[EntityDefinition] = None,
-        parameters: Optional[Dict[str, Any]] = None,
-        uploads: Optional[Dict[str, Any]] = None,
+        parameters: Optional[Mapping[str, Any]] = None,
+        uploads: Optional[UploadsMap] = None,
         non_blocking: bool = False,
     ) -> Any:
         # Workaround for plugins that do not have ID_PREFIX in place

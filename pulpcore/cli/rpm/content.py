@@ -8,6 +8,8 @@ from pulpcore.cli.common.generic import (
     PulpCLIContext,
     chunk_size_option,
     create_command,
+    exclude_field_option,
+    field_option,
     href_option,
     list_command,
     pass_entity_context,
@@ -103,8 +105,8 @@ def content() -> None:
 
 
 list_options = [
-    pulp_option("--exclude_fields"),
-    pulp_option("--fields"),
+    field_option,
+    exclude_field_option,
     pulp_option("--repository-version"),
     pulp_option("--arch", allowed_with_contexts=(PulpRpmPackageContext,)),
     pulp_option(
