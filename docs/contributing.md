@@ -19,12 +19,17 @@ If you are interested in contributing code, note that we have styling and format
 conventions for both the code and our PRs:
 * `pulp-cli` utilizes python type annotations and black and isort code formatting.
   To run the auto-formatting features, execute `make black`.
-* Please run `make lint` before committing changes to check for compliance. This executes the following checks:
-  * shellcheck
-  * black
-  * isort
-  * flake8
-  * mypy
+* To check for compliance, please, install lint requirements and run lint checks before committing changes:
+  ```
+  pip install -r lint_requirements.txt
+  make lint
+  ```
+  * This executes the following checks:
+    * shellcheck
+    * black
+    * isort
+    * flake8
+    * mypy
 * If your PR is in response to an open issue, add `fixes #<ISSUE-NUMBER>` as its own line
 in your commit message. If you do **not** have an issue, use `[noissue]`.
 
