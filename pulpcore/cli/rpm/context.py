@@ -27,10 +27,7 @@ class PulpRpmACSContext(PulpEntityContext):
     NEEDS_PLUGINS = [PluginRequirement("rpm", "3.18.0")]
 
     def refresh(self, href: str) -> Any:
-        return self.call(
-            "refresh",
-            parameters={self.HREF: href},
-        )
+        return self.call("refresh", parameters={self.HREF: href})
 
 
 class PulpRpmCompsXmlContext(PulpEntityContext):
@@ -44,8 +41,7 @@ class PulpRpmCompsXmlContext(PulpEntityContext):
         file.seek(0)
         return self.call(
             "upload_comps",
-            uploads={"file": file},
-            body={"repository": repo_href, "replace": replace},
+            body={"repository": repo_href, "replace": replace, "file": file},
         )
 
 
