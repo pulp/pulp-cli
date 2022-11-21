@@ -29,6 +29,10 @@ class OpenAPIError(Exception):
     pass
 
 
+class OpenAPIValidationError(OpenAPIError):
+    pass
+
+
 class OpenAPI:
     def __init__(
         self,
@@ -223,7 +227,9 @@ class OpenAPI:
             value = self.validate_number(schema, name, value)
         elif schema_type == "boolean":
             if not isinstance(value, bool):
-                raise OpenAPIError(_("'{name}' is expected to be a boolean.").format(name=name))
+                raise OpenAPIValidationError(
+                    _("'{name}' is expected to be a boolean.").format(name=name)
+                )
         # TODO: Add more types here.
         else:
             raise OpenAPIError(
@@ -233,13 +239,16 @@ class OpenAPI:
 
     def validate_object(self, schema: Any, name: str, value: Any) -> Dict[str, Any]:
         if not isinstance(value, Dict):
-            raise OpenAPIError(_("'{name}' is expected to be an object.").format(name=name))
+            raise OpenAPIValidationError(
+                _("'{name}' is expected to be an object.").format(name=name)
+            )
         properties = schema.get("properties")
         if properties is not None:
+            value = value.copy()
             for property_name, property_value in value.items():
                 property_schema = properties.get(property_name)
                 if not property_schema:
-                    raise OpenAPIError(
+                    raise OpenAPIValidationError(
                         _("Unexpected property '{property_name}' for '{name}' provided.").format(
                             name=name, property_name=property_name
                         )
@@ -250,7 +259,7 @@ class OpenAPI:
         if "required" in schema:
             missing_properties = set(schema["required"]) - set(value.keys())
             if missing_properties:
-                raise OpenAPIError(
+                raise OpenAPIValidationError(
                     _("Required properties(s) '{missing_properties}' of '{name}' missing.").format(
                         name=name, missing_properties=missing_properties
                     )
@@ -259,7 +268,7 @@ class OpenAPI:
 
     def validate_array(self, schema: Any, name: str, value: Any) -> List[Any]:
         if not isinstance(value, List):
-            raise OpenAPIError(_("'{name}' is expected to be a list.").format(name=name))
+            raise OpenAPIValidationError(_("'{name}' is expected to be a list.").format(name=name))
         item_schema = schema["items"]
         return [self.validate_schema(item_schema, name, item) for item in value]
 
@@ -267,42 +276,156 @@ class OpenAPI:
         schema_format = schema.get("format")
         if schema_format == "date":
             if not isinstance(value, datetime.date):
-                raise OpenAPIError(_("'{name}' is expected to be a date.").format(name=name))
+                raise OpenAPIValidationError(
+                    _("'{name}' is expected to be a date.").format(name=name)
+                )
             return value.strftime(ISO_DATE_FORMAT)
         elif schema_format == "date-time":
             if not isinstance(value, datetime.datetime):
-                raise OpenAPIError(_("'{name}' is expected to be a datetime.").format(name=name))
+                raise OpenAPIValidationError(
+                    _("'{name}' is expected to be a datetime.").format(name=name)
+                )
             return value.strftime(ISO_DATETIME_FORMAT)
         elif schema_format == "bytes":
             if not isinstance(value, bytes):
-                raise OpenAPIError(_("'{name}' is expected to be bytes.").format(name=name))
+                raise OpenAPIValidationError(
+                    _("'{name}' is expected to be bytes.").format(name=name)
+                )
             return base64.b64encode(value)
         elif schema_format == "binary":
             if not isinstance(value, (bytes, BufferedReader)):
-                raise OpenAPIError(_("'{name}' is expected to be binary.").format(name=name))
+                raise OpenAPIValidationError(
+                    _("'{name}' is expected to be binary.").format(name=name)
+                )
             return value
         else:
             if not isinstance(value, str):
-                raise OpenAPIError(_("'{name}' is expected to be a string.").format(name=name))
+                raise OpenAPIValidationError(
+                    _("'{name}' is expected to be a string.").format(name=name)
+                )
             return value
 
     def validate_integer(self, schema: Any, name: str, value: Any) -> int:
         if not isinstance(value, int):
-            raise OpenAPIError(_("'{name}' is expected to be an integer.").format(name=name))
+            raise OpenAPIValidationError(
+                _("'{name}' is expected to be an integer.").format(name=name)
+            )
         minimum = schema.get("minimum")
         if minimum is not None and value < minimum:
-            raise OpenAPIError(_("'{name}' is violating the minimum constraint").format(name=name))
+            raise OpenAPIValidationError(
+                _("'{name}' is violating the minimum constraint").format(name=name)
+            )
         maximum = schema.get("maximum")
         if maximum is not None and value > maximum:
-            raise OpenAPIError(_("'{name}' is violating the maximum constraint").format(name=name))
+            raise OpenAPIValidationError(
+                _("'{name}' is violating the maximum constraint").format(name=name)
+            )
         return value
 
     def validate_number(self, schema: Any, name: str, value: Any) -> float:
         # https://swagger.io/specification/#data-types describes float and double.
         # Python does not distinguish them.
         if not isinstance(value, float):
-            raise OpenAPIError(_("'{name}' is expected to be an integer.").format(name=name))
+            raise OpenAPIValidationError(
+                _("'{name}' is expected to be a number.").format(name=name)
+            )
         return value
+
+    def render_request_body(
+        self,
+        method_spec: Dict[str, Any],
+        body: Optional[Dict[str, Any]] = None,
+        validate_body: bool = True,
+    ) -> Tuple[
+        Optional[str],
+        Optional[Dict[str, Any]],
+        Optional[Dict[str, Any]],
+        Optional[List[Tuple[str, Tuple[str, UploadType, str]]]],
+    ]:
+        content_types: List[str] = []
+        try:
+            request_body_spec = method_spec["requestBody"]
+        except KeyError:
+            if body is not None:
+                raise OpenAPIError(_("This operation does not expect a request body."))
+            return None, None, None, None
+        else:
+            body_required = request_body_spec.get("required", False)
+            if body is None and not body_required:
+                # shortcut
+                return None, None, None, None
+            content_types = list(request_body_spec["content"].keys())
+        assert body is not None
+
+        content_type: Optional[str] = None
+        data: Optional[Dict[str, Any]] = None
+        json: Optional[Dict[str, Any]] = None
+        files: Optional[List[Tuple[str, Tuple[str, UploadType, str]]]] = None
+
+        candidate_content_types = [
+            "multipart/form-data",
+        ]
+        if not any((isinstance(value, (bytes, BufferedReader)) for value in body.values())):
+            candidate_content_types = [
+                "application/json",
+                "application/x-www-form-urlencoded",
+            ] + candidate_content_types
+        errors: List[str] = []
+        for candidate in candidate_content_types:
+            content_type = next(
+                (
+                    content_type
+                    for content_type in content_types
+                    if content_type.startswith(candidate)
+                ),
+                None,
+            )
+            if content_type:
+                if validate_body:
+                    try:
+                        body = self.validate_schema(
+                            request_body_spec["content"][content_type]["schema"],
+                            "body",
+                            body,
+                        )
+                    except OpenAPIValidationError as e:
+                        errors.append(f"{content_type}: {e}")
+                        # Try the next content-type
+                        continue
+
+                if content_type.startswith("application/json"):
+                    json = body
+                elif content_type.startswith("application/x-www-form-urlencoded"):
+                    data = body
+                elif content_type.startswith("multipart/form-data"):
+                    uploads: Dict[str, UploadType] = {}
+                    data = {}
+                    # Extract and prepare the files to upload
+                    if body:
+                        for key, value in body.items():
+                            if isinstance(value, (bytes, BufferedReader)):
+                                uploads[key] = value
+                            else:
+                                data[key] = value
+                    if uploads:
+                        files = [
+                            (key, (key, file_data, "application/octet-stream"))
+                            for key, file_data in uploads.items()
+                        ]
+                break
+        else:
+            # No known content-type left
+            if errors:
+                raise OpenAPIError(
+                    _("Validation failed for '{operation_id}':\n  ").format(
+                        operation_id=method_spec["operationId"]
+                    )
+                    + "\n  ".join(errors)
+                )
+            else:
+                raise OpenAPIError(_("No valid content type found."))
+
+        return content_type, data, json, files
 
     def render_request(
         self,
@@ -312,84 +435,20 @@ class OpenAPI:
         params: Dict[str, Any],
         headers: Dict[str, str],
         body: Optional[Dict[str, Any]] = None,
-        uploads: Optional[UploadsMap] = None,
         validate_body: bool = True,
     ) -> requests.PreparedRequest:
         method_spec = path_spec[method]
-        try:
-            content_types: List[str] = (
-                list(method_spec["requestBody"]["content"].keys()) if body or uploads else []
-            )
-        except KeyError:
-            raise OpenAPIError(_("This operation does not expect a request body."))
-
-        content_type: Optional[str] = None
-        data: Optional[Dict[str, Any]] = None
-        json: Optional[Dict[str, Any]] = None
-        files: Optional[List[Tuple[str, Tuple[str, UploadType, str]]]] = None
-
-        if uploads:
-            content_type = next(
-                (
-                    content_type
-                    for content_type in content_types
-                    if content_type.startswith("multipart/form-data")
-                ),
-                None,
-            )
-            if content_type:
-                data = body
-                files = [
-                    (key, (key, file_data, "application/octet-stream"))
-                    for key, file_data in uploads.items()
-                ]
-            else:
-                raise OpenAPIError(_("No suitable content type for file upload specified."))
-        elif body:
-            content_type = next(
-                (
-                    content_type
-                    for content_type in content_types
-                    if content_type.startswith("application/json")
-                ),
-                None,
-            )
-            if content_type:
-                json = body
-            else:
-                content_type = next(
-                    (
-                        content_type
-                        for content_type in content_types
-                        if content_type.startswith("application/x-www-form-urlencoded")
-                    ),
-                    None,
-                )
-                if content_type:
-                    data = body
-                else:
-                    raise OpenAPIError(_("No suitable content type for request specified."))
-        if content_type and validate_body:
-            body = body or {}
-            if uploads:
-                # Add uploads for validation (CRAZY HACK)
-                body.update(uploads)
-            # This only works, because data or json will be the same object as body...
-            body = self.validate_schema(
-                method_spec["requestBody"]["content"][content_type]["schema"],
-                "body",
-                body,
-            )
-            assert isinstance(body, Dict)
-            if uploads:
-                # Remove uploads again
-                for key in uploads:
-                    body.pop(key)
-        return self._session.prepare_request(
+        content_type, data, json, files = self.render_request_body(method_spec, body, validate_body)
+        request = self._session.prepare_request(
             requests.Request(
                 method, url, params=params, headers=headers, data=data, json=json, files=files
             )
         )
+        if content_type:
+            assert request.headers["content-type"].startswith(
+                content_type
+            ), f"{request.headers['content-type']} != {content_type}"
+        return request
 
     def parse_response(self, method_spec: Dict[str, Any], response: requests.Response) -> Any:
         if response.status_code == 204:
@@ -417,7 +476,6 @@ class OpenAPI:
         operation_id: str,
         parameters: Optional[Dict[str, Any]] = None,
         body: Optional[Dict[str, Any]] = None,
-        uploads: Optional[UploadsMap] = None,
         validate_body: bool = True,
     ) -> Any:
         method, path = self.operations[operation_id]
@@ -454,7 +512,6 @@ class OpenAPI:
             query_params,
             headers,
             body,
-            uploads,
             validate_body=validate_body,
         )
 

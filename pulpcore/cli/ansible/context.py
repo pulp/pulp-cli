@@ -24,7 +24,7 @@ class PulpAnsibleCollectionVersionContext(PulpContentContext):
     UPLOAD_ID: ClassVar[str] = "upload_collection"
 
     def upload(self, file: IO[bytes]) -> Any:
-        return self.call("upload", uploads={"file": file})
+        return self.call("upload", body={"file": file})
 
 
 class PulpAnsibleRoleContext(PulpContentContext):

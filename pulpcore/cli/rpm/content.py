@@ -289,11 +289,10 @@ def upload(
 ) -> None:
     """Create a content unit by uploading a file"""
     body: Dict[str, Any] = {}
-    uploads: Dict[str, IO[bytes]] = {}
     if isinstance(entity_ctx, PulpRpmPackageContext):
         size = os.path.getsize(file.name)
         if chunk_size > size:
-            uploads["file"] = file
+            body["file"] = file
         elif pulp_ctx.has_plugin(PluginRequirement("core", min="3.20.0")):
             upload_href = PulpUploadContext(pulp_ctx).upload_file(file, chunk_size)
             body["upload"] = upload_href
@@ -302,8 +301,8 @@ def upload(
             body["artifact"] = artifact_href
         body.update(kwargs)
     elif isinstance(entity_ctx, PulpRpmAdvisoryContext):
-        uploads["file"] = file
+        body["file"] = file
     else:
         raise NotImplementedError()
-    result = entity_ctx.create(body=body, uploads=uploads)
+    result = entity_ctx.create(body=body)
     pulp_ctx.output_result(result)

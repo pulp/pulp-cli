@@ -66,9 +66,7 @@ class PulpArtifactContext(PulpEntityContext):
 
         if chunk_size > size:
             # if chunk_size is bigger than the file size, just upload it directly
-            artifact: Dict[str, Any] = self.create(
-                {"sha256": sha256_digest}, uploads={"file": file.read()}
-            )
+            artifact: Dict[str, Any] = self.create({"sha256": sha256_digest, "file": file})
             return artifact["pulp_href"]
 
         upload_ctx = PulpUploadContext(self.pulp_ctx)
@@ -431,8 +429,7 @@ class PulpUploadContext(PulpEntityContext):
         return self.call(
             "update",
             parameters=parameters,
-            body={"sha256": hashlib.sha256(chunk).hexdigest()},
-            uploads={"file": chunk},
+            body={"sha256": hashlib.sha256(chunk).hexdigest(), "file": chunk},
             non_blocking=non_blocking,
         )
 

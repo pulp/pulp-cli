@@ -1,5 +1,5 @@
 import sys
-from typing import IO, Any, Dict, Iterable, Mapping, Optional
+from typing import IO, Any, Dict, Iterable, Optional
 
 import click
 
@@ -119,8 +119,10 @@ def call(
         params: Dict[str, str] = dict(parameter.partition("=")[::2] for parameter in parameters)
     except ValueError:
         raise click.ClickException("Parameters must be in the form <key>=<value>.")
-    uploads_dict: Mapping[str, IO[bytes]] = {file.name: file for file in uploads}
-    result = pulp_ctx.call(operation_id, parameters=params, body=body, uploads=uploads_dict)
+    if uploads:
+        assert isinstance(body, Dict)
+        body.update({file.name: file for file in uploads})
+    result = pulp_ctx.call(operation_id, parameters=params, body=body)
     pulp_ctx.output_result(result)
 
 

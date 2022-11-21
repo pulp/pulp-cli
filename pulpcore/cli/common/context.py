@@ -2,19 +2,7 @@ import datetime
 import re
 import sys
 import time
-from typing import (
-    Any,
-    ClassVar,
-    Dict,
-    Iterable,
-    List,
-    Mapping,
-    NamedTuple,
-    Optional,
-    Set,
-    Type,
-    Union,
-)
+from typing import Any, ClassVar, Dict, List, Mapping, NamedTuple, Optional, Set, Type, Union
 
 from packaging.version import parse as parse_version
 from requests import HTTPError
@@ -69,13 +57,11 @@ class PulpNoWait(Exception):
 
 
 def _preprocess_value(value: Any) -> Any:
-    if isinstance(value, str):
-        return value
     if isinstance(value, PulpEntityContext):
         return value.pulp_href
     if isinstance(value, Mapping):
         return {k: _preprocess_value(v) for k, v in value.items()}
-    if isinstance(value, Iterable):
+    if isinstance(value, (list, tuple)):
         return [_preprocess_value(item) for item in value]
     return value
 
@@ -150,6 +136,11 @@ class PulpContext:
                             and parameter["schema"]["type"] == "string"
                         ):
                             parameter["schema"] = {"type": "array", "items": {"type": "string"}}
+        if self.has_plugin(PluginRequirement("file", max="1.11.0")):
+            operation = api_spec["paths"]["{file_file_alternate_content_source_href}refresh/"][
+                "post"
+            ]
+            operation.pop("requestBody")
         if self.has_plugin(
             PluginRequirement("python", max="99.99.0.dev")
         ):  # TODO Add version bounds
@@ -202,12 +193,22 @@ class PulpContext:
             parameters = preprocess_payload(parameters)
         if body is not None:
             body = preprocess_payload(body)
+        # ---- SNIP ----
+        # In the future we want everything as part of the body.
+        if uploads:
+            self.echo(
+                _("Deprecated use of 'uploads' for operation '{operation_id}'").format(
+                    operation_id=operation_id
+                )
+            )
+            body = body or {}
+            body.update(uploads)
+        # ---- SNIP ----
         try:
             result = self.api.call(
                 operation_id,
                 parameters=parameters,
                 body=body,
-                uploads=uploads,
                 validate_body=validate_body,
             )
         except OpenAPIError as e:
@@ -743,7 +744,7 @@ class PulpRepositoryVersionContext(PulpEntityContext):
         return {self.repository_ctx.HREF: self.repository_ctx.pulp_href}
 
     def repair(self, href: Optional[str]) -> Any:
-        return self.call("repair", parameters={self.HREF: href or self.pulp_href})
+        return self.call("repair", parameters={self.HREF: href or self.pulp_href}, body={})
 
 
 class PulpRepositoryContext(PulpEntityContext):
