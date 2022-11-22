@@ -6,7 +6,6 @@ import schema as s
 from pulpcore.cli.common.context import (
     EntityFieldDefinition,
     PluginRequirement,
-    PulpEntityContext,
     PulpRemoteContext,
     PulpRepositoryContext,
 )
@@ -212,9 +211,12 @@ def sync(
     skip_types: Optional[Iterable[str]],
     sync_policy: Optional[str],
 ) -> None:
+    """
+    Sync the repository from a remote source.
+    If remote is not specified sync will try to use the default remote associated with
+    the repository
+    """
     repository = repository_ctx.entity
-    repository_href = repository_ctx.pulp_href
-
     body: Dict[str, Any] = {}
 
     if mirror:
@@ -226,8 +228,8 @@ def sync(
     if sync_policy:
         body["sync_policy"] = sync_policy
 
-    if isinstance(remote, PulpEntityContext):
-        body["remote"] = remote.pulp_href
+    if remote:
+        body["remote"] = remote
     elif repository["remote"] is None:
         raise click.ClickException(
             _(
@@ -236,7 +238,4 @@ def sync(
             ).format(name=repository["name"])
         )
 
-    repository_ctx.sync(
-        href=repository_href,
-        body=body,
-    )
+    repository_ctx.sync(body=body)

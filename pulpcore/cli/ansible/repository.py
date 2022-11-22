@@ -1,4 +1,4 @@
-from typing import Any, List, Optional
+from typing import Any, Dict, List, Optional
 
 import click
 import schema as s
@@ -13,7 +13,6 @@ from pulpcore.cli.ansible.context import (
 from pulpcore.cli.common.context import (
     EntityFieldDefinition,
     PluginRequirement,
-    PulpEntityContext,
     PulpRemoteContext,
     PulpRepositoryContext,
 )
@@ -200,14 +199,15 @@ def sync(
     remote: EntityFieldDefinition,
 ) -> None:
     """
+    Sync the repository from a remote source.
     If remote is not specified sync will try to use the default remote associated with
     the repository
     """
     repository = repository_ctx.entity
-    repository_href = repository["pulp_href"]
-    body = {}
-    if isinstance(remote, PulpEntityContext):
-        body["remote"] = remote.pulp_href
+    body: Dict[str, Any] = {}
+
+    if remote:
+        body["remote"] = remote
     elif repository["remote"] is None:
         name = repository["name"]
         raise click.ClickException(
@@ -217,10 +217,7 @@ def sync(
             ).format(name=name)
         )
 
-    repository_ctx.sync(
-        href=repository_href,
-        body=body,
-    )
+    repository_ctx.sync(body=body)
 
 
 @repository.command()
@@ -237,6 +234,6 @@ def sign(
     """Sign the collections in the repository using the signing service specified."""
     if content_units is None:
         content_units = ["*"]
-    body = {"content_units": content_units, "signing_service": signing_service.pulp_href}
+    body = {"content_units": content_units, "signing_service": signing_service}
     parameters = {repository_ctx.HREF: repository_ctx.pulp_href}
     repository_ctx.call("sign", parameters=parameters, body=body)

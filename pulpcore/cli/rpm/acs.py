@@ -60,8 +60,7 @@ def path() -> None:
 def add(acs_ctx: PulpRpmACSContext, paths: Iterable[str]) -> None:
     """Add path(s) to an existing ACS."""
     paths = set(paths)
-    href = acs_ctx.entity["pulp_href"]
-    existing_paths = set(acs_ctx.show(href)["paths"])
+    existing_paths = set(acs_ctx.entity["paths"])
 
     for path in paths:
         if path in existing_paths:
@@ -69,7 +68,7 @@ def add(acs_ctx: PulpRpmACSContext, paths: Iterable[str]) -> None:
 
     if existing_paths != {""}:
         paths = set.union(existing_paths, paths)
-    acs_ctx.update(href, body={"paths": list(paths)})
+    acs_ctx.update(body={"paths": list(paths)})
 
 
 @path.command()
@@ -80,15 +79,14 @@ def add(acs_ctx: PulpRpmACSContext, paths: Iterable[str]) -> None:
 def remove(acs_ctx: PulpRpmACSContext, paths: Iterable[str]) -> None:
     """Remove path(s) from an existing ACS."""
     paths = set(paths)
-    href = acs_ctx.entity["pulp_href"]
-    existing_paths = set(acs_ctx.show(href)["paths"])
+    existing_paths = set(acs_ctx.entity["paths"])
 
     if paths - existing_paths:
         missing_paths = paths - existing_paths
         raise click.ClickException(_("ACS does not have path(s): {}.").format(missing_paths))
 
     paths = existing_paths - paths
-    acs_ctx.update(href, body={"paths": list(paths)})
+    acs_ctx.update(body={"paths": list(paths)})
 
 
 remote_option = resource_option(
@@ -116,4 +114,4 @@ acs.add_command(destroy_command(decorators=lookup_options))
 @href_option
 @name_option
 def refresh(pulp_ctx: PulpCLIContext, acs_ctx: PulpRpmACSContext) -> None:
-    acs_ctx.refresh(acs_ctx.pulp_href)
+    acs_ctx.refresh()

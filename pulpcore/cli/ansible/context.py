@@ -88,7 +88,10 @@ class PulpAnsibleRepositoryContext(PulpRepositoryContext):
     ENTITY = _("ansible repository")
     ENTITIES = _("ansible repositories")
     VERSION_CONTEXT = PulpAnsibleRepositoryVersionContext
-    CAPABILITIES = {"pulpexport": [PluginRequirement("ansible")]}
+    CAPABILITIES = {
+        "sync": [PluginRequirement("ansible")],
+        "pulpexport": [PluginRequirement("ansible")],
+    }
     NULLABLES = PulpRepositoryContext.NULLABLES | {"gpgkey"}
 
 

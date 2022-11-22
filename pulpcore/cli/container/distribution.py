@@ -97,7 +97,6 @@ def update(
     pulp_labels: Optional[Dict[str, str]],
 ) -> None:
     distribution: EntityDefinition = distribution_ctx.entity
-    href: str = distribution_ctx.pulp_href
     body: EntityDefinition = {}
 
     if private is not None:
@@ -117,18 +116,16 @@ def update(
             repository = cast(PulpEntityContext, repository)
             if version is not None:
                 if distribution["repository"]:
-                    distribution_ctx.update(href, body={"repository": ""}, non_blocking=True)
+                    distribution_ctx.update(body={"repository": ""}, non_blocking=True)
                 body["repository_version"] = f"{repository.pulp_href}versions/{version}/"
             else:
                 if distribution["repository_version"]:
-                    distribution_ctx.update(
-                        href, body={"repository_version": ""}, non_blocking=True
-                    )
+                    distribution_ctx.update(body={"repository_version": ""}, non_blocking=True)
                 body["repository"] = repository.pulp_href
     elif version is not None:
         # keep current repository, change version
         if distribution["repository"]:
-            distribution_ctx.update(href, body={"repository": ""}, non_blocking=True)
+            distribution_ctx.update(body={"repository": ""}, non_blocking=True)
             body["repository_version"] = f'{distribution["repository"]}versions/{version}/'
         elif distribution["repository_version"]:
             repository_href, _, _ = distribution["repository_version"].partition("versions")
@@ -140,4 +137,4 @@ def update(
                     "please specify the repository to use  with --repository"
                 ).format(distribution=distribution["name"])
             )
-    distribution_ctx.update(href, body=body)
+    distribution_ctx.update(body=body)

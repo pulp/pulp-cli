@@ -5,7 +5,6 @@ import click
 from pulpcore.cli.common.context import (
     EntityFieldDefinition,
     PluginRequirement,
-    PulpEntityContext,
     PulpRemoteContext,
     PulpRepositoryContext,
 )
@@ -153,13 +152,16 @@ def sync(
     repository_ctx: PulpRepositoryContext,
     remote: EntityFieldDefinition,
 ) -> None:
+    """
+    Sync the repository from a remote source.
+    If remote is not specified sync will try to use the default remote associated with
+    the repository
+    """
     repository = repository_ctx.entity
-    repository_href = repository_ctx.pulp_href
-
     body: Dict[str, Any] = {}
 
-    if isinstance(remote, PulpEntityContext):
-        body["remote"] = remote.pulp_href
+    if remote:
+        body["remote"] = remote
     elif repository["remote"] is None:
         raise click.ClickException(
             _(
@@ -168,10 +170,7 @@ def sync(
             ).format(name=repository["name"])
         )
 
-    repository_ctx.sync(
-        href=repository_href,
-        body=body,
-    )
+    repository_ctx.sync(body=body)
 
 
 @repository.command(deprecated=True)
@@ -199,7 +198,6 @@ def add(
     content_href = PulpPythonContentContext(pulp_ctx, entity={"filename": filename}).pulp_href
 
     repository_ctx.modify(
-        href=repository_href,
         add_content=[content_href],
         base_version=base_version_href,
     )
@@ -230,7 +228,6 @@ def remove(
     content_href = PulpPythonContentContext(pulp_ctx, entity={"filename": filename}).pulp_href
 
     repository_ctx.modify(
-        href=repository_href,
         remove_content=[content_href],
         base_version=base_version_href,
     )

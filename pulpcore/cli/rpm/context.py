@@ -26,8 +26,11 @@ class PulpRpmACSContext(PulpEntityContext):
     ID_PREFIX = "acs_rpm_rpm"
     NEEDS_PLUGINS = [PluginRequirement("rpm", "3.18.0")]
 
-    def refresh(self, href: str) -> Any:
-        return self.call("refresh", parameters={self.HREF: href})
+    def refresh(self, href: Optional[str] = None) -> Any:
+        return self.call(
+            "refresh",
+            parameters={self.HREF: href or self.pulp_href},
+        )
 
 
 class PulpRpmCompsXmlContext(PulpEntityContext):
@@ -194,7 +197,7 @@ class PulpRpmRepositoryContext(PulpRepositoryContext):
     ENTITY = _("rpm repository")
     ENTITIES = _("rpm repositories")
     VERSION_CONTEXT = PulpRpmRepositoryVersionContext
-    CAPABILITIES = {"pulpexport": [PluginRequirement("rpm")]}
+    CAPABILITIES = {"sync": [PluginRequirement("rpm")], "pulpexport": [PluginRequirement("rpm")]}
 
 
 registered_repository_contexts["rpm:rpm"] = PulpRpmRepositoryContext

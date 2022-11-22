@@ -82,11 +82,10 @@ def update(
     importer_ctx: PulpImporterContext,
     repo_map: List[RepositoryMap],
 ) -> None:
-    importer_href = importer_ctx.pulp_href
     payload = {}
 
     if repo_map:
         payload["repo_mapping"] = {source: dest for source, dest in repo_map}
 
-    result = importer_ctx.update(importer_href, payload)
+    result = importer_ctx.update(body=payload)
     pulp_ctx.output_result(result)

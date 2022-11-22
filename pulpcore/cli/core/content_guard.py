@@ -79,8 +79,7 @@ def assign(
     users: Optional[List[str]],
     groups: Optional[List[str]],
 ) -> None:
-    href = guard_ctx.entity["pulp_href"]
-    result = guard_ctx.assign(href=href, users=users, groups=groups)
+    result = guard_ctx.assign(users=users, groups=groups)
     pulp_ctx.output_result(result)
 
 
@@ -107,8 +106,7 @@ def remove(
     users: Optional[List[str]],
     groups: Optional[List[str]],
 ) -> None:
-    href = guard_ctx.entity["pulp_href"]
-    result = guard_ctx.remove(href=href, users=users, groups=groups)
+    result = guard_ctx.remove(users=users, groups=groups)
     pulp_ctx.output_result(result)
 
 

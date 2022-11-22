@@ -6,7 +6,6 @@ import schema as s
 from pulpcore.cli.common.context import (
     EntityFieldDefinition,
     PluginRequirement,
-    PulpEntityContext,
     PulpRemoteContext,
     PulpRepositoryContext,
 )
@@ -180,13 +179,16 @@ def sync(
     repository_ctx: PulpRepositoryContext,
     remote: EntityFieldDefinition,
 ) -> None:
-    repository = repository_ctx.entity
-    repository_href = repository_ctx.pulp_href
-
+    """
+    Sync the repository from a remote source.
+    If remote is not specified sync will try to use the default remote associated with
+    the repository
+    """
     body: Dict[str, Any] = {}
+    repository = repository_ctx.entity
 
-    if isinstance(remote, PulpEntityContext):
-        body["remote"] = remote.pulp_href
+    if remote:
+        body["remote"] = remote
     elif repository["remote"] is None:
         raise click.ClickException(
             _(
@@ -195,10 +197,7 @@ def sync(
             ).format(name=repository["name"])
         )
 
-    repository_ctx.sync(
-        href=repository_href,
-        body=body,
-    )
+    repository_ctx.sync(body=body)
 
 
 @repository.command(deprecated=True)
@@ -230,7 +229,6 @@ def add(
     ).pulp_href
 
     repository_ctx.modify(
-        href=repository_href,
         add_content=[content_href],
         base_version=base_version_href,
     )
@@ -265,7 +263,6 @@ def remove(
     ).pulp_href
 
     repository_ctx.modify(
-        href=repository_href,
         remove_content=[content_href],
         base_version=base_version_href,
     )
@@ -323,7 +320,6 @@ def modify(
     ]
 
     repository_ctx.modify(
-        href=repository_href,
         add_content=add_content_href,
         remove_content=remove_content_href,
         base_version=base_version_href,

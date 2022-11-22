@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Optional
 
 from pulpcore.cli.common.context import (
     EntityDefinition,
@@ -24,8 +24,8 @@ class PulpFileACSContext(PulpEntityContext):
     NEEDS_PLUGINS = [PluginRequirement("file", "1.9.0")]
     CAPABILITIES = {"roles": [PluginRequirement("file", min="1.11.0")]}
 
-    def refresh(self, href: str) -> Any:
-        return self.call("refresh", parameters={self.HREF: href})
+    def refresh(self, href: Optional[str] = None) -> Any:
+        return self.call("refresh", parameters={self.HREF: href or self.pulp_href})
 
 
 class PulpFileContentContext(PulpContentContext):
@@ -90,6 +90,7 @@ class PulpFileRepositoryContext(PulpRepositoryContext):
     ID_PREFIX = "repositories_file_file"
     VERSION_CONTEXT = PulpFileRepositoryVersionContext
     CAPABILITIES = {
+        "sync": [PluginRequirement("file")],
         "pulpexport": [PluginRequirement("file")],
         "roles": [PluginRequirement("file", min="1.11.0")],
     }
