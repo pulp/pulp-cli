@@ -9,6 +9,7 @@ from pulp_glue.common.context import (
     PulpRepositoryContext,
 )
 from pulp_glue.common.i18n import get_translation
+from pulp_glue.core.context import PulpSigningServiceContext
 from pulp_glue.rpm.context import (
     PulpRpmPackageContext,
     PulpRpmRemoteContext,
@@ -57,6 +58,14 @@ remote_option = resource_option(
     help=_(
         "Remote used for synching in the form '[[<plugin>:]<resource_type>:]<name>' or by href."
     ),
+)
+
+metadata_signing_service_option = resource_option(
+    "--metadata-signing-service",
+    default_plugin="core",
+    default_type="core",
+    context_table={"core:core": PulpSigningServiceContext},
+    href_pattern=PulpSigningServiceContext.HREF_PATTERN,
 )
 
 
@@ -125,6 +134,7 @@ update_options = [
     click.option("--description"),
     click.option("--retain-package-versions", type=int),
     remote_option,
+    metadata_signing_service_option,
     click.option(
         "--metadata-checksum-type", type=click.Choice(CHECKSUM_CHOICES, case_sensitive=False)
     ),
