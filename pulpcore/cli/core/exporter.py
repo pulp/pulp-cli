@@ -101,7 +101,6 @@ def update(
     repository: Iterable[EntityFieldDefinition],
     repository_href: Iterable[str],
 ) -> None:
-    exporter_href = exporter_ctx.pulp_href
     payload: Dict[str, Any] = {}
 
     if path:
@@ -114,4 +113,4 @@ def update(
             if isinstance(repository_ctx, PulpEntityContext)
         ] + list(repository_href)
 
-    exporter_ctx.update(exporter_href, payload)
+    exporter_ctx.update(body=payload)

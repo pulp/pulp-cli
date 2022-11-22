@@ -636,7 +636,7 @@ class PulpEntityContext:
         # We would have a dedicated api for this ideally.
         labels = self.entity["pulp_labels"]
         labels[key] = value
-        return self.update(self.pulp_href, body={"pulp_labels": labels}, non_blocking=non_blocking)
+        return self.update(body={"pulp_labels": labels}, non_blocking=non_blocking)
 
     def unset_label(self, key: str, non_blocking: bool = False) -> Any:
         # We would have a dedicated api for this ideally.
@@ -645,7 +645,7 @@ class PulpEntityContext:
             labels.pop(key)
         except KeyError:
             raise PulpException(_("Could not find label with key '{key}'.").format(key=key))
-        return self.update(self.pulp_href, body={"pulp_labels": labels}, non_blocking=non_blocking)
+        return self.update(body={"pulp_labels": labels}, non_blocking=non_blocking)
 
     def show_label(self, key: str) -> Any:
         # We would have a dedicated api for this ideally.
@@ -743,7 +743,7 @@ class PulpRepositoryVersionContext(PulpEntityContext):
     def scope(self) -> Dict[str, Any]:
         return {self.repository_ctx.HREF: self.repository_ctx.pulp_href}
 
-    def repair(self, href: Optional[str]) -> Any:
+    def repair(self, href: Optional[str] = None) -> Any:
         return self.call("repair", parameters={self.HREF: href or self.pulp_href}, body={})
 
 
@@ -773,12 +773,12 @@ class PulpRepositoryContext(PulpEntityContext):
                 body["retained_versions"] = body.pop("retain_repo_versions")
         return body
 
-    def sync(self, href: str, body: Dict[str, Any]) -> Any:
-        return self.call("sync", parameters={self.HREF: href}, body=body)
+    def sync(self, href: Optional[str] = None, body: Optional[EntityDefinition] = None) -> Any:
+        return self.call("sync", parameters={self.HREF: href or self.pulp_href}, body=body or {})
 
     def modify(
         self,
-        href: str,
+        href: Optional[str] = None,
         add_content: Optional[List[str]] = None,
         remove_content: Optional[List[str]] = None,
         base_version: Optional[str] = None,
@@ -790,7 +790,7 @@ class PulpRepositoryContext(PulpEntityContext):
             body["remove_content_units"] = remove_content
         if base_version is not None:
             body["base_version"] = base_version
-        return self.call("modify", parameters={self.HREF: href}, body=body)
+        return self.call("modify", parameters={self.HREF: href or self.pulp_href}, body=body)
 
 
 class PulpContentContext(PulpEntityContext):

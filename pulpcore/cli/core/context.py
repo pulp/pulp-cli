@@ -60,6 +60,7 @@ class PulpArtifactContext(PulpEntityContext):
         result = self.list(limit=1, offset=0, parameters={"sha256": sha256_digest})
         if len(result) > 0:
             self.pulp_ctx.echo(_("Artifact already exists."), err=True)
+            self.pulp_href = result[0]["pulp_href"]
             return result[0]["pulp_href"]
 
         self.pulp_ctx.echo(_("Uploading file {filename}").format(filename=file.name), err=True)
@@ -67,6 +68,7 @@ class PulpArtifactContext(PulpEntityContext):
         if chunk_size > size:
             # if chunk_size is bigger than the file size, just upload it directly
             artifact: Dict[str, Any] = self.create({"sha256": sha256_digest, "file": file})
+            self.pulp_href = artifact["pulp_href"]
             return artifact["pulp_href"]
 
         upload_ctx = PulpUploadContext(self.pulp_ctx)
@@ -78,11 +80,11 @@ class PulpArtifactContext(PulpEntityContext):
                 upload_href,
                 sha256_digest,
             )
-            result = task["created_resources"][0]
         except Exception as e:
             upload_ctx.delete(upload_href)
             raise e
-        return result
+        self.pulp_href = task["created_resources"][0]
+        return task["created_resources"][0]
 
 
 class PulpExporterContext(PulpEntityContext):
@@ -288,23 +290,39 @@ class PulpRbacContentGuardContext(PulpContentGuardContext):
     CAPABILITIES = {"roles": [PluginRequirement("core", "3.17.0")]}
     NEEDS_PLUGINS = [PluginRequirement("core", "3.15.0")]
 
-    def assign(self, href: str, users: Optional[List[str]], groups: Optional[List[str]]) -> Any:
+    def assign(
+        self,
+        href: Optional[str] = None,
+        users: Optional[List[str]] = None,
+        groups: Optional[List[str]] = None,
+    ) -> Any:
         if self.pulp_ctx.has_plugin(PluginRequirement("core", min="3.17.0")):
             body: EntityDefinition = {"users": users, "groups": groups}
             body["role"] = self.DOWNLOAD_ROLE
-            return self.call("add_role", parameters={self.HREF: href}, body=body)
+            return self.call("add_role", parameters={self.HREF: href or self.pulp_href}, body=body)
         else:
             body = {"usernames": users, "groupnames": groups}
-            return self.call("assign_permission", parameters={self.HREF: href}, body=body)
+            return self.call(
+                "assign_permission", parameters={self.HREF: href or self.pulp_href}, body=body
+            )
 
-    def remove(self, href: str, users: Optional[List[str]], groups: Optional[List[str]]) -> Any:
+    def remove(
+        self,
+        href: Optional[str] = None,
+        users: Optional[List[str]] = None,
+        groups: Optional[List[str]] = None,
+    ) -> Any:
         if self.pulp_ctx.has_plugin(PluginRequirement("core", min="3.17.0")):
             body: EntityDefinition = {"users": users, "groups": groups}
             body["role"] = self.DOWNLOAD_ROLE
-            return self.call("remove_role", parameters={self.HREF: href}, body=body)
+            return self.call(
+                "remove_role", parameters={self.HREF: href or self.pulp_href}, body=body
+            )
         else:
             body = {"usernames": users, "groupnames": groups}
-            return self.call("remove_permission", parameters={self.HREF: href}, body=body)
+            return self.call(
+                "remove_permission", parameters={self.HREF: href or self.pulp_href}, body=body
+            )
 
 
 class PulpRoleContext(PulpEntityContext):
@@ -360,10 +378,10 @@ class PulpTaskContext(PulpEntityContext):
 
         return super().list(limit=limit, offset=offset, parameters=parameters)
 
-    def cancel(self, task_href: str) -> Any:
+    def cancel(self, task_href: Optional[str] = None) -> Any:
         return self.call(
             "cancel",
-            parameters={self.HREF: task_href},
+            parameters={self.HREF: task_href or self.pulp_href},
             body={"state": "canceled"},
         )
 
@@ -418,14 +436,13 @@ class PulpUploadContext(PulpEntityContext):
 
     def upload_chunk(
         self,
-        href: str,
         chunk: bytes,
         size: int,
         start: int,
         non_blocking: bool = False,
     ) -> Any:
         end: int = start + len(chunk) - 1
-        parameters = {self.HREF: href, "Content-Range": f"bytes {start}-{end}/{size}"}
+        parameters = {self.HREF: self.pulp_href, "Content-Range": f"bytes {start}-{end}/{size}"}
         return self.call(
             "update",
             parameters=parameters,
@@ -450,7 +467,6 @@ class PulpUploadContext(PulpEntityContext):
             while start < size:
                 chunk = file.read(chunk_size)
                 self.upload_chunk(
-                    href=upload_href,
                     chunk=chunk,
                     size=size,
                     start=start,

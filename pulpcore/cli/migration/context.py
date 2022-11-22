@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Optional
 
 from pulpcore.cli.common.context import PulpEntityContext
 from pulpcore.cli.common.i18n import get_translation
@@ -12,11 +12,15 @@ class PulpMigrationPlanContext(PulpEntityContext):
     HREF = "pulp_2to3_migration_migration_plan_href"
     ID_PREFIX = "migration_plans"
 
-    def run(self, href: str) -> Any:
-        return self.pulp_ctx.call("migration_plans_run", parameters={self.HREF: href})
+    def run(self, href: Optional[str] = None) -> Any:
+        return self.pulp_ctx.call(
+            "migration_plans_run", parameters={self.HREF: href or self.pulp_href}
+        )
 
-    def reset(self, href: str) -> Any:
-        return self.pulp_ctx.call("migration_plans_reset", parameters={self.HREF: href})
+    def reset(self, href: Optional[str] = None) -> Any:
+        return self.pulp_ctx.call(
+            "migration_plans_reset", parameters={self.HREF: href or self.pulp_href}
+        )
 
 
 class PulpMigrationPulp2ContentContext(PulpEntityContext):

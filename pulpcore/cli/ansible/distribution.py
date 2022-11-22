@@ -110,7 +110,6 @@ def update(
     To remove repository or repository_version fields set --repository to ""
     """
     dist_body: EntityDefinition = distribution_ctx.entity
-    href: str = dist_body["pulp_href"]
     name: str = dist_body["name"]
     body: EntityDefinition = dict()
 
@@ -129,18 +128,16 @@ def update(
             repo = repository.entity
             if version is not None:
                 if dist_body["repository"]:
-                    distribution_ctx.update(href, body={"repository": ""}, non_blocking=True)
+                    distribution_ctx.update(body={"repository": ""}, non_blocking=True)
                 body["repository_version"] = f'{repo["versions_href"]}{version}/'
             else:
                 if dist_body["repository_version"]:
-                    distribution_ctx.update(
-                        href, body={"repository_version": ""}, non_blocking=True
-                    )
+                    distribution_ctx.update(body={"repository_version": ""}, non_blocking=True)
                 body["repository"] = repo["pulp_href"]
     elif version is not None:
         # keep current repository, change version
         if dist_body["repository"]:
-            distribution_ctx.update(href, body={"repository": ""}, non_blocking=True)
+            distribution_ctx.update(body={"repository": ""}, non_blocking=True)
             body["repository_version"] = f'{dist_body["repository"]}versions/{version}/'
         elif dist_body["repository_version"]:
             repository_href, _, _ = dist_body["repository_version"].partition("versions")
@@ -152,4 +149,4 @@ def update(
                     "please specify the repository to use  with --repository"
                 ).format(name=name)
             )
-    distribution_ctx.update(href, body=body)
+    distribution_ctx.update(body=body)

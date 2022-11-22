@@ -71,6 +71,7 @@ class PulpPythonRepositoryContext(PulpRepositoryContext):
     ENTITIES = _("python repositories")
     ID_PREFIX = "repositories_python_python"
     VERSION_CONTEXT = PulpPythonRepositoryVersionContext
+    CAPABILITIES = {"sync": [PluginRequirement("python")]}
 
 
 registered_repository_contexts["python:python"] = PulpPythonRepositoryContext

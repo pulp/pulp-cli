@@ -1024,7 +1024,7 @@ def update_command(**kwargs: Any) -> click.Command:
         """
         Update a {entity}.
         """
-        entity_ctx.update(href=entity_ctx.pulp_href, body=kwargs)
+        entity_ctx.update(body=kwargs)
 
     for option in decorators:
         # Decorate callback
@@ -1045,7 +1045,7 @@ def destroy_command(**kwargs: Any) -> click.Command:
         """
         Destroy a {entity}.
         """
-        entity_ctx.delete(entity_ctx.pulp_href)
+        entity_ctx.delete()
 
     for option in decorators:
         # Decorate callback
@@ -1081,8 +1081,7 @@ def version_command(**kwargs: Any) -> click.Command:
         pulp_ctx: PulpCLIContext,
         repository_version_ctx: PulpRepositoryVersionContext,
     ) -> None:
-        href = repository_version_ctx.pulp_href
-        result = repository_version_ctx.repair(href)
+        result = repository_version_ctx.repair()
         pulp_ctx.output_result(result)
 
     return callback
@@ -1246,11 +1245,7 @@ def repository_content_command(**kwargs: Any) -> click.Group:
         base_version: PulpRepositoryVersionContext,
     ) -> None:
         repo_ctx = base_version.repository_ctx
-        repo_ctx.modify(
-            repo_ctx.pulp_href,
-            add_content=[content_ctx.pulp_href],
-            base_version=base_version.pulp_href,
-        )
+        repo_ctx.modify(add_content=[content_ctx.pulp_href], base_version=base_version.pulp_href)
 
     @pulp_command("remove")
     @click.option("--all", is_flag=True, help=_("Remove all content from repository version"))
@@ -1264,9 +1259,7 @@ def repository_content_command(**kwargs: Any) -> click.Group:
     ) -> None:
         repo_ctx = base_version.repository_ctx
         remove_content = ["*" if all else content_ctx.pulp_href]
-        repo_ctx.modify(
-            repo_ctx.pulp_href, remove_content=remove_content, base_version=base_version.pulp_href
-        )
+        repo_ctx.modify(remove_content=remove_content, base_version=base_version.pulp_href)
 
     @pulp_command("modify")
     @repository_option
@@ -1279,7 +1272,7 @@ def repository_content_command(**kwargs: Any) -> click.Group:
         repo_ctx = base_version.repository_ctx
         ac = [unit.pulp_href for unit in add_content] if add_content else None
         rc = [unit.pulp_href for unit in remove_content] if remove_content else None
-        repo_ctx.modify(repo_ctx.pulp_href, ac, rc, base_version.pulp_href)
+        repo_ctx.modify(add_content=ac, remove_content=rc, base_version=base_version.pulp_href)
 
     command_decorators: Dict[click.Command, Optional[List[Callable[[FC], FC]]]] = {
         content_list: kwargs.pop("list_decorators", []),

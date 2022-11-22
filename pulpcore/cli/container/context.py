@@ -119,17 +119,23 @@ class PulpContainerRepositoryContext(PulpContainerBaseRepositoryContext):
 
     def modify(
         self,
-        href: str,
+        href: Optional[str] = None,
         add_content: Optional[List[str]] = None,
         remove_content: Optional[List[str]] = None,
         base_version: Optional[str] = None,
     ) -> Any:
         if remove_content:
             self.call(
-                "remove", parameters={self.HREF: href}, body={"content_units": remove_content}
+                "remove",
+                parameters={self.HREF: href or self.pulp_href},
+                body={"content_units": remove_content},
             )
         if add_content:
-            self.call("add", parameters={self.HREF: href}, body={"content_units": add_content})
+            self.call(
+                "add",
+                parameters={self.HREF: href or self.pulp_href},
+                body={"content_units": add_content},
+            )
 
     def copy_tag(self, source_href: str, tags: Optional[List[str]]) -> Any:
         body = {"source_repository_version": source_href, "names": tags}

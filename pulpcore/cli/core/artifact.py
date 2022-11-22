@@ -44,6 +44,5 @@ def upload(
     file: IO[bytes],
     chunk_size: int,
 ) -> None:
-    artifact_href = artifact_ctx.upload(file, chunk_size)
-    result = artifact_ctx.show(artifact_href)
-    pulp_ctx.output_result(result)
+    artifact_ctx.upload(file, chunk_size)
+    pulp_ctx.output_result(artifact_ctx.entity)
