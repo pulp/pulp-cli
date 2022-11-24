@@ -1,3 +1,5 @@
+from typing import Any, Mapping, Optional
+
 from pulp_glue.common.context import (
     EntityDefinition,
     PluginRequirement,
@@ -11,6 +13,7 @@ from pulp_glue.common.context import (
     registered_repository_contexts,
 )
 from pulp_glue.common.i18n import get_translation
+from pulp_glue.core.context import PulpArtifactContext
 
 translation = get_translation(__name__)
 _ = translation.gettext
@@ -32,6 +35,19 @@ class PulpFileContentContext(PulpContentContext):
     ID_PREFIX = "content_file_files"
     NEEDS_PLUGINS = [PluginRequirement("file", min="1.6.0")]
     CAPABILITIES = {"upload": []}
+
+    def create(
+        self,
+        body: EntityDefinition,
+        parameters: Optional[Mapping[str, Any]] = None,
+        non_blocking: bool = False,
+    ) -> Any:
+        if "sha256" in body:
+            body = body.copy()
+            body["artifact"] = PulpArtifactContext(
+                self.pulp_ctx, entity={"sha256": body.pop("sha256")}
+            )
+        return super().create(body=body, parameters=parameters, non_blocking=non_blocking)
 
 
 class PulpFileDistributionContext(PulpDistributionContext):

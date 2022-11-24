@@ -105,10 +105,10 @@ class PulpContext:
         self,
         api_root: str,
         api_kwargs: Dict[str, Any],
-        format: str,
         background_tasks: bool,
         timeout: int,
         domain: str = "default",
+        format: Optional[str] = None,  # Deprecated
     ) -> None:
         self._api: Optional[OpenAPI] = None
         self._api_root: str = api_root
@@ -117,7 +117,6 @@ class PulpContext:
         self.isatty: bool = sys.stdout.isatty()
         self.pulp_domain: str = domain
 
-        self.format: str = format
         self.background_tasks: bool = background_tasks
         self.timeout: int = timeout
         self.start_time: Optional[datetime.datetime] = None
@@ -152,7 +151,7 @@ class PulpContext:
                             and parameter["schema"]["type"] == "string"
                         ):
                             parameter["schema"] = {"type": "array", "items": {"type": "string"}}
-        if self.has_plugin(PluginRequirement("file", max="1.11.0")):
+        if self.has_plugin(PluginRequirement("file", min="1.10.0", max="1.11.0")):
             operation = api_spec["paths"]["{file_file_alternate_content_source_href}refresh/"][
                 "post"
             ]
@@ -616,8 +615,13 @@ class PulpEntityContext:
             body=body,
             non_blocking=non_blocking,
         )
-        if not non_blocking and result["pulp_href"].startswith(self.pulp_ctx.api_path + "tasks/"):
-            result = self.show(result["created_resources"][0])
+        if result["pulp_href"].startswith(self.pulp_ctx.api_path + "tasks/"):
+            if not non_blocking:
+                self.pulp_href = result["created_resources"][0]
+                result = self.entity
+        else:
+            self._entity = result
+
         return result
 
     def update(
@@ -632,12 +636,20 @@ class PulpEntityContext:
             _parameters.update(parameters)
         if body is not None:
             body = self.preprocess_entity(body, partial=False)
-        return self.call(
+        result = self.call(
             "partial_update",
             parameters=_parameters,
             body=body,
             non_blocking=non_blocking,
         )
+        if result["pulp_href"].startswith(self.pulp_ctx.api_path + "tasks/"):
+            if not non_blocking:
+                self.pulp_href = self.pulp_href  # reload from server
+                result = self.entity
+        else:
+            self._entity = result
+
+        return result
 
     def delete(self, href: Optional[str] = None, non_blocking: bool = False) -> Any:
         return self.call(

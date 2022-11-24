@@ -33,6 +33,10 @@ class OpenAPIValidationError(OpenAPIError):
     pass
 
 
+class UnsafeCallError(OpenAPIError):
+    pass
+
+
 class OpenAPI:
     def __init__(
         self,
@@ -545,7 +549,7 @@ class OpenAPI:
         if request.body is not None:
             self.debug_callback(3, f"{request.body!r}")
         if self.safe_calls_only and method.upper() not in SAFE_METHODS:
-            raise OpenAPIError(_("Call aborted due to safe mode"))
+            raise UnsafeCallError(_("Call aborted due to safe mode"))
         try:
             response: requests.Response = self._session.send(request)
         except requests.TooManyRedirects as e:
