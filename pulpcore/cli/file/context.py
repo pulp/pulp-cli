@@ -1,8 +1,7 @@
-from typing import Any, Optional
-
 from pulpcore.cli.common.context import (
     EntityDefinition,
     PluginRequirement,
+    PulpACSContext,
     PulpContentContext,
     PulpEntityContext,
     PulpRemoteContext,
@@ -16,16 +15,13 @@ translation = get_translation(__name__)
 _ = translation.gettext
 
 
-class PulpFileACSContext(PulpEntityContext):
+class PulpFileACSContext(PulpACSContext):
     ENTITY = _("file ACS")
     ENTITIES = _("file ACSes")
     HREF = "file_file_alternate_content_source_href"
     ID_PREFIX = "acs_file_file"
     NEEDS_PLUGINS = [PluginRequirement("file", "1.9.0")]
     CAPABILITIES = {"roles": [PluginRequirement("file", min="1.11.0")]}
-
-    def refresh(self, href: Optional[str] = None) -> Any:
-        return self.call("refresh", parameters={self.HREF: href or self.pulp_href})
 
 
 class PulpFileContentContext(PulpContentContext):

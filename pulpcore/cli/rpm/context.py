@@ -5,6 +5,7 @@ import click
 from pulpcore.cli.common.context import (
     EntityDefinition,
     PluginRequirement,
+    PulpACSContext,
     PulpContentContext,
     PulpEntityContext,
     PulpException,
@@ -19,18 +20,12 @@ translation = get_translation(__name__)
 _ = translation.gettext
 
 
-class PulpRpmACSContext(PulpEntityContext):
+class PulpRpmACSContext(PulpACSContext):
     ENTITY = _("rpm ACS")
     ENTITIES = _("rpm ACSes")
     HREF = "rpm_rpm_alternate_content_source_href"
     ID_PREFIX = "acs_rpm_rpm"
     NEEDS_PLUGINS = [PluginRequirement("rpm", "3.18.0")]
-
-    def refresh(self, href: Optional[str] = None) -> Any:
-        return self.call(
-            "refresh",
-            parameters={self.HREF: href or self.pulp_href},
-        )
 
 
 class PulpRpmCompsXmlContext(PulpEntityContext):
