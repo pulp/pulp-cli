@@ -803,6 +803,14 @@ class PulpContentContext(PulpEntityContext):
     ID_PREFIX = "content"
 
 
+class PulpACSContext(PulpEntityContext):
+    ENTITY = _("ACS")
+    ENTITIES = _("ACSes")
+
+    def refresh(self, href: Optional[str] = None) -> Any:
+        return self.call("refresh", parameters={self.HREF: href or self.pulp_href})
+
+
 EntityFieldDefinition = Union[None, str, PulpEntityContext]
 
 
