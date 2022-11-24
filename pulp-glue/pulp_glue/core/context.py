@@ -71,16 +71,13 @@ class PulpArtifactContext(PulpEntityContext):
             return artifact["pulp_href"]
 
         upload_ctx = PulpUploadContext(self.pulp_ctx)
-        upload_href = upload_ctx.upload_file(file, chunk_size)
+        upload_ctx.upload_file(file, chunk_size)
 
         self.pulp_ctx.echo(_("Creating artifact."), err=True)
         try:
-            task = upload_ctx.commit(
-                upload_href,
-                sha256_digest,
-            )
+            task = upload_ctx.commit(sha256_digest)
         except Exception as e:
-            upload_ctx.delete(upload_href)
+            upload_ctx.delete()
             raise e
         self.pulp_href = task["created_resources"][0]
         return task["created_resources"][0]
@@ -466,10 +463,10 @@ class PulpUploadContext(PulpEntityContext):
             non_blocking=non_blocking,
         )
 
-    def commit(self, upload_href: str, sha256: str) -> Any:
+    def commit(self, sha256: str) -> Any:
         return self.call(
             "commit",
-            parameters={self.HREF: upload_href},
+            parameters={self.HREF: self.pulp_href},
             body={"sha256": sha256},
         )
 

@@ -71,6 +71,24 @@ class PulpCLIContext(PulpContext):
     Subclass of the Context that overwrites the CLI specifics.
     """
 
+    def __init__(
+        self,
+        api_root: str,
+        api_kwargs: Dict[str, Any],
+        background_tasks: bool,
+        timeout: int,
+        format: str,
+        domain: str = "default",
+    ) -> None:
+        super().__init__(
+            api_root=api_root,
+            api_kwargs=api_kwargs,
+            background_tasks=background_tasks,
+            timeout=timeout,
+            domain=domain,
+        )
+        self.format = format
+
     def echo(self, message: str, nl: bool = True, err: bool = False) -> None:
         click.echo(message, nl=nl, err=err)
 
