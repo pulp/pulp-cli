@@ -242,11 +242,12 @@ class OpenAPI:
             raise OpenAPIValidationError(
                 _("'{name}' is expected to be an object.").format(name=name)
             )
-        properties = schema.get("properties")
-        if properties is not None:
+        properties = schema.get("properties", {})
+        additional_properties = schema.get("additionalProperties")
+        if properties or additional_properties is not None:
             value = value.copy()
             for property_name, property_value in value.items():
-                property_schema = properties.get(property_name)
+                property_schema = properties.get(property_name, additional_properties)
                 if not property_schema:
                     raise OpenAPIValidationError(
                         _("Unexpected property '{property_name}' for '{name}' provided.").format(
