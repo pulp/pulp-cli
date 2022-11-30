@@ -1,7 +1,7 @@
 import datetime
 import json
 import re
-from functools import lru_cache
+from functools import lru_cache, wraps
 from typing import IO, Any, Callable, Dict, Iterable, List, Mapping, Optional, Tuple, Type, Union
 
 import click
@@ -331,55 +331,55 @@ def _version_callback(
     return value
 
 
-# TODO: would be great to have enable this to take a validator, rather than having
-# to build "on top of" it like I'm doing now w/ json_callback
-def load_file_or_string_callback(
-    ctx: click.Context, param: click.Parameter, value: Optional[str]
-) -> Any:
-    """Load string from input or from file if string starts with @."""
-    the_content: str
+def load_file_wrapper(handler: Callable[[click.Context, click.Parameter, str], Any]) -> Any:
+    """A wrapper that used for chaining or decorating callbacks that manipulate with input data."""
 
-    # pass None and "" verbatim
-    if not value:
-        return value
+    @wraps(handler)
+    def _load_file_or_string_wrapper(
+        ctx: click.Context, param: click.Parameter, value: Optional[str]
+    ) -> Any:
+        """Load the string from input, or from file if the value starts with @."""
+        if not value:
+            return value
 
-    if value.startswith("@"):
-        the_file = value[1:]
-        try:
-            with click.open_file(the_file, "r") as fp:
-                the_content = fp.read()
-        except OSError:
-            raise click.ClickException(
-                _("Failed to load content from {file}").format(file=the_file)
-            )
-    else:
-        the_content = value
+        if value.startswith("@"):
+            the_file = value[1:]
+            try:
+                with click.open_file(the_file, "r") as fp:
+                    the_content = fp.read()
+            except OSError:
+                raise click.ClickException(
+                    _("Failed to load content from {file}").format(file=the_file)
+                )
+        else:
+            the_content = value
 
-    return the_content
+        return handler(ctx, param, the_content)
+
+    return _load_file_or_string_wrapper
 
 
-def load_json_callback(ctx: click.Context, param: click.Parameter, value: Optional[str]) -> Any:
-    """Load JSON from input string or from file if string starts with @."""
+load_string_callback = load_file_wrapper(lambda c, p, x: x)
 
-    # None or empty-str are legal - shortcircuit here
-    if not value:
-        return value
 
-    # Now try to evaluate legal JSON
-    json_object: Any
-    json_string: str = load_file_or_string_callback(ctx, param, value)
+def json_callback(ctx: click.Context, param: click.Parameter, value: Optional[str]) -> Any:
+    if value is None:
+        return None
+
     try:
-        json_object = json.loads(json_string)
+        json_object = json.loads(value)
     except json.decoder.JSONDecodeError:
         raise click.ClickException(_("Failed to decode JSON"))
     else:
         return json_object
 
 
-def labels_callback(
+load_json_callback = load_file_wrapper(json_callback)
+
+
+def load_labels_callback(
     ctx: click.Context, param: click.Parameter, value: Optional[str]
 ) -> Optional[Dict[str, str]]:
-    # None is legal - shortcircuit here
     if value is None:
         return value
 
@@ -394,11 +394,12 @@ def labels_callback(
 def create_content_json_callback(
     context_class: Optional[Type[PulpContentContext]] = None, schema: s.Schema = None
 ) -> Any:
+    @load_file_wrapper
     def _callback(
-        ctx: click.Context, param: click.Parameter, value: Optional[str]
+        ctx: click.Context, param: click.Parameter, value: str
     ) -> Optional[List[PulpContentContext]]:
         ctx_class = context_class
-        new_value = load_json_callback(ctx, param, value)
+        new_value = json_callback(ctx, param, value)
         if new_value is not None:
             if schema is not None:
                 try:
@@ -842,7 +843,7 @@ pulp_labels_option = pulp_option(
     help=_(
         "JSON dictionary of labels to set on {entity} (or " "@file containing a JSON dictionary)"
     ),
-    callback=labels_callback,
+    callback=load_labels_callback,
 )
 
 name_filter_options = [
@@ -883,17 +884,17 @@ common_remote_create_options = [
     click.option(
         "--ca-cert",
         help=_("a PEM encoded CA certificate or @file containing same"),
-        callback=load_file_or_string_callback,
+        callback=load_string_callback,
     ),
     click.option(
         "--client-cert",
         help=_("a PEM encoded client certificate or @file containing same"),
-        callback=load_file_or_string_callback,
+        callback=load_string_callback,
     ),
     click.option(
         "--client-key",
         help=_("a PEM encode private key or @file containing same"),
-        callback=load_file_or_string_callback,
+        callback=load_string_callback,
     ),
     click.option("--connect-timeout", type=float),
     click.option(
@@ -933,17 +934,17 @@ common_remote_update_options = [
     click.option(
         "--ca-cert",
         help=_("a PEM encoded CA certificate or @file containing same"),
-        callback=load_file_or_string_callback,
+        callback=load_string_callback,
     ),
     click.option(
         "--client-cert",
         help=_("a PEM encoded client certificate or @file containing same"),
-        callback=load_file_or_string_callback,
+        callback=load_string_callback,
     ),
     click.option(
         "--client-key",
         help=_("a PEM encode private key or @file containing same"),
-        callback=load_file_or_string_callback,
+        callback=load_string_callback,
     ),
     click.option("--connect-timeout", type=float_or_empty),
     click.option(

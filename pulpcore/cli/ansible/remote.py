@@ -16,6 +16,7 @@ from pulpcore.cli.common.generic import (
     href_option,
     label_command,
     list_command,
+    load_file_wrapper,
     name_option,
     pass_pulp_context,
     pulp_group,
@@ -31,15 +32,15 @@ translation = get_translation(__name__)
 _ = translation.gettext
 
 
-def _requirements_callback(
+def yaml_file_callback(
     ctx: click.Context, param: click.Parameter, value: Any
 ) -> Optional[Union[str, Any]]:
     if value:
-        if param.name == "requirements_file":
-            return f"{yaml.safe_load(value)}"
-        elif param.name == "requirements":
-            return yaml.safe_load(f'"{value}"')
+        return f"{yaml.safe_load(value)}"
     return value
+
+
+yaml_callback = load_file_wrapper(yaml_file_callback)
 
 
 @pulp_group()
@@ -71,26 +72,27 @@ remote_options = [
 collection_options = [
     pulp_option(
         "--requirements-file",
-        callback=_requirements_callback,
+        callback=yaml_file_callback,
         type=click.File(),
-        help=_("Collections only: a Collection requirements yaml"),
+        help=_(
+            "(Deprecated) Please use '--requirements' instead\n\n"
+            "Collections only: a Collection requirements yaml"
+        ),
         allowed_with_contexts=collection_context,
     ),
     pulp_option(
         "--requirements",
-        callback=_requirements_callback,
+        callback=yaml_callback,
         help=_("Collections only: a string of a requirements yaml"),
         allowed_with_contexts=collection_context,
     ),
     pulp_option(
         "--auth-url",
-        callback=_requirements_callback,
         help=_("Collections only: URL to receive a session token"),
         allowed_with_contexts=collection_context,
     ),
     pulp_option(
         "--token",
-        callback=_requirements_callback,
         help=_("Collections only: token key use for authentication"),
         allowed_with_contexts=collection_context,
     ),

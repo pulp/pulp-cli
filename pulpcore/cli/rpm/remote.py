@@ -7,7 +7,7 @@ from pulpcore.cli.common.generic import (
     href_option,
     label_command,
     list_command,
-    load_file_or_string_callback,
+    load_string_callback,
     name_option,
     pass_pulp_context,
     pulp_group,
@@ -57,17 +57,17 @@ rpm_remote_options = [
     click.option(
         "--ca-cert",
         help=_("a PEM encoded CA certificate or @file containing same"),
-        callback=load_file_or_string_callback,
+        callback=load_string_callback,
     ),
     click.option(
         "--client-cert",
         help=_("a PEM encoded client certificate or @file containing same"),
-        callback=load_file_or_string_callback,
+        callback=load_string_callback,
     ),
     click.option(
         "--client-key",
         help=_("a PEM encode private key or @file containing same"),
-        callback=load_file_or_string_callback,
+        callback=load_string_callback,
     ),
     click.option("--connect-timeout", type=float),
     click.option(

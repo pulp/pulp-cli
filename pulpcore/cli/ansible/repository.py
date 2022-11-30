@@ -26,8 +26,8 @@ from pulpcore.cli.common.generic import (
     label_command,
     label_select_option,
     list_command,
-    load_file_or_string_callback,
     load_json_callback,
+    load_string_callback,
     name_option,
     pass_pulp_context,
     pass_repository_context,
@@ -108,7 +108,7 @@ update_options = [
     click.option("--description"),
     pulp_option(
         "--gpgkey",
-        callback=load_file_or_string_callback,
+        callback=load_string_callback,
         needs_plugins=[
             PluginRequirement(
                 "ansible", min="0.15.0.dev", feature="gpgkeys on ansible repositories"

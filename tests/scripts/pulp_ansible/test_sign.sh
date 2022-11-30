@@ -15,7 +15,8 @@ trap cleanup EXIT
 
 # Prepare
 expect_succ pulp ansible remote -t "collection" create --name "cli_test_ansible_collection_remote" \
---url "$ANSIBLE_COLLECTION_REMOTE_URL" --requirements "collections:\n  - robertdebock.ansible_development_environment"
+--url "$ANSIBLE_COLLECTION_REMOTE_URL" --requirements "collections:
+  - robertdebock.ansible_development_environment"
 expect_succ pulp ansible repository create --name "cli_test_ansible_repository"
 HREF="$(echo "$OUTPUT" | jq -r "pulp_href")"
 expect_succ pulp ansible repository sync --repository "cli_test_ansible_repository" --remote "cli_test_ansible_collection_remote"

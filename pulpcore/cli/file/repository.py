@@ -16,10 +16,11 @@ from pulpcore.cli.common.generic import (
     create_content_json_callback,
     destroy_command,
     href_option,
+    json_callback,
     label_command,
     label_select_option,
     list_command,
-    load_json_callback,
+    load_file_wrapper,
     name_option,
     pass_pulp_context,
     pass_repository_context,
@@ -69,10 +70,12 @@ def _content_callback(ctx: click.Context, param: click.Parameter, value: Any) ->
 CONTENT_LIST_SCHEMA = s.Schema([{"sha256": str, "relative_path": s.And(str, len)}])
 
 
-def _content_list_callback(ctx: click.Context, param: click.Parameter, value: Any) -> Any:
-    result = load_json_callback(ctx, param, value)
-    if result is None:
+@load_file_wrapper
+def _content_list_callback(ctx: click.Context, param: click.Parameter, value: Optional[str]) -> Any:
+    if value is None:
         return None
+
+    result = json_callback(ctx, param, value)
     try:
         return CONTENT_LIST_SCHEMA.validate(result)
     except s.SchemaError as e:
