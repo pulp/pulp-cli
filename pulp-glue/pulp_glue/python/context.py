@@ -111,7 +111,10 @@ class PulpPythonRepositoryContext(PulpRepositoryContext):
     ENTITIES = _("python repositories")
     ID_PREFIX = "repositories_python_python"
     VERSION_CONTEXT = PulpPythonRepositoryVersionContext
-    CAPABILITIES = {"sync": [PluginRequirement("python")]}
+    CAPABILITIES = {
+        "sync": [PluginRequirement("python")],
+        "pulpexport": [PluginRequirement("python", specifier=">=3.11.0")],
+    }
     NEEDS_PLUGINS = [PluginRequirement("python", specifier=">=3.1.0")]
 
     def preprocess_entity(self, body: EntityDefinition, partial: bool = False) -> EntityDefinition:
