@@ -46,8 +46,7 @@ from pulpcore.cli.rpm.context import (
 translation = get_translation(__name__)
 _ = translation.gettext
 
-
-SKIP_TYPES = ["srpm"]
+SKIP_TYPES = ["srpm", "treeinfo"]
 SYNC_TYPES = ["additive", "mirror_complete", "mirror_content_only"]
 remote_option = resource_option(
     "--remote",
@@ -187,7 +186,7 @@ repository.add_command(
     "skip_types",
     multiple=True,
     type=click.Choice(SKIP_TYPES, case_sensitive=False),
-    help="List of content types to skip during sync.",
+    help="Content type to skip during sync.",
 )
 @pulp_option(
     "--sync-policy",
@@ -217,7 +216,7 @@ def sync(
     If remote is not specified sync will try to use the default remote associated with
     the repository
     """
-    repository = repository_ctx.entity
+    repo = repository_ctx.entity
     body: Dict[str, Any] = {}
 
     if mirror:
@@ -231,12 +230,11 @@ def sync(
 
     if remote:
         body["remote"] = remote
-    elif repository["remote"] is None:
+    elif repo["remote"] is None:
         raise click.ClickException(
             _(
                 "Repository '{name}' does not have a default remote. "
                 "Please specify with '--remote'."
-            ).format(name=repository["name"])
+            ).format(name=repo["name"])
         )
-
     repository_ctx.sync(body=body)
