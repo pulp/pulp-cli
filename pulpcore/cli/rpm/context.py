@@ -195,5 +195,12 @@ class PulpRpmRepositoryContext(PulpRepositoryContext):
     VERSION_CONTEXT = PulpRpmRepositoryVersionContext
     CAPABILITIES = {"sync": [PluginRequirement("rpm")], "pulpexport": [PluginRequirement("rpm")]}
 
+    def sync(self, href: Optional[str] = None, body: Optional[EntityDefinition] = None) -> Any:
+        if body and "treeinfo" in body.get("skip_types", ""):
+            self.pulp_ctx.needs_plugin(
+                PluginRequirement("rpm", min="3.18.10", feature="--skip-type treeinfo")
+            )
+        return super().sync(href, body)
+
 
 registered_repository_contexts["rpm:rpm"] = PulpRpmRepositoryContext

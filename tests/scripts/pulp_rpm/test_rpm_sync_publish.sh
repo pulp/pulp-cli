@@ -33,7 +33,12 @@ then
 else
   expect_succ pulp rpm repository sync --repository "cli_test_rpm_repository" --skip-type srpm
 fi
-expect_succ pulp rpm repository sync --repository "cli_test_rpm_repository"
+if pulp debug has-plugin --name "rpm" --min-version "3.19.0"
+then
+  expect_succ pulp rpm repository sync --name "cli_test_rpm_repository" --skip-type treeinfo
+  expect_succ pulp rpm repository sync --name "cli_test_rpm_repository" --skip-type treeinfo --skip-type srpm
+fi
+expect_succ pulp rpm repository sync --name "cli_test_rpm_repository"
 
 expect_succ pulp rpm publication create --repository "cli_test_rpm_repository"
 PUBLICATION_HREF=$(echo "$OUTPUT" | jq -r .pulp_href)
