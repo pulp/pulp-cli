@@ -87,7 +87,7 @@ jobs:
           python-version: "3.10"
       - name: Install python dependencies
         run: |
-          pip install pygithub
+          pip install toml pygithub
       - name: Check commit message
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

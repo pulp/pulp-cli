@@ -4,6 +4,7 @@ import subprocess
 import sys
 from pathlib import Path
 
+import toml
 from github import Github
 
 KEYWORDS = ["fixes", "closes"]
@@ -15,16 +16,8 @@ BLOCKING_REGEX = [
     "EXPERIMENT",
 ]
 NO_ISSUE = "[noissue]"
-# TODO (On a rainy afternoon) Fetch the extensions from pyproject.toml
 CHANGELOG_EXTS = [
-    ".feature",
-    ".bugfix",
-    ".doc",
-    ".removal",
-    ".misc",
-    ".deprecation",
-    ".translation",
-    ".devel",
+    f"{item['directory']}." for item in toml.load("pyproject.toml")["tool"]["towncrier"]["type"]
 ]
 
 sha = sys.argv[1]
@@ -38,7 +31,7 @@ g = Github(os.environ.get("GITHUB_TOKEN"))
 repo = g.get_repo("pulp/pulp-cli")
 
 
-def __check_status(issue):
+def check_status(issue):
     gi = repo.get_issue(int(issue))
     if gi.pull_request:
         sys.exit(f"Error: issue #{issue} is a pull request.")
@@ -46,7 +39,7 @@ def __check_status(issue):
         sys.exit(f"Error: issue #{issue} is closed.")
 
 
-def __check_changelog(issue):
+def check_changelog(issue):
     matches = list(Path("CHANGES").rglob(f"{issue}.*"))
 
     if len(matches) < 1:
@@ -60,14 +53,12 @@ print("Checking commit message for {sha}.".format(sha=sha[0:7]))
 
 # validate the issue attached to the commit
 regex = r"(?:{keywords})[\s:]+#(\d+)".format(keywords=("|").join(KEYWORDS))
-pattern = re.compile(regex, re.IGNORECASE)
-
-issues = pattern.findall(message)
+issues = re.findall(regex, message, re.IGNORECASE)
 
 if issues:
-    for issue in pattern.findall(message):
-        __check_status(issue)
-        __check_changelog(issue)
+    for issue in issues:
+        check_status(issue)
+        check_changelog(issue)
 else:
     if NO_ISSUE in message:
         print("Commit {sha} has no issues but is tagged {tag}.".format(sha=sha[0:7], tag=NO_ISSUE))
