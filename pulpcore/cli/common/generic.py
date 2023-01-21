@@ -42,6 +42,10 @@ translation = get_translation(__name__)
 _ = translation.gettext
 
 
+class IncompatibleContext(click.UsageError):
+    pass
+
+
 class ClickNoWait(click.ClickException):
     exit_code = 0
 
@@ -195,8 +199,24 @@ class PulpGroup(PulpCommand, click.Group):
         if isinstance(cmd, (PulpCommand, PulpGroup)):
             if cmd.allowed_with_contexts is not None:
                 if not isinstance(ctx.obj, cmd.allowed_with_contexts):
-                    return None
+                    raise IncompatibleContext(
+                        _("The subcommand '{name}' is not available in this context.").format(
+                            name=cmd.name
+                        )
+                    )
         return cmd
+
+    def list_commands(self, ctx: click.Context) -> List[str]:
+        commands_filtered_by_context = []
+
+        for name, cmd in self.commands.items():
+            if isinstance(cmd, (PulpCommand, PulpGroup)):
+                if cmd.allowed_with_contexts is None or isinstance(
+                    ctx.obj, cmd.allowed_with_contexts
+                ):
+                    commands_filtered_by_context.append(name)
+
+        return sorted(commands_filtered_by_context)
 
 
 def pulp_command(name: Optional[str] = None, **kwargs: Any) -> Callable[[F], click.Command]:
