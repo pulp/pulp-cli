@@ -32,7 +32,7 @@ translation = get_translation(__name__)
 _ = translation.gettext
 
 
-def yaml_file_callback(
+def yaml_callback(
     ctx: click.Context, param: click.Parameter, value: Any
 ) -> Optional[Union[str, Any]]:
     if value:
@@ -40,7 +40,7 @@ def yaml_file_callback(
     return value
 
 
-yaml_callback = load_file_wrapper(yaml_file_callback)
+load_yaml_callback = load_file_wrapper(yaml_callback)
 
 
 @pulp_group()
@@ -72,7 +72,7 @@ remote_options = [
 collection_options = [
     pulp_option(
         "--requirements-file",
-        callback=yaml_file_callback,
+        callback=yaml_callback,
         type=click.File(),
         help=_(
             "(Deprecated) Please use '--requirements' instead\n\n"
@@ -82,7 +82,7 @@ collection_options = [
     ),
     pulp_option(
         "--requirements",
-        callback=yaml_callback,
+        callback=load_yaml_callback,
         help=_("Collections only: a string of a requirements yaml"),
         allowed_with_contexts=collection_context,
     ),
