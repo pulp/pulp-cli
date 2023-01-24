@@ -20,7 +20,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - python: "3.9"
+          - python: "3.11"
             image_tag: "nightly"
             pulp_api_root: "/relocated/djnd/"
           - python: "3.6"
@@ -34,7 +34,7 @@ jobs:
             image_tag: "3.18"
             pulp_api_root: "/relocated/djnd/"
           - python: "3.10"
-            image_tag: "3.17"
+            image_tag: "3.22"
             click_version: "8.0.0"
     steps:
       - uses: actions/checkout@v3
