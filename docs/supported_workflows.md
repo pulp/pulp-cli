@@ -1,9 +1,15 @@
 # Supported Workflows
 
 `pulp-cli` is still in beta, so the features and workflows listed here are subject to change.
-Currently `pulp-cli` supports 5 versions of `pulpcore` from 3.11-3.16 and 5 of Pulp's plugins:
-`pulp_ansible`, `pulp_container`, `pulp_file`, `pulp_python` and `pulp_rpm`. Some of Pulp's other
-plugins can be added to the CLI through CLI plugins, check out [CLI plugins](/#cli-plugins) for more information.
+`pulp-cli` is tested against the five most-recent pulpcore releases as of the date of the pulp-cli 
+release. It comes with support for five Pulp plugins: `pulp_ansible`, `pulp_container`, `pulp_file`, 
+`pulp_python` and `pulp_rpm`. Some of Pulp's other plugins can be added to the CLI through CLI 
+plugins, check out [CLI plugins](/#cli-plugins) for more information.
+
+While pulp-cli currently continues to work against older versions of pulpcore, we're unlikely to 
+take bug-reports for support of such older versions.
+
+(NOTE: pulp-cli does not (yet) expose all functionality provided by the REST API of pulpcore and enabled plugins. RFEs and pull-requests for missing features gratefully and cheerfully accepted!)
 
 ## pulpcore
 
@@ -23,16 +29,17 @@ The CLI currently supports the following workflows:
 ### Features
 
 The CLI currently supports the following operations on these `pulpcore` objects
-(C = Create, R = Read, U = Update, D = Delete):
+(C = Create, R = Read, U = Update, D = Delete, P = RBAC Permissions):
 
 * Access Policies - **RU**
 * Artifacts - **CR**
-* RBAC Content Guards - **CRUD, Assign, Remove**
+* Redirect/RBAC Content Guards - **CRUDP, Assign, Remove**
 * Exports Pulp - **CRD**
-* Groups - **CRD, Add Permissions, Remove Permissions, Add Users, Remove Users**
+* Groups - **CRUDP, Add Users, Remove Users**
+* Roles - **CRUDP**
 * Signing Services - **R**
-* Tasks - **RD, Cancel**
-* Users - **R**
+* Tasks - **RDP, Cancel**
+* Users - **CRUDP**
 
 
 ## pulp_ansible
@@ -73,13 +80,14 @@ The CLI currently supports the following workflows:
 ### Features
 
 The CLI currently supports the following operations on these `pulp_container` objects
-(C = Create, R = Read, U = Update, D = Delete):
+(C = Create, R = Read, U = Update, D = Delete, P = RBAC Permissions):
 
-* Container Namespaces - **CRD**
-* Container Distributions - **CRUD**
-* Container Remotes - **CRUD**
-* Container Repositories - **CRUD, Sync**
-* Push Repositories - **RU**
+* Blob/Manifest/Tag Content - **R**
+* Container Namespaces - **CRDP**
+* Container Distributions - **CRUDP**
+* Container Remotes - **CRUDP**
+* Container Repositories - **CRUDP, Sync, Tag/Untag, Add/Remove Image**
+* Push Repositories - **RP, Tag/Untag, Remove Image**
 
 
 ## pulp_file
@@ -99,14 +107,14 @@ The CLI currently supports the following workflows:
 ### Features
 
 The CLI currently supports the following operations on these `pulp_file` objects
-(C = Create, R = Read, U = Update, D = Delete):
+(C = Create, R = Read, U = Update, D = Delete, P = RBAC Permissions):
 
-* File Alternative Content Sources - **CRUD, Add, Remove, Refresh**
+* File Alternative Content Sources - **CRUDP, Add, Remove, Refresh**
 * File Content - **CR**
-* File Distributions - **CRUD**
-* File Publications - **CRD**
-* File Remotes - **CRUD**
-* File Repositories - **CRUD, Modify, Sync**
+* File Distributions - **CRUDP**
+* File Publications - **CRDP**
+* File Remotes - **CRUDP**
+* File Repositories - **CRUDP, Modify, Sync**
 
 
 ## pulp_python
@@ -152,9 +160,10 @@ The CLI currently supports the following operations on these `pulp_rpm` objects
 (C = Create, R = Read, U = Update, D = Delete):
 
 * RPM Alternative Content Sources - **CRUD, Add, Remove, Refresh**
-* RPM Packages Content - **CR**
+* RPM Package/Advisory/ModuleMD Defaults/ModuleMD Content - **CR**
+* RPM Distribution Tree/Repo Metadata Content - **R**
 * RPM Distributions - **CRUD**
 * RPM Publications - **CRD**
-* RPM Remote - **CRUD**
+* RPM/ULN Remote - **CRUD**
 * RPM Repository - **CRUD, Modify, Sync**
 

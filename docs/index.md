@@ -4,9 +4,9 @@ This is the documentation for Pulp 3's command line interface.
 
 Here you can find information about how to install the Pulp 3 CLI, and general usage and syntax information.
 
-Currently `pulp-cli` supports 5 versions of `pulpcore` from 3.11-3.16 and 5 of Pulp's plugins:
-`pulp_ansible`, `pulp_container`, `pulp_file`, `pulp_python` and `pulp_rpm`. See section below for information
-on how to extend the CLI to support other Pulp plugins.
+Currently `pulp-cli` supports at a minimum the 5 latest versions of pulpcore and the corresponding compatible 
+versions of 5 Pulp's plugins: `pulp_ansible`, `pulp_container`, `pulp_file`, `pulp_python` and `pulp_rpm`.
+See section below for information on how to extend the CLI to support other Pulp plugins.
 
 Check out the [supported workflows section](supported_workflows) to learn about the capabilities of the CLI. 
 You can find more workflow examples for the Pulp 3 CLI throughout the [plugin documentation](https://docs.pulpproject.org/pulpcore/plugins/index.html).
