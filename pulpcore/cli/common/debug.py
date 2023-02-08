@@ -39,7 +39,7 @@ def has_plugin(
     sys.exit(0 if available else 1)
 
 
-@debug.command()
+@debug.command(deprecated=True)
 @pass_pulp_context
 def task_summary(pulp_ctx: PulpCLIContext) -> None:
     """

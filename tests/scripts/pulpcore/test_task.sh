@@ -98,3 +98,6 @@ then
   expect_fail pulp task purge --finished-before "2021-12-01T12:00:00" --state "NOT A STATE"
   expect_fail pulp task purge --finished-before "2021-12-01T12:00:00" --state "running"
 fi
+
+# Test task summary
+expect_succ pulp task summary

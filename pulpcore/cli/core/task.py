@@ -196,3 +196,14 @@ def purge(
     pulp_ctx.needs_plugin(PluginRequirement("core", "3.17.0"))
     state_list = list(state) if state else None
     task_ctx.purge(finished, state_list)
+
+
+@task.command()
+@pass_entity_context
+@pass_pulp_context
+def summary(pulp_ctx: PulpCLIContext, task_ctx: PulpTaskContext) -> None:
+    """
+    List a summary of tasks by status.
+    """
+    result = task_ctx.summary()
+    pulp_ctx.output_result(result)
