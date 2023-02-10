@@ -2,8 +2,10 @@ import json
 from typing import Any, List, Optional
 
 import click
+from pulp_glue.common.context import PluginRequirement
+from pulp_glue.common.i18n import get_translation
+from pulp_glue.python.context import PulpPythonRemoteContext
 
-from pulpcore.cli.common.context import PluginRequirement
 from pulpcore.cli.common.generic import (
     PulpCLIContext,
     common_remote_create_options,
@@ -23,8 +25,6 @@ from pulpcore.cli.common.generic import (
     show_command,
     update_command,
 )
-from pulpcore.cli.common.i18n import get_translation
-from pulpcore.cli.python.context import PulpPythonRemoteContext
 
 translation = get_translation(__name__)
 _ = translation.gettext

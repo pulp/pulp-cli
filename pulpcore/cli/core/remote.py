@@ -1,6 +1,6 @@
 import click
+from pulp_glue.common.context import PulpRemoteContext
 
-from pulpcore.cli.common.context import PulpRemoteContext
 from pulpcore.cli.common.generic import (
     PulpCLIContext,
     list_command,

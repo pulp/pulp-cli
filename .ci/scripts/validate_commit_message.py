@@ -17,7 +17,7 @@ BLOCKING_REGEX = [
 ]
 NO_ISSUE = "[noissue]"
 CHANGELOG_EXTS = [
-    f"{item['directory']}." for item in toml.load("pyproject.toml")["tool"]["towncrier"]["type"]
+    f".{item['directory']}" for item in toml.load("pyproject.toml")["tool"]["towncrier"]["type"]
 ]
 
 sha = sys.argv[1]

@@ -1,8 +1,10 @@
 from typing import Iterable
 
 import click
+from pulp_glue.common.context import PulpRemoteContext
+from pulp_glue.common.i18n import get_translation
+from pulp_glue.file.context import PulpFileACSContext, PulpFileRemoteContext
 
-from pulpcore.cli.common.context import PulpRemoteContext
 from pulpcore.cli.common.generic import (
     PulpCLIContext,
     acs_lookup_option,
@@ -19,8 +21,6 @@ from pulpcore.cli.common.generic import (
     show_command,
     update_command,
 )
-from pulpcore.cli.common.i18n import get_translation
-from pulpcore.cli.file.context import PulpFileACSContext, PulpFileRemoteContext
 
 translation = get_translation(__name__)
 _ = translation.gettext

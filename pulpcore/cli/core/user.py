@@ -1,8 +1,8 @@
 import click
+from pulp_glue.common.context import PluginRequirement
+from pulp_glue.common.i18n import get_translation
+from pulp_glue.core.context import PulpUserContext, PulpUserRoleContext
 
-from pulpcore.cli.common.context import (  # PulpEntityContext,; pass_entity_context,
-    PluginRequirement,
-)
 from pulpcore.cli.common.generic import (
     PulpCLIContext,
     create_command,
@@ -18,8 +18,6 @@ from pulpcore.cli.common.generic import (
     show_command,
     update_command,
 )
-from pulpcore.cli.common.i18n import get_translation
-from pulpcore.cli.core.context import PulpUserContext, PulpUserRoleContext
 
 translation = get_translation(__name__)
 _ = translation.gettext

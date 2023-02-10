@@ -2,8 +2,10 @@ import re
 from typing import Any, Optional
 
 import click
+from pulp_glue.common.context import DATETIME_FORMATS, PluginRequirement, PulpEntityContext
+from pulp_glue.common.i18n import get_translation
+from pulp_glue.core.context import PulpTaskContext, PulpWorkerContext
 
-from pulpcore.cli.common.context import DATETIME_FORMATS, PluginRequirement, PulpEntityContext
 from pulpcore.cli.common.generic import (
     PulpCLIContext,
     list_command,
@@ -13,8 +15,6 @@ from pulpcore.cli.common.generic import (
     pulp_option,
     resource_option,
 )
-from pulpcore.cli.common.i18n import get_translation
-from pulpcore.cli.core.context import PulpTaskContext, PulpWorkerContext
 
 translation = get_translation(__name__)
 _ = translation.gettext

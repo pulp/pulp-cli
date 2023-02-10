@@ -2,13 +2,20 @@ from typing import Any, Dict, Iterable, Optional
 
 import click
 import schema as s
-
-from pulpcore.cli.common.context import (
+from pulp_glue.common.context import (
     EntityFieldDefinition,
     PluginRequirement,
     PulpRemoteContext,
     PulpRepositoryContext,
 )
+from pulp_glue.common.i18n import get_translation
+from pulp_glue.rpm.context import (
+    PulpRpmPackageContext,
+    PulpRpmRemoteContext,
+    PulpRpmRepositoryContext,
+    PulpUlnRemoteContext,
+)
+
 from pulpcore.cli.common.generic import (
     PulpCLIContext,
     create_command,
@@ -33,15 +40,8 @@ from pulpcore.cli.common.generic import (
     update_command,
     version_command,
 )
-from pulpcore.cli.common.i18n import get_translation
 from pulpcore.cli.core.generic import task_command
 from pulpcore.cli.rpm.common import CHECKSUM_CHOICES
-from pulpcore.cli.rpm.context import (
-    PulpRpmPackageContext,
-    PulpRpmRemoteContext,
-    PulpRpmRepositoryContext,
-    PulpUlnRemoteContext,
-)
 
 translation = get_translation(__name__)
 _ = translation.gettext

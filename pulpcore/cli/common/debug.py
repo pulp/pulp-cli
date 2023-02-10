@@ -2,15 +2,15 @@ import sys
 from typing import IO, Any, Dict, Iterable, Optional
 
 import click
+from pulp_glue.common.context import PluginRequirement
+from pulp_glue.common.i18n import get_translation
 
-from pulpcore.cli.common.context import PluginRequirement
 from pulpcore.cli.common.generic import (
     PulpCLIContext,
     load_json_callback,
     pass_pulp_context,
     pulp_group,
 )
-from pulpcore.cli.common.i18n import get_translation
 
 translation = get_translation(__name__)
 _ = translation.gettext
@@ -45,7 +45,7 @@ def task_summary(pulp_ctx: PulpCLIContext) -> None:
     """
     List a summary of tasks by status.
     """
-    from pulpcore.cli.core.context import PulpTaskContext
+    from pulp_glue.core.context import PulpTaskContext
 
     result = PulpTaskContext(pulp_ctx).summary()
     pulp_ctx.output_result(result)

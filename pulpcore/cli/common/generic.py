@@ -8,8 +8,7 @@ import click
 import schema as s
 import yaml
 from click.decorators import FC, F
-
-from pulpcore.cli.common.context import (
+from pulp_glue.common.context import (
     DATETIME_FORMATS,
     DEFAULT_LIMIT,
     EntityDefinition,
@@ -26,7 +25,7 @@ from pulpcore.cli.common.context import (
     PulpRepositoryContext,
     PulpRepositoryVersionContext,
 )
-from pulpcore.cli.common.i18n import get_translation
+from pulp_glue.common.i18n import get_translation
 
 try:
     from pygments import highlight

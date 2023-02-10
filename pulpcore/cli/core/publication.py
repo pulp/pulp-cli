@@ -1,6 +1,7 @@
 import click
+from pulp_glue.common.context import PluginRequirement, registered_repository_contexts
+from pulp_glue.core.context import PulpPublicationContext
 
-from pulpcore.cli.common.context import PluginRequirement, registered_repository_contexts
 from pulpcore.cli.common.generic import (
     PulpCLIContext,
     list_command,
@@ -9,7 +10,6 @@ from pulpcore.cli.common.generic import (
     pulp_group,
     resource_option,
 )
-from pulpcore.cli.core.context import PulpPublicationContext
 
 repository_option = resource_option(
     "--repository",

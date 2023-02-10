@@ -2,15 +2,15 @@ import gettext
 from typing import IO, Optional
 
 import click
+from pulp_glue.common.context import EntityFieldDefinition, PulpEntityContext
+from pulp_glue.rpm.context import PulpRpmCompsXmlContext, PulpRpmRepositoryContext
 
-from pulpcore.cli.common.context import EntityFieldDefinition, PulpEntityContext
 from pulpcore.cli.common.generic import (
     PulpCLIContext,
     pass_pulp_context,
     pulp_command,
     resource_option,
 )
-from pulpcore.cli.rpm.context import PulpRpmCompsXmlContext, PulpRpmRepositoryContext
 
 _ = gettext.gettext
 

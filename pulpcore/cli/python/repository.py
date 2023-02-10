@@ -1,13 +1,19 @@
 from typing import Any, Dict, Optional
 
 import click
-
-from pulpcore.cli.common.context import (
+from pulp_glue.common.context import (
     EntityFieldDefinition,
     PluginRequirement,
     PulpRemoteContext,
     PulpRepositoryContext,
 )
+from pulp_glue.common.i18n import get_translation
+from pulp_glue.python.context import (
+    PulpPythonContentContext,
+    PulpPythonRemoteContext,
+    PulpPythonRepositoryContext,
+)
+
 from pulpcore.cli.common.generic import (
     PulpCLIContext,
     create_command,
@@ -32,13 +38,7 @@ from pulpcore.cli.common.generic import (
     update_command,
     version_command,
 )
-from pulpcore.cli.common.i18n import get_translation
 from pulpcore.cli.core.generic import task_command
-from pulpcore.cli.python.context import (
-    PulpPythonContentContext,
-    PulpPythonRemoteContext,
-    PulpPythonRepositoryContext,
-)
 
 translation = get_translation(__name__)
 _ = translation.gettext

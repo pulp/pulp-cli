@@ -2,8 +2,9 @@ import gettext
 from typing import Iterable, Optional
 
 import click
+from pulp_glue.common.context import PluginRequirement
+from pulp_glue.core.context import PulpRoleContext
 
-from pulpcore.cli.common.context import PluginRequirement
 from pulpcore.cli.common.generic import (
     PulpCLIContext,
     create_command,
@@ -17,7 +18,6 @@ from pulpcore.cli.common.generic import (
     show_command,
     update_command,
 )
-from pulpcore.cli.core.context import PulpRoleContext
 
 _ = gettext.gettext
 NO_PERMISSION_KEY = "pulpcore.cli.core.role.no_permission"

@@ -1,6 +1,8 @@
 import click
+from pulp_glue.common.context import PluginRequirement
+from pulp_glue.common.i18n import get_translation
+from pulp_glue.file.context import PulpFilePublicationContext, PulpFileRepositoryContext
 
-from pulpcore.cli.common.context import PluginRequirement
 from pulpcore.cli.common.generic import (
     PulpCLIContext,
     create_command,
@@ -14,8 +16,6 @@ from pulpcore.cli.common.generic import (
     role_command,
     show_command,
 )
-from pulpcore.cli.common.i18n import get_translation
-from pulpcore.cli.file.context import PulpFilePublicationContext, PulpFileRepositoryContext
 
 translation = get_translation(__name__)
 _ = translation.gettext

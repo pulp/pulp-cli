@@ -1,8 +1,8 @@
 from typing import Any
 
 import click
+from pulp_glue.common.context import PluginRequirement
 
-from pulpcore.cli.common.context import PluginRequirement
 from pulpcore.cli.common.generic import PulpCLIContext, pass_pulp_context, pulp_group
 from pulpcore.cli.migration.plan import plan
 from pulpcore.cli.migration.pulp2 import pulp2
