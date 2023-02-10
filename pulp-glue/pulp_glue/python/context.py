@@ -1,4 +1,4 @@
-from pulpcore.cli.common.context import (
+from pulp_glue.common.context import (
     EntityDefinition,
     PluginRequirement,
     PulpContentContext,
@@ -9,7 +9,7 @@ from pulpcore.cli.common.context import (
     PulpRepositoryVersionContext,
     registered_repository_contexts,
 )
-from pulpcore.cli.common.i18n import get_translation
+from pulp_glue.common.i18n import get_translation
 
 translation = get_translation(__name__)
 _ = translation.gettext

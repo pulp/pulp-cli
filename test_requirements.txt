@@ -1,4 +1,5 @@
 -e .
+-e ./pulp-glue
 
 # Test requirements
 pygments

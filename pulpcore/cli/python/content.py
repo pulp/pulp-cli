@@ -2,8 +2,11 @@ import os
 from typing import IO, Any, Dict, Optional, Union
 
 import click
+from pulp_glue.common.context import PluginRequirement, PulpEntityContext
+from pulp_glue.common.i18n import get_translation
+from pulp_glue.core.context import PulpArtifactContext, PulpUploadContext
+from pulp_glue.python.context import PulpPythonContentContext, PulpPythonRepositoryContext
 
-from pulpcore.cli.common.context import PluginRequirement, PulpEntityContext
 from pulpcore.cli.common.generic import (
     PulpCLIContext,
     chunk_size_option,
@@ -16,9 +19,6 @@ from pulpcore.cli.common.generic import (
     resource_option,
     show_command,
 )
-from pulpcore.cli.common.i18n import get_translation
-from pulpcore.cli.core.context import PulpArtifactContext, PulpUploadContext
-from pulpcore.cli.python.context import PulpPythonContentContext, PulpPythonRepositoryContext
 
 translation = get_translation(__name__)
 _ = translation.gettext

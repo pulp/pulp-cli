@@ -34,7 +34,7 @@ def no_api(monkeypatch):
     def getter(self):
         pytest.fail("Invalid access to 'PulpContext.api'.", pytrace=False)
 
-    monkeypatch.setattr("pulpcore.cli.common.context.PulpContext.api", getter)
+    monkeypatch.setattr("pulp_glue.common.context.PulpContext.api", getter)
 
 
 @pytest.mark.help_page

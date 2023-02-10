@@ -1,17 +1,15 @@
 from typing import Dict, Optional
 
 import click
-
-from pulpcore.cli.ansible.context import (
-    PulpAnsibleDistributionContext,
-    PulpAnsibleRepositoryContext,
-)
-from pulpcore.cli.common.context import (
+from pulp_glue.ansible.context import PulpAnsibleDistributionContext, PulpAnsibleRepositoryContext
+from pulp_glue.common.context import (
     EntityDefinition,
     EntityFieldDefinition,
     PluginRequirement,
     PulpContext,
 )
+from pulp_glue.common.i18n import get_translation
+
 from pulpcore.cli.common.generic import (
     create_command,
     destroy_command,
@@ -28,7 +26,6 @@ from pulpcore.cli.common.generic import (
     resource_option,
     show_command,
 )
-from pulpcore.cli.common.i18n import get_translation
 
 translation = get_translation(__name__)
 _ = translation.gettext

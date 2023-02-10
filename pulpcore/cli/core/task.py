@@ -4,8 +4,10 @@ from datetime import datetime
 from typing import Optional, Tuple
 
 import click
+from pulp_glue.common.context import DATETIME_FORMATS, PluginRequirement, PulpEntityContext
+from pulp_glue.common.i18n import get_translation
+from pulp_glue.core.context import PulpTaskContext
 
-from pulpcore.cli.common.context import DATETIME_FORMATS, PluginRequirement, PulpEntityContext
 from pulpcore.cli.common.generic import (
     PulpCLIContext,
     destroy_command,
@@ -17,8 +19,6 @@ from pulpcore.cli.common.generic import (
     pulp_option,
     role_command,
 )
-from pulpcore.cli.common.i18n import get_translation
-from pulpcore.cli.core.context import PulpTaskContext
 from pulpcore.cli.core.generic import task_filter
 
 translation = get_translation(__name__)

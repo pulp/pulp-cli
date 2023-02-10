@@ -2,14 +2,16 @@ import re
 from typing import Any, Dict, Iterable, Optional, Tuple
 
 import click
-
-from pulpcore.cli.common.context import (
+from pulp_glue.common.context import (
     DEFAULT_LIMIT,
     EntityDefinition,
     PulpRepositoryContext,
     PulpRepositoryVersionContext,
     registered_repository_contexts,
 )
+from pulp_glue.common.i18n import get_translation
+from pulp_glue.core.context import PulpExportContext, PulpExporterContext
+
 from pulpcore.cli.common.generic import (
     PulpCLIContext,
     destroy_command,
@@ -19,8 +21,6 @@ from pulpcore.cli.common.generic import (
     pulp_group,
     show_command,
 )
-from pulpcore.cli.common.i18n import get_translation
-from pulpcore.cli.core.context import PulpExportContext, PulpExporterContext
 
 translation = get_translation(__name__)
 _ = translation.gettext

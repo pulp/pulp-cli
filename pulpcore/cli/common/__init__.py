@@ -12,11 +12,12 @@ try:
 except ImportError:
     HAS_CLICK_SHELL = False
 
+from pulp_glue.common.context import PluginRequirement
+from pulp_glue.common.i18n import get_translation
+
 from pulpcore.cli.common.config import CONFIG_LOCATIONS, config, config_options, validate_config
-from pulpcore.cli.common.context import PluginRequirement
 from pulpcore.cli.common.debug import debug
 from pulpcore.cli.common.generic import PulpCLIContext, pulp_group
-from pulpcore.cli.common.i18n import get_translation
 
 __version__ = "0.17.0.dev"
 

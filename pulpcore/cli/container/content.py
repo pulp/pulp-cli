@@ -2,8 +2,13 @@ import gettext
 from typing import Any
 
 import click
+from pulp_glue.common.context import PulpEntityContext
+from pulp_glue.container.context import (
+    PulpContainerBlobContext,
+    PulpContainerManifestContext,
+    PulpContainerTagContext,
+)
 
-from pulpcore.cli.common.context import PulpEntityContext
 from pulpcore.cli.common.generic import (
     GroupOption,
     PulpCLIContext,
@@ -13,11 +18,6 @@ from pulpcore.cli.common.generic import (
     pulp_group,
     pulp_option,
     show_command,
-)
-from pulpcore.cli.container.context import (
-    PulpContainerBlobContext,
-    PulpContainerManifestContext,
-    PulpContainerTagContext,
 )
 
 _ = gettext.gettext

@@ -11,8 +11,8 @@ from urllib.parse import urljoin
 
 import requests
 import urllib3
-
-from pulpcore.cli.common.i18n import get_translation
+from pulp_glue.common import __version__
+from pulp_glue.common.i18n import get_translation
 
 translation = get_translation(__name__)
 _ = translation.gettext
@@ -74,7 +74,7 @@ class OpenAPI:
             raise OpenAPIError(_("Cert is required if key is set."))
         self._session.headers.update(
             {
-                "User-Agent": user_agent or "Pulp-CLI openapi parser",
+                "User-Agent": user_agent or f"Pulp-glue openapi parser ({__version__})",
                 "Accept": "application/json",
             }
         )

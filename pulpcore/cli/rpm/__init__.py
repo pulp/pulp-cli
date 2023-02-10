@@ -1,10 +1,10 @@
 from typing import Any
 
 import click
+from pulp_glue.common.context import PluginRequirement
+from pulp_glue.common.i18n import get_translation
 
-from pulpcore.cli.common.context import PluginRequirement
 from pulpcore.cli.common.generic import PulpCLIContext, pass_pulp_context, pulp_group
-from pulpcore.cli.common.i18n import get_translation
 from pulpcore.cli.rpm.acs import acs
 from pulpcore.cli.rpm.comps import comps_upload
 from pulpcore.cli.rpm.content import content

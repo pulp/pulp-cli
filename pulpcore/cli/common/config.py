@@ -3,9 +3,9 @@ from typing import Any, Callable, Dict, List, MutableMapping, Optional, TypeVar
 
 import click
 import toml
+from pulp_glue.common.i18n import get_translation
 
 from pulpcore.cli.common.generic import pulp_group
-from pulpcore.cli.common.i18n import get_translation
 
 translation = get_translation(__name__)
 _ = translation.gettext

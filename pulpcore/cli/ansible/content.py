@@ -1,14 +1,16 @@
 from typing import IO, Any, Callable, Optional, Union
 
 import click
-
-from pulpcore.cli.ansible.context import (
+from pulp_glue.ansible.context import (
     PulpAnsibleCollectionVersionContext,
     PulpAnsibleCollectionVersionSignatureContext,
     PulpAnsibleRepositoryContext,
     PulpAnsibleRoleContext,
 )
-from pulpcore.cli.common.context import PulpEntityContext, PulpRepositoryContext
+from pulp_glue.common.context import PulpEntityContext, PulpRepositoryContext
+from pulp_glue.common.i18n import get_translation
+from pulp_glue.core.context import PulpArtifactContext
+
 from pulpcore.cli.common.generic import (
     GroupOption,
     PulpCLIContext,
@@ -22,8 +24,6 @@ from pulpcore.cli.common.generic import (
     resource_option,
     show_command,
 )
-from pulpcore.cli.common.i18n import get_translation
-from pulpcore.cli.core.context import PulpArtifactContext
 
 translation = get_translation(__name__)
 _ = translation.gettext

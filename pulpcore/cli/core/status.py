@@ -1,9 +1,9 @@
 import time
 
 import click
+from pulp_glue.common.i18n import get_translation
 
 from pulpcore.cli.common.generic import PulpCLIContext, pass_pulp_context, pulp_command
-from pulpcore.cli.common.i18n import get_translation
 
 translation = get_translation(__name__)
 _ = translation.gettext

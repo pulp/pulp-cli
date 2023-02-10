@@ -2,11 +2,12 @@ from typing import Any, Optional, Union
 
 import click
 import yaml
-
-from pulpcore.cli.ansible.context import (
+from pulp_glue.ansible.context import (
     PulpAnsibleCollectionRemoteContext,
     PulpAnsibleRoleRemoteContext,
 )
+from pulp_glue.common.i18n import get_translation
+
 from pulpcore.cli.common.generic import (
     PulpCLIContext,
     common_remote_create_options,
@@ -26,7 +27,6 @@ from pulpcore.cli.common.generic import (
     show_command,
     update_command,
 )
-from pulpcore.cli.common.i18n import get_translation
 
 translation = get_translation(__name__)
 _ = translation.gettext

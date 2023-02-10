@@ -25,6 +25,10 @@ jobs:
         TWINE_USERNAME: pulp
         TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
       run: |
+        cd pulp-glue
+        python setup.py sdist bdist_wheel
+        twine upload dist/*
+        cd ..
         python setup.py sdist bdist_wheel
         twine upload dist/*
 

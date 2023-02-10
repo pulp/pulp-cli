@@ -1,6 +1,8 @@
 from typing import Any
 
-from pulpcore.cli.common.context import PluginRequirement
+from pulp_glue.common.context import PluginRequirement
+from pulp_glue.common.i18n import get_translation
+
 from pulpcore.cli.common.generic import (
     PulpCLIContext,
     load_json_callback,
@@ -8,7 +10,6 @@ from pulpcore.cli.common.generic import (
     pulp_group,
     pulp_option,
 )
-from pulpcore.cli.common.i18n import get_translation
 
 translation = get_translation(__name__)
 _ = translation.gettext
