@@ -5,6 +5,7 @@ import base64
 import datetime
 import json
 import os
+from contextlib import suppress
 from io import BufferedReader
 from typing import IO, Any, Callable, Dict, List, Optional, Tuple, Union
 from urllib.parse import urljoin
@@ -245,7 +246,50 @@ class OpenAPI:
             return None
 
         schema_type = schema.get("type", "string")
-        if schema_type == "object":
+        allOf = schema.get("allOf")
+        anyOf = schema.get("anyOf")
+        oneOf = schema.get("oneOf")
+        not_schema = schema.get("not")
+        if allOf:
+            old_value = value
+            value = self.validate_schema(allOf[0], name, value)
+            for sub_schema in allOf[1:]:
+                # TODO check if it is possible to combine non object types.
+                value.update(self.validate_schema(sub_schema, name, old_value))
+        elif anyOf:
+            for sub_schema in anyOf:
+                with suppress(OpenAPIValidationError):
+                    value = self.validate_schema(sub_schema, name, value)
+                    break
+            else:
+                raise OpenAPIValidationError(
+                    _("No schema in anyOf validated for {name}.").format(name=name)
+                )
+        elif oneOf:
+            old_value = value
+            found_valid = False
+            for sub_schema in anyOf:
+                with suppress(OpenAPIValidationError):
+                    value = self.validate_schema(sub_schema, name, old_value)
+                    if found_valid:
+                        raise OpenAPIValidationError(
+                            _("Multiple schemas in oneOf validated for {name}.").format(name=name)
+                        )
+                    found_valid = True
+            if not found_valid:
+                raise OpenAPIValidationError(
+                    _("No schema in anyOf validated for {name}.").format(name=name)
+                )
+        elif not_schema:
+            try:
+                self.validate_schema(not_schema, name, value)
+            except OpenAPIValidationError:
+                pass
+            else:
+                raise OpenAPIValidationError(
+                    _("Forbidden schema for {name} validated.").format(name=name)
+                )
+        elif schema_type == "object":
             value = self.validate_object(schema, name, value)
         elif schema_type == "array":
             value = self.validate_array(schema, name, value)
@@ -304,6 +348,12 @@ class OpenAPI:
         return [self.validate_schema(item_schema, name, item) for item in value]
 
     def validate_string(self, schema: Any, name: str, value: Any) -> Union[str, UploadType]:
+        enum = schema.get("enum")
+        if enum:
+            if value not in enum:
+                raise OpenAPIValidationError(
+                    _("'{name}' is not one of the valid choices.").format(name=name)
+                )
         schema_format = schema.get("format")
         if schema_format == "date":
             if not isinstance(value, datetime.date):
