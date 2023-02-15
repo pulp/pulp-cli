@@ -20,7 +20,7 @@ lint:
 	black --diff --check .
 	flake8
 	.ci/scripts/check_click_for_mypy.py
-	mypy
+	MYPYPATH=pulp-glue mypy
 	cd pulp-glue; mypy
 	@echo "🙊 Code 🙈 LGTM 🙉 !"
 
