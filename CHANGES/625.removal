@@ -1,1 +1,0 @@
-Deprecated `pulp debug task-summary` in favor of `pulp task summary`.
