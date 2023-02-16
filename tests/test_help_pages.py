@@ -38,14 +38,17 @@ def no_api(monkeypatch):
 
 
 @pytest.mark.help_page
-@pytest.mark.parametrize("args", traverse_commands(main, []), ids=" ".join)
-def test_access_help(no_api, args):
+def test_access_help(no_api, subtests):
     """Test, that all help screens are accessible without touching the api property."""
     runner = CliRunner()
-    result = runner.invoke(main, args + ["--help"], catch_exceptions=False)
+    for args in traverse_commands(main, []):
+        with subtests.test(msg=" ".join(args)):
+            result = runner.invoke(main, args + ["--help"], catch_exceptions=False)
 
-    if result.exit_code == 2:
-        assert "not available in this context" in result.stdout
-    else:
-        assert result.exit_code == 0
-        assert result.stdout.startswith("Usage:") or result.stdout.startswith("DeprecationWarning:")
+            if result.exit_code == 2:
+                assert "not available in this context" in result.stdout
+            else:
+                assert result.exit_code == 0
+                assert result.stdout.startswith("Usage:") or result.stdout.startswith(
+                    "DeprecationWarning:"
+                )
