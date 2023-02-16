@@ -1,5 +1,5 @@
 [tool.towncrier]
-package = "pulpcore.cli.common"
+package = "pulp_cli"
 filename = "docs/CHANGES.md"
 directory = "CHANGES/"
 title_format = "## {version} ({project_date})"

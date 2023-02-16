@@ -1,1 +1,0 @@
-Deprecated `--fields` and `--exclude-fields` on `pulp ansible content list` in favor of `--[exclude-]field`.

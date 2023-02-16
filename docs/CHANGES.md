@@ -10,6 +10,51 @@
 
 [//]: # (towncrier release notes start)
 
+## 0.17.0 (2023-02-16)
+
+
+
+### Features
+
+- Updated the `--requirements` option for ansible remotes to handle both files and strings.
+  [#230](https://github.com/pulp/pulp-cli/issues/230)
+- Made all commands referencing entities accept both the HREF and name of the resource via the same command option.
+  For example, users can additionally use the `--repository` option in ``repository show`` commands.
+  [#475](https://github.com/pulp/pulp-cli/issues/475)
+- Added remove-image command to pulp_container.
+  [#566](https://github.com/pulp/pulp-cli/issues/566)
+- Made the context layer independent of click to allow it being used like a library.
+  [#597](https://github.com/pulp/pulp-cli/issues/597)
+- Exposed `treeinfo` as an option for `sync --skip-type` for RPM repositories.
+  [#614](https://github.com/pulp/pulp-cli/issues/614)
+- Added the `pulp task summary` command as a replacement for `pulp debug task-summary`.
+  [#625](https://github.com/pulp/pulp-cli/issues/625)
+- Added new client library `pulp-glue` as a spin off of the `pulp-cli`.
+  [#628](https://github.com/pulp/pulp-cli/issues/628)
+
+
+### Bugfixes
+
+- Deprecated `--fields` and `--exclude-fields` on `pulp ansible content list` in favor of `--[exclude-]field`.
+  [#602](https://github.com/pulp/pulp-cli/issues/602)
+
+
+### Deprecations and Removals
+
+- Removed `pass_*_context` helpers from context layer. They moved to generic layer in 0.15.0.
+  [#597](https://github.com/pulp/pulp-cli/issues/597)
+- Deprecated `pulp debug task-summary` in favor of `pulp task summary`.
+  [#625](https://github.com/pulp/pulp-cli/issues/625)
+
+
+### Misc
+
+- [#558](https://github.com/pulp/pulp-cli/issues/558), [#580](https://github.com/pulp/pulp-cli/issues/580)
+
+
+---
+
+
 ## 0.16.0 (2022-11-10)
 
 
