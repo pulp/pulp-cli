@@ -8,7 +8,6 @@ on:
 jobs:
   publish-pypi:
     name: Publish to PyPI
-    needs: release
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
