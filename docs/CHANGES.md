@@ -10,6 +10,19 @@
 
 [//]: # (towncrier release notes start)
 
+## 0.17.1 (2023-02-17)
+
+
+
+### Bugfixes
+
+- Reimport some missing symbols into their old location for compatibility.
+  [#635](https://github.com/pulp/pulp-cli/issues/635)
+
+
+---
+
+
 ## 0.17.0 (2023-02-16)
 
 
