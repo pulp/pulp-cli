@@ -52,13 +52,16 @@ def check_changelog(issue):
 print("Checking commit message for {sha}.".format(sha=sha[0:7]))
 
 # validate the issue attached to the commit
-regex = r"(?:{keywords})[\s:]+#(\d+)".format(keywords=("|").join(KEYWORDS))
-issues = re.findall(regex, message, re.IGNORECASE)
+issue_regex = r"(?:{keywords})[\s:]+#(\d+)".format(keywords=("|").join(KEYWORDS))
+issues = re.findall(issue_regex, message, re.IGNORECASE)
+cherry_pick_regex = r"^\s*\(cherry picked from commit [0-9a-f]*\)\s*$"
+cherry_pick = re.search(cherry_pick_regex, message, re.MULTILINE)
 
 if issues:
     for issue in issues:
-        check_status(issue)
-        check_changelog(issue)
+        if not cherry_pick:
+            check_status(issue)
+            check_changelog(issue)
 else:
     if NO_ISSUE in message:
         print("Commit {sha} has no issues but is tagged {tag}.".format(sha=sha[0:7], tag=NO_ISSUE))
