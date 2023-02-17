@@ -26,7 +26,7 @@ setup(
     author="Pulp Team",
     author_email="pulp-list@redhat.com",
     url="https://github.com/pulp/pulp-cli",
-    version="0.17.0",
+    version="0.17.1",
     packages=plugin_packages,
     package_data={"": ["py.typed"]},
     python_requires=">=3.6",
