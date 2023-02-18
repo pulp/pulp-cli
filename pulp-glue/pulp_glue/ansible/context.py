@@ -11,7 +11,6 @@ from pulp_glue.common.context import (
     registered_repository_contexts,
 )
 from pulp_glue.common.i18n import get_translation
-from pulp_glue.common.openapi import UploadsMap
 
 translation = get_translation(__name__)
 _ = translation.gettext
@@ -48,15 +47,12 @@ class PulpAnsibleCollectionVersionSignatureContext(PulpContentContext):
         self,
         body: EntityDefinition,
         parameters: Optional[Mapping[str, Any]] = None,
-        uploads: Optional[UploadsMap] = None,
         non_blocking: bool = False,
     ) -> Any:
         self.pulp_ctx.needs_plugin(
             PluginRequirement("ansible", min="0.13.0", feature=_("collection version creation"))
         )
-        return super().create(
-            body=body, parameters=parameters, uploads=uploads, non_blocking=non_blocking
-        )
+        return super().create(body=body, parameters=parameters, non_blocking=non_blocking)
 
 
 class PulpAnsibleDistributionContext(PulpDistributionContext):

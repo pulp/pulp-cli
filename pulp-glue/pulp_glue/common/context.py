@@ -9,7 +9,7 @@ from packaging.version import parse as parse_version
 from requests import HTTPError
 
 from pulp_glue.common.i18n import get_translation
-from pulp_glue.common.openapi import OpenAPI, OpenAPIError, UploadsMap
+from pulp_glue.common.openapi import OpenAPI, OpenAPIError
 
 translation = get_translation(__name__)
 _ = translation.gettext
@@ -181,7 +181,6 @@ class PulpContext:
         non_blocking: bool = False,
         parameters: Optional[Dict[str, Any]] = None,
         body: Optional[EntityDefinition] = None,
-        uploads: Optional[UploadsMap] = None,
         validate_body: bool = True,
     ) -> Any:
         """
@@ -194,17 +193,6 @@ class PulpContext:
             parameters = preprocess_payload(parameters)
         if body is not None:
             body = preprocess_payload(body)
-        # ---- SNIP ----
-        # In the future we want everything as part of the body.
-        if uploads:
-            self.echo(
-                _("Deprecated use of 'uploads' for operation '{operation_id}'").format(
-                    operation_id=operation_id
-                )
-            )
-            body = body or {}
-            body.update(uploads)
-        # ---- SNIP ----
         try:
             result = self.api.call(
                 operation_id,
@@ -504,7 +492,6 @@ class PulpEntityContext:
         non_blocking: bool = False,
         parameters: Optional[Dict[str, Any]] = None,
         body: Optional[EntityDefinition] = None,
-        uploads: Optional[UploadsMap] = None,
         validate_body: bool = True,
     ) -> Any:
         operation_id: str = (
@@ -515,7 +502,6 @@ class PulpEntityContext:
             non_blocking=non_blocking,
             parameters=parameters,
             body=body,
-            uploads=uploads,
             validate_body=validate_body,
         )
 
@@ -585,7 +571,6 @@ class PulpEntityContext:
         self,
         body: EntityDefinition,
         parameters: Optional[Mapping[str, Any]] = None,
-        uploads: Optional[UploadsMap] = None,
         non_blocking: bool = False,
     ) -> Any:
         _parameters = self.scope
@@ -597,7 +582,6 @@ class PulpEntityContext:
             "create",
             parameters=_parameters,
             body=body,
-            uploads=uploads,
             non_blocking=non_blocking,
         )
         if not non_blocking and result["pulp_href"].startswith(self.pulp_ctx.api_path + "tasks/"):
@@ -609,13 +593,8 @@ class PulpEntityContext:
         href: Optional[str] = None,
         body: Optional[EntityDefinition] = None,
         parameters: Optional[Mapping[str, Any]] = None,
-        uploads: Optional[UploadsMap] = None,
         non_blocking: bool = False,
     ) -> Any:
-        # Workaround for plugins that do not have ID_PREFIX in place
-        if hasattr(self, "UPDATE_ID") and not hasattr(self, "PARTIAL_UPDATE_ID"):
-            self.PARTIAL_UPDATE_ID = getattr(self, "UPDATE_ID")
-        # ----------------------------------------------------------
         _parameters = {self.HREF: href or self.pulp_href}
         if parameters:
             _parameters.update(parameters)
@@ -625,7 +604,6 @@ class PulpEntityContext:
             "partial_update",
             parameters=_parameters,
             body=body,
-            uploads=uploads,
             non_blocking=non_blocking,
         )
 
