@@ -6,7 +6,7 @@ import datetime
 import json
 import os
 from io import BufferedReader
-from typing import IO, Any, Callable, Dict, List, Mapping, Optional, Tuple, Union
+from typing import IO, Any, Callable, Dict, List, Optional, Tuple, Union
 from urllib.parse import urljoin
 
 import requests
@@ -19,7 +19,6 @@ translation = get_translation(__name__)
 _ = translation.gettext
 
 UploadType = Union[bytes, IO[bytes]]
-UploadsMap = Mapping[str, UploadType]
 
 SAFE_METHODS = ["GET", "HEAD", "OPTIONS"]
 ISO_DATE_FORMAT = "%Y-%m-%d"

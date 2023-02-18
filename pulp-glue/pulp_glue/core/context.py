@@ -12,7 +12,6 @@ from pulp_glue.common.context import (
     PulpException,
 )
 from pulp_glue.common.i18n import get_translation
-from pulp_glue.common.openapi import UploadsMap
 
 translation = get_translation(__name__)
 _ = translation.gettext
@@ -137,7 +136,6 @@ class PulpGroupPermissionContext(PulpEntityContext):
         non_blocking: bool = False,
         parameters: Optional[Dict[str, Any]] = None,
         body: Optional[Dict[str, Any]] = None,
-        uploads: Optional[UploadsMap] = None,
         validate_body: bool = False,
     ) -> Any:
         """Workaroud because the openapi spec for GroupPermissions has always been broken.
@@ -150,7 +148,6 @@ class PulpGroupPermissionContext(PulpEntityContext):
             non_blocking=non_blocking,
             parameters=parameters,
             body=body,
-            uploads=uploads,
             validate_body=validate_body,
         )
 
