@@ -1,0 +1,19 @@
+[tool.black]
+line-length = 100
+
+[tool.isort]
+profile = "black"
+line_length = 100
+
+[tool.mypy]
+strict = true
+show_error_codes = true
+files = "pulp_glue/**/*.py"
+namespace_packages = true
+explicit_package_bases = true
+
+[[tool.mypy.overrides]]
+module = [
+  "schema.*",
+]
+ignore_missing_imports = true

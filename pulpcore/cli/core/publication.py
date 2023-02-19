@@ -1,6 +1,9 @@
 import click
-from pulp_glue.common.context import PluginRequirement, registered_repository_contexts
-from pulp_glue.core.context import PulpPublicationContext
+from pulp_glue.common.context import (
+    PluginRequirement,
+    PulpPublicationContext,
+    registered_repository_contexts,
+)
 
 from pulpcore.cli.common.generic import (
     PulpCLIContext,

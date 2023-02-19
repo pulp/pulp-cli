@@ -4,7 +4,7 @@ from pulp_glue.common.context import (
     PulpACSContext,
     PulpContentContext,
     PulpDistributionContext,
-    PulpEntityContext,
+    PulpPublicationContext,
     PulpRemoteContext,
     PulpRepositoryContext,
     PulpRepositoryVersionContext,
@@ -21,7 +21,7 @@ class PulpFileACSContext(PulpACSContext):
     ENTITIES = _("file ACSes")
     HREF = "file_file_alternate_content_source_href"
     ID_PREFIX = "acs_file_file"
-    NEEDS_PLUGINS = [PluginRequirement("file", "1.9.0")]
+    NEEDS_PLUGINS = [PluginRequirement("file", min="1.9.0")]
     CAPABILITIES = {"roles": [PluginRequirement("file", min="1.11.0")]}
 
 
@@ -30,6 +30,8 @@ class PulpFileContentContext(PulpContentContext):
     ENTITIES = _("file content")
     HREF = "file_file_content_href"
     ID_PREFIX = "content_file_files"
+    NEEDS_PLUGINS = [PluginRequirement("file", min="1.6.0")]
+    CAPABILITIES = {"upload": []}
 
 
 class PulpFileDistributionContext(PulpDistributionContext):
@@ -39,6 +41,7 @@ class PulpFileDistributionContext(PulpDistributionContext):
     ID_PREFIX = "distributions_file_file"
     NULLABLES = {"publication", "repository"}
     CAPABILITIES = {"roles": [PluginRequirement("file", min="1.11.0")]}
+    NEEDS_PLUGINS = [PluginRequirement("file", min="1.6.0")]
 
     def preprocess_entity(self, body: EntityDefinition, partial: bool = False) -> EntityDefinition:
         body = super().preprocess_entity(body, partial=partial)
@@ -50,13 +53,14 @@ class PulpFileDistributionContext(PulpDistributionContext):
         return body
 
 
-class PulpFilePublicationContext(PulpEntityContext):
+class PulpFilePublicationContext(PulpPublicationContext):
     ENTITY = _("file publication")
     ENTITIES = _("file publications")
     HREF = "file_file_publication_href"
     ID_PREFIX = "publications_file_file"
     CAPABILITIES = {"roles": [PluginRequirement("file", min="1.11.0")]}
     NULLABLES = {"manifest"}
+    NEEDS_PLUGINS = [PluginRequirement("file", min="1.6.0")]
 
     def preprocess_entity(self, body: EntityDefinition, partial: bool = False) -> EntityDefinition:
         body = super().preprocess_entity(body, partial=partial)
@@ -73,11 +77,13 @@ class PulpFileRemoteContext(PulpRemoteContext):
     HREF = "file_file_remote_href"
     ID_PREFIX = "remotes_file_file"
     CAPABILITIES = {"roles": [PluginRequirement("file", min="1.11.0")]}
+    NEEDS_PLUGINS = [PluginRequirement("file", min="1.6.0")]
 
 
 class PulpFileRepositoryVersionContext(PulpRepositoryVersionContext):
     HREF = "file_file_repository_version_href"
     ID_PREFIX = "repositories_file_file_versions"
+    NEEDS_PLUGINS = [PluginRequirement("file", min="1.6.0")]
 
 
 class PulpFileRepositoryContext(PulpRepositoryContext):
@@ -92,6 +98,13 @@ class PulpFileRepositoryContext(PulpRepositoryContext):
         "roles": [PluginRequirement("file", min="1.11.0")],
     }
     NULLABLES = PulpRepositoryContext.NULLABLES.union({"manifest"})
+    NEEDS_PLUGINS = [PluginRequirement("file", min="1.6.0")]
+
+    def preprocess_entity(self, body: EntityDefinition, partial: bool = False) -> EntityDefinition:
+        body = super().preprocess_entity(body, partial=partial)
+        if "autopublish" in body:
+            self.pulp_ctx.needs_plugin(PluginRequirement("file", min="1.7.0"))
+        return body
 
 
 registered_repository_contexts["file:file"] = PulpFileRepositoryContext

@@ -1,10 +1,9 @@
-import os
 from typing import IO, Any, Dict, Optional, Union
 
 import click
-from pulp_glue.common.context import PluginRequirement, PulpEntityContext
+from pulp_glue.common.context import PulpEntityContext
 from pulp_glue.common.i18n import get_translation
-from pulp_glue.core.context import PulpArtifactContext, PulpUploadContext
+from pulp_glue.core.context import PulpArtifactContext
 from pulp_glue.rpm.context import (
     PulpRpmAdvisoryContext,
     PulpRpmDistributionTreeContext,
@@ -288,21 +287,12 @@ def upload(
     **kwargs: Any,
 ) -> None:
     """Create a content unit by uploading a file"""
-    body: Dict[str, Any] = {}
+    body: Dict[str, Any]
     if isinstance(entity_ctx, PulpRpmPackageContext):
-        size = os.path.getsize(file.name)
-        if chunk_size > size:
-            body["file"] = file
-        elif pulp_ctx.has_plugin(PluginRequirement("core", min="3.20.0")):
-            upload_href = PulpUploadContext(pulp_ctx).upload_file(file, chunk_size)
-            body["upload"] = upload_href
-        else:
-            artifact_href = PulpArtifactContext(pulp_ctx).upload(file, chunk_size)
-            body["artifact"] = artifact_href
-        body.update(kwargs)
+        result = entity_ctx.upload(file=file, chunk_size=chunk_size, **kwargs)
     elif isinstance(entity_ctx, PulpRpmAdvisoryContext):
-        body["file"] = file
+        body = {"file": file}
+        result = entity_ctx.create(body=body)
     else:
         raise NotImplementedError()
-    result = entity_ctx.create(body=body)
     pulp_ctx.output_result(result)

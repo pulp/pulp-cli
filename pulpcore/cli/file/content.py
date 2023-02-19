@@ -1,10 +1,9 @@
-import os
-from typing import IO, Any, Dict, Optional, Union
+from typing import IO, Optional, Union
 
 import click
-from pulp_glue.common.context import PluginRequirement, PulpEntityContext, PulpRepositoryContext
+from pulp_glue.common.context import PulpEntityContext, PulpRepositoryContext
 from pulp_glue.common.i18n import get_translation
-from pulp_glue.core.context import PulpArtifactContext, PulpUploadContext
+from pulp_glue.core.context import PulpArtifactContext
 from pulp_glue.file.context import PulpFileContentContext, PulpFileRepositoryContext
 
 from pulpcore.cli.common.generic import (
@@ -125,20 +124,10 @@ def upload(
     relative_path: str,
     file: IO[bytes],
     chunk_size: int,
-    repository: Optional[PulpEntityContext],
+    repository: Optional[PulpRepositoryContext],
 ) -> None:
     """Create a file content unit by uploading a file"""
-    size = os.path.getsize(file.name)
-    body: Dict[str, Any] = {"relative_path": relative_path}
-    if chunk_size > size:
-        body["file"] = file
-    elif pulp_ctx.has_plugin(PluginRequirement("core", min="3.20.0")):
-        upload_href = PulpUploadContext(pulp_ctx).upload_file(file, chunk_size)
-        body["upload"] = upload_href
-    else:
-        artifact_href = PulpArtifactContext(pulp_ctx).upload(file, chunk_size)
-        body["artifact"] = artifact_href
-    if repository:
-        body["repository"] = repository
-    result = entity_ctx.create(body=body)
+    result = entity_ctx.upload(
+        relative_path=relative_path, file=file, chunk_size=chunk_size, repository=repository
+    )
     pulp_ctx.output_result(result)

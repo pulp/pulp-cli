@@ -1,10 +1,9 @@
 from typing import Any
 
 import click
-from pulp_glue.common.context import PluginRequirement
 from pulp_glue.common.i18n import get_translation
 
-from pulpcore.cli.common.generic import PulpCLIContext, pass_pulp_context, pulp_group
+from pulpcore.cli.common.generic import pulp_group
 from pulpcore.cli.file.acs import acs
 from pulpcore.cli.file.content import content
 from pulpcore.cli.file.distribution import distribution
@@ -17,9 +16,8 @@ _ = translation.gettext
 
 
 @pulp_group(name="file")
-@pass_pulp_context
-def file_group(pulp_ctx: PulpCLIContext) -> None:
-    pulp_ctx.needs_plugin(PluginRequirement("file", min="1.6.0"))
+def file_group() -> None:
+    pass
 
 
 def mount(main: click.Group, **kwargs: Any) -> None:

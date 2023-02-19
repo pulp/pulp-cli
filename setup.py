@@ -22,8 +22,6 @@ plugin_entry_points = [(package.rsplit(".", 1)[-1], package) for package in plug
 long_description = ""
 with open("README.md") as readme:
     for line in readme:
-        if line == "## Contributing\n":
-            break
         long_description += line
 
 setup(

@@ -64,7 +64,7 @@ task.add_command(
                 "reserved_resources__in",
                 multiple=True,
                 help=_("Href of a resource reserved by the task. May be specified multiple times."),
-                needs_plugins=[PluginRequirement("core", min="3.22.0dev")],
+                needs_plugins=[PluginRequirement("core", min="3.22.0")],
             ),
             pulp_option(
                 "--exclusive-resource",
@@ -79,7 +79,7 @@ task.add_command(
                     "Href of a resource reserved exclusively by the task."
                     " May be specified multiple times."
                 ),
-                needs_plugins=[PluginRequirement("core", min="3.22.0dev")],
+                needs_plugins=[PluginRequirement("core", min="3.22.0")],
             ),
             pulp_option(
                 "--shared-resource",
@@ -91,7 +91,7 @@ task.add_command(
                 "shared_resources__in",
                 multiple=True,
                 help=_("Href of a resource shared by the task. May be specified multiple times."),
-                needs_plugins=[PluginRequirement("core", min="3.22.0dev")],
+                needs_plugins=[PluginRequirement("core", min="3.22.0")],
             ),
         ]
     )
@@ -186,14 +186,11 @@ def cancel(
     multiple=True,
 )
 @pass_entity_context
-@pass_pulp_context
 def purge(
-    pulp_ctx: PulpCLIContext,
     task_ctx: PulpTaskContext,
     finished: Optional[datetime],
     state: Optional[Tuple[str]],
 ) -> None:
-    pulp_ctx.needs_plugin(PluginRequirement("core", "3.17.0"))
     state_list = list(state) if state else None
     task_ctx.purge(finished, state_list)
 

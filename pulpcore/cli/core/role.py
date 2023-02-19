@@ -2,7 +2,6 @@ import gettext
 from typing import Iterable, Optional
 
 import click
-from pulp_glue.common.context import PluginRequirement
 from pulp_glue.core.context import PulpRoleContext
 
 from pulpcore.cli.common.generic import (
@@ -69,7 +68,6 @@ create_options = [
 @pass_pulp_context
 @click.pass_context
 def role(ctx: click.Context, pulp_ctx: PulpCLIContext) -> None:
-    pulp_ctx.needs_plugin(PluginRequirement("core", min="3.17.0"))
     ctx.obj = PulpRoleContext(pulp_ctx)
 
 

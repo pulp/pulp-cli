@@ -7,15 +7,18 @@ info:
 
 black:
 	isort .
+	cd pulp-glue; isort .
 	black .
 
 lint:
 	find . -name '*.sh' -print0 | xargs -0 shellcheck -x
-	black --diff --check .
 	isort -c --diff .
+	cd pulp-glue; isort -c --diff .
+	black --diff --check .
 	flake8
 	.ci/scripts/check_click_for_mypy.py
 	mypy
+	cd pulp-glue; mypy
 	@echo "🙊 Code 🙈 LGTM 🙉 !"
 
 tests/cli.toml:

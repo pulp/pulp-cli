@@ -12,7 +12,6 @@ try:
 except ImportError:
     HAS_CLICK_SHELL = False
 
-from pulp_glue.common.context import PluginRequirement
 from pulp_glue.common.i18n import get_translation
 
 from pulpcore.cli.common.config import CONFIG_LOCATIONS, config, config_options, validate_config
@@ -151,7 +150,6 @@ def main(
         background_tasks=background,
         timeout=timeout,
     )
-    ctx.obj.needs_plugin(PluginRequirement("core", min="3.11.0"))
 
 
 main.add_command(config)

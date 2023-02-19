@@ -19,7 +19,6 @@ def traverse_commands(command, args):
         params = command.params
         if params:
             if "--type" in params[0].opts:
-
                 # iterate over commands with specific context types
                 for context_type in params[0].type.choices:
                     yield args + ["--type", context_type]
