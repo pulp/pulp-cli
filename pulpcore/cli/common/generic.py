@@ -188,7 +188,6 @@ class PulpCommand(click.Command):
 
 
 class PulpGroup(PulpCommand, click.Group):
-
     command_class = PulpCommand
     group_class = type
 
@@ -638,7 +637,6 @@ def resource_option(*args: Any, **kwargs: Any) -> Callable[[FC], FC]:
 
 
 def type_option(*args: Any, **kwargs: Any) -> Callable[[FC], FC]:
-
     choices: Dict[str, Type[PulpEntityContext]] = kwargs.pop("choices")
     assert choices and isinstance(choices, dict)
     type_names = list(choices.keys())
@@ -851,7 +849,7 @@ pulp_last_updated_lte_option = pulp_option(
 
 retained_versions_option = pulp_option(
     "--retain-repo-versions",
-    needs_plugins=[PluginRequirement("core", "3.13.0")],
+    needs_plugins=[PluginRequirement("core", min="3.13.0")],
     help=_("Number of repository versions to keep."),
     type=int,
 )

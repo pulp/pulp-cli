@@ -1,5 +1,5 @@
-from pulp_glue.common.context import (  # noqa: F401
-    EntityDefinition,
+from pulp_glue.common.context import EntityDefinition  # noqa: F401
+from pulp_glue.common.context import (
     EntityFieldDefinition,
     PluginRequirement,
     PreprocessedEntityDefinition,

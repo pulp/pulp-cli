@@ -1,13 +1,15 @@
 import datetime
+import os
 import re
 import sys
 import time
-from typing import Any, ClassVar, Dict, List, Mapping, NamedTuple, Optional, Set, Type, Union
+from typing import IO, Any, ClassVar, Dict, List, Mapping, NamedTuple, Optional, Set, Type, Union
 
 from packaging.version import parse as parse_version
+from requests import HTTPError
+
 from pulp_glue.common.i18n import get_translation
 from pulp_glue.common.openapi import OpenAPI, OpenAPIError, UploadsMap
-from requests import HTTPError
 
 translation = get_translation(__name__)
 _ = translation.gettext
@@ -97,7 +99,7 @@ class PulpContext:
         self._api: Optional[OpenAPI] = None
         self.api_path: str = api_root + "api/v3/"
         self._api_kwargs = api_kwargs
-        self._needed_plugins: List[PluginRequirement] = []
+        self._needed_plugins: List[PluginRequirement] = [PluginRequirement("core", min="3.11.0")]
         self.isatty: bool = sys.stdout.isatty()
 
         self.format: str = format
@@ -123,7 +125,7 @@ class PulpContext:
                             parameter["schema"] = {"type": "array", "items": {"type": "string"}}
                             parameter["explode"] = False
                             parameter["style"] = "form"
-        if self.has_plugin(PluginRequirement("core", max="3.22.0.dev")):
+        if self.has_plugin(PluginRequirement("core", max="3.22.0")):
             for method, path in self.api.operations.values():
                 operation = api_spec["paths"][path][method]
                 if method == "get" and "parameters" in operation:
@@ -163,8 +165,8 @@ class PulpContext:
             except OpenAPIError as e:
                 raise PulpException(str(e))
             # Rerun scheduled version checks
-            for plugin in self._needed_plugins:
-                self.needs_plugin(plugin)
+            for plugin_requirement in self._needed_plugins:
+                self.needs_plugin(plugin_requirement)
             self._patch_api_spec()
         return self._api
 
@@ -338,38 +340,38 @@ class PulpContext:
 
     def has_plugin(
         self,
-        plugin: PluginRequirement,
+        plugin_requirement: PluginRequirement,
     ) -> bool:
         if not self.component_versions:
             # Prior to 3.9 we do not have this information.
             # Assume we have no plugin installed.
-            return not plugin.inverted
-        version: Optional[str] = self.component_versions.get(plugin.name)
+            return not plugin_requirement.inverted
+        version: Optional[str] = self.component_versions.get(plugin_requirement.name)
         if version is None:
-            return plugin.inverted
-        if plugin.min is not None:
-            if parse_version(version) < parse_version(plugin.min):
-                return plugin.inverted
-        if plugin.max is not None:
-            if parse_version(version) >= parse_version(plugin.max):
-                return plugin.inverted
-        return not plugin.inverted
+            return plugin_requirement.inverted
+        if plugin_requirement.min is not None:
+            if parse_version(version) < parse_version(plugin_requirement.min):
+                return plugin_requirement.inverted
+        if plugin_requirement.max is not None:
+            if parse_version(version) >= parse_version(plugin_requirement.max):
+                return plugin_requirement.inverted
+        return not plugin_requirement.inverted
 
     def needs_plugin(
         self,
-        plugin: PluginRequirement,
+        plugin_requirement: PluginRequirement,
     ) -> None:
         if self._api is not None:
-            if not self.has_plugin(plugin):
-                specifier = plugin.name
+            if not self.has_plugin(plugin_requirement):
+                specifier = plugin_requirement.name
                 separator = ""
-                if plugin.min is not None:
-                    specifier += f">={plugin.min}"
+                if plugin_requirement.min is not None:
+                    specifier += f">={plugin_requirement.min}"
                     separator = ","
-                if plugin.max is not None:
-                    specifier += f"{separator}<{plugin.max}"
-                feature = plugin.feature or _("this command")
-                if plugin.inverted:
+                if plugin_requirement.max is not None:
+                    specifier += f"{separator}<{plugin_requirement.max}"
+                feature = plugin_requirement.feature or _("this command")
+                if plugin_requirement.inverted:
                     msg = _(
                         "The server provides the pulp component '{specifier}',"
                         " which prevents the use of {feature}."
@@ -384,7 +386,7 @@ class PulpContext:
                 raise PulpException(msg.format(specifier=specifier, feature=feature))
         else:
             # Schedule for later checking
-            self._needed_plugins.append(plugin)
+            self._needed_plugins.append(plugin_requirement)
 
 
 class PulpEntityContext:
@@ -407,7 +409,7 @@ class PulpEntityContext:
     # e.g. `CAPABILITIES = {
     #           "feature1": [
     #               PluginRequirement("file"),
-    #               PluginRequirement("core", min_version="3.7.0")
+    #               PluginRequirement("core", min="3.7.0")
     #           ]
     #       }
     CAPABILITIES: ClassVar[Dict[str, List[PluginRequirement]]] = {}
@@ -487,8 +489,8 @@ class PulpEntityContext:
         self.pulp_ctx: PulpContext = pulp_ctx
 
         # Add requirements to the lazy evaluated list
-        for req in self.NEEDS_PLUGINS:
-            self.pulp_ctx.needs_plugin(req)
+        for plugin_requirement in self.NEEDS_PLUGINS:
+            self.pulp_ctx.needs_plugin(plugin_requirement)
 
         self._entity = None
         if pulp_href is None:
@@ -686,8 +688,8 @@ class PulpEntityContext:
 
     def needs_capability(self, capability: str) -> None:
         if capability in self.CAPABILITIES:
-            for pr in self.CAPABILITIES[capability]:
-                self.pulp_ctx.needs_plugin(pr)
+            for plugin_requirement in self.CAPABILITIES[capability]:
+                self.pulp_ctx.needs_plugin(plugin_requirement)
         else:
             raise PulpException(
                 _("Capability '{capability}' needed on '{entity}' for this command.").format(
@@ -722,6 +724,20 @@ class PulpRemoteContext(PulpEntityContext):
         "sock_read_timeout",
         "rate_limit",
     }
+
+
+class PulpPublicationContext(PulpEntityContext):
+    ENTITY = _("publication")
+    ENTITIES = _("pulications")
+    ID_PREFIX = "pulications"
+    HREF_PATTERN = r"publications/(?P<plugin>[\w\-_]+)/(?P<resource_type>[\w\-_]+)/"
+
+    def list(self, limit: int, offset: int, parameters: Dict[str, Any]) -> List[Any]:
+        if parameters.get("repository") is not None:
+            self.pulp_ctx.needs_plugin(
+                PluginRequirement("core", min="3.20.0", feature=_("repository filter"))
+            )
+        return super().list(limit, offset, parameters)
 
 
 class PulpDistributionContext(PulpEntityContext):
@@ -773,7 +789,9 @@ class PulpRepositoryContext(PulpEntityContext):
 
     def preprocess_entity(self, body: EntityDefinition, partial: bool = False) -> EntityDefinition:
         body = super().preprocess_entity(body, partial=partial)
-        if self.pulp_ctx.has_plugin(PluginRequirement("core", "3.13.0", "3.15.0")):
+        if "retain_repo_versions" in body:
+            self.pulp_ctx.needs_plugin(PluginRequirement("core", min="3.13.0"))
+        if self.pulp_ctx.has_plugin(PluginRequirement("core", min="3.13.0", max="3.15.0")):
             # "retain_repo_versions" has been named "retained_versions" until pulpcore 3.15
             # https://github.com/pulp/pulpcore/pull/1472
             if "retain_repo_versions" in body:
@@ -808,6 +826,33 @@ class PulpContentContext(PulpEntityContext):
     ENTITY = _("content")
     ENTITIES = _("content")
     ID_PREFIX = "content"
+
+    def upload(
+        self,
+        file: IO[bytes],
+        chunk_size: int,
+        repository: Optional[PulpRepositoryContext],
+        **kwargs: Any,
+    ) -> Any:
+        """Create a content unit by uploading a file"""
+        self.needs_capability("upload")
+        size = os.path.getsize(file.name)
+        body: Dict[str, Any] = {**kwargs}
+        if chunk_size > size:
+            body["file"] = file
+        elif self.pulp_ctx.has_plugin(PluginRequirement("core", min="3.20.0")):
+            from pulp_glue.core.context import PulpUploadContext
+
+            upload_href = PulpUploadContext(self.pulp_ctx).upload_file(file, chunk_size)
+            body["upload"] = upload_href
+        else:
+            from pulp_glue.core.context import PulpArtifactContext
+
+            artifact_href = PulpArtifactContext(self.pulp_ctx).upload(file, chunk_size)
+            body["artifact"] = artifact_href
+        if repository:
+            body["repository"] = repository
+        return self.create(body=body)
 
 
 class PulpACSContext(PulpEntityContext):

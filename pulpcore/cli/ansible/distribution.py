@@ -80,7 +80,7 @@ distribution.add_command(
     label_command(
         decorators=nested_lookup_options,
         need_plugins=[
-            PluginRequirement("ansible", "0.8.0"),
+            PluginRequirement("ansible", min="0.8.0"),
         ],
     )
 )

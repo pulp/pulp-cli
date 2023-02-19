@@ -1,10 +1,9 @@
 from typing import Any
 
 import click
-from pulp_glue.common.context import PluginRequirement
 from pulp_glue.common.i18n import get_translation
 
-from pulpcore.cli.common.generic import PulpCLIContext, pass_pulp_context, pulp_group
+from pulpcore.cli.common.generic import pulp_group
 from pulpcore.cli.rpm.acs import acs
 from pulpcore.cli.rpm.comps import comps_upload
 from pulpcore.cli.rpm.content import content
@@ -18,9 +17,8 @@ _ = translation.gettext
 
 
 @pulp_group()
-@pass_pulp_context
-def rpm(pulp_ctx: PulpCLIContext) -> None:
-    pulp_ctx.needs_plugin(PluginRequirement("rpm", min="3.9.0"))
+def rpm() -> None:
+    pass
 
 
 def mount(main: click.Group, **kwargs: Any) -> None:

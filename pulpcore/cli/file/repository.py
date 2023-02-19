@@ -111,7 +111,7 @@ update_options = [
     click.option("--manifest"),
     pulp_option(
         "--autopublish/--no-autopublish",
-        needs_plugins=[PluginRequirement("file", "1.7.0")],
+        needs_plugins=[PluginRequirement("file", min="1.7.0")],
         default=None,
     ),
     retained_versions_option,

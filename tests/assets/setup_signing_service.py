@@ -4,7 +4,6 @@ import os
 import sys
 
 if __name__ == "__main__":
-
     usage_string = "Usage: {} <path_to_signing_script> <path_to_public_key_file>".format(
         sys.argv[0]
     )
