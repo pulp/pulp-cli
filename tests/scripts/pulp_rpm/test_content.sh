@@ -3,7 +3,7 @@
 # shellcheck source=tests/scripts/config.source
 . "$(dirname "$(dirname "$(realpath "$0")")")"/config.source
 
-pulp debug has-plugin --name "rpm" || exit 3
+pulp debug has-plugin --name "rpm" || exit 23
 
 TEST_ADVISORY="$(dirname "$(realpath "$0")")"/test_advisory.json
 RPM_FILENAME="lemon-0-1.noarch.rpm"

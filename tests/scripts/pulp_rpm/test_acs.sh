@@ -3,7 +3,7 @@
 # shellcheck source=tests/scripts/config.source
 . "$(dirname "$(dirname "$(realpath "$0")")")"/config.source
 
-pulp debug has-plugin --name "rpm" --min-version "3.18.0" || exit 3
+pulp debug has-plugin --name "rpm" --min-version "3.18.0" || exit 23
 
 acs_remote="cli_test_rpm_acs_remote"
 acs="cli_test_acs"
@@ -22,7 +22,7 @@ cleanup
 expect_succ pulp rpm remote create --name $acs_remote --url "$PULP_FIXTURES_URL" --policy "on_demand"
 
 expect_succ pulp rpm acs create --name $acs --remote $acs_remote --path "rpm-unsigned/" --path "rpm-richnweak-deps/"
-HREF="$(echo "$OUTPUT" | jq -r "pulp_href")"
+HREF="$(echo "$OUTPUT" | jq -r '.pulp_href')"
 expect_succ pulp rpm acs list
 test "$(echo "$OUTPUT" | jq -r length)" -ge 1
 expect_succ pulp rpm acs show --acs "$HREF"
@@ -44,7 +44,7 @@ test "$(echo "$OUTPUT" | jq ".tasks | length")" -eq 2
 
 # create a remote with metadata only and sync it
 expect_succ pulp rpm remote create --name "cli-remote-metadata-only" --url "$PULP_FIXTURES_URL/rpm-unsigned-meta-only/"
-remote_href="$(echo "$OUTPUT" | jq -r ".pulp_href")"
+remote_href="$(echo "$OUTPUT" | jq -r '.pulp_href')"
 expect_succ pulp rpm repository create --name "cli-repo-metadata-only" --remote "$remote_href"
 expect_succ pulp rpm repository sync --repository "cli-repo-metadata-only"
 

@@ -3,7 +3,7 @@
 # shellcheck source=tests/scripts/config.source
 . "$(dirname "$(dirname "$(realpath "$0")")")"/config.source
 
-pulp debug has-plugin --name "rpm" --min-version "3.17.0" || exit 3
+pulp debug has-plugin --name "rpm" --min-version "3.17.0" || exit 23
 
 
 cleanup() {
@@ -16,7 +16,7 @@ LARGECOMPS="$(dirname "$(realpath "$0")")"/centos8-base-comps.xml
 if pulp debug has-plugin --name "rpm" --min-version "3.16.0"
 then
   expect_succ pulp rpm repository create --name "cli_test_rpm_repository"
-  repo_href="$(echo "$OUTPUT" | jq -r ".pulp_href")"
+  repo_href="$(echo "$OUTPUT" | jq -r '.pulp_href')"
   expect_succ pulp rpm comps-upload --file "${SMALLCOMPS}"
   test "$(echo "$OUTPUT" | jq -r '.created_resources | length')" = 4  # just comps-units
   expect_succ pulp rpm comps-upload --file "${SMALLCOMPS}"  --repository "${repo_href}"

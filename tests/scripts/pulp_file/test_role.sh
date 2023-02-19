@@ -3,7 +3,7 @@
 # shellcheck source=tests/scripts/config.source
 . "$(dirname "$(dirname "$(realpath "$0")")")"/config.source
 
-pulp debug has-plugin --name "file" --min-version "1.11.0" || exit 3
+pulp debug has-plugin --name "file" --min-version "1.11.0" || exit 23
 
 USERPASS="Yeech6ba"
 

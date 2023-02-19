@@ -3,7 +3,7 @@
 # shellcheck source=tests/scripts/config.source
 . "$(dirname "$(dirname "$(realpath "$0")")")"/config.source
 
-pulp debug has-plugin --name "file" --min-version "1.10.0" || exit 3
+pulp debug has-plugin --name "file" --min-version "1.10.0" || exit 23
 
 acs_remote="cli_test_file_acs_remote"
 acs="cli_test_acs"
@@ -21,7 +21,7 @@ cleanup
 expect_succ pulp file remote create --name $acs_remote --url "$PULP_FIXTURES_URL" --policy "on_demand"
 
 expect_succ pulp file acs create --name $acs --remote $acs_remote --path "file/PULP_MANIFEST" --path "file2/PULP_MANIFEST"
-HREF="$(echo "$OUTPUT" | jq -r "pulp_href")"
+HREF="$(echo "$OUTPUT" | jq -r '.pulp_href')"
 
 expect_succ pulp file acs list
 test "$(echo "$OUTPUT" | jq -r length)" -ge 1
@@ -49,7 +49,7 @@ test "$(echo "$OUTPUT" | jq ".tasks | length")" -eq 2
 
 # create a remote with manifest only and sync it
 expect_succ pulp file remote create --name "cli-remote-manifest-only" --url "$PULP_FIXTURES_URL/file-manifest/PULP_MANIFEST"
-remote_href="$(echo "$OUTPUT" | jq -r ".pulp_href")"
+remote_href="$(echo "$OUTPUT" | jq -r '.pulp_href')"
 expect_succ pulp file repository create --name "cli-repo-manifest-only" --remote "$remote_href"
 expect_succ pulp file repository sync --repository "cli-repo-manifest-only"
 

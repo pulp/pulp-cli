@@ -3,7 +3,7 @@
 # shellcheck source=tests/scripts/config.source
 . "$(dirname "$(dirname "$(realpath "$0")")")"/config.source
 
-pulp debug has-plugin --name "container" || exit 3
+pulp debug has-plugin --name "container" || exit 23
 
 cleanup() {
   pulp container repository destroy --name "cli_test_container_repo" || true
