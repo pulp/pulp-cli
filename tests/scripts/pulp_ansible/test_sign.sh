@@ -3,8 +3,8 @@
 # shellcheck source=tests/scripts/config.source
 . "$(dirname "$(dirname "$(realpath "$0")")")"/config.source
 
-pulp debug has-plugin --name "ansible" --min-version "0.12.0" || exit 3
-[ "$(pulp signing-service list --name "sign_ansible" | jq 'length')" = "1" ] || exit 3
+pulp debug has-plugin --name "ansible" --min-version "0.12.0" || exit 23
+[ "$(pulp signing-service list --name "sign_ansible" | jq 'length')" = "1" ] || exit 23
 
 cleanup() {
   pulp ansible remote -t "collection" destroy --name "cli_test_ansible_collection_remote" || true
@@ -18,7 +18,7 @@ expect_succ pulp ansible remote -t "collection" create --name "cli_test_ansible_
 --url "$ANSIBLE_COLLECTION_REMOTE_URL" --requirements "collections:
   - robertdebock.ansible_development_environment"
 expect_succ pulp ansible repository create --name "cli_test_ansible_repository"
-HREF="$(echo "$OUTPUT" | jq -r "pulp_href")"
+HREF="$(echo "$OUTPUT" | jq -r '.pulp_href')"
 expect_succ pulp ansible repository sync --repository "cli_test_ansible_repository" --remote "cli_test_ansible_collection_remote"
 
 # Test sign

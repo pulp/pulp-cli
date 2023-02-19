@@ -3,7 +3,7 @@
 # shellcheck source=tests/scripts/config.source
 . "$(dirname "$(dirname "$(realpath "$0")")")"/config.source
 
-pulp debug has-plugin --name "file" || exit 3
+pulp debug has-plugin --name "file" || exit 23
 
 cleanup() {
   pulp file repository destroy --name "cli_test_file_repo" || true
@@ -18,7 +18,7 @@ REMOTE2_HREF="$(pulp file remote create --name "cli:test:file:remote2" --url "ht
 expect_succ pulp file repository list
 
 expect_succ pulp file repository create --name "cli_test_file_repo" --description "Test repository for CLI tests"
-HREF="$(echo "$OUTPUT" | jq -r "pulp_href")"
+HREF="$(echo "$OUTPUT" | jq -r '.pulp_href')"
 expect_succ pulp file repository update --repository "cli_test_file_repo" --description "" --remote "cli_test_file_remote1"
 expect_succ pulp file repository show --repository "$HREF"
 test "$(echo "$OUTPUT" | jq -r '.remote')" = "$REMOTE1_HREF"

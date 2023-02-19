@@ -7,7 +7,7 @@ expect_succ pulp orphan cleanup
 
 test "$(echo "${OUTPUT}" | jq -r '.state' )" = "completed"
 
-pulp debug has-plugin --name "file" || exit 3
+pulp debug has-plugin --name "file" || exit 23
 
 if pulp debug has-plugin --name "core" --min-version "3.14.0"
 then

@@ -3,7 +3,7 @@
 # shellcheck source=tests/scripts/config.source
 . "$(dirname "$(dirname "$(realpath "$0")")")"/config.source
 
-pulp debug has-plugin --name "file" || exit 3
+pulp debug has-plugin --name "file" || exit 23
 
 autopublish_repo="cli_test_file_repository_autopublish"
 one_version_repo="cli_test_one_version_repo"

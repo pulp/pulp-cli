@@ -33,7 +33,7 @@ class ScriptItem(pytest.Function):
 
     def _runscript(self, pulp_cli_env, tmp_path, pulp_container_log):
         run = subprocess.run([self.path], cwd=tmp_path)
-        if run.returncode == 3:
+        if run.returncode == 23:
             pytest.skip("Skipped as requested by the script.")
         if run.returncode != 0:
             raise ScriptError(f"Script returned with exit code {run.returncode}.")
