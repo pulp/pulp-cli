@@ -39,18 +39,6 @@ def has_plugin(
     sys.exit(0 if available else 1)
 
 
-@debug.command(deprecated=True)
-@pass_pulp_context
-def task_summary(pulp_ctx: PulpCLIContext) -> None:
-    """
-    List a summary of tasks by status.
-    """
-    from pulp_glue.core.context import PulpTaskContext
-
-    result = PulpTaskContext(pulp_ctx).summary()
-    pulp_ctx.output_result(result)
-
-
 @debug.group(name="openapi")
 def openapi_group() -> None:
     pass
