@@ -1181,6 +1181,7 @@ def version_command(**kwargs: Any) -> click.Command:
 
     kwargs.setdefault("name", "version")
     decorators = kwargs.pop("decorators", [repository_href_option, repository_option])
+    list_only = kwargs.pop("list_only", False)
 
     @pulp_group(**kwargs)
     @pass_repository_context
@@ -1191,21 +1192,23 @@ def version_command(**kwargs: Any) -> click.Command:
     ) -> None:
         ctx.obj = repository_ctx.get_version_context()
 
-    callback.add_command(list_command(decorators=decorators))
-    callback.add_command(show_command(decorators=decorators + [version_option]))
-    callback.add_command(destroy_command(decorators=decorators + [version_option]))
+    callback.add_command(list_command(decorators=decorators + [content_in_option]))
 
-    @callback.command()
-    @repository_option
-    @version_option
-    @pass_repository_version_context
-    @pass_pulp_context
-    def repair(
-        pulp_ctx: PulpCLIContext,
-        repository_version_ctx: PulpRepositoryVersionContext,
-    ) -> None:
-        result = repository_version_ctx.repair()
-        pulp_ctx.output_result(result)
+    if not list_only:
+        callback.add_command(show_command(decorators=decorators + [version_option]))
+        callback.add_command(destroy_command(decorators=decorators + [version_option]))
+
+        @callback.command()
+        @repository_option
+        @version_option
+        @pass_repository_version_context
+        @pass_pulp_context
+        def repair(
+            pulp_ctx: PulpCLIContext,
+            repository_version_ctx: PulpRepositoryVersionContext,
+        ) -> None:
+            result = repository_version_ctx.repair()
+            pulp_ctx.output_result(result)
 
     return callback
 

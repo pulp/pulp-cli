@@ -8,6 +8,7 @@ from pulpcore.cli.common.generic import (
     name_filter_options,
     pass_pulp_context,
     pulp_group,
+    version_command,
 )
 
 translation = get_translation(__name__)
@@ -30,3 +31,4 @@ def repository(ctx: click.Context, pulp_ctx: PulpCLIContext) -> None:
 filter_options = name_filter_options
 
 repository.add_command(list_command(decorators=filter_options))
+repository.add_command(version_command(decorators=[], list_only=True))

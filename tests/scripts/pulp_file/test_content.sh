@@ -64,3 +64,7 @@ test "$(echo "$OUTPUT" | jq -r '[.[]|.relative_path]|sort|join(" ")')" = "upload
 
 expect_succ pulp content list
 test "$(echo "$OUTPUT" | jq -r length)" -gt "0"
+
+expect_succ pulp repository version list
+expect_succ pulp repository version list --content "[]"
+expect_succ pulp repository version list --content "$(jq -R '[.]' <<<"$content_href")"
