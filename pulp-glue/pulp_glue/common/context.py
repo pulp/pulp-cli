@@ -151,6 +151,26 @@ class PulpContext:
                             and parameter["schema"]["type"] == "string"
                         ):
                             parameter["schema"] = {"type": "array", "items": {"type": "string"}}
+        if self.has_plugin(PluginRequirement("core", max="99.99.0")):
+            # https://github.com/pulp/pulpcore/issues/3634
+            for operation_id, (method, path) in self.api.operations.items():
+                if (
+                    operation_id == "repository_versions_list"
+                    or (
+                        operation_id.startswith("repositories_")
+                        and operation_id.endswith("_versions_list")
+                    )
+                    or (operation_id.startswith("publications_") and operation_id.endswith("_list"))
+                ):
+                    operation = api_spec["paths"][path][method]
+                    for parameter in operation["parameters"]:
+                        if (
+                            parameter["name"] == "content__in"
+                            and parameter["in"] == "query"
+                            and "schema" in parameter
+                            and parameter["schema"]["type"] == "string"
+                        ):
+                            parameter["schema"] = {"type": "array", "items": {"type": "string"}}
         if self.has_plugin(PluginRequirement("file", min="1.10.0", max="1.11.0")):
             operation = api_spec["paths"]["{file_file_alternate_content_source_href}refresh/"][
                 "post"
@@ -496,6 +516,10 @@ class PulpEntityContext:
         self._entity_lookup = {"pulp_href": value}
         self._entity = None
 
+    @property
+    def tangible(self) -> bool:
+        return bool(self._entity) or bool(self._entity_lookup)
+
     def __init__(
         self,
         pulp_ctx: PulpContext,
@@ -770,14 +794,9 @@ class PulpDistributionContext(PulpEntityContext):
 
 
 class PulpRepositoryVersionContext(PulpEntityContext):
-    """
-    Base class for repository version specific contexts.
-    This class provides the basic CRUD commands and
-    ties its instances to the global PulpContext for api access.
-    """
-
     ENTITY = _("repository version")
     ENTITIES = _("repository versions")
+    ID_PREFIX = "repository_versions"
     repository_ctx: "PulpRepositoryContext"
 
     def __init__(self, pulp_ctx: PulpContext, repository_ctx: "PulpRepositoryContext") -> None:
@@ -786,24 +805,21 @@ class PulpRepositoryVersionContext(PulpEntityContext):
 
     @property
     def scope(self) -> Dict[str, Any]:
-        return {self.repository_ctx.HREF: self.repository_ctx.pulp_href}
+        if self.ID_PREFIX == "repository_versions":
+            return {}
+        else:
+            return {self.repository_ctx.HREF: self.repository_ctx.pulp_href}
 
     def repair(self, href: Optional[str] = None) -> Any:
         return self.call("repair", parameters={self.HREF: href or self.pulp_href}, body={})
 
 
 class PulpRepositoryContext(PulpEntityContext):
-    """
-    Base class for repository specific contexts.
-    This class provides the basic CRUD commands as well as synchronizing and
-    ties its instances to the global PulpContext for api access.
-    """
-
     ENTITY = _("repository")
     ENTITIES = _("repositories")
     HREF_PATTERN = r"repositories/(?P<plugin>[\w\-_]+)/(?P<resource_type>[\w\-_]+)/"
     ID_PREFIX = "repositories"
-    VERSION_CONTEXT: ClassVar[Type[PulpRepositoryVersionContext]]
+    VERSION_CONTEXT: ClassVar[Type[PulpRepositoryVersionContext]] = PulpRepositoryVersionContext
     NULLABLES = {"description", "retain_repo_versions"}
 
     def get_version_context(self) -> PulpRepositoryVersionContext:
@@ -841,10 +857,6 @@ class PulpRepositoryContext(PulpEntityContext):
 
 
 class PulpContentContext(PulpEntityContext):
-    """
-    Base class for content specific contexts
-    """
-
     ENTITY = _("content")
     ENTITIES = _("content")
     ID_PREFIX = "content"
