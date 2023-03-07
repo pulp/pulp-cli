@@ -218,10 +218,9 @@ def sync(
     """
     repo = repository_ctx.entity
     body: Dict[str, Any] = {}
-
-    if mirror:
+    if mirror is not None:
         body["mirror"] = mirror
-    if optimize:
+    if optimize is not None:
         body["optimize"] = optimize
     if skip_types:
         body["skip_types"] = skip_types
