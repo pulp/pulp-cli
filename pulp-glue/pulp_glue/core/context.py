@@ -343,6 +343,7 @@ class PulpSigningServiceContext(PulpEntityContext):
     ENTITIES = _("signing services")
     HREF = "signing_service_href"
     ID_PREFIX = "signing_services"
+    HREF_PATTERN = r"signing-services/"
 
 
 class PulpTaskContext(PulpEntityContext):
