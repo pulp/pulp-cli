@@ -1,1 +1,0 @@
-Fixed problem where rpm-repository-sync ignored --no-optimize.

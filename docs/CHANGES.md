@@ -10,6 +10,29 @@
 
 [//]: # (towncrier release notes start)
 
+## 0.18.0 (2023-03-09)
+
+
+
+### Features
+
+- Added support for 3.23 multi-tenancy feature Domains.
+  [#642](https://github.com/pulp/pulp-cli/issues/642)
+- Added known plugin requirements to the glue library layer.
+  [#645](https://github.com/pulp/pulp-cli/issues/645)
+
+
+### Bugfixes
+
+- Reimport some missing symbols into their old location for compatibility.
+  [#635](https://github.com/pulp/pulp-cli/issues/635)
+- Fixed problem where rpm-repository-sync ignored --no-optimize.
+  [#648](https://github.com/pulp/pulp-cli/issues/648)
+
+
+---
+
+
 ## 0.17.1 (2023-02-17)
 
 
