@@ -37,9 +37,12 @@ pip install pulp-cli-deb
 If you intend to use unreleased features, or want to contribute to the CLI, you can install from source:
 ```bash
 git clone git@github.com:pulp/pulp-cli.git
-pip install -e ./pulp-cli
+pip install -e ./pulp-cli -e ./pulp-cli/pulp-glue --config-settings editable_mode=compat
 
 # Optionally install plugins from source
 git clone git@github.com:pulp/pulp-cli-deb.git
-pip install -e ./pulp-cli-deb
+pip install -e ./pulp-cli-deb --config-settings editable_mode=compat
+
+git clone git@github.com:pulp/pulp-cli-maven.git
+pip install -e ./pulp-cli-maven -e ./pulp-cli-maven/pulp-glue-maven --config-settings editable_mode=compat
 ```
