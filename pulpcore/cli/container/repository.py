@@ -1,8 +1,14 @@
 import re
-from typing import Any, Dict, List, Optional
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Union
 
 import click
-from pulp_glue.common.context import EntityFieldDefinition, PulpRemoteContext, PulpRepositoryContext
+from pulp_glue.common.context import (
+    EntityFieldDefinition,
+    PulpContext,
+    PulpRemoteContext,
+    PulpRepositoryContext,
+)
 from pulp_glue.common.i18n import get_translation
 from pulp_glue.container.context import (
     PulpContainerBaseRepositoryContext,
@@ -13,6 +19,7 @@ from pulp_glue.container.context import (
     PulpContainerRepositoryContext,
     PulpContainerTagContext,
 )
+from pulp_glue.core.context import PulpArtifactContext
 
 from pulpcore.cli.common.generic import (
     create_command,
@@ -21,7 +28,9 @@ from pulpcore.cli.common.generic import (
     label_command,
     label_select_option,
     list_command,
+    load_json_callback,
     name_option,
+    pass_pulp_context,
     pass_repository_context,
     pulp_group,
     pulp_labels_option,
@@ -51,6 +60,22 @@ def _tag_callback(ctx: click.Context, param: click.Parameter, value: str) -> str
         raise click.ClickException(_("Please pass a valid tag."))
 
     return value
+
+
+def _directory_or_json_callback(
+    ctx: click.Context, param: click.Parameter, value: Optional[str]
+) -> Union[Dict[str, str], Path, None]:
+    if not value:
+        return None
+    uvalue: Union[Dict[str, str], Path]
+    try:
+        uvalue = load_json_callback(ctx, param, value)
+    except click.ClickException:
+        uvalue = Path(value)
+        if not uvalue.exists() or not uvalue.is_dir():
+            raise click.ClickException(_("{} is not a valid directory").format(value))
+
+    return uvalue
 
 
 source_option = resource_option(
@@ -289,6 +314,72 @@ def copy_manifest(
         digests=digests or None,
         media_types=media_types or None,
     )
+
+
+def upload_file(pulp_ctx: PulpContext, file_location: str) -> str:
+    try:
+        with click.open_file(file_location, "rb") as fp:
+            artifact_ctx = PulpArtifactContext(pulp_ctx)
+            artifact_href = artifact_ctx.upload(fp)
+    except OSError:
+        raise click.ClickException(
+            _("Failed to load content from {file}").format(file=file_location)
+        )
+    click.echo(_("Uploaded file: {}").format(artifact_href))
+    return artifact_href  # type: ignore
+
+
+@repository.command(allowed_with_contexts=container_context)
+@name_option
+@href_option
+@click.option(
+    "--containerfile",
+    help=_(
+        "An artifact href of an uploaded Containerfile. Can also be a local Containerfile to be"
+        " uploaded using @."
+    ),
+    required=True,
+)
+@click.option("--tag", help=_("A tag name for the new image being built."))
+@click.option(
+    "--artifacts",
+    help=_(
+        "Directory of files to be uploaded and used during the build. Or a JSON string where each"
+        " key is an artifact href and the value is it's relative path (name) inside the "
+        "/pulp_working_directory of the build container executing the Containerfile."
+    ),
+    callback=_directory_or_json_callback,
+)
+@pass_repository_context
+@pass_pulp_context
+def build_image(
+    pulp_ctx: PulpContext,
+    repository_ctx: PulpContainerRepositoryContext,
+    containerfile: str,
+    tag: Optional[str],
+    artifacts: Union[Dict[str, str], Path, None],
+) -> None:
+    if not repository_ctx.capable("build"):
+        raise click.ClickException(_("Repository does not support image building."))
+
+    container_artifact_href: str
+    # Upload necessary files as artifacts if specified
+    if containerfile[0] == "@":
+        container_artifact_href = upload_file(pulp_ctx, containerfile[1:])
+    else:
+        artifact_ctx = PulpArtifactContext(pulp_ctx, pulp_href=containerfile)
+        container_artifact_href = artifact_ctx.pulp_href
+
+    if isinstance(artifacts, Path):
+        artifacts_path = artifacts
+        # Upload files in directory
+        artifacts = {}
+        for child in artifacts_path.rglob("*"):
+            if child.is_file():
+                artifact_href = upload_file(pulp_ctx, str(child))
+                artifacts[artifact_href] = str(child.relative_to(artifacts_path))
+
+    repository_ctx.build_image(container_artifact_href, tag, artifacts)
 
 
 @repository.command(allowed_with_contexts=push_container_context)

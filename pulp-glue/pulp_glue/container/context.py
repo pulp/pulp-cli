@@ -1,4 +1,5 @@
-from typing import Any, List, Optional
+import json
+from typing import Any, Dict, List, Optional
 
 from pulp_glue.common.context import (
     EntityDefinition,
@@ -128,6 +129,7 @@ class PulpContainerRepositoryContext(PulpContainerBaseRepositoryContext):
         "pulpexport": [PluginRequirement("container", min="2.8.0")],
         "tag": [PluginRequirement("container", min="2.3.0")],
         "roles": [PluginRequirement("container", min="2.11.0")],
+        "build": [PluginRequirement("container", min="1.1.0")],
     }
 
     def modify(
@@ -166,6 +168,19 @@ class PulpContainerRepositoryContext(PulpContainerBaseRepositoryContext):
             "media_types": media_types,
         }
         return self.call("copy_manifests", parameters={self.HREF: self.pulp_href}, body=body)
+
+    def build_image(
+        self,
+        container_artifact: str,
+        tag: Optional[str],
+        artifacts: Optional[Dict[str, str]],
+    ) -> Any:
+        body = {"containerfile_artifact": container_artifact, "tag": tag, "artifacts": artifacts}
+        # TODO: Add plugin version check when schema is fixed
+        if artifacts:
+            body["artifacts"] = json.dumps(artifacts)
+        body = self.preprocess_body(body)
+        return self.call("build_image", parameters={self.HREF: self.pulp_href}, body=body)
 
 
 class PulpContainerPushRepositoryContext(PulpContainerBaseRepositoryContext):
