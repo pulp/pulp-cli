@@ -280,10 +280,14 @@ class PulpContext:
         return result
 
     @classmethod
-    def _check_task_finished(cls, task: EntityDefinition) -> bool:
+    def _check_task_finished(cls, task: EntityDefinition, expect_cancel: bool = False) -> bool:
         task_href = task["pulp_href"]
 
         if task["state"] == "completed":
+            if expect_cancel:
+                raise PulpException(
+                    _("The task {task_href} meant to be canceled, completed instead.")
+                )
             return True
         elif task["state"] == "failed":
             raise PulpException(
@@ -293,15 +297,17 @@ class PulpContext:
                 )
             )
         elif task["state"] == "canceled":
+            if expect_cancel:
+                return True
             raise PulpException(_("Task {task_href} canceled").format(task_href=task_href))
         elif task["state"] in ["waiting", "running", "canceling"]:
             return False
         else:
             raise NotImplementedError(_("Unknown task state: {state}").format(state=task["state"]))
 
-    def _poll_task(self, task: EntityDefinition) -> EntityDefinition:
+    def _poll_task(self, task: EntityDefinition, expect_cancel: bool = False) -> EntityDefinition:
         while True:
-            if self._check_task_finished(task):
+            if self._check_task_finished(task, expect_cancel=expect_cancel):
                 self.echo("Done.", err=True)
                 return task
             else:
@@ -317,7 +323,7 @@ class PulpContext:
                 self.echo(".", nl=False, err=True)
                 task = self.api.call("tasks_read", parameters={"task_href": task["pulp_href"]})
 
-    def wait_for_task(self, task: EntityDefinition) -> Any:
+    def wait_for_task(self, task: EntityDefinition, expect_cancel: bool = False) -> Any:
         """
         Wait for a task to finish and return the finished task object.
 
@@ -329,7 +335,7 @@ class PulpContext:
             raise PulpNoWait(_("Not waiting for task because --background was specified."))
         task_href = task["pulp_href"]
         try:
-            return self._poll_task(task)
+            return self._poll_task(task, expect_cancel=expect_cancel)
         except KeyboardInterrupt:
             raise PulpNoWait(_("Task {task_href} sent to background.").format(task_href=task_href))
 

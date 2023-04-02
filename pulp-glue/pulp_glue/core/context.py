@@ -272,10 +272,12 @@ class PulpImporterContext(PulpEntityContext):
 
 class PulpOrphanContext(PulpEntityContext):
     def cleanup(self, body: Optional[Dict[str, Any]] = None) -> Any:
-        if body:
+        if body is not None:
             body = self.preprocess_entity(body)
             if "orphan_protection_time" in body:
                 self.pulp_ctx.needs_plugin(PluginRequirement("core", min="3.15.0"))
+        else:
+            body = {}
         if self.pulp_ctx.has_plugin(PluginRequirement("core", min="3.14.0")):
             result = self.pulp_ctx.call("orphans_cleanup_cleanup", body=body)
         else:
@@ -391,12 +393,18 @@ class PulpTaskContext(PulpEntityContext):
 
         return super().list(limit=limit, offset=offset, parameters=parameters)
 
-    def cancel(self, task_href: Optional[str] = None) -> Any:
-        return self.call(
+    def cancel(self, task_href: Optional[str] = None, background: bool = False) -> Any:
+        task_href = task_href or self.pulp_href
+        task = self.call(
             "cancel",
-            parameters={self.HREF: task_href or self.pulp_href},
+            parameters={self.HREF: task_href},
             body={"state": "canceled"},
         )
+        if not background:
+            self.pulp_ctx.echo(_("Waiting to cancel task {href}").format(href=task_href), err=True)
+            task = self.pulp_ctx.wait_for_task(task, expect_cancel=True)
+            self.pulp_ctx.echo(_("Done."), err=True)
+        return task
 
     @property
     def scope(self) -> Dict[str, Any]:
