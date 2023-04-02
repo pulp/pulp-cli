@@ -1,10 +1,14 @@
-import re
 from contextlib import suppress
 from datetime import datetime
 from typing import Optional, Tuple
 
 import click
-from pulp_glue.common.context import DATETIME_FORMATS, PluginRequirement, PulpEntityContext
+from pulp_glue.common.context import (
+    DATETIME_FORMATS,
+    PluginRequirement,
+    PulpEntityContext,
+    PulpException,
+)
 from pulp_glue.common.i18n import get_translation
 from pulp_glue.core.context import PulpTaskContext
 
@@ -148,11 +152,10 @@ def cancel(
     if states:
         tasks = task_ctx.list(limit=1 << 64, offset=0, parameters={"state__in": states})
         for task in tasks:
-            with suppress(Exception):
-                task_ctx.cancel(task["pulp_href"])
+            task_ctx.cancel(task["pulp_href"], background=True)
         for task in tasks:
-            with suppress(Exception):
-                pulp_ctx.wait_for_task(task)
+            with suppress(PulpException):
+                pulp_ctx.wait_for_task(task, expect_cancel=True)
     else:
         entity = task_ctx.entity
         if entity["state"] not in ["waiting", "running"]:
@@ -163,13 +166,6 @@ def cancel(
             )
 
         task_ctx.cancel(task_ctx.pulp_href)
-        click.echo(_("Waiting to cancel task {href}").format(href=task_ctx.pulp_href), err=True)
-        try:
-            pulp_ctx.wait_for_task(entity)
-        except Exception as e:
-            if not re.match(rf"Task {pulp_ctx.api_path}tasks/[-0-9a-f]*/ canceled", str(e)):
-                raise e
-        click.echo(_("Done."), err=True)
 
 
 @task.command()
