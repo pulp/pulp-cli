@@ -1,6 +1,7 @@
 # Releasing (for internal use)
 
 1. Run `bumpversion release`.
+1. Install the corresponding pulp-glue modules from the source.
 1. Generate the changelog (`towncrier --yes`).
 1. Check and fix the changelog according to markdown formatting and language conventions.
 1. Commit your local changes with commit message "Release 0.1.0".
