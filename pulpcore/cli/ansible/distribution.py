@@ -142,7 +142,8 @@ def update(
             distribution_ctx.update(body={"repository": ""}, non_blocking=True)
             body["repository_version"] = f'{dist_body["repository"]}versions/{version}/'
         elif dist_body["repository_version"]:
-            repository_href, _, _ = dist_body["repository_version"].partition("versions")
+            # 'dummy' vars are to get us around a mypy/1.2 complaint about '_'
+            repository_href, dummy, dummy = dist_body["repository_version"].partition("versions")
             body["repository_version"] = f"{repository_href}versions/{version}/"
         else:
             raise click.ClickException(
