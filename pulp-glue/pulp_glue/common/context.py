@@ -780,8 +780,8 @@ class PulpRemoteContext(PulpEntityContext):
 
 class PulpPublicationContext(PulpEntityContext):
     ENTITY = _("publication")
-    ENTITIES = _("pulications")
-    ID_PREFIX = "pulications"
+    ENTITIES = _("publications")
+    ID_PREFIX = "publications"
     HREF_PATTERN = r"publications/(?P<plugin>[\w\-_]+)/(?P<resource_type>[\w\-_]+)/"
 
     def list(self, limit: int, offset: int, parameters: Dict[str, Any]) -> List[Any]:
