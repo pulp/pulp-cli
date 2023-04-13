@@ -26,8 +26,8 @@ test "$(echo "$OUTPUT" | jq -r '.[0].total_timeout')" = "null"
 expect_succ pulp file remote destroy --name "cli_test_file_remote"
 
 # test cert/key fields for remotes - both @file and string args
-CERTFILE="$(dirname "$(realpath "$0")")"/mock.crt
-KEYFILE="$(dirname "$(realpath "$0")")"/mock.key
+CERTFILE="$(dirname "$(realpath "$0")")"/../../assets/artifacts/x509_client.pem
+KEYFILE="$(dirname "$(realpath "$0")")"/../../assets/artifacts/x509_client_key.pem
 CERT=$(cat "${CERTFILE}")
 KEY=$(cat "${KEYFILE}")
 expect_succ pulp file remote create --name "cli_test_file_remote" --url "$FILE_REMOTE_URL" --client-cert @"$CERTFILE" --client-key @"$KEYFILE" --ca-cert @"$CERTFILE"

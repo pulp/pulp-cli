@@ -26,3 +26,5 @@ expect_succ pulp content-guard rbac remove --name "cli_test_guard" --user "admin
 expect_succ pulp content-guard rbac show --name "cli_test_guard"
 test "$(echo "$OUTPUT" | jq -r '.users' | jq -r length)" -eq "0"
 test "$(echo "$OUTPUT" | jq -r '.groups' | jq -r length)" -eq "0"
+
+expect_succ pulp content-guard rbac destroy --name "cli_test_guard"
