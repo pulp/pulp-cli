@@ -9,9 +9,11 @@ cleanup() {
   pulp file repository destroy --name "cli_test_file_repository" || true
   pulp file remote destroy --name "cli_test_file_remote" || true
   pulp file remote destroy --name "cli_test_file_large_remote" || true
-  pulp orphan cleanup || true
+  pulp orphan cleanup --protection-time 0 || true
 }
 trap cleanup EXIT
+
+pulp orphan cleanup --protection-time 0 || true
 
 sync_task="pulp_file.app.tasks.synchronizing.synchronize"
 expect_succ pulp task list --name $sync_task --state canceled
