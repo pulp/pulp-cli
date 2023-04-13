@@ -1,6 +1,7 @@
 from typing import List, Optional
 
 import click
+from pulp_glue.certguard.context import PulpRHSMCertGuardContext, PulpX509CertGuardContext
 from pulp_glue.common.i18n import get_translation
 from pulp_glue.core.context import (
     PulpContentGuardContext,
@@ -14,6 +15,7 @@ from pulpcore.cli.common.generic import (
     destroy_command,
     href_option,
     list_command,
+    load_string_callback,
     name_option,
     pass_entity_context,
     pass_pulp_context,
@@ -34,7 +36,7 @@ def content_guard(ctx: click.Context, pulp_ctx: PulpCLIContext) -> None:
     ctx.obj = PulpContentGuardContext(pulp_ctx)
 
 
-create_options = [click.option("--name", required=True), click.option("--description")]
+common_create_options = [click.option("--name", required=True), click.option("--description")]
 filter_options = [click.option("--name")]
 lookup_options = [name_option, href_option]
 
@@ -49,7 +51,7 @@ def rbac(ctx: click.Context, pulp_ctx: PulpCLIContext) -> None:
 
 
 rbac.add_command(list_command(decorators=filter_options))
-rbac.add_command(create_command(decorators=create_options))
+rbac.add_command(create_command(decorators=common_create_options))
 rbac.add_command(show_command(decorators=lookup_options))
 rbac.add_command(update_command(decorators=lookup_options))
 rbac.add_command(destroy_command(decorators=lookup_options))
@@ -118,8 +120,56 @@ def redirect(ctx: click.Context, pulp_ctx: PulpCLIContext) -> None:
 
 
 redirect.add_command(list_command(decorators=filter_options))
-redirect.add_command(create_command(decorators=create_options))
+redirect.add_command(create_command(decorators=common_create_options))
 redirect.add_command(show_command(decorators=lookup_options))
 redirect.add_command(update_command(decorators=lookup_options))
 redirect.add_command(destroy_command(decorators=lookup_options))
 redirect.add_command(role_command(decorators=lookup_options))
+
+
+@content_guard.group()
+@pass_pulp_context
+@click.pass_context
+def x509(ctx: click.Context, pulp_ctx: PulpCLIContext) -> None:
+    ctx.obj = PulpX509CertGuardContext(pulp_ctx)
+
+
+certguard_create_options = common_create_options + [
+    click.option("--description"),
+    click.option(
+        "--ca-certificate",
+        help=_("a PEM encoded CA certificate or @file containing same"),
+        callback=load_string_callback,
+        required=True,
+    ),
+]
+
+certguard_update_options = lookup_options + [
+    click.option("--description"),
+    click.option(
+        "--ca-certificate",
+        help=_("a PEM encoded CA certificate or @file containing same"),
+        callback=load_string_callback,
+    ),
+]
+
+
+x509.add_command(list_command(decorators=filter_options))
+x509.add_command(create_command(decorators=certguard_create_options))
+x509.add_command(show_command(decorators=lookup_options))
+x509.add_command(update_command(decorators=certguard_update_options))
+x509.add_command(destroy_command(decorators=lookup_options))
+
+
+@content_guard.group()
+@pass_pulp_context
+@click.pass_context
+def rhsm(ctx: click.Context, pulp_ctx: PulpCLIContext) -> None:
+    ctx.obj = PulpRHSMCertGuardContext(pulp_ctx)
+
+
+rhsm.add_command(list_command(decorators=filter_options))
+rhsm.add_command(create_command(decorators=certguard_create_options))
+rhsm.add_command(show_command(decorators=lookup_options))
+rhsm.add_command(update_command(decorators=certguard_update_options))
+rhsm.add_command(destroy_command(decorators=lookup_options))

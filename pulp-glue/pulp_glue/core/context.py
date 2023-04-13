@@ -253,9 +253,10 @@ class PulpContentGuardContext(PulpEntityContext):
     ENTITIES = "content guards"
     ID_PREFIX = "contentguards"
     HREF_PATTERN = r"contentguards/(?P<plugin>[\w\-_]+)/(?P<resource_type>[\w\-_]+)/"
+    NULLABLES = {"description"}
 
 
-class PulpContentRedirectContentGuardContext(PulpEntityContext):
+class PulpContentRedirectContentGuardContext(PulpContentGuardContext):
     ENTITY = "content redirect content guard"
     ENTITIES = "content redirect content guards"
     HREF = "content_redirect_content_guard_href"
