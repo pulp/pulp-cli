@@ -2,18 +2,19 @@
 
 There are many ways to contribute to this project, and all are welcome.
 
-## Pulp CLI feedback & thank you
+## Get in Touch
 
-If you take the time to evaluate, test, or build your own CLI commands, please complete [this survey](https://forms.gle/ca1nxVVkNivEeE5m8), and we will gladly ship you some SWAG!
+If you want to connect with the Pulp community, ask some not-so-frequently-asked-questions or just leave general feedback, you can reach us in different ways summed up on [pulpproject.org](https://pulpproject.org/get_involved/).
 
-## Doc contributions
+
+## Doc Contributions
 
 If you see something wrong with the docs, we welcome [documentation PRs](https://github.com/pulp/pulp-cli).
 
 If you are using the Pulp CLI and have written end-to-end steps for Pulp workflows, we would greatly appreciate if you would contribute docs to the relevant [plugins](https://docs.pulpproject.org/pulpcore/plugins/index.html).
 
 
-## Code conventions
+## Code Conventions
 
 If you are interested in contributing code, note that we have styling and formatting
 conventions for both the code and our PRs:
@@ -40,7 +41,7 @@ in your commit message. If you do **not** have an issue, use `[noissue]`.
 Also please follow [The seven rules of a great Git commit message](https://chris.beams.io/posts/git-commit/).
 And finally, for each new feature, we require corresponding tests.
 
-## Global help accessibility
+## Global Help Accessibility
 
 In order to be able to access every (sub-)commands help page,
 it is necessary that no code outside of the final performing command callback accesses the `api` property of the `PulpContext`.
