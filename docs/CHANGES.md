@@ -10,6 +10,45 @@
 
 [//]: # (towncrier release notes start)
 
+## 0.19.0 (2023-04-14)
+
+
+
+### Features
+
+- Added a `pulp repository version list` command. This allows to find repository versions containing content.
+  [#631](https://github.com/pulp/pulp-cli/issues/631)
+- Added `HREF_PATTERN` to `PulpSigningServiceContext` class.
+  [#653](https://github.com/pulp/pulp-cli/issues/653)
+- Added more digests lookups to artifacts
+  [#662](https://github.com/pulp/pulp-cli/issues/662)
+- Added support for x509 and rshm cert guards.
+  [#673](https://github.com/pulp/pulp-cli/issues/673)
+
+
+### Bugfixes
+
+- Fixed the generic-publications command.
+  [#665](https://github.com/pulp/pulp-cli/issues/665)
+
+
+### Improved Documentation
+
+- Fixed the installation from source instructions to include the glue layer.
+  [#654](https://github.com/pulp/pulp-cli/issues/654)
+- Added `pulp-cli-maven` to the list of known plugins.
+  [#656](https://github.com/pulp/pulp-cli/issues/656)
+
+
+### Deprecations and Removals
+
+- Removed deprecated commands `pulp orphans` and `pulp debug task-summary`.
+  [#670](https://github.com/pulp/pulp-cli/issues/670)
+
+
+---
+
+
 ## 0.18.0 (2023-03-09)
 
 
