@@ -22,7 +22,7 @@ class PulpContainerBlobContext(PulpContentContext):
     ENTITIES = _("container blobs")
     HREF = "container_blob_href"
     ID_PREFIX = "content_container_blobs"
-    NEEDS_PLUGINS = [PluginRequirement("container", min="2.3.0")]
+    NEEDS_PLUGINS = [PluginRequirement("container", specifier=">=2.3.0")]
 
 
 class PulpContainerManifestContext(PulpContentContext):
@@ -30,7 +30,7 @@ class PulpContainerManifestContext(PulpContentContext):
     ENTITIES = _("container manifests")
     HREF = "container_manifest_href"
     ID_PREFIX = "content_container_manifests"
-    NEEDS_PLUGINS = [PluginRequirement("container", min="2.3.0")]
+    NEEDS_PLUGINS = [PluginRequirement("container", specifier=">=2.3.0")]
 
 
 class PulpContainerTagContext(PulpContentContext):
@@ -38,7 +38,7 @@ class PulpContainerTagContext(PulpContentContext):
     ENTITIES = _("container tags")
     HREF = "container_tag_href"
     ID_PREFIX = "content_container_tags"
-    NEEDS_PLUGINS = [PluginRequirement("container", min="2.3.0")]
+    NEEDS_PLUGINS = [PluginRequirement("container", specifier=">=2.3.0")]
 
     def find(self, **kwargs: Any) -> Any:
         if "digest" in kwargs and isinstance(kwargs["digest"], str):
@@ -52,8 +52,8 @@ class PulpContainerNamespaceContext(PulpEntityContext):
     HREF = "container_container_namespace_href"
     ID_PREFIX = "pulp_container_namespaces"
     HREF_PATTERN = r"(?P<plugin>pulp_container)/(?P<resource_type>namespaces)/"
-    NEEDS_PLUGINS = [PluginRequirement("container", min="2.3.0")]
-    CAPABILITIES = {"roles": [PluginRequirement("container", min="2.11.0")]}
+    NEEDS_PLUGINS = [PluginRequirement("container", specifier=">=2.3.0")]
+    CAPABILITIES = {"roles": [PluginRequirement("container", specifier=">=2.11.0")]}
 
 
 class PulpContainerDistributionContext(PulpDistributionContext):
@@ -62,8 +62,8 @@ class PulpContainerDistributionContext(PulpDistributionContext):
     HREF = "container_container_distribution_href"
     ID_PREFIX = "distributions_container_container"
     NULLABLES = {"repository_version", "repository"}
-    NEEDS_PLUGINS = [PluginRequirement("container", min="2.3.0")]
-    CAPABILITIES = {"roles": [PluginRequirement("container", min="2.11.0")]}
+    NEEDS_PLUGINS = [PluginRequirement("container", specifier=">=2.3.0")]
+    CAPABILITIES = {"roles": [PluginRequirement("container", specifier=">=2.11.0")]}
 
     def preprocess_entity(self, body: EntityDefinition, partial: bool = False) -> EntityDefinition:
         body = super().preprocess_entity(body, partial=partial)
@@ -80,24 +80,24 @@ class PulpContainerRemoteContext(PulpRemoteContext):
     HREF = "container_container_remote_href"
     ID_PREFIX = "remotes_container_container"
     NULLABLES = PulpRemoteContext.NULLABLES | {"include_tags", "exclude_tags"}
-    NEEDS_PLUGINS = [PluginRequirement("container", min="2.3.0")]
-    CAPABILITIES = {"roles": [PluginRequirement("container", min="2.11.0")]}
+    NEEDS_PLUGINS = [PluginRequirement("container", specifier=">=2.3.0")]
+    CAPABILITIES = {"roles": [PluginRequirement("container", specifier=">=2.11.0")]}
 
 
 class PulpContainerRepositoryVersionContext(PulpRepositoryVersionContext):
     HREF = "container_container_repository_version_href"
     ID_PREFIX = "repositories_container_container_versions"
-    NEEDS_PLUGINS = [PluginRequirement("container", min="2.3.0")]
+    NEEDS_PLUGINS = [PluginRequirement("container", specifier=">=2.3.0")]
 
 
 class PulpContainerPushRepositoryVersionContext(PulpRepositoryVersionContext):
     HREF = "container_container_push_repository_version_href"
     ID_PREFIX = "repositories_container_container_push_versions"
-    NEEDS_PLUGINS = [PluginRequirement("container", min="2.3.0")]
+    NEEDS_PLUGINS = [PluginRequirement("container", specifier=">=2.3.0")]
 
 
 class PulpContainerBaseRepositoryContext(PulpRepositoryContext):
-    NEEDS_PLUGINS = [PluginRequirement("container", min="2.3.0")]
+    NEEDS_PLUGINS = [PluginRequirement("container", specifier=">=2.3.0")]
 
     def tag(self, tag: str, digest: str) -> Any:
         self.needs_capability("tag")
@@ -125,9 +125,9 @@ class PulpContainerRepositoryContext(PulpContainerBaseRepositoryContext):
     HREF_PATTERN = r"repositories/(?P<plugin>container)/(?P<resource_type>container)/"
     CAPABILITIES = {
         "sync": [PluginRequirement("container")],
-        "pulpexport": [PluginRequirement("container", min="2.8.0")],
-        "tag": [PluginRequirement("container", min="2.3.0")],
-        "roles": [PluginRequirement("container", min="2.11.0")],
+        "pulpexport": [PluginRequirement("container", specifier=">=2.8.0")],
+        "tag": [PluginRequirement("container", specifier=">=2.3.0")],
+        "roles": [PluginRequirement("container", specifier=">=2.11.0")],
     }
 
     def modify(
@@ -176,9 +176,9 @@ class PulpContainerPushRepositoryContext(PulpContainerBaseRepositoryContext):
     VERSION_CONTEXT = PulpContainerPushRepositoryVersionContext
     HREF_PATTERN = r"repositories/(?P<plugin>container)/(?P<resource_type>container-push)/"
     CAPABILITIES = {
-        "tag": [PluginRequirement("container", min="2.3.0")],
-        "roles": [PluginRequirement("container", min="2.11.0")],
-        "remove": [PluginRequirement("container", min="2.4.0")],
+        "tag": [PluginRequirement("container", specifier=">=2.3.0")],
+        "roles": [PluginRequirement("container", specifier=">=2.11.0")],
+        "remove": [PluginRequirement("container", specifier=">=2.4.0")],
     }
 
     def remove_image(self, digest: str) -> Any:

@@ -64,7 +64,7 @@ filter_options = publication_filter_options + [
         default_plugin="file",
         default_type="file",
         context_table={"file:file": PulpFileRepositoryContext},
-        needs_plugins=[PluginRequirement("core", min="3.20.0")],
+        needs_plugins=[PluginRequirement("core", specifier=">=3.20.0")],
     )
 ]
 publication.add_command(list_command(decorators=filter_options))

@@ -17,7 +17,7 @@ from pulpcore.cli.common.generic import (
 repository_option = resource_option(
     "--repository",
     context_table=registered_repository_contexts,
-    needs_plugins=[PluginRequirement("core", min="3.20.0")],
+    needs_plugins=[PluginRequirement("core", specifier=">=3.20.0")],
 )
 
 

@@ -67,7 +67,7 @@ It will raise an error, once the first access to the server is attempted.
 ```python
 class MyEntityContext(PulpEntityContext):
     def show(self, href):
-        if self.pulp_ctx.has_plugin(PluginRequirement("my_content", min="1.2.3", inverted=True)):
+        if self.pulp_ctx.has_plugin(PluginRequirement("my_content", specifier=">=1.2.3", inverted=True)):
             # Versioned workaroud
             # see bug-tracker/12345678
             return lookup_my_content_legacy(href)
@@ -78,7 +78,7 @@ class MyEntityContext(PulpEntityContext):
 @pass_pulp_context
 @click.pass_context
 def my_command(ctx, pulp_ctx):
-    pulp_ctx.needs_plugin(PluginRequirement("my_content", min="1.0.0"))
+    pulp_ctx.needs_plugin(PluginRequirement("my_content", specifier=">=1.0.0"))
     ctx.obj = MyEntityContext(pulp_ctx)
 ```
 

@@ -136,7 +136,7 @@ update_options = [
     click.option("--sqlite-metadata/--no-sqlite-metadata", default=None),
     pulp_option(
         "--autopublish/--no-autopublish",
-        needs_plugins=[PluginRequirement("rpm", min="3.12.0")],
+        needs_plugins=[PluginRequirement("rpm", specifier=">=3.12.0")],
         default=None,
     ),
     retained_versions_option,
@@ -179,7 +179,7 @@ repository.add_command(
     "--optimize/--no-optimize",
     default=None,
     help="Whether or not to optimize sync.",
-    needs_plugins=[PluginRequirement("rpm", min="3.3.0")],
+    needs_plugins=[PluginRequirement("rpm", specifier=">=3.3.0")],
 )
 @click.option(
     "--skip-type",
@@ -200,7 +200,7 @@ repository.add_command(
     bit-for-bit identical. 'additive' will retain the existing contents of the repository
     and add the contents of the repository being synced.
     """,
-    needs_plugins=[PluginRequirement("rpm", min="3.16.0")],
+    needs_plugins=[PluginRequirement("rpm", specifier=">=3.16.0")],
 )
 @pass_repository_context
 def sync(

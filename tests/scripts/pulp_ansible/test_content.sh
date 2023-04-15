@@ -13,7 +13,7 @@ trap cleanup EXIT
 
 pulp orphan cleanup --protection-time 0
 
-if pulp debug has-plugin --name "ansible" --min-version "0.15.0.dev"
+if pulp debug has-plugin --name "ansible" --min-version "0.15.0"
 then
   gpg --output pulp_pubkey.key --armor --export "Pulp QE"
   expect_succ pulp ansible repository create --name "cli_test_ansible_repository_verify" --gpgkey @pulp_pubkey.key

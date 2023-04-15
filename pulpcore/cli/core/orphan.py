@@ -33,7 +33,7 @@ def orphan(ctx: click.Context, pulp_ctx: PulpCLIContext) -> None:
     "--content-hrefs",
     help=_("List of specific Contents to delete if they are orphans"),
     callback=load_json_callback,
-    needs_plugins=[PluginRequirement("core", min="3.14.0")],
+    needs_plugins=[PluginRequirement("core", specifier=">=3.14.0")],
 )
 @pulp_option(
     "--protection-time",
@@ -43,7 +43,7 @@ def orphan(ctx: click.Context, pulp_ctx: PulpCLIContext) -> None:
         "How long in minutes Pulp should hold orphan Content and Artifacts before becoming"
         " candidates for cleanup task"
     ),
-    needs_plugins=[PluginRequirement("core", min="3.15.0")],
+    needs_plugins=[PluginRequirement("core", specifier=">=3.15.0")],
 )
 @pass_entity_context
 @pass_pulp_context

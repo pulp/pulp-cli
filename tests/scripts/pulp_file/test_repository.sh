@@ -45,7 +45,7 @@ if pulp debug has-plugin --name "file" --min-version "1.7.0"
 then
   expect_succ pulp file repository update --repository "cli_test_file_repo" --manifest "manifest.csv"
 
-  if pulp debug has-plugin --name "file" --min-version "1.12.0.dev"
+  if pulp debug has-plugin --name "file" --min-version "1.12.0"
   then
     expect_succ pulp file repository update --repository "cli_test_file_repo" --manifest ""
     expect_succ pulp file repository show --repository "cli_test_file_repo"

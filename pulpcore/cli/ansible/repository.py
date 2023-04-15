@@ -111,7 +111,7 @@ update_options = [
         callback=load_string_callback,
         needs_plugins=[
             PluginRequirement(
-                "ansible", min="0.15.0.dev", feature="gpgkeys on ansible repositories"
+                "ansible", specifier=">=0.15.0", feature="gpgkeys on ansible repositories"
             )
         ],
     ),

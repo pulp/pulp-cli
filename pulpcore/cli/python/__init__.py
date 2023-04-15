@@ -14,7 +14,7 @@ from pulpcore.cli.python.repository import repository
 @pulp_group(name="python")
 @pass_pulp_context
 def python_group(pulp_ctx: PulpCLIContext) -> None:
-    pulp_ctx.needs_plugin(PluginRequirement("python", min="3.1.0"))
+    pulp_ctx.needs_plugin(PluginRequirement("python", specifier=">=3.1.0"))
 
 
 def mount(main: click.Group, **kwargs: Any) -> None:
