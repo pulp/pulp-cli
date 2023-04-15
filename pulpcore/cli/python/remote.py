@@ -84,17 +84,19 @@ python_remote_options = [
     click.option("--excludes", callback=_package_list_callback, help=_("Package blocklist")),
     click.option("--prereleases", type=click.BOOL, default=True),
     pulp_option(
-        "--keep-latest-packages", type=int, needs_plugins=[PluginRequirement("python", min="3.2.0")]
+        "--keep-latest-packages",
+        type=int,
+        needs_plugins=[PluginRequirement("python", specifier=">=3.2.0")],
     ),
     pulp_option(
         "--package-types",
         callback=load_json_callback,
-        needs_plugins=[PluginRequirement("python", min="3.2.0")],
+        needs_plugins=[PluginRequirement("python", specifier=">=3.2.0")],
     ),
     pulp_option(
         "--exclude-platforms",
         callback=load_json_callback,
-        needs_plugins=[PluginRequirement("python", min="3.2.0")],
+        needs_plugins=[PluginRequirement("python", specifier=">=3.2.0")],
     ),
 ]
 

@@ -59,7 +59,7 @@ expect_succ pulp task list --started-before "21/01/12" --started-after "22/01/06
 expect_succ pulp task list --finished-before "2021-12-01" --finished-after "2022-06-01 00:00:00"
 expect_succ pulp task list --created-resource "$created_resource"
 
-if pulp debug has-plugin --name "core" --min-version "3.22.0.dev"
+if pulp debug has-plugin --name "core" --min-version "3.22.0"
 then
   # New style task resource filters
   expect_succ pulp task list --reserved-resource-in "$repository_href" --reserved-resource-in "$remote_href"

@@ -45,7 +45,7 @@ def _object_required_userrole_lookup_callback(
     return userrole_lookup_callback(ctx, param, value)
 
 
-req_core_3_17 = PluginRequirement("core", min="3.17.0")
+req_core_3_17 = PluginRequirement("core", specifier=">=3.17.0")
 
 username_option = pulp_option(
     "--username",
@@ -60,7 +60,7 @@ domain_field_options = {
         "core:domain": PulpDomainContext,
     },
     "help": _("Domain the role is applied in"),
-    "needs_plugins": (PluginRequirement("core", "3.23.dev"),),
+    "needs_plugins": (PluginRequirement("core", specifier=">=3.23"),),
 }
 domain_option = resource_option("--domain", **domain_field_options)
 domain_user_lookup_option = resource_option(

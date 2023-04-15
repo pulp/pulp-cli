@@ -59,7 +59,7 @@ filter_options = publication_filter_options + [
         default_plugin="python",
         default_type="python",
         context_table={"python:python": PulpPythonRepositoryContext},
-        needs_plugins=[PluginRequirement("core", min="3.20.0")],
+        needs_plugins=[PluginRequirement("core", specifier=">=3.20.0")],
     )
 ]
 publication.add_command(list_command(decorators=publication_filter_options + [repository_option]))

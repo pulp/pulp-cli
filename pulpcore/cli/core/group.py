@@ -77,7 +77,7 @@ domain_field_options = {
         "core:domain": PulpDomainContext,
     },
     "help": _("Domain the role is applied in"),
-    "needs_plugins": (PluginRequirement("core", "3.23.dev"),),
+    "needs_plugins": (PluginRequirement("core", specifier=">=3.23"),),
 }
 domain_option = resource_option("--domain", **domain_field_options)
 domain_group_lookup_option = resource_option(
@@ -103,11 +103,13 @@ group.add_command(show_command(decorators=lookup_options))
 group.add_command(destroy_command(decorators=lookup_options))
 group.add_command(create_command(decorators=create_options))
 group.add_command(
-    role_command(decorators=lookup_options, needs_plugins=[PluginRequirement("core", min="3.17.0")])
+    role_command(
+        decorators=lookup_options, needs_plugins=[PluginRequirement("core", specifier=">=3.17.0")]
+    )
 )
 
 
-@group.group(needs_plugins=[PluginRequirement("core", max="3.20.0")])
+@group.group(needs_plugins=[PluginRequirement("core", specifier="<3.20.0")])
 @click.option(
     "-t",
     "--type",

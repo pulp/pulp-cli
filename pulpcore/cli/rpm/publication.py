@@ -59,7 +59,7 @@ filter_options = publication_filter_options + [
         default_plugin="rpm",
         default_type="rpm",
         context_table={"rpm:rpm": PulpRpmRepositoryContext},
-        needs_plugins=[PluginRequirement("core", min="3.20.0")],
+        needs_plugins=[PluginRequirement("core", specifier=">=3.20.0")],
     )
 ]
 publication.add_command(list_command(decorators=filter_options))

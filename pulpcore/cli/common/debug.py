@@ -27,14 +27,23 @@ def debug() -> None:
 @click.option("--name", required=True)
 @click.option("--min-version", help=_("Succeed only if the installed version is not smaller."))
 @click.option("--max-version", help=_("Succeed only if the installed version is smaller."))
+@click.option("--specifier", help=_("Succeed only if the installed version is contained."))
 @pass_pulp_context
 def has_plugin(
-    pulp_ctx: PulpCLIContext, name: str, min_version: Optional[str], max_version: Optional[str]
+    pulp_ctx: PulpCLIContext,
+    name: str,
+    min_version: Optional[str],
+    max_version: Optional[str],
+    specifier: Optional[str],
 ) -> None:
     """
     Check whether a specific plugin is installed on the server.
     """
-    available = pulp_ctx.has_plugin(PluginRequirement(name, min_version, max_version))
+    if (min_version or max_version) and specifier:
+        raise click.UsageError(_("You can either provide versions or the specifier."))
+    available = pulp_ctx.has_plugin(
+        PluginRequirement(name, min=min_version, max=max_version, specifier=specifier)
+    )
     pulp_ctx.output_result(available)
     sys.exit(0 if available else 1)
 

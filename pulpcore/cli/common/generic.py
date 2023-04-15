@@ -263,8 +263,7 @@ class PulpOption(click.Option):
                 if not plugin_requirement.feature:
                     plugin_requirement = PluginRequirement(
                         plugin_requirement.name,
-                        plugin_requirement.min,
-                        plugin_requirement.max,
+                        specifier=plugin_requirement.specifier,
                         feature=_("the {name} option").format(name=self.name),
                         inverted=plugin_requirement.inverted,
                     )
@@ -887,7 +886,7 @@ pulp_last_updated_lte_option = pulp_option(
 
 retained_versions_option = pulp_option(
     "--retain-repo-versions",
-    needs_plugins=[PluginRequirement("core", min="3.13.0")],
+    needs_plugins=[PluginRequirement("core", specifier=">=3.13.0")],
     help=_("Number of repository versions to keep."),
     type=int,
 )

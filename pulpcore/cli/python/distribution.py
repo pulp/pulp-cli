@@ -75,7 +75,7 @@ update_options = [
     repository_option,
     pulp_option(
         "--allow-uploads/--block-uploads",
-        needs_plugins=[PluginRequirement("python", min="3.4.0")],
+        needs_plugins=[PluginRequirement("python", specifier=">=3.4.0")],
         default=None,
     ),
     resource_option(
@@ -83,7 +83,7 @@ update_options = [
         default_plugin="python",
         default_type="python",
         context_table={"python:python": PulpPythonRemoteContext},
-        needs_plugins=[PluginRequirement("python", min="3.6.0")],
+        needs_plugins=[PluginRequirement("python", specifier=">=3.6.0")],
         href_pattern=PulpPythonRemoteContext.HREF_PATTERN,
     ),
     pulp_labels_option,
