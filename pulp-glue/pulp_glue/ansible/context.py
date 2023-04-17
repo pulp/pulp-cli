@@ -55,6 +55,39 @@ class PulpAnsibleCollectionVersionSignatureContext(PulpContentContext):
         return super().create(body=body, parameters=parameters, non_blocking=non_blocking)
 
 
+class PulpAnsibleCollectionVersionSigstoreSignatureContext(PulpContentContext):
+    ENTITY = _("ansible collection version sigstore signature")
+    ENTITIES = _("ansible collection version sigstore signatures")
+    HREF = _("ansible_collection_version_sigstore_signature_href")
+    ID_PREFIX = "content_ansible_collection_sigstore_signatures"
+    NEEDS_PLUGINS = [PluginRequirement("ansible", min="0.12.0")]
+
+
+class PulpAnsibleSigstoreSigningServiceContext(PulpContentContext):
+    ENTITY = _("sigstore signing service")
+    ENTITIES = _("sigstore signing services")
+    HREF = "sigstore_signing_service_href"
+    ID_PREFIX = "sigstore_signing_services"
+
+
+class PulpAnsibleSigstoreVerifyingServiceContext(PulpContentContext):
+    ENTITY = _("sigstore verifying service")
+    ENTITIES = _("sigstore verifying services")
+    HREF = "sigstore_verifying_service_href"
+    ID_PREFIX = "sigstore_verifying_services"
+
+    def create(
+        self,
+        body: EntityDefinition,
+        parameters: Optional[Mapping[str, Any]] = None,
+        non_blocking: bool = False,
+    ) -> Any:
+        self.pulp_ctx.needs_plugin(
+            PluginRequirement("ansible", min="0.13.0", feature=_("collection version creation"))
+        )
+        return super().create(body=body, parameters=parameters, non_blocking=non_blocking)
+
+
 class PulpAnsibleDistributionContext(PulpDistributionContext):
     ENTITY = _("ansible distribution")
     ENTITIES = _("ansible distributions")
