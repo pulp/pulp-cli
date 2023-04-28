@@ -13,7 +13,7 @@ def pulp_cli_vars(pulp_cli_vars):
     result.update(
         {
             "FILE_REMOTE_URL": urljoin(PULP_FIXTURES_URL, "/file/PULP_MANIFEST"),
-            "FILE_LARGE_REMOTE_URL": urljoin(PULP_FIXTURES_URL, "/file-large/PULP_MANIFEST"),
+            "FILE_LARGE_REMOTE_URL": urljoin(PULP_FIXTURES_URL, "/file-perf/PULP_MANIFEST"),
             "CONTAINER_REMOTE_URL": "https://quay.io",
             "CONTAINER_IMAGE": "libpod/alpine",
             "RPM_REMOTE_URL": urljoin(PULP_FIXTURES_URL, "/rpm-unsigned"),
