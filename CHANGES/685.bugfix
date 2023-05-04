@@ -1,0 +1,1 @@
+Renamed `domains` command group to `domain` to follow the cli convention.
