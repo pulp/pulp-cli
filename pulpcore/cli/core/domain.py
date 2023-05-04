@@ -24,7 +24,7 @@ _ = translation.gettext
 @pulp_group()
 @pass_pulp_context
 @click.pass_context
-def domains(ctx: click.Context, pulp_ctx: PulpContext) -> None:
+def domain(ctx: click.Context, pulp_ctx: PulpContext) -> None:
     """
     Perform actions on domains.
     """
@@ -65,9 +65,9 @@ create_options = update_options + [
     ),
 ]
 
-domains.add_command(list_command())
-domains.add_command(show_command(decorators=lookup_options))
-domains.add_command(create_command(decorators=create_options))
-domains.add_command(update_command(decorators=update_options + lookup_options))
-domains.add_command(destroy_command(decorators=lookup_options))
-domains.add_command(role_command(decorators=lookup_options))
+domain.add_command(list_command())
+domain.add_command(show_command(decorators=lookup_options))
+domain.add_command(create_command(decorators=create_options))
+domain.add_command(update_command(decorators=update_options + lookup_options))
+domain.add_command(destroy_command(decorators=lookup_options))
+domain.add_command(role_command(decorators=lookup_options))
