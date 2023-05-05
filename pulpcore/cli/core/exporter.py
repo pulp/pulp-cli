@@ -1,12 +1,7 @@
 from typing import Any, Dict, Iterable
 
 import click
-from pulp_glue.common.context import (
-    EntityFieldDefinition,
-    PulpEntityContext,
-    PulpRepositoryContext,
-    registered_repository_contexts,
-)
+from pulp_glue.common.context import EntityFieldDefinition, PulpEntityContext, PulpRepositoryContext
 from pulp_glue.common.i18n import get_translation
 from pulp_glue.core.context import PulpExporterContext
 
@@ -29,7 +24,7 @@ _ = translation.gettext
 
 multi_repository_option = resource_option(
     "--repository",
-    context_table=registered_repository_contexts,
+    context_table=PulpRepositoryContext.TYPE_REGISTRY,
     capabilities=["pulpexport"],
     multiple=True,
     href_pattern=PulpRepositoryContext.HREF_PATTERN,

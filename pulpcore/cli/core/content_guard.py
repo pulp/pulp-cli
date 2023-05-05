@@ -2,9 +2,9 @@ from typing import List, Optional
 
 import click
 from pulp_glue.certguard.context import PulpRHSMCertGuardContext, PulpX509CertGuardContext
+from pulp_glue.common.context import PulpContentGuardContext
 from pulp_glue.common.i18n import get_translation
 from pulp_glue.core.context import (
-    PulpContentGuardContext,
     PulpContentRedirectContentGuardContext,
     PulpRbacContentGuardContext,
 )

@@ -14,7 +14,6 @@ from pulp_glue.common.context import (
     PulpRemoteContext,
     PulpRepositoryContext,
     PulpRepositoryVersionContext,
-    registered_repository_contexts,
 )
 from pulp_glue.common.i18n import get_translation
 
@@ -23,6 +22,8 @@ _ = translation.gettext
 
 
 class PulpRpmACSContext(PulpACSContext):
+    PLUGIN = "rpm"
+    RESOURCE_TYPE = "rpm"
     ENTITY = _("rpm ACS")
     ENTITIES = _("rpm ACSes")
     HREF = "rpm_rpm_alternate_content_source_href"
@@ -46,6 +47,8 @@ class PulpRpmCompsXmlContext(PulpEntityContext):
 
 
 class PulpRpmDistributionContext(PulpDistributionContext):
+    PLUGIN = "rpm"
+    RESOURCE_TYPE = "rpm"
     ENTITY = _("rpm distribution")
     ENTITIES = _("rpm distributions")
     HREF = "rpm_rpm_distribution_href"
@@ -64,6 +67,8 @@ class PulpRpmDistributionContext(PulpDistributionContext):
 
 
 class PulpRpmPackageContext(PulpContentContext):
+    PLUGIN = "rpm"
+    RESOURCE_TYPE = "package"
     ENTITY = "rpm package"
     ENTITIES = "rpm packages"
     HREF = "rpm_package_href"
@@ -82,6 +87,8 @@ class PulpRpmPackageContext(PulpContentContext):
 
 
 class PulpRpmAdvisoryContext(PulpContentContext):
+    PLUGIN = "rpm"
+    RESOURCE_TYPE = "update_record"
     ENTITY = "rpm advisory"
     ENTITIES = "rpm advisories"
     HREF = "rpm_update_record_href"
@@ -90,6 +97,8 @@ class PulpRpmAdvisoryContext(PulpContentContext):
 
 
 class PulpRpmDistributionTreeContext(PulpContentContext):
+    PLUGIN = "rpm"
+    RESOURCE_TYPE = "distribution_tree"
     ENTITY = "rpm distribution tree"
     ENTITIES = "rpm distribution trees"
     HREF = "rpm_distribution_tree_href"
@@ -98,6 +107,8 @@ class PulpRpmDistributionTreeContext(PulpContentContext):
 
 
 class PulpRpmModulemdDefaultsContext(PulpContentContext):
+    PLUGIN = "rpm"
+    RESOURCE_TYPE = "modulemd_defaults"
     ENTITY = "rpm modulemd defaults"
     ENTITIES = "rpm modulemd defaults"
     HREF = "rpm_modulemd_defaults_href"
@@ -106,6 +117,8 @@ class PulpRpmModulemdDefaultsContext(PulpContentContext):
 
 
 class PulpRpmModulemdContext(PulpContentContext):
+    PLUGIN = "rpm"
+    RESOURCE_TYPE = "modulemd"
     ENTITY = "rpm modulemd"
     ENTITIES = "rpm modulemds"
     HREF = "rpm_modulemd_href"
@@ -114,6 +127,8 @@ class PulpRpmModulemdContext(PulpContentContext):
 
 
 class PulpRpmPackageCategoryContext(PulpContentContext):
+    PLUGIN = "rpm"
+    RESOURCE_TYPE = "package_category"
     ENTITY = "rpm package category"
     ENTITIES = "rpm package categories"
     HREF = "rpm_package_category_href"
@@ -122,6 +137,8 @@ class PulpRpmPackageCategoryContext(PulpContentContext):
 
 
 class PulpRpmPackageEnvironmentContext(PulpContentContext):
+    PLUGIN = "rpm"
+    RESOURCE_TYPE = "package_environment"
     ENTITY = "rpm package environment"
     ENTITIES = "rpm package environments"
     HREF = "rpm_package_environment_href"
@@ -130,6 +147,8 @@ class PulpRpmPackageEnvironmentContext(PulpContentContext):
 
 
 class PulpRpmPackageGroupContext(PulpContentContext):
+    PLUGIN = "rpm"
+    RESOURCE_TYPE = "package_group"
     ENTITY = "rpm package group"
     ENTITIES = "rpm package groups"
     HREF = "rpm_package_group_href"
@@ -138,6 +157,8 @@ class PulpRpmPackageGroupContext(PulpContentContext):
 
 
 class PulpRpmPackageLangpacksContext(PulpContentContext):
+    PLUGIN = "rpm"
+    RESOURCE_TYPE = "package_langpack"
     ENTITY = "rpm package langpack"
     ENTITIES = "rpm package langpacks"
     HREF = "rpm_package_langpacks_href"
@@ -146,6 +167,8 @@ class PulpRpmPackageLangpacksContext(PulpContentContext):
 
 
 class PulpRpmRepoMetadataFileContext(PulpContentContext):
+    PLUGIN = "rpm"
+    RESOURCE_TYPE = "repo_metadata_file"
     ENTITY = "rpm repo metadata file"
     ENTITIES = "rpm repo metadata files"
     HREF = "rpm_repo_metadata_file_href"
@@ -154,6 +177,8 @@ class PulpRpmRepoMetadataFileContext(PulpContentContext):
 
 
 class PulpRpmPublicationContext(PulpPublicationContext):
+    PLUGIN = "rpm"
+    RESOURCE_TYPE = "rpm"
     ENTITY = _("rpm publication")
     ENTITIES = _("rpm publications")
     HREF = "rpm_rpm_publication_href"
@@ -170,6 +195,8 @@ class PulpRpmPublicationContext(PulpPublicationContext):
 
 
 class PulpRpmRemoteContext(PulpRemoteContext):
+    PLUGIN = "rpm"
+    RESOURCE_TYPE = "rpm"
     ENTITY = _("rpm remote")
     ENTITIES = _("rpm remotes")
     HREF = "rpm_rpm_remote_href"
@@ -189,6 +216,8 @@ class PulpRpmRemoteContext(PulpRemoteContext):
 
 
 class PulpUlnRemoteContext(PulpRemoteContext):
+    PLUGIN = "rpm"
+    RESOURCE_TYPE = "uln"
     ENTITY = _("uln remote")
     ENTITIES = _("uln remotes")
     HREF = "rpm_uln_remote_href"
@@ -204,6 +233,8 @@ class PulpRpmRepositoryVersionContext(PulpRepositoryVersionContext):
 
 
 class PulpRpmRepositoryContext(PulpRepositoryContext):
+    PLUGIN = "rpm"
+    RESOURCE_TYPE = "rpm"
     HREF = "rpm_rpm_repository_href"
     ID_PREFIX = "repositories_rpm_rpm"
     ENTITY = _("rpm repository")
@@ -230,6 +261,3 @@ class PulpRpmRepositoryContext(PulpRepositoryContext):
                 )
 
         return super().sync(href, body)
-
-
-registered_repository_contexts["rpm:rpm"] = PulpRpmRepositoryContext

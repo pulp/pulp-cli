@@ -7,6 +7,7 @@ from typing import IO, Any, ClassVar, Dict, List, Optional
 from pulp_glue.common.context import (
     EntityDefinition,
     PluginRequirement,
+    PulpContentGuardContext,
     PulpContext,
     PulpEntityContext,
     PulpException,
@@ -248,15 +249,9 @@ class PulpGroupUserContext(PulpEntityContext):
         return {self.group_ctx.HREF: self.group_ctx.pulp_href}
 
 
-class PulpContentGuardContext(PulpEntityContext):
-    ENTITY = "content guard"
-    ENTITIES = "content guards"
-    ID_PREFIX = "contentguards"
-    HREF_PATTERN = r"contentguards/(?P<plugin>[\w\-_]+)/(?P<resource_type>[\w\-_]+)/"
-    NULLABLES = {"description"}
-
-
 class PulpContentRedirectContentGuardContext(PulpContentGuardContext):
+    PLUGIN = "core"
+    RESOURCE_TYPE = "content_redirect"
     ENTITY = "content redirect content guard"
     ENTITIES = "content redirect content guards"
     HREF = "content_redirect_content_guard_href"
@@ -289,6 +284,8 @@ class PulpOrphanContext(PulpEntityContext):
 
 
 class PulpRbacContentGuardContext(PulpContentGuardContext):
+    PLUGIN = "core"
+    RESOURCE_TYPE = "rbac"
     ENTITY = "RBAC content guard"
     ENTITIES = "RBAC content guards"
     HREF = "r_b_a_c_content_guard_href"

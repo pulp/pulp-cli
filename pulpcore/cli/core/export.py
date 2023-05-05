@@ -7,7 +7,6 @@ from pulp_glue.common.context import (
     EntityDefinition,
     PulpRepositoryContext,
     PulpRepositoryVersionContext,
-    registered_repository_contexts,
 )
 from pulp_glue.common.i18n import get_translation
 from pulp_glue.core.context import PulpExportContext, PulpExporterContext
@@ -54,7 +53,7 @@ def _version_list_callback(
             if not identifier:
                 raise click.ClickException(_("Repositories must be specified with plugin and type"))
             entity = {"name": identifier}
-        context_class = registered_repository_contexts.get(plugin + ":" + resource_type)
+        context_class = PulpRepositoryContext.TYPE_REGISTRY.get(plugin + ":" + resource_type)
         if context_class is None:
             raise click.ClickException(
                 _(

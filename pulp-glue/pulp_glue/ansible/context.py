@@ -8,7 +8,6 @@ from pulp_glue.common.context import (
     PulpRemoteContext,
     PulpRepositoryContext,
     PulpRepositoryVersionContext,
-    registered_repository_contexts,
 )
 from pulp_glue.common.i18n import get_translation
 
@@ -17,6 +16,8 @@ _ = translation.gettext
 
 
 class PulpAnsibleCollectionVersionContext(PulpContentContext):
+    PLUGIN = "ansible"
+    RESOURCE_TYPE = "collection_version"
     ENTITY = _("ansible collection version")
     ENTITIES = _("ansible collection versions")
     HREF = "ansible_collection_version_href"
@@ -29,6 +30,8 @@ class PulpAnsibleCollectionVersionContext(PulpContentContext):
 
 
 class PulpAnsibleRoleContext(PulpContentContext):
+    PLUGIN = "ansible"
+    RESOURCE_TYPE = "role"
     ENTITY = _("ansible role")
     ENTITIES = _("ansible roles")
     HREF = "ansible_role_href"
@@ -37,6 +40,8 @@ class PulpAnsibleRoleContext(PulpContentContext):
 
 
 class PulpAnsibleCollectionVersionSignatureContext(PulpContentContext):
+    PLUGIN = "ansible"
+    RESOURCE_TYPE = "collection_version_signature"
     ENTITY = _("ansible collection version signature")
     ENTITIES = _("ansible collection version signatures")
     HREF = _("ansible_collection_version_signature_href")
@@ -58,6 +63,8 @@ class PulpAnsibleCollectionVersionSignatureContext(PulpContentContext):
 
 
 class PulpAnsibleDistributionContext(PulpDistributionContext):
+    PLUGIN = "ansible"
+    RESOURCE_TYPE = "ansible"
     ENTITY = _("ansible distribution")
     ENTITIES = _("ansible distributions")
     HREF = "ansible_ansible_distribution_href"
@@ -74,6 +81,8 @@ class PulpAnsibleDistributionContext(PulpDistributionContext):
 
 
 class PulpAnsibleRoleRemoteContext(PulpRemoteContext):
+    PLUGIN = "ansible"
+    RESOURCE_TYPE = "role"
     ENTITY = _("role remote")
     ENTITIES = _("role remotes")
     HREF = "ansible_role_remote_href"
@@ -83,6 +92,8 @@ class PulpAnsibleRoleRemoteContext(PulpRemoteContext):
 
 
 class PulpAnsibleCollectionRemoteContext(PulpRemoteContext):
+    PLUGIN = "ansible"
+    RESOURCE_TYPE = "collection"
     ENTITY = _("collection remote")
     ENTITIES = _("collection remotes")
     HREF = "ansible_collection_remote_href"
@@ -104,6 +115,8 @@ class PulpAnsibleRepositoryVersionContext(PulpRepositoryVersionContext):
 
 
 class PulpAnsibleRepositoryContext(PulpRepositoryContext):
+    PLUGIN = "ansible"
+    RESOURCE_TYPE = "ansible"
     HREF = "ansible_ansible_repository_href"
     ID_PREFIX = "repositories_ansible_ansible"
     ENTITY = _("ansible repository")
@@ -115,6 +128,3 @@ class PulpAnsibleRepositoryContext(PulpRepositoryContext):
     }
     NULLABLES = PulpRepositoryContext.NULLABLES | {"gpgkey"}
     NEEDS_PLUGINS = [PluginRequirement("ansible", specifier=">=0.7.0")]
-
-
-registered_repository_contexts["ansible:ansible"] = PulpAnsibleRepositoryContext
