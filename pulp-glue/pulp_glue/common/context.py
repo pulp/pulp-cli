@@ -774,6 +774,12 @@ class PulpRemoteContext(PulpEntityContext):
         "sock_read_timeout",
         "rate_limit",
     }
+    TYPE_REGISTRY: Dict[str, Type["PulpRemoteContext"]] = {}
+
+    def __init_subclass__(cls, **kwargs: Any) -> None:
+        super().__init_subclass__(**kwargs)
+        if hasattr(cls, "PLUGIN") and hasattr(cls, "RESOURCE_TYPE"):
+            cls.TYPE_REGISTRY[f"{cls.PLUGIN}:{cls.RESOURCE_TYPE}"] = cls
 
 
 class PulpPublicationContext(PulpEntityContext):
@@ -781,6 +787,12 @@ class PulpPublicationContext(PulpEntityContext):
     ENTITIES = _("publications")
     ID_PREFIX = "publications"
     HREF_PATTERN = r"publications/(?P<plugin>[\w\-_]+)/(?P<resource_type>[\w\-_]+)/"
+    TYPE_REGISTRY: Dict[str, Type["PulpPublicationContext"]] = {}
+
+    def __init_subclass__(cls, **kwargs: Any) -> None:
+        super().__init_subclass__(**kwargs)
+        if hasattr(cls, "PLUGIN") and hasattr(cls, "RESOURCE_TYPE"):
+            cls.TYPE_REGISTRY[f"{cls.PLUGIN}:{cls.RESOURCE_TYPE}"] = cls
 
     def list(self, limit: int, offset: int, parameters: Dict[str, Any]) -> List[Any]:
         if parameters.get("repository") is not None:
@@ -795,6 +807,12 @@ class PulpDistributionContext(PulpEntityContext):
     ENTITIES = _("distributions")
     ID_PREFIX = "distributions"
     HREF_PATTERN = r"distributions/(?P<plugin>[\w\-_]+)/(?P<resource_type>[\w\-_]+)/"
+    TYPE_REGISTRY: Dict[str, Type["PulpDistributionContext"]] = {}
+
+    def __init_subclass__(cls, **kwargs: Any) -> None:
+        super().__init_subclass__(**kwargs)
+        if hasattr(cls, "PLUGIN") and hasattr(cls, "RESOURCE_TYPE"):
+            cls.TYPE_REGISTRY[f"{cls.PLUGIN}:{cls.RESOURCE_TYPE}"] = cls
 
 
 class PulpRepositoryVersionContext(PulpEntityContext):
@@ -825,6 +843,12 @@ class PulpRepositoryContext(PulpEntityContext):
     ID_PREFIX = "repositories"
     VERSION_CONTEXT: ClassVar[Type[PulpRepositoryVersionContext]] = PulpRepositoryVersionContext
     NULLABLES = {"description", "retain_repo_versions"}
+    TYPE_REGISTRY: Dict[str, Type["PulpRepositoryContext"]] = {}
+
+    def __init_subclass__(cls, **kwargs: Any) -> None:
+        super().__init_subclass__(**kwargs)
+        if hasattr(cls, "PLUGIN") and hasattr(cls, "RESOURCE_TYPE"):
+            cls.TYPE_REGISTRY[f"{cls.PLUGIN}:{cls.RESOURCE_TYPE}"] = cls
 
     def get_version_context(self) -> PulpRepositoryVersionContext:
         return self.VERSION_CONTEXT(self.pulp_ctx, self)
@@ -864,6 +888,12 @@ class PulpContentContext(PulpEntityContext):
     ENTITY = _("content")
     ENTITIES = _("content")
     ID_PREFIX = "content"
+    TYPE_REGISTRY: Dict[str, Type["PulpContentContext"]] = {}
+
+    def __init_subclass__(cls, **kwargs: Any) -> None:
+        super().__init_subclass__(**kwargs)
+        if hasattr(cls, "PLUGIN") and hasattr(cls, "RESOURCE_TYPE"):
+            cls.TYPE_REGISTRY[f"{cls.PLUGIN}:{cls.RESOURCE_TYPE}"] = cls
 
     def upload(
         self,
@@ -898,9 +928,29 @@ class PulpACSContext(PulpEntityContext):
     ENTITIES = _("ACSes")
     HREF_PATTERN = r"acs/(?P<plugin>[\w\-_]+)/(?P<resource_type>[\w\-_]+)/"
     ID_PREFIX = "acs"
+    TYPE_REGISTRY: Dict[str, Type["PulpACSContext"]] = {}
+
+    def __init_subclass__(cls, **kwargs: Any) -> None:
+        super().__init_subclass__(**kwargs)
+        if hasattr(cls, "PLUGIN") and hasattr(cls, "RESOURCE_TYPE"):
+            cls.TYPE_REGISTRY[f"{cls.PLUGIN}:{cls.RESOURCE_TYPE}"] = cls
 
     def refresh(self, href: Optional[str] = None) -> Any:
         return self.call("refresh", parameters={self.HREF: href or self.pulp_href})
+
+
+class PulpContentGuardContext(PulpEntityContext):
+    ENTITY = "content guard"
+    ENTITIES = "content guards"
+    ID_PREFIX = "contentguards"
+    HREF_PATTERN = r"contentguards/(?P<plugin>[\w\-_]+)/(?P<resource_type>[\w\-_]+)/"
+    NULLABLES = {"description"}
+    TYPE_REGISTRY: Dict[str, Type["PulpContentGuardContext"]] = {}
+
+    def __init_subclass__(cls, **kwargs: Any) -> None:
+        super().__init_subclass__(**kwargs)
+        if hasattr(cls, "PLUGIN") and hasattr(cls, "RESOURCE_TYPE"):
+            cls.TYPE_REGISTRY[f"{cls.PLUGIN}:{cls.RESOURCE_TYPE}"] = cls
 
 
 EntityFieldDefinition = Union[None, str, PulpEntityContext]
@@ -910,6 +960,8 @@ EntityFieldDefinition = Union[None, str, PulpEntityContext]
 # Registries for Contexts of different sorts
 # A command can use these to identify e.g. all repository types known to the CLI
 # Note that it will only be fully populated, once all plugins are loaded.
+# This is deprecated. Please specify PLUGIN and RESOURCE_TYPE on the context instead.
 
-
-registered_repository_contexts: Dict[str, Type[PulpRepositoryContext]] = {}
+registered_repository_contexts: Dict[
+    str, Type[PulpRepositoryContext]
+] = PulpRepositoryContext.TYPE_REGISTRY

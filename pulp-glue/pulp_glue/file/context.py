@@ -10,7 +10,6 @@ from pulp_glue.common.context import (
     PulpRemoteContext,
     PulpRepositoryContext,
     PulpRepositoryVersionContext,
-    registered_repository_contexts,
 )
 from pulp_glue.common.i18n import get_translation
 from pulp_glue.core.context import PulpArtifactContext
@@ -20,6 +19,8 @@ _ = translation.gettext
 
 
 class PulpFileACSContext(PulpACSContext):
+    PLUGIN = "file"
+    RESOURCE_TYPE = "file"
     ENTITY = _("file ACS")
     ENTITIES = _("file ACSes")
     HREF = "file_file_alternate_content_source_href"
@@ -29,6 +30,8 @@ class PulpFileACSContext(PulpACSContext):
 
 
 class PulpFileContentContext(PulpContentContext):
+    PLUGIN = "file"
+    RESOURCE_TYPE = "file"
     ENTITY = _("file content")
     ENTITIES = _("file content")
     HREF = "file_file_content_href"
@@ -51,6 +54,8 @@ class PulpFileContentContext(PulpContentContext):
 
 
 class PulpFileDistributionContext(PulpDistributionContext):
+    PLUGIN = "file"
+    RESOURCE_TYPE = "file"
     ENTITY = _("file distribution")
     ENTITIES = _("file distributions")
     HREF = "file_file_distribution_href"
@@ -70,6 +75,8 @@ class PulpFileDistributionContext(PulpDistributionContext):
 
 
 class PulpFilePublicationContext(PulpPublicationContext):
+    PLUGIN = "file"
+    RESOURCE_TYPE = "file"
     ENTITY = _("file publication")
     ENTITIES = _("file publications")
     HREF = "file_file_publication_href"
@@ -88,6 +95,8 @@ class PulpFilePublicationContext(PulpPublicationContext):
 
 
 class PulpFileRemoteContext(PulpRemoteContext):
+    PLUGIN = "file"
+    RESOURCE_TYPE = "file"
     ENTITY = _("file remote")
     ENTITIES = _("file remotes")
     HREF = "file_file_remote_href"
@@ -103,6 +112,8 @@ class PulpFileRepositoryVersionContext(PulpRepositoryVersionContext):
 
 
 class PulpFileRepositoryContext(PulpRepositoryContext):
+    PLUGIN = "file"
+    RESOURCE_TYPE = "file"
     HREF = "file_file_repository_href"
     ENTITY = _("file repository")
     ENTITIES = _("file repositories")
@@ -121,6 +132,3 @@ class PulpFileRepositoryContext(PulpRepositoryContext):
         if "autopublish" in body:
             self.pulp_ctx.needs_plugin(PluginRequirement("file", specifier=">=1.7.0"))
         return body
-
-
-registered_repository_contexts["file:file"] = PulpFileRepositoryContext

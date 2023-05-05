@@ -7,7 +7,6 @@ from pulp_glue.common.context import (
     PulpRemoteContext,
     PulpRepositoryContext,
     PulpRepositoryVersionContext,
-    registered_repository_contexts,
 )
 from pulp_glue.common.i18n import get_translation
 
@@ -16,6 +15,8 @@ _ = translation.gettext
 
 
 class PulpPythonContentContext(PulpContentContext):
+    PLUGIN = "python"
+    RESOURCE_TYPE = "package"
     ENTITY = _("python package")
     ENTITIES = _("python packages")
     HREF = "python_python_package_content_href"
@@ -25,6 +26,8 @@ class PulpPythonContentContext(PulpContentContext):
 
 
 class PulpPythonDistributionContext(PulpDistributionContext):
+    PLUGIN = "python"
+    RESOURCE_TYPE = "python"
     ENTITY = _("python distribution")
     ENTITIES = _("python distributions")
     HREF = "python_python_distribution_href"
@@ -47,6 +50,8 @@ class PulpPythonDistributionContext(PulpDistributionContext):
 
 
 class PulpPythonPublicationContext(PulpPublicationContext):
+    PLUGIN = "python"
+    RESOURCE_TYPE = "python"
     ENTITY = _("python publication")
     ENTITIES = _("python publications")
     HREF = "python_python_publication_href"
@@ -63,6 +68,8 @@ class PulpPythonPublicationContext(PulpPublicationContext):
 
 
 class PulpPythonRemoteContext(PulpRemoteContext):
+    PLUGIN = "python"
+    RESOURCE_TYPE = "python"
     ENTITY = _("python remote")
     ENTITIES = _("python remotes")
     HREF = "python_python_remote_href"
@@ -83,6 +90,8 @@ class PulpPythonRepositoryVersionContext(PulpRepositoryVersionContext):
 
 
 class PulpPythonRepositoryContext(PulpRepositoryContext):
+    PLUGIN = "python"
+    RESOURCE_TYPE = "python"
     HREF = "python_python_repository_href"
     ENTITY = _("python repository")
     ENTITIES = _("python repositories")
@@ -96,6 +105,3 @@ class PulpPythonRepositoryContext(PulpRepositoryContext):
         if "autopublish" in body:
             self.pulp_ctx.needs_plugin(PluginRequirement("python", specifier=">=3.3.0"))
         return body
-
-
-registered_repository_contexts["python:python"] = PulpPythonRepositoryContext

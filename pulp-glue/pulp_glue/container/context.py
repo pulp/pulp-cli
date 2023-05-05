@@ -9,7 +9,6 @@ from pulp_glue.common.context import (
     PulpRemoteContext,
     PulpRepositoryContext,
     PulpRepositoryVersionContext,
-    registered_repository_contexts,
 )
 from pulp_glue.common.i18n import get_translation
 
@@ -18,6 +17,8 @@ _ = translation.gettext
 
 
 class PulpContainerBlobContext(PulpContentContext):
+    PLUGIN = "container"
+    RESOURCE_TYPE = "blob"
     ENTITY = _("container blob")
     ENTITIES = _("container blobs")
     HREF = "container_blob_href"
@@ -26,6 +27,8 @@ class PulpContainerBlobContext(PulpContentContext):
 
 
 class PulpContainerManifestContext(PulpContentContext):
+    PLUGIN = "container"
+    RESOURCE_TYPE = "manifest"
     ENTITY = _("container manifest")
     ENTITIES = _("container manifests")
     HREF = "container_manifest_href"
@@ -34,6 +37,8 @@ class PulpContainerManifestContext(PulpContentContext):
 
 
 class PulpContainerTagContext(PulpContentContext):
+    PLUGIN = "container"
+    RESOURCE_TYPE = "tag"
     ENTITY = _("container tag")
     ENTITIES = _("container tags")
     HREF = "container_tag_href"
@@ -57,6 +62,8 @@ class PulpContainerNamespaceContext(PulpEntityContext):
 
 
 class PulpContainerDistributionContext(PulpDistributionContext):
+    PLUGIN = "container"
+    RESOURCE_TYPE = "container"
     ENTITY = _("container distribution")
     ENTITIES = _("container distributions")
     HREF = "container_container_distribution_href"
@@ -75,6 +82,8 @@ class PulpContainerDistributionContext(PulpDistributionContext):
 
 
 class PulpContainerRemoteContext(PulpRemoteContext):
+    PLUGIN = "container"
+    RESOURCE_TYPE = "container"
     ENTITY = _("container remote")
     ENTITIES = _("container remotes")
     HREF = "container_container_remote_href"
@@ -117,6 +126,8 @@ class PulpContainerBaseRepositoryContext(PulpRepositoryContext):
 
 
 class PulpContainerRepositoryContext(PulpContainerBaseRepositoryContext):
+    PLUGIN = "container"
+    RESOURCE_TYPE = "container"
     HREF = "container_container_repository_href"
     ID_PREFIX = "repositories_container_container"
     ENTITY = _("container repository")
@@ -169,6 +180,8 @@ class PulpContainerRepositoryContext(PulpContainerBaseRepositoryContext):
 
 
 class PulpContainerPushRepositoryContext(PulpContainerBaseRepositoryContext):
+    PLUGIN = "container"
+    RESOURCE_TYPE = "push"
     HREF = "container_container_push_repository_href"
     ID_PREFIX = "repositories_container_container_push"
     ENTITY = _("push container repository")
@@ -185,7 +198,3 @@ class PulpContainerPushRepositoryContext(PulpContainerBaseRepositoryContext):
         self.needs_capability("remove")
         body = {"digest": digest}
         return self.call("remove_image", parameters={self.HREF: self.pulp_href}, body=body)
-
-
-registered_repository_contexts["container:container"] = PulpContainerRepositoryContext
-registered_repository_contexts["container:push"] = PulpContainerPushRepositoryContext
