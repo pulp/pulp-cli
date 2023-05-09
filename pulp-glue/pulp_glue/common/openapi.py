@@ -206,6 +206,9 @@ class OpenAPI:
                     param = self.validate_schema(param_schema, name, param)
 
                 if isinstance(param, List):
+                    if not param:
+                        # Don't propagate an empty list here
+                        continue
                     # Check if we need to implode the list
                     style = (
                         param_spec.get("style") or "form"
