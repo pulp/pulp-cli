@@ -40,9 +40,8 @@ setup(
         "pulp-glue==0.20.0.dev",
         "click>=8.0.0,<9.0.0",
         "PyYAML~=5.3",
-        "schema==0.7.5",
-        "setuptools",
-        "toml==0.10.2",
+        "schema>=0.7.5,<0.8",
+        "toml>=0.10.2,<0.11",
     ],
     extras_require={
         "pygments": ["pygments"],

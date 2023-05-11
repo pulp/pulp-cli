@@ -1,0 +1,59 @@
+name: Pull Request CI
+
+on:
+  pull_request:
+
+concurrency:
+  group: main-${{ github.ref_name }}-${{ github.workflow }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    uses: "./.github/workflows/lint.yml"
+  test:
+    needs:
+      - lint
+    uses: "./.github/workflows/test.yml"
+  codeql:
+    needs:
+      - lint
+    uses: "./.github/workflows/codeql.yml"
+  check-commits:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: |
+          git fetch --prune --unshallow
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+      - name: Install python dependencies
+        run: |
+          pip install toml pygithub
+      - name: Check commit message
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }}
+        run: |
+          for sha in $(curl -H "Authorization: token $GITHUB_TOKEN" $GITHUB_CONTEXT | jq '.[].sha' | sed 's/"//g')
+          do
+            python .ci/scripts/validate_commit_message.py $sha
+            VALUE=$?
+            if [ "$VALUE" -gt 0 ]; then
+              exit "$VALUE"
+            fi
+          done
+        shell: bash
+  ready-to-ship:
+    # This is a dummy dependent task to have a single entry for the branch protection rules.
+    runs-on: ubuntu-latest
+    needs:
+      - check-commits
+      - lint
+      - test
+      - codeql
+    steps:
+      - name: All set
+        run: |
+          echo "CI says: Looks good!"

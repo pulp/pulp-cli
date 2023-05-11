@@ -31,9 +31,8 @@ setup(
     package_data={"": ["py.typed"]},
     python_requires=">=3.6",
     install_requires=[
-        "packaging",
-        "setuptools",
-        "requests~=2.24",
+        "packaging>=20.0,<24",
+        "requests>=2.24.0,<2.32",
     ],
     license="GPLv2+",
     classifiers=[
