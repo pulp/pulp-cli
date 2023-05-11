@@ -1,0 +1,25 @@
+name: CI
+
+on:
+  workflow_call:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python:
+          - "3.7"
+          - "3.11"
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install python dependencies
+        run: |
+          pip install -r lint_requirements.txt
+      - name: Lint code
+        run: make lint

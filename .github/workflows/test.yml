@@ -1,7 +1,7 @@
-name: CI
+name: Test
 
 on:
-  pull_request:
+  workflow_call:
 
 env:
   COLORTERM: 'yes'
@@ -10,29 +10,8 @@ env:
   CONTAINER_RUNTIME: 'docker'
 
 jobs:
-  lint:
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        python:
-          - "3.7"
-          - "3.10"
-    steps:
-      - uses: actions/checkout@v3
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python }}
-      - name: Install python dependencies
-        run: |
-          pip install -r test_requirements.txt
-      - name: Lint code
-        run: make lint
   test:
     runs-on: ubuntu-20.04
-    needs:
-      - lint
     strategy:
       fail-fast: false
       matrix:
@@ -75,30 +54,3 @@ jobs:
           CONTAINER_FILE: ${{ matrix.container_file }}
           PULP_API_ROOT: ${{ matrix.pulp_api_root }}
         run: .ci/run_container.sh make test
-  ready-to-ship:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - run: |
-          git fetch --prune --unshallow
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.10"
-      - name: Install python dependencies
-        run: |
-          pip install toml pygithub
-      - name: Check commit message
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_CONTEXT: ${{ github.event.pull_request.commits_url }}
-        run: |
-          for sha in $(curl -H "Authorization: token $GITHUB_TOKEN" $GITHUB_CONTEXT | jq '.[].sha' | sed 's/"//g')
-          do
-            python .ci/scripts/validate_commit_message.py $sha
-            VALUE=$?
-            if [ "$VALUE" -gt 0 ]; then
-              exit $VALUE
-            fi
-          done
-        shell: bash
