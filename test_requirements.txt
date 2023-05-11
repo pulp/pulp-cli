@@ -6,6 +6,3 @@ pygments
 pytest
 pytest-subtests
 python-gnupg
-
-# Lint requirements
--r lint_requirements.txt

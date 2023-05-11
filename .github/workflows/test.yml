@@ -1,0 +1,56 @@
+name: Test
+
+on:
+  workflow_call:
+
+env:
+  COLORTERM: 'yes'
+  TERM: 'xterm-256color'
+  PYTEST_ADDOPTS: '--color=yes'
+  CONTAINER_RUNTIME: 'docker'
+
+jobs:
+  test:
+    runs-on: ubuntu-20.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - python: "3.11"
+            image_tag: "nightly"
+            pulp_api_root: "/relocated/djnd/"
+          - python: "3.6"
+            image_tag: "3.27"
+          - python: "3.7"
+            image_tag: "3.23"
+            lower_bounds: true
+          - python: "3.8"
+            image_tag: "3.22"
+          - python: "3.9"
+            image_tag: "3.21"
+            pulp_api_root: "/relocated/djnd/"
+          - python: "3.10"
+            image_tag: "3.18"
+            lower_bounds: true
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install Test Dependencies
+        run: |
+          if [ "${{matrix.lower_bounds}}" ]
+          then
+            pip install -r test_requirements.txt -r tests/lower_bounds_requirements.txt
+          else
+            pip install -r test_requirements.txt
+          fi
+      - name: Run tests
+        env:
+          CONTAINER_RUNTIME: ${{ matrix.container_runtime }}
+          IMAGE_TAG: ${{ matrix.image_tag }}
+          FROM_TAG: ${{ matrix.from_tag }}
+          CONTAINER_FILE: ${{ matrix.container_file }}
+          PULP_API_ROOT: ${{ matrix.pulp_api_root }}
+        run: .ci/run_container.sh make test

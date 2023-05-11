@@ -257,7 +257,7 @@ class PulpOption(click.Option):
         super().__init__(*args, **kwargs)
 
     def process_value(self, ctx: click.Context, value: Any) -> Any:
-        if value is not None and self.needs_plugins:
+        if self.needs_plugins and value is not None and value != ():
             pulp_ctx = ctx.find_object(PulpCLIContext)
             assert pulp_ctx is not None
             for plugin_requirement in self.needs_plugins:

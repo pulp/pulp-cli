@@ -13,3 +13,6 @@ types-PyYAML ; python_version > "3.6"
 types-requests ; python_version > "3.6"
 types-setuptools ; python_version > "3.6"
 types-toml ; python_version > "3.6"
+
+# Install the actual bits for mypy
+-r test_requirements.txt
