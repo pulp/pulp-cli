@@ -48,8 +48,8 @@ PUBLICATION_VER_HREF=$(echo "$OUTPUT" | jq -r .pulp_href)
 expect_succ pulp rpm distribution create --name "cli_test_rpm_distro" \
   --base-path "cli_test_rpm_distro" \
   --publication "$PUBLICATION_HREF"
-
-expect_succ curl "$curl_opt" --head --fail "$PULP_BASE_URL/pulp/content/cli_test_rpm_distro/config.repo"
+DISTRIBUTION_BASE_URL=$(echo "$OUTPUT" | jq -r .base_url)
+expect_succ curl "$curl_opt" --head --fail "${DISTRIBUTION_BASE_URL}config.repo"
 
 expect_succ pulp rpm repository version list --repository "cli_test_rpm_repository"
 expect_succ pulp rpm repository version repair --repository "cli_test_rpm_repository" --version 1
