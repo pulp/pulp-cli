@@ -10,6 +10,19 @@
 
 [//]: # (towncrier release notes start)
 
+## 0.19.2 (2023-05-22)
+
+
+
+### Bugfixes
+
+- Fixed some tests that made assumptions that worked, but were nonetheless incorrect.
+  [#692](https://github.com/pulp/pulp-cli/issues/692)
+
+
+---
+
+
 ## 0.19.1 (2023-05-02)
 
 
