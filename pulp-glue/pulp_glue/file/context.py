@@ -60,7 +60,6 @@ class PulpFileDistributionContext(PulpDistributionContext):
     ENTITIES = _("file distributions")
     HREF = "file_file_distribution_href"
     ID_PREFIX = "distributions_file_file"
-    NULLABLES = {"publication", "repository"}
     CAPABILITIES = {"roles": [PluginRequirement("file", specifier=">=1.11.0")]}
     NEEDS_PLUGINS = [PluginRequirement("file", specifier=">=1.6.0")]
 

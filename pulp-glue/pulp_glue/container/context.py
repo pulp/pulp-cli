@@ -68,7 +68,6 @@ class PulpContainerDistributionContext(PulpDistributionContext):
     ENTITIES = _("container distributions")
     HREF = "container_container_distribution_href"
     ID_PREFIX = "distributions_container_container"
-    NULLABLES = {"repository_version", "repository"}
     NEEDS_PLUGINS = [PluginRequirement("container", specifier=">=2.3.0")]
     CAPABILITIES = {"roles": [PluginRequirement("container", specifier=">=2.11.0")]}
 

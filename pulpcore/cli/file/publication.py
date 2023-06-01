@@ -1,5 +1,4 @@
 import click
-from pulp_glue.common.context import PluginRequirement
 from pulp_glue.common.i18n import get_translation
 from pulp_glue.file.context import PulpFilePublicationContext, PulpFileRepositoryContext
 
@@ -58,16 +57,7 @@ create_options = [
         help=_("Filename to use for manifest file containing metadata for all the files."),
     ),
 ]
-filter_options = publication_filter_options + [
-    resource_option(
-        "--repository",
-        default_plugin="file",
-        default_type="file",
-        context_table={"file:file": PulpFileRepositoryContext},
-        needs_plugins=[PluginRequirement("core", specifier=">=3.20.0")],
-    )
-]
-publication.add_command(list_command(decorators=filter_options))
+publication.add_command(list_command(decorators=publication_filter_options + [repository_option]))
 publication.add_command(show_command(decorators=lookup_options))
 publication.add_command(create_command(decorators=create_options))
 publication.add_command(destroy_command(decorators=lookup_options))

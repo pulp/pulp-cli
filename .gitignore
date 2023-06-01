@@ -2,6 +2,7 @@
 __pycache__/
 build/
 tests/cli.toml
+pytest_pulp_cli/GPG-PRIVATE-KEY-pulp-qe
 /.ci/settings/certs
 site/
 dist/
