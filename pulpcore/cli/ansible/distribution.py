@@ -11,6 +11,7 @@ from pulp_glue.common.context import (
 from pulp_glue.common.i18n import get_translation
 
 from pulpcore.cli.common.generic import (
+    content_guard_option,
     create_command,
     destroy_command,
     distribution_filter_options,
@@ -67,6 +68,7 @@ create_options = [
         help=_("the base (relative) path component of the published url."),
     ),
     repository_option,
+    content_guard_option,
     click.option(
         "--version", type=int, help=_("a repository version number, leave blank for latest")
     ),
@@ -86,13 +88,13 @@ distribution.add_command(
 )
 
 
-# TODO Add content_guard option
 @distribution.command()
 @name_option
 @href_option
 @distribution_lookup_option
 @click.option("--base-path", help=_("new base_path"))
 @repository_option
+@content_guard_option
 @click.option(
     "--version",
     type=int,
@@ -105,6 +107,7 @@ def update(
     distribution_ctx: PulpAnsibleDistributionContext,
     base_path: Optional[str],
     repository: EntityFieldDefinition,
+    content_guard: EntityFieldDefinition,
     version: Optional[int],
     pulp_labels: Optional[Dict[str, str]],
 ) -> None:
@@ -119,6 +122,8 @@ def update(
         body["base_path"] = base_path
     if pulp_labels is not None:
         body["pulp_labels"] = pulp_labels
+    if content_guard is not None:
+        body["content_guard"] = content_guard
     if repository is not None:
         if repository == "":
             # unset repository or repository version

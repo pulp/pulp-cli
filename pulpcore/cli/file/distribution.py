@@ -5,6 +5,7 @@ from pulp_glue.file.context import PulpFileDistributionContext, PulpFileReposito
 from pulpcore.cli.common.generic import (
     PulpCLIContext,
     common_distribution_create_options,
+    content_guard_option,
     create_command,
     destroy_command,
     distribution_filter_options,
@@ -68,6 +69,7 @@ update_options = [
         ),
     ),
     repository_option,
+    content_guard_option,
     pulp_labels_option,
 ]
 create_options = common_distribution_create_options + update_options

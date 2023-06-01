@@ -1,7 +1,12 @@
 from typing import Dict, Optional, Union, cast
 
 import click
-from pulp_glue.common.context import EntityDefinition, PulpEntityContext, PulpRepositoryContext
+from pulp_glue.common.context import (
+    EntityDefinition,
+    EntityFieldDefinition,
+    PulpEntityContext,
+    PulpRepositoryContext,
+)
 from pulp_glue.common.i18n import get_translation
 from pulp_glue.container.context import (
     PulpContainerDistributionContext,
@@ -11,6 +16,7 @@ from pulp_glue.container.context import (
 
 from pulpcore.cli.common.generic import (
     PulpCLIContext,
+    content_guard_option,
     create_command,
     destroy_command,
     distribution_filter_options,
@@ -67,6 +73,7 @@ create_options = [
     click.option("--name", required=True),
     click.option("--base-path", required=True),
     repository_option,
+    content_guard_option,
     click.option(
         "--version", type=int, help=_("a repository version number, leave blank for latest")
     ),
@@ -88,6 +95,7 @@ distribution.add_command(label_command(decorators=nested_lookup_options))
 @distribution_lookup_option
 @click.option("--base-path")
 @repository_option
+@content_guard_option
 @click.option("--version", type=int, help=_("a repository version number, leave blank for latest"))
 @click.option("--private/--public", default=None)
 @pulp_labels_option
@@ -96,6 +104,7 @@ def update(
     distribution_ctx: PulpContainerDistributionContext,
     base_path: Optional[str],
     repository: Optional[Union[str, PulpEntityContext]],
+    content_guard: EntityFieldDefinition,
     version: Optional[int],
     private: Optional[bool],
     pulp_labels: Optional[Dict[str, str]],
@@ -109,6 +118,8 @@ def update(
         body["base_path"] = base_path
     if pulp_labels is not None:
         body["pulp_labels"] = pulp_labels
+    if content_guard is not None:
+        body["content_guard"] = content_guard
     if repository is not None:
         if repository == "":
             # unset repository or repository version
