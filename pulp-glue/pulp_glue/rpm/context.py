@@ -53,7 +53,6 @@ class PulpRpmDistributionContext(PulpDistributionContext):
     ENTITIES = _("rpm distributions")
     HREF = "rpm_rpm_distribution_href"
     ID_PREFIX = "distributions_rpm_rpm"
-    NULLABLES = {"publication", "repository"}
     NEEDS_PLUGINS = [PluginRequirement("rpm", specifier=">=3.9.0")]
 
     def preprocess_entity(self, body: EntityDefinition, partial: bool = False) -> EntityDefinition:

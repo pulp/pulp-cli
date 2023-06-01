@@ -1,5 +1,4 @@
 import click
-from pulp_glue.common.context import PluginRequirement
 from pulp_glue.common.i18n import get_translation
 from pulp_glue.python.context import PulpPythonPublicationContext, PulpPythonRepositoryContext
 
@@ -52,15 +51,6 @@ create_options = [
     click.option(
         "--version", type=int, help=_("a repository version number, leave blank for latest")
     ),
-]
-filter_options = publication_filter_options + [
-    resource_option(
-        "--repository",
-        default_plugin="python",
-        default_type="python",
-        context_table={"python:python": PulpPythonRepositoryContext},
-        needs_plugins=[PluginRequirement("core", specifier=">=3.20.0")],
-    )
 ]
 publication.add_command(list_command(decorators=publication_filter_options + [repository_option]))
 publication.add_command(show_command(decorators=lookup_options))

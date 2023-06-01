@@ -15,7 +15,7 @@ translation = get_translation(__name__)
 _ = translation.gettext
 
 DEFAULT_LIMIT = 25
-BATCH_SIZE = 25
+BATCH_SIZE = 1000
 DATETIME_FORMATS = [
     "%Y-%m-%dT%H:%M:%S.%fZ",  # Pulp format
     "%Y-%m-%d",  # intl. format
@@ -807,6 +807,7 @@ class PulpDistributionContext(PulpEntityContext):
     ENTITIES = _("distributions")
     ID_PREFIX = "distributions"
     HREF_PATTERN = r"distributions/(?P<plugin>[\w\-_]+)/(?P<resource_type>[\w\-_]+)/"
+    NULLABLES = {"content_guard", "publication", "remote", "repository", "repository_version"}
     TYPE_REGISTRY: Dict[str, Type["PulpDistributionContext"]] = {}
 
     def __init_subclass__(cls, **kwargs: Any) -> None:

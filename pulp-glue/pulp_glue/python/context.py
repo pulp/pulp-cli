@@ -32,7 +32,6 @@ class PulpPythonDistributionContext(PulpDistributionContext):
     ENTITIES = _("python distributions")
     HREF = "python_python_distribution_href"
     ID_PREFIX = "distributions_python_pypi"
-    NULLABLES = {"publication", "repository"}
     NEEDS_PLUGINS = [PluginRequirement("python", specifier=">=3.1.0")]
 
     def preprocess_entity(self, body: EntityDefinition, partial: bool = False) -> EntityDefinition:

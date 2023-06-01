@@ -1,5 +1,4 @@
 import click
-from pulp_glue.common.context import PluginRequirement
 from pulp_glue.common.i18n import get_translation
 from pulp_glue.rpm.context import PulpRpmPublicationContext, PulpRpmRepositoryContext
 
@@ -53,16 +52,7 @@ create_options = [
         "--version", type=int, help=_("a repository version number, leave blank for latest")
     ),
 ]
-filter_options = publication_filter_options + [
-    resource_option(
-        "--repository",
-        default_plugin="rpm",
-        default_type="rpm",
-        context_table={"rpm:rpm": PulpRpmRepositoryContext},
-        needs_plugins=[PluginRequirement("core", specifier=">=3.20.0")],
-    )
-]
-publication.add_command(list_command(decorators=filter_options))
+publication.add_command(list_command(decorators=publication_filter_options + [repository_option]))
 publication.add_command(show_command(decorators=lookup_options))
 publication.add_command(create_command(decorators=create_options))
 publication.add_command(destroy_command(decorators=lookup_options))
