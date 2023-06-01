@@ -16,6 +16,7 @@ from pulp_glue.common.context import (
     PluginRequirement,
     PulpACSContext,
     PulpContentContext,
+    PulpContentGuardContext,
     PulpContext,
     PulpDistributionContext,
     PulpEntityContext,
@@ -809,6 +810,16 @@ distribution_lookup_option = resource_lookup_option(
 acs_lookup_option = resource_lookup_option(
     "--acs",
     context_class=PulpACSContext,
+)
+
+content_guard_option = resource_option(
+    "--content-guard",
+    context_table=PulpContentGuardContext.TYPE_REGISTRY,
+    href_pattern=PulpContentGuardContext.HREF_PATTERN,
+    help=_(
+        "Content Guard used to protect the distribution."
+        " Specified as '<plugin>:<type>:<name>' or as href."
+    ),
 )
 
 version_option = click.option(

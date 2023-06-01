@@ -10,6 +10,7 @@ from pulp_glue.python.context import (
 from pulpcore.cli.common.generic import (
     PulpCLIContext,
     common_distribution_create_options,
+    content_guard_option,
     create_command,
     destroy_command,
     distribution_filter_options,
@@ -73,6 +74,7 @@ update_options = [
         ),
     ),
     repository_option,
+    content_guard_option,
     pulp_option(
         "--allow-uploads/--block-uploads",
         needs_plugins=[PluginRequirement("python", specifier=">=3.4.0")],
