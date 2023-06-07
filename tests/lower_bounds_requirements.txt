@@ -1,5 +1,5 @@
 click==8.0.0
-packaging==20.0
+packaging==23.1
 PyYAML==5.3
 requests==2.24.0
 schema==0.7.5
