@@ -117,7 +117,7 @@ def call(
     except ValueError:
         raise click.ClickException("Parameters must be in the form <key>=<value>.")
     if uploads:
-        assert isinstance(body, Dict)
+        body = body or {}
         body.update({file.name: file for file in uploads})
     result = pulp_ctx.call(operation_id, parameters=params, body=body)
     pulp_ctx.output_result(result)
