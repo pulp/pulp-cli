@@ -1,1 +1,1 @@
-Added `PEP-440` version specifieres to `PluginRequirement` and `pulp debug has-plugin`.
+Added `PEP-440` version specifiers to `PluginRequirement` and `pulp debug has-plugin`.
