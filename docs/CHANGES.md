@@ -10,6 +10,37 @@
 
 [//]: # (towncrier release notes start)
 
+## 0.20.0 (2023-06-28)
+
+
+
+### Features
+
+- Add '--metadata-signing-service' option to rpm.
+  [#605](https://github.com/pulp/pulp-cli/issues/605)
+- Added `PEP-440` version specifiers to `PluginRequirement` and `pulp debug has-plugin`.
+  [#681](https://github.com/pulp/pulp-cli/issues/681)
+- Added `--content-guard` option to distributions.
+  [#697](https://github.com/pulp/pulp-cli/issues/697)
+
+
+### Bugfixes
+
+- Renamed `domains` command group to `domain` to follow the cli convention.
+  [#685](https://github.com/pulp/pulp-cli/issues/685)
+- Fixed some tests that made assumptions that worked, but were nonetheless incorrect.
+  [#692](https://github.com/pulp/pulp-cli/issues/692)
+
+
+### Deprecations and Removals
+
+- Deprecate the use of `min` and `max` in `PluginRequirement`.
+  [#681](https://github.com/pulp/pulp-cli/issues/681)
+
+
+---
+
+
 ## 0.19.0 (2023-04-14)
 
 
