@@ -23,5 +23,6 @@ Known plugins include:
 | Plugin | Description | Source Repository |
 | --- | --- | --- |
 | `pulp-cli-deb` | Provides the `deb` subcommand group to interact with `pulp_deb`. | [`pulp/pulp-cli-deb`](https://github.com/pulp/pulp-cli-deb) |
+| `pulp-cli-gem` | Provides the `gem` subcommand group to interact with `pulp_gem`. | [`pulp/pulp-cli-gem`](https://github.com/pulp/pulp-cli-gem) |
 | `pulp-cli-maven` | Provides the `maven` subcommand group to interact with `pulp_maven`. | [`pulp/pulp-cli-maven`](https://github.com/pulp/pulp-cli-maven) |
 | `pulp-cli-ostree` | Provides the `ostree` subcommand group to interact with `pulp_ostree`. | [`pulp/pulp-cli-ostree`](https://github.com/pulp/pulp-cli-ostree) |
