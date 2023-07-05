@@ -17,4 +17,11 @@ HREF="$(echo "$OUTPUT" | jq -r '.pulp_href')"
 expect_succ pulp rpm remote show --remote "$HREF"
 expect_succ pulp rpm remote list
 expect_succ pulp rpm remote update --remote "cli_test_rpm_remote" --sles-auth-token "0123456789abcdef"
+
+if pulp debug has-plugin --name "rpm" --specifier ">=3.19.0"
+then
+  expect_succ pulp rpm remote role list --remote "cli_test_rpm_remote"
+  expect_succ pulp rpm remote role add --remote "cli_test_rpm_remote" --user "admin" --role "rpm.rpmremote_viewer"
+fi
+
 expect_succ pulp rpm remote destroy --remote "cli_test_rpm_remote"

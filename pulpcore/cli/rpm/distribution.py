@@ -18,6 +18,7 @@ from pulpcore.cli.common.generic import (
     pulp_group,
     pulp_labels_option,
     resource_option,
+    role_command,
     show_command,
     update_command,
 )
@@ -80,3 +81,4 @@ distribution.add_command(
 )
 distribution.add_command(destroy_command(decorators=lookup_options))
 distribution.add_command(label_command(decorators=nested_lookup_options))
+distribution.add_command(role_command(decorators=lookup_options))
