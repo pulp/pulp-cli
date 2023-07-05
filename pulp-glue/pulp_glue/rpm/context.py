@@ -29,6 +29,7 @@ class PulpRpmACSContext(PulpACSContext):
     HREF = "rpm_rpm_alternate_content_source_href"
     ID_PREFIX = "acs_rpm_rpm"
     NEEDS_PLUGINS = [PluginRequirement("rpm", specifier=">=3.18.0")]
+    CAPABILITIES = {"roles": [PluginRequirement("rpm", specifier=">=3.19.0")]}
 
 
 class PulpRpmCompsXmlContext(PulpEntityContext):
@@ -54,6 +55,7 @@ class PulpRpmDistributionContext(PulpDistributionContext):
     HREF = "rpm_rpm_distribution_href"
     ID_PREFIX = "distributions_rpm_rpm"
     NEEDS_PLUGINS = [PluginRequirement("rpm", specifier=">=3.9.0")]
+    CAPABILITIES = {"roles": [PluginRequirement("rpm", specifier=">=3.19.0")]}
 
     def preprocess_entity(self, body: EntityDefinition, partial: bool = False) -> EntityDefinition:
         body = super().preprocess_entity(body, partial=partial)
@@ -183,6 +185,7 @@ class PulpRpmPublicationContext(PulpPublicationContext):
     HREF = "rpm_rpm_publication_href"
     ID_PREFIX = "publications_rpm_rpm"
     NEEDS_PLUGINS = [PluginRequirement("rpm", specifier=">=3.9.0")]
+    CAPABILITIES = {"roles": [PluginRequirement("rpm", specifier=">=3.19.0")]}
 
     def preprocess_entity(self, body: EntityDefinition, partial: bool = False) -> EntityDefinition:
         body = super().preprocess_entity(body, partial=partial)
@@ -212,6 +215,7 @@ class PulpRpmRemoteContext(PulpRemoteContext):
         "sles_auth_token",
     }
     NEEDS_PLUGINS = [PluginRequirement("rpm", specifier=">=3.9.0")]
+    CAPABILITIES = {"roles": [PluginRequirement("rpm", specifier=">=3.19.0")]}
 
 
 class PulpUlnRemoteContext(PulpRemoteContext):
@@ -223,6 +227,7 @@ class PulpUlnRemoteContext(PulpRemoteContext):
     ID_PREFIX = "remotes_rpm_uln"
     NULLABLES = PulpRemoteContext.NULLABLES | {"uln-server-base-url"}
     NEEDS_PLUGINS = [PluginRequirement("rpm", specifier=">=3.12.0")]
+    CAPABILITIES = {"roles": [PluginRequirement("rpm", specifier=">=3.19.0")]}
 
 
 class PulpRpmRepositoryVersionContext(PulpRepositoryVersionContext):
@@ -239,7 +244,11 @@ class PulpRpmRepositoryContext(PulpRepositoryContext):
     ENTITY = _("rpm repository")
     ENTITIES = _("rpm repositories")
     VERSION_CONTEXT = PulpRpmRepositoryVersionContext
-    CAPABILITIES = {"sync": [], "pulpexport": []}
+    CAPABILITIES = {
+        "sync": [],
+        "pulpexport": [],
+        "roles": [PluginRequirement("rpm", specifier=">=3.19.0")],
+    }
     NEEDS_PLUGINS = [PluginRequirement("rpm", specifier=">=3.9.0")]
 
     def preprocess_entity(self, body: EntityDefinition, partial: bool = False) -> EntityDefinition:
