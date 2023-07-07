@@ -188,14 +188,16 @@ class PulpContext:
                             and parameter["schema"]["type"] == "string"
                         ):
                             parameter["schema"] = {"type": "array", "items": {"type": "string"}}
+        if self.has_plugin(PluginRequirement("core", specifier=">=3.23,<3.30.0")):
+            operation = api_spec["paths"]["{upstream_pulp_href}replicate/"]["post"]
+            operation.pop("requestBody")
         if self.has_plugin(PluginRequirement("file", specifier=">=1.10.0,<1.11.0")):
             operation = api_spec["paths"]["{file_file_alternate_content_source_href}refresh/"][
                 "post"
             ]
             operation.pop("requestBody")
-        if self.has_plugin(
-            PluginRequirement("python", specifier="<99.99.0.dev")
-        ):  # TODO Add version bounds
+        if self.has_plugin(PluginRequirement("python", specifier="<99.99.0.dev")):
+            # TODO Add version bounds
             python_remote_serializer = api_spec["components"]["schemas"]["python.PythonRemote"]
             patched_python_remote_serializer = api_spec["components"]["schemas"][
                 "Patchedpython.PythonRemote"
@@ -356,7 +358,7 @@ class PulpContext:
             errors = []
             for task in task_group["tasks"]:
                 if task["state"] in ["failed", "canceled"]:
-                    task = self.api.call("tasks_read", parameters={"task_href": task["pul_href"]})
+                    task = self.api.call("tasks_read", parameters={"task_href": task["pulp_href"]})
                     errors.append(task["error"].get("description") or task["error"].get("reason"))
             raise PulpException(
                 _("Task group {task_group_href} has failed/canceled tasks: '{errors}'").format(
