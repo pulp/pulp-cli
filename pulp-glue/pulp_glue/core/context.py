@@ -531,3 +531,33 @@ class PulpWorkerContext(PulpEntityContext):
     HREF = "worker_href"
     ID_PREFIX = "workers"
     HREF_PATTERN = r"workers/"
+
+
+class PulpUpstreamPulpContext(PulpEntityContext):
+    ENTITY = _("upstream pulp")
+    ENTITIES = _("upstream pulps")
+    HREF = "upstream_pulp_href"
+    ID_PREFIX = "upstream_pulps"
+    HREF_PATTERN = r"upstream-pulps/"
+    NEEDS_PLUGINS = [PluginRequirement("core", specifier=">=3.23.0")]
+
+    def find(self, **kwargs: Any) -> Any:
+        """Workaroud for the missing ability to filter"""
+        # # TODO fix upstream and adjust to guard for the proper version
+        # # https://github.com/pulp/pulpcore/issues/4110
+        # if self.pulp_ctx.has_plugin(PluginRequirement("core", specifier=">=3.99.dev")):
+        #     # Workaround not needed anymore
+        #     return super().find(**kwargs)
+        search_result = self.list(limit=sys.maxsize, offset=0, parameters={})
+        for key, value in kwargs.items():
+            search_result = [res for res in search_result if res[key] == value]
+        if len(search_result) != 1:
+            raise PulpException(
+                _("Could not find {entity} with {kwargs}.").format(
+                    entity=self.ENTITY, kwargs=kwargs
+                )
+            )
+        return search_result[0]
+
+    def replicate(self) -> Any:
+        return self.call("replicate", parameters={self.HREF: self.pulp_href})

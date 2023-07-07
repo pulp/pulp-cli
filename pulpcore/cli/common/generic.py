@@ -537,7 +537,9 @@ def resource_lookup_option(*args: Any, **kwargs: Any) -> Callable[[FC], FC]:
     kwargs["expose_value"] = False
 
     if "help" not in kwargs:
-        kwargs["help"] = _("A resource to look for identified by <name> or by <href>.")
+        kwargs["help"] = _(
+            "A resource to look for identified by <{lookup_key}> or by <href>."
+        ).format(lookup_key=lookup_key)
 
     return click.option(*args, **kwargs)
 
