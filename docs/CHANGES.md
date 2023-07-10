@@ -10,6 +10,19 @@
 
 [//]: # (towncrier release notes start)
 
+## 0.18.1 (2023-07-10)
+
+
+
+### Bugfixes
+
+- Narrow down click version given a breaking change on 8.1.4.
+  [#715](https://github.com/pulp/pulp-cli/issues/715)
+
+
+---
+
+
 ## 0.18.0 (2023-03-09)
 
 
