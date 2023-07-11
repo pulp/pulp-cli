@@ -44,6 +44,7 @@ name = "Misc"
 showcontent = false
 
 [tool.black]
+target = "py36"
 line-length = 100
 
 [tool.isort]
