@@ -53,8 +53,10 @@ uuid_option = pulp_option(
 @click.option("-w", "--wait", is_flag=True, help=_("Wait for the group-task to finish"))
 @pass_entity_context
 @pass_pulp_context
-def show(pulp_ctx: PulpCLIContext, task_group_ctx: PulpTaskGroupContext, wait: bool) -> None:
+def show(pulp_ctx: PulpCLIContext, task_group_ctx: PulpEntityContext, wait: bool) -> None:
     """Shows details of a group-task."""
+    assert isinstance(task_group_ctx, PulpTaskGroupContext)
+
     entity = task_group_ctx.entity
     if wait:
         if not entity["all_tasks_dispatched"]:

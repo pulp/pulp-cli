@@ -182,10 +182,12 @@ def sync(
 @click.option("--digest", help=_("SHA256 digest of the Manifest file"), required=True)
 @pass_repository_context
 def add_tag(
-    repository_ctx: PulpContainerBaseRepositoryContext,
+    repository_ctx: PulpRepositoryContext,
     digest: str,
     tag: str,
 ) -> None:
+    assert isinstance(repository_ctx, PulpContainerBaseRepositoryContext)
+
     digest = digest.strip()
     if not digest.startswith("sha256:"):
         digest = f"sha256:{digest}"
@@ -201,7 +203,9 @@ def add_tag(
 @repository_lookup_option
 @click.option("--tag", help=_("Name of tag to remove"), required=True, callback=_tag_callback)
 @pass_repository_context
-def remove_tag(repository_ctx: PulpContainerBaseRepositoryContext, tag: str) -> None:
+def remove_tag(repository_ctx: PulpRepositoryContext, tag: str) -> None:
+    assert isinstance(repository_ctx, PulpContainerBaseRepositoryContext)
+
     repository_ctx.untag(tag)
 
 
@@ -219,11 +223,13 @@ def remove_tag(repository_ctx: PulpContainerBaseRepositoryContext, tag: str) -> 
 )
 @pass_repository_context
 def copy_tag(
-    repository_ctx: PulpContainerRepositoryContext,
+    repository_ctx: PulpRepositoryContext,
     source: PulpRepositoryContext,
     version: Optional[int],
     tags: List[str],
 ) -> None:
+    assert isinstance(repository_ctx, PulpContainerRepositoryContext)
+
     href = source.entity["latest_version_href"]
     if version is not None:
         latest_version = int(href.split("/")[-2])
@@ -267,12 +273,14 @@ def copy_tag(
 )
 @pass_repository_context
 def copy_manifest(
-    repository_ctx: PulpContainerRepositoryContext,
+    repository_ctx: PulpRepositoryContext,
     source: PulpRepositoryContext,
     version: Optional[int],
     digests: List[str],
     media_types: List[str],
 ) -> None:
+    assert isinstance(repository_ctx, PulpContainerRepositoryContext)
+
     href = source.entity["latest_version_href"]
     if version is not None:
         latest_version = int(href.split("/")[-2])
@@ -297,9 +305,11 @@ def copy_manifest(
 @click.option("--digest", help=_("SHA256 digest of the Manifest file"), required=True)
 @pass_repository_context
 def remove_image(
-    repository_ctx: PulpContainerPushRepositoryContext,
+    repository_ctx: PulpRepositoryContext,
     digest: str,
 ) -> None:
+    assert isinstance(repository_ctx, PulpContainerPushRepositoryContext)
+
     digest = digest.strip()
     if not digest.startswith("sha256:"):
         digest = f"sha256:{digest}"

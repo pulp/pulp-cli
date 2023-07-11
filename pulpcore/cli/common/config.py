@@ -143,7 +143,9 @@ def config() -> None:
     pass
 
 
-@config.command(help=_("Create a pulp-cli config settings file"))
+# This is a mypy bug getting confused with positional args
+# https://github.com/python/mypy/issues/15037
+@config.command(help=_("Create a pulp-cli config settings file"))  # type: ignore [arg-type]
 @config_options
 @click.option("--interactive", "-i", is_flag=True)
 @click.option("--editor", "-e", is_flag=True, help=_("Edit the config file in an editor"))

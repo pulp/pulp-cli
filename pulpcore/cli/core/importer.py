@@ -10,7 +10,6 @@ from pulpcore.cli.common.generic import (
     href_option,
     list_command,
     name_option,
-    pass_entity_context,
     pass_pulp_context,
     pulp_group,
     show_command,
@@ -18,6 +17,9 @@ from pulpcore.cli.common.generic import (
 
 translation = get_translation(__name__)
 _ = translation.gettext
+
+pass_importer_context = click.make_pass_decorator(PulpImporterContext)
+
 
 RepositoryMap = Tuple[str, str]  # source repo, destination repo
 
@@ -54,7 +56,7 @@ pulp.add_command(destroy_command(decorators=lookup_options))
 @pulp.command()
 @click.option("--name", required=True)
 @repo_map_option
-@pass_entity_context
+@pass_importer_context
 @pass_pulp_context
 def create(
     pulp_ctx: PulpCLIContext,
@@ -75,7 +77,7 @@ def create(
 @name_option
 @href_option
 @repo_map_option
-@pass_entity_context
+@pass_importer_context
 @pass_pulp_context
 def update(
     pulp_ctx: PulpCLIContext,

@@ -1,7 +1,7 @@
 from typing import Iterable
 
 import click
-from pulp_glue.common.context import PulpRemoteContext
+from pulp_glue.common.context import PulpACSContext, PulpRemoteContext
 from pulp_glue.common.i18n import get_translation
 from pulp_glue.file.context import PulpFileACSContext, PulpFileRemoteContext
 
@@ -13,7 +13,7 @@ from pulpcore.cli.common.generic import (
     href_option,
     list_command,
     name_option,
-    pass_entity_context,
+    pass_acs_context,
     pass_pulp_context,
     pulp_group,
     resource_option,
@@ -59,8 +59,8 @@ def path() -> None:
 @href_option
 @acs_lookup_option
 @path_option
-@pass_entity_context
-def add(acs_ctx: PulpFileACSContext, paths: Iterable[str]) -> None:
+@pass_acs_context
+def add(acs_ctx: PulpACSContext, paths: Iterable[str]) -> None:
     """Add path(s) to an existing ACS."""
     paths = set(paths)
     existing_paths = set(acs_ctx.entity["paths"])
@@ -79,8 +79,8 @@ def add(acs_ctx: PulpFileACSContext, paths: Iterable[str]) -> None:
 @href_option
 @acs_lookup_option
 @path_option
-@pass_entity_context
-def remove(acs_ctx: PulpFileACSContext, paths: Iterable[str]) -> None:
+@pass_acs_context
+def remove(acs_ctx: PulpACSContext, paths: Iterable[str]) -> None:
     """Remove path(s) from an existing ACS."""
     paths = set(paths)
     existing_paths = set(acs_ctx.entity["paths"])
@@ -114,10 +114,10 @@ acs.add_command(role_command(decorators=lookup_options))
 
 
 @acs.command()
-@pass_entity_context
-@pass_pulp_context
+@acs_lookup_option
 @href_option
 @name_option
-@acs_lookup_option
-def refresh(pulp_ctx: PulpCLIContext, acs_ctx: PulpFileACSContext) -> None:
+@pass_acs_context
+@pass_pulp_context
+def refresh(pulp_ctx: PulpCLIContext, acs_ctx: PulpACSContext) -> None:
     acs_ctx.refresh()

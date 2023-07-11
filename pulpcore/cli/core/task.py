@@ -17,7 +17,6 @@ from pulpcore.cli.common.generic import (
     destroy_command,
     href_option,
     list_command,
-    pass_entity_context,
     pass_pulp_context,
     pulp_group,
     pulp_option,
@@ -27,6 +26,9 @@ from pulpcore.cli.core.generic import task_filter
 
 translation = get_translation(__name__)
 _ = translation.gettext
+
+
+pass_task_context = click.make_pass_decorator(PulpTaskContext)
 
 
 def _uuid_callback(
@@ -113,7 +115,7 @@ task.add_command(
 @href_option
 @uuid_option
 @click.option("-w", "--wait", is_flag=True, help=_("Wait for the task to finish"))
-@pass_entity_context
+@pass_task_context
 @pass_pulp_context
 def show(pulp_ctx: PulpCLIContext, task_ctx: PulpTaskContext, wait: bool) -> None:
     """Shows details of a task."""
@@ -134,7 +136,7 @@ def show(pulp_ctx: PulpCLIContext, task_ctx: PulpTaskContext, wait: bool) -> Non
 )
 @click.option("--waiting", "waiting_tasks", is_flag=True, help=_("Cancel all 'waiting' tasks."))
 @click.option("--running", "running_tasks", is_flag=True, help=_("Cancel all 'running' tasks."))
-@pass_entity_context
+@pass_task_context
 @pass_pulp_context
 def cancel(
     pulp_ctx: PulpCLIContext,
@@ -181,7 +183,7 @@ def cancel(
     type=click.Choice(["skipped", "completed", "failed", "canceled"]),
     multiple=True,
 )
-@pass_entity_context
+@pass_task_context
 def purge(
     task_ctx: PulpTaskContext,
     finished: Optional[datetime],
@@ -192,7 +194,7 @@ def purge(
 
 
 @task.command()
-@pass_entity_context
+@pass_task_context
 @pass_pulp_context
 def summary(pulp_ctx: PulpCLIContext, task_ctx: PulpTaskContext) -> None:
     """

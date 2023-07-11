@@ -1,13 +1,12 @@
 import datetime
 import json
 import re
+import typing as t
 from functools import lru_cache, wraps
-from typing import IO, Any, Callable, Dict, Iterable, List, Mapping, Optional, Tuple, Type, Union
 
 import click
 import schema as s
 import yaml
-from click.decorators import FC, F
 from pulp_glue.common.context import (
     DATETIME_FORMATS,
     DEFAULT_LIMIT,
@@ -42,6 +41,10 @@ translation = get_translation(__name__)
 _ = translation.gettext
 
 
+_AnyCallable = t.Callable[..., t.Any]
+FC = t.TypeVar("FC", bound=t.Union[_AnyCallable, click.Command])
+
+
 class IncompatibleContext(click.UsageError):
     pass
 
@@ -49,7 +52,7 @@ class IncompatibleContext(click.UsageError):
 class ClickNoWait(click.ClickException):
     exit_code = 0
 
-    def show(self, file: Optional[IO[str]] = None) -> None:
+    def show(self, file: t.Optional[t.IO[str]] = None) -> None:
         """
         Format the message into file or STDERR.
         Overwritten from base class to not print "Error: ".
@@ -60,7 +63,7 @@ class ClickNoWait(click.ClickException):
 
 
 class PulpJSONEncoder(json.JSONEncoder):
-    def default(self, obj: Any) -> Any:
+    def default(self, obj: t.Any) -> t.Any:
         if isinstance(obj, datetime.datetime):
             return obj.isoformat()
         else:
@@ -75,7 +78,7 @@ class PulpCLIContext(PulpContext):
     def __init__(
         self,
         api_root: str,
-        api_kwargs: Dict[str, Any],
+        api_kwargs: t.Dict[str, t.Any],
         background_tasks: bool,
         timeout: int,
         format: str,
@@ -93,10 +96,10 @@ class PulpCLIContext(PulpContext):
     def echo(self, message: str, nl: bool = True, err: bool = False) -> None:
         click.echo(message, nl=nl, err=err)
 
-    def prompt(self, text: str, hide_input: bool = False) -> Any:
+    def prompt(self, text: str, hide_input: bool = False) -> t.Any:
         return click.prompt(text, hide_input=hide_input)
 
-    def output_result(self, result: Any) -> None:
+    def output_result(self, result: t.Any) -> None:
         """
         Dump the provided result to the console using the selected renderer
         """
@@ -124,16 +127,17 @@ class PulpCLIContext(PulpContext):
 
 pass_pulp_context = click.make_pass_decorator(PulpCLIContext)
 pass_entity_context = click.make_pass_decorator(PulpEntityContext)
+pass_acs_context = click.make_pass_decorator(PulpACSContext)
+pass_content_context = click.make_pass_decorator(PulpContentContext)
 pass_repository_context = click.make_pass_decorator(PulpRepositoryContext)
 pass_repository_version_context = click.make_pass_decorator(PulpRepositoryVersionContext)
-pass_content_context = click.make_pass_decorator(PulpContentContext)
 
 
 ##############################################################################
 # Custom types for parameters
 
 
-def int_or_empty(value: str) -> Union[str, int]:
+def int_or_empty(value: str) -> t.Union[str, int]:
     if value == "":
         return ""
     else:
@@ -143,7 +147,7 @@ def int_or_empty(value: str) -> Union[str, int]:
 int_or_empty.__name__ = "int or empty"
 
 
-def float_or_empty(value: str) -> Union[str, float]:
+def float_or_empty(value: str) -> t.Union[str, float]:
     if value == "":
         return ""
     else:
@@ -160,16 +164,16 @@ float_or_empty.__name__ = "float or empty"
 class PulpCommand(click.Command):
     def __init__(
         self,
-        *args: Any,
-        allowed_with_contexts: Optional[Tuple[Type[PulpEntityContext]]] = None,
-        needs_plugins: Optional[List[PluginRequirement]] = None,
-        **kwargs: Any,
+        *args: t.Any,
+        allowed_with_contexts: t.Optional[t.Tuple[t.Type[PulpEntityContext]]] = None,
+        needs_plugins: t.Optional[t.List[PluginRequirement]] = None,
+        **kwargs: t.Any,
     ):
         self.allowed_with_contexts = allowed_with_contexts
         self.needs_plugins = needs_plugins
         super().__init__(*args, **kwargs)
 
-    def invoke(self, ctx: click.Context) -> Any:
+    def invoke(self, ctx: click.Context) -> t.Any:
         try:
             if self.needs_plugins:
                 pulp_ctx = ctx.find_object(PulpCLIContext)
@@ -194,9 +198,9 @@ class PulpCommand(click.Command):
                 self.help = self.help.format(entity=entity_ctx.ENTITY, entities=entity_ctx.ENTITIES)
         super().format_help_text(ctx, formatter)
 
-    def get_params(self, ctx: click.Context) -> List[click.Parameter]:
+    def get_params(self, ctx: click.Context) -> t.List[click.Parameter]:
         params = super().get_params(ctx)
-        new_params: List[click.Parameter] = []
+        new_params: t.List[click.Parameter] = []
         for param in params:
             if isinstance(param, PulpOption):
                 if param.allowed_with_contexts is not None:
@@ -210,7 +214,7 @@ class PulpGroup(PulpCommand, click.Group):
     command_class = PulpCommand
     group_class = type
 
-    def get_command(self, ctx: click.Context, cmd_name: str) -> Optional[click.Command]:
+    def get_command(self, ctx: click.Context, cmd_name: str) -> t.Optional[click.Command]:
         # Overwriting this removes the command from the help message and from being callable
         cmd = super().get_command(ctx, cmd_name)
         if isinstance(cmd, (PulpCommand, PulpGroup)):
@@ -223,7 +227,7 @@ class PulpGroup(PulpCommand, click.Group):
                     )
         return cmd
 
-    def list_commands(self, ctx: click.Context) -> List[str]:
+    def list_commands(self, ctx: click.Context) -> t.List[str]:
         commands_filtered_by_context = []
 
         for name, cmd in self.commands.items():
@@ -236,27 +240,31 @@ class PulpGroup(PulpCommand, click.Group):
         return sorted(commands_filtered_by_context)
 
 
-def pulp_command(name: Optional[str] = None, **kwargs: Any) -> Callable[[F], click.Command]:
+def pulp_command(
+    name: t.Optional[str] = None, **kwargs: t.Any
+) -> t.Callable[[_AnyCallable], PulpCommand]:
     return click.command(name=name, cls=PulpCommand, **kwargs)
 
 
-def pulp_group(name: Optional[str] = None, **kwargs: Any) -> Callable[[F], click.Group]:
+def pulp_group(
+    name: t.Optional[str] = None, **kwargs: t.Any
+) -> t.Callable[[_AnyCallable], PulpGroup]:
     return click.group(name=name, cls=PulpGroup, **kwargs)
 
 
 class PulpOption(click.Option):
     def __init__(
         self,
-        *args: Any,
-        needs_plugins: Optional[List[PluginRequirement]] = None,
-        allowed_with_contexts: Optional[Tuple[Type[PulpEntityContext]]] = None,
-        **kwargs: Any,
+        *args: t.Any,
+        needs_plugins: t.Optional[t.List[PluginRequirement]] = None,
+        allowed_with_contexts: t.Optional[t.Tuple[t.Type[PulpEntityContext]]] = None,
+        **kwargs: t.Any,
     ):
         self.needs_plugins = needs_plugins
         self.allowed_with_contexts = allowed_with_contexts
         super().__init__(*args, **kwargs)
 
-    def process_value(self, ctx: click.Context, value: Any) -> Any:
+    def process_value(self, ctx: click.Context, value: t.Any) -> t.Any:
         if self.needs_plugins and value is not None and value != ():
             pulp_ctx = ctx.find_object(PulpCLIContext)
             assert pulp_ctx is not None
@@ -272,7 +280,7 @@ class PulpOption(click.Option):
                 pulp_ctx.needs_plugin(plugin_requirement)
         return super().process_value(ctx, value)
 
-    def get_help_record(self, ctx: click.Context) -> Optional[Tuple[str, str]]:
+    def get_help_record(self, ctx: click.Context) -> t.Optional[t.Tuple[str, str]]:
         tmp = super().get_help_record(ctx)
         if tmp is None:
             return None
@@ -284,8 +292,8 @@ class PulpOption(click.Option):
 
 
 class GroupOption(PulpOption):
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
-        self.group: List[str] = kwargs.pop("group")
+    def __init__(self, *args: t.Any, **kwargs: t.Any) -> None:
+        self.group: t.List[str] = kwargs.pop("group")
         assert self.group, "'group' parameter required"
         kwargs["help"] = (
             kwargs.get("help", "")
@@ -295,8 +303,8 @@ class GroupOption(PulpOption):
         super().__init__(*args, **kwargs)
 
     def handle_parse_result(
-        self, ctx: click.Context, opts: Mapping[str, Any], args: List[Any]
-    ) -> Any:
+        self, ctx: click.Context, opts: t.Mapping[str, t.Any], args: t.List[t.Any]
+    ) -> t.Any:
         assert self.name is not None
         all_options = self.group + [self.name]
         options_present = [x for x in all_options if x in opts]
@@ -322,11 +330,11 @@ class GroupOption(PulpOption):
 
 @lru_cache(typed=True)
 def lookup_callback(
-    attribute: str, context_class: Type[PulpEntityContext] = PulpEntityContext
-) -> Callable[[click.Context, click.Parameter, Optional[str]], Optional[str]]:
+    attribute: str, context_class: t.Type[PulpEntityContext] = PulpEntityContext
+) -> t.Callable[[click.Context, click.Parameter, t.Optional[str]], t.Optional[str]]:
     def _callback(
-        ctx: click.Context, param: click.Parameter, value: Optional[str]
-    ) -> Optional[str]:
+        ctx: click.Context, param: click.Parameter, value: t.Optional[str]
+    ) -> t.Optional[str]:
         if value is not None:
             if value == "":
                 value = "null"
@@ -339,11 +347,11 @@ def lookup_callback(
 
 
 def href_callback(
-    context_class: Type[PulpEntityContext] = PulpEntityContext,
-) -> Callable[[click.Context, click.Parameter, Optional[str]], Optional[str]]:
+    context_class: t.Type[PulpEntityContext] = PulpEntityContext,
+) -> t.Callable[[click.Context, click.Parameter, t.Optional[str]], t.Optional[str]]:
     def _href_callback(
-        ctx: click.Context, param: click.Parameter, value: Optional[str]
-    ) -> Optional[str]:
+        ctx: click.Context, param: click.Parameter, value: t.Optional[str]
+    ) -> t.Optional[str]:
         if value is not None:
             entity_ctx = ctx.find_object(context_class)
             assert entity_ctx is not None
@@ -354,8 +362,8 @@ def href_callback(
 
 
 def _version_callback(
-    ctx: click.Context, param: click.Parameter, value: Optional[int]
-) -> Optional[int]:
+    ctx: click.Context, param: click.Parameter, value: t.Optional[int]
+) -> t.Optional[int]:
     entity_ctx = ctx.find_object(PulpEntityContext)
     assert entity_ctx is not None
     repository_ctx = ctx.find_object(PulpRepositoryContext)
@@ -367,13 +375,13 @@ def _version_callback(
     return value
 
 
-def load_file_wrapper(handler: Callable[[click.Context, click.Parameter, str], Any]) -> Any:
+def load_file_wrapper(handler: t.Callable[[click.Context, click.Parameter, str], t.Any]) -> t.Any:
     """A wrapper that used for chaining or decorating callbacks that manipulate with input data."""
 
     @wraps(handler)
     def _load_file_or_string_wrapper(
-        ctx: click.Context, param: click.Parameter, value: Optional[str]
-    ) -> Any:
+        ctx: click.Context, param: click.Parameter, value: t.Optional[str]
+    ) -> t.Any:
         """Load the string from input, or from file if the value starts with @."""
         if not value:
             return value
@@ -398,7 +406,7 @@ def load_file_wrapper(handler: Callable[[click.Context, click.Parameter, str], A
 load_string_callback = load_file_wrapper(lambda c, p, x: x)
 
 
-def json_callback(ctx: click.Context, param: click.Parameter, value: Optional[str]) -> Any:
+def json_callback(ctx: click.Context, param: click.Parameter, value: t.Optional[str]) -> t.Any:
     if value is None:
         return None
 
@@ -414,8 +422,8 @@ load_json_callback = load_file_wrapper(json_callback)
 
 
 def load_labels_callback(
-    ctx: click.Context, param: click.Parameter, value: Optional[str]
-) -> Optional[Dict[str, str]]:
+    ctx: click.Context, param: click.Parameter, value: t.Optional[str]
+) -> t.Optional[t.Dict[str, str]]:
     if value is None:
         return value
 
@@ -428,12 +436,12 @@ def load_labels_callback(
 
 
 def create_content_json_callback(
-    context_class: Optional[Type[PulpContentContext]] = None, schema: s.Schema = None
-) -> Any:
+    context_class: t.Optional[t.Type[PulpContentContext]] = None, schema: s.Schema = None
+) -> t.Any:
     @load_file_wrapper
     def _callback(
         ctx: click.Context, param: click.Parameter, value: str
-    ) -> Optional[List[PulpContentContext]]:
+    ) -> t.Optional[t.List[PulpContentContext]]:
         ctx_class = context_class
         new_value = json_callback(ctx, param, value)
         if new_value is not None:
@@ -472,8 +480,8 @@ def parse_size_callback(ctx: click.Context, param: click.Parameter, value: str) 
 
 
 def null_callback(
-    ctx: click.Context, param: click.Parameter, value: Optional[str]
-) -> Optional[str]:
+    ctx: click.Context, param: click.Parameter, value: t.Optional[str]
+) -> t.Optional[str]:
     if value == "":
         return "null"
     return value
@@ -483,7 +491,7 @@ def null_callback(
 # Decorator common options
 
 
-def pulp_option(*args: Any, **kwargs: Any) -> Callable[[FC], FC]:
+def pulp_option(*args: t.Any, **kwargs: t.Any) -> t.Callable[[FC], FC]:
     kwargs["cls"] = PulpOption
     return click.option(*args, **kwargs)
 
@@ -491,12 +499,12 @@ def pulp_option(*args: Any, **kwargs: Any) -> Callable[[FC], FC]:
 domain_pattern = r"(?P<pulp_domain>[-a-zA-Z0-9_]+)"
 
 
-def resource_lookup_option(*args: Any, **kwargs: Any) -> Callable[[FC], FC]:
+def resource_lookup_option(*args: t.Any, **kwargs: t.Any) -> t.Callable[[FC], FC]:
     lookup_key: str = kwargs.pop("lookup_key", "name")
-    context_class: Type[PulpEntityContext] = kwargs.pop("context_class")
+    context_class: t.Type[PulpEntityContext] = kwargs.pop("context_class")
 
     def _option_callback(
-        ctx: click.Context, param: click.Parameter, value: Optional[str]
+        ctx: click.Context, param: click.Parameter, value: t.Optional[str]
     ) -> EntityFieldDefinition:
         # Pass None and "" verbatim
         if not value:
@@ -542,26 +550,26 @@ def resource_lookup_option(*args: Any, **kwargs: Any) -> Callable[[FC], FC]:
     return click.option(*args, **kwargs)
 
 
-def resource_option(*args: Any, **kwargs: Any) -> Callable[[FC], FC]:
-    default_plugin: Optional[str] = kwargs.pop("default_plugin", None)
-    default_type: Optional[str] = kwargs.pop("default_type", None)
+def resource_option(*args: t.Any, **kwargs: t.Any) -> t.Callable[[FC], FC]:
+    default_plugin: t.Optional[str] = kwargs.pop("default_plugin", None)
+    default_type: t.Optional[str] = kwargs.pop("default_type", None)
     lookup_key: str = kwargs.pop("lookup_key", "name")
-    context_table: Dict[str, Type[PulpEntityContext]] = kwargs.pop("context_table")
-    capabilities: Optional[List[str]] = kwargs.pop("capabilities", None)
-    href_pattern: Optional[str] = kwargs.pop("href_pattern", None)
-    parent_resource_lookup: Optional[Tuple[str, Type[PulpEntityContext]]] = kwargs.pop(
+    context_table: t.Dict[str, t.Type[PulpEntityContext]] = kwargs.pop("context_table")
+    capabilities: t.Optional[t.List[str]] = kwargs.pop("capabilities", None)
+    href_pattern: t.Optional[str] = kwargs.pop("href_pattern", None)
+    parent_resource_lookup: t.Optional[t.Tuple[str, t.Type[PulpEntityContext]]] = kwargs.pop(
         "parent_resource_lookup", None
     )
 
     def _option_callback(
-        ctx: click.Context, param: click.Parameter, value: Optional[str]
+        ctx: click.Context, param: click.Parameter, value: t.Optional[str]
     ) -> EntityFieldDefinition:
         # Pass None and "" verbatim
         if not value:
             return value
 
-        pulp_href: Optional[str] = None
-        entity: Optional[EntityDefinition] = None
+        pulp_href: t.Optional[str] = None
+        entity: t.Optional[EntityDefinition] = None
 
         pulp_ctx = ctx.find_object(PulpCLIContext)
         assert pulp_ctx is not None
@@ -643,8 +651,8 @@ def resource_option(*args: Any, **kwargs: Any) -> Callable[[FC], FC]:
         return entity_ctx
 
     def _multi_option_callback(
-        ctx: click.Context, param: click.Parameter, value: Iterable[Optional[str]]
-    ) -> Iterable[EntityFieldDefinition]:
+        ctx: click.Context, param: click.Parameter, value: t.Iterable[t.Optional[str]]
+    ) -> t.Iterable[EntityFieldDefinition]:
         if value:
             return (_option_callback(ctx, param, item) for item in value)
         return tuple()
@@ -674,8 +682,8 @@ def resource_option(*args: Any, **kwargs: Any) -> Callable[[FC], FC]:
     return click.option(*args, **kwargs)
 
 
-def type_option(*args: Any, **kwargs: Any) -> Callable[[FC], FC]:
-    choices: Dict[str, Type[PulpEntityContext]] = kwargs.pop("choices")
+def type_option(*args: t.Any, **kwargs: t.Any) -> t.Callable[[FC], FC]:
+    choices: t.Dict[str, t.Type[PulpEntityContext]] = kwargs.pop("choices")
     assert choices and isinstance(choices, dict)
     type_names = list(choices.keys())
     case_sensitive = kwargs.pop("case_sensitive", False)
@@ -686,7 +694,7 @@ def type_option(*args: Any, **kwargs: Any) -> Callable[[FC], FC]:
         "expose_value": False,
     }
 
-    def _type_callback(ctx: click.Context, param: click.Parameter, value: Optional[str]) -> str:
+    def _type_callback(ctx: click.Context, param: click.Parameter, value: t.Optional[str]) -> str:
         pulp_ctx = ctx.find_object(PulpCLIContext)
         assert pulp_ctx
         if value is not None:
@@ -1051,14 +1059,16 @@ common_remote_update_options = [
 # Generic reusable commands
 
 
-def list_command(**kwargs: Any) -> click.Command:
+def list_command(**kwargs: t.Any) -> click.Command:
     """A factory that creates a list command."""
 
     kwargs.setdefault("name", "list")
     kwargs.setdefault("help", _("Show the list of optionally filtered {entities}."))
     decorators = kwargs.pop("decorators", [])
 
-    @pulp_command(**kwargs)
+    # This is a mypy bug getting confused with positional args
+    # https://github.com/python/mypy/issues/15037
+    @pulp_command(**kwargs)  # type: ignore [arg-type]
     @limit_option
     @offset_option
     @ordering_option
@@ -1071,7 +1081,7 @@ def list_command(**kwargs: Any) -> click.Command:
         entity_ctx: PulpEntityContext,
         limit: int,
         offset: int,
-        **kwargs: Any,
+        **kwargs: t.Any,
     ) -> None:
         """
         Show the list of optionally filtered {entities}.
@@ -1089,7 +1099,7 @@ def list_command(**kwargs: Any) -> click.Command:
     return callback
 
 
-def show_command(**kwargs: Any) -> click.Command:
+def show_command(**kwargs: t.Any) -> click.Command:
     """A factory that creates a show command."""
 
     if "name" not in kwargs:
@@ -1113,7 +1123,7 @@ def show_command(**kwargs: Any) -> click.Command:
     return callback
 
 
-def create_command(**kwargs: Any) -> click.Command:
+def create_command(**kwargs: t.Any) -> click.Command:
     """A factory that creates a create command."""
 
     if "name" not in kwargs:
@@ -1122,10 +1132,12 @@ def create_command(**kwargs: Any) -> click.Command:
         kwargs["help"] = _("Create a {entity}.")
     decorators = kwargs.pop("decorators", [])
 
-    @pulp_command(**kwargs)
+    # This is a mypy bug getting confused with positional args
+    # https://github.com/python/mypy/issues/15037
+    @pulp_command(**kwargs)  # type: ignore [arg-type]
     @pass_entity_context
     @pass_pulp_context
-    def callback(pulp_ctx: PulpCLIContext, entity_ctx: PulpEntityContext, **kwargs: Any) -> None:
+    def callback(pulp_ctx: PulpCLIContext, entity_ctx: PulpEntityContext, **kwargs: t.Any) -> None:
         """
         Create a {entity}.
         """
@@ -1141,7 +1153,7 @@ def create_command(**kwargs: Any) -> click.Command:
     return callback
 
 
-def update_command(**kwargs: Any) -> click.Command:
+def update_command(**kwargs: t.Any) -> click.Command:
     """A factory that creates an update command."""
 
     if "name" not in kwargs:
@@ -1150,10 +1162,12 @@ def update_command(**kwargs: Any) -> click.Command:
         kwargs["help"] = _("Update a {entity}.")
     decorators = kwargs.pop("decorators", [])
 
-    @pulp_command(**kwargs)
+    # This is a mypy bug getting confused with positional args
+    # https://github.com/python/mypy/issues/15037
+    @pulp_command(**kwargs)  # type: ignore [arg-type]
     @pass_entity_context
     @pass_pulp_context
-    def callback(pulp_ctx: PulpCLIContext, entity_ctx: PulpEntityContext, **kwargs: Any) -> None:
+    def callback(pulp_ctx: PulpCLIContext, entity_ctx: PulpEntityContext, **kwargs: t.Any) -> None:
         """
         Update a {entity}.
         """
@@ -1165,7 +1179,7 @@ def update_command(**kwargs: Any) -> click.Command:
     return callback
 
 
-def destroy_command(**kwargs: Any) -> click.Command:
+def destroy_command(**kwargs: t.Any) -> click.Command:
     """A factory that creates a destroy command."""
 
     kwargs.setdefault("name", "destroy")
@@ -1186,7 +1200,7 @@ def destroy_command(**kwargs: Any) -> click.Command:
     return callback
 
 
-def version_command(**kwargs: Any) -> click.Command:
+def version_command(**kwargs: t.Any) -> click.Command:
     """A factory that creates a repository version command group."""
 
     kwargs.setdefault("name", "version")
@@ -1223,7 +1237,7 @@ def version_command(**kwargs: Any) -> click.Command:
     return callback
 
 
-def label_command(**kwargs: Any) -> click.Command:
+def label_command(**kwargs: t.Any) -> click.Command:
     """A factory that creates a label command group."""
 
     kwargs.setdefault("name", "label")
@@ -1266,7 +1280,7 @@ def label_command(**kwargs: Any) -> click.Command:
     return label_group
 
 
-def role_command(**kwargs: Any) -> click.Command:
+def role_command(**kwargs: t.Any) -> click.Command:
     """A factory that creates a (object) role command group."""
 
     kwargs.setdefault("name", "role")
@@ -1301,8 +1315,8 @@ def role_command(**kwargs: Any) -> click.Command:
         pulp_ctx: PulpCLIContext,
         entity_ctx: PulpEntityContext,
         role: str,
-        users: List[str],
-        groups: List[str],
+        users: t.List[str],
+        groups: t.List[str],
     ) -> None:
         result = entity_ctx.add_role(role, users, groups)
         pulp_ctx.output_result(result)
@@ -1317,8 +1331,8 @@ def role_command(**kwargs: Any) -> click.Command:
         pulp_ctx: PulpCLIContext,
         entity_ctx: PulpEntityContext,
         role: str,
-        users: List[str],
-        groups: List[str],
+        users: t.List[str],
+        groups: t.List[str],
     ) -> None:
         result = entity_ctx.remove_role(role, users, groups)
         pulp_ctx.output_result(result)
@@ -1331,13 +1345,13 @@ def role_command(**kwargs: Any) -> click.Command:
     return role_group
 
 
-def repository_content_command(**kwargs: Any) -> click.Group:
+def repository_content_command(**kwargs: t.Any) -> click.Group:
     """A factory that creates a repository content command group."""
 
     content_contexts = kwargs.pop("contexts", {})
 
     def version_callback(
-        ctx: click.Context, param: click.Parameter, value: Optional[int]
+        ctx: click.Context, param: click.Parameter, value: t.Optional[int]
     ) -> PulpRepositoryVersionContext:
         repo_ctx = ctx.find_object(PulpRepositoryContext)
         assert repo_ctx is not None
@@ -1349,7 +1363,9 @@ def repository_content_command(**kwargs: Any) -> click.Group:
         )
         return repo_ver_ctx
 
-    @pulp_command("list")
+    # This is a mypy bug getting confused with positional args
+    # https://github.com/python/mypy/issues/15037
+    @pulp_command("list")  # type: ignore [arg-type]
     @click.option("--all-types", is_flag=True)
     @limit_option
     @offset_option
@@ -1364,7 +1380,7 @@ def repository_content_command(**kwargs: Any) -> click.Group:
         offset: int,
         limit: int,
         all_types: bool,
-        **params: Any,
+        **params: t.Any,
     ) -> None:
         parameters = {k: v for k, v in params.items() if v is not None}
         parameters.update({"repository_version": version.pulp_href})
@@ -1402,15 +1418,15 @@ def repository_content_command(**kwargs: Any) -> click.Group:
     @click.option("--base-version", type=int, callback=version_callback)
     def content_modify(
         base_version: PulpRepositoryVersionContext,
-        add_content: Optional[List[PulpContentContext]],
-        remove_content: Optional[List[PulpContentContext]],
+        add_content: t.Optional[t.List[PulpContentContext]],
+        remove_content: t.Optional[t.List[PulpContentContext]],
     ) -> None:
         repo_ctx = base_version.repository_ctx
         ac = [unit.pulp_href for unit in add_content] if add_content else None
         rc = [unit.pulp_href for unit in remove_content] if remove_content else None
         repo_ctx.modify(add_content=ac, remove_content=rc, base_version=base_version.pulp_href)
 
-    command_decorators: Dict[click.Command, Optional[List[Callable[[FC], FC]]]] = {
+    command_decorators: t.Dict[click.Command, t.Optional[t.List[t.Callable[[FC], FC]]]] = {
         content_list: kwargs.pop("list_decorators", []),
         content_add: kwargs.pop("add_decorators", None),
         content_remove: kwargs.pop("remove_decorators", None),

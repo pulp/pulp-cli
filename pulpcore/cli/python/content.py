@@ -96,13 +96,15 @@ content.add_command(create_command(decorators=create_options))
 @pass_pulp_context
 def upload(
     pulp_ctx: PulpCLIContext,
-    entity_ctx: PulpPythonContentContext,
+    entity_ctx: PulpEntityContext,
     relative_path: str,
     file: IO[bytes],
     chunk_size: int,
     repository: Optional[PulpPythonRepositoryContext],
 ) -> None:
     """Create a Python package content unit through uploading a file"""
+    assert isinstance(entity_ctx, PulpPythonContentContext)
+
     result = entity_ctx.upload(
         relative_path=relative_path, file=file, chunk_size=chunk_size, repository=repository
     )

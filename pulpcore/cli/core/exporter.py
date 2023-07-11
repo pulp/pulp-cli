@@ -1,7 +1,7 @@
 from typing import Any, Dict, Iterable
 
 import click
-from pulp_glue.common.context import EntityFieldDefinition, PulpEntityContext, PulpRepositoryContext
+from pulp_glue.common.context import EntityFieldDefinition, PulpRepositoryContext
 from pulp_glue.common.i18n import get_translation
 from pulp_glue.core.context import PulpExporterContext
 
@@ -11,7 +11,6 @@ from pulpcore.cli.common.generic import (
     href_option,
     list_command,
     name_option,
-    pass_entity_context,
     pass_pulp_context,
     pulp_group,
     resource_option,
@@ -20,6 +19,8 @@ from pulpcore.cli.common.generic import (
 
 translation = get_translation(__name__)
 _ = translation.gettext
+
+pass_exporter_context = click.make_pass_decorator(PulpExporterContext)
 
 
 multi_repository_option = resource_option(
@@ -60,7 +61,7 @@ pulp.add_command(destroy_command(decorators=lookup_options))
 @click.option("--path", required=True)
 @multi_repository_option
 @click.option("--repository-href", multiple=True)
-@pass_entity_context
+@pass_exporter_context
 @pass_pulp_context
 def create(
     pulp_ctx: PulpCLIContext,
@@ -73,7 +74,7 @@ def create(
     repo_hrefs = [
         repository_ctx.pulp_href
         for repository_ctx in repository
-        if isinstance(repository_ctx, PulpEntityContext)
+        if isinstance(repository_ctx, PulpRepositoryContext)
     ] + list(repository_href)
 
     params = {"name": name, "path": path, "repositories": repo_hrefs}
@@ -87,7 +88,7 @@ def create(
 @click.option("--path")
 @multi_repository_option
 @click.option("--repository-href", multiple=True)  # This should be deprecated
-@pass_entity_context
+@pass_exporter_context
 @pass_pulp_context
 def update(
     pulp_ctx: PulpCLIContext,
@@ -105,7 +106,7 @@ def update(
         payload["repositories"] = [
             repository_ctx.pulp_href
             for repository_ctx in repository
-            if isinstance(repository_ctx, PulpEntityContext)
+            if isinstance(repository_ctx, PulpRepositoryContext)
         ] + list(repository_href)
 
     exporter_ctx.update(body=payload)
