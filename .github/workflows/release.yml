@@ -1,43 +1,25 @@
 name: pulp-cli Release
 
 on:
-  push:
-    tags:
-      - "[0-9]+.[0-9]+.[0-9]"
+  workflow_dispatch
 
 jobs:
-  publish-pypi:
-    name: Publish to PyPI
+  release:
+    name: Release
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.x'
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install setuptools wheel twine
-    - name: Build and publish
-      env:
-        TWINE_USERNAME: pulp
-        TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
-      run: |
-        cd pulp-glue
-        python setup.py sdist bdist_wheel
-        twine upload dist/*
-        cd ..
-        python setup.py sdist bdist_wheel
-        twine upload dist/*
-
-  publish-docs:
-    name: Publish docs
-    needs: publish-pypi
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-    - name: Run publish docs script
-      env:
-        PULP_DOCS_KEY: ${{ secrets.PULP_DOCS_KEY }}
-      run: .ci/scripts/publish_docs.sh "${GITHUB_REF##*/}"
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install bump2version towncrier
+      - name: Setup git
+        run: |
+          git config user.name pulpbot
+          git config user.email pulp-infra@redhat.com
+      - name: Release
+        run: .ci/scripts/release.sh

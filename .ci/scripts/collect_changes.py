@@ -9,16 +9,25 @@ from pkg_resources import parse_version
 # Read Towncrier settings
 tc_settings = toml.load("pyproject.toml")["tool"]["towncrier"]
 
-CHANGELOG_FILE = tc_settings["filename"]
-START_STRING = tc_settings["start_string"]
-TITLE_FORMAT = tc_settings["title_format"]
+CHANGELOG_FILE = tc_settings.get("filename", "NEWS.rst")
+START_STRING = tc_settings.get(
+    "start_string",
+    "<!-- towncrier release notes start -->\n"
+    if CHANGELOG_FILE.endswith(".md")
+    else ".. towncrier release notes start\n",
+)
+TITLE_FORMAT = tc_settings.get("title_format", "{name} {version} ({project_date})")
 
 
+NAME_REGEX = r".*"
 VERSION_REGEX = r"([0-9]+\.[0-9]+\.[0-9][0-9ab]*)"
 DATE_REGEX = r"[0-9]{4}-[0-9]{2}-[0-9]{2}"
 TITLE_REGEX = (
     "("
-    + re.escape(TITLE_FORMAT.format(version="VERSION_REGEX", project_date="DATE_REGEX"))
+    + re.escape(
+        TITLE_FORMAT.format(name="NAME_REGEX", version="VERSION_REGEX", project_date="DATE_REGEX")
+    )
+    .replace("NAME_REGEX", NAME_REGEX)
     .replace("VERSION_REGEX", VERSION_REGEX)
     .replace("DATE_REGEX", DATE_REGEX)
     + ")"
