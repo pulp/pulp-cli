@@ -1,0 +1,30 @@
+name: Collect changes
+on:
+  workflow_call:
+  workflow_dispatch:
+
+jobs:
+  collect-changes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: "main"
+          fetch-depth: 0
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+      - name: Setup git
+        run: |
+          git config user.name pulpbot
+          git config user.email pulp-infra@redhat.com
+      - name: Collect changes
+        run: |
+          pip install GitPython toml
+          python3 .ci/scripts/collect_changes.py
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          title: "Update Changelog"
+          branch: "update_changes"
+          delete-branch: true
