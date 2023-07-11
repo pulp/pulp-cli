@@ -1,5 +1,24 @@
 # Releasing (for internal use)
 
+## New method (experimental)
+
+### Create a new Y-Release Branch
+
+  1. Trigger the "Create Release Branch" workflow on the "main" branch.
+  1. Watch for the "Bump Version" PR, verify that it deletes all the changes snippets present on the new release branch, approve and merge it.
+
+### Release from a Release Branch
+
+  1. Trigger the "pulp-cli Release" workflow on the corresponding release branch.
+  1. Lean back and see the magic happen.
+  1. Wait for the "pulp-cli Publish" workflow to succeed.
+  1. Verify that a new version appeared on PyPI.
+  1. Verify that the docs have been updated.
+  1. [only Y-releases] Announce the release at https://discourse.pulpproject.org/c/announcements/6.
+  1. Look for the "Update Changelog" PR, approve and merge it.
+
+## Manual method
+
 1. Install `bumpversion` and `towncrier` into a virtualenv or select one if it exists.
 1. Run `bumpversion release`.
 1. Install the corresponding `pulp-glue` and `pulp-cli` modules from the source (`pip install -e . ./pulp-glue`)

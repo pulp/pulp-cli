@@ -19,7 +19,6 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
       - name: Install python dependencies
-        run: |
-          pip install -r lint_requirements.txt
+        run: pip install -r lint_requirements.txt
       - name: Lint code
         run: make lint
