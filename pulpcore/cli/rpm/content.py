@@ -247,7 +247,9 @@ content.add_command(
 # upload takes a file-argument and creates the entity from it.
 # upload currently only works for advisory/package,
 # see https://github.com/pulp/pulp_rpm/issues/2534
-@content.command(
+# This is a mypy bug getting confused with positional args
+# https://github.com/python/mypy/issues/15037
+@content.command(  # type: ignore [arg-type]
     allowed_with_contexts=(
         PulpRpmPackageContext,
         PulpRpmAdvisoryContext,
@@ -278,10 +280,7 @@ content.add_command(
 @pass_pulp_context
 def upload(
     pulp_ctx: PulpCLIContext,
-    entity_ctx: Union[
-        PulpRpmPackageContext,
-        PulpRpmAdvisoryContext,
-    ],
+    entity_ctx: PulpEntityContext,
     file: IO[bytes],
     chunk_size: int,
     **kwargs: Any,

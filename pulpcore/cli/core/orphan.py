@@ -1,7 +1,7 @@
 from typing import Any
 
 import click
-from pulp_glue.common.context import PluginRequirement
+from pulp_glue.common.context import PluginRequirement, PulpEntityContext
 from pulp_glue.common.i18n import get_translation
 from pulp_glue.core.context import PulpOrphanContext
 
@@ -28,7 +28,9 @@ def orphan(ctx: click.Context, pulp_ctx: PulpCLIContext) -> None:
     ctx.obj = PulpOrphanContext(pulp_ctx)
 
 
-@orphan.command()
+# This is a mypy bug getting confused with positional args
+# https://github.com/python/mypy/issues/15037
+@orphan.command()  # type: ignore [arg-type]
 @pulp_option(
     "--content-hrefs",
     help=_("List of specific Contents to delete if they are orphans"),
@@ -47,8 +49,10 @@ def orphan(ctx: click.Context, pulp_ctx: PulpCLIContext) -> None:
 )
 @pass_entity_context
 @pass_pulp_context
-def cleanup(pulp_ctx: PulpCLIContext, orphan_ctx: PulpOrphanContext, **kwargs: Any) -> None:
+def cleanup(pulp_ctx: PulpCLIContext, orphan_ctx: PulpEntityContext, **kwargs: Any) -> None:
     """
     Cleanup orphaned content.
     """
+    assert isinstance(orphan_ctx, PulpOrphanContext)
+
     pulp_ctx.output_result(orphan_ctx.cleanup(kwargs))

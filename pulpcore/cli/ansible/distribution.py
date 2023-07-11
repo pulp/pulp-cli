@@ -7,6 +7,7 @@ from pulp_glue.common.context import (
     EntityFieldDefinition,
     PluginRequirement,
     PulpContext,
+    PulpEntityContext,
 )
 from pulp_glue.common.i18n import get_translation
 
@@ -104,7 +105,7 @@ distribution.add_command(
 @pulp_labels_option
 @pass_entity_context
 def update(
-    distribution_ctx: PulpAnsibleDistributionContext,
+    distribution_ctx: PulpEntityContext,
     base_path: Optional[str],
     repository: EntityFieldDefinition,
     content_guard: EntityFieldDefinition,
@@ -114,6 +115,8 @@ def update(
     """
     To remove repository or repository_version fields set --repository to ""
     """
+    assert isinstance(distribution_ctx, PulpAnsibleDistributionContext)
+
     dist_body: EntityDefinition = distribution_ctx.entity
     name: str = dist_body["name"]
     body: EntityDefinition = dict()

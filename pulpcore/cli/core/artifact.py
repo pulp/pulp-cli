@@ -1,6 +1,7 @@
 from typing import IO
 
 import click
+from pulp_glue.common.context import PulpEntityContext
 from pulp_glue.common.i18n import get_translation
 from pulp_glue.core.context import PulpArtifactContext
 
@@ -66,9 +67,11 @@ artifact.add_command(show_command(decorators=lookup_options))
 @pass_pulp_context
 def upload(
     pulp_ctx: PulpCLIContext,
-    artifact_ctx: PulpArtifactContext,
+    artifact_ctx: PulpEntityContext,
     file: IO[bytes],
     chunk_size: int,
 ) -> None:
+    assert isinstance(artifact_ctx, PulpArtifactContext)
+
     artifact_ctx.upload(file, chunk_size)
     pulp_ctx.output_result(artifact_ctx.entity)

@@ -1,7 +1,7 @@
 from typing import Optional
 
 import click
-from pulp_glue.common.context import PluginRequirement
+from pulp_glue.common.context import PluginRequirement, PulpEntityContext
 from pulp_glue.common.i18n import get_translation
 from pulp_glue.core.context import PulpDomainContext, PulpUserContext, PulpUserRoleContext
 
@@ -111,7 +111,9 @@ user.add_command(destroy_command(decorators=lookup_options, needs_plugins=[req_c
 @pass_entity_context
 @pass_pulp_context
 @click.pass_context
-def role(ctx: click.Context, pulp_ctx: PulpCLIContext, user_ctx: PulpUserContext) -> None:
+def role(ctx: click.Context, pulp_ctx: PulpCLIContext, user_ctx: PulpEntityContext) -> None:
+    assert isinstance(user_ctx, PulpUserContext)
+
     pulp_ctx.needs_plugin(req_core_3_17)
     ctx.obj = PulpUserRoleContext(pulp_ctx, user_ctx)
 

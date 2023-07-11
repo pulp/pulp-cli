@@ -1,4 +1,4 @@
-from typing import IO, Any, Callable, Optional, Union
+from typing import IO, Any, Callable, Optional
 
 import click
 from pulp_glue.ansible.context import (
@@ -218,7 +218,9 @@ content.add_command(_list_command_wrapper(list_command(decorators=list_options +
 content.add_command(show_command(decorators=lookup_options))
 
 
-@content.command()
+# This is a mypy bug getting confused with positional args
+# https://github.com/python/mypy/issues/15037
+@content.command()  # type: ignore [arg-type]
 @click.option("--file", type=click.File("rb"), required=True)
 @repository_option
 @pulp_option(
@@ -253,11 +255,7 @@ content.add_command(show_command(decorators=lookup_options))
 @pass_pulp_context
 def upload(
     pulp_ctx: PulpCLIContext,
-    content_ctx: Union[
-        PulpAnsibleRoleContext,
-        PulpAnsibleCollectionVersionContext,
-        PulpAnsibleCollectionVersionSignatureContext,
-    ],
+    content_ctx: PulpEntityContext,
     file: IO[bytes],
     **kwargs: Any,
 ) -> None:

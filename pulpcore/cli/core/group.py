@@ -1,7 +1,7 @@
 from typing import Optional
 
 import click
-from pulp_glue.common.context import PluginRequirement
+from pulp_glue.common.context import PluginRequirement, PulpEntityContext
 from pulp_glue.common.i18n import get_translation
 from pulp_glue.core.context import (
     PulpDomainContext,
@@ -33,6 +33,8 @@ from pulpcore.cli.common.generic import (
 
 translation = get_translation(__name__)
 _ = translation.gettext
+
+pass_group_context = click.make_pass_decorator(PulpGroupContext)
 
 
 def _object_callback(ctx: click.Context, param: click.Parameter, value: str) -> str:
@@ -117,7 +119,7 @@ group.add_command(
     type=click.Choice(["model", "object"], case_sensitive=False),
     default="model",
 )
-@pass_entity_context
+@pass_group_context
 @pass_pulp_context
 @click.pass_context
 def permission(
@@ -146,9 +148,9 @@ permission.add_command(
 @click.option("--permission", required=True)
 @click.option("--object", "obj", callback=_object_callback)
 @pass_entity_context
-def add_permission(
-    entity_ctx: PulpGroupPermissionContext, permission: str, obj: Optional[str]
-) -> None:
+def add_permission(entity_ctx: PulpEntityContext, permission: str, obj: Optional[str]) -> None:
+    assert isinstance(entity_ctx, PulpGroupPermissionContext)
+
     body = {"permission": permission}
     if obj:
         body["obj"] = obj
@@ -174,7 +176,7 @@ permission.add_command(
 
 
 @group.group()
-@pass_entity_context
+@pass_group_context
 @pass_pulp_context
 @click.pass_context
 def user(ctx: click.Context, pulp_ctx: PulpCLIContext, group_ctx: PulpGroupContext) -> None:
@@ -193,7 +195,9 @@ user.add_command(
 @click.option("--username", required=True)
 @pass_entity_context
 @pass_pulp_context
-def remove_user(pulp_ctx: PulpCLIContext, entity_ctx: PulpGroupUserContext, username: str) -> None:
+def remove_user(pulp_ctx: PulpCLIContext, entity_ctx: PulpEntityContext, username: str) -> None:
+    assert isinstance(entity_ctx, PulpGroupUserContext)
+
     user_href = PulpUserContext(pulp_ctx).find(username=username)["pulp_href"]
     user_pk = user_href.split("/")[-2]
     group_user_href = f"{entity_ctx.group_ctx.pulp_href}users/{user_pk}/"
@@ -202,7 +206,7 @@ def remove_user(pulp_ctx: PulpCLIContext, entity_ctx: PulpGroupUserContext, user
 
 
 @group.group(name="role-assignment")
-@pass_entity_context
+@pass_group_context
 @pass_pulp_context
 @click.pass_context
 def role(ctx: click.Context, pulp_ctx: PulpCLIContext, group_ctx: PulpGroupContext) -> None:

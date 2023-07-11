@@ -2,7 +2,7 @@ from typing import List, Optional
 
 import click
 from pulp_glue.certguard.context import PulpRHSMCertGuardContext, PulpX509CertGuardContext
-from pulp_glue.common.context import PulpContentGuardContext
+from pulp_glue.common.context import PulpContentGuardContext, PulpEntityContext
 from pulp_glue.common.i18n import get_translation
 from pulp_glue.core.context import (
     PulpContentRedirectContentGuardContext,
@@ -77,10 +77,12 @@ rbac.add_command(role_command(decorators=lookup_options))
 @pass_pulp_context
 def assign(
     pulp_ctx: PulpCLIContext,
-    guard_ctx: PulpRbacContentGuardContext,
+    guard_ctx: PulpEntityContext,
     users: Optional[List[str]],
     groups: Optional[List[str]],
 ) -> None:
+    assert isinstance(guard_ctx, PulpRbacContentGuardContext)
+
     result = guard_ctx.assign(users=users, groups=groups)
     pulp_ctx.output_result(result)
 
@@ -104,10 +106,12 @@ def assign(
 @pass_pulp_context
 def remove(
     pulp_ctx: PulpCLIContext,
-    guard_ctx: PulpRbacContentGuardContext,
+    guard_ctx: PulpEntityContext,
     users: Optional[List[str]],
     groups: Optional[List[str]],
 ) -> None:
+    assert isinstance(guard_ctx, PulpRbacContentGuardContext)
+
     result = guard_ctx.remove(users=users, groups=groups)
     pulp_ctx.output_result(result)
 

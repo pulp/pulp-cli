@@ -15,7 +15,6 @@ from pulpcore.cli.common.generic import (
     PulpCLIContext,
     destroy_command,
     href_option,
-    pass_entity_context,
     pass_pulp_context,
     pulp_group,
     show_command,
@@ -23,6 +22,8 @@ from pulpcore.cli.common.generic import (
 
 translation = get_translation(__name__)
 _ = translation.gettext
+
+pass_export_context = click.make_pass_decorator(PulpExportContext)
 
 
 def _version_list_callback(
@@ -98,13 +99,15 @@ pulp.add_command(show_command(decorators=lookup_options))
 pulp.add_command(destroy_command(decorators=lookup_options))
 
 
-@pulp.command()
+# This is a mypy bug getting confused with positional args
+# https://github.com/python/mypy/issues/15037
+@pulp.command()  # type: ignore [arg-type]
 @click.option("--exporter", type=str, required=True, help=_("Name of owning PulpExporter"))
 @click.option(
     "--limit", default=DEFAULT_LIMIT, type=int, help=_("Limit the number of exporters to show.")
 )
 @click.option("--offset", default=0, type=int, help=_("Skip a number of exporters to show."))
-@pass_entity_context
+@pass_export_context
 @pass_pulp_context
 def list(
     pulp_ctx: PulpCLIContext,
@@ -129,7 +132,7 @@ def list(
 @click.option(
     "--start-versions", type=tuple([str, int]), multiple=True, callback=_version_list_callback
 )
-@pass_entity_context
+@pass_export_context
 @pass_pulp_context
 def run(
     pulp_ctx: PulpCLIContext,
