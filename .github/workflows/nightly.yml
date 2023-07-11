@@ -2,10 +2,12 @@ name: Nightly
 
 on:
   schedule:
-    - cron: '15 3 * * *'
+    - cron: "15 3 * * *"
 
 jobs:
   test:
     uses: "./.github/workflows/test.yml"
   codeql:
     uses: "./.github/workflows/codeql.yml"
+  collect_changes:
+    uses: "./.github/workflows/changes.yml"
