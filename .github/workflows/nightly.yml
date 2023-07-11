@@ -11,5 +11,5 @@ jobs:
   codeql:
     uses: "./.github/workflows/codeql.yml"
   collect_changes:
-    uses: "./.github/workflows/changes.yml"
+    uses: "./.github/workflows/collect_changes.yml"
     secrets: inherit

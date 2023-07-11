@@ -22,15 +22,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - run: |
-          git fetch --prune --unshallow
+      - run: git fetch --prune --unshallow
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.11"
       - name: Install python dependencies
-        run: |
-          pip install toml pygithub
+        run: pip install toml pygithub
       - name: Check commit message
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
