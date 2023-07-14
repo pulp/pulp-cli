@@ -8,6 +8,14 @@ issue_format = "[#{issue}](https://github.com/pulp/pulp-cli/issues/{issue})"
 start_string = "[//]: # (towncrier release notes start)\n"
 underlines = ["", "", ""]
 
+[[tool.towncrier.section]]
+path = ""
+name = ""
+
+[[tool.towncrier.section]]
+path = "pulp-glue"
+name = "Pulp GLUE"
+
 [[tool.towncrier.type]]
 directory = "feature"
 name = "Features"
