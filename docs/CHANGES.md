@@ -10,6 +10,19 @@
 
 [//]: # (towncrier release notes start)
 
+## 0.20.1 (2023-07-07)
+
+
+
+### Bugfixes
+
+- Narrow down click version given a breaking change on 8.1.4.
+  [#715](https://github.com/pulp/pulp-cli/issues/715)
+
+
+---
+
+
 ## 0.20.0 (2023-06-28)
 
 
@@ -36,6 +49,42 @@
 
 - Deprecate the use of `min` and `max` in `PluginRequirement`.
   [#681](https://github.com/pulp/pulp-cli/issues/681)
+
+
+---
+
+
+## 0.19.3 (2023-07-10)
+
+
+
+### Bugfixes
+
+- Narrow down click version given a breaking change on 8.1.4.
+  [#715](https://github.com/pulp/pulp-cli/issues/715)
+
+
+---
+
+
+## 0.19.2 (2023-05-22)
+
+
+
+### Bugfixes
+
+- Fixed some tests that made assumptions that worked, but were nonetheless incorrect.
+  [#692](https://github.com/pulp/pulp-cli/issues/692)
+
+
+---
+
+
+## 0.19.1 (2023-05-02)
+
+
+
+No significant changes.
 
 
 ---
@@ -75,6 +124,19 @@
 
 - Removed deprecated commands `pulp orphans` and `pulp debug task-summary`.
   [#670](https://github.com/pulp/pulp-cli/issues/670)
+
+
+---
+
+
+## 0.18.1 (2023-07-10)
+
+
+
+### Bugfixes
+
+- Narrow down click version given a breaking change on 8.1.4.
+  [#715](https://github.com/pulp/pulp-cli/issues/715)
 
 
 ---
