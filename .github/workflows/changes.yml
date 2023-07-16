@@ -25,6 +25,7 @@ jobs:
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v5
         with:
+          token: ${{ secrets.RELEASE_TOKEN }}
           title: "Update Changelog"
           branch: "update_changes"
           delete-branch: true
