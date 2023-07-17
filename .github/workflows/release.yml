@@ -1,4 +1,4 @@
-name: Pulp CLI Release
+name: pulp-cli Release
 
 on:
   push:
