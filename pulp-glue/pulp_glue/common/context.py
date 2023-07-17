@@ -1259,6 +1259,32 @@ class PulpRepositoryContext(PulpEntityContext):
         return self.call("modify", parameters={self.HREF: href or self.pulp_href}, body=body)
 
 
+class PulpGenericRepositoryContext(PulpRepositoryContext):
+    """Generic repository context class to separate specific general functionality."""
+
+    def reclaim(
+        self,
+        repo_hrefs: List[t.Union[str, PulpRepositoryContext]],
+        repo_versions_keeplist: Optional[List[t.Union[str, PulpRepositoryVersionContext]]] = None,
+    ) -> Any:
+        """
+        Reclaim disk space for a list of repositories.
+
+        Parameters:
+            repo_hrefs: List of repository hrefs to reclaim.
+            repo_versions_keeplist: List of repository version hrefs to keep unaffected.
+
+        Returns:
+            Record of the reclaim space task.
+        """
+        self.pulp_ctx.needs_plugin(PluginRequirement("core", specifier=">=3.19.0"))
+        body: Dict[str, Any] = {}
+        body["repo_hrefs"] = repo_hrefs
+        if repo_versions_keeplist:
+            body["repo_versions_keeplist"] = repo_versions_keeplist
+        return self.call("reclaim_space_reclaim", body=body)
+
+
 class PulpContentContext(PulpEntityContext):
     """Base class for content contexts."""
 
