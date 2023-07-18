@@ -1,6 +1,6 @@
 click==8.0.0
 packaging==20.0
-PyYAML==5.3
+PyYAML==6.0.1
 requests==2.24.0
 schema==0.7.5
 toml==0.10.2
