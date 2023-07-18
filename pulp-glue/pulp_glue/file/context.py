@@ -1,4 +1,4 @@
-from typing import Any, Mapping, Optional
+import typing as t
 
 from pulp_glue.common.context import (
     EntityDefinition,
@@ -10,12 +10,20 @@ from pulp_glue.common.context import (
     PulpRemoteContext,
     PulpRepositoryContext,
     PulpRepositoryVersionContext,
+    api_quirk,
 )
 from pulp_glue.common.i18n import get_translation
+from pulp_glue.common.openapi import OpenAPI
 from pulp_glue.core.context import PulpArtifactContext
 
 translation = get_translation(__name__)
 _ = translation.gettext
+
+
+@api_quirk(PluginRequirement("file", specifier=">=1.10.0,<1.11.0"))
+def patch_file_acs_refresh_request_body(api: OpenAPI) -> None:
+    operation = api.api_spec["paths"]["{file_file_alternate_content_source_href}refresh/"]["post"]
+    operation.pop("requestBody", None)
 
 
 class PulpFileACSContext(PulpACSContext):
@@ -42,9 +50,9 @@ class PulpFileContentContext(PulpContentContext):
     def create(
         self,
         body: EntityDefinition,
-        parameters: Optional[Mapping[str, Any]] = None,
+        parameters: t.Optional[t.Mapping[str, t.Any]] = None,
         non_blocking: bool = False,
-    ) -> Any:
+    ) -> t.Any:
         if "sha256" in body:
             body = body.copy()
             body["artifact"] = PulpArtifactContext(

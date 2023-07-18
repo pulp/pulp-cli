@@ -3,6 +3,7 @@ import os
 import re
 import sys
 import time
+import typing as t
 from typing import IO, Any, ClassVar, Dict, List, Mapping, Optional, Set, Type, Union, cast
 
 from packaging.specifiers import SpecifierSet
@@ -75,6 +76,11 @@ class PluginRequirement:
             return self.inverted
         return (version in self.specifier) != self.inverted
 
+    def __str__(self) -> str:
+        return f"{self.__class__.__name__}({self.name}{self.specifier})"
+
+    __repr__ = __str__
+
 
 class PulpException(Exception):
     pass
@@ -101,6 +107,78 @@ def preprocess_payload(payload: EntityDefinition) -> EntityDefinition:
     return PreprocessedEntityDefinition(
         {key: _preprocess_value(value) for key, value in payload.items() if value is not None}
     )
+
+
+_REGISTERED_API_QUIRKS: t.List[t.Tuple[PluginRequirement, t.Callable[[OpenAPI], None]]] = []
+
+
+def api_quirk(
+    req: PluginRequirement,
+) -> t.Callable[[t.Callable[[OpenAPI], None]], None]:
+    def _decorator(patch: t.Callable[[OpenAPI], None]) -> None:
+        _REGISTERED_API_QUIRKS.append((req, patch))
+
+    return _decorator
+
+
+@api_quirk(PluginRequirement("core", specifier="<3.20.0"))
+def patch_ordering_filters(api: OpenAPI) -> None:
+    for method, path in api.operations.values():
+        operation = api.api_spec["paths"][path][method]
+        if method == "get" and "parameters" in operation:
+            for parameter in operation["parameters"]:
+                if (
+                    parameter["name"] == "ordering"
+                    and parameter["in"] == "query"
+                    and "schema" in parameter
+                    and parameter["schema"]["type"] == "string"
+                ):
+                    parameter["schema"] = {"type": "array", "items": {"type": "string"}}
+                    parameter["explode"] = False
+                    parameter["style"] = "form"
+
+
+@api_quirk(PluginRequirement("core", specifier="<3.22.0"))
+def patch_field_select_filters(api: OpenAPI) -> None:
+    for method, path in api.operations.values():
+        operation = api.api_spec["paths"][path][method]
+        if method == "get" and "parameters" in operation:
+            for parameter in operation["parameters"]:
+                if (
+                    parameter["name"] in ["fields", "exclude_fields"]
+                    and parameter["in"] == "query"
+                    and "schema" in parameter
+                    and parameter["schema"]["type"] == "string"
+                ):
+                    parameter["schema"] = {"type": "array", "items": {"type": "string"}}
+
+
+@api_quirk(PluginRequirement("core", specifier="<99.99.0"))
+def patch_content_in_query_filters(api: OpenAPI) -> None:
+    # https://github.com/pulp/pulpcore/issues/3634
+    for operation_id, (method, path) in api.operations.items():
+        if (
+            operation_id == "repository_versions_list"
+            or (
+                operation_id.startswith("repositories_") and operation_id.endswith("_versions_list")
+            )
+            or (operation_id.startswith("publications_") and operation_id.endswith("_list"))
+        ):
+            operation = api.api_spec["paths"][path][method]
+            for parameter in operation["parameters"]:
+                if (
+                    parameter["name"] == "content__in"
+                    and parameter["in"] == "query"
+                    and "schema" in parameter
+                    and parameter["schema"]["type"] == "string"
+                ):
+                    parameter["schema"] = {"type": "array", "items": {"type": "string"}}
+
+
+@api_quirk(PluginRequirement("core", specifier=">=3.23,<3.30.0"))
+def patch_upstream_pulp_replicate_request_body(api: OpenAPI) -> None:
+    operation = api.api_spec["paths"]["{upstream_pulp_href}replicate/"]["post"]
+    operation.pop("requestBody", None)
 
 
 class PulpContext:
@@ -141,72 +219,10 @@ class PulpContext:
     def _patch_api_spec(self) -> None:
         # A place for last minute fixes to the api_spec.
         # WARNING: Operations are already indexed at this point.
-        api_spec = self.api.api_spec
-        if self.has_plugin(PluginRequirement("core", specifier="<3.20.0")):
-            for method, path in self.api.operations.values():
-                operation = api_spec["paths"][path][method]
-                if method == "get" and "parameters" in operation:
-                    for parameter in operation["parameters"]:
-                        if (
-                            parameter["name"] == "ordering"
-                            and parameter["in"] == "query"
-                            and "schema" in parameter
-                            and parameter["schema"]["type"] == "string"
-                        ):
-                            parameter["schema"] = {"type": "array", "items": {"type": "string"}}
-                            parameter["explode"] = False
-                            parameter["style"] = "form"
-        if self.has_plugin(PluginRequirement("core", specifier="<3.22.0")):
-            for method, path in self.api.operations.values():
-                operation = api_spec["paths"][path][method]
-                if method == "get" and "parameters" in operation:
-                    for parameter in operation["parameters"]:
-                        if (
-                            parameter["name"] in ["fields", "exclude_fields"]
-                            and parameter["in"] == "query"
-                            and "schema" in parameter
-                            and parameter["schema"]["type"] == "string"
-                        ):
-                            parameter["schema"] = {"type": "array", "items": {"type": "string"}}
-        if self.has_plugin(PluginRequirement("core", specifier="<99.99.0")):
-            # https://github.com/pulp/pulpcore/issues/3634
-            for operation_id, (method, path) in self.api.operations.items():
-                if (
-                    operation_id == "repository_versions_list"
-                    or (
-                        operation_id.startswith("repositories_")
-                        and operation_id.endswith("_versions_list")
-                    )
-                    or (operation_id.startswith("publications_") and operation_id.endswith("_list"))
-                ):
-                    operation = api_spec["paths"][path][method]
-                    for parameter in operation["parameters"]:
-                        if (
-                            parameter["name"] == "content__in"
-                            and parameter["in"] == "query"
-                            and "schema" in parameter
-                            and parameter["schema"]["type"] == "string"
-                        ):
-                            parameter["schema"] = {"type": "array", "items": {"type": "string"}}
-        if self.has_plugin(PluginRequirement("core", specifier=">=3.23,<3.30.0")):
-            operation = api_spec["paths"]["{upstream_pulp_href}replicate/"]["post"]
-            operation.pop("requestBody", None)
-        if self.has_plugin(PluginRequirement("file", specifier=">=1.10.0,<1.11.0")):
-            operation = api_spec["paths"]["{file_file_alternate_content_source_href}refresh/"][
-                "post"
-            ]
-            operation.pop("requestBody", None)
-        if self.has_plugin(PluginRequirement("python", specifier="<99.99.0.dev")):
-            # TODO Add version bounds
-            python_remote_serializer = api_spec["components"]["schemas"]["python.PythonRemote"]
-            patched_python_remote_serializer = api_spec["components"]["schemas"][
-                "Patchedpython.PythonRemote"
-            ]
-            for prop in ("includes", "excludes"):
-                python_remote_serializer["properties"][prop]["type"] = "array"
-                python_remote_serializer["properties"][prop]["items"] = {"type": "string"}
-                patched_python_remote_serializer["properties"][prop]["type"] = "array"
-                patched_python_remote_serializer["properties"][prop]["items"] = {"type": "string"}
+        assert self._api is not None
+        for req, patch in _REGISTERED_API_QUIRKS:
+            if self.has_plugin(req):
+                patch(self._api)
 
     @property
     def domain_enabled(self) -> bool:
