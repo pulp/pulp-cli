@@ -142,7 +142,7 @@ def update(
             distribution_ctx.update(body={"repository": ""}, non_blocking=True)
             body["repository_version"] = f'{dist_body["repository"]}versions/{version}/'
         elif dist_body["repository_version"]:
-            repository_href, _, _ = dist_body["repository_version"].partition("versions")
+            repository_href = dist_body["repository_version"].partition("versions")[0]
             body["repository_version"] = f"{repository_href}versions/{version}/"
         else:
             raise click.ClickException(
