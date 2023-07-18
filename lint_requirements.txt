@@ -2,7 +2,7 @@
 black~=22.12 ; python_version > "3.6"
 flake8 ; python_version > "3.6"
 isort ; python_version > "3.6"
-mypy ; python_version > "3.6"
+mypy==1.2.0 ; python_version > "3.6"
 shellcheck-py ; python_version > "3.6"
 
 # Type annotation stubs
