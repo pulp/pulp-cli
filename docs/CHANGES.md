@@ -10,6 +10,19 @@
 
 [//]: # (towncrier release notes start)
 
+## 0.19.4 (2023-07-19)
+
+
+
+### Bugfixes
+
+- Pinnend PyYAML version to fix installation issues.
+  [#724](https://github.com/pulp/pulp-cli/issues/724)
+
+
+---
+
+
 ## 0.19.3 (2023-07-10)
 
 
