@@ -10,7 +10,7 @@
 
 [//]: # (towncrier release notes start)
 
-## 0.20.2.dev (2023-07-19)
+## 0.20.2 (2023-07-19)
 
 
 
