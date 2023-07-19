@@ -23,4 +23,4 @@ towncrier --yes
 bumpversion release --commit --message "Release {new_version}" --tag --tag-name "{new_version}" --tag-message "Release {new_version}" --allow-dirty
 bumpversion patch --commit
 
-git push upstream "${BRANCH}" "${NEW_VERSION}"
+git push origin "${BRANCH}" "${NEW_VERSION}"
