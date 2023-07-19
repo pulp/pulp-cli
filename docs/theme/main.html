@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+
+{% block site_name %}
+{{ super() }}
+<div class="version">{{ config.theme.version }}</div>
+{% endblock %}
