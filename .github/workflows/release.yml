@@ -9,6 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+        token: ${{ secrets.RELEASE_TOKEN }}
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
