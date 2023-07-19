@@ -19,7 +19,7 @@ then
   exit 1
 fi
 
-towncrier --yes --version "${NEW_VERSION}"
+towncrier build --yes --version "${NEW_VERSION}"
 bumpversion release --commit --message "Release {new_version}" --tag --tag-name "{new_version}" --tag-message "Release {new_version}" --allow-dirty
 bumpversion patch --commit
 
