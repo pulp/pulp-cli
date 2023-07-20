@@ -21,7 +21,7 @@ To install with minimal dependencies:
 pip install pulp-cli  # minimal dependencies
 ```
 
-You can also include optional dependencies for [advanced features](../advanced_features/) with one of the following commands:
+You can also include optional dependencies for [advanced features](advanced_features.md) with one of the following commands:
 ```bash
 pip install pulp-cli[pygments]  # colorized output
 pip install pulp-cli[shell]  # with interactive shell mode

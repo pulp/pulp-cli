@@ -1,12 +1,12 @@
 # Supported Workflows
 
 `pulp-cli` is still in beta, so the features and workflows listed here are subject to change.
-`pulp-cli` is tested against the five most-recent pulpcore releases as of the date of the pulp-cli 
-release. It comes with support for five Pulp plugins: `pulp_ansible`, `pulp_container`, `pulp_file`, 
-`pulp_python` and `pulp_rpm`. Some of Pulp's other plugins can be added to the CLI through CLI 
-plugins, check out [CLI plugins](/#cli-plugins) for more information.
+`pulp-cli` is tested against the five most-recent pulpcore releases as of the date of the pulp-cli
+release. It comes with support for five Pulp plugins: `pulp_ansible`, `pulp_container`, `pulp_file`,
+`pulp_python` and `pulp_rpm`. Some of Pulp's other plugins can be added to the CLI through CLI
+plugins, check out [CLI plugins](index.md#cli-plugins) for more information.
 
-While pulp-cli currently continues to work against older versions of pulpcore, we're unlikely to 
+While pulp-cli currently continues to work against older versions of pulpcore, we're unlikely to
 take bug-reports for support of such older versions.
 
 (NOTE: pulp-cli does not (yet) expose all functionality provided by the REST API of pulpcore and enabled plugins. RFEs and pull-requests for missing features gratefully and cheerfully accepted!)
@@ -14,7 +14,7 @@ take bug-reports for support of such older versions.
 ## pulpcore
 
 Pulpcore commands require a minimum version of 3.11. Not every command is supported for all
-`pulpcore` versions. Run `pulp status` to check your connection to Pulp and see currently 
+`pulpcore` versions. Run `pulp status` to check your connection to Pulp and see currently
 installed plugins.
 
 ### Workflows
