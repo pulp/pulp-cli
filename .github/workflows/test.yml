@@ -42,7 +42,7 @@ jobs:
         run: |
           if [ "${{matrix.lower_bounds}}" ]
           then
-            pip install -r test_requirements.txt -r tests/lower_bounds_requirements.txt
+            pip install -r test_requirements.txt -r tests/lower_bounds_requirements.lock
           else
             pip install -r test_requirements.txt
           fi

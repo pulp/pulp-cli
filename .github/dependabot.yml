@@ -14,15 +14,6 @@ updates:
   open-pull-requests-limit: 10
   commit-message:
     prefix: "[noissue]"
-- package-ecosystem: pip
-  directory: "/tests"
-  schedule:
-    interval: monthly
-  ignore:
-    - dependency-name: "*"
-  open-pull-requests-limit: 0
-  commit-message:
-    prefix: "[noissue]"
 - package-ecosystem: github-actions
   directory: "/"
   schedule:
