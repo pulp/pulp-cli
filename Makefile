@@ -29,7 +29,7 @@ test: | tests/cli.toml
 	pytest -v tests
 
 servedocs:
-	mkdocs serve
+	mkdocs serve -w docs_theme
 
 site:
 	mkdocs build

@@ -1,7 +1,7 @@
 site_name: Pulp CLI
 theme:
   name: readthedocs
-  custom_dir: docs/theme
+  custom_dir: docs_theme
   version: "0.22.0.dev"
 repo_url: https://github.com/pulp/pulp-cli
 edit_uri: edit/main/docs/

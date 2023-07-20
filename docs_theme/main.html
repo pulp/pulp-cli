@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% if config.theme.version.endswith("dev") %}
+{% set prefix = "" %}
+{% else %}
+{% set prefix = "../../" %}
+{% endif %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+  fetch("{{ prefix }}{{ 'versions.txt'|url }}").then(function(res) {
+    const version_div = document.createElement("div");
+    version_div.classList.add("version");
+    version_div.appendChild(document.createTextNode("Version: "));
+    document.getElementsByClassName("wy-side-nav-search")[0].children[0].insertAdjacentElement("afterend", version_div);
+    if (res.ok) {
+      res.text().then(function(text) {
+        const versions = text.trim().split("\n");
+        const version_select = document.createElement("select");
+        version_select.classList.add("x9c4-custom-select");
+        version_select.id = "version-select";
+        version_div.appendChild(version_select);
+        const option = document.createElement("option");
+        option.innerText = "nightly";
+        option.value = "";
+        version_select.add(option);
+        versions.map(function(version) {
+          const option = document.createElement("option");
+          option.innerText = version;
+          option.value = "/en/" + version;
+          version_select.add(option);
+        });
+        {% if config.theme.version.endswith("dev") -%}
+        version_select.value = "";
+        {% else -%}
+        version_select.value = "{{ config.theme.version }}";
+        {% endif -%}
+        version_select.onchange = function(event) { window.location = "{{ prefix }}{{ '.'|url }}" + event.target.value };
+      })
+    } else {
+      version_div.appendChild(document.createTextNode("{{ config.theme.version }}"));
+    }
+  });
+</script>
+{% endblock %}
+
+{% block styles %}
+{{ super() }}
+<style>
+  select.x9c4-custom-select {
+    appearance: none;
+    background-color: transparent;
+    border: none;
+    padding: 0 1em 0 0;
+    margin: 0;
+    font-family: inherit;
+    font-size: inherit;
+    color: inherit;
+    text-align: center;
+    line-height: inherit;
+    box-shadow: inherit;
+    cursor: pointer;
+}
+</style>
+{% endblock %}
