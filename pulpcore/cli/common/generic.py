@@ -1438,9 +1438,7 @@ def repository_content_command(**kwargs: t.Any) -> click.Group:
 
     @pulp_group(**kwargs)
     @type_option(choices=content_contexts)
-    @pass_pulp_context
-    @click.pass_context
-    def content_group(ctx: click.Context, pulp_ctx: PulpCLIContext) -> None:
+    def content_group() -> None:
         pass
 
     for command, options in command_decorators.items():
