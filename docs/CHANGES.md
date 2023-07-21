@@ -10,6 +10,19 @@
 
 [//]: # (towncrier release notes start)
 
+## 0.20.2 (2023-07-19)
+
+
+
+### Bugfixes
+
+- Pinnend PyYAML version to fix installation issues.
+  [#724](https://github.com/pulp/pulp-cli/issues/724)
+
+
+---
+
+
 ## 0.20.1 (2023-07-07)
 
 
@@ -49,6 +62,19 @@
 
 - Deprecate the use of `min` and `max` in `PluginRequirement`.
   [#681](https://github.com/pulp/pulp-cli/issues/681)
+
+
+---
+
+
+## 0.19.4 (2023-07-19)
+
+
+
+### Bugfixes
+
+- Pinnend PyYAML version to fix installation issues.
+  [#724](https://github.com/pulp/pulp-cli/issues/724)
 
 
 ---
