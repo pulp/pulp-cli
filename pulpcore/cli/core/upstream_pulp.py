@@ -1,4 +1,5 @@
 import click
+from pulp_glue.common.context import PulpEntityContext
 from pulp_glue.common.i18n import get_translation
 from pulp_glue.core.context import PulpUpstreamPulpContext
 
@@ -75,5 +76,6 @@ upstream_pulp.add_command(destroy_command(decorators=lookup_options))
 @upstream_pulp.command()
 @lookup_option
 @pass_entity_context
-def replicate(upstream_pulp_ctx: PulpUpstreamPulpContext) -> None:
+def replicate(upstream_pulp_ctx: PulpEntityContext) -> None:
+    assert isinstance(upstream_pulp_ctx, PulpUpstreamPulpContext)
     upstream_pulp_ctx.replicate()
