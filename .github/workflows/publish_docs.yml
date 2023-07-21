@@ -12,7 +12,6 @@ on:
 jobs:
   publish-docs:
     name: Publish docs
-    needs: publish-pypi
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
