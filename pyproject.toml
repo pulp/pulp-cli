@@ -62,6 +62,7 @@ skip = ["pulp-glue"]
 
 [tool.pytest.ini_options]
 markers = [
+  "glue: tests for pulp-glue in isolation",
   "script: tests provided as shell scripts",
   "help_page: tests that render help pages",
   "pulpcore: pulpcore tests",
@@ -76,7 +77,7 @@ markers = [
 [tool.mypy]
 strict = true
 show_error_codes = true
-files = "pulpcore/**/*.py, pulp_cli/**/*.py"
+files = "pulpcore/**/*.py, pulp_cli/**/*.py, tests/*.py"
 namespace_packages = true
 explicit_package_bases = true
 
