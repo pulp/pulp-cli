@@ -1,0 +1,1 @@
+Made api-quirks idempotent to prevent them from failing once the original api is fixed.
