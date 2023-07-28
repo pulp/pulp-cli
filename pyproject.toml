@@ -53,6 +53,7 @@ skip = ["pulp-glue"]
 
 [tool.pytest.ini_options]
 markers = [
+  "glue: tests for pulp-glue in isolation",
   "script: tests provided as shell scripts",
   "help_page: tests that render help pages",
   "pulpcore: pulpcore tests",
