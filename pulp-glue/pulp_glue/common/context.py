@@ -190,7 +190,7 @@ class PulpContext:
                             parameter["schema"] = {"type": "array", "items": {"type": "string"}}
         if self.has_plugin(PluginRequirement("core", specifier=">=3.23,<3.30.0")):
             operation = api_spec["paths"]["{upstream_pulp_href}replicate/"]["post"]
-            operation.pop("requestBody")
+            operation.pop("requestBody", None)
         if self.has_plugin(PluginRequirement("file", specifier=">=1.10.0,<1.11.0")):
             operation = api_spec["paths"]["{file_file_alternate_content_source_href}refresh/"][
                 "post"
