@@ -155,7 +155,7 @@ class PulpContext:
             operation = api_spec["paths"]["{file_file_alternate_content_source_href}refresh/"][
                 "post"
             ]
-            operation.pop("requestBody")
+            operation.pop("requestBody", None)
         if self.has_plugin(
             PluginRequirement("python", max="99.99.0.dev")
         ):  # TODO Add version bounds
