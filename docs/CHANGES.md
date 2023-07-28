@@ -10,6 +10,19 @@
 
 [//]: # (towncrier release notes start)
 
+## 0.20.3 (2023-07-28)
+
+
+
+### Bugfixes
+
+- Made api-quirks idempotent to prevent them from failing once the original api is fixed.
+  [#752](https://github.com/pulp/pulp-cli/issues/752)
+
+
+---
+
+
 ## 0.20.2 (2023-07-19)
 
 
