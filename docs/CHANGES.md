@@ -10,6 +10,19 @@
 
 [//]: # (towncrier release notes start)
 
+## 0.20.3 (2023-07-28)
+
+
+
+### Bugfixes
+
+- Made api-quirks idempotent to prevent them from failing once the original api is fixed.
+  [#752](https://github.com/pulp/pulp-cli/issues/752)
+
+
+---
+
+
 ## 0.20.2 (2023-07-19)
 
 
@@ -62,6 +75,19 @@
 
 - Deprecate the use of `min` and `max` in `PluginRequirement`.
   [#681](https://github.com/pulp/pulp-cli/issues/681)
+
+
+---
+
+
+## 0.19.5 (2023-07-28)
+
+
+
+### Bugfixes
+
+- Made api-quirks idempotent to prevent them from failing once the original api is fixed.
+  [#752](https://github.com/pulp/pulp-cli/issues/752)
 
 
 ---
@@ -150,6 +176,21 @@ No significant changes.
 
 - Removed deprecated commands `pulp orphans` and `pulp debug task-summary`.
   [#670](https://github.com/pulp/pulp-cli/issues/670)
+
+
+---
+
+
+## 0.18.2 (2023-07-30)
+
+
+
+### Bugfixes
+
+- Pinnend PyYAML version to fix installation issues.
+  [#724](https://github.com/pulp/pulp-cli/issues/724)
+- Made api-quirks idempotent to prevent them from failing once the original api is fixed.
+  [#752](https://github.com/pulp/pulp-cli/issues/752)
 
 
 ---
