@@ -10,6 +10,21 @@
 
 [//]: # (towncrier release notes start)
 
+## 0.18.2 (2023-07-30)
+
+
+
+### Bugfixes
+
+- Pinnend PyYAML version to fix installation issues.
+  [#724](https://github.com/pulp/pulp-cli/issues/724)
+- Made api-quirks idempotent to prevent them from failing once the original api is fixed.
+  [#752](https://github.com/pulp/pulp-cli/issues/752)
+
+
+---
+
+
 ## 0.18.1 (2023-07-10)
 
 
