@@ -26,7 +26,7 @@ _ = translation.gettext
 
 
 def _uln_url_callback(ctx: click.Context, param: click.Parameter, value: str) -> str:
-    if type(ctx.obj) == PulpUlnRemoteContext and (value and not value.startswith("uln://")):
+    if type(ctx.obj) is PulpUlnRemoteContext and (value and not value.startswith("uln://")):
         raise click.ClickException("Invalid url format. Please enter correct uln channel.")
 
     return value
