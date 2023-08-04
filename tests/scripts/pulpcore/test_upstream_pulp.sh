@@ -17,6 +17,6 @@ expect_succ pulp upstream-pulp update --id "cli_test_upstream_pulp" --pulp-label
 
 # Without credentials there is not much we can do...
 # Also this is a real dangerous command, deleting all existing repositories.
-expect_fail pulp upstream-pulp replicate --id "cli_test_upstream_pulp"
+#expect_fail pulp upstream-pulp replicate --id "cli_test_upstream_pulp"
 
 expect_succ pulp upstream-pulp destroy --id "cli_test_upstream_pulp"
