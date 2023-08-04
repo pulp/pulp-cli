@@ -10,6 +10,49 @@
 
 [//]: # (towncrier release notes start)
 
+## 0.21.0 (2023-08-03)
+
+
+
+#### Features
+
+- Added `role` subcommands to `rpm` commands.
+  [#630](https://github.com/pulp/pulp-cli/issues/630)
+- Added `upstream-pulp` command group.
+  [#699](https://github.com/pulp/pulp-cli/issues/699)
+
+
+#### Bugfixes
+
+- Narrow down click version given a breaking change on 8.1.4.
+  [#715](https://github.com/pulp/pulp-cli/issues/715)
+- Pinnend PyYAML version to fix installation issues.
+  [#724](https://github.com/pulp/pulp-cli/issues/724)
+- Made api-quirks idempotent to prevent them from failing once the original api is fixed.
+  [#752](https://github.com/pulp/pulp-cli/issues/752)
+
+
+#### Misc
+
+- [#726](https://github.com/pulp/pulp-cli/issues/726)
+
+
+### Pulp GLUE
+
+
+#### Features
+
+- Added role capability to rpm contexts.
+  [#630](https://github.com/pulp/pulp-cli/issues/630)
+- Added decorator `api_quirk` to declare version dependent fixes to the api spec.
+  [#658](https://github.com/pulp/pulp-cli/issues/658)
+- Added `PulpUpstreamPulpContext`.
+  [#699](https://github.com/pulp/pulp-cli/issues/699)
+
+
+---
+
+
 ## 0.20.3 (2023-07-28)
 
 
