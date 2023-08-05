@@ -10,6 +10,22 @@
 
 [//]: # (towncrier release notes start)
 
+## 0.21.1 (2023-08-04)
+
+
+
+No significant changes.
+
+
+### Pulp GLUE
+
+
+No significant changes.
+
+
+---
+
+
 ## 0.21.0 (2023-08-03)
 
 
