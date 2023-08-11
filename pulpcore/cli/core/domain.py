@@ -21,7 +21,9 @@ translation = get_translation(__name__)
 _ = translation.gettext
 
 
-@pulp_group()
+# We need to override the default_map, because we may read a default value for the `--domain`
+# option from the config file that will collide here.
+@pulp_group(name="domain", context_settings={"default_map": {}})
 @pass_pulp_context
 @click.pass_context
 def domain(ctx: click.Context, pulp_ctx: PulpContext) -> None:
