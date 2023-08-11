@@ -4,7 +4,7 @@ from typing import Any, Dict, Optional
 import click
 import pkg_resources
 
-__version__ = "0.21.2"
+__version__ = "0.21.3.dev"
 _main: Optional[click.Group] = None
 
 
