@@ -10,6 +10,25 @@
 
 [//]: # (towncrier release notes start)
 
+## 0.21.2 (2023-08-11)
+
+
+
+#### Bugfixes
+
+- Fixed a crash in `pulp domain` when a default value for `--domain` was provided in the config file.
+  [#769](https://github.com/pulp/pulp-cli/issues/769)
+
+
+### Pulp GLUE
+
+
+No significant changes.
+
+
+---
+
+
 ## 0.21.1 (2023-08-04)
 
 
