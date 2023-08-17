@@ -38,7 +38,7 @@ setup(
     python_requires=">=3.6",
     install_requires=[
         "pulp-glue==0.22.0.dev",
-        "click>=8.0.0,<8.1.7",
+        "click>=8.0.0,<8.1.8",
         "PyYAML>=5.3,<6.1",
         "schema>=0.7.5,<0.8",
         "toml>=0.10.2,<0.11",
