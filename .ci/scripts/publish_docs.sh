@@ -27,9 +27,9 @@ if [ "${REF_TYPE}" = "heads" ]
 then
   [ "${REF_NAME}" = "main" ]
   # publish to docs.pulpproject.org/pulp_cli
-  rsync -avzh site/ doc_builder_pulp_cli@docs.pulpproject.org:/var/www/docs.pulpproject.org/pulp_cli/
+  rsync -avzh --delete-delay site/ doc_builder_pulp_cli@docs.pulpproject.org:/var/www/docs.pulpproject.org/pulp_cli/
 else
   [ "${REF_TYPE}" = "tags" ]
   # publish to docs.pulpproject.org/pulp_cli/en/{release}
-  rsync -avzh site/ doc_builder_pulp_cli@docs.pulpproject.org:/var/www/docs.pulpproject.org/pulp_cli/en/"${REF_NAME}"
+  rsync -avzh --delete-delay site/ doc_builder_pulp_cli@docs.pulpproject.org:/var/www/docs.pulpproject.org/pulp_cli/en/"${REF_NAME}"
 fi
