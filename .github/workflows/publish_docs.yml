@@ -14,7 +14,7 @@ jobs:
     name: Publish docs
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Run publish docs script
         env:
           PULP_DOCS_KEY: ${{ secrets.PULP_DOCS_KEY }}
