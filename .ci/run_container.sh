@@ -4,6 +4,8 @@
 # Known places:
 #   - https://github.com/pulp/pulp-cli/blob/main/.ci/run_container.sh
 #   - https://github.com/pulp/pulp-cli-deb/blob/main/.ci/run_container.sh
+#   - https://github.com/pulp/pulp-cli-gem/blob/main/.ci/run_container.sh
+#   - https://github.com/pulp/pulp-cli-maven/blob/main/.ci/run_container.sh
 #   - https://github.com/pulp/pulp-cli-ostree/blob/main/.ci/run_container.sh
 #   - https://github.com/pulp/squeezer/blob/develop/tests/run_container.sh
 

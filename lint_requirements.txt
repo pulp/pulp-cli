@@ -1,18 +1,16 @@
 # Lint requirements
-black==23.7.0 ; python_version > "3.7"
-flake8==5.0.4 ; python_version >= "3.6.1" and python_version < "3.8.1"
-flake8==6.1.0 ; python_version >= "3.8.1"
-isort==5.11.5 ; python_version > "3.6" and python_version < "3.8"
-isort==5.12.0 ; python_version >= "3.8"
-mypy==1.5.1 ; python_version > "3.6"
-shellcheck-py==0.9.0.5 ; python_version > "3.6"
+black==23.7.0
+flake8==6.1.0
+isort==5.12.0
+mypy==1.5.1
+shellcheck-py==0.9.0.5
 
 # Type annotation stubs
-types-pygments ; python_version > "3.6"
-types-PyYAML ; python_version > "3.6"
-types-requests ; python_version > "3.6"
-types-setuptools ; python_version > "3.6"
-types-toml ; python_version > "3.6"
+types-pygments
+types-PyYAML
+types-requests
+types-setuptools
+types-toml
 
 # Install the actual bits for mypy
 -r test_requirements.txt
