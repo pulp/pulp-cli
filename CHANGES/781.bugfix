@@ -1,0 +1,1 @@
+Fixed a bug where not all commands of a command group were listed in the help and available to the auto-completion.

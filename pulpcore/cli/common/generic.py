@@ -217,25 +217,27 @@ class PulpGroup(PulpCommand, click.Group):
     def get_command(self, ctx: click.Context, cmd_name: str) -> t.Optional[click.Command]:
         # Overwriting this removes the command from the help message and from being callable
         cmd = super().get_command(ctx, cmd_name)
-        if isinstance(cmd, (PulpCommand, PulpGroup)):
-            if cmd.allowed_with_contexts is not None:
-                if not isinstance(ctx.obj, cmd.allowed_with_contexts):
-                    raise IncompatibleContext(
-                        _("The subcommand '{name}' is not available in this context.").format(
-                            name=cmd.name
-                        )
-                    )
+        if (
+            isinstance(cmd, (PulpCommand, PulpGroup))
+            and cmd.allowed_with_contexts is not None
+            and not isinstance(ctx.obj, cmd.allowed_with_contexts)
+        ):
+            raise IncompatibleContext(
+                _("The subcommand '{name}' is not available in this context.").format(name=cmd.name)
+            )
         return cmd
 
     def list_commands(self, ctx: click.Context) -> t.List[str]:
         commands_filtered_by_context = []
 
         for name, cmd in self.commands.items():
-            if isinstance(cmd, (PulpCommand, PulpGroup)):
-                if cmd.allowed_with_contexts is None or isinstance(
-                    ctx.obj, cmd.allowed_with_contexts
-                ):
-                    commands_filtered_by_context.append(name)
+            if (
+                isinstance(cmd, (PulpCommand, PulpGroup))
+                and cmd.allowed_with_contexts is not None
+                and not isinstance(ctx.obj, cmd.allowed_with_contexts)
+            ):
+                continue
+            commands_filtered_by_context.append(name)
 
         return sorted(commands_filtered_by_context)
 
