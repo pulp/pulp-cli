@@ -49,7 +49,10 @@ expect_succ pulp rpm distribution create --name "cli_test_rpm_distro" \
   --base-path "cli_test_rpm_distro" \
   --publication "$PUBLICATION_HREF"
 DISTRIBUTION_BASE_URL=$(echo "$OUTPUT" | jq -r .base_url)
-expect_succ curl "$curl_opt" --head --fail "${DISTRIBUTION_BASE_URL}config.repo"
+if pulp debug has-plugin --name "rpm" --specifier "<3.23.0.dev"
+then
+  expect_succ curl "$curl_opt" --head --fail "${DISTRIBUTION_BASE_URL}config.repo"
+fi
 
 expect_succ pulp rpm repository version list --repository "cli_test_rpm_repository"
 expect_succ pulp rpm repository version repair --repository "cli_test_rpm_repository" --version 1
