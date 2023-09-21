@@ -64,6 +64,10 @@ class PulpRpmDistributionContext(PulpDistributionContext):
                 body["publication"] = None
             if "repository" not in body and "publication" in body:
                 body["repository"] = None
+        if body.get("generate_repo_config") is False:
+            self.pulp_ctx.needs_plugin(PluginRequirement("rpm", specifier=">=3.23.0.dev"))
+        elif self.pulp_ctx.has_plugin(PluginRequirement("rpm", specifier="<3.23.0.dev")):
+            body.pop("generate_repo_config", None)
         return body
 
 
