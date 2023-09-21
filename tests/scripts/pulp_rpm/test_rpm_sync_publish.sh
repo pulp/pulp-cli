@@ -49,9 +49,23 @@ expect_succ pulp rpm distribution create --name "cli_test_rpm_distro" \
   --base-path "cli_test_rpm_distro" \
   --publication "$PUBLICATION_HREF"
 DISTRIBUTION_BASE_URL=$(echo "$OUTPUT" | jq -r .base_url)
+
 if pulp debug has-plugin --name "rpm" --specifier "<3.23.0.dev"
 then
   expect_succ curl "$curl_opt" --head --fail "${DISTRIBUTION_BASE_URL}config.repo"
+else
+  expect_fail curl "$curl_opt" --head --fail "${DISTRIBUTION_BASE_URL}config.repo"
+fi
+
+if pulp debug has-plugin --name "rpm" --specifier ">=3.23.0.dev"
+then
+  expect_succ pulp rpm distribution create --name "cli_test_rpm_distro2" \
+    --base-path "cli_test_rpm_distro2" \
+    --publication "$PUBLICATION_HREF" \
+    --generate-repo-config
+  DISTRIBUTION_BASE_URL=$(echo "$OUTPUT" | jq -r .base_url)
+  expect_succ curl "$curl_opt" --head --fail "${DISTRIBUTION_BASE_URL}config.repo"
+  expect_succ pulp rpm distribution destroy --name "cli_test_rpm_distro2"
 fi
 
 expect_succ pulp rpm repository version list --repository "cli_test_rpm_repository"
