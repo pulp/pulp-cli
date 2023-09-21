@@ -606,6 +606,7 @@ class OpenAPI:
         try:
             response: requests.Response = self._session.send(request)
         except requests.TooManyRedirects as e:
+            assert e.response is not None
             raise OpenAPIError(
                 _("Received redirect to '{url}'. Please check your CLI configuration.").format(
                     url=e.response.headers["location"]
