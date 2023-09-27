@@ -15,6 +15,7 @@ trap cleanup EXIT
 
 pulp orphan cleanup --protection-time 0 || true
 
+expected_repo_task_count=1
 sync_task="pulp_file.app.tasks.synchronizing.synchronize"
 expect_succ pulp task list --name $sync_task --state canceled
 count="$(echo "$OUTPUT" | jq -r length)"
@@ -28,8 +29,8 @@ expect_succ pulp file remote create --name "cli_test_file_large_remote" --url "$
 expect_succ pulp file repository create --name "cli_test_file_repository" --remote "cli_test_file_remote"
 repository_href="$(echo "$OUTPUT" | jq -r '.pulp_href')"
 
-# Test canceling a task
-if pulp debug has-plugin --name "core" --specifier ">=3.12.0"
+# Test canceling a task introduced in 3.12, but not reliable in 3.18
+if pulp debug has-plugin --name "core" --specifier ">=3.21.0"
 then
   expect_succ pulp --background file repository sync --name "cli_test_file_repository" --remote "cli_test_file_large_remote"
   task="$(echo "$ERROUTPUT" | grep -E -o "${PULP_API_ROOT}([-_a-zA-Z0-9]+/)?api/v3/tasks/[-[:xdigit:]]*/")"
@@ -45,6 +46,11 @@ then
     expect_succ pulp task show --href "$task"
     expect_succ test "$(echo "$OUTPUT" | jq -r '.state')" = "completed"
   fi
+  expected_repo_task_count=$((expected_repo_task_count + 1))
+fi
+
+if pulp debug has-plugin --name "core" --specifier ">=3.12.0"
+then
   expect_succ pulp --dry-run task cancel --all
 fi
 
@@ -79,13 +85,7 @@ then
   expect_succ test "$(echo "$OUTPUT" | jq -r length)" -eq 1
 else
   expect_succ pulp task list --reserved-resource "$repository_href"
-  if pulp debug has-plugin --name "core" --min-version "3.12.0"
-  then
-    expect_succ test "$(echo "$OUTPUT" | jq -r length)" -eq 2
-  else
-    # We didn't run the cancel test in this condition
-    expect_succ test "$(echo "$OUTPUT" | jq -r length)" -eq 1
-  fi
+  expect_succ test "$(echo "$OUTPUT" | jq -r length)" -eq "$expected_repo_task_count"
 fi
 
 expect_fail pulp task list --state=cannotwork
