@@ -86,6 +86,12 @@ class PulpException(Exception):
     pass
 
 
+class PulpHTTPError(PulpException):
+    def __init__(self, msg: str, status_code: int) -> None:
+        super().__init__(msg)
+        self.status_code = status_code
+
+
 class PulpNoWait(Exception):
     pass
 
@@ -289,7 +295,7 @@ class PulpContext:
         except OpenAPIError as e:
             raise PulpException(str(e))
         except HTTPError as e:
-            raise PulpException(str(e.response.text))
+            raise PulpHTTPError(str(e.response.text), e.response.status_code)
         # Asynchronous tasks seem to be reported by a dict containing only one key "task"
         if isinstance(result, dict) and ["task"] == list(result.keys()):
             task_href = result["task"]
@@ -700,23 +706,37 @@ class PulpEntityContext:
         )
 
     def set_label(self, key: str, value: str, non_blocking: bool = False) -> Any:
-        if not self.pulp_ctx.has_plugin(PluginRequirement("core", specifier=">=3.34.0")):
-            labels = self.entity["pulp_labels"]
-            labels[key] = value
-            return self.update(body={"pulp_labels": labels}, non_blocking=non_blocking)
-        return self.call(
-            "set_label", parameters={self.HREF: self.pulp_href}, body={"key": key, "value": value}
-        )
+        if self.pulp_ctx.has_plugin(PluginRequirement("core", specifier=">=3.34.0")):
+            try:
+                return self.call(
+                    "set_label",
+                    parameters={self.HREF: self.pulp_href},
+                    body={"key": key, "value": value},
+                )
+            except PulpHTTPError as e:
+                if e.status_code != 403:
+                    raise
+                # Workaround for broken access policies: Try the old mechanism.
+        labels = self.entity["pulp_labels"]
+        labels[key] = value
+        return self.update(body={"pulp_labels": labels}, non_blocking=non_blocking)
 
     def unset_label(self, key: str, non_blocking: bool = False) -> Any:
-        if not self.pulp_ctx.has_plugin(PluginRequirement("core", specifier=">=3.34.0")):
-            labels = self.entity["pulp_labels"]
+        if self.pulp_ctx.has_plugin(PluginRequirement("core", specifier=">=3.34.0")):
             try:
-                labels.pop(key)
-            except KeyError:
-                raise PulpException(_("Could not find label with key '{key}'.").format(key=key))
-            return self.update(body={"pulp_labels": labels}, non_blocking=non_blocking)
-        return self.call("unset_label", parameters={self.HREF: self.pulp_href}, body={"key": key})
+                return self.call(
+                    "unset_label", parameters={self.HREF: self.pulp_href}, body={"key": key}
+                )
+            except PulpHTTPError as e:
+                if e.status_code != 403:
+                    raise
+                # Workaround for broken access policies: Try the old mechanism.
+        labels = self.entity["pulp_labels"]
+        try:
+            labels.pop(key)
+        except KeyError:
+            raise PulpException(_("Could not find label with key '{key}'.").format(key=key))
+        return self.update(body={"pulp_labels": labels}, non_blocking=non_blocking)
 
     def show_label(self, key: str) -> Any:
         # We would have a dedicated api for this ideally.
