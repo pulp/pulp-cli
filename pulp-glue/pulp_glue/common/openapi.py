@@ -27,18 +27,43 @@ ISO_DATETIME_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 
 
 class OpenAPIError(Exception):
+    """Base Exception for errors related to using the openapi spec."""
+
     pass
 
 
 class OpenAPIValidationError(OpenAPIError):
+    """Exception raised for failed client side validation of parameters or request bodies."""
+
     pass
 
 
 class UnsafeCallError(OpenAPIError):
+    """Exception raised for POST, PUT, PATCH or DELETE calls with `safe_calls_only=True`."""
+
     pass
 
 
 class OpenAPI:
+    """
+    The abstraction Layer to interact with a server providing an openapi v3 specification.
+
+    Parameters:
+        base_url: The base URL inlcuding the HTTP scheme, hostname and optional subpaths of the
+            served api.
+        doc_path: Path of the json api doc schema relative to the `base_url`.
+        username: Username used for basic auth.
+        password: Password used for basic auth.
+        cert: Client certificate used for auth.
+        key: Matching key for `cert` if not already included.
+        validate_certs: Whether to check server TLS certificates agains a CA.
+        refresh_cache: Whether to fetch the api doc regardless.
+        safe_calls_only: Flag to disallow issuing POST, PUT, PATCH or DELETE calls.
+        debug_callback: Callback that will be called with strings useful for logging or debugging.
+        user_agent: String to use in the User-Agent header.
+        cid: Correlation ID to send with all requests.
+    """
+
     def __init__(
         self,
         base_url: str,
@@ -559,6 +584,22 @@ class OpenAPI:
         body: Optional[Dict[str, Any]] = None,
         validate_body: bool = True,
     ) -> Any:
+        """
+        Make a call to the server.
+
+        Parameters:
+            operation_id: ID of the operation in the openapi v3 specification.
+            parameters: Arguments that are to be sent as headers, querystrings or part of the URI.
+            body: Body payload for POST, PUT, PATCH calls.
+            validate_body: Indicate whether the body should be validated.
+
+        Returns:
+            The JSON decoded server response if any.
+
+        Raises:
+            OpenAPIValidationError: on failed input validation (no request was sent to the server).
+            requests.HTTPError: on failures related to the HTTP call made.
+        """
         method, path = self.operations[operation_id]
         path_spec = self.api_spec["paths"][path]
         method_spec = path_spec[method]

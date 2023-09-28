@@ -144,11 +144,10 @@ class PulpGroupPermissionContext(PulpEntityContext):
         body: Optional[Dict[str, Any]] = None,
         validate_body: bool = False,
     ) -> Any:
-        """Workaroud because the openapi spec for GroupPermissions has always been broken.
-
-        This will probably not be fixed upstream, and GroupPermissions are removed from pulpcore.
-        So we just skip linting here.
-        """
+        # Workaroud because the openapi spec for GroupPermissions has always been broken.
+        #
+        # This will probably not be fixed upstream, and GroupPermissions are removed from pulpcore.
+        # So we just skip linting here.
         return super().call(
             operation,
             non_blocking=non_blocking,
@@ -158,7 +157,7 @@ class PulpGroupPermissionContext(PulpEntityContext):
         )
 
     def find(self, **kwargs: Any) -> Any:
-        """Workaroud for the missing ability to filter"""
+        # Workaroud the missing ability to filter.
         # # TODO fix upstream and adjust to guard for the proper version
         # # https://pulp.plan.io/issues/8241
         # if self.pulp_ctx.has_plugin(PluginRequirement("core", specifier=">=3.99.dev")):
@@ -542,7 +541,7 @@ class PulpUpstreamPulpContext(PulpEntityContext):
     NEEDS_PLUGINS = [PluginRequirement("core", specifier=">=3.23.0")]
 
     def find(self, **kwargs: Any) -> Any:
-        """Workaroud for the missing ability to filter"""
+        # Workaroud the missing ability to filter.
         # # TODO fix upstream and adjust to guard for the proper version
         # # https://github.com/pulp/pulpcore/issues/4110
         # if self.pulp_ctx.has_plugin(PluginRequirement("core", specifier=">=3.99.dev")):
