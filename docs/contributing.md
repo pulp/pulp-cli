@@ -47,6 +47,7 @@ In order to be able to access every (sub-)commands help page,
 it is necessary that no code outside of the final performing command callback accesses the `api` property of the `PulpContext`.
 There are some facilities that perform lazy loading to help with that requirement.
 Those include:
+
   - `PulpContext.api`: When accessed, the `api.json` file for the addressed server will be read or downloaded and processed.
     Scheduled version checks will be reevaluated.
   - `PulpContext.needs_version`: This function can be used at any time to declear that an operation needs a plugin in a version range.

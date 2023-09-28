@@ -5,6 +5,24 @@ import pkg_resources
 
 
 def get_translation(name: str) -> gettext.NullTranslations:
+    """
+    Return a translations object for a certain import path.
+
+    Parameters:
+        name: An import path.
+
+    Returns:
+        A `gettext` translations object containing all the `gettext` variations.
+
+    Examples:
+        Import the usual suspects like this:
+        ```
+        from pulp_glue.common.i18n import get_translation
+
+        translation = get_translation(__name__)
+        _ = translation.gettext
+        ```
+    """
     localedir = pkg_resources.resource_filename(name, "locale")
     return _get_translation_for_domain("messages", localedir)
 

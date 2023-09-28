@@ -29,7 +29,7 @@ test: | tests/cli.toml
 	pytest -v tests
 
 servedocs:
-	mkdocs serve -w docs_theme
+	mkdocs serve -w docs_theme -w pulp-glue/pulp_glue
 
 site:
 	mkdocs build

@@ -9,6 +9,24 @@ markdown_extensions:
   - toc:
       permalink: True
   - admonition
+plugins:
+  - search
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          paths:
+            - pulp-glue/pulp_glue
+          options:
+            heading_level: 2
+            show_root_heading: false
+            show_root_toc_entry: false
+            show_symbol_type_heading: true
+            show_if_no_docstring: false
+            show_signature_annotations: true
+            separate_signature: true
+            members_order: "source"
+            merge_init_into_class: true
 nav:
   - 'Overview': 'index.md'
   - 'installation.md'
@@ -17,5 +35,11 @@ nav:
   - 'supported_workflows.md'
   - 'advanced_features.md'
   - 'CHANGES.md'
-  - 'contributing.md'
-  - 'architecture.md'
+  - 'Developer material':
+    - 'contributing.md'
+    - 'architecture.md'
+  - 'Pulp Glue API Reference':
+    - 'glue_reference/common_openapi.md'
+    - 'glue_reference/common_context.md'
+    - 'glue_reference/common_i18n.md'
+    - 'glue_reference/core_context.md'
