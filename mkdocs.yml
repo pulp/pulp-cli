@@ -9,6 +9,8 @@ markdown_extensions:
   - toc:
       permalink: True
   - admonition
+  - attr_list
+  - mkdocs-click
 nav:
   - 'Overview': 'index.md'
   - 'installation.md'
@@ -16,6 +18,8 @@ nav:
   - 'using_the_cli.md'
   - 'supported_workflows.md'
   - 'advanced_features.md'
+  - 'CLI Command Reference': 'cli_reference.md'
   - 'CHANGES.md'
-  - 'contributing.md'
-  - 'architecture.md'
+  - 'Developer material':
+    - 'contributing.md'
+    - 'architecture.md'

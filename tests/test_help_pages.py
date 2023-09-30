@@ -4,9 +4,7 @@ import click
 import pytest
 from click.testing import CliRunner
 
-from pulp_cli import load_plugins
-
-main = load_plugins()
+from pulp_cli import main
 
 
 def traverse_commands(command, args):
