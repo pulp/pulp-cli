@@ -10,6 +10,19 @@
 
 [//]: # (towncrier release notes start)
 
+## 0.20.5 (2023-10-02)
+
+
+
+### Improved Documentation
+
+- Added a version select widget to docs.
+  
+
+
+---
+
+
 ## 0.20.4 (2023-09-22)
 
 
