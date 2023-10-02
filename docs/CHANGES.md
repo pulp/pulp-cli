@@ -10,6 +10,25 @@
 
 [//]: # (towncrier release notes start)
 
+## 0.21.4 (2023-10-02)
+
+
+
+#### Improved Documentation
+
+- Added a version select widget to docs.
+  
+
+
+### Pulp GLUE
+
+
+No significant changes.
+
+
+---
+
+
 ## 0.21.3 (2023-09-22)
 
 
