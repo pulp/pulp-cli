@@ -34,7 +34,7 @@
         {% if config.theme.version.endswith("dev") -%}
         version_select.value = "";
         {% else -%}
-        version_select.value = "{{ config.theme.version }}";
+        version_select.value = "{{ config.theme.version }}".match("[0-9]+\.[0-9]+")[0];
         {% endif -%}
         version_select.onchange = function(event) { window.location = "{{ prefix }}{{ '.'|url }}" + event.target.value };
       })
