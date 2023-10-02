@@ -10,6 +10,16 @@
 
 [//]: # (towncrier release notes start)
 
+## 0.20.6 (2023-10-02)
+
+
+
+No significant changes.
+
+
+---
+
+
 ## 0.20.5 (2023-10-02)
 
 
