@@ -50,5 +50,5 @@ $(foreach LANGUAGE,$(LANGUAGES),pulpcore/cli/%/locale/$(LANGUAGE)/LC_MESSAGES/me
 
 compile_messages: $(foreach LANGUAGE,$(LANGUAGES),$(foreach PLUGIN,$(PLUGINS),pulpcore/cli/$(PLUGIN)/locale/$(LANGUAGE)/LC_MESSAGES/messages.mo))
 
-.PHONY: info black lint test servedocs
+.PHONY: info black lint test servedocs site
 .PRECIOUS: $(foreach LANGUAGE,$(LANGUAGES),$(foreach PLUGIN,$(PLUGINS),pulpcore/cli/$(PLUGIN)/locale/$(LANGUAGE)/LC_MESSAGES/messages.po))
