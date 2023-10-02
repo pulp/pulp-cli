@@ -27,11 +27,14 @@ if [ "${REF_TYPE}" = "heads" ]
 then
   [ "${REF_NAME}" = "main" ]
   # publish to docs.pulpproject.org/pulp_cli
-  rsync -avzh --mkpath --delete-delay site/ doc_builder_pulp_cli@docs.pulpproject.org:/var/www/docs.pulpproject.org/pulp_cli/
+  ssh doc_builder_pulp_cli@docs.pulpproject.org /bin/bash -c 'mkdir -p /var/www/docs.pulpproject.org/pulp_cli/'
+  rsync -avzh --delete-delay site/ doc_builder_pulp_cli@docs.pulpproject.org:/var/www/docs.pulpproject.org/pulp_cli/
 else
   [ "${REF_TYPE}" = "tags" ]
   # publish to docs.pulpproject.org/pulp_cli/en/{release}
-  rsync -avzh --mkpath --delete-delay site/ doc_builder_pulp_cli@docs.pulpproject.org:/var/www/docs.pulpproject.org/pulp_cli/en/"${REF_NAME}"
+  ssh doc_builder_pulp_cli@docs.pulpproject.org /bin/bash -c 'mkdir -p /var/www/docs.pulpproject.org/pulp_cli/en/'
+  rsync -avzh --delete-delay site/ doc_builder_pulp_cli@docs.pulpproject.org:/var/www/docs.pulpproject.org/pulp_cli/en/"${REF_NAME}"
+  ssh doc_builder_pulp_cli@docs.pulpproject.org /bin/bash -c '"ls /var/www/docs.pulpproject.org/pulp_cli/en/ | sort -n > /var/www/docs.pulpproject.org/pulp_cli/versions.txt"'
 fi
 
 ssh doc_builder_pulp_cli@docs.pulpproject.org /bin/bash -c '"ls /var/www/docs.pulpproject.org/pulp_cli/en/ | sort -n > /var/www/docs.pulpproject.org/pulp_cli/versions.txt"'
