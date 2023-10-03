@@ -10,6 +10,25 @@
 
 [//]: # (towncrier release notes start)
 
+## 0.21.4 (2023-10-02)
+
+
+
+#### Improved Documentation
+
+- Added a version select widget to docs.
+  
+
+
+### Pulp GLUE
+
+
+No significant changes.
+
+
+---
+
+
 ## 0.21.3 (2023-09-22)
 
 
@@ -99,6 +118,29 @@ No significant changes.
   [#658](https://github.com/pulp/pulp-cli/issues/658)
 - Added `PulpUpstreamPulpContext`.
   [#699](https://github.com/pulp/pulp-cli/issues/699)
+
+
+---
+
+
+## 0.20.6 (2023-10-02)
+
+
+
+No significant changes.
+
+
+---
+
+
+## 0.20.5 (2023-10-02)
+
+
+
+### Improved Documentation
+
+- Added a version select widget to docs.
+  
 
 
 ---
