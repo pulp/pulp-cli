@@ -1,0 +1,82 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-10-04 09:25+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: pulp-glue/pulp_glue/container/context.py:22
+msgid "container blob"
+msgstr ""
+
+#: pulp-glue/pulp_glue/container/context.py:23
+msgid "container blobs"
+msgstr ""
+
+#: pulp-glue/pulp_glue/container/context.py:32
+msgid "container manifest"
+msgstr ""
+
+#: pulp-glue/pulp_glue/container/context.py:33
+msgid "container manifests"
+msgstr ""
+
+#: pulp-glue/pulp_glue/container/context.py:42
+msgid "container tag"
+msgstr ""
+
+#: pulp-glue/pulp_glue/container/context.py:43
+msgid "container tags"
+msgstr ""
+
+#: pulp-glue/pulp_glue/container/context.py:55
+msgid "container namespace"
+msgstr ""
+
+#: pulp-glue/pulp_glue/container/context.py:56
+msgid "container namespaces"
+msgstr ""
+
+#: pulp-glue/pulp_glue/container/context.py:67
+msgid "container distribution"
+msgstr ""
+
+#: pulp-glue/pulp_glue/container/context.py:68
+msgid "container distributions"
+msgstr ""
+
+#: pulp-glue/pulp_glue/container/context.py:86
+msgid "container remote"
+msgstr ""
+
+#: pulp-glue/pulp_glue/container/context.py:87
+msgid "container remotes"
+msgstr ""
+
+#: pulp-glue/pulp_glue/container/context.py:132
+msgid "container repository"
+msgstr ""
+
+#: pulp-glue/pulp_glue/container/context.py:133
+msgid "container repositories"
+msgstr ""
+
+#: pulp-glue/pulp_glue/container/context.py:186
+msgid "push container repository"
+msgstr ""
+
+#: pulp-glue/pulp_glue/container/context.py:187
+msgid "push container repositories"
+msgstr ""

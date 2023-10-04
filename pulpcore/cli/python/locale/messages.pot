@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-11-06 19:41+0100\n"
+"POT-Creation-Date: 2023-10-04 09:12+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,94 +17,68 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: pulpcore/cli/python/content.py:55 pulpcore/cli/python/content.py:76
+#: pulpcore/cli/python/content.py:46
+msgid ""
+"Repository to add the content to in the form "
+"'[[<plugin>:]<resource_type>:]<name>' or by href."
+msgstr ""
+
+#: pulpcore/cli/python/content.py:70 pulpcore/cli/python/content.py:91
 msgid "Exact name of file"
 msgstr ""
 
-#: pulpcore/cli/python/content.py:60
+#: pulpcore/cli/python/content.py:75
 msgid "Digest of the artifact to use"
 msgstr ""
 
-#: pulpcore/cli/python/content.py:77
+#: pulpcore/cli/python/content.py:92
 msgid "Path to file"
 msgstr ""
 
-#: pulpcore/cli/python/context.py:20
-msgid "python package"
-msgstr ""
-
-#: pulpcore/cli/python/context.py:21
-msgid "python packages"
-msgstr ""
-
-#: pulpcore/cli/python/context.py:29
-msgid "python distribution"
-msgstr ""
-
-#: pulpcore/cli/python/context.py:30
-msgid "python distributions"
-msgstr ""
-
-#: pulpcore/cli/python/context.py:50
-msgid "python publication"
-msgstr ""
-
-#: pulpcore/cli/python/context.py:51
-msgid "python publications"
-msgstr ""
-
-#: pulpcore/cli/python/context.py:68
-msgid "python remote"
-msgstr ""
-
-#: pulpcore/cli/python/context.py:69
-msgid "python remotes"
-msgstr ""
-
-#: pulpcore/cli/python/distribution.py:33
+#: pulpcore/cli/python/distribution.py:41
 msgid ""
-"Repository to be used for auto-publishing. When set, this will unset the "
+"Repository to be used for auto-distributing. When set, this will unset the "
 "'publication'. Specified as '[[<plugin>:]<type>:]<name>' or as href."
 msgstr ""
 
-#: pulpcore/cli/python/distribution.py:64
+#: pulpcore/cli/python/distribution.py:72
 msgid ""
-"Publication to be served. This will unset the 'repository' and disable auto "
-"publish."
+"Publication to be served. This will unset the 'repository' and disable auto-"
+"distribute."
 msgstr ""
 
-#: pulpcore/cli/python/publication.py:50
+#: pulpcore/cli/python/publication.py:52
 msgid "a repository version number, leave blank for latest"
 msgstr ""
 
-#: pulpcore/cli/python/remote.py:42
+#: pulpcore/cli/python/remote.py:52
 msgid "Failed to decode JSON: {}"
 msgstr ""
 
-#: pulpcore/cli/python/remote.py:72
+#: pulpcore/cli/python/remote.py:83
 msgid "Package allowlist"
 msgstr ""
 
-#: pulpcore/cli/python/remote.py:73
+#: pulpcore/cli/python/remote.py:84
 msgid "Package blocklist"
 msgstr ""
 
-#: pulpcore/cli/python/remote.py:124
+#: pulpcore/cli/python/remote.py:137
 #, python-brace-format
 msgid "Failed to load content from {requirements_file}"
 msgstr ""
 
-#: pulpcore/cli/python/repository.py:53
+#: pulpcore/cli/python/repository.py:54
 msgid ""
 "Remote used for synching in the form '[[<plugin>:]<resource_type>:]<name>' "
 "or by href."
 msgstr ""
 
-#: pulpcore/cli/python/repository.py:102
+#: pulpcore/cli/python/repository.py:104
 msgid "Filename of the python package"
 msgstr ""
 
-#: pulpcore/cli/python/repository.py:110
+#: pulpcore/cli/python/repository.py:112
 msgid ""
 "JSON string with a list of objects to add to the repository.\n"
 "    Each object should have the key: \"filename\"\n"
@@ -112,7 +86,7 @@ msgid ""
 "list of objects."
 msgstr ""
 
-#: pulpcore/cli/python/repository.py:119
+#: pulpcore/cli/python/repository.py:121
 msgid ""
 "JSON string with a list of objects to remove from the repository.\n"
 "    Each object should have the key: \"filename\"\n"
@@ -120,7 +94,7 @@ msgid ""
 "list of objects."
 msgstr ""
 
-#: pulpcore/cli/python/repository.py:163
+#: pulpcore/cli/python/repository.py:169
 #, python-brace-format
 msgid ""
 "Repository '{name}' does not have a default remote. Please specify with '--"

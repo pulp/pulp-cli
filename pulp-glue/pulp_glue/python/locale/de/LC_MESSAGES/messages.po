@@ -1,0 +1,58 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-10-04 09:26+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: pulp-glue/pulp_glue/python/context.py:35
+msgid "python package"
+msgstr ""
+
+#: pulp-glue/pulp_glue/python/context.py:36
+msgid "python packages"
+msgstr ""
+
+#: pulp-glue/pulp_glue/python/context.py:46
+msgid "python distribution"
+msgstr ""
+
+#: pulp-glue/pulp_glue/python/context.py:47
+msgid "python distributions"
+msgstr ""
+
+#: pulp-glue/pulp_glue/python/context.py:69
+msgid "python publication"
+msgstr ""
+
+#: pulp-glue/pulp_glue/python/context.py:70
+msgid "python publications"
+msgstr ""
+
+#: pulp-glue/pulp_glue/python/context.py:87
+msgid "python remote"
+msgstr ""
+
+#: pulp-glue/pulp_glue/python/context.py:88
+msgid "python remotes"
+msgstr ""
+
+#: pulp-glue/pulp_glue/python/context.py:110
+msgid "python repository"
+msgstr ""
+
+#: pulp-glue/pulp_glue/python/context.py:111
+msgid "python repositories"
+msgstr ""

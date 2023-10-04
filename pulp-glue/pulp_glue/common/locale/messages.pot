@@ -1,0 +1,363 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-10-04 09:25+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: pulp-glue/pulp_glue/common/context.py:304
+#, python-brace-format
+msgid "Started background task {task_href}"
+msgstr ""
+
+#: pulp-glue/pulp_glue/common/context.py:314
+#, python-brace-format
+msgid "Started background task group {task_group_href}"
+msgstr ""
+
+#: pulp-glue/pulp_glue/common/context.py:330
+#, python-brace-format
+msgid "The task {task_href} meant to be canceled, completed instead."
+msgstr ""
+
+#: pulp-glue/pulp_glue/common/context.py:335
+#, python-brace-format
+msgid "Task {task_href} failed: '{description}'"
+msgstr ""
+
+#: pulp-glue/pulp_glue/common/context.py:343
+#, python-brace-format
+msgid "Task {task_href} canceled"
+msgstr ""
+
+#: pulp-glue/pulp_glue/common/context.py:347
+#, python-brace-format
+msgid "Unknown task state: {state}"
+msgstr ""
+
+#: pulp-glue/pulp_glue/common/context.py:358
+msgid "Not waiting for task because --background was specified."
+msgstr ""
+
+#: pulp-glue/pulp_glue/common/context.py:364
+#, python-brace-format
+msgid "Waiting for task {task_href} timed out."
+msgstr ""
+
+#: pulp-glue/pulp_glue/common/context.py:374
+#, python-brace-format
+msgid "Task {task_href} sent to background."
+msgstr ""
+
+#: pulp-glue/pulp_glue/common/context.py:386
+#, python-brace-format
+msgid "Task group {task_group_href} has failed/canceled tasks: '{errors}'"
+msgstr ""
+
+#: pulp-glue/pulp_glue/common/context.py:407
+#, python-brace-format
+msgid "Waiting for task group {task_group_href} timed out."
+msgstr ""
+
+#: pulp-glue/pulp_glue/common/context.py:418
+#, python-brace-format
+msgid "Task group {task_group_href} sent to background."
+msgstr ""
+
+#: pulp-glue/pulp_glue/common/context.py:437
+msgid "this command"
+msgstr ""
+
+#: pulp-glue/pulp_glue/common/context.py:440
+#, python-brace-format
+msgid ""
+"The server provides the pulp component '{component}', which prevents the use "
+"of {feature}. See 'pulp status' for installed components."
+msgstr ""
+
+#: pulp-glue/pulp_glue/common/context.py:446
+#, python-brace-format
+msgid ""
+"The server does not provide the pulp component '{component}', which is "
+"needed to use {feature}. See 'pulp status' for installed components."
+msgstr ""
+
+#: pulp-glue/pulp_glue/common/context.py:464
+msgid "entity"
+msgstr ""
+
+#: pulp-glue/pulp_glue/common/context.py:465
+msgid "entities"
+msgstr ""
+
+#: pulp-glue/pulp_glue/common/context.py:503
+#, python-brace-format
+msgid "A {entity} must be specified for this command."
+msgstr ""
+
+#: pulp-glue/pulp_glue/common/context.py:535
+#, python-brace-format
+msgid "'{value}' is not a valid HREF value for a {context_id}"
+msgstr ""
+
+#: pulp-glue/pulp_glue/common/context.py:633
+#, python-brace-format
+msgid "Not all {count} entries were shown."
+msgstr ""
+
+#: pulp-glue/pulp_glue/common/context.py:641
+#, python-brace-format
+msgid "Could not find {entity} with {kwargs}."
+msgstr ""
+
+#: pulp-glue/pulp_glue/common/context.py:738
+#: pulp-glue/pulp_glue/common/context.py:747
+#, python-brace-format
+msgid "Could not find label with key '{key}'."
+msgstr ""
+
+#: pulp-glue/pulp_glue/common/context.py:784
+#, python-brace-format
+msgid "Capability '{capability}' needed on '{entity}' for this command."
+msgstr ""
+
+#: pulp-glue/pulp_glue/common/context.py:795
+msgid "remote"
+msgstr ""
+
+#: pulp-glue/pulp_glue/common/context.py:796
+msgid "remotes"
+msgstr ""
+
+#: pulp-glue/pulp_glue/common/context.py:825
+msgid "publication"
+msgstr ""
+
+#: pulp-glue/pulp_glue/common/context.py:826
+msgid "publications"
+msgstr ""
+
+#: pulp-glue/pulp_glue/common/context.py:839
+msgid "repository filter"
+msgstr ""
+
+#: pulp-glue/pulp_glue/common/context.py:845
+msgid "distribution"
+msgstr ""
+
+#: pulp-glue/pulp_glue/common/context.py:846
+msgid "distributions"
+msgstr ""
+
+#: pulp-glue/pulp_glue/common/context.py:859
+msgid "repository version"
+msgstr ""
+
+#: pulp-glue/pulp_glue/common/context.py:860
+msgid "repository versions"
+msgstr ""
+
+#: pulp-glue/pulp_glue/common/context.py:880
+msgid "repository"
+msgstr ""
+
+#: pulp-glue/pulp_glue/common/context.py:881
+msgid "repositories"
+msgstr ""
+
+#: pulp-glue/pulp_glue/common/context.py:928
+#: pulp-glue/pulp_glue/common/context.py:929
+msgid "content"
+msgstr ""
+
+#: pulp-glue/pulp_glue/common/context.py:967
+msgid "ACS"
+msgstr ""
+
+#: pulp-glue/pulp_glue/common/context.py:968
+msgid "ACSes"
+msgstr ""
+
+#: pulp-glue/pulp_glue/common/openapi.py:68
+msgid "Cannot use both username/password and cert auth."
+msgstr ""
+
+#: pulp-glue/pulp_glue/common/openapi.py:71
+msgid "Password is required if username is set."
+msgstr ""
+
+#: pulp-glue/pulp_glue/common/openapi.py:73
+msgid "Username is required if password is set."
+msgstr ""
+
+#: pulp-glue/pulp_glue/common/openapi.py:79
+msgid "Cert is required if key is set."
+msgstr ""
+
+#: pulp-glue/pulp_glue/common/openapi.py:129
+msgid "Unknown schema version"
+msgstr ""
+
+#: pulp-glue/pulp_glue/common/openapi.py:151
+msgid "Correlation ID returned from server did not match. {} != {}"
+msgstr ""
+
+#: pulp-glue/pulp_glue/common/openapi.py:229
+#, python-brace-format
+msgid "Required parameters [{required}] missing in {param_in}."
+msgstr ""
+
+#: pulp-glue/pulp_glue/common/openapi.py:240
+msgid "Api spec is invalid."
+msgstr ""
+
+#: pulp-glue/pulp_glue/common/openapi.py:266
+#: pulp-glue/pulp_glue/common/openapi.py:281
+#, python-brace-format
+msgid "No schema in anyOf validated for {name}."
+msgstr ""
+
+#: pulp-glue/pulp_glue/common/openapi.py:276
+#, python-brace-format
+msgid "Multiple schemas in oneOf validated for {name}."
+msgstr ""
+
+#: pulp-glue/pulp_glue/common/openapi.py:290
+#, python-brace-format
+msgid "Forbidden schema for {name} validated."
+msgstr ""
+
+#: pulp-glue/pulp_glue/common/openapi.py:305
+#, python-brace-format
+msgid "'{name}' is expected to be a boolean."
+msgstr ""
+
+#: pulp-glue/pulp_glue/common/openapi.py:310
+#, python-brace-format
+msgid "Type `{schema_type}` is not implemented yet."
+msgstr ""
+
+#: pulp-glue/pulp_glue/common/openapi.py:317
+#, python-brace-format
+msgid "'{name}' is expected to be an object."
+msgstr ""
+
+#: pulp-glue/pulp_glue/common/openapi.py:327
+#, python-brace-format
+msgid "Unexpected property '{property_name}' for '{name}' provided."
+msgstr ""
+
+#: pulp-glue/pulp_glue/common/openapi.py:338
+#, python-brace-format
+msgid "Required properties(s) '{missing_properties}' of '{name}' missing."
+msgstr ""
+
+#: pulp-glue/pulp_glue/common/openapi.py:346
+#, python-brace-format
+msgid "'{name}' is expected to be a list."
+msgstr ""
+
+#: pulp-glue/pulp_glue/common/openapi.py:355
+#, python-brace-format
+msgid "'{name}' is not one of the valid choices."
+msgstr ""
+
+#: pulp-glue/pulp_glue/common/openapi.py:361
+#, python-brace-format
+msgid "'{name}' is expected to be a date."
+msgstr ""
+
+#: pulp-glue/pulp_glue/common/openapi.py:367
+#, python-brace-format
+msgid "'{name}' is expected to be a datetime."
+msgstr ""
+
+#: pulp-glue/pulp_glue/common/openapi.py:373
+#, python-brace-format
+msgid "'{name}' is expected to be bytes."
+msgstr ""
+
+#: pulp-glue/pulp_glue/common/openapi.py:379
+#, python-brace-format
+msgid "'{name}' is expected to be binary."
+msgstr ""
+
+#: pulp-glue/pulp_glue/common/openapi.py:385
+#, python-brace-format
+msgid "'{name}' is expected to be a string."
+msgstr ""
+
+#: pulp-glue/pulp_glue/common/openapi.py:392
+#, python-brace-format
+msgid "'{name}' is expected to be an integer."
+msgstr ""
+
+#: pulp-glue/pulp_glue/common/openapi.py:397
+#, python-brace-format
+msgid "'{name}' is violating the minimum constraint"
+msgstr ""
+
+#: pulp-glue/pulp_glue/common/openapi.py:402
+#, python-brace-format
+msgid "'{name}' is violating the maximum constraint"
+msgstr ""
+
+#: pulp-glue/pulp_glue/common/openapi.py:411
+#, python-brace-format
+msgid "'{name}' is expected to be a number."
+msgstr ""
+
+#: pulp-glue/pulp_glue/common/openapi.py:431
+msgid "This operation does not expect a request body."
+msgstr ""
+
+#: pulp-glue/pulp_glue/common/openapi.py:501
+#, python-brace-format
+msgid ""
+"Validation failed for '{operation_id}':\n"
+"  "
+msgstr ""
+
+#: pulp-glue/pulp_glue/common/openapi.py:507
+msgid "No valid content type found."
+msgstr ""
+
+#: pulp-glue/pulp_glue/common/openapi.py:546
+#, python-brace-format
+msgid "Unexpected response '{code}' (expected '{expected}')."
+msgstr ""
+
+#: pulp-glue/pulp_glue/common/openapi.py:572
+msgid "Cookie parameters are not implemented."
+msgstr ""
+
+#: pulp-glue/pulp_glue/common/openapi.py:583
+#, python-brace-format
+msgid "Parameter [{names}] not available for {operation_id}."
+msgstr ""
+
+#: pulp-glue/pulp_glue/common/openapi.py:605
+msgid "Call aborted due to safe mode"
+msgstr ""
+
+#: pulp-glue/pulp_glue/common/openapi.py:611
+#, python-brace-format
+msgid "Received redirect to '{url}'. Please check your CLI configuration."
+msgstr ""
+
+#: pulp-glue/pulp_glue/common/openapi.py:618
+#, python-brace-format
+msgid "Response: {status_code}"
+msgstr ""

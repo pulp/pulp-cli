@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-11-06 20:29+0100\n"
+"POT-Creation-Date: 2023-10-04 09:12+0200\n"
 "PO-Revision-Date: 2021-12-06 11:08+0100\n"
 "Last-Translator: Matthias Dellweg <mdellweg@redhat.com>\n"
 "Language-Team: \n"
@@ -38,600 +38,634 @@ msgstr "Abgebrochen."
 msgid "pulp3 command line interface"
 msgstr "Pulp 3 Kommandozeilenschnittstelle"
 
-#: pulpcore/cli/common/__init__.py:83
+#: pulpcore/cli/common/__init__.py:84
 msgid "Config profile to use"
 msgstr "Zu benutzendes Konfigurationsprofil"
 
-#: pulpcore/cli/common/__init__.py:91
+#: pulpcore/cli/common/__init__.py:92
 msgid "Path of a Pulp CLI settings file to use instead of the default location"
 msgstr ""
 "Pfad einer Pulp CLI Konfigurationsdatei, die anstatt des voreingestellten "
 "Ort genutzt werden soll."
 
-#: pulpcore/cli/common/__init__.py:99
+#: pulpcore/cli/common/__init__.py:100
 msgid "Start tasks in the background instead of awaiting them"
 msgstr "Starte Aufgaben im Hintergrund, anstatt auf sie zu warten."
 
-#: pulpcore/cli/common/__init__.py:101
+#: pulpcore/cli/common/__init__.py:102
 msgid "Invalidate cached API docs"
 msgstr "Annulliere vorgespeicherte API Dokumentation."
 
-#: pulpcore/cli/common/config.py:34
+#: pulpcore/cli/common/__init__.py:106
+msgid ""
+"Logging CID to send on requests (note: server configuration may require a "
+"valid GUID and ignore CIDs that aren't)"
+msgstr ""
+
+#: pulpcore/cli/common/acs.py:30
+msgid "path to add to ACS; can be specified multiple times."
+msgstr ""
+
+#: pulpcore/cli/common/acs.py:63
+msgid "ACS already has path '{}'."
+msgstr ""
+
+#: pulpcore/cli/common/acs.py:82
+msgid "ACS does not have path(s): {}."
+msgstr ""
+
+#: pulpcore/cli/common/acs.py:94
+msgid ""
+"Remote to attach to ACS in the form '[[<plugin>:]<resource_type>:]<name>' or "
+"by href."
+msgstr ""
+
+#: pulpcore/cli/common/config.py:38
 msgid "API base url"
 msgstr "API Basisadresse"
 
-#: pulpcore/cli/common/config.py:35
+#: pulpcore/cli/common/config.py:42
+msgid "Absolute API base path on server (not including 'api/v3/')"
+msgstr ""
+
+#: pulpcore/cli/common/config.py:44
+msgid "Domain to work in if feature is enabled"
+msgstr ""
+
+#: pulpcore/cli/common/config.py:45
 msgid "Username on pulp server"
 msgstr "Benutzername auf dem pulp Server"
 
-#: pulpcore/cli/common/config.py:36
+#: pulpcore/cli/common/config.py:46
 msgid "Password on pulp server"
 msgstr "Passwort auf dem pulp server"
 
-#: pulpcore/cli/common/config.py:37
+#: pulpcore/cli/common/config.py:47
 msgid "Path to client certificate"
 msgstr "Verzeichnis zum Benutzerzertifikat"
 
-#: pulpcore/cli/common/config.py:41
+#: pulpcore/cli/common/config.py:51
 msgid "Path to client private key. Not required if client cert contains this."
 msgstr ""
 "Verzeichis zum Schlüssel des Benutzerzertifikats. Nicht notwendig, wenn in "
 "Benutzerzertifikat enthalten."
 
-#: pulpcore/cli/common/config.py:43
+#: pulpcore/cli/common/config.py:53
 msgid "Verify SSL connection"
 msgstr "SSL-Verbindung verifizieren"
 
-#: pulpcore/cli/common/config.py:48
+#: pulpcore/cli/common/config.py:58
 msgid "Format of the response"
 msgstr "Format der Antwort"
 
-#: pulpcore/cli/common/config.py:53
+#: pulpcore/cli/common/config.py:63
 msgid "Trace commands without performing any unsafe HTTP calls"
 msgstr "Verfolge Kommandos ohne gefährliche HTTP Aufrufe durchzuführen."
 
-#: pulpcore/cli/common/config.py:60
+#: pulpcore/cli/common/config.py:70
 msgid "Time to wait for background tasks, set to 0 to wait infinitely"
 msgstr ""
 "Dauer um auf Hintergrundprozesse zu warten. Setze auf 0 um ewig zu warten."
 
-#: pulpcore/cli/common/config.py:67
+#: pulpcore/cli/common/config.py:77
 msgid "Increase verbosity; explain api calls as they are made"
 msgstr "Erhöhe Gesprächigkeit; erläutert API Aufrufe wenn sie gemacht werden."
 
-#: pulpcore/cli/common/config.py:74
+#: pulpcore/cli/common/config.py:84
 msgid "Value cannot be None."
 msgstr "Der Wert kann nicht 'None' sein."
 
-#: pulpcore/cli/common/config.py:88
+#: pulpcore/cli/common/config.py:98
+msgid "'api_root' must begin and end with '/'"
+msgstr ""
+
+#: pulpcore/cli/common/config.py:100
 #, python-brace-format
 msgid "'format' is not one of {choices}"
 msgstr "'format' enthält nicht eines aus '{choices}'."
 
-#: pulpcore/cli/common/config.py:90
+#: pulpcore/cli/common/config.py:102
 msgid "'dry_run' is not a bool"
 msgstr "'dry_run' enthält keinen bool'schen Ausdruck."
 
-#: pulpcore/cli/common/config.py:92
+#: pulpcore/cli/common/config.py:104
 msgid "'timeout' is not an integer"
 msgstr "'timeout' enthält keine ganze Zahl."
 
-#: pulpcore/cli/common/config.py:94
+#: pulpcore/cli/common/config.py:106
 msgid "'verbose' is not an integer"
 msgstr "'verbose' enthält keine ganze Zahl."
 
-#: pulpcore/cli/common/config.py:97
+#: pulpcore/cli/common/config.py:108
+msgid "'domain' must be a slug string"
+msgstr ""
+
+#: pulpcore/cli/common/config.py:111
 msgid "Unknown settings: '{}'."
 msgstr "Unbekannte Einstellungen: '{}'."
 
-#: pulpcore/cli/common/config.py:101
+#: pulpcore/cli/common/config.py:115
 msgid "Missing settings: '{}'."
 msgstr "Fehlende Einstellungen: '{}'."
 
-#: pulpcore/cli/common/config.py:110
+#: pulpcore/cli/common/config.py:124
 msgid "Could not locate default profile 'cli' setting"
 msgstr "Konnte voreingestelltes Konfigurationsprofil 'cli' nicht finden."
 
-#: pulpcore/cli/common/config.py:115
+#: pulpcore/cli/common/config.py:129
 #, python-brace-format
 msgid "Invalid profile '{key}'"
 msgstr "Ungültiges Profil '{key}'"
 
-#: pulpcore/cli/common/config.py:120
+#: pulpcore/cli/common/config.py:134
 #, python-brace-format
 msgid "Profile {key}:"
 msgstr "Profil {key}:"
 
-#: pulpcore/cli/common/config.py:127
+#: pulpcore/cli/common/config.py:141
 msgid "Manage pulp-cli config file"
 msgstr ""
 
-#: pulpcore/cli/common/config.py:132
+#: pulpcore/cli/common/config.py:148
 msgid "Create a pulp-cli config settings file"
 msgstr ""
 
-#: pulpcore/cli/common/config.py:135
+#: pulpcore/cli/common/config.py:151
 msgid "Edit the config file in an editor"
 msgstr ""
 
-#: pulpcore/cli/common/config.py:136
+#: pulpcore/cli/common/config.py:152
 msgid "Overwrite any existing config file"
 msgstr ""
 
-#: pulpcore/cli/common/config.py:151
+#: pulpcore/cli/common/config.py:167
 #, python-brace-format
 msgid ""
 "File '{location}' already exists. Use --overwrite if you want to overwrite "
 "it."
 msgstr ""
 
-#: pulpcore/cli/common/config.py:167
+#: pulpcore/cli/common/config.py:183
 msgid "Config file location"
 msgstr ""
 
-#: pulpcore/cli/common/config.py:178 pulpcore/cli/common/config.py:208
+#: pulpcore/cli/common/config.py:194 pulpcore/cli/common/config.py:224
 msgid "No output from editor. Aborting."
 msgstr ""
 
-#: pulpcore/cli/common/config.py:190
+#: pulpcore/cli/common/config.py:206
 #, python-brace-format
 msgid "Created config file at '{location}'."
 msgstr ""
 
-#: pulpcore/cli/common/config.py:193
+#: pulpcore/cli/common/config.py:209
 msgid "Open the settings config file in an editor"
 msgstr ""
 
-#: pulpcore/cli/common/config.py:199
+#: pulpcore/cli/common/config.py:215
 #, python-brace-format
 msgid ""
 "File '{location}' does not exists. If you wish to create the file, use the "
 "pulp create command."
 msgstr ""
 
-#: pulpcore/cli/common/config.py:216
+#: pulpcore/cli/common/config.py:232
 msgid "Retry"
 msgstr ""
 
-#: pulpcore/cli/common/config.py:221
+#: pulpcore/cli/common/config.py:237
 msgid "Validate a pulp-cli config file"
 msgstr ""
 
-#: pulpcore/cli/common/config.py:223
+#: pulpcore/cli/common/config.py:239
 msgid "Validate that all settings are present"
 msgstr ""
 
-#: pulpcore/cli/common/config.py:228
+#: pulpcore/cli/common/config.py:244
 #, python-brace-format
 msgid "Invalid toml file '{location}'."
 msgstr ""
 
-#: pulpcore/cli/common/config.py:235
+#: pulpcore/cli/common/config.py:251
 #, python-brace-format
 msgid "File '{location}' is a valid pulp-cli config."
 msgstr ""
 
-#: pulpcore/cli/common/context.py:124
-#, python-brace-format
-msgid "Format '{format}' not implemented."
-msgstr ""
-
-#: pulpcore/cli/common/context.py:145
-#, python-brace-format
-msgid "Started background task {task_href}"
-msgstr ""
-
-#: pulpcore/cli/common/context.py:155
-#, python-brace-format
-msgid "Started background task group {task_group_href}"
-msgstr ""
-
-#: pulpcore/cli/common/context.py:172
-#, python-brace-format
-msgid "Task {task_href} failed: '{description}'"
-msgstr ""
-
-#: pulpcore/cli/common/context.py:177
-#, python-brace-format
-msgid "Task {task_href} canceled"
-msgstr ""
-
-#: pulpcore/cli/common/context.py:181
-#, python-brace-format
-msgid "Unknown task state: {state}"
-msgstr ""
-
-#: pulpcore/cli/common/context.py:193
-#, python-brace-format
-msgid "Waiting for task {task_href} timed out."
-msgstr ""
-
-#: pulpcore/cli/common/context.py:210
-msgid "Not waiting for task because --background was specified."
-msgstr ""
-
-#: pulpcore/cli/common/context.py:215
-#, python-brace-format
-msgid "Task {task_href} sent to background."
-msgstr ""
-
-#: pulpcore/cli/common/context.py:236
-#, python-brace-format
-msgid "Waiting for task {task_href}"
-msgstr ""
-
-#: pulpcore/cli/common/context.py:246
-#, python-brace-format
-msgid "Waiting for task group {task_group_href} timed out."
-msgstr ""
-
-#: pulpcore/cli/common/context.py:257
-#, python-brace-format
-msgid "Task group {task_group_href} sent to background."
-msgstr ""
-
-#: pulpcore/cli/common/context.py:294
-msgid "this command"
-msgstr "dieses Kommando"
-
-#: pulpcore/cli/common/context.py:297
-#, python-brace-format
-msgid ""
-"The server provides the pulp component '{specifier}', which prevents the use "
-"of {feature}. See 'pulp status' for installed components."
-msgstr ""
-
-#: pulpcore/cli/common/context.py:303
-#, python-brace-format
-msgid ""
-"The server does not provide the pulp component '{specifier}', which is "
-"needed to use {feature}. See 'pulp status' for installed components."
-msgstr ""
-
-#: pulpcore/cli/common/context.py:321
-msgid "entity"
-msgstr ""
-
-#: pulpcore/cli/common/context.py:322
-msgid "entities"
-msgstr ""
-
-#: pulpcore/cli/common/context.py:360
-#, python-brace-format
-msgid "A {entity} must be specified for this command."
-msgstr ""
-
-#: pulpcore/cli/common/context.py:444
-#, python-brace-format
-msgid "Not all {count} entries were shown."
-msgstr "Nicht alle {count} Einträge werden angezeigt."
-
-#: pulpcore/cli/common/context.py:451
-#, python-brace-format
-msgid "Could not find {entity} with {kwargs}."
-msgstr "Kann {entity} mit {kwargs} nicht finden."
-
-#: pulpcore/cli/common/context.py:520
-#, python-brace-format
-msgid "Could not find label with key '{key}'."
-msgstr ""
-
-#: pulpcore/cli/common/context.py:533
-msgid "remote"
-msgstr ""
-
-#: pulpcore/cli/common/context.py:534
-msgid "remotes"
-msgstr ""
-
-#: pulpcore/cli/common/context.py:553
-msgid "repository version"
-msgstr ""
-
-#: pulpcore/cli/common/context.py:554
-msgid "repository versions"
-msgstr ""
-
-#: pulpcore/cli/common/context.py:580
-msgid "repository"
-msgstr ""
-
-#: pulpcore/cli/common/context.py:581
-msgid "repositories"
-msgstr ""
-
-#: pulpcore/cli/common/context.py:634 pulpcore/cli/common/context.py:635
-msgid "content"
-msgstr ""
-
-#: pulpcore/cli/common/debug.py:13
+#: pulpcore/cli/common/debug.py:19
 msgid "Commands useful for debugging"
 msgstr "Befehle zum Debuggen"
 
-#: pulpcore/cli/common/debug.py:22
+#: pulpcore/cli/common/debug.py:28
 msgid "Succeed only if the installed version is not smaller."
 msgstr ""
 
-#: pulpcore/cli/common/debug.py:23
+#: pulpcore/cli/common/debug.py:29
 msgid "Succeed only if the installed version is smaller."
 msgstr ""
 
-#: pulpcore/cli/common/debug.py:82
+#: pulpcore/cli/common/debug.py:30
+msgid "Succeed only if the installed version is contained."
+msgstr ""
+
+#: pulpcore/cli/common/debug.py:43
+msgid "You can either provide versions or the specifier."
+msgstr ""
+
+#: pulpcore/cli/common/debug.py:66 pulpcore/cli/common/debug.py:98
+msgid "Operation ID in openapi schema"
+msgstr ""
+
+#: pulpcore/cli/common/debug.py:78
 #, python-brace-format
 msgid "No operation with id {operation_id} found."
 msgstr ""
 
-#: pulpcore/cli/common/generic.py:67
+#: pulpcore/cli/common/debug.py:128
+msgid "Component schema name in openapi schema"
+msgstr ""
+
+#: pulpcore/cli/common/debug.py:139
+#, python-brace-format
+msgid "No schema component with name {schema_name} found."
+msgstr ""
+
+#: pulpcore/cli/common/generic.py:120
+#, python-brace-format
+msgid "Format '{format}' not implemented."
+msgstr ""
+
+#: pulpcore/cli/common/generic.py:226
+#, python-brace-format
+msgid "The subcommand '{name}' is not available in this context."
+msgstr ""
+
+#: pulpcore/cli/common/generic.py:278
 #, python-brace-format
 msgid "the {name} option"
 msgstr ""
 
-#: pulpcore/cli/common/generic.py:92
+#: pulpcore/cli/common/generic.py:303
 #, python-brace-format
 msgid "Option is grouped with {option_list}."
 msgstr ""
 
-#: pulpcore/cli/common/generic.py:105
+#: pulpcore/cli/common/generic.py:316
 #, python-brace-format
 msgid "Illegal usage, please specify all options in the group: {option_list}"
 msgstr ""
 
-#: pulpcore/cli/common/generic.py:195
+#: pulpcore/cli/common/generic.py:398
 #, python-brace-format
 msgid "Failed to load content from {file}"
 msgstr "Das Laden des Inhalts aus der Datei {file} ist fehlgeschlagen"
 
-#: pulpcore/cli/common/generic.py:216
+#: pulpcore/cli/common/generic.py:418
 msgid "Failed to decode JSON"
 msgstr "Die JSON-Dekodierung ist fehlgeschlagen"
 
-#: pulpcore/cli/common/generic.py:235
+#: pulpcore/cli/common/generic.py:437
+msgid "Labels must be provided as a dictionary of strings."
+msgstr ""
+
+#: pulpcore/cli/common/generic.py:455
 #, python-brace-format
 msgid "Validation of '{parameter}' failed: {error}"
 msgstr ""
 
-#: pulpcore/cli/common/generic.py:295
-#, python-brace-format
-msgid "The option {option_name} does not support href."
-msgstr ""
-
-#: pulpcore/cli/common/generic.py:302
+#: pulpcore/cli/common/generic.py:533 pulpcore/cli/common/generic.py:596
 #, python-brace-format
 msgid "'{value}' is not a valid href for {option_name}."
 msgstr ""
 
-#: pulpcore/cli/common/generic.py:321
+#: pulpcore/cli/common/generic.py:551
+#, python-brace-format
+msgid "A resource to look for identified by <{lookup_key}> or by <href>."
+msgstr ""
+
+#: pulpcore/cli/common/generic.py:585
+#, python-brace-format
+msgid "The option {option_name} does not support href."
+msgstr ""
+
+#: pulpcore/cli/common/generic.py:615
 #, python-brace-format
 msgid "A resource type must be specified with the {option_name} option."
 msgstr ""
 
-#: pulpcore/cli/common/generic.py:329
+#: pulpcore/cli/common/generic.py:623
 #, python-brace-format
 msgid "A plugin must be specified with the {option_name} option."
 msgstr ""
 
-#: pulpcore/cli/common/generic.py:339
+#: pulpcore/cli/common/generic.py:633
 #, python-brace-format
 msgid ""
 "The type '{plugin}:{resource_type}' is not valid for the {option_name} "
 "option."
 msgstr ""
 
-#: pulpcore/cli/common/generic.py:352
+#: pulpcore/cli/common/generic.py:644
 #, python-brace-format
 msgid ""
 "The type '{plugin}:{resource_type}' does not support the '{capability}' "
 "capability."
 msgstr ""
 
-#: pulpcore/cli/common/generic.py:378
+#: pulpcore/cli/common/generic.py:673
+#, python-brace-format
+msgid ""
+"Referenced resource, in the form {plugin_form}{type_form}<name> or by href. "
+"{plugin_default}{type_default}"
+msgstr ""
+
+#: pulpcore/cli/common/generic.py:676
+msgid "[<plugin>:]"
+msgstr ""
+
+#: pulpcore/cli/common/generic.py:676
+msgid "<plugin>:"
+msgstr ""
+
+#: pulpcore/cli/common/generic.py:677
+msgid "[<resource_type>:]"
+msgstr ""
+
+#: pulpcore/cli/common/generic.py:677
+msgid "<resource_type>:"
+msgstr ""
+
+#: pulpcore/cli/common/generic.py:678
+#, python-brace-format
+msgid "'<plugin>' defaults to {plugin}. "
+msgstr ""
+
+#: pulpcore/cli/common/generic.py:681
+#, python-brace-format
+msgid "'<resource_type>' defaults to {type}. "
+msgstr ""
+
+#: pulpcore/cli/common/generic.py:725
 #, python-brace-format
 msgid "Limit the number of {entities} to show."
 msgstr ""
 
-#: pulpcore/cli/common/generic.py:384
+#: pulpcore/cli/common/generic.py:732
 #, python-brace-format
 msgid "Skip a number of {entities} to show."
 msgstr ""
 
-#: pulpcore/cli/common/generic.py:389
+#: pulpcore/cli/common/generic.py:739
+msgid ""
+"A field that will be used to order the results. Can be specified multiple "
+"times."
+msgstr ""
+
+#: pulpcore/cli/common/generic.py:747
+msgid ""
+"A field that is to be selected from a result. Can be specified multiple "
+"times."
+msgstr ""
+
+#: pulpcore/cli/common/generic.py:755
+msgid ""
+"A field that is to be excluded from a result. Can be specified multiple "
+"times."
+msgstr ""
+
+#: pulpcore/cli/common/generic.py:760
 #, python-brace-format
 msgid "HREF of the {entity}"
 msgstr ""
 
-#: pulpcore/cli/common/generic.py:396
+#: pulpcore/cli/common/generic.py:767
 #, python-brace-format
 msgid "Name of the {entity}"
 msgstr ""
 
-#: pulpcore/cli/common/generic.py:403
+#: pulpcore/cli/common/generic.py:774
+#, python-brace-format
+msgid "Filter {entity} by exact name"
+msgstr ""
+
+#: pulpcore/cli/common/generic.py:780
+#, python-brace-format
+msgid "Filter {entity} results where name contains value"
+msgstr ""
+
+#: pulpcore/cli/common/generic.py:786
+#, python-brace-format
+msgid "Filter {entity} results where name contains value, case insensitive"
+msgstr ""
+
+#: pulpcore/cli/common/generic.py:793
+#, python-brace-format
+msgid "Filter {entity} by name. Can be specified multiple times"
+msgstr ""
+
+#: pulpcore/cli/common/generic.py:798
 msgid "HREF of the repository"
 msgstr "HREF des Repositories"
 
-#: pulpcore/cli/common/generic.py:410
+#: pulpcore/cli/common/generic.py:805
 msgid "Name of the repository"
 msgstr ""
 
-#: pulpcore/cli/common/generic.py:417
+#: pulpcore/cli/common/generic.py:832
+msgid ""
+"Content Guard used to protect the distribution. Specified as '<plugin>:"
+"<type>:<name>' or as href."
+msgstr ""
+
+#: pulpcore/cli/common/generic.py:839
 msgid "Repository version number"
 msgstr ""
 
-#: pulpcore/cli/common/generic.py:426
+#: pulpcore/cli/common/generic.py:848
 #, python-brace-format
 msgid "Filter {entities} by a label search query."
 msgstr ""
 
-#: pulpcore/cli/common/generic.py:432
+#: pulpcore/cli/common/generic.py:854
 #, python-brace-format
 msgid "Base-path of the {entity}"
 msgstr "Basispfad des/der {entity}"
 
-#: pulpcore/cli/common/generic.py:439
+#: pulpcore/cli/common/generic.py:861
 #, python-brace-format
 msgid "{entity} base-path contains search"
 msgstr ""
 
-#: pulpcore/cli/common/generic.py:447
+#: pulpcore/cli/common/generic.py:869
 #, python-brace-format
 msgid ""
 "Search for {entities} with these content hrefs in them (JSON list or @file "
 "containing a JSON list)"
 msgstr ""
 
-#: pulpcore/cli/common/generic.py:455
+#: pulpcore/cli/common/generic.py:877
 #, python-brace-format
 msgid "Chunk size to break up {entity} into. Defaults to 1MB"
 msgstr ""
 
-#: pulpcore/cli/common/generic.py:463
+#: pulpcore/cli/common/generic.py:885
 #, python-brace-format
-msgid "Search for {entities} created at or after this ISO 8601 date"
+msgid "Search for {entities} created at or after this date"
 msgstr ""
 
-#: pulpcore/cli/common/generic.py:470
+#: pulpcore/cli/common/generic.py:892
 #, python-brace-format
-msgid "Search for {entities} created at or before this ISO 8601 date"
+msgid "Search for {entities} created at or before this date"
 msgstr ""
 
-#: pulpcore/cli/common/generic.py:477
+#: pulpcore/cli/common/generic.py:899
+#, python-brace-format
+msgid "Search for {entities} last updated at or after this date"
+msgstr ""
+
+#: pulpcore/cli/common/generic.py:906
+#, python-brace-format
+msgid "Search for {entities} last updated at or before this date"
+msgstr ""
+
+#: pulpcore/cli/common/generic.py:913
 msgid "Number of repository versions to keep."
 msgstr ""
 
-#: pulpcore/cli/common/generic.py:484
+#: pulpcore/cli/common/generic.py:921
+#, python-brace-format
+msgid ""
+"JSON dictionary of labels to set on {entity} (or @file containing a JSON "
+"dictionary)"
+msgstr ""
+
+#: pulpcore/cli/common/generic.py:954
 #, python-brace-format
 msgid "Search {entities} by repository version HREF"
 msgstr ""
 
-#: pulpcore/cli/common/generic.py:492 pulpcore/cli/common/generic.py:525
+#: pulpcore/cli/common/generic.py:963 pulpcore/cli/common/generic.py:1013
 msgid "a PEM encoded CA certificate or @file containing same"
 msgstr "eine PEM kodierte Zertifikatsauthorität oder @Datei die sie enthält"
 
-#: pulpcore/cli/common/generic.py:497 pulpcore/cli/common/generic.py:530
+#: pulpcore/cli/common/generic.py:968 pulpcore/cli/common/generic.py:1018
 msgid "a PEM encoded client certificate or @file containing same"
 msgstr "ein PEM kodiertes Benutzerzertifikat oder @Datei die es enthält"
 
-#: pulpcore/cli/common/generic.py:502 pulpcore/cli/common/generic.py:535
+#: pulpcore/cli/common/generic.py:973 pulpcore/cli/common/generic.py:1023
 msgid "a PEM encode private key or @file containing same"
 msgstr ""
 
-#: pulpcore/cli/common/generic.py:507 pulpcore/cli/common/generic.py:540
+#: pulpcore/cli/common/generic.py:978 pulpcore/cli/common/generic.py:1030
 msgid "total number of simultaneous connections"
 msgstr ""
 
-#: pulpcore/cli/common/generic.py:513 pulpcore/cli/common/generic.py:546
+#: pulpcore/cli/common/generic.py:983 pulpcore/cli/common/generic.py:1035
+msgid ""
+"The password to authenticate to the remote (can contain leading and trailing "
+"spaces)."
+msgstr ""
+
+#: pulpcore/cli/common/generic.py:991 pulpcore/cli/common/generic.py:1043
+msgid ""
+"The password to authenticate to the proxy (can contain leading and trailing "
+"spaces)."
+msgstr ""
+
+#: pulpcore/cli/common/generic.py:994 pulpcore/cli/common/generic.py:1047
 msgid "limit download rate in requests per second"
 msgstr ""
 
-#: pulpcore/cli/common/generic.py:566
+#: pulpcore/cli/common/generic.py:1003 pulpcore/cli/common/generic.py:1057
+msgid "maximum number of retry attemts after a download failure"
+msgstr ""
+
+#: pulpcore/cli/common/generic.py:1070
 #, python-brace-format
 msgid "Show the list of optionally filtered {entities}."
 msgstr ""
 
-#: pulpcore/cli/common/generic.py:598
+#: pulpcore/cli/common/generic.py:1112
 #, python-brace-format
 msgid "Show details of a {entity}."
 msgstr ""
 
-#: pulpcore/cli/common/generic.py:624
+#: pulpcore/cli/common/generic.py:1136
 #, python-brace-format
 msgid "Create a {entity}."
 msgstr ""
 
-#: pulpcore/cli/common/generic.py:655
+#: pulpcore/cli/common/generic.py:1166
 #, python-brace-format
 msgid "Update a {entity}."
 msgstr ""
 
-#: pulpcore/cli/common/generic.py:682
+#: pulpcore/cli/common/generic.py:1190
 #, python-brace-format
 msgid "Destroy a {entity}."
 msgstr ""
 
-#: pulpcore/cli/common/generic.py:749
+#: pulpcore/cli/common/generic.py:1257
 msgid "Add or update a label"
 msgstr ""
 
-#: pulpcore/cli/common/generic.py:750 pulpcore/cli/common/generic.py:759
-#: pulpcore/cli/common/generic.py:767
+#: pulpcore/cli/common/generic.py:1258 pulpcore/cli/common/generic.py:1266
+#: pulpcore/cli/common/generic.py:1273
 msgid "Key of the label"
 msgstr ""
 
-#: pulpcore/cli/common/generic.py:751
+#: pulpcore/cli/common/generic.py:1259
 msgid "Value of the label"
 msgstr ""
 
-#: pulpcore/cli/common/generic.py:758
+#: pulpcore/cli/common/generic.py:1265
 msgid "Remove a label with a given key"
 msgstr ""
 
-#: pulpcore/cli/common/generic.py:766
+#: pulpcore/cli/common/generic.py:1272
 msgid "Show the value for a particular label key"
 msgstr "Zeige den Wert zu einem bestimmen Anhängerschlüssel"
 
-#: pulpcore/cli/common/generic.py:840
+#: pulpcore/cli/common/generic.py:1291
+msgid "Manage object roles."
+msgstr ""
+
+#: pulpcore/cli/common/generic.py:1298
+msgid "List my permissions on this object."
+msgstr ""
+
+#: pulpcore/cli/common/generic.py:1305
+msgid "List assigned object roles."
+msgstr ""
+
+#: pulpcore/cli/common/generic.py:1312
+msgid "Add assigned object roles."
+msgstr ""
+
+#: pulpcore/cli/common/generic.py:1328
+msgid "Remove assigned object roles."
+msgstr ""
+
+#: pulpcore/cli/common/generic.py:1407
 msgid "Remove all content from repository version"
 msgstr ""
 
-#: pulpcore/cli/common/openapi.py:49
-msgid "Cannot use both username/password and cert auth."
-msgstr ""
+#~ msgid "this command"
+#~ msgstr "dieses Kommando"
 
-#: pulpcore/cli/common/openapi.py:52
-msgid "Password is required if username is set."
-msgstr ""
-
-#: pulpcore/cli/common/openapi.py:54
-msgid "Username is required if password is set."
-msgstr ""
-
-#: pulpcore/cli/common/openapi.py:60
-msgid "Cert is required if key is set."
-msgstr ""
-
-#: pulpcore/cli/common/openapi.py:99
-msgid "Unknown schema version"
-msgstr ""
-
-#: pulpcore/cli/common/openapi.py:144
 #, python-brace-format
-msgid "Required parameters [{required}] missing for {param_type}."
-msgstr ""
+#~ msgid "Not all {count} entries were shown."
+#~ msgstr "Nicht alle {count} Einträge werden angezeigt."
 
-#: pulpcore/cli/common/openapi.py:179
-msgid "No suitable content type for file upload specified."
-msgstr ""
-
-#: pulpcore/cli/common/openapi.py:191
-msgid "No suitable content type for request specified."
-msgstr ""
-
-#: pulpcore/cli/common/openapi.py:210
 #, python-brace-format
-msgid "Unexpected response '{code}' (expected '{expected}')."
-msgstr ""
+#~ msgid "Could not find {entity} with {kwargs}."
+#~ msgstr "Kann {entity} mit {kwargs} nicht finden."
 
-#: pulpcore/cli/common/openapi.py:236
-msgid "Cookie parameters are not implemented."
-msgstr ""
+#~ msgid "Call aborted due to safe mode"
+#~ msgstr "Kommando abgebrochen wegen Trockenlauf"
 
-#: pulpcore/cli/common/openapi.py:247
 #, python-brace-format
-msgid "Parameter [{names}] not available for {operation_id}."
-msgstr ""
-
-#: pulpcore/cli/common/openapi.py:263
-msgid "Call aborted due to safe mode"
-msgstr "Kommando abgebrochen wegen Trockenlauf"
-
-#: pulpcore/cli/common/openapi.py:270
-#, python-brace-format
-msgid "Received redirect to '{url}'. Please check your CLI configuration."
-msgstr ""
-
-#: pulpcore/cli/common/openapi.py:275
-#, python-brace-format
-msgid "Response: {status_code}"
-msgstr "Antwort: {status_code}"
+#~ msgid "Response: {status_code}"
+#~ msgstr "Antwort: {status_code}"
 
 #~ msgid "Path to the Pulp settings.toml file"
 #~ msgstr "Pfad zur Pulp Einstellungsdatei settings.toml"

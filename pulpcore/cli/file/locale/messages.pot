@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-11-06 19:41+0100\n"
+"POT-Creation-Date: 2023-10-04 09:12+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,115 +17,67 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: pulpcore/cli/file/acs.py:29
-msgid "path to add to ACS; can be specified multiple times."
-msgstr ""
-
-#: pulpcore/cli/file/acs.py:70
-msgid "ACS already has path '{}'."
-msgstr ""
-
-#: pulpcore/cli/file/acs.py:90
-msgid "ACS does not have path(s): {}."
-msgstr ""
-
-#: pulpcore/cli/file/acs.py:102
+#: pulpcore/cli/file/content.py:62
 msgid ""
-"Remote to attach to ACS in the form '[[<plugin>:]<resource_type>:]<name>' or "
-"by href."
+"Repository to add the content to in the form "
+"'[[<plugin>:]<resource_type>:]<name>' or by href."
 msgstr ""
 
-#: pulpcore/cli/file/content.py:81
+#: pulpcore/cli/file/content.py:96
 msgid "Digest of the artifact to use"
 msgstr ""
 
-#: pulpcore/cli/file/context.py:20
-msgid "file ACS"
-msgstr ""
-
-#: pulpcore/cli/file/context.py:21
-msgid "file ACSes"
-msgstr ""
-
-#: pulpcore/cli/file/context.py:38 pulpcore/cli/file/context.py:39
-msgid "file content"
-msgstr ""
-
-#: pulpcore/cli/file/context.py:47
-msgid "file distribution"
-msgstr ""
-
-#: pulpcore/cli/file/context.py:48
-msgid "file distributions"
-msgstr ""
-
-#: pulpcore/cli/file/context.py:68
-msgid "file publication"
-msgstr ""
-
-#: pulpcore/cli/file/context.py:69
-msgid "file publications"
-msgstr ""
-
-#: pulpcore/cli/file/context.py:86
-msgid "file remote"
-msgstr ""
-
-#: pulpcore/cli/file/context.py:87
-msgid "file remotes"
-msgstr ""
-
-#: pulpcore/cli/file/distribution.py:32
+#: pulpcore/cli/file/distribution.py:37
 msgid ""
-"Repository to be used for auto-publishing. When set, this will unset the "
+"Repository to be used for auto-distributing. When set, this will unset the "
 "'publication'. Specified as '[[<plugin>:]<type>:]<name>' or as href."
 msgstr ""
 
-#: pulpcore/cli/file/distribution.py:63
+#: pulpcore/cli/file/distribution.py:67
 msgid ""
-"Publication to be served. This will unset the 'repository' and disable auto "
-"publish."
+"Publication to be served. This will unset the 'repository' and disable auto-"
+"distribute."
 msgstr ""
 
-#: pulpcore/cli/file/publication.py:50
+#: pulpcore/cli/file/publication.py:53
 msgid "a repository version number, leave blank for latest"
 msgstr ""
 
-#: pulpcore/cli/file/publication.py:54
+#: pulpcore/cli/file/publication.py:57
 msgid ""
 "Filename to use for manifest file containing metadata for all the files."
 msgstr ""
 
-#: pulpcore/cli/file/repository.py:56
+#: pulpcore/cli/file/repository.py:58
 msgid ""
-"Remote used for synching in the form '[[<plugin>:]<resource_type>:]<name>' "
-"or by href."
+"Remote used for syncing in the form '[[<plugin>:]<resource_type>:]<name>' or "
+"by href."
 msgstr ""
 
-#: pulpcore/cli/file/repository.py:80
+#: pulpcore/cli/file/repository.py:83
 #, python-brace-format
 msgid "Validation of '{parameter}' failed: {error}"
 msgstr ""
 
-#: pulpcore/cli/file/repository.py:135 pulpcore/cli/file/repository.py:279
+#: pulpcore/cli/file/repository.py:139 pulpcore/cli/file/repository.py:293
 msgid ""
 "JSON string with a list of objects to add to the repository.\n"
-"    Each object must contain the following keys: \"sha256\", \"relative_path"
-"\".\n"
+"    Each object must contain the following keys: \"sha256\", "
+"\"relative_path\".\n"
 "    The argument prefixed with the '@' can be the path to a JSON file with a "
 "list of objects."
 msgstr ""
 
-#: pulpcore/cli/file/repository.py:144 pulpcore/cli/file/repository.py:290
+#: pulpcore/cli/file/repository.py:148 pulpcore/cli/file/repository.py:304
 msgid ""
 "JSON string with a list of objects to remove from the repository.\n"
-"    Each object must contain the following keys: \"sha256\", \"relative_path"
-"\".\n"
+"    Each object must contain the following keys: \"sha256\", "
+"\"relative_path\".\n"
 "    The argument prefixed with the '@' can be the path to a JSON file with a "
 "list of objects."
 msgstr ""
 
-#: pulpcore/cli/file/repository.py:188
+#: pulpcore/cli/file/repository.py:204
 #, python-brace-format
 msgid ""
 "Repository '{name}' does not have a default remote. Please specify with '--"
