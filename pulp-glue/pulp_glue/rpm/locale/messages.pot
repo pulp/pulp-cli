@@ -1,0 +1,75 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-10-04 09:26+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: pulp-glue/pulp_glue/rpm/context.py:27
+msgid "rpm ACS"
+msgstr ""
+
+#: pulp-glue/pulp_glue/rpm/context.py:28
+msgid "rpm ACSes"
+msgstr ""
+
+#: pulp-glue/pulp_glue/rpm/context.py:42
+#, python-brace-format
+msgid "Uploading file {filename}"
+msgstr ""
+
+#: pulp-glue/pulp_glue/rpm/context.py:53
+msgid "rpm distribution"
+msgstr ""
+
+#: pulp-glue/pulp_glue/rpm/context.py:54
+msgid "rpm distributions"
+msgstr ""
+
+#: pulp-glue/pulp_glue/rpm/context.py:90
+msgid "--relative-path must be provided"
+msgstr ""
+
+#: pulp-glue/pulp_glue/rpm/context.py:187
+msgid "rpm publication"
+msgstr ""
+
+#: pulp-glue/pulp_glue/rpm/context.py:188
+msgid "rpm publications"
+msgstr ""
+
+#: pulp-glue/pulp_glue/rpm/context.py:206
+msgid "rpm remote"
+msgstr ""
+
+#: pulp-glue/pulp_glue/rpm/context.py:207
+msgid "rpm remotes"
+msgstr ""
+
+#: pulp-glue/pulp_glue/rpm/context.py:228
+msgid "uln remote"
+msgstr ""
+
+#: pulp-glue/pulp_glue/rpm/context.py:229
+msgid "uln remotes"
+msgstr ""
+
+#: pulp-glue/pulp_glue/rpm/context.py:248
+msgid "rpm repository"
+msgstr ""
+
+#: pulp-glue/pulp_glue/rpm/context.py:249
+msgid "rpm repositories"
+msgstr ""

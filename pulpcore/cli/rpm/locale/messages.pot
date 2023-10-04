@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-12-06 11:10+0100\n"
+"POT-Creation-Date: 2023-10-04 09:12+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,84 +17,110 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: pulpcore/cli/rpm/acs.py:30
-msgid "path to add to ACS; can be specified multiple times."
-msgstr ""
-
-#: pulpcore/cli/rpm/acs.py:71
-msgid "ACS already has path '{}'."
-msgstr ""
-
-#: pulpcore/cli/rpm/acs.py:91
-msgid "ACS does not have path(s): {}."
-msgstr ""
-
-#: pulpcore/cli/rpm/acs.py:103
-msgid ""
-"Remote to attach to ACS in the form '[[<plugin>:]<resource_type>:]<name>' or "
-"by href."
-msgstr ""
-
-#: pulpcore/cli/rpm/comps.py:24
+#: pulpcore/cli/rpm/comps.py:23
 msgid "Repository to associate the comps-units to, takes <name> or href."
 msgstr ""
 
-#: pulpcore/cli/rpm/content.py:96
+#: pulpcore/cli/rpm/content.py:78
+msgid ""
+"Repository to add the content to in the form "
+"'[[<plugin>:]<resource_type>:]<name>' or by href."
+msgstr ""
+
+#: pulpcore/cli/rpm/content.py:233
 msgid "Digest of the artifact to use"
 msgstr ""
 
-#: pulpcore/cli/rpm/context.py:22
-msgid "rpm ACS"
+#: pulpcore/cli/rpm/content.py:261
+msgid "Relative path within a distribution of the entity"
 msgstr ""
 
-#: pulpcore/cli/rpm/context.py:23
-msgid "rpm ACSes"
+#: pulpcore/cli/rpm/content.py:268
+msgid "An RPM binary"
 msgstr ""
 
-#: pulpcore/cli/rpm/context.py:45
-#, python-brace-format
-msgid "Uploading file {filename}"
+#: pulpcore/cli/rpm/content.py:275
+msgid "An advisory JSON file."
 msgstr ""
 
-#: pulpcore/cli/rpm/context.py:55
-msgid "rpm distribution"
+#: pulpcore/cli/rpm/distribution.py:36
+msgid ""
+"Repository to be used for auto-distributing. When set, this will unset the "
+"'publication'. Specified as '[[<plugin>:]<type>:]<name>' or as href."
 msgstr ""
 
-#: pulpcore/cli/rpm/context.py:56
-msgid "rpm distributions"
+#: pulpcore/cli/rpm/distribution.py:67
+msgid ""
+"Publication to be served. This will unset the 'repository' and disable auto-"
+"distribute."
 msgstr ""
 
-#: pulpcore/cli/rpm/context.py:76
-msgid "rpm publication"
+#: pulpcore/cli/rpm/distribution.py:74
+msgid ""
+"Option specifying whether ``*.repo`` files will be generated and served."
 msgstr ""
 
-#: pulpcore/cli/rpm/context.py:77
-msgid "rpm publications"
-msgstr ""
-
-#: pulpcore/cli/rpm/context.py:94
-msgid "rpm remote"
-msgstr ""
-
-#: pulpcore/cli/rpm/context.py:95
-msgid "rpm remotes"
-msgstr ""
-
-#: pulpcore/cli/rpm/publication.py:46
+#: pulpcore/cli/rpm/publication.py:53
 msgid "a repository version number, leave blank for latest"
 msgstr ""
 
-#: pulpcore/cli/rpm/repository.py:56
+#: pulpcore/cli/rpm/remote.py:60
+msgid "a PEM encoded CA certificate or @file containing same"
+msgstr ""
+
+#: pulpcore/cli/rpm/remote.py:65
+msgid "a PEM encoded client certificate or @file containing same"
+msgstr ""
+
+#: pulpcore/cli/rpm/remote.py:70
+msgid "a PEM encode private key or @file containing same"
+msgstr ""
+
+#: pulpcore/cli/rpm/remote.py:75
+msgid "total number of simultaneous connections"
+msgstr ""
+
+#: pulpcore/cli/rpm/remote.py:80
+msgid ""
+"The password to authenticate to the remote (can contain leading and trailing "
+"spaces)."
+msgstr ""
+
+#: pulpcore/cli/rpm/remote.py:91
+msgid ""
+"The password to authenticate to the proxy (can contain leading and trailing "
+"spaces)."
+msgstr ""
+
+#: pulpcore/cli/rpm/remote.py:94
+msgid "limit download rate in requests per second"
+msgstr ""
+
+#: pulpcore/cli/rpm/remote.py:108 pulpcore/cli/rpm/remote.py:126
+msgid ""
+"For remote_type:uln, Use the ULN channel name starting with uln://. For "
+"remote_type:rpm, use url with http/https."
+msgstr ""
+
+#: pulpcore/cli/rpm/remote.py:117
+msgid "ULN Server base URL, default is 'https://linux-update.oracle.com/'"
+msgstr ""
+
+#: pulpcore/cli/rpm/remote.py:133
+msgid "ULN Server base URL."
+msgstr ""
+
+#: pulpcore/cli/rpm/repository.py:60
 msgid ""
 "Remote used for synching in the form '[[<plugin>:]<resource_type>:]<name>' "
 "or by href."
 msgstr ""
 
-#: pulpcore/cli/rpm/repository.py:94
+#: pulpcore/cli/rpm/repository.py:106
 msgid "Href of the rpm package to use"
 msgstr ""
 
-#: pulpcore/cli/rpm/repository.py:107
+#: pulpcore/cli/rpm/repository.py:119
 msgid ""
 "JSON string with a list of objects to add to the repository.\n"
 "    Each object must contain the following keys: \"pulp_href\".\n"
@@ -102,7 +128,7 @@ msgid ""
 "list of objects."
 msgstr ""
 
-#: pulpcore/cli/rpm/repository.py:116
+#: pulpcore/cli/rpm/repository.py:128
 msgid ""
 "JSON string with a list of objects to remove from the repository.\n"
 "    Each object must contain the following keys: \"pulp_href\".\n"
@@ -110,7 +136,7 @@ msgid ""
 "list of objects."
 msgstr ""
 
-#: pulpcore/cli/rpm/repository.py:192
+#: pulpcore/cli/rpm/repository.py:247
 #, python-brace-format
 msgid ""
 "Repository '{name}' does not have a default remote. Please specify with '--"
