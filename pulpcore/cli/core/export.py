@@ -74,8 +74,7 @@ def _version_list_callback(
                 ).format(plugin=plugin, resource_type=resource_type, capability="export")
             )
 
-        entity_ctx = repository_ctx.get_version_context()
-        entity_ctx.pulp_href = f"{repository_ctx.entity['versions_href']}{item[1]}/"
+        entity_ctx = repository_ctx.get_version_context(number=item[1])
         result.append(entity_ctx)
 
     return result

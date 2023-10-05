@@ -1359,13 +1359,7 @@ def repository_content_command(**kwargs: t.Any) -> click.Group:
     ) -> PulpRepositoryVersionContext:
         repo_ctx = ctx.find_object(PulpRepositoryContext)
         assert repo_ctx is not None
-        repo_ver_ctx = repo_ctx.get_version_context()
-        repo_ver_ctx.pulp_href = (
-            f"{repo_ctx.pulp_href}versions/{value}/"
-            if value is not None
-            else repo_ctx.entity["latest_version_href"]
-        )
-        return repo_ver_ctx
+        return repo_ctx.get_version_context(-1 if value is None else value)
 
     # This is a mypy bug getting confused with positional args
     # https://github.com/python/mypy/issues/15037

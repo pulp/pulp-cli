@@ -1117,15 +1117,27 @@ class PulpDistributionContext(PulpEntityContext):
 
 
 class PulpRepositoryVersionContext(PulpEntityContext):
-    """Base class for repository version contexts."""
+    """
+    Base class for repository version contexts.
+
+    Parameters:
+        pulp_ctx: The server context to attach this entity to.
+        repository_ctx: Context of the repository this context should be scoped to.
+        pulp_href: Specifying this is equivalent to assinging to `pulp_href` later.
+    """
 
     ENTITY = _("repository version")
     ENTITIES = _("repository versions")
     ID_PREFIX = "repository_versions"
     repository_ctx: "PulpRepositoryContext"
 
-    def __init__(self, pulp_ctx: PulpContext, repository_ctx: "PulpRepositoryContext") -> None:
-        super().__init__(pulp_ctx)
+    def __init__(
+        self,
+        pulp_ctx: PulpContext,
+        repository_ctx: "PulpRepositoryContext",
+        pulp_href: Optional[str] = None,
+    ) -> None:
+        super().__init__(pulp_ctx, pulp_href=pulp_href)
         self.repository_ctx = repository_ctx
 
     @property
@@ -1164,14 +1176,31 @@ class PulpRepositoryContext(PulpEntityContext):
         if hasattr(cls, "PLUGIN") and hasattr(cls, "RESOURCE_TYPE"):
             cls.TYPE_REGISTRY[f"{cls.PLUGIN}:{cls.RESOURCE_TYPE}"] = cls
 
-    def get_version_context(self) -> PulpRepositoryVersionContext:
+    def get_version_context(
+        self,
+        number: Optional[int] = None,
+    ) -> PulpRepositoryVersionContext:
         """
         Return a repository version context of the proper type scoped for this repository.
+
+        Parameters:
+            number: Version number or `-1` for the latest version.
 
         Returns:
             Repository version context attached to the same pulp_ctx and scoped to the repository.
         """
-        return self.VERSION_CONTEXT(self.pulp_ctx, self)
+        if number is not None:
+            if number >= 0:
+                version_href = self.entity["versions_href"] + f"{number}/"
+            elif number == -1:
+                version_href = self.entity["latest_version_href"]
+            else:
+                PulpException(_("Invalid version number ({number}).").format(number=number))
+        else:
+            version_href = None
+        return self.VERSION_CONTEXT(
+            pulp_ctx=self.pulp_ctx, repository_ctx=self, pulp_href=version_href
+        )
 
     def preprocess_entity(self, body: EntityDefinition, partial: bool = False) -> EntityDefinition:
         body = super().preprocess_entity(body, partial=partial)
