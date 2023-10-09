@@ -17,7 +17,6 @@
 #### Improved Documentation
 
 - Added a version select widget to docs.
-  
 
 
 ### Pulp GLUE
@@ -140,7 +139,7 @@ No significant changes.
 ### Improved Documentation
 
 - Added a version select widget to docs.
-  
+
 
 
 ---

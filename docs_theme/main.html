@@ -52,7 +52,7 @@
     appearance: none;
     background-color: transparent;
     border: none;
-    padding: 0 1em 0 0;
+    padding: 0 1.5em 0 0;
     margin: 0;
     font-family: inherit;
     font-size: inherit;
@@ -61,6 +61,11 @@
     line-height: inherit;
     box-shadow: inherit;
     cursor: pointer;
-}
+  }
+  div.version::after {
+    content: '\2630';
+    margin-left: -1em;
+    pointer-events: none;
+  }
 </style>
 {% endblock %}
