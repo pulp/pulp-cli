@@ -46,17 +46,17 @@ FC = t.TypeVar("FC", bound=t.Union[_AnyCallable, click.Command])
 
 
 class IncompatibleContext(click.UsageError):
-    pass
+    """Exception to signal that an option or subcommand was used with an incompatible context."""
 
 
 class ClickNoWait(click.ClickException):
+    """Exception raised when a user interrupts waiting for a task/taskgroup."""
+
     exit_code = 0
 
     def show(self, file: t.Optional[t.IO[str]] = None) -> None:
-        """
-        Format the message into file or STDERR.
-        Overwritten from base class to not print "Error: ".
-        """
+        # Format the message into file or STDERR.
+        # Overwritten from base class to not print "Error: ".
         if file is None:
             file = click.get_text_stream("stderr")
         click.echo(self.format_message(), file=file)
@@ -73,6 +73,15 @@ class PulpJSONEncoder(json.JSONEncoder):
 class PulpCLIContext(PulpContext):
     """
     Subclass of the Context that overwrites the CLI specifics.
+
+    Parameters:
+        api_root: The base url (excluding "api/v3/") to the server's api.
+        api_kwargs: Extra arguments to pass to the wrapped `OpenAPI` object.
+        background_tasks: Whether to wait for tasks. If `True`, all tasks triggered will
+            immediately raise `PulpNoWait`.
+        timeout: Limit of time (in seconds) to wait for unfinished tasks.
+        format: The format to be used by `output_result`.
+        domain: Name of the domain to interact with.
     """
 
     def __init__(
@@ -101,7 +110,10 @@ class PulpCLIContext(PulpContext):
 
     def output_result(self, result: t.Any) -> None:
         """
-        Dump the provided result to the console using the selected renderer
+        Dump the provided result to the console using the selected renderer.
+
+        arguments:
+            result: JSON serializable data to be outputted.
         """
         if self.format == "json":
             output = json.dumps(result, cls=PulpJSONEncoder, indent=(2 if self.isatty else None))
@@ -126,11 +138,17 @@ class PulpCLIContext(PulpContext):
 
 
 pass_pulp_context = click.make_pass_decorator(PulpCLIContext)
+"""Decorator to make the Pulp context available to a command."""
 pass_entity_context = click.make_pass_decorator(PulpEntityContext)
+"""Decorator to make the nearest entity context available to a command."""
 pass_acs_context = click.make_pass_decorator(PulpACSContext)
+"""Decorator to make the nearest ACS context available to a command."""
 pass_content_context = click.make_pass_decorator(PulpContentContext)
+"""Decorator to make the nearest content context available to a command."""
 pass_repository_context = click.make_pass_decorator(PulpRepositoryContext)
+"""Decorator to make the nearest repository context available to a command."""
 pass_repository_version_context = click.make_pass_decorator(PulpRepositoryVersionContext)
+"""Decorator to make the nearest repository version context available to a command."""
 
 
 ##############################################################################
@@ -138,6 +156,11 @@ pass_repository_version_context = click.make_pass_decorator(PulpRepositoryVersio
 
 
 def int_or_empty(value: str) -> t.Union[str, int]:
+    """
+    Turns a string into an integer or keeps the empty string.
+
+    This is meant to be used as a click parameter type.
+    """
     if value == "":
         return ""
     else:
@@ -148,6 +171,11 @@ int_or_empty.__name__ = "int or empty"
 
 
 def float_or_empty(value: str) -> t.Union[str, float]:
+    """
+    Turns a string into a float or keeps the empty string.
+
+    This is meant to be used as a click parameter type.
+    """
     if value == "":
         return ""
     else:
@@ -245,12 +273,25 @@ class PulpGroup(PulpCommand, click.Group):
 def pulp_command(
     name: t.Optional[str] = None, **kwargs: t.Any
 ) -> t.Callable[[_AnyCallable], PulpCommand]:
+    """
+    Pulp command factory.
+
+    Creates a click compatible command that can be modified with `needs_plugins` and
+    `allowed_with_contexts`. It allows rendering the docstring with the values of `ENTITY` and
+    `ENTITIES` from the closest entity context.
+    """
     return click.command(name=name, cls=PulpCommand, **kwargs)
 
 
 def pulp_group(
     name: t.Optional[str] = None, **kwargs: t.Any
 ) -> t.Callable[[_AnyCallable], PulpGroup]:
+    """
+    Pulp command group factory.
+
+    Creates a click compatible group command that selects subcommands based on
+    `allowed_with_contexts` and creates `PulpCommand` subcommands by default.
+    """
     return click.group(name=name, cls=PulpGroup, **kwargs)
 
 
@@ -378,7 +419,12 @@ def _version_callback(
 
 
 def load_file_wrapper(handler: t.Callable[[click.Context, click.Parameter, str], t.Any]) -> t.Any:
-    """A wrapper that used for chaining or decorating callbacks that manipulate with input data."""
+    """
+    A wrapper that is used for chaining or decorating callbacks that manipulate input data.
+
+    When prefixed with `"@"`, content will be read from a file instead of being taken from the
+    command line.
+    """
 
     @wraps(handler)
     def _load_file_or_string_wrapper(
@@ -406,9 +452,15 @@ def load_file_wrapper(handler: t.Callable[[click.Context, click.Parameter, str],
 
 
 load_string_callback = load_file_wrapper(lambda c, p, x: x)
+"""
+A reusable callback for text parameters.
+
+It will read data from a file if their value starts with `"@"`, otherwise use it unchanged.
+"""
 
 
 def json_callback(ctx: click.Context, param: click.Parameter, value: t.Optional[str]) -> t.Any:
+    """A reusable callback that will parse its value from json."""
     if value is None:
         return None
 
@@ -421,6 +473,11 @@ def json_callback(ctx: click.Context, param: click.Parameter, value: t.Optional[
 
 
 load_json_callback = load_file_wrapper(json_callback)
+"""
+A reusable callback that will parse its value from json.
+
+Will optionally read from a file prefixed with `"@"`.
+"""
 
 
 def load_labels_callback(
@@ -494,6 +551,7 @@ def null_callback(
 
 
 def pulp_option(*args: t.Any, **kwargs: t.Any) -> t.Callable[[FC], FC]:
+    """Factory that creates a `PulpOption`."""
     kwargs["cls"] = PulpOption
     return click.option(*args, **kwargs)
 
@@ -1205,7 +1263,13 @@ def destroy_command(**kwargs: t.Any) -> click.Command:
 
 
 def version_command(**kwargs: t.Any) -> click.Command:
-    """A factory that creates a repository version command group."""
+    """
+    A factory that creates a repository version command group.
+
+    This group contains `list`, `show`, `destroy` and `repair` subcommands.
+    If `list_only=True` is passed, only the `list` command will be instantiated.
+    Repository lookup options can be provided in `decorators`.
+    """
 
     kwargs.setdefault("name", "version")
     decorators = kwargs.pop("decorators", [repository_href_option, repository_option])
@@ -1242,7 +1306,12 @@ def version_command(**kwargs: t.Any) -> click.Command:
 
 
 def label_command(**kwargs: t.Any) -> click.Command:
-    """A factory that creates a label command group."""
+    """
+    A factory that creates a label command group.
+
+    This group contains `set`, `unset` and `show` commands and acts on the nearest entity context.
+    Pass options in as `decorators` to customize the entity lookup options.
+    """
 
     kwargs.setdefault("name", "label")
     decorators = kwargs.pop("decorators", [name_option, href_option])
@@ -1285,7 +1354,12 @@ def label_command(**kwargs: t.Any) -> click.Command:
 
 
 def role_command(**kwargs: t.Any) -> click.Command:
-    """A factory that creates a (object) role command group."""
+    """
+    A factory that creates a (object) role command group.
+
+    This group contains `my-permissions`, `list`, `add` and `remove`.
+    Pass options in as `decorators` to customize the entity lookup options.
+    """
 
     kwargs.setdefault("name", "role")
     kwargs.setdefault("help", _("Manage object roles."))

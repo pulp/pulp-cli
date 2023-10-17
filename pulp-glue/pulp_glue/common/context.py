@@ -371,7 +371,10 @@ class PulpContext:
         except OpenAPIError as e:
             raise PulpException(str(e))
         except HTTPError as e:
-            raise PulpHTTPError(str(e.response.text), e.response.status_code)
+            if e.response is not None:
+                raise PulpHTTPError(str(e.response.text), e.response.status_code)
+            else:
+                raise PulpException(str(e))
         # Asynchronous tasks seem to be reported by a dict containing only one key "task"
         if isinstance(result, dict) and ["task"] == list(result.keys()):
             task_href = result["task"]

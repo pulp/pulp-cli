@@ -43,3 +43,5 @@ nav:
     - 'glue_reference/common_context.md'
     - 'glue_reference/common_i18n.md'
     - 'glue_reference/core_context.md'
+  - 'Pulp CLI plumbings API Reference':
+    - 'cli_reference/common_generic.md'
