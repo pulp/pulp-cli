@@ -26,6 +26,7 @@ from pulpcore.cli.common.generic import (
     label_command,
     label_select_option,
     list_command,
+    load_json_callback,
     name_option,
     pass_pulp_context,
     pass_repository_context,
@@ -142,8 +143,22 @@ update_options = [
     click.option(
         "--package-checksum-type", type=click.Choice(CHECKSUM_CHOICES, case_sensitive=False)
     ),
-    click.option("--gpgcheck", type=click.Choice(("0", "1"))),
-    click.option("--repo-gpgcheck", type=click.Choice(("0", "1"))),
+    click.option(
+        "--gpgcheck",
+        type=click.Choice(("0", "1")),
+        help=_(
+            """DEPRECATED:Option specifying whether a client should perform a GPG signature check
+            on packages."""
+        ),
+    ),
+    click.option(
+        "--repo-gpgcheck",
+        type=click.Choice(("0", "1")),
+        help=_(
+            """DEPRECATED:Option specifying whether a client should perform a GPG signature check
+            on the repodata."""
+        ),
+    ),
     click.option("--sqlite-metadata/--no-sqlite-metadata", default=None),
     pulp_option(
         "--autopublish/--no-autopublish",
@@ -152,6 +167,16 @@ update_options = [
     ),
     retained_versions_option,
     pulp_labels_option,
+    pulp_option(
+        "--repo-config",
+        "repo_config",
+        needs_plugins=[PluginRequirement("rpm", specifier=">=3.24.0")],
+        help=_(
+            "A JSON dictionary describing config.repo file (or "
+            "@file containing a JSON dictionary)"
+        ),
+        callback=load_json_callback,
+    ),
 ]
 create_options = update_options + [click.option("--name", required=True)]
 

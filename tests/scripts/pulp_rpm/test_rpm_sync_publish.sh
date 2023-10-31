@@ -19,12 +19,31 @@ else
   curl_opt=""
 fi
 
+# Add content using JSON file
+cat <<EOT >> repo_config.json
+{
+"enabled":1,
+"repo_gpgcheck":1,
+"gpgcheck":1,
+"skip_if_unavailable":false,
+"assumeyes":true
+}
+
+EOT
+
 expect_succ pulp rpm remote create --name "cli_test_rpm_remote" --url "$RPM_REMOTE_URL"
 expect_succ pulp rpm remote show --name "cli_test_rpm_remote"
 expect_succ pulp rpm repository create --name "cli_test_rpm_repository" --remote "cli_test_rpm_remote" --description "cli test repository"
 expect_succ pulp rpm repository update --repository "cli_test_rpm_repository" --description ""
 expect_succ pulp rpm repository show --repository "cli_test_rpm_repository"
 test "$(echo "$OUTPUT" | jq -r '.description')" = "null"
+
+if pulp debug has-plugin --name "rpm" --specifier ">=3.24.0"
+then
+expect_succ pulp rpm repository create --name "cli_test_rpm_repository2" --repo-config "@repo_config.json"
+test "$(echo "$OUTPUT" | jq -r '.repo_config.assumeyes')" = "true"
+expect_succ pulp rpm repository destroy --repository "cli_test_rpm_repository2"
+fi
 
 # skip-types is broken in 3.12.0
 if pulp debug has-plugin --name "rpm" --min-version "3.12.0" --max-version "3.12.1"
@@ -45,19 +64,26 @@ PUBLICATION_HREF=$(echo "$OUTPUT" | jq -r .pulp_href)
 expect_succ pulp rpm publication create --repository "cli_test_rpm_repository" --version 0
 PUBLICATION_VER_HREF=$(echo "$OUTPUT" | jq -r .pulp_href)
 
+if pulp debug has-plugin --name "rpm" --specifier ">=3.24.0"
+then
+expect_succ pulp rpm publication create --repository "cli_test_rpm_repository" --repo-config "@repo_config.json"
+test "$(echo "$OUTPUT" | jq -r '.repo_config.assumeyes')" = "true"
+expect_succ pulp rpm publication destroy --href "$(echo "$OUTPUT" | jq -r '.pulp_href')"
+fi
+
 expect_succ pulp rpm distribution create --name "cli_test_rpm_distro" \
   --base-path "cli_test_rpm_distro" \
   --publication "$PUBLICATION_HREF"
 DISTRIBUTION_BASE_URL=$(echo "$OUTPUT" | jq -r .base_url)
 
-if pulp debug has-plugin --name "rpm" --specifier "<3.23.0.dev"
+if pulp debug has-plugin --name "rpm" --specifier "<3.23.0"
 then
   expect_succ curl "$curl_opt" --head --fail "${DISTRIBUTION_BASE_URL}config.repo"
 else
   expect_fail curl "$curl_opt" --head --fail "${DISTRIBUTION_BASE_URL}config.repo"
 fi
 
-if pulp debug has-plugin --name "rpm" --specifier ">=3.23.0.dev"
+if pulp debug has-plugin --name "rpm" --specifier ">=3.23.0"
 then
   expect_succ pulp rpm distribution create --name "cli_test_rpm_distro2" \
     --base-path "cli_test_rpm_distro2" \
