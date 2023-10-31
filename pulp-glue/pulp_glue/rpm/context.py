@@ -65,8 +65,14 @@ class PulpRpmDistributionContext(PulpDistributionContext):
             if "repository" not in body and "publication" in body:
                 body["repository"] = None
         if body.get("generate_repo_config") is False:
-            self.pulp_ctx.needs_plugin(PluginRequirement("rpm", specifier=">=3.23.0.dev"))
-        elif self.pulp_ctx.has_plugin(PluginRequirement("rpm", specifier="<3.23.0.dev")):
+            self.pulp_ctx.needs_plugin(
+                PluginRequirement(
+                    "rpm",
+                    specifier=">=3.23.0",
+                    feature=_("configuring the generation of the config.repo file"),
+                )
+            )
+        elif self.pulp_ctx.has_plugin(PluginRequirement("rpm", specifier="<3.23.0")):
             body.pop("generate_repo_config", None)
         return body
 
@@ -197,6 +203,14 @@ class PulpRpmPublicationContext(PulpPublicationContext):
         if version is not None:
             repository_href = body.pop("repository")
             body["repository_version"] = f"{repository_href}versions/{version}/"
+        if "repo_config" in body:
+            self.pulp_ctx.needs_plugin(
+                PluginRequirement(
+                    "rpm",
+                    specifier=">=3.24.0",
+                    feature=_("customization of the config.repo file"),
+                )
+            )
         return body
 
 
@@ -259,6 +273,14 @@ class PulpRpmRepositoryContext(PulpRepositoryContext):
         body = super().preprocess_entity(body, partial=partial)
         if "autopublish" in body:
             self.pulp_ctx.needs_plugin(PluginRequirement("rpm", specifier=">=3.12.0"))
+        if "repo_config" in body:
+            self.pulp_ctx.needs_plugin(
+                PluginRequirement(
+                    "rpm",
+                    specifier=">=3.24.0",
+                    feature=_("customization of the config.repo file"),
+                )
+            )
         return body
 
     def sync(self, href: Optional[str] = None, body: Optional[EntityDefinition] = None) -> Any:

@@ -1,4 +1,5 @@
 import click
+from pulp_glue.common.context import PluginRequirement
 from pulp_glue.common.i18n import get_translation
 from pulp_glue.rpm.context import PulpRpmPublicationContext, PulpRpmRepositoryContext
 
@@ -8,9 +9,11 @@ from pulpcore.cli.common.generic import (
     destroy_command,
     href_option,
     list_command,
+    load_json_callback,
     pass_pulp_context,
     publication_filter_options,
     pulp_group,
+    pulp_option,
     resource_option,
     role_command,
     show_command,
@@ -51,6 +54,16 @@ create_options = [
     repository_option,
     click.option(
         "--version", type=int, help=_("a repository version number, leave blank for latest")
+    ),
+    pulp_option(
+        "--repo-config",
+        "repo_config",
+        needs_plugins=[PluginRequirement("rpm", specifier=">=3.24.0")],
+        help=_(
+            "A JSON dictionary describing config.repo file (or "
+            "@file containing a JSON dictionary)"
+        ),
+        callback=load_json_callback,
     ),
 ]
 publication.add_command(list_command(decorators=publication_filter_options + [repository_option]))
