@@ -220,6 +220,23 @@ class PulpRpmPublicationContext(PulpPublicationContext):
                     feature=_("sqlite_metadata generation"),
                 )
             )
+        if "metadata_checksum_type" in body or "package_checksum_type" in body:
+            metadata_checksum_type = body.get("metadata_checksum_type")
+            package_checksum_type = body.get("metadata_checksum_type")
+            disallowed_checksums = {"md5", "sha1", "sha224"}
+
+            if metadata_checksum_type and metadata_checksum_type in disallowed_checksums:
+                self.pulp_ctx.needs_plugin(
+                    PluginRequirement(
+                        "rpm", specifier=">=3.25.0", inverted=True, feature=_("weak checksums")
+                    )
+                )
+            if package_checksum_type and package_checksum_type in disallowed_checksums:
+                self.pulp_ctx.needs_plugin(
+                    PluginRequirement(
+                        "rpm", specifier=">=3.25.0", inverted=True, feature=_("weak checksums")
+                    )
+                )
         return body
 
 
@@ -299,6 +316,23 @@ class PulpRpmRepositoryContext(PulpRepositoryContext):
                     feature=_("sqlite_metadata generation"),
                 )
             )
+        if "metadata_checksum_type" in body or "package_checksum_type" in body:
+            metadata_checksum_type = body.get("metadata_checksum_type")
+            package_checksum_type = body.get("metadata_checksum_type")
+            disallowed_checksums = {"md5", "sha1", "sha224"}
+
+            if metadata_checksum_type and metadata_checksum_type in disallowed_checksums:
+                self.pulp_ctx.needs_plugin(
+                    PluginRequirement(
+                        "rpm", specifier=">=3.25.0", inverted=True, feature=_("weak checksums")
+                    )
+                )
+            if package_checksum_type and package_checksum_type in disallowed_checksums:
+                self.pulp_ctx.needs_plugin(
+                    PluginRequirement(
+                        "rpm", specifier=">=3.25.0", inverted=True, feature=_("weak checksums")
+                    )
+                )
         return body
 
     def sync(self, href: Optional[str] = None, body: Optional[EntityDefinition] = None) -> Any:
