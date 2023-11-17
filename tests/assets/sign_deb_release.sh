@@ -6,7 +6,7 @@ RELEASE_FILE="$(/usr/bin/readlink -f "$1")"
 OUTPUT_DIR="$(/usr/bin/mktemp -d)"
 DETACHED_SIGNATURE_PATH="${OUTPUT_DIR}/Release.gpg"
 INLINE_SIGNATURE_PATH="${OUTPUT_DIR}/InRelease"
-GPG_KEY_ID="Pulp QE"
+GPG_KEY_ID="pulp-fixture-signing-key"
 
 # Create a detached signature
 /usr/bin/gpg --batch --armor --digest-algo SHA256 \

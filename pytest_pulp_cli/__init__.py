@@ -92,13 +92,11 @@ def pulp_cli_gnupghome(tmp_path_factory):
     gnupghome = tmp_path_factory.mktemp("gnupghome")
     gpg = gnupg.GPG(gnupghome=str(gnupghome))
 
-    key_file = pathlib.Path(__file__).parent / "GPG-PRIVATE-KEY-pulp-qe"
+    key_file = pathlib.Path(__file__).parent / "GPG-PRIVATE-KEY-fixture-signing"
     if key_file.exists():
         private_key_data = key_file.read_text()
     else:
-        private_key_url = (
-            "https://github.com/pulp/pulp-fixtures/raw/master/common/GPG-PRIVATE-KEY-pulp-qe"
-        )
+        private_key_url = "https://github.com/pulp/pulp-fixtures/raw/master/common/GPG-PRIVATE-KEY-fixture-signing"  # noqa: E501
         private_key_data = requests.get(private_key_url).text
         key_file.write_text(private_key_data)
 
