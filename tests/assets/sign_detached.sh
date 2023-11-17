@@ -2,7 +2,7 @@
 
 FILE_PATH=$1
 SIGNATURE_PATH="$1.asc"
-: "${PULP_SIGNING_KEY_FINGERPRINT:="Pulp QE"}"
+: "${PULP_SIGNING_KEY_FINGERPRINT:="pulp-fixture-signing-key"}"
 
 # Create a detached signature
 gpg --quiet --batch --detach-sign --local-user "${PULP_SIGNING_KEY_FINGERPRINT}" \

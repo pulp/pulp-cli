@@ -15,7 +15,7 @@ pulp orphan cleanup --protection-time 0
 
 if pulp debug has-plugin --name "ansible" --min-version "0.15.0"
 then
-  gpg --output pulp_pubkey.key --armor --export "Pulp QE"
+  gpg --output pulp_pubkey.key --armor --export "pulp-fixture-signing-key"
   expect_succ pulp ansible repository create --name "cli_test_ansible_repository_verify" --gpgkey @pulp_pubkey.key
 else
   expect_succ pulp ansible repository create --name "cli_test_ansible_repository_verify"
@@ -53,7 +53,7 @@ then
   collection_path="$(realpath 'MANIFEST.json')"
   signature_path="$("$(dirname "$(dirname "$(dirname "$(realpath "$0")")")")"/assets/sign_detached.sh "$collection_path" | jq -r .signature)"
   expect_succ pulp ansible content --type "signature" upload --file "$signature_path" --collection "$content_href" --repository "cli_test_ansible_repository_verify"
-  expect_succ pulp ansible content --type "signature" list --collection "$content_href" --pubkey-fingerprint "6EDF301256480B9B801EBA3D05A5E6DA269D9D98"
+  expect_succ pulp ansible content --type "signature" list --collection "$content_href" --pubkey-fingerprint "0C1A894EBB86AFAE218424CADDEF3019C2D4A8CF"
   test "$(echo "$OUTPUT" | jq -r length)" -eq "1"
   content3_href="$(echo "$OUTPUT" | jq -r .[0].pulp_href)"
   expect_succ pulp ansible content --type "signature" show --href "$content3_href"
