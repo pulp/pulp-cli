@@ -5,10 +5,14 @@
 
 pulp debug has-plugin --name "rpm" || exit 23
 
+# This container seems to have issues with the compression format of the fixture.
+pulp debug has-plugin --name "rpm" --specifier "==3.20.0" && pulp debug has-plugin --name "core" --specifier "==3.23.21" && exit 23
+
 cleanup() {
   pulp rpm distribution destroy --name "cli_test_rpm_distro" || true
   pulp rpm repository destroy --name "cli_test_rpm_repository" || true
   pulp rpm remote destroy --name "cli_test_rpm_remote" || true
+  pulp rpm repository destroy --repository "cli_test_rpm_repository2" || true
 }
 trap cleanup EXIT
 
@@ -42,17 +46,16 @@ if pulp debug has-plugin --name "rpm" --specifier ">=3.24.0"
 then
 expect_succ pulp rpm repository create --name "cli_test_rpm_repository2" --repo-config "@repo_config.json"
 test "$(echo "$OUTPUT" | jq -r '.repo_config.assumeyes')" = "true"
-expect_succ pulp rpm repository destroy --repository "cli_test_rpm_repository2"
 fi
 
 # skip-types is broken in 3.12.0
-if pulp debug has-plugin --name "rpm" --min-version "3.12.0" --max-version "3.12.1"
+if pulp debug has-plugin --name "rpm" --specifier "==3.12.0"
 then
   expect_succ pulp rpm repository sync --repository "cli_test_rpm_repository"
 else
   expect_succ pulp rpm repository sync --repository "cli_test_rpm_repository" --skip-type srpm
 fi
-if pulp debug has-plugin --name "rpm" --min-version "3.19.0"
+if pulp debug has-plugin --name "rpm" --specifier ">=3.19.0"
 then
   expect_succ pulp rpm repository sync --name "cli_test_rpm_repository" --skip-type treeinfo
   expect_succ pulp rpm repository sync --name "cli_test_rpm_repository" --skip-type treeinfo --skip-type srpm

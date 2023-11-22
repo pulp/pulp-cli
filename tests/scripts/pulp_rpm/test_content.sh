@@ -5,6 +5,9 @@
 
 pulp debug has-plugin --name "rpm" || exit 23
 
+# This container seems to have issues with the compression format of the fixture.
+pulp debug has-plugin --name "rpm" --specifier "==3.20.0" && pulp debug has-plugin --name "core" --specifier "==3.23.21" && exit 23
+
 TEST_ADVISORY="$(dirname "$(realpath "$0")")"/test_advisory.json
 RPM_FILENAME="lemon-0-1.noarch.rpm"
 RPM2_FILENAME="icecubes-2-3.noarch.rpm"
