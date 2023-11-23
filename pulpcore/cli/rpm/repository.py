@@ -82,6 +82,12 @@ def _content_callback(ctx: click.Context, param: click.Parameter, value: Any) ->
 CONTENT_LIST_SCHEMA = s.Schema([{"pulp_href": str}])
 
 
+def choice_to_int_callback(ctx: click.Context, param: click.Parameter, value: Any) -> Optional[int]:
+    if value:
+        return int(value)
+    return None
+
+
 @pulp_group()
 @click.option(
     "-t",
@@ -146,6 +152,7 @@ update_options = [
     click.option(
         "--gpgcheck",
         type=click.Choice(("0", "1")),
+        callback=choice_to_int_callback,
         help=_(
             """DEPRECATED:Option specifying whether a client should perform a GPG signature check
             on packages."""
@@ -154,6 +161,7 @@ update_options = [
     click.option(
         "--repo-gpgcheck",
         type=click.Choice(("0", "1")),
+        callback=choice_to_int_callback,
         help=_(
             """DEPRECATED:Option specifying whether a client should perform a GPG signature check
             on the repodata."""

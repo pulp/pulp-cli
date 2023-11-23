@@ -1,0 +1,1 @@
+Arguments --gpgcheck and --repo-gpgcheck in creating a rpm repository no longer fail to convert to integer.
