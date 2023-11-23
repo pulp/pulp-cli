@@ -167,7 +167,14 @@ update_options = [
             on the repodata."""
         ),
     ),
-    click.option("--sqlite-metadata/--no-sqlite-metadata", default=None),
+    click.option(
+        "--sqlite-metadata/--no-sqlite-metadata",
+        default=None,
+        help=_(
+            """DEPRECATED: An option specifying whether Pulp should generate SQLite metadata.
+            Unavailable for pulp_rpm>=3.25.0"""
+        ),
+    ),
     pulp_option(
         "--autopublish/--no-autopublish",
         needs_plugins=[PluginRequirement("rpm", specifier=">=3.12.0")],
