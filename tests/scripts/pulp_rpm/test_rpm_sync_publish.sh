@@ -42,6 +42,14 @@ expect_succ pulp rpm repository update --repository "cli_test_rpm_repository" --
 expect_succ pulp rpm repository show --repository "cli_test_rpm_repository"
 test "$(echo "$OUTPUT" | jq -r '.description')" = "null"
 
+# sqlite metadata removal from pulp_rpm (pulp/pulp_rpm#3328)
+if pulp debug has-plugin --name "rpm" --specifier "<3.25.0"
+then
+  expect_succ pulp rpm repository update --name "cli_test_rpm_repository" --no-sqlite-metadata
+else
+  expect_fail pulp rpm repository update --name "cli_test_rpm_repository" --no-sqlite-metadata
+fi
+
 if pulp debug has-plugin --name "rpm" --specifier ">=3.24.0"
 then
 expect_succ pulp rpm repository create --name "cli_test_rpm_repository2" --repo-config "@repo_config.json"

@@ -1,0 +1,1 @@
+Added version restriction to prevent the use of `sqlite_metadata` attribute on Repository and Publication contexts for `pulp_rpm>=3.25.0`.

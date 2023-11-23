@@ -211,6 +211,15 @@ class PulpRpmPublicationContext(PulpPublicationContext):
                     feature=_("customization of the config.repo file"),
                 )
             )
+        if "sqlite_metadata" in body:
+            self.pulp_ctx.needs_plugin(
+                PluginRequirement(
+                    "rpm",
+                    specifier=">=3.25.0",
+                    inverted=True,
+                    feature=_("sqlite_metadata generation"),
+                )
+            )
         return body
 
 
@@ -279,6 +288,15 @@ class PulpRpmRepositoryContext(PulpRepositoryContext):
                     "rpm",
                     specifier=">=3.24.0",
                     feature=_("customization of the config.repo file"),
+                )
+            )
+        if "sqlite_metadata" in body:
+            self.pulp_ctx.needs_plugin(
+                PluginRequirement(
+                    "rpm",
+                    specifier=">=3.25.0",
+                    inverted=True,
+                    feature=_("sqlite_metadata generation"),
                 )
             )
         return body
