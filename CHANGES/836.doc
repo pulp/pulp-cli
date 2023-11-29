@@ -1,0 +1,1 @@
+Improved `Developer Material/Architecture` section by adding clarification about `pulp-glue`, version guards and `pulp_option` factory.
