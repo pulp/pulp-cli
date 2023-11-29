@@ -296,6 +296,13 @@ def pulp_group(
 
 
 class PulpOption(click.Option):
+    """
+    Pulp-CLI specific subclass of `click.Option`.
+
+    The preferred way to use this is through the
+    [`pulp_option`][pulpcore.cli.common.generic.pulp_option] factory.
+    """
+
     def __init__(
         self,
         *args: t.Any,
@@ -551,7 +558,26 @@ def null_callback(
 
 
 def pulp_option(*args: t.Any, **kwargs: t.Any) -> t.Callable[[FC], FC]:
-    """Factory that creates a `PulpOption`."""
+    """
+    Factory of [`PulpOption`][pulpcore.cli.common.generic.PulpOption] objects.
+
+    `PulpOption` provides extra features over `click.Option`, namely:
+
+    1. Define version constrains.
+    2. Support for template variables in the help message.
+    3. Limit the use of options to certain entity contexts.
+
+    Examples:
+        Define version constrains and custom help message:
+        ```
+        pulp_option(
+            "--name",
+            needs_plugins=[PluginRequirement("rpm", specifier=">=3.12.0")],
+            help=_("Name of {entity}"),
+            allowed_with_contexts=(PulpRpmRepositoryContext,),
+        )
+        ```
+    """
     kwargs["cls"] = PulpOption
     return click.option(*args, **kwargs)
 
