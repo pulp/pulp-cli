@@ -10,7 +10,62 @@
 
 [//]: # (towncrier release notes start)
 
-## 0.21.4 (2023-10-02)
+## 0.22.0 (2023-12-04)
+
+
+
+#### Features
+
+- Added the ability to reclaim disk space (cmd: 'pulp repository reclaim').
+  [#620](https://github.com/pulp/pulp-cli/issues/620)
+- Added ``--repo-config`` option to the rpm repository and publication.
+  
+
+
+#### Bugfixes
+
+- Arguments --gpgcheck and --repo-gpgcheck in creating a rpm repository no longer fail to convert to integer.
+  [#677](https://github.com/pulp/pulp-cli/issues/677)
+- Fixed a crash in `pulp domain` when a default value for `--domain` was provided in the config file.
+  [#769](https://github.com/pulp/pulp-cli/issues/769)
+- Fixed a bug where not all commands of a command group were listed in the help and available to the auto-completion.
+  [#781](https://github.com/pulp/pulp-cli/issues/781)
+
+
+#### Improved Documentation
+
+- Added a version select widget to docs.
+  
+
+
+### Pulp GLUE
+
+
+#### Features
+
+- Added 'PulpGenericRepositoryContext' class to handle repository commands not available with subtypes.
+  [#620](https://github.com/pulp/pulp-cli/issues/620)
+- Added ``repo_config`` option PluginRequirement checks to the ``PulpRpmRepositoryContext``and ``PulpRpmPublicationContext``.
+  
+- Added parameter `pulp_href` to `PulpRepositoryVersionContext` and `number` to `PulpRepositoryContext.get_version_context`.
+  
+- Use the labels api starting with `pulpcore` 3.34.
+  
+
+
+#### Improved Documentation
+
+- Add API reference docs for pulp-glue.
+  [#808](https://github.com/pulp/pulp-cli/issues/808)
+
+
+#### Translations
+
+- Added translation files machinery for pulp-glue.
+  [#634](https://github.com/pulp/pulp-cli/issues/634)
+
+
+---## 0.21.4 (2023-10-02)
 
 
 
