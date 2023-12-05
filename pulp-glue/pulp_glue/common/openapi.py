@@ -504,20 +504,21 @@ class OpenAPI:
                 elif content_type.startswith("application/x-www-form-urlencoded"):
                     data = body
                 elif content_type.startswith("multipart/form-data"):
-                    uploads: Dict[str, UploadType] = {}
+                    uploads: Dict[str, Tuple[str, UploadType, str]] = {}
                     data = {}
                     # Extract and prepare the files to upload
                     if body:
                         for key, value in body.items():
                             if isinstance(value, (bytes, BufferedReader)):
-                                uploads[key] = value
+                                uploads[key] = (
+                                    getattr(value, "name", key),
+                                    value,
+                                    "application/octet-stream",
+                                )
                             else:
                                 data[key] = value
                     if uploads:
-                        files = [
-                            (key, (key, file_data, "application/octet-stream"))
-                            for key, file_data in uploads.items()
-                        ]
+                        files = [(key, upload_data) for key, upload_data in uploads.items()]
                 break
         else:
             # No known content-type left
