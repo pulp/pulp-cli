@@ -24,9 +24,19 @@ class PulpAnsibleCollectionVersionContext(PulpContentContext):
     ID_PREFIX = "content_ansible_collection_versions"
     UPLOAD_ID: ClassVar[str] = "upload_collection"
     NEEDS_PLUGINS = [PluginRequirement("ansible", specifier=">=0.7.0")]
+    CAPABILITIES = {"upload": [PluginRequirement("ansible", specifier=">=0.16.0")]}
 
     def upload(self, file: IO[bytes], **kwargs: Any) -> Any:  # type:ignore
-        return self.call("upload", body={"file": file})
+        repository: Optional[PulpRepositoryContext] = kwargs.pop("repository", None)
+        if self.capable("upload"):
+            chunk_size: int = kwargs.pop("chunk_size", 1000000)
+            return super().upload(file, chunk_size, repository, **kwargs)
+        else:
+            result = self.call("upload", body={"file": file})
+            self.pulp_href = result["created_resources"][0]
+            if repository:
+                repository.modify(add_content=[self.pulp_href])
+            return self.entity
 
 
 class PulpAnsibleRoleContext(PulpContentContext):

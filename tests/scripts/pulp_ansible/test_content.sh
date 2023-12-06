@@ -8,6 +8,7 @@ pulp debug has-plugin --name "ansible" || exit 23
 cleanup() {
   pulp ansible repository destroy --name "cli_test_ansible_repository" || true
   pulp ansible repository destroy --name "cli_test_ansible_repository_verify" || true
+  pulp ansible repository destroy --name "cli_test_ansible_repository_upload" || true
 }
 trap cleanup EXIT
 
@@ -25,13 +26,16 @@ fi
 wget "https://galaxy.ansible.com/download/ansible-posix-1.3.0.tar.gz"
 sha256=$(sha256sum ansible-posix-1.3.0.tar.gz | cut -d' ' -f1)
 
-expect_succ pulp ansible content upload --file "ansible-posix-1.3.0.tar.gz"
+expect_succ pulp ansible repository create --name "cli_test_ansible_repository_upload"
+expect_succ pulp ansible content upload --file "ansible-posix-1.3.0.tar.gz" --repository "cli_test_ansible_repository_upload"
 expect_succ pulp artifact list --sha256 "$sha256"
 test "$(echo "$OUTPUT" | jq -r length)" -eq "1"
 expect_succ pulp ansible content list --name "posix" --namespace "ansible" --version "1.3.0"
 test "$(echo "$OUTPUT" | jq -r length)" -eq "1"
 content_href="$(echo "$OUTPUT" | jq -r .[0].pulp_href)"
 expect_succ pulp ansible content show --href "$content_href"
+expect_succ pulp ansible repository content list --repository "cli_test_ansible_repository_upload" --version 1
+test "$(echo "$OUTPUT" | jq -r length)" -eq "1"
 
 # Test ansible role upload
 wget "https://github.com/ansible/ansible-kubernetes-modules/archive/v0.0.1.tar.gz"
