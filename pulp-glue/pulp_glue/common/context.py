@@ -675,9 +675,8 @@ class PulpEntityContext:
             self.pulp_ctx.needs_plugin(plugin_requirement)
 
         self._entity = None
-        if pulp_href is None:
-            self._entity_lookup = entity or {}
-        else:
+        self._entity_lookup = entity or {}
+        if pulp_href is not None:
             self.pulp_href = pulp_href
 
     def call(
@@ -1159,6 +1158,21 @@ class PulpRepositoryVersionContext(PulpEntityContext):
             return {}
         else:
             return {self.repository_ctx.HREF: self.repository_ctx.pulp_href}
+
+    @property
+    def entity(self) -> EntityDefinition:
+        if (
+            self._entity is None
+            and "number" in self._entity_lookup.keys()
+            and self._entity_lookup.get("number") is None
+        ):
+            self.pulp_href = self.repository_ctx.entity["latest_version_href"]
+        return super().entity
+
+    @entity.setter
+    def entity(self, value: Optional[EntityDefinition]) -> None:
+        # ignore needed due to a bug regarding overriding property setter in mypy
+        PulpEntityContext.entity.fset(self, value)  # type: ignore[attr-defined]
 
     def repair(self, href: Optional[str] = None) -> Any:
         """
