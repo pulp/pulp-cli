@@ -46,7 +46,7 @@ expect_succ pulp file repository version repair --repository "cli_test_file_repo
 test "$(echo "$OUTPUT" | jq -r '.state')" = "completed"
 
 # Delete version again
-expect_succ pulp file repository version destroy --repository "cli_test_file_repository" --version 1
+expect_succ pulp file repository version destroy --version 1 --repository "cli_test_file_repository"
 
 # Test autopublish
 expect_succ pulp file repository create --name "$autopublish_repo" --remote "cli_test_file_remote" --autopublish

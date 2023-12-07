@@ -1,4 +1,5 @@
 import typing as t
+from functools import reduce
 
 import click
 import pytest
@@ -57,3 +58,53 @@ def test_access_help(no_api: None, subtests: SubTests) -> None:
                 assert result.stdout.startswith("Usage:") or result.stdout.startswith(
                     "DeprecationWarning:"
                 )
+
+
+@pytest.mark.parametrize(
+    "command,options",
+    [
+        (
+            [
+                "file",
+                "repository",
+                "show",
+            ],
+            [
+                "--repository",
+                "dummy",
+            ],
+        ),
+        pytest.param(
+            [
+                "file",
+                "repository",
+                "version",
+                "show",
+            ],
+            [
+                "--repository",
+                "dummy",
+                "--version",
+                "42",
+            ],
+        ),
+    ],
+)
+def test_deferred_context(
+    monkeypatch: pytest.MonkeyPatch,
+    no_api: None,
+    command: t.List[str],
+    options: t.List[str],
+) -> None:
+    monkeypatch.setattr(
+        reduce(
+            lambda com, sub: com.commands[sub] if isinstance(com, click.Group) else pytest.fail(),
+            command,
+            t.cast(click.Command, main),
+        ),
+        "callback",
+        lambda: None,
+    )
+    runner = CliRunner()
+    result = runner.invoke(main, command + options)
+    assert result.exit_code == 0

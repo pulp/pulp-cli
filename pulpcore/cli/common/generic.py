@@ -414,14 +414,9 @@ def href_callback(
 def _version_callback(
     ctx: click.Context, param: click.Parameter, value: t.Optional[int]
 ) -> t.Optional[int]:
-    entity_ctx = ctx.find_object(PulpEntityContext)
-    assert entity_ctx is not None
-    repository_ctx = ctx.find_object(PulpRepositoryContext)
-    assert repository_ctx is not None
-    if value is not None:
-        entity_ctx.pulp_href = f"{repository_ctx.entity['versions_href']}{value}/"
-    else:
-        entity_ctx.pulp_href = repository_ctx.entity["latest_version_href"]
+    repository_version_ctx = ctx.find_object(PulpRepositoryVersionContext)
+    assert repository_version_ctx is not None
+    repository_version_ctx.entity = {"number": value}
     return value
 
 
