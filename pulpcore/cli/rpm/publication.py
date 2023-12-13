@@ -18,6 +18,7 @@ from pulpcore.cli.common.generic import (
     role_command,
     show_command,
 )
+from pulpcore.cli.rpm.common import CHECKSUM_CHOICES
 
 translation = get_translation(__name__)
 _ = translation.gettext
@@ -64,6 +65,14 @@ create_options = [
             "@file containing a JSON dictionary)"
         ),
         callback=load_json_callback,
+    ),
+    pulp_option(
+        "--checksum-type",
+        type=click.Choice(CHECKSUM_CHOICES, case_sensitive=False),
+        help=_(
+            "Option specifying the checksum type to use for package and metadata integrity checks."
+        ),
+        needs_plugins=[PluginRequirement("rpm", specifier=">=3.25.0")],
     ),
 ]
 publication.add_command(list_command(decorators=publication_filter_options + [repository_option]))

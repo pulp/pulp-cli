@@ -144,17 +144,32 @@ update_options = [
     remote_option,
     metadata_signing_service_option,
     click.option(
-        "--metadata-checksum-type", type=click.Choice(CHECKSUM_CHOICES, case_sensitive=False)
+        "--metadata-checksum-type",
+        type=click.Choice(CHECKSUM_CHOICES, case_sensitive=False),
+        help=_("DEPRECATED: Option specifying the checksum type to use for repository metadata."),
     ),
     click.option(
-        "--package-checksum-type", type=click.Choice(CHECKSUM_CHOICES, case_sensitive=False)
+        "--package-checksum-type",
+        type=click.Choice(CHECKSUM_CHOICES, case_sensitive=False),
+        help=_(
+            "DEPRECATED: Option specifying the checksum type to use for packages in "
+            "repository metadata."
+        ),
+    ),
+    pulp_option(
+        "--checksum-type",
+        type=click.Choice(CHECKSUM_CHOICES, case_sensitive=False),
+        help=_(
+            "Option specifying the checksum type to use for package and metadata integrity checks."
+        ),
+        needs_plugins=[PluginRequirement("rpm", specifier=">=3.25.0")],
     ),
     click.option(
         "--gpgcheck",
         type=click.Choice(("0", "1")),
         callback=choice_to_int_callback,
         help=_(
-            """DEPRECATED:Option specifying whether a client should perform a GPG signature check
+            """DEPRECATED: Option specifying whether a client should perform a GPG signature check
             on packages."""
         ),
     ),
@@ -163,7 +178,7 @@ update_options = [
         type=click.Choice(("0", "1")),
         callback=choice_to_int_callback,
         help=_(
-            """DEPRECATED:Option specifying whether a client should perform a GPG signature check
+            """DEPRECATED: Option specifying whether a client should perform a GPG signature check
             on the repodata."""
         ),
     ),
