@@ -111,6 +111,12 @@ class PulpMyPluginRepositoryContext(PulpRepositoryContext):
         return body
 ```
 
+!!! note
+    The specifier `>=x.y.z` doesn't include `x.y.z.dev` according to PEP 440.
+    Therefore, when adapting to an unreleased feature change from a plugin, you need to specify the prerelease part of the version explicitly.
+    However `>=x.y.z.dev` is never unambiguous in the current Pulp versioning practice.
+    Once that change is released please reset the constraint to the plain `x.y.z` schema.
+
 ### Generics
 
 For certain often repeated patterns like listing all entities of a particular kind,
