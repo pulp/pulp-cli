@@ -1,4 +1,4 @@
-name: pulp-cli Publish
+name: "pulp-cli Publish"
 
 on:
   push:
@@ -6,32 +6,37 @@ on:
       - "[0-9]+.[0-9]+.[0-9]+"
 
 jobs:
+  build:
+    uses: "./.github/workflows/build.yml"
   publish-pypi:
-    name: Publish to PyPI
-    runs-on: ubuntu-latest
+    name: "Publish to PyPI"
+    needs: "build"
+    runs-on: "ubuntu-latest"
     steps:
-      - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: "actions/checkout@v4"
+      - name: "Download wheels"
+        uses: "actions/download-artifact@v4"
         with:
-          python-version: '3.x'
-      - name: Install dependencies
+          name: "pulp_cli_packages"
+      - name: "Set up Python"
+        uses: "actions/setup-python@v5"
+        with:
+          python-version: "3.x"
+      - name: "Install dependencies"
         run: |
           python -m pip install --upgrade pip
           pip install build setuptools wheel twine
-      - name: Build and publish
+      - name: "Build and publish"
         env:
-          TWINE_USERNAME: __token__
-          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+          TWINE_USERNAME: "__token__"
+          TWINE_PASSWORD: "${{ secrets.PYPI_API_TOKEN }}"
         run: |
           cd pulp-glue
-          pyproject-build -n
           twine upload dist/*
           cd ..
-          pyproject-build -n
           twine upload dist/*
   publish-docs:
     needs:
-      - publish-pypi
+      - "publish-pypi"
     uses: "./.github/workflows/publish_docs.yml"
-    secrets: inherit
+    secrets: "inherit"
