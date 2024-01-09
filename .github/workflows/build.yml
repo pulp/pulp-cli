@@ -1,17 +1,11 @@
-name: "Lint"
+name: "Build"
 
 on:
   workflow_call:
 
 jobs:
-  lint:
+  build:
     runs-on: "ubuntu-latest"
-    strategy:
-      fail-fast: false
-      matrix:
-        python:
-          - "3.8"
-          - "3.11"
     steps:
       - uses: "actions/checkout@v4"
       - uses: "actions/cache@v3"
@@ -20,17 +14,22 @@ jobs:
           key: "${{ runner.os }}-pip-${{ hashFiles('**/*requirements.txt', '**/*constraints.lock', '**/setup.py', '**/pyproject.toml') }}"
           restore-keys: |
             ${{ runner.os }}-pip-
-      - name: "Download wheels"
-        uses: "actions/download-artifact@v4"
-        with:
-          name: "pulp_cli_packages"
       - name: "Set up Python"
         uses: "actions/setup-python@v5"
         with:
-          python-version: "${{ matrix.python }}"
+          python-version: "3.11"
       - name: "Install python dependencies"
         run: |
-          pip install dist/pulp_cli-*.whl pulp-glue/dist/pulp_glue-*.whl -r lint_requirements.txt
-      - name: "Lint code"
+          pip install build setuptools wheel
+      - name: "Build wheels"
         run: |
-          make lint
+          make build
+      - name: "Upload wheels"
+        uses: "actions/upload-artifact@v4"
+        with:
+          name: "pulp_cli_packages"
+          path: |
+            pulp-glue/dist/
+            dist/
+          if-no-files-found: "error"
+          retention-days: 5
