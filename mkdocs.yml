@@ -1,22 +1,25 @@
-site_name: Pulp CLI
+site_name: "Pulp CLI"
 theme:
-  name: readthedocs
-  custom_dir: docs_theme
+  name: "readthedocs"
+  custom_dir: "docs_theme"
   version: "0.24.0.dev"
-repo_url: https://github.com/pulp/pulp-cli
-edit_uri: edit/main/docs/
+extra_css:
+  - "css/mkdocstrings.css"
+repo_url: "https://github.com/pulp/pulp-cli"
+edit_uri: "edit/main/docs/"
 markdown_extensions:
   - toc:
       permalink: True
-  - admonition
+  - "admonition"
 plugins:
-  - search
+  - "search"
   - mkdocstrings:
-      default_handler: python
+      default_handler: "python"
       handlers:
         python:
           paths:
-            - pulp-glue/pulp_glue
+            - "pulp-glue/pulp_glue"
+            - "pulp-glue"
           options:
             heading_level: 2
             show_root_heading: false
@@ -28,20 +31,20 @@ plugins:
             members_order: "source"
             merge_init_into_class: true
 nav:
-  - 'Overview': 'index.md'
-  - 'installation.md'
-  - 'configuration.md'
-  - 'using_the_cli.md'
-  - 'supported_workflows.md'
-  - 'advanced_features.md'
-  - 'CHANGES.md'
-  - 'Developer material':
-    - 'contributing.md'
-    - 'architecture.md'
-  - 'Pulp Glue API Reference':
-    - 'glue_reference/common_openapi.md'
-    - 'glue_reference/common_context.md'
-    - 'glue_reference/common_i18n.md'
-    - 'glue_reference/core_context.md'
-  - 'Pulp CLI plumbings API Reference':
-    - 'cli_reference/common_generic.md'
+  - "Overview": "index.md"
+  - "installation.md"
+  - "configuration.md"
+  - "using_the_cli.md"
+  - "supported_workflows.md"
+  - "advanced_features.md"
+  - "CHANGES.md"
+  - "Developer material":
+    - "contributing.md"
+    - "architecture.md"
+  - "Pulp Glue API Reference":
+    - "glue_reference/common_openapi.md"
+    - "glue_reference/common_context.md"
+    - "glue_reference/common_i18n.md"
+    - "glue_reference/core_context.md"
+  - "Pulp CLI plumbings API Reference":
+    - "cli_reference/common_generic.md"
