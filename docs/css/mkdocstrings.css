@@ -1,0 +1,19 @@
+.doc-symbol-attribute::after {
+  content: "attr";
+}
+
+.doc-symbol-function::after {
+  content: "func";
+}
+
+.doc-symbol-method::after {
+  content: "meth";
+}
+
+.doc-symbol-class::after {
+  content: "class";
+}
+
+.doc-symbol-module::after {
+  content: "mod";
+}
