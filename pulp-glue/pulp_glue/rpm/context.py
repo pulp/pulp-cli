@@ -215,7 +215,7 @@ class PulpRpmPublicationContext(PulpPublicationContext):
             self.pulp_ctx.needs_plugin(
                 PluginRequirement(
                     "rpm",
-                    specifier=">=3.25.0",
+                    specifier=">=3.25.0.dev",
                     inverted=True,
                     feature=_("sqlite_metadata generation"),
                 )
@@ -228,13 +228,13 @@ class PulpRpmPublicationContext(PulpPublicationContext):
             if metadata_checksum_type and metadata_checksum_type in disallowed_checksums:
                 self.pulp_ctx.needs_plugin(
                     PluginRequirement(
-                        "rpm", specifier=">=3.25.0", inverted=True, feature=_("weak checksums")
+                        "rpm", specifier=">=3.25.0.dev", inverted=True, feature=_("weak checksums")
                     )
                 )
             if package_checksum_type and package_checksum_type in disallowed_checksums:
                 self.pulp_ctx.needs_plugin(
                     PluginRequirement(
-                        "rpm", specifier=">=3.25.0", inverted=True, feature=_("weak checksums")
+                        "rpm", specifier=">=3.25.0.dev", inverted=True, feature=_("weak checksums")
                     )
                 )
         return body
@@ -311,7 +311,7 @@ class PulpRpmRepositoryContext(PulpRepositoryContext):
             self.pulp_ctx.needs_plugin(
                 PluginRequirement(
                     "rpm",
-                    specifier=">=3.25.0",
+                    specifier=">=3.25.0.dev",
                     inverted=True,
                     feature=_("sqlite_metadata generation"),
                 )
@@ -324,13 +324,13 @@ class PulpRpmRepositoryContext(PulpRepositoryContext):
             if metadata_checksum_type and metadata_checksum_type in disallowed_checksums:
                 self.pulp_ctx.needs_plugin(
                     PluginRequirement(
-                        "rpm", specifier=">=3.25.0", inverted=True, feature=_("weak checksums")
+                        "rpm", specifier=">=3.25.0.dev", inverted=True, feature=_("weak checksums")
                     )
                 )
             if package_checksum_type and package_checksum_type in disallowed_checksums:
                 self.pulp_ctx.needs_plugin(
                     PluginRequirement(
-                        "rpm", specifier=">=3.25.0", inverted=True, feature=_("weak checksums")
+                        "rpm", specifier=">=3.25.0.dev", inverted=True, feature=_("weak checksums")
                     )
                 )
 
@@ -338,7 +338,7 @@ class PulpRpmRepositoryContext(PulpRepositoryContext):
             self.pulp_ctx.needs_plugin(
                 PluginRequirement(
                     "rpm",
-                    specifier=">=3.25.0",
+                    specifier=">=3.25.0.dev",
                     feature=_("checksum_type"),
                 )
             )
