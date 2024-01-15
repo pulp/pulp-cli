@@ -333,6 +333,15 @@ class PulpRpmRepositoryContext(PulpRepositoryContext):
                         "rpm", specifier=">=3.25.0", inverted=True, feature=_("weak checksums")
                     )
                 )
+
+        if "checksum_type" in body:
+            self.pulp_ctx.needs_plugin(
+                PluginRequirement(
+                    "rpm",
+                    specifier=">=3.25.0",
+                    feature=_("checksum_type"),
+                )
+            )
         return body
 
     def sync(self, href: Optional[str] = None, body: Optional[EntityDefinition] = None) -> Any:
