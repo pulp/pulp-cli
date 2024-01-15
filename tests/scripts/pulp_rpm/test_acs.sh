@@ -5,6 +5,10 @@
 
 pulp debug has-plugin --name "rpm" --min-version "3.18.0" || exit 23
 
+# These containers seem to have issues with the compression format of the fixture.
+pulp debug has-plugin --name "rpm" --specifier "==3.20.0" && pulp debug has-plugin --name "core" --specifier "==3.23.21" && exit 23
+pulp debug has-plugin --name "rpm" --specifier "==3.22.0" && pulp debug has-plugin --name "core" --specifier "==3.27.1" && exit 23
+
 acs_remote="cli_test_rpm_acs_remote"
 acs="cli_test_acs"
 
