@@ -44,7 +44,7 @@ from pulpcore.cli.common.generic import (
     version_command,
 )
 from pulpcore.cli.core.generic import task_command
-from pulpcore.cli.rpm.common import CHECKSUM_CHOICES
+from pulpcore.cli.rpm.common import CHECKSUM_CHOICES, LEGACY_CHECKSUM_CHOICES
 
 translation = get_translation(__name__)
 _ = translation.gettext
@@ -145,12 +145,12 @@ update_options = [
     metadata_signing_service_option,
     click.option(
         "--metadata-checksum-type",
-        type=click.Choice(CHECKSUM_CHOICES, case_sensitive=False),
+        type=click.Choice(LEGACY_CHECKSUM_CHOICES, case_sensitive=False),
         help=_("DEPRECATED: Option specifying the checksum type to use for repository metadata."),
     ),
     click.option(
         "--package-checksum-type",
-        type=click.Choice(CHECKSUM_CHOICES, case_sensitive=False),
+        type=click.Choice(LEGACY_CHECKSUM_CHOICES, case_sensitive=False),
         help=_(
             "DEPRECATED: Option specifying the checksum type to use for packages in "
             "repository metadata."

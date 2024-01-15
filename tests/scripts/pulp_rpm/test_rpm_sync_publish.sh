@@ -127,6 +127,20 @@ then
   expect_fail pulp rpm repository sync --repository "cli_test_rpm_repository" --sync-policy foobar
 fi
 
+if pulp debug has-plugin --name "rpm" --min-version "3.25.0.dev"
+then
+  expect_succ pulp rpm publication create --repository "cli_test_rpm_repository" --checksum-type sha512
+  expect_fail pulp rpm publication create --repository "cli_test_rpm_repository" --checksum-type sha1
+
+  expect_succ pulp rpm repository update --name "cli_test_rpm_repository" --checksum-type sha512
+  expect_fail pulp rpm repository update --name "cli_test_rpm_repository" --checksum-type sha1
+  expect_fail pulp rpm repository update --name "cli_test_rpm_repository" --package-checksum-type sha1
+  expect_fail pulp rpm repository update --name "cli_test_rpm_repository" --metadata-checksum-type sha1
+else
+  expect_succ pulp rpm repository update --name "cli_test_rpm_repository" --metadata-checksum-type sha1
+  expect_succ pulp rpm repository update --name "cli_test_rpm_repository" --package-checksum-type sha1
+fi
+
 expect_succ pulp rpm distribution destroy --name "cli_test_rpm_distro"
 expect_succ pulp rpm publication destroy --href "$PUBLICATION_HREF"
 expect_succ pulp rpm publication destroy --href "$PUBLICATION_VER_HREF"
