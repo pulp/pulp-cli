@@ -18,7 +18,7 @@ from pulpcore.cli.common.config import CONFIG_LOCATIONS, config, config_options,
 from pulpcore.cli.common.debug import debug
 from pulpcore.cli.common.generic import PulpCLIContext, pulp_group
 
-__version__ = "0.23.0.dev"
+__version__ = "0.23.0"
 
 translation = get_translation(__package__)
 _ = translation.gettext
