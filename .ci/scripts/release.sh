@@ -20,7 +20,7 @@ then
 fi
 
 towncrier build --yes --version "${NEW_VERSION}"
-bumpversion release --commit --message "Release {new_version}" --tag --tag-name "{new_version}" --tag-message "Release {new_version}" --allow-dirty
-bumpversion patch --commit
+bump2version release --commit --message "Release {new_version}" --tag --tag-name "{new_version}" --tag-message "Release {new_version}" --allow-dirty
+bump2version patch --commit
 
 git push origin "${BRANCH}" "${NEW_VERSION}"
