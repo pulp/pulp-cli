@@ -14,7 +14,24 @@ pulp status
 The pulp-cli package can be installed from a variety of sources.
 After installing, see the next section on how to configure pulp-cli.
 
-## From PyPI
+## Using pipx
+
+To install with `pipx` run:
+```bash
+pipx install pulp-cli
+```
+
+You can add optional dependencies in the usual way.
+```bash
+pipx install pulp-cli[pygments,shell]
+```
+
+Additional plugins need to be injected into the apps virtual environment like this:
+```bash
+pipx inject pulp-cli pulp-cli-deb
+```
+
+## From PyPI using pip
 
 To install with minimal dependencies:
 ```bash
