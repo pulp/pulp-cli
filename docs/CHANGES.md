@@ -177,7 +177,17 @@ No significant changes.
 ---
 
 
-## 0.20.6 (2023-10-02)
+## 0.20.7 (2024-01-15)
+
+
+
+### Bugfixes
+
+- Fixed a crash in `pulp domain` when a default value for `--domain` was provided in the config file.
+  [#769](https://github.com/pulp/pulp-cli/issues/769)
+
+
+---## 0.20.6 (2023-10-02)
 
 
 
