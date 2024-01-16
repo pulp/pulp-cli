@@ -20,7 +20,7 @@ from pulpcore.cli.common.generic import (
 )
 from pulpcore.cli.rpm.common import CHECKSUM_CHOICES
 
-translation = get_translation(__name__)
+translation = get_translation(__package__)
 _ = translation.gettext
 
 

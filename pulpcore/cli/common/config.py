@@ -8,7 +8,7 @@ from pulp_glue.common.i18n import get_translation
 
 from pulpcore.cli.common.generic import pulp_group
 
-translation = get_translation(__name__)
+translation = get_translation(__package__)
 _ = translation.gettext
 
 _T = TypeVar("_T")

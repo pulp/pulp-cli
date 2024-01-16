@@ -4,7 +4,7 @@ import re
 
 import toml
 from git import GitCommandError, Repo
-from pkg_resources import parse_version
+from packaging.version import parse as parse_version
 
 # Read Towncrier settings
 tc_settings = toml.load("pyproject.toml")["tool"]["towncrier"]

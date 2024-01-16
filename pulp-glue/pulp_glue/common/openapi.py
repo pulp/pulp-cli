@@ -16,7 +16,7 @@ import urllib3
 from pulp_glue.common import __version__
 from pulp_glue.common.i18n import get_translation
 
-translation = get_translation(__name__)
+translation = get_translation(__package__)
 _ = translation.gettext
 
 UploadType = Union[bytes, IO[bytes]]

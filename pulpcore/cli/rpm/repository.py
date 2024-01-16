@@ -46,7 +46,7 @@ from pulpcore.cli.common.generic import (
 from pulpcore.cli.core.generic import task_command
 from pulpcore.cli.rpm.common import CHECKSUM_CHOICES, LEGACY_CHECKSUM_CHOICES
 
-translation = get_translation(__name__)
+translation = get_translation(__package__)
 _ = translation.gettext
 
 SKIP_TYPES = ["srpm", "treeinfo"]

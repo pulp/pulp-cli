@@ -1,9 +1,15 @@
 import gettext
+import sys
 from functools import lru_cache
 
-import pkg_resources
+if sys.version_info >= (3, 9):
+    from importlib.resources import files
+else:
+    from importlib_resources import files
 
 
+# Need to call lru_cache() before using it as a decorator for python 3.7 compatibility
+@lru_cache(maxsize=None)
 def get_translation(name: str) -> gettext.NullTranslations:
     """
     Return a translations object for a certain import path.
@@ -19,15 +25,9 @@ def get_translation(name: str) -> gettext.NullTranslations:
         ```
         from pulp_glue.common.i18n import get_translation
 
-        translation = get_translation(__name__)
+        translation = get_translation(__package__)
         _ = translation.gettext
         ```
     """
-    localedir = pkg_resources.resource_filename(name, "locale")
-    return _get_translation_for_domain("messages", localedir)
-
-
-# Need to call lru_cache() before using it as a decorator for python 3.7 compatibility
-@lru_cache(maxsize=None)
-def _get_translation_for_domain(domain: str, localedir: str) -> gettext.NullTranslations:
-    return gettext.translation(domain, localedir=localedir, fallback=True)
+    localedir = files(name) / "locale"
+    return gettext.translation("messages", localedir=str(localedir), fallback=True)

@@ -16,7 +16,7 @@ from pulp_glue.common.i18n import get_translation
 from pulp_glue.common.openapi import OpenAPI
 from pulp_glue.core.context import PulpArtifactContext
 
-translation = get_translation(__name__)
+translation = get_translation(__package__)
 _ = translation.gettext
 
 

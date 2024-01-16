@@ -10,7 +10,7 @@ from pulpcore.cli.container.namespace import namespace
 from pulpcore.cli.container.remote import remote
 from pulpcore.cli.container.repository import repository
 
-translation = get_translation(__name__)
+translation = get_translation(__package__)
 _ = translation.gettext
 
 

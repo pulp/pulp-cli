@@ -17,7 +17,7 @@ from pulpcore.cli.common.generic import (
     show_command,
 )
 
-translation = get_translation(__name__)
+translation = get_translation(__package__)
 _ = translation.gettext
 
 pass_exporter_context = click.make_pass_decorator(PulpExporterContext)

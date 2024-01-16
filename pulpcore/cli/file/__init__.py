@@ -12,7 +12,7 @@ from pulpcore.cli.file.publication import publication
 from pulpcore.cli.file.remote import remote
 from pulpcore.cli.file.repository import repository
 
-translation = get_translation(__name__)
+translation = get_translation(__package__)
 _ = translation.gettext
 
 

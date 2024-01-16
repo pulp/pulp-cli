@@ -4,7 +4,7 @@ from pulp_glue.common.i18n import get_translation
 
 from pulpcore.cli.common.generic import PulpCLIContext, list_command, pass_pulp_context, pulp_group
 
-translation = get_translation(__name__)
+translation = get_translation(__package__)
 _ = translation.gettext
 
 
