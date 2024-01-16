@@ -1,8 +1,13 @@
+import sys
 from types import ModuleType
 from typing import Any, Dict, Optional
 
 import click
-import pkg_resources
+
+if sys.version_info >= (3, 10):
+    from importlib.metadata import entry_points
+else:
+    from importlib_metadata import entry_points
 
 __version__ = "0.23.0.dev"
 _main: Optional[click.Group] = None
@@ -16,7 +21,7 @@ def load_plugins() -> click.Group:
     # https://packaging.python.org/guides/creating-and-discovering-plugins/#using-package-metadata
     discovered_plugins: Dict[str, ModuleType] = {
         entry_point.name: entry_point.load()
-        for entry_point in pkg_resources.iter_entry_points("pulp_cli.plugins")
+        for entry_point in entry_points(group="pulp_cli.plugins")
     }
     _main = discovered_plugins["common"].main
     assert isinstance(_main, click.Group)

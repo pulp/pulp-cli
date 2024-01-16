@@ -47,7 +47,7 @@ from pulpcore.cli.common.generic import (
 )
 from pulpcore.cli.core.generic import task_command
 
-translation = get_translation(__name__)
+translation = get_translation(__package__)
 _ = translation.gettext
 
 

@@ -9,7 +9,7 @@ from pulpcore.cli.ansible.remote import remote
 from pulpcore.cli.ansible.repository import repository
 from pulpcore.cli.common.generic import pulp_group
 
-translation = get_translation(__name__)
+translation = get_translation(__package__)
 _ = translation.gettext
 
 

@@ -39,7 +39,7 @@ from pulpcore.cli.common.generic import (
 from pulpcore.cli.container.content import show_options
 from pulpcore.cli.core.generic import task_command
 
-translation = get_translation(__name__)
+translation = get_translation(__package__)
 _ = translation.gettext
 VALID_TAG_REGEX = r"^[A-Za-z0-9][A-Za-z0-9._-]*$"
 

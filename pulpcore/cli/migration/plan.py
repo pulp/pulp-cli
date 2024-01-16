@@ -14,7 +14,7 @@ from pulpcore.cli.common.generic import (
 )
 from pulpcore.cli.migration.context import PulpMigrationPlanContext
 
-translation = get_translation(__name__)
+translation = get_translation(__package__)
 _ = translation.gettext
 
 pass_migration_plan_context = click.make_pass_decorator(PulpMigrationPlanContext)

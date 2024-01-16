@@ -12,7 +12,7 @@ from requests import HTTPError
 from pulp_glue.common.i18n import get_translation
 from pulp_glue.common.openapi import OpenAPI, OpenAPIError
 
-translation = get_translation(__name__)
+translation = get_translation(__package__)
 _ = translation.gettext
 
 DEFAULT_LIMIT = 25

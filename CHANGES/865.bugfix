@@ -1,0 +1,1 @@
+Remove dependency on `pkg_resources` that failed some installations but is deprecated anyway.

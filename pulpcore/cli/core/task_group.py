@@ -15,7 +15,7 @@ from pulpcore.cli.common.generic import (
     pulp_option,
 )
 
-translation = get_translation(__name__)
+translation = get_translation(__package__)
 _ = translation.gettext
 
 

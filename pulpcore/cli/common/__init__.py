@@ -20,7 +20,7 @@ from pulpcore.cli.common.generic import PulpCLIContext, pulp_group
 
 __version__ = "0.23.0.dev"
 
-translation = get_translation(__name__)
+translation = get_translation(__package__)
 _ = translation.gettext
 
 
