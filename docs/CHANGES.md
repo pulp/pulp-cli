@@ -37,7 +37,7 @@
 - Clarified how to handle version specifiers when testing the CLI for unreleased plugin versions (.dev).
   [#852](https://github.com/pulp/pulp-cli/issues/852)
 - Added information how to use pipx for installation.
-  
+
 
 
 #### Deprecations and Removals
@@ -57,7 +57,10 @@
   [#851](https://github.com/pulp/pulp-cli/issues/851)
 
 
----## 0.22.0 (2023-12-04)
+---
+
+
+## 0.22.0 (2023-12-04)
 
 
 
@@ -66,7 +69,7 @@
 - Added the ability to reclaim disk space (cmd: 'pulp repository reclaim').
   [#620](https://github.com/pulp/pulp-cli/issues/620)
 - Added ``--repo-config`` option to the rpm repository and publication.
-  
+
 
 
 #### Bugfixes
@@ -82,7 +85,7 @@
 #### Improved Documentation
 
 - Added a version select widget to docs.
-  
+
 
 
 ### Pulp GLUE
@@ -93,11 +96,11 @@
 - Added 'PulpGenericRepositoryContext' class to handle repository commands not available with subtypes.
   [#620](https://github.com/pulp/pulp-cli/issues/620)
 - Added ``repo_config`` option PluginRequirement checks to the ``PulpRpmRepositoryContext``and ``PulpRpmPublicationContext``.
-  
+
 - Added parameter `pulp_href` to `PulpRepositoryVersionContext` and `number` to `PulpRepositoryContext.get_version_context`.
-  
+
 - Use the labels api starting with `pulpcore` 3.34.
-  
+
 
 
 #### Improved Documentation
