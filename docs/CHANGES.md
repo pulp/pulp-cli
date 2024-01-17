@@ -10,6 +10,56 @@
 
 [//]: # (towncrier release notes start)
 
+## 0.23.0 (2024-01-16)
+
+
+
+#### Features
+
+- Ansible Collection upload now uses the Pulp V3 API and uploading directly to a repository with `--repository`.
+  [#844](https://github.com/pulp/pulp-cli/issues/844)
+- Added support for `--checksum-type` option (combination of `--package-checksum-type` and `--metadata-checksum-type`) when creating rpm publications and configuring rpm repository publish settings.
+  [#850](https://github.com/pulp/pulp-cli/issues/850)
+
+
+#### Bugfixes
+
+- Fixed a bug where the filenames on uploads were not being sent.
+  [#842](https://github.com/pulp/pulp-cli/issues/842)
+- Remove dependency on `pkg_resources` that failed some installations but is deprecated anyway.
+  [#865](https://github.com/pulp/pulp-cli/issues/865)
+
+
+#### Improved Documentation
+
+- Improved `Developer Material/Architecture` section by adding clarification about `pulp-glue`, version guards and `pulp_option` factory.
+  [#836](https://github.com/pulp/pulp-cli/issues/836)
+- Clarified how to handle version specifiers when testing the CLI for unreleased plugin versions (.dev).
+  [#852](https://github.com/pulp/pulp-cli/issues/852)
+- Added information how to use pipx for installation.
+
+
+
+#### Deprecations and Removals
+
+- Marked option `--sqlite-metadata` on `pulp rpm repository update/create` unavailable for `pulp_rpm>=3.25.0`, as it was removed there.
+  [#831](https://github.com/pulp/pulp-cli/issues/831)
+
+
+### Pulp GLUE
+
+
+#### Deprecations and Removals
+
+- Added version restriction to prevent the use of `sqlite_metadata` attribute on Repository and Publication contexts for `pulp_rpm>=3.25.0`.
+  [#831](https://github.com/pulp/pulp-cli/issues/831)
+- Adjusted to `pulp_rpm>=3.25` no longer allowing publishing repositories with md5, sha1, or sha224 checksums.
+  [#851](https://github.com/pulp/pulp-cli/issues/851)
+
+
+---
+
+
 ## 0.22.0 (2023-12-04)
 
 
