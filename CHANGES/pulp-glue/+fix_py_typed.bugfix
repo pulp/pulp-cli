@@ -1,0 +1,2 @@
+Fixed the distribution of extra files with the package.
+This should fix both type annotations as well as translations.
