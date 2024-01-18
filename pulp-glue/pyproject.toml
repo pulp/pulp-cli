@@ -39,7 +39,7 @@ include = ["pulp_glue.*"]
 namespaces = true
 
 [tool.setuptools.package-data]
-"*" = ["py.typed, locale/*/LC_MESSAGES/*.mo"]
+"*" = ["py.typed", "locale/*/LC_MESSAGES/*.mo"]
 
 [tool.black]
 line-length = 100
