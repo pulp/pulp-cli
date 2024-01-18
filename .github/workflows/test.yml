@@ -1,17 +1,17 @@
-name: Test
+name: "Test"
 
 on:
   workflow_call:
 
 env:
-  COLORTERM: 'yes'
-  TERM: 'xterm-256color'
-  PYTEST_ADDOPTS: '--color=yes'
-  CONTAINER_RUNTIME: 'docker'
+  COLORTERM: "yes"
+  TERM: "xterm-256color"
+  PYTEST_ADDOPTS: "--color=yes"
+  CONTAINER_RUNTIME: "docker"
 
 jobs:
   test:
-    runs-on: ubuntu-20.04
+    runs-on: "ubuntu-20.04"
     strategy:
       fail-fast: false
       matrix:
@@ -35,22 +35,22 @@ jobs:
             image_tag: "3.18"
             lower_bounds: true
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/cache@v4
+      - uses: "actions/checkout@v4"
+      - uses: "actions/cache@v4"
         with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/*requirements.txt', '**/*constraints.lock', '**/setup.py', '**/pyproject.toml') }}
+          path: "~/.cache/pip"
+          key: "${{ runner.os }}-pip-${{ hashFiles('**/*requirements.txt', '**/*constraints.lock', '**/setup.py', '**/pyproject.toml') }}"
           restore-keys: |
             ${{ runner.os }}-pip-
       - name: "Download wheels"
         uses: "actions/download-artifact@v4"
         with:
           name: "pulp_cli_packages"
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: "Set up Python"
+        uses: "actions/setup-python@v5"
         with:
-          python-version: ${{ matrix.python }}
-      - name: Install Test Dependencies
+          python-version: "${{ matrix.python }}"
+      - name: "Install Test Dependencies"
         run: |
           if [ "${{matrix.lower_bounds}}" ]
           then

@@ -1,4 +1,4 @@
-name: pulp-cli Nightly
+name: "pulp-cli Nightly"
 
 on:
   schedule:
@@ -16,4 +16,4 @@ jobs:
     uses: "./.github/workflows/codeql.yml"
   collect_changes:
     uses: "./.github/workflows/collect_changes.yml"
-    secrets: inherit
+    secrets: "inherit"
