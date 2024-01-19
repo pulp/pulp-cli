@@ -1,0 +1,6 @@
+{# Dummy file to allow injecting the matrix into the ci cookiecutter. #}
+
+jobs:
+  test:
+    strategy:
+      matrix:{{ cookiecutter.test_matrix | to_nice_yaml(level=4, embed_in="dict") }}

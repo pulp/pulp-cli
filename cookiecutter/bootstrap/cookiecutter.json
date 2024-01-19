@@ -1,0 +1,20 @@
+{
+  "app_label": "noname",
+  "glue": true,
+  "docs": false,
+  "translations": false,
+  "test_matrix": {
+    "include": [
+      {"python": "3.11", "image_tag": "nightly", "pulp_api_root": "/relocated/djnd/"},
+      {"python": "3.8", "image_tag": "latest", "lower_bounds": true}
+    ]
+  },
+  "version": "0.0.1.dev0",
+  "__app_label_suffix": "{{ cookiecutter.app_label and '-' + cookiecutter.app_label }}",
+  "__project_name": "pulp-cli{{ cookiecutter.__app_label_suffix }}",
+  "__project_slug": "{{ cookiecutter.__project_name | lower | replace(' ', '_') }}",
+  "_copy_without_render": [
+    "CHANGES/.TEMPLATE.md"
+  ],
+  "_extensions": [".pulp_filter_extension.PulpFilterExtension"]
+}

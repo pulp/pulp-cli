@@ -179,15 +179,15 @@ showcontent = false
 
 [tool.black]
 line-length = 100
-exclude = "cookiecutter/ci/hooks"
+exclude = "cookiecutter"
 
 [tool.isort]
 profile = "black"
 line_length = 100
-skip = ["pulp-glue"]
+skip = ["pulp-glue", "cookiecutter"]
 
 [tool.flake8]
-exclude = ["./docs/*"]
+exclude = ["./docs/*", "./cookiecutter/*"]
 ignore = ["W503", "Q000", "Q003", "D100", "D104", "D106", "D200", "D202", "D205", "D400", "D401", "D402"]
 # E203: whitespace before ':'; https://github.com/psf/black/issues/279
 # E401: multiple imports on one line

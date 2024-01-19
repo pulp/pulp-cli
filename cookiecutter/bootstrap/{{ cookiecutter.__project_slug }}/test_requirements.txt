@@ -1,0 +1,5 @@
+# Test requirements
+pygments
+pytest
+pytest-subtests
+python-gnupg
