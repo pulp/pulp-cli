@@ -10,6 +10,27 @@
 
 [//]: # (towncrier release notes start)
 
+## 0.23.1 (2024-01-18)
+
+
+
+#### Bugfixes
+
+- Fixed the distribution of extra files with the package.
+  This should fix both type annotations as well as translations.
+
+
+### Pulp GLUE
+
+
+#### Bugfixes
+
+- Fixed the distribution of extra files with the package.
+  This should fix both type annotations as well as translations.
+
+
+---
+
 ## 0.23.0 (2024-01-16)
 
 
