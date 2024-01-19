@@ -1,32 +1,32 @@
-name: "Collect changes"
+---
+name: "Create Release Branch"
 on:
-  workflow_call:
   workflow_dispatch:
 
 jobs:
-  collect-changes:
+  create-release-branch:
     runs-on: "ubuntu-latest"
     steps:
       - uses: "actions/checkout@v4"
-        with:
-          ref: "main"
-          fetch-depth: 0
-      - uses: "actions/setup-python@v5"
+      - name: "Set up Python"
+        uses: "actions/setup-python@v5"
         with:
           python-version: "3.11"
       - name: "Setup git"
         run: |
           git config user.name pulpbot
           git config user.email pulp-infra@redhat.com
-      - name: "Collect changes"
+      - name: "Install python dependencies"
         run: |
-          pip install GitPython packaging toml
-          python3 .ci/scripts/collect_changes.py
+          pip install bump2version
+      - name: "Create Release Branch"
+        run: |
+          .ci/scripts/create_release_branch.sh
       - name: "Create Pull Request"
         uses: "peter-evans/create-pull-request@v5"
         with:
           token: "${{ secrets.RELEASE_TOKEN }}"
-          title: "Update Changelog"
+          title: "Bump dev-version"
           body: ""
-          branch: "update_changes"
+          branch: "bump_version"
           delete-branch: true

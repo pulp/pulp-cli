@@ -22,14 +22,14 @@ jobs:
           - python: "3.11"
             image_tag: "latest"
           - python: "3.6"
-            image_tag: "3.28"
+            image_tag: "3.39"
           - python: "3.7"
-            image_tag: "3.21"
+            image_tag: "3.28"
             lower_bounds: true
           - python: "3.8"
             image_tag: "3.22"
           - python: "3.9"
-            image_tag: "3.39"
+            image_tag: "3.21"
             pulp_api_root: "/relocated/djnd/"
           - python: "3.10"
             image_tag: "3.18"
@@ -42,6 +42,7 @@ jobs:
           key: "${{ runner.os }}-pip-${{ hashFiles('**/*requirements.txt', '**/*constraints.lock', '**/setup.py', '**/pyproject.toml') }}"
           restore-keys: |
             ${{ runner.os }}-pip-
+
       - name: "Download wheels"
         uses: "actions/download-artifact@v4"
         with:
