@@ -14,13 +14,7 @@ jobs:
           - "3.11"
     steps:
       - uses: "actions/checkout@v4"
-      - uses: "actions/cache@v4"
-        with:
-          path: "~/.cache/pip"
-          key: "${{ runner.os }}-pip-${{ hashFiles('**/*requirements.txt', '**/*constraints.lock', '**/setup.py', '**/pyproject.toml') }}"
-          restore-keys: |
-            ${{ runner.os }}-pip-
-
+      {%- include "cache_action" %}
       - name: "Download wheels"
         uses: "actions/download-artifact@v4"
         with:
@@ -28,10 +22,10 @@ jobs:
       - name: "Set up Python"
         uses: "actions/setup-python@v5"
         with:
-          python-version: "${{ matrix.python }}"
+          python-version: "{{ "${{ matrix.python }}" }}"
       - name: "Install python dependencies"
         run: |
-          pip install dist/pulp_cli-*.whl pulp-glue/dist/pulp_glue-*.whl -r lint_requirements.txt
+          pip install dist/pulp_cli{{ cookiecutter.__app_label_suffix | replace ("-", "_") }}-*.whl {%- if cookiecutter.glue %} pulp-glue{{ cookiecutter.__app_label_suffix }}/dist/pulp_glue{{ cookiecutter.__app_label_suffix | replace ("-", "_") }}-*.whl {%- endif %} -r lint_requirements.txt
       - name: "Lint code"
         run: |
           make lint

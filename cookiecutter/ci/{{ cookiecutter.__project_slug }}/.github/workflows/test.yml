@@ -1,0 +1,48 @@
+name: "Test"
+
+on:
+  workflow_call:
+
+env:
+  COLORTERM: "yes"
+  TERM: "xterm-256color"
+  PYTEST_ADDOPTS: "--color=yes"
+  CONTAINER_RUNTIME: "docker"
+
+jobs:
+  test:
+    runs-on: "ubuntu-20.04"
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          {{ cookiecutter.test_matrix | indent(10) }}
+    steps:
+      - uses: "actions/checkout@v4"
+      {%- include "cache_action" %}
+      - name: "Download wheels"
+        uses: "actions/download-artifact@v4"
+        with:
+          name: "pulp_cli_packages"
+      - name: "Set up Python"
+        uses: "actions/setup-python@v5"
+        with:
+          python-version: "{{ "${{ matrix.python }}" }}"
+      - name: "Install Test Dependencies"
+        run: |
+          if [ "{{ "${{matrix.lower_bounds}}" }}" ]
+          then
+            pip install dist/pulp_cli{{ cookiecutter.__app_label_suffix | replace("-", "_") }}-*.whl {%- if cookiecutter.glue %} pulp-glue{{ cookiecutter.__app_label_suffix }}/dist/pulp_glue{{ cookiecutter.__app_label_suffix | replace("-", "_") }}-*.whl {%- endif %} -r test_requirements.txt -c lower_bounds_constraints.lock
+          else
+            pip install dist/pulp_cli{{ cookiecutter.__app_label_suffix | replace("-", "_") }}-*.whl {%- if cookiecutter.glue %} pulp-glue{{ cookiecutter.__app_label_suffix }}/dist/pulp_glue{{ cookiecutter.__app_label_suffix | replace("-", "_") }}-*.whl {%- endif %} -r test_requirements.txt
+          fi
+      - name: Run tests
+        env:
+          {%- raw %}
+          CONTAINER_RUNTIME: ${{ matrix.container_runtime }}
+          IMAGE_TAG: ${{ matrix.image_tag }}
+          FROM_TAG: ${{ matrix.from_tag }}
+          CONTAINER_FILE: ${{ matrix.container_file }}
+          PULP_API_ROOT: ${{ matrix.pulp_api_root }}
+          {%- endraw %}
+        run: .ci/run_container.sh make test

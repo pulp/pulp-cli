@@ -18,20 +18,14 @@ jobs:
     steps:
       - name: "Checkout repository"
         uses: "actions/checkout@v4"
-      - uses: "actions/cache@v4"
-        with:
-          path: "~/.cache/pip"
-          key: "${{ runner.os }}-pip-${{ hashFiles('**/*requirements.txt', '**/*constraints.lock', '**/setup.py', '**/pyproject.toml') }}"
-          restore-keys: |
-            ${{ runner.os }}-pip-
-
+      {%- include "cache_action" %}
       - name: "Set up Python"
         uses: "actions/setup-python@v5"
         with:
           python-version: "3.11"
       - name: "Manually install from sources"
         run: |
-          python -m pip install -e . -e ./pulp-glue
+          python -m pip install -e . {%- if cookiecutter.glue %} -e ./pulp-glue{{ cookiecutter.__app_label_suffix }} {%- endif %}
           echo "CODEQL_PYTHON=$(which python)" >> "$GITHUB_ENV"
       - name: "Initialize CodeQL"
         uses: "github/codeql-action/init@v3"

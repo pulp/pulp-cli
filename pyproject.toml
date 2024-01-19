@@ -61,6 +61,31 @@ namespaces = true
 [tool.setuptools.package-data]
 "*" = ["py.typed", "locale/*/LC_MESSAGES/*.mo"]
 
+[tool.pulp_cli_template]
+app_label = ""
+docs = true
+translations = true
+test_matrix = """
+- python: "3.11"
+  image_tag: "nightly"
+  pulp_api_root: "/relocated/djnd/"
+- python: "3.11"
+  image_tag: "latest"
+- python: "3.6"
+  image_tag: "3.39"
+- python: "3.7"
+  image_tag: "3.28"
+  lower_bounds: true
+- python: "3.8"
+  image_tag: "3.22"
+- python: "3.9"
+  image_tag: "3.21"
+  pulp_api_root: "/relocated/djnd/"
+- python: "3.10"
+  image_tag: "3.18"
+  lower_bounds: true
+"""
+
 [tool.towncrier]
 filename = "docs/CHANGES.md"
 directory = "CHANGES/"
@@ -120,6 +145,14 @@ line-length = 100
 profile = "black"
 line_length = 100
 skip = ["pulp-glue"]
+
+[tool.flake8]
+exclude = ["./docs/*"]
+ignore = ["W503", "Q000", "Q003", "D100", "D104", "D106", "D200", "D202", "D205", "D400", "D401", "D402"]
+# E203: whitespace before ':'; https://github.com/psf/black/issues/279
+# E401: multiple imports on one line
+extend-ignore = ["E203", "E401"]
+max-line-length = 100
 
 [tool.pytest.ini_options]
 markers = [

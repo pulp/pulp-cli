@@ -1,0 +1,17 @@
+{
+  "app_label": "noname",
+  "glue": true,
+  "docs": false,
+  "translations": false,
+  "test_matrix": "- python: \"3.11\"\nimage_tag: \"nightly\"\npulp_api_root: \"/relocated/djnd/\"\n- python: \"3.6\"\nimage_tag: \"latest\"\nlower_bounds: true",
+  "__app_label_suffix": "{{ cookiecutter.app_label and '-' + cookiecutter.app_label }}",
+  "__project_name": "pulp-cli{{ cookiecutter.__app_label_suffix }}",
+  "__project_slug": "{{ cookiecutter.__project_name | lower | replace(' ', '_') }}",
+  "_copy_without_render": [
+    ".github/workflows/collect_changes.yml",
+    ".github/workflows/pr.yml",
+    ".github/workflows/release.yml",
+    ".github/workflows/release_branch.yml",
+    ".github/workflows/pr_checks.yml"
+  ]
+}

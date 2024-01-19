@@ -1,0 +1,10 @@
+{
+  "app_label": "noname",
+  "docs": false,
+  "__app_label_suffix": "{{ cookiecutter.app_label and '-' + cookiecutter.app_label }}",
+  "__project_name": "pulp-cli{{ cookiecutter.__app_label_suffix }}",
+  "__project_slug": "{{ cookiecutter.__project_name | lower | replace(' ', '_') }}",
+  "_copy_without_render": [
+    ".github/workflows/publish_docs.yml"
+  ]
+}

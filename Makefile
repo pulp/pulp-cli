@@ -1,3 +1,4 @@
+
 LANGUAGES=de
 GLUE_PLUGINS=$(notdir $(wildcard pulp-glue/pulp_glue/*))
 CLI_PLUGINS=$(notdir $(wildcard pulpcore/cli/*))
@@ -18,7 +19,7 @@ black:
 	black .
 
 lint:
-	find . -name '*.sh' -print0 | xargs -0 shellcheck -x
+	find tests .ci -name '*.sh' -print0 | xargs -0 shellcheck -x
 	isort -c --diff .
 	cd pulp-glue; isort -c --diff .
 	black --diff --check .
@@ -65,6 +66,5 @@ $(foreach LANGUAGE,$(LANGUAGES),pulpcore/cli/%/locale/$(LANGUAGE)/LC_MESSAGES/me
 	msgfmt -o $@ $<
 
 compile_messages: $(foreach LANGUAGE,$(LANGUAGES),$(foreach GLUE_PLUGIN,$(GLUE_PLUGINS),pulp-glue/pulp_glue/$(GLUE_PLUGIN)/locale/$(LANGUAGE)/LC_MESSAGES/messages.mo)) $(foreach LANGUAGE,$(LANGUAGES),$(foreach CLI_PLUGIN,$(CLI_PLUGINS),pulpcore/cli/$(CLI_PLUGIN)/locale/$(LANGUAGE)/LC_MESSAGES/messages.mo))
-
 .PHONY: build info black lint test servedocs site
 .PRECIOUS: $(foreach LANGUAGE,$(LANGUAGES),$(foreach GLUE_PLUGIN,$(GLUE_PLUGINS),pulp-glue/pulp_glue/$(GLUE_PLUGIN)/locale/$(LANGUAGE)/LC_MESSAGES/messages.po)) $(foreach LANGUAGE,$(LANGUAGES),$(foreach CLI_PLUGIN,$(CLI_PLUGINS),pulpcore/cli/$(CLI_PLUGIN)/locale/$(LANGUAGE)/LC_MESSAGES/messages.po))
