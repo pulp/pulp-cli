@@ -5,12 +5,16 @@ theme:
   version: "0.24.0.dev"
 extra_css:
   - "css/mkdocstrings.css"
+  - "css/tabbed.css"
 repo_url: "https://github.com/pulp/pulp-cli"
 edit_uri: "edit/main/docs/"
 markdown_extensions:
   - toc:
       permalink: True
   - "admonition"
+  - "pymdownx.superfences"
+  - "pymdownx.tabbed":
+      alternate_style: false
 plugins:
   - "search"
   - mkdocstrings:
