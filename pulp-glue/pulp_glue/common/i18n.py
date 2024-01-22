@@ -29,5 +29,11 @@ def get_translation(name: str) -> gettext.NullTranslations:
         _ = translation.gettext
         ```
     """
-    localedir = files(name) / "locale"
-    return gettext.translation("messages", localedir=str(localedir), fallback=True)
+    name_parts = name.split(".")
+    while name_parts:
+        try:
+            localedir = files(".".join(name_parts)) / "locale"
+            return gettext.translation("messages", localedir=str(localedir), fallback=True)
+        except TypeError:
+            name_parts.pop()
+    raise TypeError(f"No package found for {name}.")
