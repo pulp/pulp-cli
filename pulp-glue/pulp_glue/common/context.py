@@ -4,7 +4,6 @@ import re
 import sys
 import time
 import typing as t
-from typing import IO, Any, ClassVar, Dict, List, Mapping, Optional, Set, Type, Union, cast
 
 from packaging.specifiers import SpecifierSet
 from requests import HTTPError
@@ -35,11 +34,11 @@ DATETIME_FORMATS = [
 href_regex = re.compile(r"\/([a-z0-9-_]+\/)+", flags=re.IGNORECASE)
 
 
-class PreprocessedEntityDefinition(Dict[str, Any]):
+class PreprocessedEntityDefinition(t.Dict[str, t.Any]):
     pass
 
 
-EntityDefinition = Union[Dict[str, Any], PreprocessedEntityDefinition]
+EntityDefinition = t.Union[t.Dict[str, t.Any], PreprocessedEntityDefinition]
 
 
 class PluginRequirement:
@@ -63,11 +62,11 @@ class PluginRequirement:
     def __init__(
         self,
         name: str,
-        min: Optional[str] = None,
-        max: Optional[str] = None,
-        feature: Optional[str] = None,
+        min: t.Optional[str] = None,
+        max: t.Optional[str] = None,
+        feature: t.Optional[str] = None,
         inverted: bool = False,
-        specifier: Optional[Union[str, SpecifierSet]] = None,
+        specifier: t.Optional[t.Union[str, SpecifierSet]] = None,
     ):
         self.name = name
         self.feature = feature
@@ -88,7 +87,7 @@ class PluginRequirement:
         else:
             self.specifier = SpecifierSet(specifier, prereleases=True)
 
-    def __contains__(self, version: Optional[str]) -> bool:
+    def __contains__(self, version: t.Optional[str]) -> bool:
         if version is None:
             return self.inverted
         return (version in self.specifier) != self.inverted
@@ -119,10 +118,10 @@ class PulpNoWait(Exception):
     pass
 
 
-def _preprocess_value(value: Any) -> Any:
+def _preprocess_value(value: t.Any) -> t.Any:
     if isinstance(value, PulpEntityContext):
         return value.pulp_href
-    if isinstance(value, Mapping):
+    if isinstance(value, t.Mapping):
         return {k: _preprocess_value(v) for k, v in value.items()}
     if isinstance(value, (list, tuple)):
         return [_preprocess_value(item) for item in value]
@@ -248,7 +247,7 @@ class PulpContext:
         """
         raise NotImplementedError("PulpContext is an abstract class.")
 
-    def prompt(self, text: str, hide_input: bool = False) -> Any:
+    def prompt(self, text: str, hide_input: bool = False) -> str:
         """
         Abstract function that will be called to ask for a password interactively.
 
@@ -260,16 +259,16 @@ class PulpContext:
     def __init__(
         self,
         api_root: str,
-        api_kwargs: Dict[str, Any],
+        api_kwargs: t.Dict[str, t.Any],
         background_tasks: bool,
-        timeout: Union[int, datetime.timedelta],
+        timeout: t.Union[int, datetime.timedelta],
         domain: str = "default",
-        format: Optional[str] = None,  # Deprecated
+        format: t.Optional[str] = None,  # Deprecated
     ) -> None:
-        self._api: Optional[OpenAPI] = None
+        self._api: t.Optional[OpenAPI] = None
         self._api_root: str = api_root
         self._api_kwargs = api_kwargs
-        self._needed_plugins: List[PluginRequirement] = [
+        self._needed_plugins: t.List[PluginRequirement] = [
             PluginRequirement("core", specifier=">=3.11.0")
         ]
         self.isatty: bool = sys.stdout.isatty()
@@ -290,7 +289,7 @@ class PulpContext:
 
     @property
     def domain_enabled(self) -> bool:
-        return cast(bool, self.api.api_spec.get("info", {}).get("x-pulp-domain-enabled", False))
+        return t.cast(bool, self.api.api_spec.get("info", {}).get("x-pulp-domain-enabled", False))
 
     @property
     def api_path(self) -> str:
@@ -322,18 +321,18 @@ class PulpContext:
         return self._api
 
     @property
-    def component_versions(self) -> Dict[str, str]:
-        result: Dict[str, str] = self.api.api_spec.get("info", {}).get("x-pulp-app-versions", {})
+    def component_versions(self) -> t.Dict[str, str]:
+        result: t.Dict[str, str] = self.api.api_spec.get("info", {}).get("x-pulp-app-versions", {})
         return result
 
     def call(
         self,
         operation_id: str,
         non_blocking: bool = False,
-        parameters: Optional[Dict[str, Any]] = None,
-        body: Optional[EntityDefinition] = None,
+        parameters: t.Optional[t.Dict[str, t.Any]] = None,
+        body: t.Optional[EntityDefinition] = None,
         validate_body: bool = True,
-    ) -> Any:
+    ) -> t.Any:
         """
         Perform an API call for operation_id.
         Wait for triggered tasks to finish if not background.
@@ -425,7 +424,7 @@ class PulpContext:
         else:
             raise NotImplementedError(_("Unknown task state: {state}").format(state=task["state"]))
 
-    def wait_for_task(self, task: EntityDefinition, expect_cancel: bool = False) -> Any:
+    def wait_for_task(self, task: EntityDefinition, expect_cancel: bool = False) -> t.Any:
         """
         Wait for a task to finish and return the finished task object.
 
@@ -475,7 +474,7 @@ class PulpContext:
             )
         return True
 
-    def wait_for_task_group(self, task_group: EntityDefinition) -> Any:
+    def wait_for_task_group(self, task_group: EntityDefinition) -> t.Any:
         """
         Wait for a task group to finish and return the finished task object.
 
@@ -514,7 +513,7 @@ class PulpContext:
         self,
         plugin_requirement: PluginRequirement,
     ) -> bool:
-        version: Optional[str] = self.component_versions.get(plugin_requirement.name)
+        version: t.Optional[str] = self.component_versions.get(plugin_requirement.name)
         return version in plugin_requirement
 
     def needs_plugin(
@@ -557,19 +556,19 @@ class PulpEntityContext:
     """
 
     # Subclasses should provide appropriate values here
-    ENTITY: ClassVar[str] = _("entity")
+    ENTITY: t.ClassVar[str] = _("entity")
     """Translatable name of the entity."""
-    ENTITIES: ClassVar[str] = _("entities")
+    ENTITIES: t.ClassVar[str] = _("entities")
     """Translatable plural of `ENTITY`."""
-    HREF: ClassVar[str]
+    HREF: t.ClassVar[str]
     """Name of the href parameter in the url patterns."""
-    ID_PREFIX: ClassVar[str]
+    ID_PREFIX: t.ClassVar[str]
     """Common prefix for the operations of this entity."""
-    NULLABLES: ClassVar[Set[str]] = set()
+    NULLABLES: t.ClassVar[t.Set[str]] = set()
     """Set of fields that can be cleared by sending 'null'."""
-    NEEDS_PLUGINS: ClassVar[List[PluginRequirement]] = []
+    NEEDS_PLUGINS: t.ClassVar[t.List[PluginRequirement]] = []
     """List of plugin requirements to operate such an entity on the server."""
-    CAPABILITIES: ClassVar[Dict[str, List[PluginRequirement]]] = {}
+    CAPABILITIES: t.ClassVar[t.Dict[str, t.List[PluginRequirement]]] = {}
     """
     List of capabilities this entity provides.
 
@@ -589,11 +588,11 @@ class PulpEntityContext:
     """Regular expression with capture groups for 'plugin' and 'resource_type' to match URIs."""
 
     # Hidden values for the lazy entity lookup
-    _entity: Optional[EntityDefinition]
+    _entity: t.Optional[EntityDefinition]
     _entity_lookup: EntityDefinition
 
     @property
-    def scope(self) -> Dict[str, Any]:
+    def scope(self) -> t.Dict[str, t.Any]:
         """
         Extra scope used in parameters for create and list calls.
 
@@ -623,7 +622,7 @@ class PulpEntityContext:
         return self._entity
 
     @entity.setter
-    def entity(self, value: Optional[EntityDefinition]) -> None:
+    def entity(self, value: t.Optional[EntityDefinition]) -> None:
         # Setting this property will always (lazily) retrigger retrieving the entity.
         # If set multiple times in a row without reading, the criteria will be added.
         if value is None:
@@ -662,12 +661,12 @@ class PulpEntityContext:
     def __init__(
         self,
         pulp_ctx: PulpContext,
-        pulp_href: Optional[str] = None,
-        entity: Optional[EntityDefinition] = None,
+        pulp_href: t.Optional[str] = None,
+        entity: t.Optional[EntityDefinition] = None,
     ) -> None:
         assert pulp_href is None or entity is None
 
-        self.meta: Dict[str, str] = {}
+        self.meta: t.Dict[str, str] = {}
         self.pulp_ctx: PulpContext = pulp_ctx
 
         # Add requirements to the lazy evaluated list
@@ -683,10 +682,10 @@ class PulpEntityContext:
         self,
         operation: str,
         non_blocking: bool = False,
-        parameters: Optional[Dict[str, Any]] = None,
-        body: Optional[EntityDefinition] = None,
+        parameters: t.Optional[t.Dict[str, t.Any]] = None,
+        body: t.Optional[EntityDefinition] = None,
         validate_body: bool = True,
-    ) -> Any:
+    ) -> t.Any:
         """
         Perform an API call for operation.
         Wait for triggered tasks to finish if not background.
@@ -718,7 +717,7 @@ class PulpEntityContext:
         )
 
     @classmethod
-    def _preprocess_value(cls, key: str, value: Any) -> Any:
+    def _preprocess_value(cls, key: str, value: t.Any) -> t.Any:
         if key in cls.NULLABLES and value == "":
             return None
         return _preprocess_value(value)
@@ -754,7 +753,7 @@ class PulpEntityContext:
         """
         return self.preprocess_body(body)
 
-    def list(self, limit: int, offset: int, parameters: Dict[str, Any]) -> List[Any]:
+    def list(self, limit: int, offset: int, parameters: t.Dict[str, t.Any]) -> t.List[t.Any]:
         """
         List entities by the type of this context.
 
@@ -767,8 +766,8 @@ class PulpEntityContext:
             List of entities matching the conditions.
         """
         count: int = -1
-        entities: List[Any] = []
-        payload: Dict[str, Any] = parameters.copy()
+        entities: t.List[t.Any] = []
+        payload: t.Dict[str, t.Any] = parameters.copy()
         payload.update(self.scope)
         payload["offset"] = offset
         payload["limit"] = BATCH_SIZE
@@ -778,7 +777,7 @@ class PulpEntityContext:
             else:
                 payload["limit"] = limit
                 limit = 0
-            result: Mapping[str, Any] = self.call("list", parameters=payload)
+            result: t.Mapping[str, t.Any] = self.call("list", parameters=payload)
             count = result["count"]
             entities.extend(result["results"])
             if result["next"] is None:
@@ -790,7 +789,7 @@ class PulpEntityContext:
             )
         return entities
 
-    def find(self, **kwargs: Any) -> Any:
+    def find(self, **kwargs: t.Any) -> t.Any:
         """
         Find an entity based on search parameters.
 
@@ -805,11 +804,11 @@ class PulpEntityContext:
         Raises:
             PulpException: if no entity satisfies the search parameters uniquely.
         """
-        payload: Dict[str, Any] = kwargs.copy()
+        payload: t.Dict[str, t.Any] = kwargs.copy()
         payload.update(self.scope)
         payload["offset"] = 0
         payload["limit"] = 1
-        result: Mapping[str, Any] = self.call("list", parameters=payload)
+        result: t.Mapping[str, t.Any] = self.call("list", parameters=payload)
         if result["count"] == 0:
             raise PulpException(
                 _("Could not find {entity} with {kwargs}.").format(
@@ -824,7 +823,7 @@ class PulpEntityContext:
             )
         return result["results"][0]
 
-    def show(self, href: Optional[str] = None) -> Any:
+    def show(self, href: t.Optional[str] = None) -> t.Any:
         """
         Retrieve and return the full record of an entity from the server.
 
@@ -843,9 +842,9 @@ class PulpEntityContext:
     def create(
         self,
         body: EntityDefinition,
-        parameters: Optional[Mapping[str, Any]] = None,
+        parameters: t.Optional[t.Mapping[str, t.Any]] = None,
         non_blocking: bool = False,
-    ) -> Any:
+    ) -> t.Any:
         """
         Create an entity.
 
@@ -879,11 +878,11 @@ class PulpEntityContext:
 
     def update(
         self,
-        href: Optional[str] = None,
-        body: Optional[EntityDefinition] = None,
-        parameters: Optional[Mapping[str, Any]] = None,
+        href: t.Optional[str] = None,
+        body: t.Optional[EntityDefinition] = None,
+        parameters: t.Optional[t.Mapping[str, t.Any]] = None,
         non_blocking: bool = False,
-    ) -> Any:
+    ) -> t.Any:
         """
         Update the entity.
 
@@ -916,7 +915,7 @@ class PulpEntityContext:
 
         return result
 
-    def delete(self, href: Optional[str] = None, non_blocking: bool = False) -> Any:
+    def delete(self, href: t.Optional[str] = None, non_blocking: bool = False) -> t.Any:
         """
         Delete the entity.
 
@@ -931,7 +930,7 @@ class PulpEntityContext:
             "delete", parameters={self.HREF: href or self.pulp_href}, non_blocking=non_blocking
         )
 
-    def set_label(self, key: str, value: str, non_blocking: bool = False) -> Any:
+    def set_label(self, key: str, value: str, non_blocking: bool = False) -> t.Any:
         """
         Set a label.
 
@@ -956,7 +955,7 @@ class PulpEntityContext:
         labels[key] = value
         return self.update(body={"pulp_labels": labels}, non_blocking=non_blocking)
 
-    def unset_label(self, key: str, non_blocking: bool = False) -> Any:
+    def unset_label(self, key: str, non_blocking: bool = False) -> t.Any:
         """
         Unset a label.
 
@@ -1000,15 +999,15 @@ class PulpEntityContext:
         except KeyError:
             raise PulpException(_("Could not find label with key '{key}'.").format(key=key))
 
-    def my_permissions(self) -> Any:
+    def my_permissions(self) -> t.Any:
         self.needs_capability("roles")
         return self.call("my_permissions", parameters={self.HREF: self.pulp_href})
 
-    def list_roles(self) -> Any:
+    def list_roles(self) -> t.Any:
         self.needs_capability("roles")
         return self.call("list_roles", parameters={self.HREF: self.pulp_href})
 
-    def add_role(self, role: str, users: List[str], groups: List[str]) -> Any:
+    def add_role(self, role: str, users: t.List[str], groups: t.List[str]) -> t.Any:
         self.needs_capability("roles")
         return self.call(
             "add_role",
@@ -1016,7 +1015,7 @@ class PulpEntityContext:
             body={"role": role, "users": users, "groups": groups},
         )
 
-    def remove_role(self, role: str, users: List[str], groups: List[str]) -> Any:
+    def remove_role(self, role: str, users: t.List[str], groups: t.List[str]) -> t.Any:
         self.needs_capability("roles")
         return self.call(
             "remove_role",
@@ -1082,9 +1081,9 @@ class PulpRemoteContext(PulpEntityContext):
         "sock_read_timeout",
         "rate_limit",
     }
-    TYPE_REGISTRY: Dict[str, Type["PulpRemoteContext"]] = {}
+    TYPE_REGISTRY: t.Dict[str, t.Type["PulpRemoteContext"]] = {}
 
-    def __init_subclass__(cls, **kwargs: Any) -> None:
+    def __init_subclass__(cls, **kwargs: t.Any) -> None:
         super().__init_subclass__(**kwargs)
         if hasattr(cls, "PLUGIN") and hasattr(cls, "RESOURCE_TYPE"):
             cls.TYPE_REGISTRY[f"{cls.PLUGIN}:{cls.RESOURCE_TYPE}"] = cls
@@ -1097,14 +1096,14 @@ class PulpPublicationContext(PulpEntityContext):
     ENTITIES = _("publications")
     ID_PREFIX = "publications"
     HREF_PATTERN = r"publications/(?P<plugin>[\w\-_]+)/(?P<resource_type>[\w\-_]+)/"
-    TYPE_REGISTRY: Dict[str, Type["PulpPublicationContext"]] = {}
+    TYPE_REGISTRY: t.Dict[str, t.Type["PulpPublicationContext"]] = {}
 
-    def __init_subclass__(cls, **kwargs: Any) -> None:
+    def __init_subclass__(cls, **kwargs: t.Any) -> None:
         super().__init_subclass__(**kwargs)
         if hasattr(cls, "PLUGIN") and hasattr(cls, "RESOURCE_TYPE"):
             cls.TYPE_REGISTRY[f"{cls.PLUGIN}:{cls.RESOURCE_TYPE}"] = cls
 
-    def list(self, limit: int, offset: int, parameters: Dict[str, Any]) -> List[Any]:
+    def list(self, limit: int, offset: int, parameters: t.Dict[str, t.Any]) -> t.List[t.Any]:
         if parameters.get("repository") is not None:
             self.pulp_ctx.needs_plugin(
                 PluginRequirement("core", specifier=">=3.20.0", feature=_("repository filter"))
@@ -1120,9 +1119,9 @@ class PulpDistributionContext(PulpEntityContext):
     ID_PREFIX = "distributions"
     HREF_PATTERN = r"distributions/(?P<plugin>[\w\-_]+)/(?P<resource_type>[\w\-_]+)/"
     NULLABLES = {"content_guard", "publication", "remote", "repository", "repository_version"}
-    TYPE_REGISTRY: Dict[str, Type["PulpDistributionContext"]] = {}
+    TYPE_REGISTRY: t.Dict[str, t.Type["PulpDistributionContext"]] = {}
 
-    def __init_subclass__(cls, **kwargs: Any) -> None:
+    def __init_subclass__(cls, **kwargs: t.Any) -> None:
         super().__init_subclass__(**kwargs)
         if hasattr(cls, "PLUGIN") and hasattr(cls, "RESOURCE_TYPE"):
             cls.TYPE_REGISTRY[f"{cls.PLUGIN}:{cls.RESOURCE_TYPE}"] = cls
@@ -1147,13 +1146,13 @@ class PulpRepositoryVersionContext(PulpEntityContext):
         self,
         pulp_ctx: PulpContext,
         repository_ctx: "PulpRepositoryContext",
-        pulp_href: Optional[str] = None,
+        pulp_href: t.Optional[str] = None,
     ) -> None:
         super().__init__(pulp_ctx, pulp_href=pulp_href)
         self.repository_ctx = repository_ctx
 
     @property
-    def scope(self) -> Dict[str, Any]:
+    def scope(self) -> t.Dict[str, t.Any]:
         if self.ID_PREFIX == "repository_versions":
             return {}
         else:
@@ -1170,11 +1169,11 @@ class PulpRepositoryVersionContext(PulpEntityContext):
         return super().entity
 
     @entity.setter
-    def entity(self, value: Optional[EntityDefinition]) -> None:
+    def entity(self, value: t.Optional[EntityDefinition]) -> None:
         # ignore needed due to a bug regarding overriding property setter in mypy
         PulpEntityContext.entity.fset(self, value)  # type: ignore[attr-defined]
 
-    def repair(self, href: Optional[str] = None) -> Any:
+    def repair(self, href: t.Optional[str] = None) -> t.Any:
         """
         Trigger a repair task for this repository version.
 
@@ -1194,18 +1193,18 @@ class PulpRepositoryContext(PulpEntityContext):
     ENTITIES = _("repositories")
     HREF_PATTERN = r"repositories/(?P<plugin>[\w\-_]+)/(?P<resource_type>[\w\-_]+)/"
     ID_PREFIX = "repositories"
-    VERSION_CONTEXT: ClassVar[Type[PulpRepositoryVersionContext]] = PulpRepositoryVersionContext
+    VERSION_CONTEXT: t.ClassVar[t.Type[PulpRepositoryVersionContext]] = PulpRepositoryVersionContext
     NULLABLES = {"description", "retain_repo_versions"}
-    TYPE_REGISTRY: Dict[str, Type["PulpRepositoryContext"]] = {}
+    TYPE_REGISTRY: t.Dict[str, t.Type["PulpRepositoryContext"]] = {}
 
-    def __init_subclass__(cls, **kwargs: Any) -> None:
+    def __init_subclass__(cls, **kwargs: t.Any) -> None:
         super().__init_subclass__(**kwargs)
         if hasattr(cls, "PLUGIN") and hasattr(cls, "RESOURCE_TYPE"):
             cls.TYPE_REGISTRY[f"{cls.PLUGIN}:{cls.RESOURCE_TYPE}"] = cls
 
     def get_version_context(
         self,
-        number: Optional[int] = None,
+        number: t.Optional[int] = None,
     ) -> PulpRepositoryVersionContext:
         """
         Return a repository version context of the proper type scoped for this repository.
@@ -1240,7 +1239,9 @@ class PulpRepositoryContext(PulpEntityContext):
                 body["retained_versions"] = body.pop("retain_repo_versions")
         return body
 
-    def sync(self, href: Optional[str] = None, body: Optional[EntityDefinition] = None) -> Any:
+    def sync(
+        self, href: t.Optional[str] = None, body: t.Optional[EntityDefinition] = None
+    ) -> t.Any:
         """
         Trigger a sync task for this repository.
 
@@ -1255,11 +1256,11 @@ class PulpRepositoryContext(PulpEntityContext):
 
     def modify(
         self,
-        href: Optional[str] = None,
-        add_content: Optional[List[str]] = None,
-        remove_content: Optional[List[str]] = None,
-        base_version: Optional[str] = None,
-    ) -> Any:
+        href: t.Optional[str] = None,
+        add_content: t.Optional[t.List[str]] = None,
+        remove_content: t.Optional[t.List[str]] = None,
+        base_version: t.Optional[str] = None,
+    ) -> t.Any:
         """
         Add to or remove content from this repository.
 
@@ -1273,7 +1274,7 @@ class PulpRepositoryContext(PulpEntityContext):
         Returns:
             Record of the modify task.
         """
-        body: Dict[str, Any] = {}
+        body: t.Dict[str, t.Any] = {}
         if add_content is not None:
             body["add_content_units"] = add_content
         if remove_content is not None:
@@ -1288,9 +1289,11 @@ class PulpGenericRepositoryContext(PulpRepositoryContext):
 
     def reclaim(
         self,
-        repo_hrefs: List[t.Union[str, PulpRepositoryContext]],
-        repo_versions_keeplist: Optional[List[t.Union[str, PulpRepositoryVersionContext]]] = None,
-    ) -> Any:
+        repo_hrefs: t.List[t.Union[str, PulpRepositoryContext]],
+        repo_versions_keeplist: t.Optional[
+            t.List[t.Union[str, PulpRepositoryVersionContext]]
+        ] = None,
+    ) -> t.Any:
         """
         Reclaim disk space for a list of repositories.
 
@@ -1302,7 +1305,7 @@ class PulpGenericRepositoryContext(PulpRepositoryContext):
             Record of the reclaim space task.
         """
         self.pulp_ctx.needs_plugin(PluginRequirement("core", specifier=">=3.19.0"))
-        body: Dict[str, Any] = {}
+        body: t.Dict[str, t.Any] = {}
         body["repo_hrefs"] = repo_hrefs
         if repo_versions_keeplist:
             body["repo_versions_keeplist"] = repo_versions_keeplist
@@ -1315,20 +1318,20 @@ class PulpContentContext(PulpEntityContext):
     ENTITY = _("content")
     ENTITIES = _("content")
     ID_PREFIX = "content"
-    TYPE_REGISTRY: Dict[str, Type["PulpContentContext"]] = {}
+    TYPE_REGISTRY: t.Dict[str, t.Type["PulpContentContext"]] = {}
 
-    def __init_subclass__(cls, **kwargs: Any) -> None:
+    def __init_subclass__(cls, **kwargs: t.Any) -> None:
         super().__init_subclass__(**kwargs)
         if hasattr(cls, "PLUGIN") and hasattr(cls, "RESOURCE_TYPE"):
             cls.TYPE_REGISTRY[f"{cls.PLUGIN}:{cls.RESOURCE_TYPE}"] = cls
 
     def upload(
         self,
-        file: IO[bytes],
+        file: t.IO[bytes],
         chunk_size: int,
-        repository: Optional[PulpRepositoryContext],
-        **kwargs: Any,
-    ) -> Any:
+        repository: t.Optional[PulpRepositoryContext],
+        **kwargs: t.Any,
+    ) -> t.Any:
         """
         Create a content unit by uploading a file.
 
@@ -1343,7 +1346,7 @@ class PulpContentContext(PulpEntityContext):
         """
         self.needs_capability("upload")
         size = os.path.getsize(file.name)
-        body: Dict[str, Any] = {**kwargs}
+        body: t.Dict[str, t.Any] = {**kwargs}
         if chunk_size > size:
             body["file"] = file
         elif self.pulp_ctx.has_plugin(PluginRequirement("core", specifier=">=3.20.0")):
@@ -1368,14 +1371,14 @@ class PulpACSContext(PulpEntityContext):
     ENTITIES = _("ACSes")
     HREF_PATTERN = r"acs/(?P<plugin>[\w\-_]+)/(?P<resource_type>[\w\-_]+)/"
     ID_PREFIX = "acs"
-    TYPE_REGISTRY: Dict[str, Type["PulpACSContext"]] = {}
+    TYPE_REGISTRY: t.Dict[str, t.Type["PulpACSContext"]] = {}
 
-    def __init_subclass__(cls, **kwargs: Any) -> None:
+    def __init_subclass__(cls, **kwargs: t.Any) -> None:
         super().__init_subclass__(**kwargs)
         if hasattr(cls, "PLUGIN") and hasattr(cls, "RESOURCE_TYPE"):
             cls.TYPE_REGISTRY[f"{cls.PLUGIN}:{cls.RESOURCE_TYPE}"] = cls
 
-    def refresh(self, href: Optional[str] = None) -> Any:
+    def refresh(self, href: t.Optional[str] = None) -> t.Any:
         return self.call("refresh", parameters={self.HREF: href or self.pulp_href})
 
 
@@ -1387,15 +1390,15 @@ class PulpContentGuardContext(PulpEntityContext):
     ID_PREFIX = "contentguards"
     HREF_PATTERN = r"contentguards/(?P<plugin>[\w\-_]+)/(?P<resource_type>[\w\-_]+)/"
     NULLABLES = {"description"}
-    TYPE_REGISTRY: Dict[str, Type["PulpContentGuardContext"]] = {}
+    TYPE_REGISTRY: t.Dict[str, t.Type["PulpContentGuardContext"]] = {}
 
-    def __init_subclass__(cls, **kwargs: Any) -> None:
+    def __init_subclass__(cls, **kwargs: t.Any) -> None:
         super().__init_subclass__(**kwargs)
         if hasattr(cls, "PLUGIN") and hasattr(cls, "RESOURCE_TYPE"):
             cls.TYPE_REGISTRY[f"{cls.PLUGIN}:{cls.RESOURCE_TYPE}"] = cls
 
 
-EntityFieldDefinition = Union[None, str, PulpEntityContext]
+EntityFieldDefinition = t.Union[None, str, PulpEntityContext]
 
 
 ##############################################################################
@@ -1404,6 +1407,6 @@ EntityFieldDefinition = Union[None, str, PulpEntityContext]
 # Note that it will only be fully populated, once all plugins are loaded.
 # This is deprecated. Please specify PLUGIN and RESOURCE_TYPE on the context instead.
 
-registered_repository_contexts: Dict[str, Type[PulpRepositoryContext]] = (
+registered_repository_contexts: t.Dict[str, t.Type[PulpRepositoryContext]] = (
     PulpRepositoryContext.TYPE_REGISTRY
 )
