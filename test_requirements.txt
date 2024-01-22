@@ -5,3 +5,4 @@ python-gnupg==0.5.2
 
 # No pinning here, because we only switch on optional dependencies here.
 pygments
+SecretStorage
