@@ -2,7 +2,7 @@ site_name: Pulp CLI
 theme:
   name: readthedocs
   custom_dir: docs_theme
-  version: "0.23.2.dev"
+  version: "0.23.2"
 repo_url: https://github.com/pulp/pulp-cli
 edit_uri: edit/main/docs/
 markdown_extensions:

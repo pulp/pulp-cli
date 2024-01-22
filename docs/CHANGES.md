@@ -10,6 +10,24 @@
 
 [//]: # (towncrier release notes start)
 
+## 0.23.2 (2024-01-22)
+
+
+
+#### Bugfixes
+
+- Fixed a regression introduced in `get_translations`.
+  [#874](https://github.com/pulp/pulp-cli/issues/874)
+
+
+### Pulp GLUE
+
+
+No significant changes.
+
+
+---
+
 ## 0.23.1 (2024-01-18)
 
 
