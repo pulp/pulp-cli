@@ -5,9 +5,9 @@ import base64
 import datetime
 import json
 import os
+import typing as t
 from contextlib import suppress
 from io import BufferedReader
-from typing import IO, Any, Callable, Dict, List, Optional, Tuple, Union
 from urllib.parse import urljoin
 
 import requests
@@ -19,7 +19,7 @@ from pulp_glue.common.i18n import get_translation
 translation = get_translation(__package__)
 _ = translation.gettext
 
-UploadType = Union[bytes, IO[bytes]]
+UploadType = t.Union[bytes, t.IO[bytes]]
 
 SAFE_METHODS = ["GET", "HEAD", "OPTIONS"]
 ISO_DATE_FORMAT = "%Y-%m-%d"
@@ -69,22 +69,22 @@ class OpenAPI:
         self,
         base_url: str,
         doc_path: str,
-        headers: Optional[Dict[str, str]] = None,
-        username: Optional[str] = None,
-        password: Optional[str] = None,
-        cert: Optional[str] = None,
-        key: Optional[str] = None,
+        headers: t.Optional[t.Dict[str, str]] = None,
+        username: t.Optional[str] = None,
+        password: t.Optional[str] = None,
+        cert: t.Optional[str] = None,
+        key: t.Optional[str] = None,
         validate_certs: bool = True,
         refresh_cache: bool = False,
         safe_calls_only: bool = False,
-        debug_callback: Optional[Callable[[int, str], Any]] = None,
-        user_agent: Optional[str] = None,
-        cid: Optional[str] = None,
+        debug_callback: t.Optional[t.Callable[[int, str], t.Any]] = None,
+        user_agent: t.Optional[str] = None,
+        cid: t.Optional[str] = None,
     ):
         if not validate_certs:
             urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-        self.debug_callback: Callable[[int, str], Any] = debug_callback or (lambda i, x: None)
+        self.debug_callback: t.Callable[[int, str], t.Any] = debug_callback or (lambda i, x: None)
         self.base_url: str = base_url
         self.doc_path: str = doc_path
         self.safe_calls_only: bool = safe_calls_only
@@ -116,7 +116,7 @@ class OpenAPI:
             self._session.headers.update(headers)
         self._session.max_redirects = 0
 
-        verify: Optional[Union[bool, str]] = (
+        verify: t.Optional[t.Union[bool, str]] = (
             os.environ.get("PULP_CA_BUNDLE") if validate_certs is not False else False
         )
         session_settings = self._session.merge_environment_settings(
@@ -151,12 +151,12 @@ class OpenAPI:
                 f.write(data)
 
     def _parse_api(self, data: bytes) -> None:
-        self.api_spec: Dict[str, Any] = json.loads(data)
+        self.api_spec: t.Dict[str, t.Any] = json.loads(data)
         if self.api_spec.get("openapi", "").startswith("3."):
             self.openapi_version: int = 3
         else:
             raise OpenAPIError(_("Unknown schema version"))
-        self.operations: Dict[str, Any] = {
+        self.operations: t.Dict[str, t.Any] = {
             method_entry["operationId"]: (method, path)
             for path, path_entry in self.api_spec["paths"].items()
             for method, method_entry in path_entry.items()
@@ -186,7 +186,7 @@ class OpenAPI:
 
     def param_spec(
         self, operation_id: str, param_type: str, required: bool = False
-    ) -> Dict[str, Any]:
+    ) -> t.Dict[str, t.Any]:
         method, path = self.operations[operation_id]
         path_spec = self.api_spec["paths"][path]
         method_spec = path_spec[method]
@@ -210,10 +210,10 @@ class OpenAPI:
     def extract_params(
         self,
         param_in: str,
-        path_spec: Dict[str, Any],
-        method_spec: Dict[str, Any],
-        params: Dict[str, Any],
-    ) -> Dict[str, Any]:
+        path_spec: t.Dict[str, t.Any],
+        method_spec: t.Dict[str, t.Any],
+        params: t.Dict[str, t.Any],
+    ) -> t.Dict[str, t.Any]:
         param_specs = {
             entry["name"]: entry
             for entry in path_spec.get("parameters", [])
@@ -226,7 +226,7 @@ class OpenAPI:
                 if entry["in"] == param_in
             }
         )
-        result: Dict[str, Any] = {}
+        result: t.Dict[str, t.Any] = {}
         for name in list(params.keys()):
             if name in param_specs:
                 param = params.pop(name)
@@ -235,7 +235,7 @@ class OpenAPI:
                 if param_schema:
                     param = self.validate_schema(param_schema, name, param)
 
-                if isinstance(param, List):
+                if isinstance(param, t.List):
                     if not param:
                         # Don't propagate an empty list here
                         continue
@@ -261,7 +261,7 @@ class OpenAPI:
             )
         return result
 
-    def validate_schema(self, schema: Any, name: str, value: Any) -> Any:
+    def validate_schema(self, schema: t.Any, name: str, value: t.Any) -> t.Any:
         # Look if the schema is provided by reference
         schema_ref = schema.get("$ref")
         if schema_ref:
@@ -340,8 +340,8 @@ class OpenAPI:
             )
         return value
 
-    def validate_object(self, schema: Any, name: str, value: Any) -> Dict[str, Any]:
-        if not isinstance(value, Dict):
+    def validate_object(self, schema: t.Any, name: str, value: t.Any) -> t.Dict[str, t.Any]:
+        if not isinstance(value, t.Dict):
             raise OpenAPIValidationError(
                 _("'{name}' is expected to be an object.").format(name=name)
             )
@@ -370,13 +370,13 @@ class OpenAPI:
                 )
         return value
 
-    def validate_array(self, schema: Any, name: str, value: Any) -> List[Any]:
-        if not isinstance(value, List):
+    def validate_array(self, schema: t.Any, name: str, value: t.Any) -> t.List[t.Any]:
+        if not isinstance(value, t.List):
             raise OpenAPIValidationError(_("'{name}' is expected to be a list.").format(name=name))
         item_schema = schema["items"]
         return [self.validate_schema(item_schema, name, item) for item in value]
 
-    def validate_string(self, schema: Any, name: str, value: Any) -> Union[str, UploadType]:
+    def validate_string(self, schema: t.Any, name: str, value: t.Any) -> t.Union[str, UploadType]:
         enum = schema.get("enum")
         if enum:
             if value not in enum:
@@ -415,7 +415,7 @@ class OpenAPI:
                 )
             return value
 
-    def validate_integer(self, schema: Any, name: str, value: Any) -> int:
+    def validate_integer(self, schema: t.Any, name: str, value: t.Any) -> int:
         if not isinstance(value, int):
             raise OpenAPIValidationError(
                 _("'{name}' is expected to be an integer.").format(name=name)
@@ -432,7 +432,7 @@ class OpenAPI:
             )
         return value
 
-    def validate_number(self, schema: Any, name: str, value: Any) -> float:
+    def validate_number(self, schema: t.Any, name: str, value: t.Any) -> float:
         # https://swagger.io/specification/#data-types describes float and double.
         # Python does not distinguish them.
         if not isinstance(value, float):
@@ -443,16 +443,16 @@ class OpenAPI:
 
     def render_request_body(
         self,
-        method_spec: Dict[str, Any],
-        body: Optional[Dict[str, Any]] = None,
+        method_spec: t.Dict[str, t.Any],
+        body: t.Optional[t.Dict[str, t.Any]] = None,
         validate_body: bool = True,
-    ) -> Tuple[
-        Optional[str],
-        Optional[Dict[str, Any]],
-        Optional[Dict[str, Any]],
-        Optional[List[Tuple[str, Tuple[str, UploadType, str]]]],
+    ) -> t.Tuple[
+        t.Optional[str],
+        t.Optional[t.Dict[str, t.Any]],
+        t.Optional[t.Dict[str, t.Any]],
+        t.Optional[t.List[t.Tuple[str, t.Tuple[str, UploadType, str]]]],
     ]:
-        content_types: List[str] = []
+        content_types: t.List[str] = []
         try:
             request_body_spec = method_spec["requestBody"]
         except KeyError:
@@ -467,10 +467,10 @@ class OpenAPI:
             content_types = list(request_body_spec["content"].keys())
         assert body is not None
 
-        content_type: Optional[str] = None
-        data: Optional[Dict[str, Any]] = None
-        json: Optional[Dict[str, Any]] = None
-        files: Optional[List[Tuple[str, Tuple[str, UploadType, str]]]] = None
+        content_type: t.Optional[str] = None
+        data: t.Optional[t.Dict[str, t.Any]] = None
+        json: t.Optional[t.Dict[str, t.Any]] = None
+        files: t.Optional[t.List[t.Tuple[str, t.Tuple[str, UploadType, str]]]] = None
 
         candidate_content_types = [
             "multipart/form-data",
@@ -480,7 +480,7 @@ class OpenAPI:
                 "application/json",
                 "application/x-www-form-urlencoded",
             ] + candidate_content_types
-        errors: List[str] = []
+        errors: t.List[str] = []
         for candidate in candidate_content_types:
             content_type = next(
                 (
@@ -508,7 +508,7 @@ class OpenAPI:
                 elif content_type.startswith("application/x-www-form-urlencoded"):
                     data = body
                 elif content_type.startswith("multipart/form-data"):
-                    uploads: Dict[str, Tuple[str, UploadType, str]] = {}
+                    uploads: t.Dict[str, t.Tuple[str, UploadType, str]] = {}
                     data = {}
                     # Extract and prepare the files to upload
                     if body:
@@ -540,12 +540,12 @@ class OpenAPI:
 
     def render_request(
         self,
-        path_spec: Dict[str, Any],
+        path_spec: t.Dict[str, t.Any],
         method: str,
         url: str,
-        params: Dict[str, Any],
-        headers: Dict[str, str],
-        body: Optional[Dict[str, Any]] = None,
+        params: t.Dict[str, t.Any],
+        headers: t.Dict[str, str],
+        body: t.Optional[t.Dict[str, t.Any]] = None,
         validate_body: bool = True,
     ) -> requests.PreparedRequest:
         method_spec = path_spec[method]
@@ -561,7 +561,7 @@ class OpenAPI:
             ), f"{request.headers['content-type']} != {content_type}"
         return request
 
-    def parse_response(self, method_spec: Dict[str, Any], response: requests.Response) -> Any:
+    def parse_response(self, method_spec: t.Dict[str, t.Any], response: requests.Response) -> t.Any:
         if response.status_code == 204:
             return "{}"
 
@@ -585,10 +585,10 @@ class OpenAPI:
     def call(
         self,
         operation_id: str,
-        parameters: Optional[Dict[str, Any]] = None,
-        body: Optional[Dict[str, Any]] = None,
+        parameters: t.Optional[t.Dict[str, t.Any]] = None,
+        body: t.Optional[t.Dict[str, t.Any]] = None,
         validate_body: bool = True,
-    ) -> Any:
+    ) -> t.Any:
         """
         Make a call to the server.
 
