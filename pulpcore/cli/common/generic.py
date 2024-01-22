@@ -2,6 +2,7 @@ import datetime
 import json
 import re
 import typing as t
+from contextlib import closing
 from functools import lru_cache, wraps
 
 import click
@@ -38,6 +39,13 @@ except ImportError:
 else:
     PYGMENTS = True
     PYGMENTS_STYLE = "solarized-dark"
+
+try:
+    import secretstorage
+except ImportError:
+    SECRET_STORAGE = False
+else:
+    SECRET_STORAGE = True
 
 translation = get_translation(__package__)
 _ = translation.gettext
@@ -135,6 +143,56 @@ class PulpCLIContext(PulpContext):
             )
 
 
+if SECRET_STORAGE:
+
+    class SecretStorageBasicAuth(requests.auth.AuthBase):
+        def __init__(self, pulp_ctx: PulpCLIContext):
+            self.pulp_ctx = pulp_ctx
+            self.attr: t.Dict[str, str] = {
+                "service": "pulp-cli",
+                "base_url": self.pulp_ctx.api.base_url,
+                "api_path": self.pulp_ctx.api_path,
+                "username": self.pulp_ctx.username,
+            }
+
+        def response_hook(self, response: requests.Response, **kwargs: t.Any) -> requests.Response:
+            # https://docs.python-requests.org/en/latest/_modules/requests/auth/#HTTPDigestAuth
+            if 200 <= response.status_code < 300 and not self.password_in_manager:
+                if click.confirm(_("Add password to password manager?")):
+                    assert isinstance(self.pulp_ctx.password, str)
+
+                    with closing(secretstorage.dbus_init()) as connection:
+                        collection = secretstorage.get_default_collection(connection)
+                        collection.create_item(
+                            "Pulp CLI", self.attr, self.pulp_ctx.password.encode(), replace=True
+                        )
+            elif response.status_code == 401 and self.password_in_manager:
+                with closing(secretstorage.dbus_init()) as connection:
+                    collection = secretstorage.get_default_collection(connection)
+                    item = next(collection.search_items(self.attr), None)
+                    if item:
+                        if click.confirm(_("Remove failed password from password manager?")):
+                            item.delete()
+                            self.pulp_ctx.password = None
+            return response
+
+        def __call__(self, request: requests.PreparedRequest) -> requests.PreparedRequest:
+            with closing(secretstorage.dbus_init()) as connection:
+                collection = secretstorage.get_default_collection(connection)
+                item = next(collection.search_items(self.attr), None)
+                if item:
+                    self.pulp_ctx.password = item.get_secret().decode()
+                    self.password_in_manager = True
+                else:
+                    self.pulp_ctx.password = str(click.prompt("Password", hide_input=True))
+                    self.password_in_manager = False
+            request.register_hook("response", self.response_hook)  # type: ignore [no-untyped-call]
+            return requests.auth.HTTPBasicAuth(  # type: ignore [no-any-return]
+                self.pulp_ctx.username,
+                self.pulp_ctx.password,
+            )(request)
+
+
 class PulpCLIAuthProvider(AuthProviderBase):
     def __init__(self, pulp_ctx: PulpCLIContext):
         self.pulp_ctx = pulp_ctx
@@ -143,7 +201,13 @@ class PulpCLIAuthProvider(AuthProviderBase):
         if self.pulp_ctx.username is None:
             self.pulp_ctx.username = click.prompt("Username")
         if self.pulp_ctx.password is None:
-            self.pulp_ctx.password = click.prompt("Password", hide_input=True)
+            # TODO give the user a chance to opt out.
+            if SECRET_STORAGE:
+                # We could just try to fetch the password here,
+                # but we want to get a grip on the response_hook.
+                return SecretStorageBasicAuth(self.pulp_ctx)
+            else:
+                self.pulp_ctx.password = click.prompt("Password", hide_input=True)
         return (self.pulp_ctx.username, self.pulp_ctx.password)
 
 

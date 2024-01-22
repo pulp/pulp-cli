@@ -8,3 +8,4 @@ toml==0.10.2
 pygments==2.17.2
 importlib_metadata==4.8.0
 importlib_resources==5.4.0
+SecretStorage==3.3.3
