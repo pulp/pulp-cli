@@ -72,7 +72,7 @@ create_options = [
         help=_(
             "Option specifying the checksum type to use for package and metadata integrity checks."
         ),
-        needs_plugins=[PluginRequirement("rpm", specifier=">=3.25.0.dev")],
+        needs_plugins=[PluginRequirement("rpm", specifier=">=3.25.0")],
     ),
 ]
 publication.add_command(list_command(decorators=publication_filter_options + [repository_option]))
