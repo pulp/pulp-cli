@@ -3,8 +3,6 @@
 # shellcheck source=tests/scripts/config.source
 . "$(dirname "$(dirname "$(realpath "$0")")")"/config.source
 
-pulp debug has-plugin --name "core" --min-version "3.15.1" || exit 23
-
 cleanup() {
   pulp content-guard rbac destroy --name "cli_test_guard" || true
   pulp group destroy --name "cli_test_group" || true

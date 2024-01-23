@@ -39,22 +39,14 @@ expect_succ pulp python distribution update \
   --base-path "cli_test_python_distro" \
   --publication "$PUBLICATION_HREF"
 
-if pulp debug has-plugin --name "python" --min-version "3.4.0"
-then
-  expect_succ curl "$curl_opt" --head --fail "$PULP_BASE_URL/pypi/cli_test_python_distro/simple/"
-  expect_succ pulp python distribution update \
-  --name "cli_test_python_distro" \
-  --repository "cli_test_python_repository" \
-  --block-uploads
-else
-  expect_succ curl "$curl_opt" --head --fail "$PULP_BASE_URL/pulp/content/cli_test_python_distro/simple/"
-fi
+expect_succ curl "$curl_opt" --head --fail "$PULP_BASE_URL/pypi/cli_test_python_distro/simple/"
+expect_succ pulp python distribution update \
+--name "cli_test_python_distro" \
+--repository "cli_test_python_repository" \
+--block-uploads
 
-if pulp debug has-plugin --name "python" --min-version "3.6.0"
-then
-  expect_succ pulp python distribution update \
-  --name "cli_test_python_distro" \
-  --remote "cli_test_python_remote"
-fi
+expect_succ pulp python distribution update \
+--name "cli_test_python_distro" \
+--remote "cli_test_python_remote"
 
 expect_succ pulp python distribution destroy --distribution "cli_test_python_distro"

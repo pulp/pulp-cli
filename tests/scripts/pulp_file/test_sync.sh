@@ -49,20 +49,14 @@ test "$(echo "$OUTPUT" | jq -r '.state')" = "completed"
 expect_succ pulp file repository version destroy --repository "cli_test_file_repository" --version 1
 
 # Test autopublish
-if pulp debug has-plugin --name "file" --min-version "1.7.0"
-then
-  expect_succ pulp file repository create --name "$autopublish_repo" --remote "cli_test_file_remote" --autopublish
-  expect_succ pulp file repository sync --repository "$autopublish_repo"
-  task=$(echo "$ERROUTPUT" | grep -E -o "${PULP_API_ROOT}([-_a-zA-Z0-9]+/)?api/v3/tasks/[-[:xdigit:]]*/")
-  created_resources=$(pulp show --href "$task" | jq -r ".created_resources")
-  echo "$created_resources" | grep -q -E "${PULP_API_ROOT}([-_a-zA-Z0-9]+/)?api/v3/publications/file/file/"
-fi
+expect_succ pulp file repository create --name "$autopublish_repo" --remote "cli_test_file_remote" --autopublish
+expect_succ pulp file repository sync --repository "$autopublish_repo"
+task=$(echo "$ERROUTPUT" | grep -E -o "${PULP_API_ROOT}([-_a-zA-Z0-9]+/)?api/v3/tasks/[-[:xdigit:]]*/")
+created_resources=$(pulp show --href "$task" | jq -r ".created_resources")
+echo "$created_resources" | grep -q -E "${PULP_API_ROOT}([-_a-zA-Z0-9]+/)?api/v3/publications/file/file/"
 
 # Test retained versions
-if pulp debug has-plugin --name "core" --min-version "3.13.0"
-then
-  expect_succ pulp file repository create --name "$one_version_repo" --remote "cli_test_file_remote" --retain-repo-versions 1
-  expect_succ pulp file repository sync --repository "$one_version_repo"
-  expect_succ pulp file repository version list --repository "$one_version_repo"
-  test "$(echo "$OUTPUT" | jq -r length)" -eq 1
-fi
+expect_succ pulp file repository create --name "$one_version_repo" --remote "cli_test_file_remote" --retain-repo-versions 1
+expect_succ pulp file repository sync --repository "$one_version_repo"
+expect_succ pulp file repository version list --repository "$one_version_repo"
+test "$(echo "$OUTPUT" | jq -r length)" -eq 1
