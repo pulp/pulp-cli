@@ -759,12 +759,16 @@ def resource_option(*args: t.Any, **kwargs: t.Any) -> t.Callable[[FC], FC]:
         ).format(
             plugin_form=_("[<plugin>:]") if default_plugin else _("<plugin>:"),
             type_form=_("[<resource_type>:]") if default_type else _("<resource_type>:"),
-            plugin_default=_("'<plugin>' defaults to {plugin}. ").format(plugin=default_plugin)
-            if default_plugin
-            else "",
-            type_default=_("'<resource_type>' defaults to {type}. ").format(type=default_type)
-            if default_type
-            else "",
+            plugin_default=(
+                _("'<plugin>' defaults to {plugin}. ").format(plugin=default_plugin)
+                if default_plugin
+                else ""
+            ),
+            type_default=(
+                _("'<resource_type>' defaults to {type}. ").format(type=default_type)
+                if default_type
+                else ""
+            ),
         )
 
     return click.option(*args, **kwargs)
