@@ -1380,6 +1380,6 @@ EntityFieldDefinition = Union[None, str, PulpEntityContext]
 # Note that it will only be fully populated, once all plugins are loaded.
 # This is deprecated. Please specify PLUGIN and RESOURCE_TYPE on the context instead.
 
-registered_repository_contexts: Dict[
-    str, Type[PulpRepositoryContext]
-] = PulpRepositoryContext.TYPE_REGISTRY
+registered_repository_contexts: Dict[str, Type[PulpRepositoryContext]] = (
+    PulpRepositoryContext.TYPE_REGISTRY
+)
