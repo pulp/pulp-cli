@@ -1,6 +1,6 @@
 mkdocs~=1.5.3
 mkdocstrings-python~=1.8.0
-black==24.1.0
+black==24.1.1
 pygments~=2.17.2
 .
 ./pulp-glue
