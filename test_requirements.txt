@@ -1,5 +1,7 @@
 # Test requirements
+pytest>=7.0.0,<9.0.0
+pytest-subtests>=0.8.0,<0.12.0
+python-gnupg==0.5.2
+
+# No pinning here, because we only switch on optional dependencies here.
 pygments
-pytest
-pytest-subtests
-python-gnupg
