@@ -3,7 +3,7 @@ from urllib.parse import urljoin
 
 import pytest
 
-pytest_plugins = "pytest_pulp_cli"
+pytest_plugins = ("pytest_pulp_cli",)
 
 
 @pytest.fixture

@@ -115,7 +115,7 @@ expect_succ pulp rpm repository sync --repository "cli_test_rpm_repository" --sy
 expect_succ pulp rpm repository sync --repository "cli_test_rpm_repository" --sync-policy mirror_content_only
 expect_fail pulp rpm repository sync --repository "cli_test_rpm_repository" --sync-policy foobar
 
-if pulp debug has-plugin --name "rpm" --min-version "3.25.0.dev"
+if pulp debug has-plugin --name "rpm" --specifier ">=3.25.0.dev"
 then
   expect_succ pulp rpm publication create --repository "cli_test_rpm_repository" --checksum-type sha512
   expect_fail pulp rpm publication create --repository "cli_test_rpm_repository" --checksum-type sha1

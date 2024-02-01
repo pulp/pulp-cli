@@ -3,7 +3,7 @@
 # shellcheck source=tests/scripts/config.source
 . "$(dirname "$(dirname "$(realpath "$0")")")"/config.source
 
-pulp debug has-plugin --name "core" --min-version "3.23.0" || exit 23
+pulp debug has-plugin --name "core" --specifier ">=3.23.0" || exit 23
 
 cleanup() {
   pulp upstream-pulp destroy --upstream-pulp "cli_test_upstream_pulp" || true

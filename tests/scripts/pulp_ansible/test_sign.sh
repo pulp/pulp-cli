@@ -3,7 +3,7 @@
 # shellcheck source=tests/scripts/config.source
 . "$(dirname "$(dirname "$(realpath "$0")")")"/config.source
 
-pulp debug has-plugin --name "ansible" --min-version "0.12.0" || exit 23
+pulp debug has-plugin --name "ansible" --specifier ">=0.12.0" || exit 23
 [ "$(pulp signing-service list --name "sign_ansible" | jq 'length')" = "1" ] || exit 23
 
 cleanup() {

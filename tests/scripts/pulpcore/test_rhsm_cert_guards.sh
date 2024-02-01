@@ -3,10 +3,10 @@
 # shellcheck source=tests/scripts/config.source
 . "$(dirname "$(dirname "$(realpath "$0")")")"/config.source
 
-pulp debug has-plugin --name "certguard" --min-version "1.4.0" || exit 23
+pulp debug has-plugin --name "certguard" --specifier ">=1.4.0" || exit 23
 
 # Seems like the rhsm module is not installed on older oci_images
-pulp debug has-plugin --name "core" --min-version "3.22" || exit 23
+pulp debug has-plugin --name "core" --specifier ">=3.22" || exit 23
 
 cleanup() {
   pulp content-guard rhsm destroy --name "cli_test_rhsm_guard" || true

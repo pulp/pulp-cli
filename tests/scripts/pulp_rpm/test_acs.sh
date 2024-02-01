@@ -3,7 +3,7 @@
 # shellcheck source=tests/scripts/config.source
 . "$(dirname "$(dirname "$(realpath "$0")")")"/config.source
 
-pulp debug has-plugin --name "rpm" --min-version "3.18.0" || exit 23
+pulp debug has-plugin --name "rpm" --specifier ">=3.18.0" || exit 23
 
 # This container seems to have issues with the compression format of the fixture.
 pulp debug has-plugin --name "rpm" --specifier "==3.20.0" && pulp debug has-plugin --name "core" --specifier "==3.23.21" && exit 23
