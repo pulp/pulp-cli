@@ -14,7 +14,7 @@ trap cleanup EXIT
 
 pulp orphan cleanup --protection-time 0
 
-if pulp debug has-plugin --name "ansible" --min-version "0.15.0"
+if pulp debug has-plugin --name "ansible" --specifier ">=0.15.0"
 then
   gpg --output pulp_pubkey.key --armor --export "pulp-fixture-signing-key"
   expect_succ pulp ansible repository create --name "cli_test_ansible_repository_verify" --gpgkey @pulp_pubkey.key
@@ -50,7 +50,7 @@ content2_href="$(echo "$OUTPUT" | jq -r .[0].pulp_href)"
 expect_succ pulp ansible content --type "role" show --href "$content2_href"
 
 # Test ansible signature upload
-if pulp debug has-plugin --name "ansible" --min-version "0.13.0"
+if pulp debug has-plugin --name "ansible" --specifier ">=0.13.0"
 then
   expect_succ pulp ansible content --type "signature" list
   tar --extract --file="ansible-posix-1.3.0.tar.gz" "MANIFEST.json"
@@ -72,7 +72,7 @@ expect_succ pulp ansible repository content --type "role" add --repository "cli_
 expect_succ pulp ansible repository content --type "role" list --repository "cli_test_ansible_repository" --version 2
 test "$(echo "$OUTPUT" | jq -r length)" -eq "1"
 
-if pulp debug has-plugin --name "core" --min-version "3.11.0"
+if pulp debug has-plugin --name "core" --specifier ">=3.11.0"
 then
   expect_succ pulp ansible repository content list --repository "cli_test_ansible_repository" --version 2 --all-types
   test "$(echo "$OUTPUT" | jq -r length)" -eq "2"

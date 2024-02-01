@@ -3,7 +3,7 @@
 # shellcheck source=tests/scripts/config.source
 . "$(dirname "$(dirname "$(realpath "$0")")")"/config.source
 
-pulp debug has-plugin --name "certguard" --min-version "1.4.0" || exit 23
+pulp debug has-plugin --name "certguard" --specifier ">=1.4.0" || exit 23
 
 cleanup() {
   pulp content-guard x509 destroy --name "cli_test_x509_guard" || true

@@ -3,6 +3,8 @@
 # shellcheck source=tests/scripts/config.source
 . "$(dirname "$(dirname "$(realpath "$0")")")"/config.source
 
+pulp debug has-plugin --name "rpm" || exit 23
+
 # Set USERNAME, USERPASS, and ULN_REMOTE_URL for tests to work.
 
 USERNAME="user"

@@ -44,7 +44,7 @@ expect_succ pulp file distribution update \
   --publication "$PUBLICATION_HREF" \
   --content-guard ""
 
-if pulp debug has-plugin --name "file" --min-version "1.7.0"
+if pulp debug has-plugin --name "file" --specifier ">=1.7.0"
 then
   expect_succ pulp file distribution update \
     --distribution "cli_test_file_distro" \
