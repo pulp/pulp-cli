@@ -806,14 +806,24 @@ class PulpEntityContext:
         Raises:
             PulpException: if no entity satisfies the search parameters uniquely.
         """
-        search_result = self.list(limit=1, offset=0, parameters=kwargs)
-        if len(search_result) != 1:
+        payload: Dict[str, Any] = kwargs.copy()
+        payload.update(self.scope)
+        payload["offset"] = 0
+        payload["limit"] = 1
+        result: Mapping[str, Any] = self.call("list", parameters=payload)
+        if result["count"] == 0:
             raise PulpException(
                 _("Could not find {entity} with {kwargs}.").format(
                     entity=self.ENTITY, kwargs=kwargs
                 )
             )
-        return search_result[0]
+        if result["count"] > 1:
+            raise PulpException(
+                _("Multiple {entities} found with {kwargs}.").format(
+                    entities=self.ENTITIES, kwargs=kwargs
+                )
+            )
+        return result["results"][0]
 
     def show(self, href: Optional[str] = None) -> Any:
         """
