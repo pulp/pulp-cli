@@ -5,9 +5,9 @@ import click
 import pytest
 from click.testing import CliRunner
 
-from pulp_cli import load_plugins
+from pulp_cli import load_plugins, main
 
-main = load_plugins()
+load_plugins()
 
 
 # Workaround for missing type annotations.
