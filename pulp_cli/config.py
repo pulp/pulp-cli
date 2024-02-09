@@ -12,6 +12,8 @@ translation = get_translation(__package__)
 _ = translation.gettext
 
 _T = t.TypeVar("_T")
+_AnyCallable = t.Callable[..., t.Any]
+FC = t.TypeVar("FC", bound=t.Union[_AnyCallable, click.Command])
 
 CONFIG_LOCATIONS = [
     "/etc/pulp/cli.toml",
@@ -33,6 +35,7 @@ SETTINGS = [
     "dry_run",
     "timeout",
     "verbose",
+    "plugins",
 ]
 
 CONFIG_OPTIONS = [
@@ -96,7 +99,7 @@ def not_none(value: t.Optional[_T], exc: t.Optional[Exception] = None) -> _T:
     return value
 
 
-def config_options(command: t.Callable[..., t.Any]) -> t.Callable[..., t.Any]:
+def config_options(command: FC) -> FC:
     for option in reversed(CONFIG_OPTIONS):
         command = option(command)
     return command
@@ -126,11 +129,16 @@ def validate_config(config: t.Dict[str, t.Any], strict: bool = False) -> bool:
             )
         ):
             errors.append(_("'headers' must be a list of strings with a colon separator"))
+    if "plugins" in config and not (
+        isinstance(config["plugins"], list)
+        and all((isinstance(item, str) for item in config["plugins"]))
+    ):
+        errors.append(_("'plugins' must be a list of strings"))
     unknown_settings = set(config.keys()) - set(SETTINGS)
     if unknown_settings:
         errors.append(_("Unknown settings: '{}'.").format("','".join(unknown_settings)))
     if strict:
-        missing_settings = set(SETTINGS) - set(config.keys()) - {"username", "password"}
+        missing_settings = set(SETTINGS) - set(config.keys()) - {"plugins", "username", "password"}
         if missing_settings:
             errors.append(_("Missing settings: '{}'.").format("','".join(missing_settings)))
     if errors:
@@ -169,6 +177,12 @@ def config() -> None:
 # https://github.com/python/mypy/issues/15037
 @config.command(help=_("Create a pulp-cli config settings file"))  # type: ignore [arg-type]
 @config_options
+@click.option(
+    "--plugin",
+    "plugins",
+    multiple=True,
+    help=_("Select pluins supposed to be loaded. Can be specified multiple times"),
+)
 @click.option("--interactive", "-i", is_flag=True)
 @click.option("--editor", "-e", is_flag=True, help=_("Edit the config file in an editor"))
 @click.option("--overwrite", "-o", is_flag=True, help=_("Overwrite any existing config file"))
@@ -200,6 +214,8 @@ def create(
         return click.prompt(help, default=(option.default), type=option.type)
 
     settings: t.MutableMapping[str, t.Any] = kwargs
+    if not settings["plugins"]:
+        settings["plugins"] = None
 
     if interactive:
         location = click.prompt(_("Config file location"), default=location)
