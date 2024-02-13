@@ -44,6 +44,47 @@ class UnsafeCallError(OpenAPIError):
     pass
 
 
+class AuthProviderBase:
+    """
+    Base class for auth providers.
+
+    This abstract base class will analyze the authentication proposals of the openapi specs.
+    Different authentication schemes should be implemented by subclasses.
+    Returned auth objects need to be compatible with `requests.auth.AuthBase`.
+    """
+
+    def basic_auth(self) -> t.Optional[t.Union[t.Tuple[str, str], requests.auth.AuthBase]]:
+        """Implement this to provide means of http basic auth."""
+        return None
+
+    def __call__(
+        self,
+        security: t.List[t.Dict[str, t.List[str]]],
+        security_schemes: t.Dict[str, t.Dict[str, t.Any]],
+    ) -> t.Optional[t.Union[t.Tuple[str, str], requests.auth.AuthBase]]:
+        for proposal in security:
+            if [security_schemes[name] for name in proposal] == [
+                {"type": "http", "scheme": "basic"}
+            ]:
+                result = self.basic_auth()
+                if result:
+                    return result
+        raise OpenAPIError(_("No suitable auth scheme found."))
+
+
+class BasicAuthProvider(AuthProviderBase):
+    """
+    Reference Implementation for AuthProviderBase providing basic auth with `username`, `password`.
+    """
+
+    def __init__(self, username: str, password: str):
+        self.username = username
+        self.password = password
+
+    def basic_auth(self) -> t.Optional[t.Union[t.Tuple[str, str], requests.auth.AuthBase]]:
+        return (self.username, self.password)
+
+
 class OpenAPI:
     """
     The abstraction Layer to interact with a server providing an openapi v3 specification.
@@ -53,8 +94,7 @@ class OpenAPI:
             served api.
         doc_path: Path of the json api doc schema relative to the `base_url`.
         headers: Dictionary of additional request headers.
-        username: Username used for basic auth.
-        password: Password used for basic auth.
+        auth_provider: Object that returns requests auth objects according to the api spec.
         cert: Client certificate used for auth.
         key: Matching key for `cert` if not already included.
         validate_certs: Whether to check server TLS certificates agains a CA.
@@ -70,8 +110,7 @@ class OpenAPI:
         base_url: str,
         doc_path: str,
         headers: t.Optional[t.Dict[str, str]] = None,
-        username: t.Optional[str] = None,
-        password: t.Optional[str] = None,
+        auth_provider: t.Optional[AuthProviderBase] = None,
         cert: t.Optional[str] = None,
         key: t.Optional[str] = None,
         validate_certs: bool = True,
@@ -90,20 +129,17 @@ class OpenAPI:
         self.safe_calls_only: bool = safe_calls_only
 
         self._session: requests.Session = requests.session()
-        if username and password:
+        if auth_provider:
             if cert or key:
-                raise OpenAPIError(_("Cannot use both username/password and cert auth."))
-            self._session.auth = (username, password)
-        elif username:
-            raise OpenAPIError(_("Password is required if username is set."))
-        elif password:
-            raise OpenAPIError(_("Username is required if password is set."))
-        elif cert and key:
-            self._session.cert = (cert, key)
-        elif cert:
-            self._session.cert = cert
-        elif key:
-            raise OpenAPIError(_("Cert is required if key is set."))
+                raise OpenAPIError(_("Cannot use both 'auth' and 'cert'."))
+            self.auth_provider = auth_provider
+        else:
+            if cert and key:
+                self._session.cert = (cert, key)
+            elif cert:
+                self._session.cert = cert
+            elif key:
+                raise OpenAPIError(_("Cert is required if key is set."))
         self._session.headers.update(
             {
                 "User-Agent": user_agent or f"Pulp-glue openapi parser ({__version__})",
@@ -550,9 +586,25 @@ class OpenAPI:
     ) -> requests.PreparedRequest:
         method_spec = path_spec[method]
         content_type, data, json, files = self.render_request_body(method_spec, body, validate_body)
+        security: t.List[t.Dict[str, t.List[str]]] = method_spec.get(
+            "security", self.api_spec.get("security", {})
+        )
+        if security and self.auth_provider:
+            auth = self.auth_provider(security, self.api_spec["components"]["securitySchemes"])
+        else:
+            # No auth required? Don't provide it.
+            # No auth_provider available? Hope for the best (should do the trick for cert auth).
+            auth = None
         request = self._session.prepare_request(
             requests.Request(
-                method, url, params=params, headers=headers, data=data, json=json, files=files
+                method,
+                url,
+                auth=auth,
+                params=params,
+                headers=headers,
+                data=data,
+                json=json,
+                files=files,
             )
         )
         if content_type:

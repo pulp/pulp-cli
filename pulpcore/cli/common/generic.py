@@ -5,6 +5,7 @@ import typing as t
 from functools import lru_cache, wraps
 
 import click
+import requests
 import schema as s
 import yaml
 from pulp_glue.common.context import (
@@ -26,6 +27,7 @@ from pulp_glue.common.context import (
     PulpRepositoryVersionContext,
 )
 from pulp_glue.common.i18n import get_translation
+from pulp_glue.common.openapi import AuthProviderBase
 
 try:
     from pygments import highlight
@@ -93,6 +95,9 @@ class PulpCLIContext(PulpContext):
         format: str,
         domain: str = "default",
     ) -> None:
+        self.username = api_kwargs.pop("username", None)
+        self.password = api_kwargs.pop("password", None)
+        api_kwargs["auth_provider"] = PulpCLIAuthProvider(pulp_ctx=self)
         super().__init__(
             api_root=api_root,
             api_kwargs=api_kwargs,
@@ -104,9 +109,6 @@ class PulpCLIContext(PulpContext):
 
     def echo(self, message: str, nl: bool = True, err: bool = False) -> None:
         click.echo(message, nl=nl, err=err)
-
-    def prompt(self, text: str, hide_input: bool = False) -> t.Any:
-        return click.prompt(text, hide_input=hide_input)
 
     def output_result(self, result: t.Any) -> None:
         """
@@ -131,6 +133,18 @@ class PulpCLIContext(PulpContext):
             raise NotImplementedError(
                 _("Format '{format}' not implemented.").format(format=self.format)
             )
+
+
+class PulpCLIAuthProvider(AuthProviderBase):
+    def __init__(self, pulp_ctx: PulpCLIContext):
+        self.pulp_ctx = pulp_ctx
+
+    def basic_auth(self) -> t.Optional[t.Union[t.Tuple[str, str], requests.auth.AuthBase]]:
+        if self.pulp_ctx.username is None:
+            self.pulp_ctx.username = click.prompt("Username")
+        if self.pulp_ctx.password is None:
+            self.pulp_ctx.password = click.prompt("Password", hide_input=True)
+        return (self.pulp_ctx.username, self.pulp_ctx.password)
 
 
 ##############################################################################
