@@ -53,8 +53,8 @@ CONFIG_OPTIONS = [
             "Can be specified multiple times."
         ),
     ),
-    click.option("--username", default="", help=_("Username on pulp server")),
-    click.option("--password", default="", help=_("Password on pulp server")),
+    click.option("--username", default=None, help=_("Username on pulp server")),
+    click.option("--password", default=None, help=_("Password on pulp server")),
     click.option("--cert", default="", help=_("Path to client certificate")),
     click.option(
         "--key",
@@ -130,7 +130,7 @@ def validate_config(config: Dict[str, Any], strict: bool = False) -> bool:
     if unknown_settings:
         errors.append(_("Unknown settings: '{}'.").format("','".join(unknown_settings)))
     if strict:
-        missing_settings = set(SETTINGS) - set(config.keys())
+        missing_settings = set(SETTINGS) - set(config.keys()) - {"username", "password"}
         if missing_settings:
             errors.append(_("Missing settings: '{}'.").format("','".join(missing_settings)))
     if errors:

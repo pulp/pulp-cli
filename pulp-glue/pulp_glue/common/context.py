@@ -4,12 +4,13 @@ import re
 import sys
 import time
 import typing as t
+import warnings
 
 from packaging.specifiers import SpecifierSet
 from requests import HTTPError
 
 from pulp_glue.common.i18n import get_translation
-from pulp_glue.common.openapi import OpenAPI, OpenAPIError
+from pulp_glue.common.openapi import BasicAuthProvider, OpenAPI, OpenAPIError
 
 translation = get_translation(__package__)
 _ = translation.gettext
@@ -306,8 +307,19 @@ class PulpContext:
         All calls to the API should be performed via `call`.
         """
         if self._api is None:
-            if self._api_kwargs.get("username") and not self._api_kwargs.get("password"):
-                self._api_kwargs["password"] = self.prompt("password", hide_input=True)
+            if self._api_kwargs.get("username"):
+                # Deprecated for 'auth'.
+                if not self._api_kwargs.get("password"):
+                    self._api_kwargs["password"] = self.prompt("password", hide_input=True)
+                self._api_kwargs["auth_provider"] = BasicAuthProvider(
+                    self._api_kwargs.pop("username"),
+                    self._api_kwargs.pop("password", None),
+                )
+                warnings.warn(
+                    "Using 'username' and 'password' with 'PulpContext' is deprecated. "
+                    "Use an auth provider with the 'auth_provider' argument instead.",
+                    DeprecationWarning,
+                )
             try:
                 self._api = OpenAPI(
                     doc_path=f"{self._api_root}api/v3/docs/api.json", **self._api_kwargs

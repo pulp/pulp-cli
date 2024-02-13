@@ -47,7 +47,6 @@ def _fields_callback(ctx: click.Context, param: click.Parameter, value: Any) -> 
     if value:
         click.echo(_("Option {name} is deprecated.").format(name=param.opts[0]), err=True)
         value = tuple(value.split(","))
-        print(value)
 
     return value
 

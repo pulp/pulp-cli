@@ -63,6 +63,24 @@ def spec(pulp_ctx: PulpCLIContext) -> None:
 
 
 @openapi_group.command()
+@pass_pulp_context
+def info(pulp_ctx: PulpCLIContext) -> None:
+    """
+    Print info block.
+    """
+    pulp_ctx.output_result(pulp_ctx.api.api_spec["info"])
+
+
+@openapi_group.command()
+@pass_pulp_context
+def security_schemes(pulp_ctx: PulpCLIContext) -> None:
+    """
+    Print info block.
+    """
+    pulp_ctx.output_result(pulp_ctx.api.api_spec["components"]["securitySchemes"])
+
+
+@openapi_group.command()
 @click.option("--id", "operation_id", required=True, help=_("Operation ID in openapi schema"))
 @pass_pulp_context
 def operation(pulp_ctx: PulpCLIContext, operation_id: str) -> None:
