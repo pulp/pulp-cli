@@ -52,6 +52,7 @@ class OpenAPI:
         base_url: The base URL inlcuding the HTTP scheme, hostname and optional subpaths of the
             served api.
         doc_path: Path of the json api doc schema relative to the `base_url`.
+        headers: Dictionary of additional request headers.
         username: Username used for basic auth.
         password: Password used for basic auth.
         cert: Client certificate used for auth.
@@ -68,6 +69,7 @@ class OpenAPI:
         self,
         base_url: str,
         doc_path: str,
+        headers: Optional[Dict[str, str]] = None,
         username: Optional[str] = None,
         password: Optional[str] = None,
         cert: Optional[str] = None,
@@ -110,6 +112,8 @@ class OpenAPI:
         )
         if cid:
             self._session.headers["Correlation-Id"] = cid
+        if headers:
+            self._session.headers.update(headers)
         self._session.max_redirects = 0
 
         verify: Optional[Union[bool, str]] = (

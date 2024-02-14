@@ -1,6 +1,6 @@
 import os
 import sys
-from typing import Any, Optional
+from typing import Any, List, Optional
 
 import click
 import toml
@@ -114,6 +114,7 @@ def main(
     base_url: str,
     api_root: str,
     domain: str,
+    headers: List[str],
     username: Optional[str],
     password: Optional[str],
     cert: Optional[str],
@@ -133,6 +134,7 @@ def main(
 
     api_kwargs = dict(
         base_url=base_url,
+        headers=dict((header.split(":", maxsplit=1) for header in headers)),
         username=username,
         password=password,
         cert=cert,

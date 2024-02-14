@@ -22,6 +22,8 @@ FORMAT_CHOICES = ["json", "yaml", "none"]
 SETTINGS = [
     "base_url",
     "api_root",
+    "domain",
+    "headers",
     "username",
     "password",
     "cert",
@@ -31,7 +33,6 @@ SETTINGS = [
     "dry_run",
     "timeout",
     "verbose",
-    "domain",
 ]
 
 CONFIG_OPTIONS = [
@@ -42,6 +43,16 @@ CONFIG_OPTIONS = [
         help=_("Absolute API base path on server (not including 'api/v3/')"),
     ),
     click.option("--domain", default="default", help=_("Domain to work in if feature is enabled")),
+    click.option(
+        "--header",
+        "headers",
+        multiple=True,
+        help=_(
+            "Custom header to add to each api call. "
+            "Name and value are colon separated. "
+            "Can be specified multiple times."
+        ),
+    ),
     click.option("--username", default="", help=_("Username on pulp server")),
     click.option("--password", default="", help=_("Password on pulp server")),
     click.option("--cert", default="", help=_("Path to client certificate")),
@@ -106,6 +117,15 @@ def validate_config(config: Dict[str, Any], strict: bool = False) -> bool:
         errors.append(_("'verbose' is not an integer"))
     if "domain" in config and not re.match(r"^[-a-zA-Z0-9_]+\Z", config["domain"]):
         errors.append(_("'domain' must be a slug string"))
+    if "headers" in config:
+        if not isinstance(config["headers"], list) or not all(
+            (
+                isinstance(header, str)
+                and re.match(r"^[-a-zA-Z0-9_]+\s*:\s*[-a-zA-Z0-9_]+$", header)
+                for header in config["headers"]
+            )
+        ):
+            errors.append(_("'headers' must be a list of strings with a colon separator"))
     unknown_settings = set(config.keys()) - set(SETTINGS)
     if unknown_settings:
         errors.append(_("Unknown settings: '{}'.").format("','".join(unknown_settings)))
