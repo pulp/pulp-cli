@@ -1,6 +1,41 @@
-## Architecture
+# Architecture
 
 The Pulp CLI architecture is described in this section.
+
+## Pulp Glue
+
+Pulp CLI provides the `pulp-glue` library as an abstraction layer that lets you perform high-level operations in pulp.
+Its goal is to abstract interacting with the REST api by parsing the api docs, and waiting on tasks and task groups.
+It is shipped as a separate python package to allow broad use across multiple projects, such as `pulp-squeezer` and `pulpcore`.
+To this end, `pulp-glue` is the go-to place for all known version-dependent Pulp API subtleties and their corresponding fixes (see Version-dependent codepaths below).
+
+### OpenAPI
+
+This is the part in `pulp_glue` that uses `requests` to perform low level communication with an `openapi 3` compatible server.
+
+### Contexts
+
+Pulp-glue provides the [`PulpContext`][pulp_glue.common.context.PulpContext] encapsulating the [`OpenAPI`][pulp_glue.common.openapi.OpenAPI] object.
+You can use its `call` method to interact with any operation designated by its operation id.
+In addition, to perform specific operations on entities, glue ships a bunch of [`PulpEntityContext`][pulp_glue.common.context.PulpEntityContext] subclasses.
+
+#### Deferred Api and Entity lookup
+
+In order to be able to access every (sub-)command's help page,
+it is necessary that no code outside of the final performing command callback accesses the `api` property of the `PulpContext`.
+There are some facilities that perform deferred loading to help with that requirement.
+Those include:
+
+  - `PulpContext.api`: When accessed, the `api.json` file for the addressed server will be read or downloaded and processed.
+    Scheduled version checks will be reevaluated.
+  - `PulpContext.needs_version`: This function can be used at any time to declare that an operation needs a plugin in a version range.
+    The actual check will be performed when `api` was accessed for the first time, or immediately afterwards.
+  - `PulpEntityContext.entity`: This property can be used to collect lookup attributes for entities by assigning dicts to it.
+    On read access, the entity lookup will be performed through the `api` property.
+  - `PulpEntityContext.pulp_href`: This property can be used to specify an entity by its URI.
+    It will be fetched from the server only at read access.
+
+## Pulp CLI
 
 ### Plugin System
 
@@ -30,14 +65,7 @@ def mount(main: click.Group, **kwargs: Any) -> None:
     main.add_command(my_command)
 ```
 
-### Pulp Glue
-
-Pulp CLI provides the `pulp-glue` library as an abstraction layer that let's you perform high level operations in pulp.
-Its goal is to abstract interacting with the rest api by parsing the api docs and waiting on tasks and task groups.
-It is shipped as a separate python package to allow broad use across multiple projects, such as `pulp-squeezer` and `pulpcore`.
-To this end, `pulp-glue` is the go to place for all known version dependent Pulp API subtleties and their corresponding fixes (see Version dependent codepaths below).
-
-#### Contexts
+### Contexts
 
 In `click`, every subcommand is accompanied by a `click.Context`, and objects can be attached to them.
 In this CLI we attach a [`PulpCLIContext`][pulpcore.cli.common.generic.PulpCLIContext] to the main command, which inherits from `pulp-glue`'s [`PulpContext`][pulp_glue.common.context.PulpContext].
@@ -64,7 +92,33 @@ def my_sub_command(entity_ctx):
     entity_ctx.destroy(href)
 ```
 
-#### Version dependent code paths
+### Generics
+
+For certain often repeated patterns like listing all entities of a particular kind,
+we provide generic commands that use the underlying context objects.
+The following example shows the use of the [`show_command`][pulpcore.cli.common.generic.show_command] generic.
+
+```python
+from pulpcore.cli.common.generic import name_option, show_command,
+
+lookup_params = [name_option]
+my_command.add_command(show_command(decorators=lookup_params))
+```
+
+To add options to these subcommands, pass a list of [`PulpOption`][pulpcore.cli.common.generic.PulpOption] objects to the `decorators` argument.
+Preferably these are created using the [`pulp_option`][pulpcore.cli.common.generic.pulp_option] factory.
+
+```python
+from pulpcore.cli.common.generic import list_command,
+
+filter_params = [
+    pulp_option("--name"),
+    pulp_option("--name-contains", "name__contains"),
+]
+my_command.add_command(list_command(decorators=filter_params))
+```
+
+## Version dependent code paths
 
 Each Pulp CLI release is designed to support multiple Pulp server versions and the CLI itself is versioned independently of any version of the Pulp server components.
 It is supposed to be able to communicate with different combinations of server component versions at the same time.
@@ -77,6 +131,7 @@ While `has_plugin` will evaluate immediately, `needs_plugin` can be seen as a de
 It will raise an error, once the first access to the server is attempted.
 
 ```python
+# In pulp_glue_my_plugin
 class MyEntityContext(PulpEntityContext):
     def show(self, href):
         if self.pulp_ctx.has_plugin(PluginRequirement("my_content", specifier=">=1.2.3", inverted=True)):
@@ -86,6 +141,7 @@ class MyEntityContext(PulpEntityContext):
         return super().show(href)
 
 
+# In pulp_cli_my_plugin
 @main.command()
 @pass_pulp_context
 @click.pass_context
@@ -116,29 +172,3 @@ class PulpMyPluginRepositoryContext(PulpRepositoryContext):
     Therefore, when adapting to an unreleased feature change from a plugin, you need to specify the prerelease part of the version explicitly.
     However `>=x.y.z.dev` is never unambiguous in the current Pulp versioning practice.
     Once that change is released please reset the constraint to the plain `x.y.z` schema.
-
-### Generics
-
-For certain often repeated patterns like listing all entities of a particular kind,
-we provide generic commands that use the underlying context objects.
-The following example shows the use of the [`show_command`][pulpcore.cli.common.generic.show_command] generic.
-
-```python
-from pulpcore.cli.common.generic import name_option, show_command,
-
-lookup_params = [name_option]
-my_command.add_command(show_command(decorators=lookup_params))
-```
-
-To add options to these subcommands, pass a list of [`PulpOption`][pulpcore.cli.common.generic.PulpOption] objects to the `decorators` argument.
-Preferably these are created using the [`pulp_option`][pulpcore.cli.common.generic.pulp_option] factory.
-
-```python
-from pulpcore.cli.common.generic import list_command,
-
-filter_params = [
-    pulp_option("--name"),
-    pulp_option("--name-contains", "name__contains"),
-]
-my_command.add_command(list_command(decorators=filter_params))
-```
