@@ -16,24 +16,24 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - python: "3.11"
-            image_tag: "nightly"
+          - image_tag: "nightly"
             pulp_api_root: "/relocated/djnd/"
-          - python: "3.11"
-            image_tag: "latest"
-          - python: "3.12"
-            image_tag: "3.39"
-          - python: "3.12"
-            image_tag: "3.28"
+            python: "3.11"
+          - image_tag: "latest"
+            python: "3.11"
+          - image_tag: "3.39"
+            python: "3.12"
+          - image_tag: "3.28"
             lower_bounds: true
-          - python: "3.8"
-            image_tag: "3.22"
-          - python: "3.9"
-            image_tag: "3.21"
+            python: "3.12"
+          - image_tag: "3.22"
+            python: "3.8"
+          - image_tag: "3.21"
             pulp_api_root: "/relocated/djnd/"
-          - python: "3.10"
-            image_tag: "3.18"
+            python: "3.9"
+          - image_tag: "3.18"
             lower_bounds: true
+            python: "3.10"
     steps:
       - uses: "actions/checkout@v4"
       - uses: "actions/cache@v4"
