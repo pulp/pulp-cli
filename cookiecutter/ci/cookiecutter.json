@@ -8,10 +8,12 @@
   "__project_name": "pulp-cli{{ cookiecutter.__app_label_suffix }}",
   "__project_slug": "{{ cookiecutter.__project_name | lower | replace(' ', '_') }}",
   "_copy_without_render": [
+    "CHANGES/.TEMPLATE.md",
     ".github/workflows/collect_changes.yml",
     ".github/workflows/pr.yml",
     ".github/workflows/release.yml",
     ".github/workflows/release_branch.yml",
     ".github/workflows/pr_checks.yml"
-  ]
+  ],
+  "_extensions": [".pulp_filter_extension.PulpFilterExtension"]
 }

@@ -14,9 +14,7 @@ jobs:
     runs-on: "ubuntu-20.04"
     strategy:
       fail-fast: false
-      matrix:
-        include:
-          {{ cookiecutter.test_matrix | indent(10) }}
+      matrix:{{ cookiecutter.test_matrix | to_nice_yaml(level=4, embed_in="dict") }}
     steps:
       - uses: "actions/checkout@v4"
       {%- include "cache_action" %}
