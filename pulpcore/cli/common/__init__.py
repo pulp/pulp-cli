@@ -1,6 +1,6 @@
 import os
 import sys
-from typing import Any, List, Optional
+import typing as t
 
 import click
 import toml
@@ -31,13 +31,15 @@ _ = translation.gettext
 PROFILE_KEY = f"{__name__}.profile"
 
 
-def _config_profile_callback(ctx: click.Context, param: Any, value: Optional[str]) -> Optional[str]:
+def _config_profile_callback(
+    ctx: click.Context, param: t.Any, value: t.Optional[str]
+) -> t.Optional[str]:
     if value is not None:
         ctx.meta[PROFILE_KEY] = value
     return value
 
 
-def _config_callback(ctx: click.Context, param: Any, value: Optional[str]) -> None:
+def _config_callback(ctx: click.Context, param: t.Any, value: t.Optional[str]) -> None:
     if ctx.default_map:
         return
 
@@ -114,11 +116,11 @@ def main(
     base_url: str,
     api_root: str,
     domain: str,
-    headers: List[str],
-    username: Optional[str],
-    password: Optional[str],
-    cert: Optional[str],
-    key: Optional[str],
+    headers: t.List[str],
+    username: t.Optional[str],
+    password: t.Optional[str],
+    cert: t.Optional[str],
+    key: t.Optional[str],
     verify_ssl: bool,
     format: str,
     verbose: int,

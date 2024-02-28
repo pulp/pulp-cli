@@ -1,4 +1,4 @@
-from typing import Any
+import typing as t
 
 import click
 from pulp_glue.common.i18n import get_translation
@@ -21,7 +21,7 @@ def file_group() -> None:
     pass
 
 
-def mount(main: click.Group, **kwargs: Any) -> None:
+def mount(main: click.Group, **kwargs: t.Any) -> None:
     file_group.add_command(repository)
     file_group.add_command(remote)
     file_group.add_command(publication)

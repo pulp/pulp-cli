@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional
+import typing as t
 
 import click
 import schema as s
@@ -71,13 +71,13 @@ CONTENT_LIST_SCHEMA = s.Schema(
 )
 
 
-def _content_callback(ctx: click.Context, param: click.Parameter, value: Any) -> Any:
+def _content_callback(ctx: click.Context, param: click.Parameter, value: t.Any) -> t.Any:
     if value:
         ctx.obj.entity = value  # The context is set by the type parameter on the content commands
     return value
 
 
-def _signing_service_callback(ctx: click.Context, param: click.Parameter, value: Any) -> Any:
+def _signing_service_callback(ctx: click.Context, param: click.Parameter, value: t.Any) -> t.Any:
     if value:
         pulp_ctx = ctx.find_object(PulpCLIContext)
         assert pulp_ctx is not None
@@ -205,7 +205,7 @@ def sync(
     the repository
     """
     repository = repository_ctx.entity
-    body: Dict[str, Any] = {}
+    body: t.Dict[str, t.Any] = {}
 
     if remote:
         body["remote"] = remote
@@ -231,7 +231,7 @@ def sync(
 def sign(
     repository_ctx: PulpRepositoryContext,
     signing_service: PulpSigningServiceContext,
-    content_units: Optional[List[str]],
+    content_units: t.Optional[t.List[str]],
 ) -> None:
     """Sign the collections in the repository using the signing service specified."""
     if content_units is None:

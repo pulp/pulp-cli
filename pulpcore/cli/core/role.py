@@ -1,5 +1,5 @@
 import gettext
-from typing import Iterable, Optional
+import typing as t
 
 import click
 from pulp_glue.core.context import PulpRoleContext
@@ -28,8 +28,8 @@ def _no_permission_callback(ctx: click.Context, param: click.Parameter, value: b
 
 
 def _permission_callback(
-    ctx: click.Context, param: click.Parameter, value: Iterable[str]
-) -> Optional[Iterable[str]]:
+    ctx: click.Context, param: click.Parameter, value: t.Iterable[str]
+) -> t.Optional[t.Iterable[str]]:
     if ctx.meta.get(NO_PERMISSION_KEY, False):
         if value:
             raise click.ClickException(_("Cannot specify `--permission` and `--no-permission`."))

@@ -1,4 +1,4 @@
-from typing import Any
+import typing as t
 
 import click
 from pulp_glue.common.context import PluginRequirement
@@ -17,7 +17,7 @@ def python_group(pulp_ctx: PulpCLIContext) -> None:
     pulp_ctx.needs_plugin(PluginRequirement("python", specifier=">=3.1.0"))
 
 
-def mount(main: click.Group, **kwargs: Any) -> None:
+def mount(main: click.Group, **kwargs: t.Any) -> None:
     python_group.add_command(repository)
     python_group.add_command(remote)
     python_group.add_command(publication)

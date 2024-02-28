@@ -1,6 +1,6 @@
+import typing as t
 from contextlib import suppress
 from datetime import datetime
-from typing import Optional, Tuple
 
 import click
 from pulp_glue.common.context import (
@@ -32,8 +32,8 @@ pass_task_context = click.make_pass_decorator(PulpTaskContext)
 
 
 def _uuid_callback(
-    ctx: click.Context, param: click.Parameter, value: Optional[str]
-) -> Optional[str]:
+    ctx: click.Context, param: click.Parameter, value: t.Optional[str]
+) -> t.Optional[str]:
     if value is not None:
         entity_ctx = ctx.find_object(PulpEntityContext)
         assert entity_ctx is not None
@@ -186,8 +186,8 @@ def cancel(
 @pass_task_context
 def purge(
     task_ctx: PulpTaskContext,
-    finished: Optional[datetime],
-    state: Optional[Tuple[str]],
+    finished: t.Optional[datetime],
+    state: t.Optional[t.Tuple[str]],
 ) -> None:
     state_list = list(state) if state else None
     task_ctx.purge(finished, state_list)

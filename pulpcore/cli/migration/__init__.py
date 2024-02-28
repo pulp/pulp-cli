@@ -1,4 +1,4 @@
-from typing import Any
+import typing as t
 
 import click
 from pulp_glue.common.context import PluginRequirement
@@ -14,7 +14,7 @@ def migration(pulp_ctx: PulpCLIContext) -> None:
     pulp_ctx.needs_plugin(PluginRequirement("pulp_2to3_migration"))
 
 
-def mount(main: click.Group, **kwargs: Any) -> None:
+def mount(main: click.Group, **kwargs: t.Any) -> None:
     migration.add_command(plan)
     migration.add_command(pulp2)
     main.add_command(migration)

@@ -1,4 +1,4 @@
-from typing import Optional
+import typing as t
 
 import click
 from pulp_glue.common.context import PulpEntityContext
@@ -30,8 +30,8 @@ task_group.add_command(list_command())
 
 
 def _uuid_callback(
-    ctx: click.Context, param: click.Parameter, value: Optional[str]
-) -> Optional[str]:
+    ctx: click.Context, param: click.Parameter, value: t.Optional[str]
+) -> t.Optional[str]:
     if value is not None:
         entity_ctx = ctx.find_object(PulpEntityContext)
         assert entity_ctx is not None

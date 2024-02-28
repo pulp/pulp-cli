@@ -1,5 +1,5 @@
 import re
-from typing import Any, Dict, Iterable, Optional, Tuple
+import typing as t
 
 import click
 from pulp_glue.common.context import (
@@ -27,14 +27,14 @@ pass_export_context = click.make_pass_decorator(PulpExportContext)
 
 
 def _version_list_callback(
-    ctx: click.Context, param: click.Parameter, value: Iterable[Tuple[str, int]]
-) -> Iterable[PulpRepositoryVersionContext]:
+    ctx: click.Context, param: click.Parameter, value: t.Iterable[t.Tuple[str, int]]
+) -> t.Iterable[PulpRepositoryVersionContext]:
     result = []
     pulp_ctx = ctx.find_object(PulpCLIContext)
     assert pulp_ctx is not None
     for item in value:
-        pulp_href: Optional[str] = None
-        entity: Optional[EntityDefinition] = None
+        pulp_href: t.Optional[str] = None
+        entity: t.Optional[EntityDefinition] = None
 
         if item[0].startswith("/"):
             pattern = rf"^{pulp_ctx.api_path}{PulpRepositoryContext.HREF_PATTERN}"
@@ -114,7 +114,7 @@ def list(
     exporter: str,
     limit: int,
     offset: int,
-    **kwargs: Any,
+    **kwargs: t.Any,
 ) -> None:
     params = {k: v for k, v in kwargs.items() if v is not None}
     exporter_ctx = PulpExporterContext(pulp_ctx)
@@ -139,13 +139,13 @@ def run(
     exporter: str,
     full: bool,
     chunk_size: str,
-    versions: Iterable[PulpRepositoryVersionContext],
-    start_versions: Iterable[PulpRepositoryVersionContext],
+    versions: t.Iterable[PulpRepositoryVersionContext],
+    start_versions: t.Iterable[PulpRepositoryVersionContext],
 ) -> None:
     exporter_ctx = PulpExporterContext(pulp_ctx)
     export_ctx.exporter = exporter_ctx.find(name=exporter)
 
-    body: Dict[str, Any] = dict(full=full)
+    body: t.Dict[str, t.Any] = dict(full=full)
 
     if chunk_size:
         body["chunk_size"] = chunk_size

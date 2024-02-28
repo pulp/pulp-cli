@@ -1,4 +1,4 @@
-from typing import Any, Dict, Iterable
+import typing as t
 
 import click
 from pulp_glue.common.context import EntityFieldDefinition, PulpRepositoryContext
@@ -68,8 +68,8 @@ def create(
     exporter_ctx: PulpExporterContext,
     name: str,
     path: str,
-    repository: Iterable[EntityFieldDefinition],
-    repository_href: Iterable[str],
+    repository: t.Iterable[EntityFieldDefinition],
+    repository_href: t.Iterable[str],
 ) -> None:
     repo_hrefs = [
         repository_ctx.pulp_href
@@ -94,10 +94,10 @@ def update(
     pulp_ctx: PulpCLIContext,
     exporter_ctx: PulpExporterContext,
     path: str,
-    repository: Iterable[EntityFieldDefinition],
-    repository_href: Iterable[str],
+    repository: t.Iterable[EntityFieldDefinition],
+    repository_href: t.Iterable[str],
 ) -> None:
-    payload: Dict[str, Any] = {}
+    payload: t.Dict[str, t.Any] = {}
 
     if path:
         payload["path"] = path

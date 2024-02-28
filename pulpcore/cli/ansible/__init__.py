@@ -1,4 +1,4 @@
-from typing import Any
+import typing as t
 
 import click
 from pulp_glue.common.i18n import get_translation
@@ -18,7 +18,7 @@ def ansible() -> None:
     pass
 
 
-def mount(main: click.Group, **kwargs: Any) -> None:
+def mount(main: click.Group, **kwargs: t.Any) -> None:
     ansible.add_command(repository)
     ansible.add_command(remote)
     ansible.add_command(distribution)

@@ -1,4 +1,4 @@
-from typing import Any, Dict, Iterable, Optional
+import typing as t
 
 import click
 import schema as s
@@ -71,7 +71,7 @@ metadata_signing_service_option = resource_option(
 )
 
 
-def _content_callback(ctx: click.Context, param: click.Parameter, value: Any) -> Any:
+def _content_callback(ctx: click.Context, param: click.Parameter, value: t.Any) -> t.Any:
     if value:
         pulp_ctx = ctx.find_object(PulpCLIContext)
         assert pulp_ctx is not None
@@ -82,7 +82,9 @@ def _content_callback(ctx: click.Context, param: click.Parameter, value: Any) ->
 CONTENT_LIST_SCHEMA = s.Schema([{"pulp_href": str}])
 
 
-def choice_to_int_callback(ctx: click.Context, param: click.Parameter, value: Any) -> Optional[int]:
+def choice_to_int_callback(
+    ctx: click.Context, param: click.Parameter, value: t.Any
+) -> t.Optional[int]:
     if value:
         return int(value)
     return None
@@ -273,10 +275,10 @@ repository.add_command(role_command(decorators=lookup_options))
 def sync(
     repository_ctx: PulpRepositoryContext,
     remote: EntityFieldDefinition,
-    mirror: Optional[bool],
-    optimize: Optional[bool],
-    skip_types: Optional[Iterable[str]],
-    sync_policy: Optional[str],
+    mirror: t.Optional[bool],
+    optimize: t.Optional[bool],
+    skip_types: t.Optional[t.Iterable[str]],
+    sync_policy: t.Optional[str],
 ) -> None:
     """
     Sync the repository from a remote source.
@@ -284,7 +286,7 @@ def sync(
     the repository
     """
     repo = repository_ctx.entity
-    body: Dict[str, Any] = {}
+    body: t.Dict[str, t.Any] = {}
     if mirror is not None:
         body["mirror"] = mirror
     if optimize is not None:

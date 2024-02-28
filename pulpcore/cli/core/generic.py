@@ -1,5 +1,5 @@
 import re
-from typing import Any, Optional
+import typing as t
 
 import click
 from pulp_glue.common.context import DATETIME_FORMATS, PluginRequirement, PulpEntityContext
@@ -29,8 +29,8 @@ class HrefOrUuidCallback:
         self.base_href = base_href
 
     def __call__(
-        self, ctx: click.Context, param: click.Parameter, value: Optional[str]
-    ) -> Optional[str]:
+        self, ctx: click.Context, param: click.Parameter, value: t.Optional[str]
+    ) -> t.Optional[str]:
         if value is not None:
             pulp_ctx = ctx.find_object(PulpCLIContext)
             assert pulp_ctx is not None
@@ -132,7 +132,7 @@ task_filter = [
 ]
 
 
-def task_command(**kwargs: Any) -> click.Command:
+def task_command(**kwargs: t.Any) -> click.Command:
     """A factory that creates a nested task command group."""
 
     # This generic moved to core to avoid a circular import

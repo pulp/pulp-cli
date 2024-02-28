@@ -1,4 +1,4 @@
-from typing import Dict, Optional
+import typing as t
 
 import click
 from pulp_glue.ansible.context import PulpAnsibleDistributionContext, PulpAnsibleRepositoryContext
@@ -106,11 +106,11 @@ distribution.add_command(
 @pass_entity_context
 def update(
     distribution_ctx: PulpEntityContext,
-    base_path: Optional[str],
+    base_path: t.Optional[str],
     repository: EntityFieldDefinition,
     content_guard: EntityFieldDefinition,
-    version: Optional[int],
-    pulp_labels: Optional[Dict[str, str]],
+    version: t.Optional[int],
+    pulp_labels: t.Optional[t.Dict[str, str]],
 ) -> None:
     """
     To remove repository or repository_version fields set --repository to ""

@@ -1,4 +1,4 @@
-from typing import Any, Optional, Union
+import typing as t
 
 import click
 import yaml
@@ -33,8 +33,8 @@ _ = translation.gettext
 
 
 def yaml_callback(
-    ctx: click.Context, param: click.Parameter, value: Any
-) -> Optional[Union[str, Any]]:
+    ctx: click.Context, param: click.Parameter, value: t.Any
+) -> t.Optional[t.Union[str, t.Any]]:
     if value:
         return f"{yaml.safe_load(value)}"
     return value

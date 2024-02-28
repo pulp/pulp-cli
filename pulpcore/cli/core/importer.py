@@ -1,4 +1,4 @@
-from typing import Dict, List, Tuple, Union
+import typing as t
 
 import click
 from pulp_glue.common.i18n import get_translation
@@ -21,7 +21,7 @@ _ = translation.gettext
 pass_importer_context = click.make_pass_decorator(PulpImporterContext)
 
 
-RepositoryMap = Tuple[str, str]  # source repo, destination repo
+RepositoryMap = t.Tuple[str, str]  # source repo, destination repo
 
 repo_map_option = click.option(
     "--repo-map",
@@ -62,9 +62,9 @@ def create(
     pulp_ctx: PulpCLIContext,
     importer_ctx: PulpImporterContext,
     name: str,
-    repo_map: List[RepositoryMap],
+    repo_map: t.List[RepositoryMap],
 ) -> None:
-    params: Dict[str, Union[str, Dict[str, str]]] = {"name": name}
+    params: t.Dict[str, t.Union[str, t.Dict[str, str]]] = {"name": name}
 
     if repo_map:
         params["repo_mapping"] = {source: dest for source, dest in repo_map}
@@ -82,7 +82,7 @@ def create(
 def update(
     pulp_ctx: PulpCLIContext,
     importer_ctx: PulpImporterContext,
-    repo_map: List[RepositoryMap],
+    repo_map: t.List[RepositoryMap],
 ) -> None:
     payload = {}
 

@@ -1,6 +1,6 @@
 import sys
+import typing as t
 from types import ModuleType
-from typing import Any, Dict, Optional
 
 import click
 
@@ -10,7 +10,7 @@ else:
     from importlib_metadata import entry_points
 
 __version__ = "0.24.0.dev"
-_main: Optional[click.Group] = None
+_main: t.Optional[click.Group] = None
 
 
 def load_plugins() -> click.Group:
@@ -19,7 +19,7 @@ def load_plugins() -> click.Group:
     ##############################################################################
     # Load plugins
     # https://packaging.python.org/guides/creating-and-discovering-plugins/#using-package-metadata
-    discovered_plugins: Dict[str, ModuleType] = {
+    discovered_plugins: t.Dict[str, ModuleType] = {
         entry_point.name: entry_point.load()
         for entry_point in entry_points(group="pulp_cli.plugins")
     }
@@ -31,7 +31,7 @@ def load_plugins() -> click.Group:
     return _main
 
 
-def main() -> Any:
+def main() -> t.Any:
     if _main is None:
         load_plugins()
         assert _main is not None
