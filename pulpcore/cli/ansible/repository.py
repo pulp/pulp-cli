@@ -8,6 +8,7 @@ from pulp_glue.ansible.context import (
     PulpAnsibleRepositoryContext,
     PulpAnsibleRoleContext,
     PulpAnsibleRoleRemoteContext,
+    PulpAnsibleSigstoreSigningServiceContext,
 )
 from pulp_glue.common.context import (
     EntityFieldDefinition,
@@ -82,6 +83,16 @@ def _signing_service_callback(ctx: click.Context, param: click.Parameter, value:
         pulp_ctx = ctx.find_object(PulpCLIContext)
         assert pulp_ctx is not None
         value = PulpSigningServiceContext(pulp_ctx, entity={"name": value})
+    return value
+
+
+def _sigstore_signing_service_callback(
+    ctx: click.Context, param: click.Parameter, value: Any
+) -> Any:
+    if value:
+        pulp_ctx = ctx.find_object(PulpCLIContext)
+        assert pulp_ctx is not None
+        value = PulpAnsibleSigstoreSigningServiceContext(pulp_ctx, entity={"name": value})
     return value
 
 
@@ -239,3 +250,23 @@ def sign(
     body = {"content_units": content_units, "signing_service": signing_service}
     parameters = {repository_ctx.HREF: repository_ctx.pulp_href}
     repository_ctx.call("sign", parameters=parameters, body=body)
+
+
+@repository.command()
+@name_option
+@href_option
+@repository_lookup_option
+@click.option("--signing-service", required=True, callback=_signing_service_callback)
+@click.option("--content-units", callback=load_json_callback)
+@pass_repository_context
+def sigstore_sign(
+    repository_ctx: PulpRepositoryContext,
+    signing_service: PulpAnsibleSigstoreSigningServiceContext,
+    content_units: Optional[List[str]],
+) -> None:
+    """Sign the collections in the repository using the Sigstore signing service specified."""
+    if content_units is None:
+        content_units = ["*"]
+    body = {"content_units": content_units, "sigstore_signing_service": signing_service}
+    parameters = {repository_ctx.HREF: repository_ctx.pulp_href}
+    repository_ctx.call("sigstore_sign", parameters=parameters, body=body)
