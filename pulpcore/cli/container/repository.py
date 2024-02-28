@@ -1,5 +1,5 @@
 import re
-from typing import Any, Dict, List, Optional
+import typing as t
 
 import click
 from pulp_glue.common.context import EntityFieldDefinition, PulpRemoteContext, PulpRepositoryContext
@@ -159,7 +159,7 @@ def sync(
         raise click.ClickException(_("Repository type does not support sync."))
 
     repository = repository_ctx.entity
-    body: Dict[str, Any] = {}
+    body: t.Dict[str, t.Any] = {}
 
     if remote:
         body["remote"] = remote
@@ -225,8 +225,8 @@ def remove_tag(repository_ctx: PulpRepositoryContext, tag: str) -> None:
 def copy_tag(
     repository_ctx: PulpRepositoryContext,
     source: PulpRepositoryContext,
-    version: Optional[int],
-    tags: List[str],
+    version: t.Optional[int],
+    tags: t.List[str],
 ) -> None:
     assert isinstance(repository_ctx, PulpContainerRepositoryContext)
 
@@ -275,9 +275,9 @@ def copy_tag(
 def copy_manifest(
     repository_ctx: PulpRepositoryContext,
     source: PulpRepositoryContext,
-    version: Optional[int],
-    digests: List[str],
-    media_types: List[str],
+    version: t.Optional[int],
+    digests: t.List[str],
+    media_types: t.List[str],
 ) -> None:
     assert isinstance(repository_ctx, PulpContainerRepositoryContext)
 

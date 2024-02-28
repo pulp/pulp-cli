@@ -1,4 +1,4 @@
-from typing import Any
+import typing as t
 
 import click
 from pulp_glue.common.context import PluginRequirement, PulpEntityContext
@@ -49,7 +49,7 @@ def orphan(ctx: click.Context, pulp_ctx: PulpCLIContext) -> None:
 )
 @pass_entity_context
 @pass_pulp_context
-def cleanup(pulp_ctx: PulpCLIContext, orphan_ctx: PulpEntityContext, **kwargs: Any) -> None:
+def cleanup(pulp_ctx: PulpCLIContext, orphan_ctx: PulpEntityContext, **kwargs: t.Any) -> None:
     """
     Cleanup orphaned content.
     """

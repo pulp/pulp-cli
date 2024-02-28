@@ -1,5 +1,5 @@
 import sys
-from typing import IO, Any, Dict, Iterable, Optional
+import typing as t
 
 import click
 from pulp_glue.common.context import PluginRequirement
@@ -32,9 +32,9 @@ def debug() -> None:
 def has_plugin(
     pulp_ctx: PulpCLIContext,
     name: str,
-    min_version: Optional[str],
-    max_version: Optional[str],
-    specifier: Optional[str],
+    min_version: t.Optional[str],
+    max_version: t.Optional[str],
+    specifier: t.Optional[str],
 ) -> None:
     """
     Check whether a specific plugin is installed on the server.
@@ -121,9 +121,9 @@ def operation_ids(pulp_ctx: PulpCLIContext) -> None:
 def call(
     pulp_ctx: PulpCLIContext,
     operation_id: str,
-    parameters: Iterable[str],
-    body: Any,
-    uploads: Iterable[IO[bytes]],
+    parameters: t.Iterable[str],
+    body: t.Any,
+    uploads: t.Iterable[t.IO[bytes]],
 ) -> None:
     """
     Make a REST call by operation-id.
@@ -131,7 +131,7 @@ def call(
     WARNING: Danger ahead!
     """
     try:
-        params: Dict[str, str] = dict(parameter.partition("=")[::2] for parameter in parameters)
+        params: t.Dict[str, str] = dict(parameter.partition("=")[::2] for parameter in parameters)
     except ValueError:
         raise click.ClickException("Parameters must be in the form <key>=<value>.")
     if uploads:

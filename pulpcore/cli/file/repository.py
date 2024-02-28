@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional
+import typing as t
 
 import click
 import schema as s
@@ -59,7 +59,7 @@ remote_option = resource_option(
 )
 
 
-def _content_callback(ctx: click.Context, param: click.Parameter, value: Any) -> Any:
+def _content_callback(ctx: click.Context, param: click.Parameter, value: t.Any) -> t.Any:
     if value:
         pulp_ctx = ctx.find_object(PulpCLIContext)
         assert pulp_ctx is not None
@@ -71,7 +71,9 @@ CONTENT_LIST_SCHEMA = s.Schema([{"sha256": str, "relative_path": s.And(str, len)
 
 
 @load_file_wrapper
-def _content_list_callback(ctx: click.Context, param: click.Parameter, value: Optional[str]) -> Any:
+def _content_list_callback(
+    ctx: click.Context, param: click.Parameter, value: t.Optional[str]
+) -> t.Any:
     if value is None:
         return None
 
@@ -184,14 +186,14 @@ repository.add_command(role_command(decorators=lookup_options))
 def sync(
     repository_ctx: PulpRepositoryContext,
     remote: EntityFieldDefinition,
-    mirror: Optional[bool],
+    mirror: t.Optional[bool],
 ) -> None:
     """
     Sync the repository from a remote source.
     If remote is not specified sync will try to use the default remote associated with
     the repository
     """
-    body: Dict[str, Any] = {}
+    body: t.Dict[str, t.Any] = {}
     repository = repository_ctx.entity
     if mirror is not None:
         body["mirror"] = mirror
@@ -223,12 +225,12 @@ def add(
     repository_ctx: PulpRepositoryContext,
     sha256: str,
     relative_path: str,
-    base_version: Optional[int],
+    base_version: t.Optional[int],
 ) -> None:
     """Please use 'content add' instead."""
     repository_href = repository_ctx.pulp_href
 
-    base_version_href: Optional[str]
+    base_version_href: t.Optional[str]
     if base_version is not None:
         base_version_href = f"{repository_href}versions/{base_version}/"
     else:
@@ -258,12 +260,12 @@ def remove(
     repository_ctx: PulpRepositoryContext,
     sha256: str,
     relative_path: str,
-    base_version: Optional[int],
+    base_version: t.Optional[int],
 ) -> None:
     """Please use 'content remove' instead."""
     repository_href = repository_ctx.pulp_href
 
-    base_version_href: Optional[str]
+    base_version_href: t.Optional[str]
     if base_version is not None:
         base_version_href = f"{repository_href}versions/{base_version}/"
     else:
@@ -311,14 +313,14 @@ def remove(
 def modify(
     pulp_ctx: PulpCLIContext,
     repository_ctx: PulpRepositoryContext,
-    add_content: List[Dict[str, str]],
-    remove_content: List[Dict[str, str]],
-    base_version: Optional[int],
+    add_content: t.List[t.Dict[str, str]],
+    remove_content: t.List[t.Dict[str, str]],
+    base_version: t.Optional[int],
 ) -> None:
     """Please use 'content modify' instead."""
     repository_href = repository_ctx.pulp_href
 
-    base_version_href: Optional[str]
+    base_version_href: t.Optional[str]
     if base_version is not None:
         base_version_href = f"{repository_href}versions/{base_version}/"
     else:

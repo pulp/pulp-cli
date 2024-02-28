@@ -1,4 +1,4 @@
-from typing import Dict, Optional, Union, cast
+import typing as t
 
 import click
 from pulp_glue.common.context import (
@@ -102,12 +102,12 @@ distribution.add_command(label_command(decorators=nested_lookup_options))
 @pass_entity_context
 def update(
     distribution_ctx: PulpEntityContext,
-    base_path: Optional[str],
-    repository: Optional[Union[str, PulpEntityContext]],
+    base_path: t.Optional[str],
+    repository: t.Optional[t.Union[str, PulpEntityContext]],
     content_guard: EntityFieldDefinition,
-    version: Optional[int],
-    private: Optional[bool],
-    pulp_labels: Optional[Dict[str, str]],
+    version: t.Optional[int],
+    private: t.Optional[bool],
+    pulp_labels: t.Optional[t.Dict[str, str]],
 ) -> None:
     assert isinstance(distribution_ctx, PulpContainerDistributionContext)
 
@@ -130,7 +130,7 @@ def update(
             elif distribution["repository_version"]:
                 body["repository_version"] = ""
         else:
-            repository = cast(PulpEntityContext, repository)
+            repository = t.cast(PulpEntityContext, repository)
             if version is not None:
                 if distribution["repository"]:
                     distribution_ctx.update(body={"repository": ""}, non_blocking=True)

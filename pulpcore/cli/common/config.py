@@ -1,6 +1,6 @@
 import re
+import typing as t
 from pathlib import Path
-from typing import Any, Callable, Dict, List, MutableMapping, Optional, TypeVar
 
 import click
 import toml
@@ -11,7 +11,7 @@ from pulpcore.cli.common.generic import pulp_group
 translation = get_translation(__package__)
 _ = translation.gettext
 
-_T = TypeVar("_T")
+_T = t.TypeVar("_T")
 
 CONFIG_LOCATIONS = [
     "/etc/pulp/cli.toml",
@@ -90,21 +90,21 @@ CONFIG_OPTIONS = [
 ]
 
 
-def not_none(value: Optional[_T], exc: Optional[Exception] = None) -> _T:
+def not_none(value: t.Optional[_T], exc: t.Optional[Exception] = None) -> _T:
     if value is None:
         raise exc or RuntimeError(_("Value cannot be None."))
     return value
 
 
-def config_options(command: Callable[..., Any]) -> Callable[..., Any]:
+def config_options(command: t.Callable[..., t.Any]) -> t.Callable[..., t.Any]:
     for option in reversed(CONFIG_OPTIONS):
         command = option(command)
     return command
 
 
-def validate_config(config: Dict[str, Any], strict: bool = False) -> bool:
+def validate_config(config: t.Dict[str, t.Any], strict: bool = False) -> bool:
     """Validate, that the config provides the proper data types"""
-    errors: List[str] = []
+    errors: t.List[str] = []
     if "api_root" in config and (config["api_root"][0] != "/" or config["api_root"][-1] != "/"):
         errors.append(_("'api_root' must begin and end with '/'"))
     if "format" in config and config["format"].lower() not in FORMAT_CHOICES:
@@ -138,8 +138,10 @@ def validate_config(config: Dict[str, Any], strict: bool = False) -> bool:
     return True
 
 
-def validate_settings(settings: MutableMapping[str, Dict[str, Any]], strict: bool = False) -> bool:
-    errors: List[str] = []
+def validate_settings(
+    settings: t.MutableMapping[str, t.Dict[str, t.Any]], strict: bool = False
+) -> bool:
+    errors: t.List[str] = []
     if "cli" not in settings:
         errors.append(_("Could not locate default profile 'cli' setting"))
 
@@ -178,7 +180,7 @@ def create(
     editor: bool,
     overwrite: bool,
     location: str,
-    **kwargs: Any,
+    **kwargs: t.Any,
 ) -> None:
     def _check_location(location: str) -> None:
         if not overwrite and Path(location).exists():
@@ -188,7 +190,7 @@ def create(
                 ).format(location=location)
             )
 
-    def prompt_config_option(name: str) -> Any:
+    def prompt_config_option(name: str) -> t.Any:
         """Find the option from the root command and prompt."""
         option = next(p for p in ctx.command.params if p.name == name)
         if isinstance(option, click.Option) and option.help:
@@ -197,7 +199,7 @@ def create(
             help = name
         return click.prompt(help, default=(option.default), type=option.type)
 
-    settings: MutableMapping[str, Any] = kwargs
+    settings: t.MutableMapping[str, t.Any] = kwargs
 
     if interactive:
         location = click.prompt(_("Config file location"), default=location)

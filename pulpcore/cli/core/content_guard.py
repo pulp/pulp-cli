@@ -1,4 +1,4 @@
-from typing import List, Optional
+import typing as t
 
 import click
 from pulp_glue.certguard.context import PulpRHSMCertGuardContext, PulpX509CertGuardContext
@@ -78,8 +78,8 @@ rbac.add_command(role_command(decorators=lookup_options))
 def assign(
     pulp_ctx: PulpCLIContext,
     guard_ctx: PulpEntityContext,
-    users: Optional[List[str]],
-    groups: Optional[List[str]],
+    users: t.Optional[t.List[str]],
+    groups: t.Optional[t.List[str]],
 ) -> None:
     assert isinstance(guard_ctx, PulpRbacContentGuardContext)
 
@@ -107,8 +107,8 @@ def assign(
 def remove(
     pulp_ctx: PulpCLIContext,
     guard_ctx: PulpEntityContext,
-    users: Optional[List[str]],
-    groups: Optional[List[str]],
+    users: t.Optional[t.List[str]],
+    groups: t.Optional[t.List[str]],
 ) -> None:
     assert isinstance(guard_ctx, PulpRbacContentGuardContext)
 

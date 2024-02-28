@@ -1,4 +1,4 @@
-from typing import Any
+import typing as t
 
 import click
 from pulp_glue.common.i18n import get_translation
@@ -22,7 +22,7 @@ def rpm() -> None:
     pass
 
 
-def mount(main: click.Group, **kwargs: Any) -> None:
+def mount(main: click.Group, **kwargs: t.Any) -> None:
     rpm.add_command(repository)
     rpm.add_command(remote)
     rpm.add_command(publication)

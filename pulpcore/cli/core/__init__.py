@@ -1,4 +1,4 @@
-from typing import Any, Optional
+import typing as t
 
 import click
 
@@ -28,7 +28,7 @@ from pulpcore.cli.core.user import user
 from pulpcore.cli.core.worker import worker
 
 
-def mount(main: click.Group, **kwargs: Any) -> None:
+def mount(main: click.Group, **kwargs: t.Any) -> None:
     main.add_command(access_policy)
     main.add_command(artifact)
     main.add_command(content)
@@ -56,7 +56,7 @@ def mount(main: click.Group, **kwargs: Any) -> None:
 
     _orig_get_command = main.get_command
 
-    def patched_get_command(ctx: click.Context, cmd_name: str) -> Optional[click.Command]:
+    def patched_get_command(ctx: click.Context, cmd_name: str) -> t.Optional[click.Command]:
         if cmd_name == "domains":
             click.echo("Please use 'domain' instead of 'domains'.", err=True)
             cmd_name = "domain"

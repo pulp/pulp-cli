@@ -1,4 +1,4 @@
-from typing import Any
+import typing as t
 
 import click
 from pulp_glue.common.i18n import get_translation
@@ -19,7 +19,7 @@ def container() -> None:
     pass
 
 
-def mount(main: click.Group, **kwargs: Any) -> None:
+def mount(main: click.Group, **kwargs: t.Any) -> None:
     container.add_command(repository)
     container.add_command(remote)
     container.add_command(namespace)

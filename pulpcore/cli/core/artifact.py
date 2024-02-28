@@ -1,4 +1,4 @@
-from typing import IO
+import typing as t
 
 import click
 from pulp_glue.common.context import PulpEntityContext
@@ -68,7 +68,7 @@ artifact.add_command(show_command(decorators=lookup_options))
 def upload(
     pulp_ctx: PulpCLIContext,
     artifact_ctx: PulpEntityContext,
-    file: IO[bytes],
+    file: t.IO[bytes],
     chunk_size: int,
 ) -> None:
     assert isinstance(artifact_ctx, PulpArtifactContext)

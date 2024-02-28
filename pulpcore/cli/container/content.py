@@ -1,5 +1,5 @@
 import gettext
-from typing import Any
+import typing as t
 
 import click
 from pulp_glue.common.context import PulpEntityContext
@@ -23,7 +23,7 @@ from pulpcore.cli.common.generic import (
 _ = gettext.gettext
 
 
-def _content_callback(ctx: click.Context, param: click.Parameter, value: Any) -> None:
+def _content_callback(ctx: click.Context, param: click.Parameter, value: t.Any) -> None:
     if value is not None:
         entity_ctx = ctx.find_object(PulpEntityContext)
         assert entity_ctx is not None

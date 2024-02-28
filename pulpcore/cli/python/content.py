@@ -1,4 +1,4 @@
-from typing import IO, Optional, Union
+import typing as t
 
 import click
 from pulp_glue.common.context import PulpEntityContext
@@ -24,8 +24,8 @@ _ = translation.gettext
 
 
 def _sha256_artifact_callback(
-    ctx: click.Context, param: click.Parameter, value: Optional[str]
-) -> Optional[Union[str, PulpEntityContext]]:
+    ctx: click.Context, param: click.Parameter, value: t.Optional[str]
+) -> t.Optional[t.Union[str, PulpEntityContext]]:
     # Pass None and "" verbatim
     if value:
         pulp_ctx = ctx.find_object(PulpCLIContext)
@@ -98,9 +98,9 @@ def upload(
     pulp_ctx: PulpCLIContext,
     entity_ctx: PulpEntityContext,
     relative_path: str,
-    file: IO[bytes],
+    file: t.IO[bytes],
     chunk_size: int,
-    repository: Optional[PulpPythonRepositoryContext],
+    repository: t.Optional[PulpPythonRepositoryContext],
 ) -> None:
     """Create a Python package content unit through uploading a file"""
     assert isinstance(entity_ctx, PulpPythonContentContext)

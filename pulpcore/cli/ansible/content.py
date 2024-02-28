@@ -1,4 +1,4 @@
-from typing import IO, Any, Callable
+import typing as t
 
 import click
 from pulp_glue.ansible.context import (
@@ -35,7 +35,7 @@ content_context = (PulpAnsibleRoleContext, PulpAnsibleCollectionVersionContext)
 signature_context = (PulpAnsibleCollectionVersionSignatureContext,)
 
 
-def _content_callback(ctx: click.Context, param: click.Parameter, value: Any) -> Any:
+def _content_callback(ctx: click.Context, param: click.Parameter, value: t.Any) -> t.Any:
     if value:
         entity_ctx = ctx.find_object(PulpContentContext)
         assert entity_ctx is not None
@@ -43,7 +43,7 @@ def _content_callback(ctx: click.Context, param: click.Parameter, value: Any) ->
     return value
 
 
-def _fields_callback(ctx: click.Context, param: click.Parameter, value: Any) -> Any:
+def _fields_callback(ctx: click.Context, param: click.Parameter, value: t.Any) -> t.Any:
     if value:
         click.echo(_("Option {name} is deprecated.").format(name=param.opts[0]), err=True)
         value = tuple(value.split(","))
@@ -53,9 +53,9 @@ def _fields_callback(ctx: click.Context, param: click.Parameter, value: Any) -> 
 
 def _list_command_wrapper(list_command: click.Command) -> click.Command:
     assert list_command.callback is not None
-    _old_callback: Callable[[Any], Any] = list_command.callback
+    _old_callback: t.Callable[[t.Any], t.Any] = list_command.callback
 
-    def _new_callback(*args: Any, **kwargs: Any) -> Any:
+    def _new_callback(*args: t.Any, **kwargs: t.Any) -> t.Any:
         _fields = kwargs.pop("_fields")
         if _fields:
             kwargs["fields"] += _fields
@@ -255,8 +255,8 @@ content.add_command(show_command(decorators=lookup_options))
 def upload(
     pulp_ctx: PulpCLIContext,
     content_ctx: PulpContentContext,
-    file: IO[bytes],
-    **kwargs: Any,
+    file: t.IO[bytes],
+    **kwargs: t.Any,
 ) -> None:
     if isinstance(content_ctx, PulpAnsibleRoleContext):
         chunk_size = kwargs.pop("chunk_size")

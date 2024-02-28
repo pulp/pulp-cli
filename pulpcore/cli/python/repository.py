@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional
+import typing as t
 
 import click
 from pulp_glue.common.context import (
@@ -57,8 +57,8 @@ remote_option = resource_option(
 
 
 def _content_callback(
-    ctx: click.Context, param: click.Parameter, value: Optional[str]
-) -> Optional[str]:
+    ctx: click.Context, param: click.Parameter, value: t.Optional[str]
+) -> t.Optional[str]:
     if value:
         pulp_ctx = ctx.find_object(PulpCLIContext)
         assert pulp_ctx is not None
@@ -159,7 +159,7 @@ def sync(
     the repository
     """
     repository = repository_ctx.entity
-    body: Dict[str, Any] = {}
+    body: t.Dict[str, t.Any] = {}
 
     if remote:
         body["remote"] = remote
@@ -186,12 +186,12 @@ def add(
     pulp_ctx: PulpCLIContext,
     repository_ctx: PulpRepositoryContext,
     filename: str,
-    base_version: Optional[int],
+    base_version: t.Optional[int],
 ) -> None:
     """Please use 'content add' instead."""
     repository_href = repository_ctx.pulp_href
 
-    base_version_href: Optional[str]
+    base_version_href: t.Optional[str]
     if base_version is not None:
         base_version_href = f"{repository_href}versions/{base_version}/"
     else:
@@ -217,12 +217,12 @@ def remove(
     pulp_ctx: PulpCLIContext,
     repository_ctx: PulpRepositoryContext,
     filename: str,
-    base_version: Optional[int],
+    base_version: t.Optional[int],
 ) -> None:
     """Please use 'content remove' instead."""
     repository_href = repository_ctx.pulp_href
 
-    base_version_href: Optional[str]
+    base_version_href: t.Optional[str]
     if base_version is not None:
         base_version_href = f"{repository_href}versions/{base_version}/"
     else:

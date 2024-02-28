@@ -1,5 +1,5 @@
 import gettext
-from typing import IO, Optional
+import typing as t
 
 import click
 from pulp_glue.common.context import EntityFieldDefinition, PulpEntityContext
@@ -31,9 +31,9 @@ repository_option = resource_option(
 @pass_pulp_context
 def comps_upload(
     pulp_ctx: PulpCLIContext,
-    file: IO[bytes],
-    repository: Optional[EntityFieldDefinition],
-    replace: Optional[bool],
+    file: t.IO[bytes],
+    repository: t.Optional[EntityFieldDefinition],
+    replace: t.Optional[bool],
 ) -> None:
     """Create comps.xml content-units by uploading a comps.xml-formatted file"""
     entity_ctx = PulpRpmCompsXmlContext(pulp_ctx)

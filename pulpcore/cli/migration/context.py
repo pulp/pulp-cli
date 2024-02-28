@@ -1,4 +1,4 @@
-from typing import Any, Optional
+import typing as t
 
 from pulp_glue.common.context import PulpEntityContext
 from pulp_glue.common.i18n import get_translation
@@ -12,12 +12,12 @@ class PulpMigrationPlanContext(PulpEntityContext):
     HREF = "pulp_2to3_migration_migration_plan_href"
     ID_PREFIX = "migration_plans"
 
-    def run(self, href: Optional[str] = None) -> Any:
+    def run(self, href: t.Optional[str] = None) -> t.Any:
         return self.pulp_ctx.call(
             "migration_plans_run", parameters={self.HREF: href or self.pulp_href}
         )
 
-    def reset(self, href: Optional[str] = None) -> Any:
+    def reset(self, href: t.Optional[str] = None) -> t.Any:
         return self.pulp_ctx.call(
             "migration_plans_reset", parameters={self.HREF: href or self.pulp_href}
         )
