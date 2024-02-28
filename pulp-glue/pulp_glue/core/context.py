@@ -2,7 +2,7 @@ import datetime
 import hashlib
 import os
 import sys
-from typing import IO, Any, ClassVar, Dict, List, Optional
+import typing as t
 
 from pulp_glue.common.context import (
     EntityDefinition,
@@ -24,7 +24,7 @@ class PulpAccessPolicyContext(PulpEntityContext):
     HREF = "access_policy_href"
     ID_PREFIX = "access_policies"
 
-    def reset(self) -> Any:
+    def reset(self) -> t.Any:
         self.pulp_ctx.needs_plugin(PluginRequirement("core", specifier=">=3.17.0"))
         return self.call("reset", parameters={self.HREF: self.pulp_href})
 
@@ -43,8 +43,8 @@ class PulpArtifactContext(PulpEntityContext):
     ID_PREFIX = "artifacts"
 
     def upload(
-        self, file: IO[bytes], chunk_size: int = 1000000, sha256: Optional[str] = None
-    ) -> Any:
+        self, file: t.IO[bytes], chunk_size: int = 1000000, sha256: t.Optional[str] = None
+    ) -> t.Any:
         size = os.path.getsize(file.name)
 
         sha256_hasher = hashlib.sha256()
@@ -67,7 +67,7 @@ class PulpArtifactContext(PulpEntityContext):
 
         if chunk_size > size:
             # if chunk_size is bigger than the file size, just upload it directly
-            artifact: Dict[str, Any] = self.create({"sha256": sha256_digest, "file": file})
+            artifact: t.Dict[str, t.Any] = self.create({"sha256": sha256_digest, "file": file})
             self.pulp_href = artifact["pulp_href"]
             return artifact["pulp_href"]
 
@@ -107,7 +107,7 @@ class PulpExportContext(PulpEntityContext):
     exporter: EntityDefinition
 
     @property
-    def scope(self) -> Dict[str, Any]:
+    def scope(self) -> t.Dict[str, t.Any]:
         return {PulpExporterContext.HREF: self.exporter["pulp_href"]}
 
 
@@ -140,10 +140,10 @@ class PulpGroupPermissionContext(PulpEntityContext):
         self,
         operation: str,
         non_blocking: bool = False,
-        parameters: Optional[Dict[str, Any]] = None,
-        body: Optional[Dict[str, Any]] = None,
+        parameters: t.Optional[t.Dict[str, t.Any]] = None,
+        body: t.Optional[t.Dict[str, t.Any]] = None,
         validate_body: bool = False,
-    ) -> Any:
+    ) -> t.Any:
         # Workaroud because the openapi spec for GroupPermissions has always been broken.
         #
         # This will probably not be fixed upstream, and GroupPermissions are removed from pulpcore.
@@ -156,7 +156,7 @@ class PulpGroupPermissionContext(PulpEntityContext):
             validate_body=validate_body,
         )
 
-    def find(self, **kwargs: Any) -> Any:
+    def find(self, **kwargs: t.Any) -> t.Any:
         # Workaroud the missing ability to filter.
         # # TODO fix upstream and adjust to guard for the proper version
         # # https://pulp.plan.io/issues/8241
@@ -175,7 +175,7 @@ class PulpGroupPermissionContext(PulpEntityContext):
         return search_result[0]
 
     @property
-    def scope(self) -> Dict[str, Any]:
+    def scope(self) -> t.Dict[str, t.Any]:
         return {self.group_ctx.HREF: self.group_ctx.pulp_href}
 
 
@@ -221,7 +221,7 @@ class PulpGroupRoleContext(PulpEntityContext):
         self.group_ctx = group_ctx
 
     @property
-    def scope(self) -> Dict[str, Any]:
+    def scope(self) -> t.Dict[str, t.Any]:
         return {self.group_ctx.HREF: self.group_ctx.pulp_href}
 
 
@@ -244,7 +244,7 @@ class PulpGroupUserContext(PulpEntityContext):
         self.group_ctx = group_ctx
 
     @property
-    def scope(self) -> Dict[str, Any]:
+    def scope(self) -> t.Dict[str, t.Any]:
         return {self.group_ctx.HREF: self.group_ctx.pulp_href}
 
 
@@ -266,7 +266,7 @@ class PulpImporterContext(PulpEntityContext):
 
 
 class PulpOrphanContext(PulpEntityContext):
-    def cleanup(self, body: Optional[Dict[str, Any]] = None) -> Any:
+    def cleanup(self, body: t.Optional[t.Dict[str, t.Any]] = None) -> t.Any:
         if body is not None:
             body = self.preprocess_entity(body)
             if "orphan_protection_time" in body:
@@ -289,16 +289,16 @@ class PulpRbacContentGuardContext(PulpContentGuardContext):
     ENTITIES = "RBAC content guards"
     HREF = "r_b_a_c_content_guard_href"
     ID_PREFIX = "contentguards_core_rbac"
-    DOWNLOAD_ROLE: ClassVar[str] = "core.rbaccontentguard_downloader"
+    DOWNLOAD_ROLE: t.ClassVar[str] = "core.rbaccontentguard_downloader"
     CAPABILITIES = {"roles": [PluginRequirement("core", specifier=">=3.17.0")]}
     NEEDS_PLUGINS = [PluginRequirement("core", specifier=">=3.15.0")]
 
     def assign(
         self,
-        href: Optional[str] = None,
-        users: Optional[List[str]] = None,
-        groups: Optional[List[str]] = None,
-    ) -> Any:
+        href: t.Optional[str] = None,
+        users: t.Optional[t.List[str]] = None,
+        groups: t.Optional[t.List[str]] = None,
+    ) -> t.Any:
         if self.pulp_ctx.has_plugin(PluginRequirement("core", specifier=">=3.17.0")):
             body: EntityDefinition = {"users": users, "groups": groups}
             body["role"] = self.DOWNLOAD_ROLE
@@ -311,10 +311,10 @@ class PulpRbacContentGuardContext(PulpContentGuardContext):
 
     def remove(
         self,
-        href: Optional[str] = None,
-        users: Optional[List[str]] = None,
-        groups: Optional[List[str]] = None,
-    ) -> Any:
+        href: t.Optional[str] = None,
+        users: t.Optional[t.List[str]] = None,
+        groups: t.Optional[t.List[str]] = None,
+    ) -> t.Any:
         if self.pulp_ctx.has_plugin(PluginRequirement("core", specifier=">=3.17.0")):
             body: EntityDefinition = {"users": users, "groups": groups}
             body["role"] = self.DOWNLOAD_ROLE
@@ -352,9 +352,9 @@ class PulpTaskContext(PulpEntityContext):
     ID_PREFIX = "tasks"
     CAPABILITIES = {"roles": [PluginRequirement("core", specifier=">=3.17.0")]}
 
-    resource_context: Optional[PulpEntityContext] = None
+    resource_context: t.Optional[PulpEntityContext] = None
 
-    def list(self, limit: int, offset: int, parameters: Dict[str, Any]) -> List[Any]:
+    def list(self, limit: int, offset: int, parameters: t.Dict[str, t.Any]) -> t.List[t.Any]:
         if (
             parameters.get("logging_cid") is not None
             or parameters.get("logging_cid__contains") is not None
@@ -390,7 +390,7 @@ class PulpTaskContext(PulpEntityContext):
 
         return super().list(limit=limit, offset=offset, parameters=parameters)
 
-    def cancel(self, task_href: Optional[str] = None, background: bool = False) -> Any:
+    def cancel(self, task_href: t.Optional[str] = None, background: bool = False) -> t.Any:
         task_href = task_href or self.pulp_href
         task = self.call(
             "cancel",
@@ -404,7 +404,7 @@ class PulpTaskContext(PulpEntityContext):
         return task
 
     @property
-    def scope(self) -> Dict[str, Any]:
+    def scope(self) -> t.Dict[str, t.Any]:
         if self.resource_context:
             if self.pulp_ctx.has_plugin(PluginRequirement("core", specifier=">=3.22.0")):
                 return {"reserved_resources": self.resource_context.pulp_href}
@@ -415,11 +415,11 @@ class PulpTaskContext(PulpEntityContext):
 
     def purge(
         self,
-        finished_before: Optional[datetime.datetime],
-        states: Optional[List[str]],
-    ) -> Any:
+        finished_before: t.Optional[datetime.datetime],
+        states: t.Optional[t.List[str]],
+    ) -> t.Any:
         self.pulp_ctx.needs_plugin(PluginRequirement("core", specifier=">=3.17.0"))
-        body: Dict[str, Any] = {}
+        body: t.Dict[str, t.Any] = {}
         if finished_before:
             body["finished_before"] = finished_before
         if states:
@@ -429,7 +429,7 @@ class PulpTaskContext(PulpEntityContext):
             body=body,
         )
 
-    def summary(self) -> Dict[str, int]:
+    def summary(self) -> t.Dict[str, int]:
         task_states = ["waiting", "skipped", "running", "completed", "failed", "canceled"]
         if self.pulp_ctx.has_plugin(PluginRequirement("core", specifier=">=3.14.0")):
             task_states.append("canceling")
@@ -459,7 +459,7 @@ class PulpUploadContext(PulpEntityContext):
         size: int,
         start: int,
         non_blocking: bool = False,
-    ) -> Any:
+    ) -> t.Any:
         end: int = start + len(chunk) - 1
         parameters = {self.HREF: self.pulp_href, "Content-Range": f"bytes {start}-{end}/{size}"}
         return self.call(
@@ -469,14 +469,14 @@ class PulpUploadContext(PulpEntityContext):
             non_blocking=non_blocking,
         )
 
-    def commit(self, sha256: str) -> Any:
+    def commit(self, sha256: str) -> t.Any:
         return self.call(
             "commit",
             parameters={self.HREF: self.pulp_href},
             body={"sha256": sha256},
         )
 
-    def upload_file(self, file: IO[bytes], chunk_size: int = 1000000) -> Any:
+    def upload_file(self, file: t.IO[bytes], chunk_size: int = 1000000) -> t.Any:
         """Upload a file and return the uncommitted upload_href."""
         start = 0
         size = os.path.getsize(file.name)
@@ -520,7 +520,7 @@ class PulpUserRoleContext(PulpEntityContext):
         self.user_ctx = user_ctx
 
     @property
-    def scope(self) -> Dict[str, Any]:
+    def scope(self) -> t.Dict[str, t.Any]:
         return {self.user_ctx.HREF: self.user_ctx.pulp_href}
 
 
@@ -540,7 +540,7 @@ class PulpUpstreamPulpContext(PulpEntityContext):
     HREF_PATTERN = r"upstream-pulps/"
     NEEDS_PLUGINS = [PluginRequirement("core", specifier=">=3.23.0")]
 
-    def find(self, **kwargs: Any) -> Any:
+    def find(self, **kwargs: t.Any) -> t.Any:
         # Workaroud the missing ability to filter.
         # # TODO fix upstream and adjust to guard for the proper version
         # # https://github.com/pulp/pulpcore/issues/4110
@@ -558,5 +558,5 @@ class PulpUpstreamPulpContext(PulpEntityContext):
             )
         return search_result[0]
 
-    def replicate(self) -> Any:
+    def replicate(self) -> t.Any:
         return self.call("replicate", parameters={self.HREF: self.pulp_href})

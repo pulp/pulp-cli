@@ -1,4 +1,4 @@
-from typing import IO, Any, ClassVar, Mapping, Optional
+import typing as t
 
 from pulp_glue.common.context import (
     EntityDefinition,
@@ -22,12 +22,12 @@ class PulpAnsibleCollectionVersionContext(PulpContentContext):
     ENTITIES = _("ansible collection versions")
     HREF = "ansible_collection_version_href"
     ID_PREFIX = "content_ansible_collection_versions"
-    UPLOAD_ID: ClassVar[str] = "upload_collection"
+    UPLOAD_ID: t.ClassVar[str] = "upload_collection"
     NEEDS_PLUGINS = [PluginRequirement("ansible", specifier=">=0.7.0")]
     CAPABILITIES = {"upload": [PluginRequirement("ansible", specifier=">=0.16.0")]}
 
-    def upload(self, file: IO[bytes], **kwargs: Any) -> Any:  # type:ignore
-        repository: Optional[PulpRepositoryContext] = kwargs.pop("repository", None)
+    def upload(self, file: t.IO[bytes], **kwargs: t.Any) -> t.Any:  # type:ignore
+        repository: t.Optional[PulpRepositoryContext] = kwargs.pop("repository", None)
         if self.capable("upload"):
             chunk_size: int = kwargs.pop("chunk_size", 1000000)
             return super().upload(file, chunk_size, repository, **kwargs)
@@ -61,9 +61,9 @@ class PulpAnsibleCollectionVersionSignatureContext(PulpContentContext):
     def create(
         self,
         body: EntityDefinition,
-        parameters: Optional[Mapping[str, Any]] = None,
+        parameters: t.Optional[t.Mapping[str, t.Any]] = None,
         non_blocking: bool = False,
-    ) -> Any:
+    ) -> t.Any:
         self.pulp_ctx.needs_plugin(
             PluginRequirement(
                 "ansible", specifier=">=0.13.0", feature=_("collection version creation")
