@@ -1,4 +1,4 @@
-from typing import Any, List, Optional
+import typing as t
 
 from pulp_glue.common.context import (
     EntityDefinition,
@@ -45,7 +45,7 @@ class PulpContainerTagContext(PulpContentContext):
     ID_PREFIX = "content_container_tags"
     NEEDS_PLUGINS = [PluginRequirement("container", specifier=">=2.3.0")]
 
-    def find(self, **kwargs: Any) -> Any:
+    def find(self, **kwargs: t.Any) -> t.Any:
         if "digest" in kwargs and isinstance(kwargs["digest"], str):
             kwargs["digest"] = [kwargs["digest"]]
         return super().find(**kwargs)
@@ -107,7 +107,7 @@ class PulpContainerPushRepositoryVersionContext(PulpRepositoryVersionContext):
 class PulpContainerBaseRepositoryContext(PulpRepositoryContext):
     NEEDS_PLUGINS = [PluginRequirement("container", specifier=">=2.3.0")]
 
-    def tag(self, tag: str, digest: str) -> Any:
+    def tag(self, tag: str, digest: str) -> t.Any:
         self.needs_capability("tag")
         return self.call(
             "tag",
@@ -115,7 +115,7 @@ class PulpContainerBaseRepositoryContext(PulpRepositoryContext):
             body={"tag": tag, "digest": digest},
         )
 
-    def untag(self, tag: str) -> Any:
+    def untag(self, tag: str) -> t.Any:
         self.needs_capability("tag")
         return self.call(
             "untag",
@@ -142,11 +142,11 @@ class PulpContainerRepositoryContext(PulpContainerBaseRepositoryContext):
 
     def modify(
         self,
-        href: Optional[str] = None,
-        add_content: Optional[List[str]] = None,
-        remove_content: Optional[List[str]] = None,
-        base_version: Optional[str] = None,
-    ) -> Any:
+        href: t.Optional[str] = None,
+        add_content: t.Optional[t.List[str]] = None,
+        remove_content: t.Optional[t.List[str]] = None,
+        base_version: t.Optional[str] = None,
+    ) -> t.Any:
         if remove_content:
             self.call(
                 "remove",
@@ -160,16 +160,16 @@ class PulpContainerRepositoryContext(PulpContainerBaseRepositoryContext):
                 body={"content_units": add_content},
             )
 
-    def copy_tag(self, source_href: str, tags: Optional[List[str]]) -> Any:
+    def copy_tag(self, source_href: str, tags: t.Optional[t.List[str]]) -> t.Any:
         body = {"source_repository_version": source_href, "names": tags}
         return self.call("copy_tags", parameters={self.HREF: self.pulp_href}, body=body)
 
     def copy_manifest(
         self,
         source_href: str,
-        digests: Optional[List[str]],
-        media_types: Optional[List[str]],
-    ) -> Any:
+        digests: t.Optional[t.List[str]],
+        media_types: t.Optional[t.List[str]],
+    ) -> t.Any:
         body = {
             "source_repository_version": source_href,
             "digests": digests,
@@ -193,7 +193,7 @@ class PulpContainerPushRepositoryContext(PulpContainerBaseRepositoryContext):
         "remove": [PluginRequirement("container", specifier=">=2.4.0")],
     }
 
-    def remove_image(self, digest: str) -> Any:
+    def remove_image(self, digest: str) -> t.Any:
         self.needs_capability("remove")
         body = {"digest": digest}
         return self.call("remove_image", parameters={self.HREF: self.pulp_href}, body=body)

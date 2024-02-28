@@ -1,4 +1,4 @@
-from typing import IO, Any, ClassVar, Optional
+import typing as t
 
 import click
 
@@ -33,12 +33,12 @@ class PulpRpmACSContext(PulpACSContext):
 
 
 class PulpRpmCompsXmlContext(PulpEntityContext):
-    UPLOAD_COMPS_ID: ClassVar[str] = "rpm_comps_upload"
+    UPLOAD_COMPS_ID: t.ClassVar[str] = "rpm_comps_upload"
     NEEDS_PLUGINS = [PluginRequirement("rpm", specifier=">=3.17.0")]
 
     def upload_comps(
-        self, file: IO[bytes], repo_href: Optional[str], replace: Optional[bool]
-    ) -> Any:
+        self, file: t.IO[bytes], repo_href: t.Optional[str], replace: t.Optional[bool]
+    ) -> t.Any:
         click.echo(_("Uploading file {filename}").format(filename=file.name), err=True)
         file.seek(0)
         return self.call(
@@ -344,7 +344,9 @@ class PulpRpmRepositoryContext(PulpRepositoryContext):
             )
         return body
 
-    def sync(self, href: Optional[str] = None, body: Optional[EntityDefinition] = None) -> Any:
+    def sync(
+        self, href: t.Optional[str] = None, body: t.Optional[EntityDefinition] = None
+    ) -> t.Any:
         if body:
             if body.get("optimize") is not None:
                 self.pulp_ctx.needs_plugin(PluginRequirement("rpm", specifier=">=3.3.0"))
