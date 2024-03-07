@@ -7,7 +7,7 @@ name = "pulp-cli"
 version = "0.24.0.dev"
 description = "Command line interface to talk to pulpcore's REST API."
 readme = "README.md"
-requires-python = ">=3.6"
+requires-python = ">=3.8"
 license = {text = "GPLv2+"}
 authors = [
   {name = "Pulp Team", email = "pulp-list@redhat.com"},
@@ -71,9 +71,9 @@ test_matrix = """
   pulp_api_root: "/relocated/djnd/"
 - python: "3.11"
   image_tag: "latest"
-- python: "3.6"
+- python: "3.12"
   image_tag: "3.39"
-- python: "3.7"
+- python: "3.12"
   image_tag: "3.28"
   lower_bounds: true
 - python: "3.8"
