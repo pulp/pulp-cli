@@ -1304,7 +1304,36 @@ class PulpEntityContext(PulpViewSetContext):
             )
 
 
-class PulpRemoteContext(PulpEntityContext):
+class PulpMasterContext(PulpEntityContext):
+    TYPE_REGISTRY: t.Final[t.ClassVar[t.Dict[str, t.Type["t.Self"]]]]
+
+    def __init_subclass__(cls, **kwargs: t.Any) -> None:
+        super().__init_subclass__(**kwargs)
+        if not hasattr(cls, "RESOURCE_TYPE"):
+            cls.TYPE_REGISTRY = {}
+        elif hasattr(cls, "PLUGIN"):
+            cls.TYPE_REGISTRY[f"{cls.PLUGIN}:{cls.RESOURCE_TYPE}"] = cls
+
+    def detail_context(self, pulp_href: str) -> "t.Self":
+        """
+        Provide a detail context for a matching href.
+        """
+        m = re.search(self.HREF_PATTERN, pulp_href)
+        if m is None:
+            raise PulpException(f"'{pulp_href}' is not an href for {self.ENTITY}.")
+        plugin = m.group("plugin")
+        resource_type = m.group("resource_type")
+        try:
+            detail_class = self.TYPE_REGISTRY[f"{plugin}:{resource_type}"]
+        except KeyError:
+            raise PulpException(
+                f"{self.ENTITY} with plugin '{plugin}' and"
+                f"resource type '{resource_type}' is unknown."
+            )
+        return detail_class(self.pulp_ctx, pulp_href=pulp_href)
+
+
+class PulpRemoteContext(PulpMasterContext):
     """
     Base class for remote contexts.
     """
@@ -1330,27 +1359,15 @@ class PulpRemoteContext(PulpEntityContext):
         "sock_read_timeout",
         "rate_limit",
     }
-    TYPE_REGISTRY: t.Final[t.Dict[str, t.Type["PulpRemoteContext"]]] = {}
-
-    def __init_subclass__(cls, **kwargs: t.Any) -> None:
-        super().__init_subclass__(**kwargs)
-        if hasattr(cls, "PLUGIN") and hasattr(cls, "RESOURCE_TYPE"):
-            cls.TYPE_REGISTRY[f"{cls.PLUGIN}:{cls.RESOURCE_TYPE}"] = cls
 
 
-class PulpPublicationContext(PulpEntityContext):
+class PulpPublicationContext(PulpMasterContext):
     """Base class for publication contexts."""
 
     ENTITY = _("publication")
     ENTITIES = _("publications")
     ID_PREFIX = "publications"
     HREF_PATTERN = r"publications/(?P<plugin>[\w\-_]+)/(?P<resource_type>[\w\-_]+)/"
-    TYPE_REGISTRY: t.Final[t.Dict[str, t.Type["PulpPublicationContext"]]] = {}
-
-    def __init_subclass__(cls, **kwargs: t.Any) -> None:
-        super().__init_subclass__(**kwargs)
-        if hasattr(cls, "PLUGIN") and hasattr(cls, "RESOURCE_TYPE"):
-            cls.TYPE_REGISTRY[f"{cls.PLUGIN}:{cls.RESOURCE_TYPE}"] = cls
 
     def list(self, limit: int, offset: int, parameters: t.Dict[str, t.Any]) -> t.List[t.Any]:
         if parameters.get("repository") is not None:
@@ -1360,7 +1377,7 @@ class PulpPublicationContext(PulpEntityContext):
         return super().list(limit, offset, parameters)
 
 
-class PulpDistributionContext(PulpEntityContext):
+class PulpDistributionContext(PulpMasterContext):
     """Base class for distribution contexts."""
 
     ENTITY = _("distribution")
@@ -1368,12 +1385,6 @@ class PulpDistributionContext(PulpEntityContext):
     ID_PREFIX = "distributions"
     HREF_PATTERN = r"distributions/(?P<plugin>[\w\-_]+)/(?P<resource_type>[\w\-_]+)/"
     NULLABLES = {"content_guard", "publication", "remote", "repository", "repository_version"}
-    TYPE_REGISTRY: t.Final[t.Dict[str, t.Type["PulpDistributionContext"]]] = {}
-
-    def __init_subclass__(cls, **kwargs: t.Any) -> None:
-        super().__init_subclass__(**kwargs)
-        if hasattr(cls, "PLUGIN") and hasattr(cls, "RESOURCE_TYPE"):
-            cls.TYPE_REGISTRY[f"{cls.PLUGIN}:{cls.RESOURCE_TYPE}"] = cls
 
 
 class PulpRepositoryVersionContext(PulpEntityContext):
@@ -1432,7 +1443,7 @@ class PulpRepositoryVersionContext(PulpEntityContext):
         return self.call("repair", parameters={self.HREF: self.pulp_href}, body={})
 
 
-class PulpRepositoryContext(PulpEntityContext):
+class PulpRepositoryContext(PulpMasterContext):
     """Base class for repository contexts."""
 
     ENTITY = _("repository")
@@ -1441,12 +1452,6 @@ class PulpRepositoryContext(PulpEntityContext):
     ID_PREFIX = "repositories"
     VERSION_CONTEXT: t.ClassVar[t.Type[PulpRepositoryVersionContext]] = PulpRepositoryVersionContext
     NULLABLES = {"description", "retain_repo_versions"}
-    TYPE_REGISTRY: t.Final[t.Dict[str, t.Type["PulpRepositoryContext"]]] = {}
-
-    def __init_subclass__(cls, **kwargs: t.Any) -> None:
-        super().__init_subclass__(**kwargs)
-        if hasattr(cls, "PLUGIN") and hasattr(cls, "RESOURCE_TYPE"):
-            cls.TYPE_REGISTRY[f"{cls.PLUGIN}:{cls.RESOURCE_TYPE}"] = cls
 
     def get_version_context(
         self,
@@ -1555,19 +1560,14 @@ class PulpGenericRepositoryContext(PulpRepositoryContext):
         return self.call("reclaim_space_reclaim", body=body)
 
 
-class PulpContentContext(PulpEntityContext):
+class PulpContentContext(PulpMasterContext):
     """Base class for content contexts."""
 
     ENTITY = _("content")
     ENTITIES = _("content")
+    HREF_PATTERN = r"content/(?P<plugin>[\w\-_]+)/(?P<resource_type>[\w\-_]+)/"
     ID_PREFIX = "content"
     HREF_PATTERN = r"content/(?P<plugin>[\w\-_]+)/(?P<resource_type>[\w\-_]+)/"
-    TYPE_REGISTRY: t.Final[t.Dict[str, t.Type["PulpContentContext"]]] = {}
-
-    def __init_subclass__(cls, **kwargs: t.Any) -> None:
-        super().__init_subclass__(**kwargs)
-        if hasattr(cls, "PLUGIN") and hasattr(cls, "RESOURCE_TYPE"):
-            cls.TYPE_REGISTRY[f"{cls.PLUGIN}:{cls.RESOURCE_TYPE}"] = cls
 
     def __init__(
         self,
@@ -1669,25 +1669,19 @@ class PulpContentContext(PulpEntityContext):
         return self.create(body=body)
 
 
-class PulpACSContext(PulpEntityContext):
+class PulpACSContext(PulpMasterContext):
     """Base class for ACS contexts."""
 
     ENTITY = _("ACS")
     ENTITIES = _("ACSes")
     HREF_PATTERN = r"acs/(?P<plugin>[\w\-_]+)/(?P<resource_type>[\w\-_]+)/"
     ID_PREFIX = "acs"
-    TYPE_REGISTRY: t.Final[t.Dict[str, t.Type["PulpACSContext"]]] = {}
-
-    def __init_subclass__(cls, **kwargs: t.Any) -> None:
-        super().__init_subclass__(**kwargs)
-        if hasattr(cls, "PLUGIN") and hasattr(cls, "RESOURCE_TYPE"):
-            cls.TYPE_REGISTRY[f"{cls.PLUGIN}:{cls.RESOURCE_TYPE}"] = cls
 
     def refresh(self, href: t.Optional[str] = None) -> t.Any:
         return self.call("refresh", parameters={self.HREF: href or self.pulp_href})
 
 
-class PulpContentGuardContext(PulpEntityContext):
+class PulpContentGuardContext(PulpMasterContext):
     """Base class for content guard contexts."""
 
     ENTITY = "content guard"
@@ -1695,12 +1689,6 @@ class PulpContentGuardContext(PulpEntityContext):
     ID_PREFIX = "contentguards"
     HREF_PATTERN = r"contentguards/(?P<plugin>[\w\-_]+)/(?P<resource_type>[\w\-_]+)/"
     NULLABLES = {"description"}
-    TYPE_REGISTRY: t.Final[t.Dict[str, t.Type["PulpContentGuardContext"]]] = {}
-
-    def __init_subclass__(cls, **kwargs: t.Any) -> None:
-        super().__init_subclass__(**kwargs)
-        if hasattr(cls, "PLUGIN") and hasattr(cls, "RESOURCE_TYPE"):
-            cls.TYPE_REGISTRY[f"{cls.PLUGIN}:{cls.RESOURCE_TYPE}"] = cls
 
 
 EntityFieldDefinition = t.Union[None, str, PulpEntityContext]
