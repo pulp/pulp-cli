@@ -82,7 +82,7 @@ def pulp_cli_vars() -> t.Dict[str, str]:
 
 
 @pytest.fixture(scope="session")
-def pulp_cli_settings(tmp_path_factory: pytest.TempPathFactory) -> t.Tuple[pathlib.Path, t.Any]:
+def pulp_cli_settings() -> t.Dict[str, t.Dict[str, t.Any]]:
     """
     This fixture will setup the config file once per session only.
     It is most likely not useful to be included standalone.
@@ -95,11 +95,18 @@ def pulp_cli_settings(tmp_path_factory: pytest.TempPathFactory) -> t.Tuple[pathl
     if os.environ.get("PULP_API_ROOT"):
         for key in settings:
             settings[key]["api_root"] = os.environ["PULP_API_ROOT"]
+    return settings
+
+
+@pytest.fixture(scope="session")
+def pulp_cli_settings_path(
+    tmp_path_factory: pytest.TempPathFactory, pulp_cli_settings: t.Dict[str, t.Dict[str, t.Any]]
+) -> pathlib.Path:
     settings_path = tmp_path_factory.mktemp("config", numbered=False)
     (settings_path / "pulp").mkdir(parents=True)
     with open(settings_path / "pulp" / "cli.toml", "w") as settings_file:
-        toml.dump(settings, settings_file)
-    return settings_path, settings
+        toml.dump(pulp_cli_settings, settings_file)
+    return settings_path
 
 
 @pytest.fixture(scope="session")
@@ -125,11 +132,12 @@ def pulp_cli_gnupghome(tmp_path_factory: pytest.TempPathFactory) -> pathlib.Path
 
 @pytest.fixture
 def pulp_cli_env(
-    pulp_cli_settings: t.Tuple[pathlib.Path, t.Dict[str, t.Any]],
+    pulp_cli_settings: t.Dict[str, t.Dict[str, t.Any]],
+    pulp_cli_settings_path: pathlib.Path,
     pulp_cli_vars: t.Dict[str, str],
     pulp_cli_gnupghome: pathlib.Path,
     monkeypatch: pytest.MonkeyPatch,
-) -> t.Dict[str, t.Any]:
+) -> None:
     """
     This fixture will set up the environment for cli commands by:
 
@@ -138,16 +146,15 @@ def pulp_cli_env(
     * pointing XDG_CONFIG_HOME accordingly
     * supplying other useful environment vars
     """
-    settings_path, settings = pulp_cli_settings
-    monkeypatch.setenv("XDG_CONFIG_HOME", str(settings_path))
-    monkeypatch.setenv("PULP_BASE_URL", settings["cli"]["base_url"])
-    monkeypatch.setenv("VERIFY_SSL", str(settings["cli"].get("verify_ssl", True)).lower())
+    monkeypatch.setenv("XDG_CONFIG_HOME", str(pulp_cli_settings_path))
+    monkeypatch.setenv("PULP_BASE_URL", pulp_cli_settings["cli"]["base_url"])
+    monkeypatch.setenv("VERIFY_SSL", str(pulp_cli_settings["cli"].get("verify_ssl", True)).lower())
     monkeypatch.setenv("GNUPGHOME", str(pulp_cli_gnupghome))
 
     for key, value in pulp_cli_vars.items():
         monkeypatch.setenv(key, value)
 
-    return settings
+    return None
 
 
 if "PULP_LOGGING" in os.environ:
