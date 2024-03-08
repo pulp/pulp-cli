@@ -1,3 +1,5 @@
+import warnings
+
 from pulp_glue.common.context import EntityDefinition  # noqa: F401
 from pulp_glue.common.context import (
     EntityFieldDefinition,
@@ -13,6 +15,10 @@ from pulp_glue.common.context import (
     PulpRepositoryContext,
     PulpRepositoryVersionContext,
     registered_repository_contexts,
+)
+
+warnings.warn(
+    DeprecationWarning("This module is deprecated. Import from pulp_glue.common.context instead.")
 )
 
 __all__ = [
