@@ -23,7 +23,7 @@ classifiers=[
   "Typing :: Typed",
 ]
 dependencies = [
-  "pulp-glue==0.24.0.dev",
+  "pulp-glue==0.24.0",
   "click>=8.0.0,<9.0.0",
   "PyYAML>=5.3,<6.1",
   "schema>=0.7.5,<0.8",
