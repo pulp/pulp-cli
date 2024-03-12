@@ -10,8 +10,8 @@ jobs:
       fail-fast: false
       matrix:
         python:
-          - "3.8"
           - "3.11"
+          - "3.12"
     steps:
       - uses: "actions/checkout@v4"
       - uses: "actions/cache@v4"
