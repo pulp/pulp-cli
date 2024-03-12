@@ -10,6 +10,73 @@
 
 [//]: # (towncrier release notes start)
 
+## 0.24.0 (2024-03-11)
+
+
+
+#### Features
+
+- Add `plugins` configuration option to select which plugins to load.
+  [#291](https://github.com/pulp/pulp-cli/issues/291)
+- Added import export support of python content.
+  [#609](https://github.com/pulp/pulp-cli/issues/609)
+- Added support for the dbus secret service to make use of password managers.
+  [#821](https://github.com/pulp/pulp-cli/issues/821)
+- Added `--header` parameter to allow passing an arbitrary number of custom headers along with every request.
+  [#889](https://github.com/pulp/pulp-cli/issues/889)
+
+
+#### Bugfixes
+
+- User-entered order of parameters no longer matters for repository version commands.
+  [#650](https://github.com/pulp/pulp-cli/issues/650)
+- Fixed a regression introduced in `get_translations`.
+  [#874](https://github.com/pulp/pulp-cli/issues/874)
+- Fixed the distribution of extra files with the package.
+  This should fix both type annotations as well as translations.
+
+
+#### Deprecations and Removals
+
+- Marked option `--sqlite-metadata` on `pulp rpm repository update/create` unavailable for `pulp_rpm>=3.25.0`, as it was removed there.
+  [#831](https://github.com/pulp/pulp-cli/issues/831)
+- Dropped support for python 3.6 and 3.7.
+
+
+### Pulp GLUE
+
+
+#### Features
+
+- Added `auth` to `apikwargs` so you can plug in any `requests.auth.AuthBase`.
+  [#821](https://github.com/pulp/pulp-cli/issues/821)
+- Added `auth_provider` to `api_kwargs` to allow flexible authentication schemes driven by the openapi3 specs.
+
+
+#### Bugfixes
+
+- Added a missing check for uniqueness on entity lookup.
+  [#894](https://github.com/pulp/pulp-cli/issues/894)
+- Fixed the distribution of extra files with the package.
+  This should fix both type annotations as well as translations.
+
+
+#### Improved Documentation
+
+- Fixed the style to display the type of objects in the code reference docs.
+
+
+#### Deprecations and Removals
+
+- Added version restriction to prevent the use of `sqlite_metadata` attribute on Repository and Publication contexts for `pulp_rpm>=3.25.0`.
+  [#831](https://github.com/pulp/pulp-cli/issues/831)
+- Adjusted to `pulp_rpm>=3.25` no longer allowing publishing repositories with md5, sha1, or sha224 checksums.
+  [#851](https://github.com/pulp/pulp-cli/issues/851)
+- Dropped support for python 3.6 and 3.7.
+
+
+---
+
 ## 0.23.2 (2024-01-22)
 
 
