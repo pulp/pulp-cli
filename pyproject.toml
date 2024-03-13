@@ -180,6 +180,7 @@ explicit_package_bases = true
 module = [
   "click_shell.*",
   "gnupg.*",
+  "IPython.*",
   "schema.*",
 ]
 ignore_missing_imports = true
