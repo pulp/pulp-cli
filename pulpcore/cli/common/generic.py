@@ -28,7 +28,12 @@ from pulp_glue.common.context import (
     PulpRepositoryVersionContext,
 )
 from pulp_glue.common.i18n import get_translation
-from pulp_glue.common.openapi import AuthProviderBase
+from pulp_glue.common.openapi import (
+    AuthProviderBase,
+    BasicAuthProvider,
+    TokenAuthProvider,
+    ThirdPartyAuthProvider,
+)
 
 try:
     from pygments import highlight
@@ -105,7 +110,13 @@ class PulpCLIContext(PulpContext):
     ) -> None:
         self.username = api_kwargs.pop("username", None)
         self.password = api_kwargs.pop("password", None)
-        api_kwargs["auth_provider"] = PulpCLIAuthProvider(pulp_ctx=self)
+        self.headers = api_kwargs.pop("headers", None)
+
+        if "Authorization" in self.headers.keys():
+            auth_provider_type = "token"
+        else:
+            auth_provider_type = "basic"
+        api_kwargs["auth_provider"] = CLIAuthProvider()(auth_provider_type)(pulp_ctx=self)
         super().__init__(
             api_root=api_root,
             api_kwargs=api_kwargs,
@@ -193,11 +204,14 @@ if SECRET_STORAGE:
             )(request)
 
 
-class PulpCLIAuthProvider(AuthProviderBase):
+class PulpCLIBasicAuthProvider(AuthProviderBase):
+
+    auth_type = BasicAuthProvider.auth_type
+
     def __init__(self, pulp_ctx: PulpCLIContext):
         self.pulp_ctx = pulp_ctx
 
-    def basic_auth(self) -> t.Optional[t.Union[t.Tuple[str, str], requests.auth.AuthBase]]:
+    def auth(self) -> requests.auth.AuthBase:
         if self.pulp_ctx.username is None:
             self.pulp_ctx.username = click.prompt("Username")
         if self.pulp_ctx.password is None:
@@ -208,7 +222,51 @@ class PulpCLIAuthProvider(AuthProviderBase):
                 return SecretStorageBasicAuth(self.pulp_ctx)
             else:
                 self.pulp_ctx.password = click.prompt("Password", hide_input=True)
-        return (self.pulp_ctx.username, self.pulp_ctx.password)
+        return BasicAuthProvider(self.pulp_ctx.username, self.pulp_ctx.password)
+
+
+class PulpCLITokenAuthProvider(AuthProviderBase):
+
+    auth_type = TokenAuthProvider.auth_type
+
+    def __init__(self, pulp_ctx: PulpCLIContext):
+        self.pulp_ctx = pulp_ctx
+
+    def auth(self, request):
+        token = TokenAuthProvider(self.pulp_ctx.headers["Authorization"])
+        return token.auth(request)
+
+
+class PulpCLIThirdPartyAuthProvider(AuthProviderBase):
+
+    auth_type = ThirdPartyAuthProvider.auth_type
+
+    def __init__(self, pulp_ctx: PulpCLIContext):
+        self.pulp_ctx = pulp_ctx
+
+    def auth(self, request):
+        if not self.pulp_ctx.client_id:
+            self.pulp_ctx.client_id = click.prompt("cliend_id")
+        if not self.pulp_ctx.client_secret:
+            self.pulp_ctx.client_secret = click.prompt("client_secret")
+        if not self.pulp_ctx.token_url:
+            self.pulp_ctx.token_url = click.prompt("token_url")
+
+        return ThirdPartyAuthProvider(
+            self.pulp_ctx.client_id, self.pulp_ctx.client_secret, self.pulp_ctx.token_url
+        )(request)
+
+
+class CLIAuthProvider:
+
+    providers = [PulpCLIBasicAuthProvider, PulpCLITokenAuthProvider]
+
+    def __call__(self, type):
+        providers_type = self._providers_type()
+        return providers_type[type]
+
+    def _providers_type(self):
+        return {provider.auth_type: provider for provider in self.providers}
 
 
 ##############################################################################

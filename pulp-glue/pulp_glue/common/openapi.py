@@ -12,6 +12,8 @@ from urllib.parse import urljoin
 
 import requests
 import urllib3
+from oauthlib.oauth2 import BackendApplicationClient
+from requests_oauthlib import OAuth2Session
 
 from pulp_glue.common import __version__
 from pulp_glue.common.i18n import get_translation
@@ -53,23 +55,28 @@ class AuthProviderBase:
     Returned auth objects need to be compatible with `requests.auth.AuthBase`.
     """
 
-    def basic_auth(self) -> t.Optional[t.Union[t.Tuple[str, str], requests.auth.AuthBase]]:
-        """Implement this to provide means of http basic auth."""
+    auth_type: str = ""
+
+    def auth(self, request: requests.PreparedRequest) -> requests.auth.AuthBase:
+        """Implement this to provide means of http auth."""
         return None
 
-    def __call__(
-        self,
-        security: t.List[t.Dict[str, t.List[str]]],
-        security_schemes: t.Dict[str, t.Dict[str, t.Any]],
-    ) -> t.Optional[t.Union[t.Tuple[str, str], requests.auth.AuthBase]]:
-        for proposal in security:
-            if [security_schemes[name] for name in proposal] == [
-                {"type": "http", "scheme": "basic"}
-            ]:
-                result = self.basic_auth()
-                if result:
-                    return result
-        raise OpenAPIError(_("No suitable auth scheme found."))
+    def __call__(self, request: requests.PreparedRequest) -> requests.PreparedRequest:
+        return self.auth(request)
+
+    # def __call__(
+    #     self,
+    #     security: t.List[t.Dict[str, t.List[str]]],
+    #     security_schemes: t.Dict[str, t.Dict[str, t.Any]],
+    # ) -> t.Optional[t.Union[t.Tuple[str, str], requests.auth.AuthBase]]:
+    #     for proposal in security:
+    #         if [security_schemes[name] for name in proposal] == [
+    #             {"type": "http", "scheme": "basic"}
+    #         ]:
+    #             result = self.basic_auth()
+    #             if result:
+    #                 return result
+    #     raise OpenAPIError(_("No suitable auth scheme found."))
 
 
 class BasicAuthProvider(AuthProviderBase):
@@ -77,12 +84,50 @@ class BasicAuthProvider(AuthProviderBase):
     Reference Implementation for AuthProviderBase providing basic auth with `username`, `password`.
     """
 
+    auth_type = "basic"
+
     def __init__(self, username: str, password: str):
         self.username = username
         self.password = password
 
-    def basic_auth(self) -> t.Optional[t.Union[t.Tuple[str, str], requests.auth.AuthBase]]:
-        return (self.username, self.password)
+    def auth(self, request) -> requests.PreparedRequest:
+        return requests.auth.HTTPBasicAuth(self.username, self.password)(request)
+
+
+class TokenAuthProvider(AuthProviderBase):
+    """
+    Reference implementation for a Token based authentication.
+    """
+
+    auth_type = "token"
+
+    def __init__(self, token: str):
+        self.token = token
+
+    def auth(self, request) -> requests.PreparedRequest:
+        request.headers["Authorization"] = self.token
+        return request
+
+
+class ThirdPartyAuthProvider(AuthProviderBase):
+
+    auth_type = "third_party"
+
+    def __init__(self, client_id, client_secret, token_url):
+        self.client_id = client_id
+        self.client_secret = client_secret
+        self.token_url = token_url
+
+    def auth(self, request):
+        client = BackendApplicationClient(client_id=self.client_id)
+        oauth = OAuth2Session(client=client)
+        token = oauth.fetch_token(
+            token_url=self.token_url, client_id=self.client_id, client_secret=self.client_secret
+        )
+        token_type = token["token_type"]
+        access_token = token["access_token"]
+
+        return TokenAuthProvider(f"{token_type} {access_token}").auth(request)
 
 
 class OpenAPI:
@@ -589,8 +634,9 @@ class OpenAPI:
         security: t.List[t.Dict[str, t.List[str]]] = method_spec.get(
             "security", self.api_spec.get("security", {})
         )
-        if security and self.auth_provider:
-            auth = self.auth_provider(security, self.api_spec["components"]["securitySchemes"])
+        if security or self.auth_provider:
+            # auth = self.auth_provider(security, self.api_spec["components"]["securitySchemes"])
+            auth = self.auth_provider
         else:
             # No auth required? Don't provide it.
             # No auth_provider available? Hope for the best (should do the trick for cert auth).

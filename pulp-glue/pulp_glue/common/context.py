@@ -10,7 +10,7 @@ from packaging.specifiers import SpecifierSet
 from requests import HTTPError
 
 from pulp_glue.common.i18n import get_translation
-from pulp_glue.common.openapi import BasicAuthProvider, OpenAPI, OpenAPIError
+from pulp_glue.common.openapi import BasicAuthProvider, TokenAuthProvider, ThirdPartyAuthProvider, OpenAPI, OpenAPIError
 
 translation = get_translation(__package__)
 _ = translation.gettext
@@ -307,6 +307,13 @@ class PulpContext:
         All calls to the API should be performed via `call`.
         """
         if self._api is None:
+            if header := self._api_kwargs.get("headers"):
+                self._api_kwargs["auth_provider"] = TokenAuthProvider(header)
+            if self._api_kwargs.get("client_id"):
+                client_id = self._api_kwargs.pop("client_id")
+                client_secret = self._api_kwargs.pop("client_secret")
+                token_url = self._api_kwargs.pop("token_url")
+                self._api_kwargs["auth_provider"] = ThirdPartyAuthProvider(client_id, client_secret, token_url)
             if self._api_kwargs.get("username"):
                 # Deprecated for 'auth'.
                 if not self._api_kwargs.get("password"):
