@@ -46,6 +46,7 @@ nav:
     - "contributing.md"
     - "architecture.md"
   - "Pulp Glue API Reference":
+    - "glue_reference/common.md"
     - "glue_reference/common_openapi.md"
     - "glue_reference/common_context.md"
     - "glue_reference/common_i18n.md"
