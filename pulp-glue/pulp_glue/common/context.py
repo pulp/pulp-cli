@@ -307,13 +307,17 @@ class PulpContext:
         All calls to the API should be performed via `call`.
         """
         if self._api is None:
-            if header := self._api_kwargs.get("headers"):
-                self._api_kwargs["auth_provider"] = TokenAuthProvider(header)
-            if self._api_kwargs.get("client_id"):
-                client_id = self._api_kwargs.pop("client_id")
-                client_secret = self._api_kwargs.pop("client_secret")
-                token_url = self._api_kwargs.pop("token_url")
+            headers = self._api_kwargs.pop("headers", None)
+            client_id = self._api_kwargs.pop("client_id", None)
+            client_secret = self._api_kwargs.pop("client_secret", None)
+            token_url = self._api_kwargs.pop("token_url", None)
+
+            if headers and "Authorization" in headers.keys():
+                self._api_kwargs["auth_provider"] = TokenAuthProvider(headers)
+
+            if client_id and client_secret and token_url:
                 self._api_kwargs["auth_provider"] = ThirdPartyAuthProvider(client_id, client_secret, token_url)
+
             if self._api_kwargs.get("username"):
                 # Deprecated for 'auth'.
                 if not self._api_kwargs.get("password"):

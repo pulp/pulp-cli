@@ -211,7 +211,7 @@ class PulpCLIBasicAuthProvider(AuthProviderBase):
     def __init__(self, pulp_ctx: PulpCLIContext):
         self.pulp_ctx = pulp_ctx
 
-    def auth(self) -> requests.auth.AuthBase:
+    def auth(self, request) -> requests.auth.AuthBase:
         if self.pulp_ctx.username is None:
             self.pulp_ctx.username = click.prompt("Username")
         if self.pulp_ctx.password is None:
@@ -222,7 +222,7 @@ class PulpCLIBasicAuthProvider(AuthProviderBase):
                 return SecretStorageBasicAuth(self.pulp_ctx)
             else:
                 self.pulp_ctx.password = click.prompt("Password", hide_input=True)
-        return BasicAuthProvider(self.pulp_ctx.username, self.pulp_ctx.password)
+        return BasicAuthProvider(self.pulp_ctx.username, self.pulp_ctx.password).auth(request)
 
 
 class PulpCLITokenAuthProvider(AuthProviderBase):
