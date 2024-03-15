@@ -267,6 +267,17 @@ float_or_empty.__name__ = "float or empty"
 # Custom classes for commands and parameters
 
 
+def _check_allowed_contexts(
+    ctx: click.Context, allowed_contexts: t.Optional[t.Tuple[t.Type[PulpEntityContext]]]
+) -> bool:
+    if allowed_contexts is None:
+        return True
+    for ctx_type in allowed_contexts:
+        if ctx.find_object(ctx_type) is not None:
+            return True
+    return False
+
+
 class PulpCommand(click.Command):
     def __init__(
         self,
@@ -308,10 +319,10 @@ class PulpCommand(click.Command):
         params = super().get_params(ctx)
         new_params: t.List[click.Parameter] = []
         for param in params:
-            if isinstance(param, PulpOption):
-                if param.allowed_with_contexts is not None:
-                    if not isinstance(ctx.obj, param.allowed_with_contexts):
-                        continue
+            if isinstance(param, PulpOption) and not _check_allowed_contexts(
+                ctx, param.allowed_with_contexts
+            ):
+                continue
             new_params.append(param)
         return new_params
 
@@ -323,10 +334,8 @@ class PulpGroup(PulpCommand, click.Group):
     def get_command(self, ctx: click.Context, cmd_name: str) -> t.Optional[click.Command]:
         # Overwriting this removes the command from the help message and from being callable
         cmd = super().get_command(ctx, cmd_name)
-        if (
-            isinstance(cmd, (PulpCommand, PulpGroup))
-            and cmd.allowed_with_contexts is not None
-            and not isinstance(ctx.obj, cmd.allowed_with_contexts)
+        if isinstance(cmd, (PulpCommand, PulpGroup)) and not _check_allowed_contexts(
+            ctx, cmd.allowed_with_contexts
         ):
             raise IncompatibleContext(
                 _("The subcommand '{name}' is not available in this context.").format(name=cmd.name)
@@ -337,10 +346,8 @@ class PulpGroup(PulpCommand, click.Group):
         commands_filtered_by_context = []
 
         for name, cmd in self.commands.items():
-            if (
-                isinstance(cmd, (PulpCommand, PulpGroup))
-                and cmd.allowed_with_contexts is not None
-                and not isinstance(ctx.obj, cmd.allowed_with_contexts)
+            if isinstance(cmd, (PulpCommand, PulpGroup)) and not _check_allowed_contexts(
+                ctx, cmd.allowed_with_contexts
             ):
                 continue
             commands_filtered_by_context.append(name)
@@ -1530,6 +1537,10 @@ def repository_content_command(**kwargs: t.Any) -> click.Group:
     """A factory that creates a repository content command group."""
 
     content_contexts = kwargs.pop("contexts", {})
+    list_kwargs = kwargs.pop("list_kwargs", {})
+    add_kwargs = kwargs.pop("add_kwargs", {})
+    remove_kwargs = kwargs.pop("remove_kwargs", {})
+    modify_kwargs = kwargs.pop("modify_kwargs", {})
 
     def version_callback(
         ctx: click.Context, param: click.Parameter, value: t.Optional[int]
@@ -1540,7 +1551,7 @@ def repository_content_command(**kwargs: t.Any) -> click.Group:
 
     # This is a mypy bug getting confused with positional args
     # https://github.com/python/mypy/issues/15037
-    @pulp_command("list")  # type: ignore [arg-type]
+    @pulp_command("list", **list_kwargs)  # type: ignore [arg-type]
     @click.option("--all-types", is_flag=True)
     @limit_option
     @offset_option
@@ -1563,7 +1574,7 @@ def repository_content_command(**kwargs: t.Any) -> click.Group:
         result = content_ctx.list(limit=limit, offset=offset, parameters=parameters)
         pulp_ctx.output_result(result)
 
-    @pulp_command("add")
+    @pulp_command("add", **add_kwargs)
     @repository_option
     @click.option("--base-version", type=int, callback=version_callback)
     @pass_content_context
@@ -1574,7 +1585,7 @@ def repository_content_command(**kwargs: t.Any) -> click.Group:
         repo_ctx = base_version.repository_ctx
         repo_ctx.modify(add_content=[content_ctx.pulp_href], base_version=base_version.pulp_href)
 
-    @pulp_command("remove")
+    @pulp_command("remove", **remove_kwargs)
     @click.option("--all", is_flag=True, help=_("Remove all content from repository version"))
     @repository_option
     @click.option("--base-version", type=int, callback=version_callback)
@@ -1588,7 +1599,7 @@ def repository_content_command(**kwargs: t.Any) -> click.Group:
         remove_content = ["*" if all else content_ctx.pulp_href]
         repo_ctx.modify(remove_content=remove_content, base_version=base_version.pulp_href)
 
-    @pulp_command("modify")
+    @pulp_command("modify", **modify_kwargs)
     @repository_option
     @click.option("--base-version", type=int, callback=version_callback)
     def content_modify(

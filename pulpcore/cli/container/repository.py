@@ -135,7 +135,9 @@ repository.add_command(
         contexts=contexts,
         add_decorators=show_options,
         remove_decorators=show_options,
-        allowed_with_contexts=container_context,
+        add_kwargs={"allowed_with_contexts": container_context},
+        remove_kwargs={"allowed_with_contexts": container_context},
+        modify_kwargs={"allowed_with_contexts": container_context},
     )
 )
 

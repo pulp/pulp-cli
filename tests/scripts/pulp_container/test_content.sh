@@ -7,6 +7,7 @@ pulp debug has-plugin --name "container" || exit 23
 
 cleanup() {
   pulp container repository destroy --name "cli_test_container_repository" || true
+  pulp container repository --type push destroy --name "cli_test_container_push_repository" || true
   pulp container remote destroy --name "cli_test_container_remote" || true
   pulp orphan cleanup || true
 }
@@ -16,6 +17,7 @@ trap cleanup EXIT
 pulp container remote create --name "cli_test_container_remote" --url "$CONTAINER_REMOTE_URL" --upstream-name "$CONTAINER_IMAGE"
 pulp container repository create --name "cli_test_container_repository"
 pulp container repository sync --name "cli_test_container_repository" --remote "cli_test_container_remote"
+pulp container repository --type push create --name "cli_test_container_push_repository"
 
 # Check each content list
 expect_succ pulp container content -t blob list
@@ -59,3 +61,8 @@ expect_succ pulp container repository content --type "tag" remove --repository "
 expect_succ pulp container repository content add --repository "cli_test_container_repository" --href "$blob_href"
 expect_succ pulp container repository content add --repository "cli_test_container_repository" --href "$manifest_href"
 expect_succ pulp container repository content add --repository "cli_test_container_repository" --href "$tag_href"
+
+expect_succ pulp container repository -t push content list --repository "cli_test_container_push_repository" --all-types
+expect_succ pulp container repository -t push content --type "tag" list --repository "cli_test_container_push_repository"
+expect_succ pulp container repository -t push content --type "manifest" list --repository "cli_test_container_push_repository"
+expect_succ pulp container repository -t push content --type "blob" list --repository "cli_test_container_push_repository"
