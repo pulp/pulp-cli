@@ -1,0 +1,1 @@
+Added validation to see if `base_url` in the config looks useful.
