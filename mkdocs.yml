@@ -9,6 +9,7 @@ extra_css:
 repo_url: "https://github.com/pulp/pulp-cli"
 edit_uri: "edit/main/docs/"
 markdown_extensions:
+  - "attr_list"
   - toc:
       permalink: True
   - "admonition"
