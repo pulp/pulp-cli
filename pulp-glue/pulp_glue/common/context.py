@@ -307,14 +307,13 @@ class PulpContext:
         All calls to the API should be performed via `call`.
         """
         if self._api is None:
-            if self._api_kwargs.get("username"):
+            username = self._api_kwargs.pop("username", None)
+            password = self._api_kwargs.pop("password", None)
+            if username:
                 # Deprecated for 'auth'.
-                if not self._api_kwargs.get("password"):
-                    self._api_kwargs["password"] = self.prompt("password", hide_input=True)
-                self._api_kwargs["auth_provider"] = BasicAuthProvider(
-                    self._api_kwargs.pop("username"),
-                    self._api_kwargs.pop("password", None),
-                )
+                if not password:
+                    password = self.prompt("password", hide_input=True)
+                self._api_kwargs["auth_provider"] = BasicAuthProvider(username, password)
                 warnings.warn(
                     "Using 'username' and 'password' with 'PulpContext' is deprecated. "
                     "Use an auth provider with the 'auth_provider' argument instead.",
