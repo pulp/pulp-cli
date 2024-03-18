@@ -178,6 +178,7 @@ class OpenAPI:
             if cert or key:
                 raise OpenAPIError(_("Cannot use both 'auth' and 'cert'."))
             self.auth_provider = auth_provider
+            self._session.auth = auth_provider
         else:
             if cert and key:
                 self._session.cert = (cert, key)
