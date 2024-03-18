@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pulp-cli"
-version = "0.24.1"
+version = "0.24.2.dev"
 description = "Command line interface to talk to pulpcore's REST API."
 readme = "README.md"
 requires-python = ">=3.8"
@@ -23,7 +23,7 @@ classifiers=[
   "Typing :: Typed",
 ]
 dependencies = [
-  "pulp-glue==0.24.1",
+  "pulp-glue==0.24.2.dev",
   "click>=8.0.0,<9.0.0",
   "PyYAML>=5.3,<6.1",
   "schema>=0.7.5,<0.8",
