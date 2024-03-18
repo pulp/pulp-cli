@@ -32,7 +32,7 @@ from pulp_glue.common.openapi import (
     AuthProviderBase,
     BasicAuthProvider,
     TokenAuthProvider,
-    ThirdPartyAuthProvider,
+    OAuth2AuthProvider,
 )
 
 try:
@@ -237,9 +237,9 @@ class PulpCLITokenAuthProvider(AuthProviderBase):
         return token.auth(request)
 
 
-class PulpCLIThirdPartyAuthProvider(AuthProviderBase):
+class PulpCLIOAuth2AuthProvider(AuthProviderBase):
 
-    auth_type = ThirdPartyAuthProvider.auth_type
+    auth_type = OAuth2AuthProvider.auth_type
 
     def __init__(self, pulp_ctx: PulpCLIContext):
         self.pulp_ctx = pulp_ctx
@@ -252,7 +252,7 @@ class PulpCLIThirdPartyAuthProvider(AuthProviderBase):
         if not self.pulp_ctx.token_url:
             self.pulp_ctx.token_url = click.prompt("token_url")
 
-        return ThirdPartyAuthProvider(
+        return OAuth2AuthProvider(
             self.pulp_ctx.client_id, self.pulp_ctx.client_secret, self.pulp_ctx.token_url
         )(request)
 

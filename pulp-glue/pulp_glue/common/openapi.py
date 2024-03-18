@@ -109,9 +109,9 @@ class TokenAuthProvider(AuthProviderBase):
         return request
 
 
-class ThirdPartyAuthProvider(AuthProviderBase):
+class OAuth2AuthProvider(AuthProviderBase):
 
-    auth_type = "third_party"
+    auth_type = "oauth2"
 
     def __init__(self, client_id, client_secret, token_url):
         self.client_id = client_id
