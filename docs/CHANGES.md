@@ -37,8 +37,6 @@
 
 #### Deprecations and Removals {: #0.24.0-removal }
 
-- Marked option `--sqlite-metadata` on `pulp rpm repository update/create` unavailable for `pulp_rpm>=3.25.0`, as it was removed there.
-  [#831](https://github.com/pulp/pulp-cli/issues/831)
 - Dropped support for python 3.6 and 3.7.
 
 
@@ -67,10 +65,6 @@
 
 #### Deprecations and Removals {: #0.24.0-pulp-glue-removal }
 
-- Added version restriction to prevent the use of `sqlite_metadata` attribute on Repository and Publication contexts for `pulp_rpm>=3.25.0`.
-  [#831](https://github.com/pulp/pulp-cli/issues/831)
-- Adjusted to `pulp_rpm>=3.25` no longer allowing publishing repositories with md5, sha1, or sha224 checksums.
-  [#851](https://github.com/pulp/pulp-cli/issues/851)
 - Dropped support for python 3.6 and 3.7.
 
 
