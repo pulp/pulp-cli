@@ -35,6 +35,11 @@
   This should fix both type annotations as well as translations.
 
 
+#### Improved Documentation {: #0.24.0-doc }
+
+- Better separate the concepts of cli and glue in the architecture docs.
+
+
 #### Deprecations and Removals {: #0.24.0-removal }
 
 - Dropped support for python 3.6 and 3.7.
@@ -112,6 +117,7 @@ No significant changes.
 
 #### Features {: #0.23.0-feature }
 
+- Switched the buildsystem from using `setup.py` to using `pyproject.toml`.
 - Ansible Collection upload now uses the Pulp V3 API and uploading directly to a repository with `--repository`.
   [#844](https://github.com/pulp/pulp-cli/issues/844)
 - Added support for `--checksum-type` option (combination of `--package-checksum-type` and `--metadata-checksum-type`) when creating rpm publications and configuring rpm repository publish settings.
@@ -178,6 +184,7 @@ No significant changes.
 #### Improved Documentation {: #0.22.0-doc }
 
 - Added a version select widget to docs.
+- Added reference docs for `pulpcore.cli.common.generic`.
 
 
 ### Pulp GLUE {: #0.22.0-pulp-glue }

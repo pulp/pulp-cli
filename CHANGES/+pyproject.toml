@@ -1,1 +1,0 @@
-Switched the buildsystem from using `setup.py` to using `pyproject.toml`.
