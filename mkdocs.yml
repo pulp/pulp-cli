@@ -2,13 +2,14 @@ site_name: "Pulp CLI"
 theme:
   name: "readthedocs"
   custom_dir: "docs_theme"
-  version: "0.24.0.dev"
+  version: "0.25.0.dev"
 extra_css:
   - "css/mkdocstrings.css"
   - "css/tabbed.css"
 repo_url: "https://github.com/pulp/pulp-cli"
 edit_uri: "edit/main/docs/"
 markdown_extensions:
+  - "attr_list"
   - toc:
       permalink: True
   - "admonition"

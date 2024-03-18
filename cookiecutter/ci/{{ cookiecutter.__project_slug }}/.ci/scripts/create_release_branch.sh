@@ -21,7 +21,7 @@ fi
 git branch "${NEW_BRANCH}"
 
 # Clean changelog snippets.
-find CHANGES/ \( -name "*.feature" -o -name "*.bugfix" -o -name "*.doc" -o -name "*.translation" -o -name "*.devel" -o -name "*.misc" \) -exec git rm -f \{\} +
+find CHANGES/ \( -name "*.feature" -o -name "*.bugfix" -o -name "*.removal" -o -name "*.doc" -o -name "*.translation" -o -name "*.devel" -o -name "*.misc" \) -exec git rm -f \{\} +
 {%- if cookiecutter.docs %}
 
 # Add to version.txt

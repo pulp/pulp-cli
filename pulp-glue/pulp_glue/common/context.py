@@ -318,14 +318,12 @@ class PulpContext:
             if client_id and client_secret and token_url:
                 self._api_kwargs["auth_provider"] = OAuth2AuthProvider(client_id, client_secret, token_url)
 
-            if self._api_kwargs.get("username"):
+            if username := self._api_kwargs.pop("username"):
+                password = self._api_kwargs.pop("password", None)
                 # Deprecated for 'auth'.
-                if not self._api_kwargs.get("password"):
-                    self._api_kwargs["password"] = self.prompt("password", hide_input=True)
-                self._api_kwargs["auth_provider"] = BasicAuthProvider(
-                    self._api_kwargs.pop("username"),
-                    self._api_kwargs.pop("password", None),
-                )
+                if not password:
+                    password = self.prompt("password", hide_input=True)
+                self._api_kwargs["auth_provider"] = BasicAuthProvider(username, password)
                 warnings.warn(
                     "Using 'username' and 'password' with 'PulpContext' is deprecated. "
                     "Use an auth provider with the 'auth_provider' argument instead.",

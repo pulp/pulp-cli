@@ -16,7 +16,7 @@ def pytest_collect_file(
     file_path: pathlib.Path, parent: pytest.Collector
 ) -> t.Optional[pytest.Collector]:
     if file_path.suffix == ".sh" and file_path.name.startswith("test_"):
-        return ScriptFile.from_parent(parent, path=file_path)  # type: ignore
+        return ScriptFile.from_parent(parent, path=file_path)
     return None
 
 
@@ -27,7 +27,7 @@ class ScriptFile(pytest.File):
     def collect(self) -> t.Iterable[t.Union[pytest.Item, pytest.Collector]]:
         # Extract the name between "test_" and ".sh".
         name = self.path.name[5:][:-3]
-        yield ScriptItem.from_parent(self, name=name, path=self.path)  # type: ignore
+        yield ScriptItem.from_parent(self, name=name, path=self.path)
 
 
 # HACK: Inherit from `pytest.Function` to be able to use the fixtures

@@ -12,6 +12,13 @@ from pulpcore.cli.common.generic import (
     pulp_group,
 )
 
+try:
+    import IPython
+except ImportError:
+    IPYTHON_AVAILABLE = False
+else:
+    IPYTHON_AVAILABLE = True
+
 translation = get_translation(__package__)
 _ = translation.gettext
 
@@ -21,6 +28,35 @@ def debug() -> None:
     """
     Commands useful for debugging.
     """
+
+
+if IPYTHON_AVAILABLE:
+
+    @debug.command()
+    @pass_pulp_context
+    @click.pass_context
+    def ipython(
+        ctx: click.Context,
+        pulp_ctx: PulpCLIContext,
+    ) -> None:
+        """
+        Drop into an interactive python shell.
+        Prepopulated symbols:
+          - click
+          - PluginRequirement
+          - ctx: click.Context
+          - pulp_ctx: PulpContext
+        """
+        user_ns: t.Dict[str, t.Any] = {
+            # modules
+            "click": click,
+            # Classes
+            "PluginRequirement": PluginRequirement,
+            # Objects
+            "ctx": ctx,
+            "pulp_ctx": pulp_ctx,
+        }
+        IPython.start_ipython(argv=[], user_ns=user_ns)
 
 
 @debug.command()

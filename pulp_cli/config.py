@@ -1,6 +1,7 @@
 import re
 import typing as t
 from pathlib import Path
+from urllib.parse import urlparse
 
 import click
 import toml
@@ -111,9 +112,23 @@ def config_options(command: FC) -> FC:
     return command
 
 
-def validate_config(config: t.Dict[str, t.Any], strict: bool = False) -> bool:
+def validate_config(config: t.Dict[str, t.Any], strict: bool = False) -> None:
     """Validate, that the config provides the proper data types"""
     errors: t.List[str] = []
+    if "base_url" in config:
+        try:
+            parsed_url = urlparse(config["base_url"])
+            if (
+                not parsed_url.scheme
+                or not parsed_url.netloc
+                or parsed_url.path
+                or parsed_url.params
+                or parsed_url.query
+                or parsed_url.fragment
+            ):
+                errors.append(_("'base_url' should be of the form '<schema>://<netloc>'"))
+        except ValueError:
+            errors.append(_("Failed to parse the 'base_path'."))
     if "api_root" in config and (config["api_root"][0] != "/" or config["api_root"][-1] != "/"):
         errors.append(_("'api_root' must begin and end with '/'"))
     if "format" in config and config["format"].lower() not in FORMAT_CHOICES:
@@ -149,12 +164,11 @@ def validate_config(config: t.Dict[str, t.Any], strict: bool = False) -> bool:
             errors.append(_("Missing settings: '{}'.").format("','".join(missing_settings)))
     if errors:
         raise ValueError("\n".join(errors))
-    return True
 
 
 def validate_settings(
     settings: t.MutableMapping[str, t.Dict[str, t.Any]], strict: bool = False
-) -> bool:
+) -> None:
     errors: t.List[str] = []
     if "cli" not in settings:
         errors.append(_("Could not locate default profile 'cli' setting"))
@@ -171,7 +185,6 @@ def validate_settings(
             errors.append(str(e))
     if errors:
         raise ValueError("\n".join(errors))
-    return True
 
 
 @pulp_group(name="config", help=_("Manage pulp-cli config file"))

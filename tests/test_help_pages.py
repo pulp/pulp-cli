@@ -4,15 +4,11 @@ from functools import reduce
 import click
 import pytest
 from click.testing import CliRunner
+from pytest_subtests.plugin import SubTests
 
 from pulp_cli import load_plugins, main
 
 load_plugins()
-
-
-# Workaround for missing type annotations.
-# from pytest_subtests.plugin import SubTests
-SubTests = t.Any
 
 
 def traverse_commands(command: click.Command, args: t.List[str]) -> t.Iterator[t.List[str]]:
