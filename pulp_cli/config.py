@@ -112,14 +112,7 @@ def validate_config(config: t.Dict[str, t.Any], strict: bool = False) -> None:
     if "base_url" in config:
         try:
             parsed_url = urlparse(config["base_url"])
-            if (
-                not parsed_url.scheme
-                or not parsed_url.netloc
-                or parsed_url.path
-                or parsed_url.params
-                or parsed_url.query
-                or parsed_url.fragment
-            ):
+            if not parsed_url.scheme or not parsed_url.netloc:
                 errors.append(_("'base_url' should be of the form '<schema>://<netloc>'"))
         except ValueError:
             errors.append(_("Failed to parse the 'base_path'."))

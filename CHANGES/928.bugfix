@@ -1,0 +1,1 @@
+Fixes the url validation by checking for a path.
