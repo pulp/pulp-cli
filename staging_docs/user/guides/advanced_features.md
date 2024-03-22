@@ -1,4 +1,4 @@
-# Advanced features
+# Configure (advanced)
 
 ## Custom CA bundle
 

@@ -1,4 +1,4 @@
-# Configuration
+# Configure (basic)
 
 The CLI can be configured by using a toml file.
 By default the location of this file is `~/.config/pulp/cli.toml`.
