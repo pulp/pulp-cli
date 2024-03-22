@@ -37,7 +37,7 @@ test: | tests/cli.toml
 	pytest -v tests
 
 servedocs:
-	mkdocs serve -w docs_theme -w pulp-glue/pulp_glue -w pulpcore/cli/common/generic.py
+	pulp-docs serve -w pulp-glue/pulp_glue -w pulpcore/cli/common/generic.py
 
 site:
 	mkdocs build
