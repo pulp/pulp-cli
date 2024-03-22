@@ -1,4 +1,4 @@
-# Installation
+# Install
 
 ## TL;DR: Get Started Real Fast
 
