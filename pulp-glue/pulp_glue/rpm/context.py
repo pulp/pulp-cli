@@ -94,6 +94,18 @@ class PulpRpmPackageContext(PulpContentContext):
                 self.pulp_ctx.needs_plugin(PluginRequirement("rpm", specifier=">=3.18.0"))
             else:
                 PulpException(_("--relative-path must be provided"))
+        contains_startswith = [
+            "name__contains",
+            "name__startswith",
+            "release__contains",
+            "release__startswith",
+            "arch__contains",
+            "arch__startswith",
+        ]
+        if any(k in body for k in contains_startswith):
+            self.pulp_ctx.needs_plugin(
+                PluginRequirement("rpm", specifier=">=3.20.0", feature=_("substring filters"))
+            )
         return body
 
 

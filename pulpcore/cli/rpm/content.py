@@ -109,9 +109,19 @@ list_options = [
     pulp_option("--repository-version"),
     pulp_option("--arch", allowed_with_contexts=(PulpRpmPackageContext,)),
     pulp_option(
+        "--arch-contains",
+        "arch__contains",
+        allowed_with_contexts=(PulpRpmPackageContext,),
+    ),
+    pulp_option(
         "--arch-in", "arch__in", multiple=True, allowed_with_contexts=(PulpRpmPackageContext,)
     ),
     pulp_option("--arch-ne", "arch__ne", allowed_with_contexts=(PulpRpmPackageContext,)),
+    pulp_option(
+        "--arch-startswith",
+        "arch__startswith",
+        allowed_with_contexts=(PulpRpmPackageContext,),
+    ),
     pulp_option("--epoch", allowed_with_contexts=(PulpRpmPackageContext,)),
     pulp_option(
         "--epoch-in", "epoch__in", multiple=True, allowed_with_contexts=(PulpRpmPackageContext,)
@@ -130,6 +140,11 @@ list_options = [
     ),
     pulp_option("--name", allowed_with_contexts=(PulpRpmPackageContext, PulpRpmModulemdContext)),
     pulp_option(
+        "--name-contains",
+        "name__contains",
+        allowed_with_contexts=(PulpRpmPackageContext, PulpRpmModulemdContext),
+    ),
+    pulp_option(
         "--name-in",
         "name__in",
         multiple=True,
@@ -138,6 +153,11 @@ list_options = [
     pulp_option(
         "--name-ne",
         "name__ne",
+        allowed_with_contexts=(PulpRpmPackageContext, PulpRpmModulemdContext),
+    ),
+    pulp_option(
+        "--name-startswith",
+        "name__startswith",
         allowed_with_contexts=(PulpRpmPackageContext, PulpRpmModulemdContext),
     ),
     pulp_option("--package-href", allowed_with_contexts=(PulpRpmPackageContext,)),
@@ -150,9 +170,19 @@ list_options = [
     ),
     pulp_option("--release", allowed_with_contexts=(PulpRpmPackageContext,)),
     pulp_option(
+        "--release-contains",
+        "release__contains",
+        allowed_with_contexts=(PulpRpmPackageContext,),
+    ),
+    pulp_option(
         "--release-in", "release__in", multiple=True, allowed_with_contexts=(PulpRpmPackageContext,)
     ),
     pulp_option("--release-ne", "release__ne", allowed_with_contexts=(PulpRpmPackageContext,)),
+    pulp_option(
+        "--release-startswith",
+        "release__startswith",
+        allowed_with_contexts=(PulpRpmPackageContext,),
+    ),
     pulp_option("--severity", allowed_with_contexts=(PulpRpmAdvisoryContext,)),
     pulp_option(
         "--severity-in",

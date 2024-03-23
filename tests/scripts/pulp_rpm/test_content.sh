@@ -125,6 +125,8 @@ do
   fi
 done
 
+expect_succ pulp rpm content list --name-contains "${RPM_NAME}"
+expect_succ pulp rpm content list --name-startswith "${RPM_NAME}"
 expect_succ pulp rpm content list --name-in "${RPM_NAME}" --name-in "${RPM2_NAME}"
 pulp rpm content list
 expect_succ test "$(echo "${OUTPUT}" | jq -r 'length')" -eq 2
