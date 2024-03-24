@@ -38,13 +38,7 @@ sha256=$(sha256sum test.txt | cut -d' ' -f1)
 expect_succ pulp artifact upload --file test.txt
 expect_succ pulp file content create --sha256 "$sha256" --relative-path upload_test/test.txt
 
-# Old content commands
 expect_succ pulp file repository create --name "cli_test_file_repository"
-expect_succ pulp file repository add --repository "cli_test_file_repository" --sha256 "$sha256" --relative-path upload_test/test.txt
-expect_succ pulp file repository add --name "cli_test_file_repository" --sha256 "$sha256" --relative-path upload_test/test.txt --base-version 0
-expect_succ pulp file repository remove --repository "cli_test_file_repository" --sha256 "$sha256" --relative-path upload_test/test.txt
-expect_succ pulp file repository remove --name "cli_test_file_repository" --sha256 "$sha256" --relative-path upload_test/test.txt --base-version 1
-
 # New content commands
 expect_succ pulp file repository content add --repository "cli_test_file_repository" --sha256 "$sha256" --relative-path upload_test/test.txt
 expect_succ pulp file repository content add --repository "cli_test_file_repository" --sha256 "$sha256" --relative-path upload_test/test.txt --base-version 0

@@ -56,30 +56,22 @@ if IPYTHON_AVAILABLE:
             "ctx": ctx,
             "pulp_ctx": pulp_ctx,
         }
-        IPython.start_ipython(argv=[], user_ns=user_ns)
+        IPython.start_ipython(argv=[], user_ns=user_ns)  # type:ignore
 
 
 @debug.command()
 @click.option("--name", required=True)
-@click.option("--min-version", help=_("Succeed only if the installed version is not smaller."))
-@click.option("--max-version", help=_("Succeed only if the installed version is smaller."))
 @click.option("--specifier", help=_("Succeed only if the installed version is contained."))
 @pass_pulp_context
 def has_plugin(
     pulp_ctx: PulpCLIContext,
     name: str,
-    min_version: t.Optional[str],
-    max_version: t.Optional[str],
     specifier: t.Optional[str],
 ) -> None:
     """
     Check whether a specific plugin is installed on the server.
     """
-    if (min_version or max_version) and specifier:
-        raise click.UsageError(_("You can either provide versions or the specifier."))
-    available = pulp_ctx.has_plugin(
-        PluginRequirement(name, min=min_version, max=max_version, specifier=specifier)
-    )
+    available = pulp_ctx.has_plugin(PluginRequirement(name, specifier=specifier))
     pulp_ctx.output_result(available)
     sys.exit(0 if available else 1)
 

@@ -1,0 +1,1 @@
+Removed unused `format` parameter from `PulpContext`.

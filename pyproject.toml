@@ -209,6 +209,7 @@ markers = [
 
 [tool.mypy]
 strict = true
+warn_unused_ignores = false
 show_error_codes = true
 files = "pulpcore/**/*.py, pulp_cli/**/*.py, tests/*.py, pytest_pulp_cli/**/*.py"
 namespace_packages = true

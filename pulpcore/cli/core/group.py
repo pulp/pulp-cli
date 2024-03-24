@@ -198,11 +198,8 @@ user.add_command(
 def remove_user(pulp_ctx: PulpCLIContext, entity_ctx: PulpEntityContext, username: str) -> None:
     assert isinstance(entity_ctx, PulpGroupUserContext)
 
-    user_href = PulpUserContext(pulp_ctx).find(username=username)["pulp_href"]
-    user_pk = user_href.split("/")[-2]
-    group_user_href = f"{entity_ctx.group_ctx.pulp_href}users/{user_pk}/"
-    # TODO Check if this can be transformed to a preloaded context.
-    entity_ctx.delete(group_user_href)
+    user = PulpUserContext(pulp_ctx, entity={"username": username})
+    entity_ctx.group_ctx.remove_user(user)
 
 
 @group.group(name="role-assignment")

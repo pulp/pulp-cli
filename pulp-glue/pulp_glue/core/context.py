@@ -125,6 +125,18 @@ class PulpGroupContext(PulpEntityContext):
             return "auth_group_href"
         return "group_href"
 
+    def add_user(self, user: "PulpUserContext") -> None:
+        pass
+
+    def remove_user(self, user: "PulpUserContext") -> None:
+        user_pk = user.pulp_href.split("/")[-2]
+        group_user_ctx = PulpGroupUserContext(self.pulp_ctx, self)
+        # This is a bad workaround, because the api is terrible.
+        group_user_ctx._entity = {
+            "pulp_href": f"{group_user_ctx.group_ctx.pulp_href}users/{user_pk}/"
+        }
+        group_user_ctx.delete()
+
 
 class PulpGroupPermissionContext(PulpEntityContext):
     ENTITY = _("group permission")

@@ -961,13 +961,6 @@ repository_href_option = click.option(
     expose_value=False,
 )
 
-repository_option = click.option(
-    "--repository",
-    help=_("Name of the repository"),
-    callback=lookup_callback("name", PulpRepositoryContext),
-    expose_value=False,
-)
-
 repository_lookup_option = resource_lookup_option(
     "--repository",
     context_class=PulpRepositoryContext,
@@ -1375,7 +1368,7 @@ def version_command(**kwargs: t.Any) -> click.Command:
     """
 
     kwargs.setdefault("name", "version")
-    decorators = kwargs.pop("decorators", [repository_href_option, repository_option])
+    decorators = kwargs.pop("decorators", [repository_lookup_option])
     list_only = kwargs.pop("list_only", False)
 
     @pulp_group(**kwargs)
@@ -1394,7 +1387,7 @@ def version_command(**kwargs: t.Any) -> click.Command:
         callback.add_command(destroy_command(decorators=decorators + [version_option]))
 
         @callback.command()
-        @repository_option
+        @repository_lookup_option
         @version_option
         @pass_repository_version_context
         @pass_pulp_context
@@ -1544,7 +1537,7 @@ def repository_content_command(**kwargs: t.Any) -> click.Group:
     @click.option("--all-types", is_flag=True)
     @limit_option
     @offset_option
-    @repository_option
+    @repository_lookup_option
     @click.option("--version", type=int, callback=version_callback)
     @pass_pulp_context
     @pass_content_context
@@ -1564,7 +1557,7 @@ def repository_content_command(**kwargs: t.Any) -> click.Group:
         pulp_ctx.output_result(result)
 
     @pulp_command("add")
-    @repository_option
+    @repository_lookup_option
     @click.option("--base-version", type=int, callback=version_callback)
     @pass_content_context
     def content_add(
@@ -1576,7 +1569,7 @@ def repository_content_command(**kwargs: t.Any) -> click.Group:
 
     @pulp_command("remove")
     @click.option("--all", is_flag=True, help=_("Remove all content from repository version"))
-    @repository_option
+    @repository_lookup_option
     @click.option("--base-version", type=int, callback=version_callback)
     @pass_content_context
     def content_remove(
@@ -1589,7 +1582,7 @@ def repository_content_command(**kwargs: t.Any) -> click.Group:
         repo_ctx.modify(remove_content=remove_content, base_version=base_version.pulp_href)
 
     @pulp_command("modify")
-    @repository_option
+    @repository_lookup_option
     @click.option("--base-version", type=int, callback=version_callback)
     def content_modify(
         base_version: PulpRepositoryVersionContext,
