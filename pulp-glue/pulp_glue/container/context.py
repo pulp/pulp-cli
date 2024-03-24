@@ -142,7 +142,6 @@ class PulpContainerRepositoryContext(PulpContainerBaseRepositoryContext):
 
     def modify(
         self,
-        href: t.Optional[str] = None,
         add_content: t.Optional[t.List[str]] = None,
         remove_content: t.Optional[t.List[str]] = None,
         base_version: t.Optional[str] = None,
@@ -150,13 +149,13 @@ class PulpContainerRepositoryContext(PulpContainerBaseRepositoryContext):
         if remove_content:
             self.call(
                 "remove",
-                parameters={self.HREF: href or self.pulp_href},
+                parameters={self.HREF: self.pulp_href},
                 body={"content_units": remove_content},
             )
         if add_content:
             self.call(
                 "add",
-                parameters={self.HREF: href or self.pulp_href},
+                parameters={self.HREF: self.pulp_href},
                 body={"content_units": add_content},
             )
 

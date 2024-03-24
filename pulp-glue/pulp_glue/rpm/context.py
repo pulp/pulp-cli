@@ -344,9 +344,7 @@ class PulpRpmRepositoryContext(PulpRepositoryContext):
             )
         return body
 
-    def sync(
-        self, href: t.Optional[str] = None, body: t.Optional[EntityDefinition] = None
-    ) -> t.Any:
+    def sync(self, body: t.Optional[EntityDefinition] = None) -> t.Any:
         if body:
             if body.get("optimize") is not None:
                 self.pulp_ctx.needs_plugin(PluginRequirement("rpm", specifier=">=3.3.0"))
@@ -357,4 +355,4 @@ class PulpRpmRepositoryContext(PulpRepositoryContext):
                     PluginRequirement("rpm", specifier=">=3.18.10", feature="--skip-type treeinfo")
                 )
 
-        return super().sync(href, body)
+        return super().sync(body)
