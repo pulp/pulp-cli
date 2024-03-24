@@ -43,39 +43,6 @@ def _content_callback(ctx: click.Context, param: click.Parameter, value: t.Any) 
     return value
 
 
-def _fields_callback(ctx: click.Context, param: click.Parameter, value: t.Any) -> t.Any:
-    if value:
-        click.echo(_("Option {name} is deprecated.").format(name=param.opts[0]), err=True)
-        value = tuple(value.split(","))
-
-    return value
-
-
-def _list_command_wrapper(list_command: click.Command) -> click.Command:
-    assert list_command.callback is not None
-    _old_callback: t.Callable[[t.Any], t.Any] = list_command.callback
-
-    def _new_callback(*args: t.Any, **kwargs: t.Any) -> t.Any:
-        _fields = kwargs.pop("_fields")
-        if _fields:
-            kwargs["fields"] += _fields
-        _exclude_fields = kwargs.pop("_exclude_fields")
-        if _exclude_fields:
-            kwargs["exclude_fields"] += _exclude_fields
-
-        if not kwargs["fields"] and not kwargs["exclude_fields"]:
-            kwargs["exclude_fields"] = (
-                "files",
-                "manifest",
-                "docs_blob",
-            )
-
-        return _old_callback(*args, **kwargs)
-
-    list_command.callback = _new_callback
-    return list_command
-
-
 repository_option = resource_option(
     "--repository",
     default_plugin="ansible",
@@ -149,23 +116,6 @@ list_options = [
     ),
 ]
 
-# Deprecated fields options
-
-fields_options = [
-    pulp_option(
-        "--fields",
-        "_fields",
-        help=_("String list of fields to include in the result [DEPRECATED]"),
-        callback=_fields_callback,
-    ),
-    pulp_option(
-        "--exclude-fields",
-        "_exclude_fields",
-        help=_("String list of fields to exclude from result [DEPRECATED]"),
-        callback=_fields_callback,
-    ),
-]
-
 lookup_options = [
     click.option(
         "--name",
@@ -213,7 +163,7 @@ lookup_options = [
     href_option,
 ]
 
-content.add_command(_list_command_wrapper(list_command(decorators=list_options + fields_options)))
+content.add_command(list_command(decorators=list_options))
 content.add_command(show_command(decorators=lookup_options))
 
 

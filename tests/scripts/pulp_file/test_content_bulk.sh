@@ -40,11 +40,6 @@ echo "${ERROUTPUT}" | grep -q "should be instance of 'str'"
 expect_fail pulp file repository content modify --repository "cli_test_file_repository" --add-content "[{\"sha256\":\"$sha256_1\",\"relative_path\":\"\"}]"
 echo "${ERROUTPUT}" | grep -q "Key 'relative_path' error:"
 
-# Old content commands
-# Add content using JSON string
-expect_succ pulp file repository modify --repository "cli_test_file_repository" --add-content "[{\"sha256\":\"$sha256_1\",\"relative_path\":\"upload_test/test_1.txt\"},{\"sha256\":\"$sha256_2\",\"relative_path\":\"upload_test/test_2.txt\"},{\"sha256\":\"$sha256_3\",\"relative_path\":\"upload_test/test_3.txt\"}]"
-expect_succ pulp file repository modify --repository "cli_test_file_repository" --remove-content "[{\"sha256\":\"$sha256_1\",\"relative_path\":\"upload_test/test_1.txt\"},{\"sha256\":\"$sha256_2\",\"relative_path\":\"upload_test/test_2.txt\"},{\"sha256\":\"$sha256_3\",\"relative_path\":\"upload_test/test_3.txt\"}]"
-
 # Add content using JSON file
 cat <<EOT >> add_content.json
 [
@@ -64,9 +59,6 @@ cat <<EOT >> add_content.json
 EOT
 cp add_content.json remove_content.json
 
-expect_succ pulp file repository modify --name "cli_test_file_repository" --add-content "@-" --base-version 0 < add_content.json
-expect_succ pulp file repository modify --name "cli_test_file_repository" --remove-content "@remove_content.json"
-
 # New Content commands
 expect_succ pulp file repository content modify --repository "cli_test_file_repository" --add-content "[{\"sha256\":\"$sha256_1\",\"relative_path\":\"upload_test/test_1.txt\"},{\"sha256\":\"$sha256_2\",\"relative_path\":\"upload_test/test_2.txt\"},{\"sha256\":\"$sha256_3\",\"relative_path\":\"upload_test/test_3.txt\"}]"
 expect_succ pulp file repository content list --repository "cli_test_file_repository"
@@ -74,4 +66,3 @@ test "$(echo "$OUTPUT" | jq -r length)" -eq "3"
 expect_succ pulp file repository content modify --repository "cli_test_file_repository" --remove-content "@remove_content.json"
 expect_succ pulp file repository content list --repository "cli_test_file_repository"
 test "$(echo "$OUTPUT" | jq -r length)" -eq "0"
-

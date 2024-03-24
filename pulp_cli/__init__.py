@@ -1,7 +1,6 @@
 import os
 import sys
 import typing as t
-import warnings
 from types import ModuleType
 
 import click
@@ -42,12 +41,7 @@ def load_plugins(enabled_plugins: t.Optional[t.List[str]] = None) -> None:
         and entry_point.name not in loaded_plugins
     }
     for name, plugin in discovered_plugins.items():
-        if hasattr(plugin, "mount"):
-            plugin.mount(main, discovered_plugins=discovered_plugins)
-        else:
-            warnings.warn(
-                DeprecationWarning("Plugin '{name}' has no `mount` entrypoint which is deprecated.")
-            )
+        plugin.mount(main, discovered_plugins=discovered_plugins)
         loaded_plugins.add(name)
 
 

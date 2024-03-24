@@ -1,0 +1,2 @@
+Removed deprecated file and python content modification commands.
+Use the `pulp {file,python} content ...` commands.
