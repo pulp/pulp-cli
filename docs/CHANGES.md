@@ -10,6 +10,22 @@
 
 [//]: # (towncrier release notes start)
 
+## 0.24.1 (2024-03-18) {: #0.24.1 }
+
+
+#### Bugfixes {: #0.24.1-bugfix }
+
+- Fixed an issue where passing `usename=None` in `api_kwargs` was handled different than not providing it at all.
+
+
+### Pulp GLUE {: #0.24.1-pulp-glue }
+
+
+No significant changes.
+
+
+---
+
 ## 0.24.0 (2024-03-11) {: #0.24.0 }
 
 
