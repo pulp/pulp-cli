@@ -34,7 +34,7 @@ tests/cli.toml:
 	@echo "In order to configure the tests to talk to your test server, you might need to edit $@ ."
 
 test: | tests/cli.toml
-	pytest -v tests
+	pytest -v tests pulp-glue/tests
 
 servedocs:
 	pulp-docs serve -w pulp-glue/pulp_glue -w pulpcore/cli/common/generic.py
