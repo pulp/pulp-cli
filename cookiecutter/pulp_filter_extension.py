@@ -55,6 +55,19 @@ def to_nice_yaml(data: t.Any, level: int = 0, embed_in: str = "") -> str:
         return result
 
 
+def to_toml_value(value: t.Any) -> str:
+    if isinstance(value, str):
+        return '"' + value + '"'
+    elif value is True:
+        return "true"
+    elif value is False:
+        return "false"
+    elif isinstance(value, int):
+        return str(value)
+    else:
+        raise NotImplementedError("Not an atomic value.")
+
+
 def to_camel(name: str) -> str:
     return name.title().replace("_", "")
 
@@ -75,6 +88,7 @@ class PulpFilterExtension(Extension):
         environment.filters["dash"] = to_dash
         environment.filters["snake"] = to_snake
         environment.filters["to_nice_yaml"] = to_nice_yaml
+        environment.filters["to_toml_value"] = to_toml_value
         environment.filters["shquote"] = shlex.quote
 
 
