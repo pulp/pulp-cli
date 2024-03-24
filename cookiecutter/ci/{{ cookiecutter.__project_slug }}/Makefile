@@ -53,7 +53,7 @@ test: | tests/cli.toml
 {%- if cookiecutter.docs %}
 
 servedocs:
-	mkdocs serve -w docs_theme -w pulp-glue{{ cookiecutter.__app_label_suffix }}/pulp_glue -w pulpcore/cli/common/generic.py
+	pulp-docs serve -w pulp-glue/pulp_glue -w pulpcore/cli/common/generic.py
 
 site:
 	mkdocs build

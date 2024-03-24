@@ -35,10 +35,3 @@ jobs:
           twine upload dist/*
           cd ..
           twine upload dist/*
-{%- if cookiecutter.docs %}
-  publish-docs:
-    needs:
-      - "publish-pypi"
-    uses: "./.github/workflows/publish_docs.yml"
-    secrets: "inherit"
-{%- endif %}
