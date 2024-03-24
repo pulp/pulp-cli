@@ -66,31 +66,11 @@ namespaces = true
 app_label = ""
 docs = true
 translations = true
-test_matrix = """
-- python: "3.11"
-  image_tag: "nightly"
-  pulp_api_root: "/relocated/djnd/"
-- python: "3.11"
-  image_tag: "latest"
-- python: "3.12"
-  image_tag: "3.39"
-- python: "3.12"
-  image_tag: "3.28"
-  lower_bounds: true
-- python: "3.8"
-  image_tag: "3.22"
-- python: "3.9"
-  image_tag: "3.21"
-  pulp_api_root: "/relocated/djnd/"
-- python: "3.10"
-  image_tag: "3.18"
-  lower_bounds: true
-"""
 
 [tool.towncrier]
 filename = "docs/CHANGES.md"
 directory = "CHANGES/"
-title_format = "## {version} ({project_date})"
+title_format = "## {version} ({project_date}) {{: #{version} }}"
 template = "CHANGES/.TEMPLATE.md"
 issue_format = "[#{issue}](https://github.com/pulp/pulp-cli/issues/{issue})"
 start_string = "[//]: # (towncrier release notes start)\n"

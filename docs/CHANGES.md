@@ -10,16 +10,15 @@
 
 [//]: # (towncrier release notes start)
 
-## 0.24.1 (2024-03-18)
+## 0.24.1 (2024-03-18) {: #0.24.1 }
 
 
-
-#### Bugfixes
+#### Bugfixes {: #0.24.1-bugfix }
 
 - Fixed an issue where passing `usename=None` in `api_kwargs` was handled different than not providing it at all.
 
 
-### Pulp GLUE
+### Pulp GLUE {: #0.24.1-pulp-glue }
 
 
 No significant changes.
@@ -27,11 +26,10 @@ No significant changes.
 
 ---
 
-## 0.24.0 (2024-03-11)
+## 0.24.0 (2024-03-11) {: #0.24.0 }
 
 
-
-#### Features
+#### Features {: #0.24.0-feature }
 
 - Add `plugins` configuration option to select which plugins to load.
   [#291](https://github.com/pulp/pulp-cli/issues/291)
@@ -43,7 +41,7 @@ No significant changes.
   [#889](https://github.com/pulp/pulp-cli/issues/889)
 
 
-#### Bugfixes
+#### Bugfixes {: #0.24.0-bugfix }
 
 - User-entered order of parameters no longer matters for repository version commands.
   [#650](https://github.com/pulp/pulp-cli/issues/650)
@@ -53,24 +51,27 @@ No significant changes.
   This should fix both type annotations as well as translations.
 
 
-#### Deprecations and Removals
+#### Improved Documentation {: #0.24.0-doc }
 
-- Marked option `--sqlite-metadata` on `pulp rpm repository update/create` unavailable for `pulp_rpm>=3.25.0`, as it was removed there.
-  [#831](https://github.com/pulp/pulp-cli/issues/831)
+- Better separate the concepts of cli and glue in the architecture docs.
+
+
+#### Deprecations and Removals {: #0.24.0-removal }
+
 - Dropped support for python 3.6 and 3.7.
 
 
-### Pulp GLUE
+### Pulp GLUE {: #0.24.0-pulp-glue }
 
 
-#### Features
+#### Features {: #0.24.0-pulp-glue-feature }
 
 - Added `auth` to `apikwargs` so you can plug in any `requests.auth.AuthBase`.
   [#821](https://github.com/pulp/pulp-cli/issues/821)
 - Added `auth_provider` to `api_kwargs` to allow flexible authentication schemes driven by the openapi3 specs.
 
 
-#### Bugfixes
+#### Bugfixes {: #0.24.0-pulp-glue-bugfix }
 
 - Added a missing check for uniqueness on entity lookup.
   [#894](https://github.com/pulp/pulp-cli/issues/894)
@@ -78,33 +79,28 @@ No significant changes.
   This should fix both type annotations as well as translations.
 
 
-#### Improved Documentation
+#### Improved Documentation {: #0.24.0-pulp-glue-doc }
 
 - Fixed the style to display the type of objects in the code reference docs.
 
 
-#### Deprecations and Removals
+#### Deprecations and Removals {: #0.24.0-pulp-glue-removal }
 
-- Added version restriction to prevent the use of `sqlite_metadata` attribute on Repository and Publication contexts for `pulp_rpm>=3.25.0`.
-  [#831](https://github.com/pulp/pulp-cli/issues/831)
-- Adjusted to `pulp_rpm>=3.25` no longer allowing publishing repositories with md5, sha1, or sha224 checksums.
-  [#851](https://github.com/pulp/pulp-cli/issues/851)
 - Dropped support for python 3.6 and 3.7.
 
 
 ---
 
-## 0.23.2 (2024-01-22)
+## 0.23.2 (2024-01-22) {: #0.23.2 }
 
 
-
-#### Bugfixes
+#### Bugfixes {: #0.23.2-bugfix }
 
 - Fixed a regression introduced in `get_translations`.
   [#874](https://github.com/pulp/pulp-cli/issues/874)
 
 
-### Pulp GLUE
+### Pulp GLUE {: #0.23.2-pulp-glue }
 
 
 No significant changes.
@@ -112,20 +108,19 @@ No significant changes.
 
 ---
 
-## 0.23.1 (2024-01-18)
+## 0.23.1 (2024-01-18) {: #0.23.1 }
 
 
-
-#### Bugfixes
+#### Bugfixes {: #0.23.1-bugfix }
 
 - Fixed the distribution of extra files with the package.
   This should fix both type annotations as well as translations.
 
 
-### Pulp GLUE
+### Pulp GLUE {: #0.23.1-pulp-glue }
 
 
-#### Bugfixes
+#### Bugfixes {: #0.23.1-pulp-glue-bugfix }
 
 - Fixed the distribution of extra files with the package.
   This should fix both type annotations as well as translations.
@@ -133,19 +128,19 @@ No significant changes.
 
 ---
 
-## 0.23.0 (2024-01-16)
+## 0.23.0 (2024-01-16) {: #0.23.0 }
 
 
+#### Features {: #0.23.0-feature }
 
-#### Features
-
+- Switched the buildsystem from using `setup.py` to using `pyproject.toml`.
 - Ansible Collection upload now uses the Pulp V3 API and uploading directly to a repository with `--repository`.
   [#844](https://github.com/pulp/pulp-cli/issues/844)
 - Added support for `--checksum-type` option (combination of `--package-checksum-type` and `--metadata-checksum-type`) when creating rpm publications and configuring rpm repository publish settings.
   [#850](https://github.com/pulp/pulp-cli/issues/850)
 
 
-#### Bugfixes
+#### Bugfixes {: #0.23.0-bugfix }
 
 - Fixed a bug where the filenames on uploads were not being sent.
   [#842](https://github.com/pulp/pulp-cli/issues/842)
@@ -153,7 +148,7 @@ No significant changes.
   [#865](https://github.com/pulp/pulp-cli/issues/865)
 
 
-#### Improved Documentation
+#### Improved Documentation {: #0.23.0-doc }
 
 - Improved `Developer Material/Architecture` section by adding clarification about `pulp-glue`, version guards and `pulp_option` factory.
   [#836](https://github.com/pulp/pulp-cli/issues/836)
@@ -162,17 +157,16 @@ No significant changes.
 - Added information how to use pipx for installation.
 
 
-
-#### Deprecations and Removals
+#### Deprecations and Removals {: #0.23.0-removal }
 
 - Marked option `--sqlite-metadata` on `pulp rpm repository update/create` unavailable for `pulp_rpm>=3.25.0`, as it was removed there.
   [#831](https://github.com/pulp/pulp-cli/issues/831)
 
 
-### Pulp GLUE
+### Pulp GLUE {: #0.23.0-pulp-glue }
 
 
-#### Deprecations and Removals
+#### Deprecations and Removals {: #0.23.0-pulp-glue-removal }
 
 - Added version restriction to prevent the use of `sqlite_metadata` attribute on Repository and Publication contexts for `pulp_rpm>=3.25.0`.
   [#831](https://github.com/pulp/pulp-cli/issues/831)
@@ -183,19 +177,17 @@ No significant changes.
 ---
 
 
-## 0.22.0 (2023-12-04)
+## 0.22.0 (2023-12-04) {: #0.22.0 }
 
 
-
-#### Features
+#### Features {: #0.22.0-feature }
 
 - Added the ability to reclaim disk space (cmd: 'pulp repository reclaim').
   [#620](https://github.com/pulp/pulp-cli/issues/620)
 - Added ``--repo-config`` option to the rpm repository and publication.
-  
 
 
-#### Bugfixes
+#### Bugfixes {: #0.22.0-bugfix }
 
 - Arguments --gpgcheck and --repo-gpgcheck in creating a rpm repository no longer fail to convert to integer.
   [#677](https://github.com/pulp/pulp-cli/issues/677)
@@ -205,49 +197,48 @@ No significant changes.
   [#781](https://github.com/pulp/pulp-cli/issues/781)
 
 
-#### Improved Documentation
+#### Improved Documentation {: #0.22.0-doc }
 
 - Added a version select widget to docs.
-  
+- Added reference docs for `pulpcore.cli.common.generic`.
 
 
-### Pulp GLUE
+### Pulp GLUE {: #0.22.0-pulp-glue }
 
 
-#### Features
+#### Features {: #0.22.0-pulp-glue-feature }
 
 - Added 'PulpGenericRepositoryContext' class to handle repository commands not available with subtypes.
   [#620](https://github.com/pulp/pulp-cli/issues/620)
 - Added ``repo_config`` option PluginRequirement checks to the ``PulpRpmRepositoryContext``and ``PulpRpmPublicationContext``.
-  
 - Added parameter `pulp_href` to `PulpRepositoryVersionContext` and `number` to `PulpRepositoryContext.get_version_context`.
-  
 - Use the labels api starting with `pulpcore` 3.34.
-  
 
 
-#### Improved Documentation
+#### Improved Documentation {: #0.22.0-pulp-glue-doc }
 
 - Add API reference docs for pulp-glue.
   [#808](https://github.com/pulp/pulp-cli/issues/808)
 
 
-#### Translations
+#### Translations {: #0.22.0-pulp-glue-translation }
 
 - Added translation files machinery for pulp-glue.
   [#634](https://github.com/pulp/pulp-cli/issues/634)
 
 
----## 0.21.4 (2023-10-02)
+---
 
 
+## 0.21.4 (2023-10-02) {: #0.21.4 }
 
-#### Improved Documentation
+
+#### Improved Documentation {: #0.21.4-doc }
 
 - Added a version select widget to docs.
 
 
-### Pulp GLUE
+### Pulp GLUE {: #0.21.4-pulp-glue }
 
 
 No significant changes.
@@ -256,14 +247,13 @@ No significant changes.
 ---
 
 
-## 0.21.3 (2023-09-22)
-
+## 0.21.3 (2023-09-22) {: #0.21.3 }
 
 
 No significant changes.
 
 
-### Pulp GLUE
+### Pulp GLUE {: #0.21.3-pulp-glue }
 
 
 No significant changes.
@@ -272,17 +262,16 @@ No significant changes.
 ---
 
 
-## 0.21.2 (2023-08-11)
+## 0.21.2 (2023-08-11) {: #0.21.2 }
 
 
-
-#### Bugfixes
+#### Bugfixes {: #0.21.2-bugfix }
 
 - Fixed a crash in `pulp domain` when a default value for `--domain` was provided in the config file.
   [#769](https://github.com/pulp/pulp-cli/issues/769)
 
 
-### Pulp GLUE
+### Pulp GLUE {: #0.21.2-pulp-glue }
 
 
 No significant changes.
@@ -291,14 +280,13 @@ No significant changes.
 ---
 
 
-## 0.21.1 (2023-08-04)
-
+## 0.21.1 (2023-08-04) {: #0.21.1 }
 
 
 No significant changes.
 
 
-### Pulp GLUE
+### Pulp GLUE {: #0.21.1-pulp-glue }
 
 
 No significant changes.
@@ -307,11 +295,10 @@ No significant changes.
 ---
 
 
-## 0.21.0 (2023-08-03)
+## 0.21.0 (2023-08-03) {: #0.21.0 }
 
 
-
-#### Features
+#### Features {: #0.21.0-feature }
 
 - Added `role` subcommands to `rpm` commands.
   [#630](https://github.com/pulp/pulp-cli/issues/630)
@@ -319,7 +306,7 @@ No significant changes.
   [#699](https://github.com/pulp/pulp-cli/issues/699)
 
 
-#### Bugfixes
+#### Bugfixes {: #0.21.0-bugfix }
 
 - Narrow down click version given a breaking change on 8.1.4.
   [#715](https://github.com/pulp/pulp-cli/issues/715)
@@ -329,15 +316,15 @@ No significant changes.
   [#752](https://github.com/pulp/pulp-cli/issues/752)
 
 
-#### Misc
+#### Misc {: #0.21.0-misc }
 
 - [#726](https://github.com/pulp/pulp-cli/issues/726)
 
 
-### Pulp GLUE
+### Pulp GLUE {: #0.21.0-pulp-glue }
 
 
-#### Features
+#### Features {: #0.21.0-pulp-glue-feature }
 
 - Added role capability to rpm contexts.
   [#630](https://github.com/pulp/pulp-cli/issues/630)
@@ -350,18 +337,19 @@ No significant changes.
 ---
 
 
-## 0.20.7 (2024-01-15)
+## 0.20.7 (2024-01-15) {: #0.20.7 }
 
 
-
-### Bugfixes
+### Bugfixes {: #0.20.7-bugfix }
 
 - Fixed a crash in `pulp domain` when a default value for `--domain` was provided in the config file.
   [#769](https://github.com/pulp/pulp-cli/issues/769)
 
 
----## 0.20.6 (2023-10-02)
+---
 
+
+## 0.20.6 (2023-10-02) {: #0.20.6 }
 
 
 No significant changes.
@@ -370,11 +358,10 @@ No significant changes.
 ---
 
 
-## 0.20.5 (2023-10-02)
+## 0.20.5 (2023-10-02) {: #0.20.5 }
 
 
-
-### Improved Documentation
+### Improved Documentation {: #0.20.0-doc }
 
 - Added a version select widget to docs.
 
@@ -383,8 +370,7 @@ No significant changes.
 ---
 
 
-## 0.20.4 (2023-09-22)
-
+## 0.20.4 (2023-09-22) {: #0.20.4 }
 
 
 No significant changes.
@@ -393,11 +379,10 @@ No significant changes.
 ---
 
 
-## 0.20.3 (2023-07-28)
+## 0.20.3 (2023-07-28) {: #0.20.3 }
 
 
-
-### Bugfixes
+### Bugfixes {: #0.20.3-bugfix }
 
 - Made api-quirks idempotent to prevent them from failing once the original api is fixed.
   [#752](https://github.com/pulp/pulp-cli/issues/752)
@@ -406,11 +391,10 @@ No significant changes.
 ---
 
 
-## 0.20.2 (2023-07-19)
+## 0.20.2 (2023-07-19) {: #0.20.2 }
 
 
-
-### Bugfixes
+### Bugfixes {: #0.20.2-bugfix }
 
 - Pinnend PyYAML version to fix installation issues.
   [#724](https://github.com/pulp/pulp-cli/issues/724)
@@ -419,11 +403,10 @@ No significant changes.
 ---
 
 
-## 0.20.1 (2023-07-07)
+## 0.20.1 (2023-07-07) {: #0.20.1 }
 
 
-
-### Bugfixes
+### Bugfixes {: #0.20.1-bugfix }
 
 - Narrow down click version given a breaking change on 8.1.4.
   [#715](https://github.com/pulp/pulp-cli/issues/715)
@@ -432,11 +415,10 @@ No significant changes.
 ---
 
 
-## 0.20.0 (2023-06-28)
+## 0.20.0 (2023-06-28) {: #0.20.0 }
 
 
-
-### Features
+### Features {: #0.20.0-feature }
 
 - Add '--metadata-signing-service' option to rpm.
   [#605](https://github.com/pulp/pulp-cli/issues/605)
@@ -446,7 +428,7 @@ No significant changes.
   [#697](https://github.com/pulp/pulp-cli/issues/697)
 
 
-### Bugfixes
+### Bugfixes {: #0.20.0-bugfix }
 
 - Renamed `domains` command group to `domain` to follow the cli convention.
   [#685](https://github.com/pulp/pulp-cli/issues/685)
@@ -454,7 +436,7 @@ No significant changes.
   [#692](https://github.com/pulp/pulp-cli/issues/692)
 
 
-### Deprecations and Removals
+### Deprecations and Removals {: #0.20.0-removal }
 
 - Deprecate the use of `min` and `max` in `PluginRequirement`.
   [#681](https://github.com/pulp/pulp-cli/issues/681)
@@ -463,11 +445,10 @@ No significant changes.
 ---
 
 
-## 0.19.5 (2023-07-28)
+## 0.19.5 (2023-07-28) {: #0.19.5 }
 
 
-
-### Bugfixes
+### Bugfixes {: #0.19.5-bugfix }
 
 - Made api-quirks idempotent to prevent them from failing once the original api is fixed.
   [#752](https://github.com/pulp/pulp-cli/issues/752)
@@ -476,11 +457,10 @@ No significant changes.
 ---
 
 
-## 0.19.4 (2023-07-19)
+## 0.19.4 (2023-07-19) {: #0.19.4 }
 
 
-
-### Bugfixes
+### Bugfixes {: #0.19.4-bugfix }
 
 - Pinnend PyYAML version to fix installation issues.
   [#724](https://github.com/pulp/pulp-cli/issues/724)
@@ -489,11 +469,10 @@ No significant changes.
 ---
 
 
-## 0.19.3 (2023-07-10)
+## 0.19.3 (2023-07-10) {: #0.19.3 }
 
 
-
-### Bugfixes
+### Bugfixes {: #0.19.3-bugfix }
 
 - Narrow down click version given a breaking change on 8.1.4.
   [#715](https://github.com/pulp/pulp-cli/issues/715)
@@ -502,11 +481,10 @@ No significant changes.
 ---
 
 
-## 0.19.2 (2023-05-22)
+## 0.19.2 (2023-05-22) {: #0.19.2 }
 
 
-
-### Bugfixes
+### Bugfixes {: #0.19.2-bugfix }
 
 - Fixed some tests that made assumptions that worked, but were nonetheless incorrect.
   [#692](https://github.com/pulp/pulp-cli/issues/692)
@@ -515,8 +493,7 @@ No significant changes.
 ---
 
 
-## 0.19.1 (2023-05-02)
-
+## 0.19.1 (2023-05-02) {: #0.19.1 }
 
 
 No significant changes.
@@ -525,11 +502,10 @@ No significant changes.
 ---
 
 
-## 0.19.0 (2023-04-14)
+## 0.19.0 (2023-04-14) {: #0.19.0 }
 
 
-
-### Features
+### Features {: #0.19.0-feature }
 
 - Added a `pulp repository version list` command. This allows to find repository versions containing content.
   [#631](https://github.com/pulp/pulp-cli/issues/631)
@@ -541,13 +517,13 @@ No significant changes.
   [#673](https://github.com/pulp/pulp-cli/issues/673)
 
 
-### Bugfixes
+### Bugfixes {: #0.19.0-bugfix }
 
 - Fixed the generic-publications command.
   [#665](https://github.com/pulp/pulp-cli/issues/665)
 
 
-### Improved Documentation
+### Improved Documentation {: #0.19.0-doc }
 
 - Fixed the installation from source instructions to include the glue layer.
   [#654](https://github.com/pulp/pulp-cli/issues/654)
@@ -555,7 +531,7 @@ No significant changes.
   [#656](https://github.com/pulp/pulp-cli/issues/656)
 
 
-### Deprecations and Removals
+### Deprecations and Removals {: #0.19.0-removal }
 
 - Removed deprecated commands `pulp orphans` and `pulp debug task-summary`.
   [#670](https://github.com/pulp/pulp-cli/issues/670)
@@ -564,11 +540,10 @@ No significant changes.
 ---
 
 
-## 0.18.2 (2023-07-30)
+## 0.18.2 (2023-07-30) {: #0.18.2 }
 
 
-
-### Bugfixes
+### Bugfixes {: #0.18.2-bugfix }
 
 - Pinnend PyYAML version to fix installation issues.
   [#724](https://github.com/pulp/pulp-cli/issues/724)
@@ -579,11 +554,10 @@ No significant changes.
 ---
 
 
-## 0.18.1 (2023-07-10)
+## 0.18.1 (2023-07-10) {: #0.18.1 }
 
 
-
-### Bugfixes
+### Bugfixes {: #0.18.1-bugfix }
 
 - Narrow down click version given a breaking change on 8.1.4.
   [#715](https://github.com/pulp/pulp-cli/issues/715)
@@ -592,11 +566,10 @@ No significant changes.
 ---
 
 
-## 0.18.0 (2023-03-09)
+## 0.18.0 (2023-03-09) {: #0.18.0 }
 
 
-
-### Features
+### Features {: #0.18.0-feature }
 
 - Added support for 3.23 multi-tenancy feature Domains.
   [#642](https://github.com/pulp/pulp-cli/issues/642)
@@ -604,7 +577,7 @@ No significant changes.
   [#645](https://github.com/pulp/pulp-cli/issues/645)
 
 
-### Bugfixes
+### Bugfixes {: #0.18.0-bugfix }
 
 - Reimport some missing symbols into their old location for compatibility.
   [#635](https://github.com/pulp/pulp-cli/issues/635)
@@ -615,11 +588,10 @@ No significant changes.
 ---
 
 
-## 0.17.1 (2023-02-17)
+## 0.17.1 (2023-02-17) {: #0.17.1 }
 
 
-
-### Bugfixes
+### Bugfixes {: #0.17.1-bugfix }
 
 - Reimport some missing symbols into their old location for compatibility.
   [#635](https://github.com/pulp/pulp-cli/issues/635)
@@ -628,11 +600,10 @@ No significant changes.
 ---
 
 
-## 0.17.0 (2023-02-16)
+## 0.17.0 (2023-02-16) {: #0.17.0 }
 
 
-
-### Features
+### Features {: #0.17.0-feature }
 
 - Updated the `--requirements` option for ansible remotes to handle both files and strings.
   [#230](https://github.com/pulp/pulp-cli/issues/230)
@@ -651,13 +622,13 @@ No significant changes.
   [#628](https://github.com/pulp/pulp-cli/issues/628)
 
 
-### Bugfixes
+### Bugfixes {: #0.17.0-bugfix }
 
 - Deprecated `--fields` and `--exclude-fields` on `pulp ansible content list` in favor of `--[exclude-]field`.
   [#602](https://github.com/pulp/pulp-cli/issues/602)
 
 
-### Deprecations and Removals
+### Deprecations and Removals {: #0.17.0-removal }
 
 - Removed `pass_*_context` helpers from context layer. They moved to generic layer in 0.15.0.
   [#597](https://github.com/pulp/pulp-cli/issues/597)
@@ -665,7 +636,7 @@ No significant changes.
   [#625](https://github.com/pulp/pulp-cli/issues/625)
 
 
-### Misc
+### Misc {: #0.17.0-misc }
 
 - [#558](https://github.com/pulp/pulp-cli/issues/558), [#580](https://github.com/pulp/pulp-cli/issues/580)
 
@@ -673,11 +644,10 @@ No significant changes.
 ---
 
 
-## 0.16.0 (2022-11-10)
+## 0.16.0 (2022-11-10) {: #0.16.0 }
 
 
-
-### Features
+### Features {: #0.16.0-feature }
 
 - Added `--max-retries` option to remotes.
   [#227](https://github.com/pulp/pulp-cli/issues/227)
@@ -701,7 +671,7 @@ No significant changes.
   [#568](https://github.com/pulp/pulp-cli/issues/568)
 
 
-### Bugfixes
+### Bugfixes {: #0.16.0-bugfix }
 
 - Allowed remote timeout and rate limiting parameters to be nulled by passing `""`.
   [#227](https://github.com/pulp/pulp-cli/issues/227)
@@ -719,7 +689,7 @@ No significant changes.
   [#574](https://github.com/pulp/pulp-cli/issues/574)
 
 
-### Misc
+### Misc {: #0.16.0-misc }
 
 - [#569](https://github.com/pulp/pulp-cli/issues/569), [#589](https://github.com/pulp/pulp-cli/issues/589)
 
@@ -727,10 +697,10 @@ No significant changes.
 ---
 
 
-## 0.15.0 (2022-07-20)
+## 0.15.0 (2022-07-20) {: #0.15.0 }
 
 
-### Features
+### Features {: #0.15.0-feature }
 
 - Added `pulp_container` repository list/add/remove content commands.
   [#422](https://github.com/pulp/pulp-cli/issues/422)
@@ -766,7 +736,7 @@ No significant changes.
   [#532](https://github.com/pulp/pulp-cli/issues/532)
 
 
-### Bugfixes
+### Bugfixes {: #0.15.0-bugfix }
 
 - Fixed bug, where the failure to load config file due to the lack of file permissions lead to a crash.
   Now those files are simply ignored.
@@ -777,13 +747,13 @@ No significant changes.
   [#535](https://github.com/pulp/pulp-cli/issues/535)
 
 
-### Deprecations and Removals
+### Deprecations and Removals {: #0.15.0-removal }
 
 - Marked `group permission` command unusable with pulpcore 3.20.
   [#501](https://github.com/pulp/pulp-cli/issues/501)
 
 
-### Misc
+### Misc {: #0.15.0-misc }
 
 - [#499](https://github.com/pulp/pulp-cli/issues/499), [#520](https://github.com/pulp/pulp-cli/issues/520)
 
@@ -791,9 +761,9 @@ No significant changes.
 ---
 
 
-## 0.14.1 (2022-07-15)
+## 0.14.1 (2022-07-15) {: #0.14.1 }
 
-### Bugfixes
+### Bugfixes {: #0.14.1-bugfix }
 
 - Fixed the heuristics for the `PARTIAL_UPDATE_ID` workaround.
   [#529](https://github.com/pulp/pulp-cli/issues/529)
@@ -802,9 +772,9 @@ No significant changes.
 ---
 
 
-## 0.14.0 (2022-03-02)
+## 0.14.0 (2022-03-02) {: #0.14.0 }
 
-### Features
+### Features {: #0.14.0-feature }
 
 - Added content list/show commands for container blob/manifest/tag content types.
   [#421](https://github.com/pulp/pulp-cli/issues/421)
@@ -818,7 +788,7 @@ No significant changes.
   [#463](https://github.com/pulp/pulp-cli/issues/463)
 
 
-### Bugfixes
+### Bugfixes {: #0.14.0-bugfix }
 
 - Fixed missing help text on path option for ACS create commands.
   [#446](https://github.com/pulp/pulp-cli/issues/446)
@@ -828,13 +798,13 @@ No significant changes.
   [#472](https://github.com/pulp/pulp-cli/issues/472)
 
 
-### Improved Documentation
+### Improved Documentation {: #0.14.0-doc }
 
 - Add default help text for options taking a generic resource argument.
   [#387](https://github.com/pulp/pulp-cli/issues/387)
 
 
-### Developer Notes
+### Developer Notes {: #0.14.0-devel }
 
 - Introduced `ID_PREFIX` on `PulpEntityContext` to generate most operation ids.
   [#444](https://github.com/pulp/pulp-cli/issues/444)
@@ -845,9 +815,9 @@ No significant changes.
 ---
 
 
-## 0.13.0 (2021-12-16)
+## 0.13.0 (2021-12-16) {: #0.13.0 }
 
-### Features
+### Features {: #0.13.0-feature }
 
 - Allow path to certificate bundle to be specified via `PULP_CA_BUNDLE`, `REQUESTS_CA_BUNDLE` or `CURL_CA_BUNDLE` environment variables.
   Use proxy settings from environment.
@@ -881,13 +851,13 @@ No significant changes.
   [#439](https://github.com/pulp/pulp-cli/issues/439)
 
 
-### Bugfixes
+### Bugfixes {: #0.13.0-bugfix }
 
 - Fixed a bug where in the version lookup, where "--version 0" lead to latest.
   [#415](https://github.com/pulp/pulp-cli/issues/415)
 
 
-### Improved Documentation
+### Improved Documentation {: #0.13.0-doc }
 
 - Updated docs home page to reflect current plugin support of the CLI.
   [#394](https://github.com/pulp/pulp-cli/issues/394)
@@ -895,7 +865,7 @@ No significant changes.
   [#395](https://github.com/pulp/pulp-cli/issues/395)
 
 
-### Translations
+### Translations {: #0.13.0-translation }
 
 - Added some German translations.
   [#328](https://github.com/pulp/pulp-cli/issues/328)
@@ -904,11 +874,11 @@ No significant changes.
 ---
 
 
-## 0.12.0 (2021-10-06)
+## 0.12.0 (2021-10-06) {: #0.12.0 }
 ======================
 
 
-### Features
+### Features {: #0.12.0-feature }
 
 - Chunked artifact and content uploads now allow unit specifier in ``--chunk-size`` option
   [#260](https://github.com/pulp/pulp-cli/issues/260)
@@ -932,7 +902,7 @@ No significant changes.
   [#384](https://github.com/pulp/pulp-cli/issues/384)
 
 
-### Bugfixes
+### Bugfixes {: #0.12.0-bugfix }
 
 - Fixed the referenced version with the `--version` parameter.
   [#351](https://github.com/pulp/pulp-cli/issues/351)
@@ -940,7 +910,7 @@ No significant changes.
   [#373](https://github.com/pulp/pulp-cli/issues/373)
 
 
-### Improved Documentation
+### Improved Documentation {: #0.12.0-doc }
 
 - Add installation instructions for plugins and a list of known plugins.
   [#331](https://github.com/pulp/pulp-cli/issues/331)
@@ -952,13 +922,13 @@ No significant changes.
   [#357](https://github.com/pulp/pulp-cli/issues/357)
 
 
-### Deprecations and Removals
+### Deprecations and Removals {: #0.12.0-removal }
 
 - Bumped required pulpcore version to >=3.11 and removed legacy workarounds.
   [#380](https://github.com/pulp/pulp-cli/issues/380)
 
 
-### Misc
+### Misc {: #0.12.0-misc }
 
 - [#342](https://github.com/pulp/pulp-cli/issues/342)
 
@@ -966,9 +936,9 @@ No significant changes.
 ---
 
 
-## 0.11.0 (2021-08-10)
+## 0.11.0 (2021-08-10) {: #0.11.0 }
 
-### Features
+### Features {: #0.11.0-feature }
 
 - Added support to specify skip-types on rpm sync.
   [#225](https://github.com/pulp/pulp-cli/issues/225)
@@ -984,7 +954,7 @@ No significant changes.
   [#327](https://github.com/pulp/pulp-cli/issues/327)
 
 
-### Bugfixes
+### Bugfixes {: #0.11.0-bugfix }
 
 - Added validation to some json input parameters.
   [#255](https://github.com/pulp/pulp-cli/issues/255)
@@ -1005,9 +975,9 @@ No significant changes.
 ---
 
 
-## 0.10.1 (2021-06-30)
+## 0.10.1 (2021-06-30) {: #0.10.1 }
 
-### Bugfixes
+### Bugfixes {: #0.10.1-bugfix }
 
 - Fixed a bug in the docs publishing workflow.
   [#286](https://github.com/pulp/pulp-cli/issues/286)
@@ -1018,9 +988,9 @@ No significant changes.
 ---
 
 
-## 0.10.0 (2021-06-30)
+## 0.10.0 (2021-06-30) {: #0.10.0 }
 
-### Features
+### Features {: #0.10.0-feature }
 
 - Change resource options to accept plugin and type along with the name.
   [#158](https://github.com/pulp/pulp-cli/issues/158)
@@ -1044,7 +1014,7 @@ No significant changes.
   [#271](https://github.com/pulp/pulp-cli/issues/271)
 
 
-### Bugfixes
+### Bugfixes {: #0.10.0-bugfix }
 
 - Properly report timed out tasks.
   [#232](https://github.com/pulp/pulp-cli/issues/232)
@@ -1055,10 +1025,10 @@ No significant changes.
 ---
 
 
-## 0.9.0 (2021-05-17)
+## 0.9.0 (2021-05-17) {: #0.9.0 }
 
 
-### Features
+### Features {: #0.9.0-feature }
 
 - Disabled following of redirects and added better handling of response codes.
   [#221](https://github.com/pulp/pulp-cli/issues/221)
@@ -1068,7 +1038,7 @@ No significant changes.
   [#239](https://github.com/pulp/pulp-cli/issues/239)
 
 
-### Bugfixes
+### Bugfixes {: #0.9.0-bugfix }
 
 - Fixed extra request when using the repository version option.
   [#223](https://github.com/pulp/pulp-cli/issues/223)
@@ -1078,7 +1048,7 @@ No significant changes.
   [#239](https://github.com/pulp/pulp-cli/issues/239)
 
 
-### Misc
+### Misc {: #0.9.0-misc }
 
 - [#235](https://github.com/pulp/pulp-cli/issues/235)
 
@@ -1086,10 +1056,10 @@ No significant changes.
 ---
 
 
-## 0.8.0 (2021-04-30)
+## 0.8.0 (2021-04-30) {: #0.8.0 }
 
 
-### Features
+### Features {: #0.8.0-feature }
 
 - Added support for autopublish and autodistribute in `pulp_file` and `pulp_rpm`.
   [#155](https://github.com/pulp/pulp-cli/issues/155)
@@ -1099,36 +1069,36 @@ No significant changes.
   [#171](https://github.com/pulp/pulp-cli/issues/171)
 - Added an interactive-shell mode to pulp-cli.
   [#181](https://github.com/pulp/pulp-cli/issues/181)
-- Added label command to ansible distribution group.
+- Added `label` command to ansible distribution group.
   [#185](https://github.com/pulp/pulp-cli/issues/185)
-- Added signing-service list and show commands.
+- Added `signing-service` `list` and `show` commands.
   [#189](https://github.com/pulp/pulp-cli/issues/189)
-- Added new python 3.2 remote options.
+- Added new pulp python 3.2 remote options.
   [#208](https://github.com/pulp/pulp-cli/issues/208)
-- Added retained_versions option to repository commands.
+- Added `retained_versions` option to repository commands.
   [#210](https://github.com/pulp/pulp-cli/issues/210)
-- Added the task-group subcommand.
+- Added the `task-group` subcommand.
   [#211](https://github.com/pulp/pulp-cli/issues/211)
-- Added mirror flag support for pulp rpm repository sync.
+- Added `mirror` flag support for pulp rpm repository sync.
   [#212](https://github.com/pulp/pulp-cli/issues/212)
-- Added support for file paths for plan argument for miigration plan create command.
+- Added support for file paths for plan argument for migration plan create command.
   [#213](https://github.com/pulp/pulp-cli/issues/213)
 
 
-### Bugfixes
+### Bugfixes {: #0.8.0-bugfix }
 
 - Improved the error message, when a required server component is missing.
   [#184](https://github.com/pulp/pulp-cli/issues/184)
 
 
-### Deprecations and Removals
+### Deprecations and Removals {: #0.8.0-removal }
 
 
 - Repository add/remove/modify commands have now been deprecated. Please use the new content subgroup commands.
   [#215](https://github.com/pulp/pulp-cli/issues/215)
 
 
-### Misc
+### Misc {: #0.8.0-misc }
 
 - [#190](https://github.com/pulp/pulp-cli/issues/190)
 
@@ -1136,10 +1106,10 @@ No significant changes.
 ---
 
 
-## 0.7.0 (2021-03-15)
+## 0.7.0 (2021-03-15) {: #0.7.0 }
 
 
-### Features
+### Features {: #0.7.0-feature }
 
 - Added the python command group.
   [#73](https:// github.com/pulp/pulp-cli/issues/73)
@@ -1154,10 +1124,10 @@ No significant changes.
 ---
 
 
-## 0.6.0 (2021-02-26)
+## 0.6.0 (2021-02-26) {: #0.6.0 }
 
 
-### Features
+### Features {: #0.6.0-feature }
 
 - In pulpcore 3.11, the component names changed to fix a bug. This ported `pulp-cli` to use the new
   names and provides dictionary named `new_component_names_to_pre_3_11_names` in the
@@ -1169,10 +1139,10 @@ No significant changes.
 ---
 
 
-## 0.5.0 (2021-02-20)
+## 0.5.0 (2021-02-20) {: #0.5.0 }
 
 
-### Features
+### Features {: #0.5.0-feature }
 
 - Made task state a choice option for pulp task list.
   [#115](https://github.com/pulp/pulp-cli/issues/115)
@@ -1184,7 +1154,7 @@ No significant changes.
   [#145](https://github.com/pulp/pulp-cli/issues/145)
 
 
-### Misc
+### Misc {: #0.5.0-misc }
 
 - [#148](https://github.com/pulp/pulp-cli/issues/148)
 
@@ -1192,10 +1162,10 @@ No significant changes.
 ---
 
 
-## 0.4.0 (2021-02-10)
+## 0.4.0 (2021-02-10) {: #0.4.0 }
 
 
-### Features
+### Features {: #0.4.0-feature }
 
 - Added config commands to manage pulp-cli's config.
   [#111](https://github.com/pulp/pulp-cli/issues/111)
@@ -1205,7 +1175,7 @@ No significant changes.
   [#124](https://github.com/pulp/pulp-cli/issues/124)
 
 
-### Bugfixes
+### Bugfixes {: #0.4.0-bugfix }
 
 - Improve handling of background option and ctrl-c with tasks.
   [#85](https://github.com/pulp/pulp-cli/issues/85)
@@ -1213,13 +1183,13 @@ No significant changes.
   [#125](https://github.com/pulp/pulp-cli/issues/125)
 
 
-### Deprecations and Removals
+### Deprecations and Removals {: #0.4.0-removal }
 
 - Moved the location of `--repository` option after the last command for version commands.
   [#123](https://github.com/pulp/pulp-cli/issues/123)
 
 
-### Misc
+### Misc {: #0.4.0-misc }
 
 - [#91](https://github.com/pulp/pulp-cli/issues/91), [#118](https://github.com/pulp/pulp-cli/issues/118)
 
@@ -1227,22 +1197,22 @@ No significant changes.
 ---
 
 
-## 0.3.0 (2021-02-04)
+## 0.3.0 (2021-02-04) {: #0.3.0 }
 
 
-### Features
+### Features {: #0.3.0-feature }
 
 - Added label commands.
   [#100](https://github.com/pulp/pulp-cli/issues/100)
 
 
-### Bugfixes
+### Bugfixes {: #0.3.0-bugfix }
 
 - Fixed missing `READ_ID` error for pulp file remote show.
   [#107](https://github.com/pulp/pulp-cli/issues/107)
 
 
-### Misc
+### Misc {: #0.3.0-misc }
 
 - [#89](https://github.com/pulp/pulp-cli/issues/89)
 
@@ -1250,10 +1220,10 @@ No significant changes.
 ---
 
 
-## 0.2.0 (2021-01-26)
+## 0.2.0 (2021-01-26) {: #0.2.0 }
 
 
-### Features
+### Features {: #0.2.0-feature }
 
 - Basic CRUD support for Ansible repositories
 - Basic CRUD for Ansible role remotes, use `-t role` after remote to select type
@@ -1268,7 +1238,7 @@ No significant changes.
 ---
 
 
-## 0.1.0 (2021-01-15)
+## 0.1.0 (2021-01-15) {: #0.1.0 }
 
 Initial release of pulp-cli.
 
