@@ -1,0 +1,75 @@
+{#
+  This file is not templated for itself, but it is used to update sections in pyproject.toml.
+#}
+
+[tool.pulp_cli_template]
+# This section is co-managed by the cookiecutter templates.
+# Changes to existing keys should be preserved.
+app_label = {{ cookiecutter.app_label | to_toml_value }}
+glue = {{ cookiecutter.glue | to_toml_value }}
+docs = {{ cookiecutter.docs | to_toml_value }}
+translations = {{ cookiecutter.translations | to_toml_value }}
+main_package = {{ cookiecutter.main_package | to_toml_value }}
+
+[tool.bumpversion]
+# This section is managed by the cookiecutter templates.
+current_version = "{{ cookiecutter.current_version }}"
+commit = false
+tag = false
+parse = "(?P<major>\\d+)\\.(?P<minor>\\d+)\\.(?P<patch>\\d+)(\\.(?P<release>[a-z]+))?"
+serialize = [
+  "{major}.{minor}.{patch}.{release}",
+  "{major}.{minor}.{patch}",
+]
+
+[tool.bumpversion.parts.release]
+optional_value = "prod"
+values = [
+  "dev",
+  "prod",
+]
+{%- if cookiecutter.app_label == "" %}
+
+[[tool.bumpversion.files]]
+filename = "./pulp_cli/__init__.py"
+search = "__version__ = \"{current_version}\""
+replace = "__version__ = \"{new_version}\""
+{%- endif %}
+{%- if cookiecutter.glue %}
+
+[[tool.bumpversion.files]]
+filename = "./pulp-glue{{ cookiecutter.__app_label_suffix }}/pulp_glue/{{ cookiecutter.main_package }}/__init__.py"
+search = "__version__ = \"{current_version}\""
+replace = "__version__ = \"{new_version}\""
+{%- endif %}
+
+[[tool.bumpversion.files]]
+filename = "./pulpcore/cli/{{ cookiecutter.main_package }}/__init__.py"
+search = "__version__ = \"{current_version}\""
+replace = "__version__ = \"{new_version}\""
+{%- if cookiecutter.glue %}
+
+[[tool.bumpversion.files]]
+filename = "./pulp-glue{{ cookiecutter.__app_label_suffix }}/pyproject.toml"
+search = "version = \"{current_version}\""
+replace = "version = \"{new_version}\""
+{%- endif %}
+
+[[tool.bumpversion.files]]
+filename = "./pyproject.toml"
+search = "version = \"{current_version}\""
+replace = "version = \"{new_version}\""
+{%- if cookiecutter.glue %}
+
+[[tool.bumpversion.files]]
+filename = "./pyproject.toml"
+search = "\"pulp-glue{{ cookiecutter.__app_label_suffix }}=={current_version}\""
+replace = "\"pulp-glue{{ cookiecutter.__app_label_suffix }}=={new_version}\""
+{%- endif %}
+{%- if cookiecutter.docs %}
+
+[[tool.bumpversion.files]]
+filename = "./mkdocs.yml"
+search = "version: \"{current_version}\""
+replace = "version: \"{new_version}\""
+{%- endif %}
