@@ -1,55 +1,39 @@
-# Architecture
-
-The Pulp CLI architecture is described in this section.
+# Pulp CLI Architecture
 
 ## Pulp Glue
 
-Pulp CLI provides the `pulp-glue` library as an abstraction layer that lets you perform high-level operations in pulp.
-Its goal is to abstract interacting with the REST api by parsing the api docs, and waiting on tasks and task groups.
-It is shipped as a separate python package to allow broad use across multiple projects, such as `pulp-squeezer` and `pulpcore`.
-To this end, `pulp-glue` is the go-to place for all known version-dependent Pulp API subtleties and their corresponding fixes (see Version-dependent codepaths below).
+Pulp CLI uses the [`pulp-glue`](site:pulp-glue/docs/learn/architecture) library as an abstraction layer to perform high-level operations in pulp.
 
-### OpenAPI
-
-This is the part in `pulp_glue` that uses `requests` to perform low level communication with an `openapi 3` compatible server.
-
-### Contexts
-
-Pulp-glue provides the [`PulpContext`][pulp_glue.common.context.PulpContext] encapsulating the [`OpenAPI`][pulp_glue.common.openapi.OpenAPI] object.
-You can use its `call` method to interact with any operation designated by its operation id.
-In addition, to perform specific operations on entities, glue ships a bunch of [`PulpEntityContext`][pulp_glue.common.context.PulpEntityContext] subclasses.
-
-#### Deferred Api and Entity lookup
+## Deferred Api and Entity lookup
 
 In order to be able to access every (sub-)command's help page,
 it is necessary that no code outside of the final performing command callback accesses the `api` property of the `PulpContext`.
-There are some facilities that perform deferred loading to help with that requirement.
-Those include:
+See `pulp-glue` section about [deferred lookup](site:pulp-glue/docs/learn/architecture#deferred_api_and_entity_lookup).
 
-  - `PulpContext.api`: When accessed, the `api.json` file for the addressed server will be read or downloaded and processed.
-    Scheduled version checks will be reevaluated.
-  - `PulpContext.needs_version`: This function can be used at any time to declare that an operation needs a plugin in a version range.
-    The actual check will be performed when `api` was accessed for the first time, or immediately afterwards.
-  - `PulpEntityContext.entity`: This property can be used to collect lookup attributes for entities by assigning dicts to it.
-    On read access, the entity lookup will be performed through the `api` property.
-  - `PulpEntityContext.pulp_href`: This property can be used to specify an entity by its URI.
-    It will be fetched from the server only at read access.
-
-## Pulp CLI
-
-### Plugin System
+## Plugin System
 
 The Pulp CLI is designed with a plugin structure. Plugins can either live in the pulp-cli package or be shipped independently.
-By convention, all parts of the CLI are packages in the open namespace `pulpcore.cli`.
-A plugin can register itself with the main app by specifying its main module as a `pulp_cli.plugins` entrypoint in `setup.py`.
+By convention, all CLI plugins are modules in the open namespace `pulpcore.cli`.
+A plugin must register itself with the main app by specifying its main module as a `pulp_cli.plugins` entrypoint.
 
-```python
-entry_points={
-    "pulp_cli.plugins": [
-        "myplugin=pulpcore.cli.myplugin",
-    ],
-}
-```
+=== "pyproject.toml"
+
+    ```toml
+    [project.entry-points."pulp_cli.plugins"]
+    myplugin = "pulpcore.cli.myplugin"
+    ```
+
+=== "setup.py"
+
+    ```python
+    entry_points={
+        "pulp_cli.plugins": [
+            "myplugin=pulpcore.cli.myplugin",
+        ],
+    }
+    ```
+
+---
 
 The plugin should then attach subcommands to the `pulpcore.cli.common.main` command by providing a `mount` method in the main module.
 
@@ -65,7 +49,7 @@ def mount(main: click.Group, **kwargs: Any) -> None:
     main.add_command(my_command)
 ```
 
-### Contexts
+## Contexts
 
 In `click`, every subcommand is accompanied by a `click.Context`, and objects can be attached to them.
 In this CLI we attach a [`PulpCLIContext`][pulpcore.cli.common.generic.PulpCLIContext] to the main command, which inherits from `pulp-glue`'s [`PulpContext`][pulp_glue.common.context.PulpContext].
@@ -88,11 +72,11 @@ def my_command(ctx, pulp_ctx):
 @my_command.command()
 @pass_entity_context
 def my_sub_command(entity_ctx):
-    ... href = ...
-    entity_ctx.destroy(href)
+    entity_ctx.entity = {"name": "myentity")
+    entity_ctx.destroy()
 ```
 
-### Generics
+## Generics
 
 For certain often repeated patterns like listing all entities of a particular kind,
 we provide generic commands that use the underlying context objects.
