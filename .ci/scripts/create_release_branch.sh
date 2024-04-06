@@ -10,7 +10,7 @@ then
   exit 1
 fi
 
-NEW_BRANCH="$(bump2version --dry-run --list release | sed -Ene 's/^new_version=([[:digit:]]+\.[[:digit:]]+)\..*$/\1/p')"
+NEW_BRANCH="$(bump-my-version show new_version --increment release | sed -Ene 's/^([[:digit:]]+\.[[:digit:]]+)\.[[:digit:]]+$/\1/p')"
 
 if [[ -z "${NEW_BRANCH}" ]]
 then
@@ -27,6 +27,6 @@ find CHANGES/ \( -name "*.feature" -o -name "*.bugfix" -o -name "*.removal" -o -
 sed -i -e "1 i \\${NEW_BRANCH}" docs/versions.txt
 git add docs/versions.txt
 
-bump2version minor --commit --message $'Bump version to {new_version}\n\n[noissue]' --allow-dirty
+bump-my-version bump minor --commit --message $'Bump version to {new_version}\n\n[noissue]' --allow-dirty
 
 git push origin "${NEW_BRANCH}"

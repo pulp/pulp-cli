@@ -18,7 +18,7 @@ jobs:
       - name: "Install dependencies"
         run: |
           python -m pip install --upgrade pip
-          pip install bump2version towncrier~=23.11.0
+          pip install bump-my-version~=0.20.0 towncrier~=23.11.0
       - name: "Setup git"
         run: |
           git config user.name pulpbot
