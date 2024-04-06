@@ -18,7 +18,7 @@ jobs:
           git config user.email pulp-infra@redhat.com
       - name: "Install python dependencies"
         run: |
-          pip install bump2version
+          pip install bump-my-version~=0.20.0
       - name: "Create Release Branch"
         run: |
           .ci/scripts/create_release_branch.sh
