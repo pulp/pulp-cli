@@ -3,8 +3,8 @@
 import itertools
 import os
 import re
-
 import tomllib
+
 from git import GitCommandError, Repo
 from packaging.version import parse as parse_version
 

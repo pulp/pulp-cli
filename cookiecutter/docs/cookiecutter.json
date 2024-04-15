@@ -5,6 +5,6 @@
   "__project_name": "pulp-cli{{ cookiecutter.__app_label_suffix }}",
   "__project_slug": "{{ cookiecutter.__project_name | lower | replace(' ', '_') }}",
   "_copy_without_render": [
-    ".github/workflows/publish_docs.yml"
+    ".github/workflows/docs.yml"
   ]
 }

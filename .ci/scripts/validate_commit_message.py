@@ -2,11 +2,13 @@ import os
 import re
 import subprocess
 import sys
+import tomllib
 from pathlib import Path
 
-import toml
 from github import Github
 
+with open("pyproject.toml", "rb") as fp:
+    PYPROJECT_TOML = tomllib.load(fp)
 KEYWORDS = ["fixes", "closes"]
 BLOCKING_REGEX = [
     "DRAFT",
@@ -16,9 +18,7 @@ BLOCKING_REGEX = [
     "EXPERIMENT",
 ]
 NO_ISSUE = "[noissue]"
-CHANGELOG_EXTS = [
-    f".{item['directory']}" for item in toml.load("pyproject.toml")["tool"]["towncrier"]["type"]
-]
+CHANGELOG_EXTS = [f".{item['directory']}" for item in PYPROJECT_TOML["tool"]["towncrier"]["type"]]
 
 sha = sys.argv[1]
 message = subprocess.check_output(["git", "log", "--format=%B", "-n 1", sha]).decode("utf-8")
