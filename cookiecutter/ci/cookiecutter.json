@@ -12,7 +12,6 @@
   "_copy_without_render": [
     "CHANGES/.TEMPLATE.md",
     ".github/workflows/collect_changes.yml",
-    ".github/workflows/pr.yml",
     ".github/workflows/release.yml",
     ".github/workflows/release_branch.yml",
     ".github/workflows/pr_checks.yml"

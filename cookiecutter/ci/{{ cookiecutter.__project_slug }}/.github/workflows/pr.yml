@@ -4,7 +4,7 @@ on:
   pull_request:
 
 concurrency:
-  group: "main-${{ github.ref_name }}-${{ github.workflow }}"
+  group: "{{ "main-${{ github.ref_name }}-${{ github.workflow }}" }}"
   cancel-in-progress: true
 
 jobs:
@@ -18,6 +18,12 @@ jobs:
     needs:
       - "lint"
     uses: "./.github/workflows/test.yml"
+  {%- if cookiecutter.docs %}
+  docs:
+    needs:
+      - "lint"
+    uses: "./.github/workflows/docs.yml"
+  {%- endif %}
   codeql:
     needs:
       - "lint"
@@ -37,8 +43,8 @@ jobs:
           pip install toml pygithub
       - name: "Check commit message"
         env:
-          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-          GITHUB_CONTEXT: "${{ github.event.pull_request.commits_url }}"
+          GITHUB_TOKEN: "{{ "${{ secrets.GITHUB_TOKEN }}" }}"
+          GITHUB_CONTEXT: "{{ "${{ github.event.pull_request.commits_url }}" }}"
         run: |
           for SHA in $(curl -H "Authorization: token $GITHUB_TOKEN" "$GITHUB_CONTEXT" | jq -r '.[].sha')
           do
@@ -56,11 +62,14 @@ jobs:
       - "check-commits"
       - "lint"
       - "test"
+      {%- if cookiecutter.docs %}
+      - "docs"
+      {%- endif %}
       - "codeql"
     if: "always()"
     steps:
       - name: "Collect needed jobs results"
         run: |
-          echo '${{toJson(needs)}}' | jq -r 'to_entries[]|select(.value.result!="success")|.key + ": " + .value.result'
-          echo '${{toJson(needs)}}' | jq -e 'to_entries|map(select(.value.result!="success"))|length == 0'
+          echo {{ "'${{toJson(needs)}}'" }} | jq -r 'to_entries[]|select(.value.result!="success")|.key + ": " + .value.result'
+          echo {{ "'${{toJson(needs)}}'" }} | jq -e 'to_entries|map(select(.value.result!="success"))|length == 0'
           echo "CI says: Looks good!"
