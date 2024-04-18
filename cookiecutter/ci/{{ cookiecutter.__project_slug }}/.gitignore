@@ -1,0 +1,9 @@
+*.egg-info
+__pycache__/
+build/
+tests/cli.toml
+pytest_pulp_cli/GPG-PRIVATE-KEY-fixture-signing
+/.ci/settings/certs
+site/
+dist/
+*.po~
