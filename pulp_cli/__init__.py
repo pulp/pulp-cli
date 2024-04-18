@@ -26,10 +26,12 @@ __version__ = "0.25.0.dev"
 translation = get_translation(__package__)
 _ = translation.gettext
 # Keep track to prevent loading plugins twice
-loaded_plugins: t.Set[str] = set()
+loaded_plugins: t.MutableMapping[str, ModuleType] = {}
 
 
-def load_plugins(enabled_plugins: t.Optional[t.List[str]] = None) -> None:
+def load_plugins(
+    enabled_plugins: t.Optional[t.List[str]] = None,
+) -> t.MutableMapping[str, ModuleType]:
     ##############################################################################
     # Load plugins
     # https://packaging.python.org/guides/creating-and-discovering-plugins/#using-package-metadata
@@ -42,19 +44,21 @@ def load_plugins(enabled_plugins: t.Optional[t.List[str]] = None) -> None:
     }
     for name, plugin in discovered_plugins.items():
         plugin.mount(main, discovered_plugins=discovered_plugins)
-        loaded_plugins.add(name)
+        loaded_plugins[name] = plugin
+    return loaded_plugins
 
 
 ##############################################################################
 # Main entry point
 
 
+PLUGIN_KEY = f"{__name__}.plugins"
 CONFIG_KEY = f"{__name__}.config"
 PROFILE_KEY = f"{__name__}.profile"
 
 
-# config and config-profile need to be combined to be combined in order to fetch the desired
-# defaults. Click will call both these callbacks exactly once, but we cannot know the order.
+# config and config-profile need to be combined in order to fetch the desired defaults.
+# Click will call both these callbacks exactly once, but we cannot know the order.
 # Therefore whichever one has seen the that the other deposited it's value will coninue with
 # _load_config (also to be called exactly once).
 
@@ -72,6 +76,7 @@ def _config_profile_callback(ctx: click.Context, param: t.Any, value: t.Optional
 
 
 def _load_config(ctx: click.Context) -> None:
+    # Raise a runtime error if called a second time.
     assert ctx.default_map is None
 
     enabled_plugins: t.Optional[t.List[str]] = None
@@ -108,7 +113,19 @@ def _load_config(ctx: click.Context) -> None:
         click.echo(_("Config file failed to parse. ({}).").format(e), err=True)
         if not sys.stdout.isatty() or not click.confirm(_("Continue without config?")):
             raise click.ClickException(_("Aborted."))
-    load_plugins(enabled_plugins)
+    ctx.meta[PLUGIN_KEY] = load_plugins(enabled_plugins)
+
+
+def _version_callback(ctx: click.Context, param: t.Any, value: bool) -> None:
+    if value:
+        click.echo(_("Pulp3 Command Line Interface, Version {}").format(__version__))
+        click.echo(_("Plugin Versions:"))
+        for name, plugin in ctx.meta[PLUGIN_KEY].items():
+            version = getattr(plugin, "__version__", None)
+            if version:
+                click.echo(f"  {name}: {version}")
+        # If we ever decouple the glue parts, we should list the versions here too.
+        ctx.exit(0)
 
 
 @click.option(
@@ -128,7 +145,13 @@ def _load_config(ctx: click.Context) -> None:
     expose_value=False,
     is_eager=True,
 )
-@click.version_option(prog_name=_("pulp3 command line interface"), package_name="pulp-cli")
+@click.option(
+    "--version",
+    help=_("Show CLI version information and exit."),
+    is_flag=True,
+    callback=_version_callback,
+    expose_value=False,
+)
 @click.option(
     "-b",
     "--background",
