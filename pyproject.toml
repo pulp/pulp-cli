@@ -125,6 +125,7 @@ filename = "./mkdocs.yml"
 search = "version: \"{current_version}\""
 replace = "version: \"{new_version}\""
 
+
 [tool.towncrier]
 filename = "CHANGES.md"
 directory = "CHANGES/"
@@ -178,15 +179,18 @@ name = "Misc"
 showcontent = false
 
 [tool.black]
+# This section is managed by the cookiecutter templates.
 line-length = 100
 exclude = "cookiecutter"
 
 [tool.isort]
+# This section is managed by the cookiecutter templates.
 profile = "black"
 line_length = 100
 skip = ["pulp-glue", "cookiecutter"]
 
 [tool.flake8]
+# This section is managed by the cookiecutter templates.
 exclude = ["./docs/*", "./cookiecutter/*"]
 ignore = ["W503", "Q000", "Q003", "D100", "D104", "D106", "D200", "D202", "D205", "D400", "D401", "D402"]
 # E203: whitespace before ':'; https://github.com/psf/black/issues/279
@@ -209,10 +213,11 @@ markers = [
 ]
 
 [tool.mypy]
+# This section is managed by the cookiecutter templates.
 strict = true
 warn_unused_ignores = false
 show_error_codes = true
-files = "pulpcore/**/*.py, pulp_cli/**/*.py, tests/*.py, pytest_pulp_cli/**/*.py"
+files = "pulpcore/**/*.py, tests/*.py, pulp_cli/**/*.py, pytest_pulp_cli/**/*.py"
 namespace_packages = true
 explicit_package_bases = true
 

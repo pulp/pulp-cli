@@ -25,6 +25,7 @@ with open("pyproject.toml", "w") as fp:
 REMOVE_PATHS = [
     "pyproject.toml.update",
     ".bumpversion.cfg",
+    ".flake8",
     {% if not cookiecutter.glue -%}
     "pulp-glue{{ cookiecutter.__app_label_suffix }}",
     "CHANGES/pulp-glue{{ cookiecutter.__app_label_suffix }}",
