@@ -1,7 +1,8 @@
-import sys
 import typing as t
+from types import ModuleType
 
 import click
+from packaging.specifiers import SpecifierSet
 from pulp_glue.common.context import PluginRequirement
 from pulp_glue.common.i18n import get_translation
 
@@ -63,7 +64,40 @@ if IPYTHON_AVAILABLE:
 @click.option("--name", required=True)
 @click.option("--specifier", help=_("Succeed only if the installed version is contained."))
 @pass_pulp_context
+@click.pass_context
+def has_cli_plugin(
+    ctx: click.Context,
+    pulp_ctx: PulpCLIContext,
+    name: str,
+    specifier: t.Optional[str],
+) -> None:
+    """
+    Check whether a specific cli plugin is installed.
+    """
+    available = False
+    plugin: t.Optional[ModuleType] = ctx.meta["pulp_cli.plugins"].get(name)
+    if plugin:
+        if specifier:
+            version = getattr(plugin, "__version__", None)
+            if version:
+                available = version in SpecifierSet(specifier, prereleases=True)
+            else:
+                raise click.ClickException(
+                    _("CLI Plugin '{}' does not advertise a version.").format(name)
+                )
+        else:
+            available = True
+    pulp_ctx.output_result(available)
+    ctx.exit(0 if available else 1)
+
+
+@debug.command()
+@click.option("--name", required=True)
+@click.option("--specifier", help=_("Succeed only if the installed version is contained."))
+@pass_pulp_context
+@click.pass_context
 def has_plugin(
+    ctx: click.Context,
     pulp_ctx: PulpCLIContext,
     name: str,
     specifier: t.Optional[str],
@@ -73,7 +107,7 @@ def has_plugin(
     """
     available = pulp_ctx.has_plugin(PluginRequirement(name, specifier=specifier))
     pulp_ctx.output_result(available)
-    sys.exit(0 if available else 1)
+    ctx.exit(0 if available else 1)
 
 
 @debug.group(name="openapi")
