@@ -90,14 +90,25 @@ def _load_config(ctx: click.Context) -> None:
             for location in CONFIG_LOCATIONS:
                 try:
                     new_config = toml.load(location)
+                except (FileNotFoundError, PermissionError):
+                    pass
+                else:
+                    if location.endswith("settings.toml"):
+                        click.echo(
+                            _(
+                                "Warning: "
+                                "Using '{location}' for the pulp-cli configuration is deprecated.\n"
+                                "Please move your config to '{new_location}'."
+                            ).format(location=location, new_location=CONFIG_LOCATIONS[-1]),
+                            err=True,
+                        )
+
                     # level 1 merge
                     for key in new_config:
                         if key in config:
                             config[key].update(new_config[key])
                         else:
                             config[key] = new_config[key]
-                except (FileNotFoundError, PermissionError):
-                    pass
         profile: str = "cli"
         if profile_key is not None:
             profile = "cli-" + profile_key
