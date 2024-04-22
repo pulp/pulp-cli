@@ -1,1 +1,0 @@
-CLI Plugins need to provide a `mount` function. This used to be an optional requirement.
