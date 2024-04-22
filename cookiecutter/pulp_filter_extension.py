@@ -1,3 +1,4 @@
+import datetime
 import shlex
 import typing as t
 
@@ -20,10 +21,14 @@ def to_nice_yaml(data: t.Any, level: int = 0, embed_in: str = "") -> str:
     nl = False
     if isinstance(data, str):
         result = f'"{data}"'
+    elif data is None:
+        result = "null"
     elif data is True:
         result = "true"
     elif data is False:
         result = "false"
+    elif isinstance(data, datetime.datetime):
+        result = data.isoformat()
     elif isinstance(data, int):
         result = f"{data}"
     elif isinstance(data, list):

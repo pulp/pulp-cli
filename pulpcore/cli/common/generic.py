@@ -101,10 +101,74 @@ def _yaml_formatter(result: t.Any) -> str:
     return output
 
 
+def _assert_key(key: t.Any) -> str:
+    assert isinstance(key, str)
+    assert key.isidentifier()
+    return key
+
+
+def to_nice_yaml(data: t.Any, level: int = 0, embed_in: str = "") -> str:
+    """Filter render human readable YAML without disambiguities."""
+    # Don't even believe this is complete!
+    # Yes, I have checked pyyaml and ruamel.
+
+    nl = False
+    if isinstance(data, str):
+        result = f'"{data}"'
+    elif data is None:
+        result = "null"
+    elif data is True:
+        result = "true"
+    elif data is False:
+        result = "false"
+    elif isinstance(data, datetime.datetime):
+        result = data.isoformat()
+    elif isinstance(data, int):
+        result = f"{data}"
+    elif isinstance(data, list):
+        if len(data):
+            nl = embed_in == "dict"
+            result = ("\n" + "  " * level).join(
+                ("-" + to_nice_yaml(item, level + 1, "list") for item in data)
+            )
+        else:
+            result = "[]"
+    elif isinstance(data, dict):
+        if len(data):
+            nl = embed_in == "dict"
+            result = ("\n" + "  " * level).join(
+                (
+                    f"{_assert_key(key)}:" + to_nice_yaml(value, level + 1, "dict")
+                    for key, value in sorted(data.items())
+                )
+            )
+        else:
+            result = "{}"
+    else:
+        raise NotImplementedError(
+            _("Cannot serialize '{data_class}'.").format(data_class=data.__class__.__name__)
+        )
+    if nl:
+        return "\n" + "  " * level + result
+    elif embed_in:
+        return " " + result
+    else:
+        return result
+
+
+def _jaml_formatter(result: t.Any) -> str:
+    isatty = sys.stdout.isatty()
+    output = to_nice_yaml(result)
+    if PYGMENTS and isatty:
+        output = highlight(output, YamlLexer(), Terminal256Formatter(style=PYGMENTS_STYLE))
+    return output
+
+
 REGISTERED_OUTPUT_FORMATTERS = {
     "none": _none_formatter,
     "json": _json_formatter,
     "yaml": _yaml_formatter,
+    "jaml": _jaml_formatter,
 }
 
 
