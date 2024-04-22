@@ -1,1 +1,0 @@
-Removed `preprocess_body` from `PulpEntityContext` in favor of `preprocess_entity`.
