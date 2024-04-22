@@ -10,6 +10,71 @@
 
 [//]: # (towncrier release notes start)
 
+## 0.25.0 (2024-04-22) {: #0.25.0 }
+
+
+
+#### Features {: #0.25.0-feature }
+
+- Added CLI plugin information to `pulp --version` command.
+- Added `pulp debug has-cli-plugin` command.
+- Added `pulp debug ipython` command to drop into a python shell.
+
+
+#### Bugfixes {: #0.25.0-bugfix }
+
+- Added validation to see if `base_url` in the config looks useful.
+  [#588](https://github.com/pulp/pulp-cli/issues/588)
+- Fixed an issue where passing `usename=None` in `api_kwargs` was handled different than not providing it at all.
+
+
+#### Improved Documentation {: #0.25.0-doc }
+
+- Added the structure for `https://staging-docs.pulpproject.org` and populated it with existing content.
+  [#903](https://github.com/pulp/pulp-cli/issues/903)
+
+
+#### Deprecations and Removals {: #0.25.0-removal }
+
+- Removed `min` and `max` parameters from `pulp debug has-plugin`.
+- Removed deprecated `--fields` and `--exclude-fields` options from `pulp ansible content list` command.
+  Use the `--field` and `--exclude-field` options instead.
+- Removed deprecated file and python content modification commands.
+  Use the `pulp {file,python} content ...` commands.
+
+
+#### Developer Notes {: #0.25.0-devel }
+
+- CLI Plugins need to provide a `mount` function. This used to be an optional requirement.
+- `pulpcore.cli.common.context` and `pulpcore.cli.core.context` are no longer available as a convenience export.
+- `repository_option` has been removed. Please use `repository_lookup_option` instead.
+
+
+### Pulp GLUE {: #0.25.0-pulp-glue }
+
+
+#### Features {: #0.25.0-pulp-glue-feature }
+
+- Added `add_user` and `remove_user` to `PulpGroupContext`.
+
+
+#### Improved Documentation {: #0.25.0-pulp-glue-doc }
+
+- Added the structure for `https://staging-docs.pulpproject.org` and populated it with existing content.
+  [#903](https://github.com/pulp/pulp-cli/issues/903)
+- Improve the docs split for the pulp-glue architecture documentation.
+
+
+#### Deprecations and Removals {: #0.25.0-pulp-glue-removal }
+
+- Removed `preprocess_body` from `PulpEntityContext` in favor of `preprocess_entity`.
+- Removed deprecated `registered_repository_contexts`.
+- Removed optional `href` parameter from many verbs on `PulpEntityContext`.
+- Removed unused `format` parameter from `PulpContext`.
+
+
+---
+
 ## 0.24.1 (2024-03-18) {: #0.24.1 }
 
 
