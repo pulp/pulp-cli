@@ -20,7 +20,7 @@ jobs:
           git config user.email pulp-infra@redhat.com
       - name: "Collect changes"
         run: |
-          pip install GitPython packaging toml
+          pip install GitPython packaging
           python3 .ci/scripts/collect_changes.py
       - name: "Create Pull Request"
         uses: "peter-evans/create-pull-request@v6"
