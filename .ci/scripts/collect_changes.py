@@ -4,12 +4,13 @@ import itertools
 import os
 import re
 
-import toml
+import tomllib
 from git import GitCommandError, Repo
 from packaging.version import parse as parse_version
 
 # Read Towncrier settings
-tc_settings = toml.load("pyproject.toml")["tool"]["towncrier"]
+with open("pyproject.toml", "rb") as fp:
+    tc_settings = tomllib.load(fp)["tool"]["towncrier"]
 
 CHANGELOG_FILE = tc_settings.get("filename", "NEWS.rst")
 START_STRING = tc_settings.get(
@@ -44,7 +45,11 @@ TITLE_REGEX = (
 
 
 def get_changelog(repo, branch):
-    return repo.git.show(f"{branch}:{CHANGELOG_FILE}") + "\n"
+    branch_tc_settings = tomllib.loads(repo.git.show(f"{branch}:pyproject.toml"))["tool"][
+        "towncrier"
+    ]
+    branch_changelog_file = branch_tc_settings.get("filename", "NEWS.rst")
+    return repo.git.show(f"{branch}:{branch_changelog_file}") + "\n"
 
 
 def _tokenize_changes(splits):

@@ -38,9 +38,9 @@ shell = ["click-shell~=2.1"]
 password-manager = ["SecretStorage>=3.3.3,<3.3.4"]
 
 [project.urls]
-documentation = "https://docs.pulpproject.org/pulp_cli/"
+documentation = "https://staging-docs.pulpproject.org/pulp-cli/docs/user/"
 repository = "https://github.com/pulp/pulp-cli"
-changelog = "https://docs.pulpproject.org/pulp_cli/CHANGES/"
+changelog = "https://staging-docs.pulpproject.org/pulp-cli/changes/changelog/"
 
 [project.scripts]
 pulp = "pulp_cli:main"
@@ -126,7 +126,7 @@ search = "version: \"{current_version}\""
 replace = "version: \"{new_version}\""
 
 [tool.towncrier]
-filename = "docs/CHANGES.md"
+filename = "CHANGES.md"
 directory = "CHANGES/"
 title_format = "## {version} ({project_date}) {{: #{version} }}"
 template = "CHANGES/.TEMPLATE.md"
