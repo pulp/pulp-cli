@@ -4,7 +4,6 @@ import typing as t
 from types import ModuleType
 
 import click
-import toml
 from pulp_glue.common.i18n import get_translation
 
 from pulp_cli.config import CONFIG_LOCATIONS, config, config_options, validate_config
@@ -14,6 +13,12 @@ if sys.version_info >= (3, 10):
     from importlib.metadata import entry_points
 else:
     from importlib_metadata import entry_points
+
+if sys.version_info >= (3, 11):
+    import tomllib
+else:
+    import tomli as tomllib
+
 
 try:
     from click_shell import make_click_shell
@@ -84,12 +89,14 @@ def _load_config(ctx: click.Context) -> None:
         config_path = ctx.meta[CONFIG_KEY]
         profile_key = ctx.meta[PROFILE_KEY]
         if config_path is not None:
-            config = toml.load(config_path)
+            with open(config_path, "rb") as fp:
+                config = tomllib.load(fp)
         else:
             config = {"cli": {}}
             for location in CONFIG_LOCATIONS:
                 try:
-                    new_config = toml.load(location)
+                    with open(location, "rb") as fp:
+                        new_config = tomllib.load(fp)
                 except (FileNotFoundError, PermissionError):
                     pass
                 else:
