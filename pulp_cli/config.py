@@ -1,13 +1,20 @@
 import re
+import sys
 import typing as t
 from pathlib import Path
 from urllib.parse import urlparse
 
 import click
-import toml
+import tomli_w
 from pulp_glue.common.i18n import get_translation
 
 from pulpcore.cli.common.generic import REGISTERED_OUTPUT_FORMATTERS, pulp_group
+
+if sys.version_info >= (3, 11):
+    import tomllib
+else:
+    import tomli as tomllib
+
 
 translation = get_translation(__package__)
 _ = translation.gettext
@@ -225,7 +232,7 @@ def create(
                 ).format(location=location)
             )
 
-    def prompt_config_option(name: str) -> t.Any:
+    def _prompt_config_option(name: str) -> t.Any:
         """Find the option from the root command and prompt."""
         option = next(p for p in ctx.command.params if p.name == name)
         if option.multiple:
@@ -248,20 +255,22 @@ def create(
         location = click.prompt(_("Config file location"), default=location)
         _check_location(location)
         for setting in SETTINGS:
-            settings[setting] = prompt_config_option(setting)
+            settings[setting] = _prompt_config_option(setting)
     else:
         _check_location(location)
 
-    output: str = toml.dumps({"cli": settings})
+    # Sanitize
+    settings = {k: v for k, v in settings.items() if v is not None}
+    output: str = tomli_w.dumps({"cli": settings})
 
     if editor:
         output = not_none(
             click.edit(output), click.ClickException(_("No output from editor. Aborting."))
         )
     try:
-        settings = toml.loads(output)
+        settings = tomllib.loads(output)
         validate_settings(settings)
-    except (ValueError, toml.TomlDecodeError) as e:
+    except (ValueError, tomllib.TOMLDecodeError) as e:
         raise click.ClickException(str(e))
 
     Path(location).parent.mkdir(parents=True, exist_ok=True)
@@ -289,10 +298,10 @@ def edit(location: str) -> None:
             click.edit(output), click.ClickException(_("No output from editor. Aborting."))
         )
         try:
-            settings = toml.loads(output)
+            settings = tomllib.loads(output)
             validate_settings(settings)
             break
-        except (ValueError, toml.TomlDecodeError) as e:
+        except (ValueError, tomllib.TOMLDecodeError) as e:
             click.echo(str(e), err=True)
             click.confirm(_("Retry"), abort=True)
     with Path(location).open("w") as sfile:
@@ -304,8 +313,9 @@ def edit(location: str) -> None:
 @click.option("--strict", is_flag=True, help=_("Validate that all settings are present"))
 def validate(location: str, strict: bool) -> None:
     try:
-        settings = toml.load(location)
-    except toml.TomlDecodeError:
+        with open(location, "rb") as fp:
+            settings = tomllib.load(fp)
+    except tomllib.TOMLDecodeError:
         raise click.ClickException(_("Invalid toml file '{location}'.").format(location=location))
 
     try:

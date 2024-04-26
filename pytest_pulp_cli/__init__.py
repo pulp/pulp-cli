@@ -1,12 +1,19 @@
 import os
 import pathlib
 import subprocess
+import sys
 import typing as t
 
 import gnupg
 import pytest
 import requests
-import toml
+import tomli_w
+
+if sys.version_info >= (3, 11):
+    import tomllib
+else:
+    import tomli as tomllib
+
 
 if t.TYPE_CHECKING:
     from _pytest._code.code import ExceptionInfo, TerminalRepr
@@ -89,7 +96,8 @@ def pulp_cli_settings() -> t.Dict[str, t.Dict[str, t.Any]]:
     The `pulp_cli_env` fixture, however depends on it and sets $XDG_CONFIG_HOME up accordingly.
     """
     pulp_cli_test_tmpdir = pathlib.Path(os.environ.get("PULP_CLI_TEST_TMPDIR", "."))
-    settings = {"cli": toml.load(os.environ.get("PULP_CLI_CONFIG", "tests/cli.toml"))["cli"]}
+    with open(os.environ.get("PULP_CLI_CONFIG", "tests/cli.toml"), "rb") as fp:
+        settings = {"cli": tomllib.load(fp)["cli"]}
     if os.environ.get("PULP_HTTPS"):
         settings["cli"]["base_url"] = settings["cli"]["base_url"].replace("http://", "https://")
         client_cert_path = pulp_cli_test_tmpdir / "settings" / "certs" / "client.pem"
@@ -116,8 +124,8 @@ def pulp_cli_settings_path(
 ) -> pathlib.Path:
     settings_path = tmp_path_factory.mktemp("config", numbered=False)
     (settings_path / "pulp").mkdir(parents=True)
-    with open(settings_path / "pulp" / "cli.toml", "w") as settings_file:
-        toml.dump(pulp_cli_settings, settings_file)
+    with open(settings_path / "pulp" / "cli.toml", "wb") as fp:
+        tomli_w.dump(pulp_cli_settings, fp)
     return settings_path
 
 
