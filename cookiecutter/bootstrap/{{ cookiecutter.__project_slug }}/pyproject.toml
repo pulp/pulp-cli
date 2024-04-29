@@ -31,18 +31,10 @@ dependencies = [
 
 [project.urls]
 repository = "https://github.com/pulp/{{ cookiecutter.__project_slug }}"
-changelog = "https://github.com/pulp/{{ cookiecutter.__project_slug }}/blob/main/{{ "docs/" if cookiecutter.docs else "" }}CHANGES.md"
+changelog = "https://github.com/pulp/{{ cookiecutter.__project_slug }}/blob/main/CHANGES.md"
 
 [project.entry-points."pulp_cli.plugins"]
 {{ cookiecutter.app_label }} = "pulpcore.cli.{{ cookiecutter.app_label }}"
-
-[tool.setuptools.packages.find]
-where = ["."]
-include = ["pulpcore.cli.*"]
-namespaces = true
-
-[tool.setuptools.package-data]
-"*" = ["py.typed", "locale/*/LC_MESSAGES/*.mo"]
 
 [tool.pulp_cli_template]
 app_label = {{ cookiecutter.app_label | to_toml_value }}
@@ -50,100 +42,9 @@ glue = {{ cookiecutter.glue | to_toml_value }}
 docs = {{ cookiecutter.docs | to_toml_value }}
 translations = {{ cookiecutter.translations | to_toml_value }}
 
-[tool.towncrier]
-{%- if cookiecutter.docs %}
-filename = "docs/CHANGES.md"
-{%- else %}
-filename = "CHANGES.md"
-{%- endif %}
-directory = "CHANGES/"
-title_format = "## {version} ({project_date})"
-template = "CHANGES/.TEMPLATE.md"
-issue_format = "[#{issue}](https://github.com/pulp/{{ cookiecutter.__project_slug }}/issues/{issue})"
-start_string = "[//]: # (towncrier release notes start)\n"
-underlines = ["", "", ""]
-
-[[tool.towncrier.section]]
-path = ""
-name = ""
-{%- if cookiecutter.glue %}
-
-[[tool.towncrier.section]]
-path = "pulp-glue-{{ cookiecutter.app_label }}"
-name = "Pulp-{{ cookiecutter.app_label }} GLUE"
-{%- endif %}
-
-[[tool.towncrier.type]]
-directory = "feature"
-name = "Features"
-showcontent = true
-
-[[tool.towncrier.type]]
-directory = "bugfix"
-name = "Bugfixes"
-showcontent = true
-
-[[tool.towncrier.type]]
-directory = "doc"
-name = "Improved Documentation"
-showcontent = true
-
-[[tool.towncrier.type]]
-directory = "removal"
-name = "Deprecations and Removals"
-showcontent = true
-
-[[tool.towncrier.type]]
-directory = "translation"
-name = "Translations"
-showcontent = true
-
-[[tool.towncrier.type]]
-directory = "devel"
-name = "Developer Notes"
-showcontent = true
-
-[[tool.towncrier.type]]
-directory = "misc"
-name = "Misc"
-showcontent = false
-
-[tool.black]
-line-length = 100
-
-[tool.isort]
-profile = "black"
-line_length = 100
-{%- if cookiecutter.glue %}
-skip = ["pulp-glue-{{ cookiecutter.app_label }}"]
-{%- endif %}
-
-
-[tool.flake8]
-exclude = ["./docs/*"]
-ignore = ["W503", "Q000", "Q003", "D100", "D104", "D106", "D200", "D202", "D205", "D400", "D401", "D402"]
-# E203: whitespace before ':'; https://github.com/psf/black/issues/279
-# E401: multiple imports on one line
-extend-ignore = ["E203", "E401"]
-max-line-length = 100
-
 [tool.pytest.ini_options]
 markers = [
   "script: tests provided as shell scripts",
   "help_page: tests that render help pages",
   "pulp_{{ cookiecutter.app_label }}: pulp_{{ cookiecutter.app_label }} tests",
 ]
-
-[tool.mypy]
-strict = true
-show_error_codes = true
-files = "pulpcore/**/*.py"
-namespace_packages = true
-explicit_package_bases = true
-
-[[tool.mypy.overrides]]
-module = [
-  "click_shell.*",
-  "schema.*",
-]
-ignore_missing_imports = true

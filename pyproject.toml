@@ -138,6 +138,7 @@ replace = "version: \"{new_version}\""
 
 
 [tool.towncrier]
+# This section is managed by the cookiecutter templates.
 filename = "CHANGES.md"
 directory = "CHANGES/"
 title_format = "## {version} ({project_date}) {{: #{version} }}"
@@ -147,47 +148,57 @@ start_string = "[//]: # (towncrier release notes start)\n"
 underlines = ["", "", ""]
 
 [[tool.towncrier.section]]
+# This section is managed by the cookiecutter templates.
 path = ""
 name = ""
 
 [[tool.towncrier.section]]
+# This section is managed by the cookiecutter templates.
 path = "pulp-glue"
 name = "Pulp GLUE"
 
 [[tool.towncrier.type]]
+# This section is managed by the cookiecutter templates.
 directory = "feature"
 name = "Features"
 showcontent = true
 
 [[tool.towncrier.type]]
+# This section is managed by the cookiecutter templates.
 directory = "bugfix"
 name = "Bugfixes"
 showcontent = true
 
 [[tool.towncrier.type]]
+# This section is managed by the cookiecutter templates.
 directory = "doc"
 name = "Improved Documentation"
 showcontent = true
 
 [[tool.towncrier.type]]
+# This section is managed by the cookiecutter templates.
 directory = "removal"
 name = "Deprecations and Removals"
 showcontent = true
 
 [[tool.towncrier.type]]
+# This section is managed by the cookiecutter templates.
 directory = "translation"
 name = "Translations"
 showcontent = true
 
 [[tool.towncrier.type]]
+# This section is managed by the cookiecutter templates.
 directory = "devel"
 name = "Developer Notes"
 showcontent = true
 
 [[tool.towncrier.type]]
+# This section is managed by the cookiecutter templates.
 directory = "misc"
 name = "Misc"
 showcontent = false
+
 
 [tool.black]
 # This section is managed by the cookiecutter templates.
