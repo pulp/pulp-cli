@@ -56,12 +56,15 @@ python = "pulpcore.cli.python"
 rpm = "pulpcore.cli.rpm"
 
 [tool.setuptools.packages.find]
+# This section is managed by the cookiecutter templates.
 where = ["."]
 include = ["pulpcore.cli.*", "pulp_cli", "pytest_pulp_cli"]
 namespaces = true
 
 [tool.setuptools.package-data]
+# This section is managed by the cookiecutter templates.
 "*" = ["py.typed", "locale/*/LC_MESSAGES/*.mo"]
+
 
 [tool.pulp_cli_template]
 # This section is co-managed by the cookiecutter templates.
@@ -84,6 +87,7 @@ serialize = [
 ]
 
 [tool.bumpversion.parts.release]
+# This section is managed by the cookiecutter templates.
 optional_value = "prod"
 values = [
   "dev",
@@ -91,36 +95,43 @@ values = [
 ]
 
 [[tool.bumpversion.files]]
+# This section is managed by the cookiecutter templates.
 filename = "./pulp_cli/__init__.py"
 search = "__version__ = \"{current_version}\""
 replace = "__version__ = \"{new_version}\""
 
 [[tool.bumpversion.files]]
+# This section is managed by the cookiecutter templates.
 filename = "./pulp-glue/pulp_glue/common/__init__.py"
 search = "__version__ = \"{current_version}\""
 replace = "__version__ = \"{new_version}\""
 
 [[tool.bumpversion.files]]
+# This section is managed by the cookiecutter templates.
 filename = "./pulpcore/cli/common/__init__.py"
 search = "__version__ = \"{current_version}\""
 replace = "__version__ = \"{new_version}\""
 
 [[tool.bumpversion.files]]
+# This section is managed by the cookiecutter templates.
 filename = "./pulp-glue/pyproject.toml"
 search = "version = \"{current_version}\""
 replace = "version = \"{new_version}\""
 
 [[tool.bumpversion.files]]
+# This section is managed by the cookiecutter templates.
 filename = "./pyproject.toml"
 search = "version = \"{current_version}\""
 replace = "version = \"{new_version}\""
 
 [[tool.bumpversion.files]]
+# This section is managed by the cookiecutter templates.
 filename = "./pyproject.toml"
 search = "\"pulp-glue=={current_version}\""
 replace = "\"pulp-glue=={new_version}\""
 
 [[tool.bumpversion.files]]
+# This section is managed by the cookiecutter templates.
 filename = "./mkdocs.yml"
 search = "version: \"{current_version}\""
 replace = "version: \"{new_version}\""
@@ -222,6 +233,7 @@ namespace_packages = true
 explicit_package_bases = true
 
 [[tool.mypy.overrides]]
+# This section is managed by the cookiecutter templates.
 module = [
   "click_shell.*",
   "gnupg.*",
