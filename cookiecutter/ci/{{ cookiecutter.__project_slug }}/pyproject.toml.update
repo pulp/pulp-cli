@@ -92,6 +92,74 @@ search = "version: \"{current_version}\""
 replace = "version: \"{new_version}\""
 {%- endif %}
 
+[tool.towncrier]
+# This section is managed by the cookiecutter templates.
+filename = "CHANGES.md"
+directory = "CHANGES/"
+title_format = "## {version} ({project_date}) {{ "{{: #{version} }}" }}"
+template = "CHANGES/.TEMPLATE.md"
+issue_format = "[#{issue}](https://github.com/pulp/pulp-cli{{ cookiecutter.__app_label_suffix }}/issues/{issue})"
+start_string = "[//]: # (towncrier release notes start)\n"
+underlines = ["", "", ""]
+
+[[tool.towncrier.section]]
+# This section is managed by the cookiecutter templates.
+path = ""
+name = ""
+{%- if cookiecutter.glue %}
+
+[[tool.towncrier.section]]
+# This section is managed by the cookiecutter templates.
+path = "pulp-glue{{ cookiecutter.__app_label_suffix}}"
+name = "Pulp{{ cookiecutter.__app_label_suffix}} GLUE"
+{%- endif %}
+
+[[tool.towncrier.type]]
+# This section is managed by the cookiecutter templates.
+directory = "feature"
+name = "Features"
+showcontent = true
+
+[[tool.towncrier.type]]
+# This section is managed by the cookiecutter templates.
+directory = "bugfix"
+name = "Bugfixes"
+showcontent = true
+{%- if cookiecutter.docs %}
+
+[[tool.towncrier.type]]
+# This section is managed by the cookiecutter templates.
+directory = "doc"
+name = "Improved Documentation"
+showcontent = true
+{%- endif %}
+
+[[tool.towncrier.type]]
+# This section is managed by the cookiecutter templates.
+directory = "removal"
+name = "Deprecations and Removals"
+showcontent = true
+{%- if cookiecutter.translations %}
+
+[[tool.towncrier.type]]
+# This section is managed by the cookiecutter templates.
+directory = "translation"
+name = "Translations"
+showcontent = true
+{%- endif %}
+
+[[tool.towncrier.type]]
+# This section is managed by the cookiecutter templates.
+directory = "devel"
+name = "Developer Notes"
+showcontent = true
+
+[[tool.towncrier.type]]
+# This section is managed by the cookiecutter templates.
+directory = "misc"
+name = "Misc"
+showcontent = false
+
 [tool.black]
 # This section is managed by the cookiecutter templates.
 line-length = 100
