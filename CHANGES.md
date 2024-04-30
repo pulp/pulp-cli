@@ -36,7 +36,8 @@
 
 #### Deprecations and Removals {: #0.25.0-removal }
 
-- Removed `min` and `max` parameters from `pulp debug has-plugin`.
+- Removed `--min` and `--max` parameters from `pulp debug has-plugin`.
+  Use `--specifier` instead.
 - Removed deprecated `--fields` and `--exclude-fields` options from `pulp ansible content list` command.
   Use the `--field` and `--exclude-field` options instead.
 - Removed deprecated file and python content modification commands.
@@ -69,7 +70,10 @@
 
 - Removed `preprocess_body` from `PulpEntityContext` in favor of `preprocess_entity`.
 - Removed deprecated `registered_repository_contexts`.
+  Polymorpohic entity classes register themselves to the `TYPE_REGISTRY` when providing the `PLUGIN` and `RESOURCE_TYPE` class attributes.
 - Removed optional `href` parameter from many verbs on `PulpEntityContext`.
+  The methods rely on the `entity` or `href` properties to be preloaded.
+  e.g. `entity_ctx.update(href, body=body)` should be changed to `entity_ctx.href = href; entity_ctx.update(body=body)`.
 - Removed unused `format` parameter from `PulpContext`.
 
 
