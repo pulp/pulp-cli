@@ -22,18 +22,23 @@ jobs:
       - uses: "actions/checkout@v4"
         with:
           fetch-depth: 0
-      - name: "Commit Count Check"
+      - uses: "actions/setup-python@v5"
+        with:
+          python_version: "3.12"
+      - name: "Determine PR labels"
         run: |
           git fetch origin ${{ github.event.pull_request.head.sha }}
-          echo "COMMIT_COUNT=$(git log  --oneline --no-merges origin/${{ github.base_ref }}..${{ github.event.pull_request.head.sha }} | wc -l)" >> "$GITHUB_ENV"
+          python .ci/scripts/pr_labels.py "origin/${{ github.base_ref }}" "${{ github.event.pull_request.head.sha }}" >> "$GITHUB_ENV"
       - uses: "actions/github-script@v7"
+        name: "Apply PR Labels"
         with:
           script: |
-            const labelName = "multi-commit";
-            const { COMMIT_COUNT } = process.env;
+            const { ADD_LABELS, REMOVE_LABELS } = process.env;
 
-            if (COMMIT_COUNT == 1)
-            {
+            const addLables = ADD_LABELS.split(",");
+            const removeLables = REMOVE_LABELS.split(",");
+
+            removeLabels.map((labelName) => {
               try {
                 await github.rest.issues.removeLabel({
                   issue_number: context.issue.number,
@@ -44,8 +49,7 @@ jobs:
               } catch(err) {
               }
             }
-            else
-            {
+            addLabels.map((labelName) => {
               await github.rest.issues.addLabels({
                 issue_number: context.issue.number,
                 owner: context.repo.owner,

@@ -1,0 +1,3 @@
+Added an automatic PR labeler for "no-issue", "no-changelog", "multi-commit", "wip" and "cherry-pick".
+It is no longer necessary to put the [noissue] tag in to commits without a link to an issue.
+Instead, the reviewer should take note of the "noissue"-label and decide whether to ask for one.
