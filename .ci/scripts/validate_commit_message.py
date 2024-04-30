@@ -17,7 +17,6 @@ BLOCKING_REGEX = [
     r"DO\s*NOT\s*MERGE",
     "EXPERIMENT",
 ]
-NO_ISSUE = "[noissue]"
 CHANGELOG_EXTS = [f".{item['directory']}" for item in PYPROJECT_TOML["tool"]["towncrier"]["type"]]
 
 sha = sys.argv[1]
@@ -61,13 +60,5 @@ if issues:
         if not cherry_pick:
             check_status(issue)
             check_changelog(issue)
-else:
-    if NO_ISSUE in message:
-        print("Commit {sha} has no issues but is tagged {tag}.".format(sha=sha[0:7], tag=NO_ISSUE))
-    else:
-        sys.exit(
-            "Error: no attached issues found for {sha}. If this was intentional, add "
-            " '{tag}' to the commit message.".format(sha=sha[0:7], tag=NO_ISSUE)
-        )
 
 print("Commit message for {sha} passed.".format(sha=sha[0:7]))
