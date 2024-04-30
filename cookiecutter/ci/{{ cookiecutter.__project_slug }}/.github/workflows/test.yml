@@ -26,7 +26,12 @@ jobs:
         uses: "actions/setup-python@v5"
         with:
           python-version: "{{ "${{ matrix.python }}" }}"
-      - name: "Install Test Dependencies"
+      {%- if cookiecutter.binary_dependencies %}
+      - name: "Install Binary Test Dependencies"
+        run: |
+          sudo apt-get install {{ cookiecutter.binary_dependencies }}
+      {%- endif %}
+      - name: "Install Python Test Dependencies"
         run: |
           if [ "{{ "${{matrix.lower_bounds}}" }}" ]
           then

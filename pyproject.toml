@@ -74,6 +74,7 @@ glue = true
 docs = true
 translations = true
 main_package = "common"
+binary_dependencies = ""
 
 [tool.bumpversion]
 # This section is managed by the cookiecutter templates.

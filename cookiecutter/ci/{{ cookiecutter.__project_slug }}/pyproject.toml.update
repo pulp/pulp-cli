@@ -20,6 +20,7 @@ glue = {{ cookiecutter.glue | to_toml_value }}
 docs = {{ cookiecutter.docs | to_toml_value }}
 translations = {{ cookiecutter.translations | to_toml_value }}
 main_package = {{ cookiecutter.main_package | to_toml_value }}
+binary_dependencies = {{ cookiecutter.binary_dependencies | to_toml_value }}
 
 [tool.bumpversion]
 # This section is managed by the cookiecutter templates.

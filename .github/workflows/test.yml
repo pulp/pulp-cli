@@ -51,7 +51,7 @@ jobs:
         uses: "actions/setup-python@v5"
         with:
           python-version: "${{ matrix.python }}"
-      - name: "Install Test Dependencies"
+      - name: "Install Python Test Dependencies"
         run: |
           if [ "${{matrix.lower_bounds}}" ]
           then

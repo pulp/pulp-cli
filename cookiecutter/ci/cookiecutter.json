@@ -6,6 +6,7 @@
   "translations": false,
   "current_version": "0.0.1.dev",
   "test_matrix": null,
+  "binary_dependencies": "",
   "__app_label_suffix": "{{ cookiecutter.app_label and '-' + cookiecutter.app_label }}",
   "__project_name": "pulp-cli{{ cookiecutter.__app_label_suffix }}",
   "__project_slug": "{{ cookiecutter.__project_name | lower | replace(' ', '_') }}",
