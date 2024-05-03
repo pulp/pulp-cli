@@ -15,7 +15,7 @@ concurrency:
 jobs:
   single_commit:
     runs-on: "ubuntu-latest"
-    name: "Label multiple commit PR"
+    name: "Label PR"
     permissions:
       pull-requests: "write"
     steps:

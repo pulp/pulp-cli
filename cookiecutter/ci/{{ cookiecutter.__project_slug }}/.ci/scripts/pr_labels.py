@@ -1,3 +1,5 @@
+#!/bin/env python3
+
 # This script is running with elevated privileges from the main branch against pull requests.
 
 import re
@@ -20,9 +22,6 @@ def main():
         f".{item['directory']}" for item in PYPROJECT_TOML["tool"]["towncrier"]["type"]
     ]
 
-    add_labels = []
-    remove_labels = []
-
     repo = Repo(".")
 
     base_commit = repo.commit(sys.argv[1])
@@ -38,7 +37,7 @@ def main():
         "wip": False,
     }
     for commit in pr_commits:
-        labels["wip"] |= BLOCKING_REGEX.search(commit.message) is not None
+        labels["wip"] |= BLOCKING_REGEX.search(commit.summary) is not None
         no_issue = ISSUE_REGEX.search(commit.message, re.IGNORECASE) is None
         labels["no-issue"] |= no_issue
         cherry_pick = CHERRY_PICK_REGEX.search(commit.message) is not None
