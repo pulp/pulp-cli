@@ -39,7 +39,7 @@ jobs:
             const addLables = ADD_LABELS.split(",");
             const removeLables = REMOVE_LABELS.split(",");
 
-            removeLabels.map((labelName) => {
+            for await (const labelName of removeLabels) {
               try {
                 await github.rest.issues.removeLabel({
                   issue_number: context.issue.number,
@@ -50,7 +50,7 @@ jobs:
               } catch(err) {
               }
             }
-            addLabels.map((labelName) => {
+            for await (const labelName of addLabels) {
               await github.rest.issues.addLabels({
                 issue_number: context.issue.number,
                 owner: context.repo.owner,
