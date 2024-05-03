@@ -28,7 +28,10 @@ note that we have styling and formatting conventions for both the code and our P
 - Shell scripts must pass `shellcheck`.
 
 - If your PR is in response to an open issue, add `fixes #<ISSUE-NUMBER>` as its own line in your commit message.
-  If you do **not** have an issue, use `[noissue]`.
+  You need to add a changelog entry for it.
+
+- If you do not have an issue, consider adding an anonymous changelog entry anyway.
+  You might be asked by the reviewer to file an issue anyway.
 
 !!!note
 
