@@ -36,8 +36,8 @@ jobs:
           script: |
             const { ADD_LABELS, REMOVE_LABELS } = process.env;
 
-            const addLables = ADD_LABELS.split(",");
-            const removeLables = REMOVE_LABELS.split(",");
+            const addLabels = ADD_LABELS.split(",");
+            const removeLabels = REMOVE_LABELS.split(",");
 
             for await (const labelName of removeLabels) {
               try {
