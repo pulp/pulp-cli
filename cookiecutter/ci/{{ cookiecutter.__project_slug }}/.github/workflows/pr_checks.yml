@@ -15,7 +15,7 @@ concurrency:
 jobs:
   single_commit:
     runs-on: "ubuntu-latest"
-    name: "Label multiple commit PR"
+    name: "Label PR"
     permissions:
       pull-requests: "write"
     steps:
@@ -24,9 +24,10 @@ jobs:
           fetch-depth: 0
       - uses: "actions/setup-python@v5"
         with:
-          python_version: "3.12"
+          python-version: "3.12"
       - name: "Determine PR labels"
         run: |
+          pip install GitPython==3.1.42
           git fetch origin ${{ github.event.pull_request.head.sha }}
           python .ci/scripts/pr_labels.py "origin/${{ github.base_ref }}" "${{ github.event.pull_request.head.sha }}" >> "$GITHUB_ENV"
       - uses: "actions/github-script@v7"
@@ -38,7 +39,7 @@ jobs:
             const addLabels = ADD_LABELS.split(",");
             const removeLabels = REMOVE_LABELS.split(",");
 
-            removeLabels.map((labelName) => {
+            for await (const labelName of removeLabels) {
               try {
                 await github.rest.issues.removeLabel({
                   issue_number: context.issue.number,
@@ -49,7 +50,7 @@ jobs:
               } catch(err) {
               }
             }
-            addLabels.map((labelName) => {
+            for await (const labelName of addLabels) {
               await github.rest.issues.addLabels({
                 issue_number: context.issue.number,
                 owner: context.repo.owner,
