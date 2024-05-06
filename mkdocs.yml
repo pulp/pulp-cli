@@ -2,7 +2,7 @@ site_name: "Pulp CLI"
 theme:
   name: "readthedocs"
   custom_dir: "docs_theme"
-  version: "0.24.2.dev"
+  version: "0.24.2"
 extra_css:
   - "css/mkdocstrings.css"
   - "css/tabbed.css"
