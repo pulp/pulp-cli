@@ -36,25 +36,24 @@ jobs:
           script: |
             const { ADD_LABELS, REMOVE_LABELS } = process.env;
 
-            const addLabels = ADD_LABELS.split(",");
-            const removeLabels = REMOVE_LABELS.split(",");
-
-            for await (const labelName of removeLabels) {
-              try {
-                await github.rest.issues.removeLabel({
-                  issue_number: context.issue.number,
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  name: labelName,
-                });
-              } catch(err) {
+            if (REMOVE_LABELS.length) {
+              for await (const labelName of REMOVE_LABELS.split(",")) {
+                try {
+                  await github.rest.issues.removeLabel({
+                    issue_number: context.issue.number,
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    name: labelName,
+                  });
+                } catch(err) {
+                }
               }
             }
-            for await (const labelName of addLabels) {
+            if (ADD_LABELS.length) {
               await github.rest.issues.addLabels({
                 issue_number: context.issue.number,
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                labels: [labelName],
+                labels: ADD_LABELS.split(","),
               });
             }
