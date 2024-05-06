@@ -33,7 +33,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-pygments = ["pygments>=2.17.2,<2.18"]
+pygments = ["pygments>=2.17.2,<2.19"]
 shell = ["click-shell~=2.1"]
 password-manager = ["SecretStorage>=3.3.3,<3.3.4"]
 
