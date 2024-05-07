@@ -1,14 +1,5 @@
 #!/bin/sh
 
-# This file is shared between some projects please keep all copies in sync
-# Known places:
-#   - https://github.com/pulp/pulp-cli/blob/main/.ci/run_container.sh
-#   - https://github.com/pulp/pulp-cli-deb/blob/main/.ci/run_container.sh
-#   - https://github.com/pulp/pulp-cli-gem/blob/main/.ci/run_container.sh
-#   - https://github.com/pulp/pulp-cli-maven/blob/main/.ci/run_container.sh
-#   - https://github.com/pulp/pulp-cli-ostree/blob/main/.ci/run_container.sh
-#   - https://github.com/pulp/squeezer/blob/develop/tests/run_container.sh
-
 set -eu
 
 BASEPATH="$(dirname "$(readlink -f "$0")")"

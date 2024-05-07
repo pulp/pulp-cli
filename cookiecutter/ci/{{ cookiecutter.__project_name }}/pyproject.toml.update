@@ -16,6 +16,7 @@ namespaces = true
 # This section is co-managed by the cookiecutter templates.
 # Changes to existing keys should be preserved.
 app_label = {{ cookiecutter.app_label | to_toml_value }}
+repository = {{ cookiecutter.repository | to_toml_value }}
 glue = {{ cookiecutter.glue | to_toml_value }}
 docs = {{ cookiecutter.docs | to_toml_value }}
 translations = {{ cookiecutter.translations | to_toml_value }}
@@ -99,7 +100,7 @@ filename = "CHANGES.md"
 directory = "CHANGES/"
 title_format = "## {version} ({project_date}) {{ "{{: #{version} }}" }}"
 template = "CHANGES/.TEMPLATE.md"
-issue_format = "[#{issue}](https://github.com/pulp/pulp-cli{{ cookiecutter.__app_label_suffix }}/issues/{issue})"
+issue_format = "[#{issue}]({{ cookiecutter.repository }}/issues/{issue})"
 start_string = "[//]: # (towncrier release notes start)\n"
 underlines = ["", "", ""]
 

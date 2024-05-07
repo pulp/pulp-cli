@@ -1,15 +1,15 @@
 {
   "app_label": "noname",
-  "main_package": null,
   "glue": true,
   "docs": false,
   "translations": false,
+  "main_package": null,
+  "binary_dependencies": "",
   "current_version": "0.0.1.dev",
   "test_matrix": null,
-  "binary_dependencies": "",
   "__app_label_suffix": "{{ cookiecutter.app_label and '-' + cookiecutter.app_label }}",
   "__project_name": "pulp-cli{{ cookiecutter.__app_label_suffix }}",
-  "__project_slug": "{{ cookiecutter.__project_name | lower | replace(' ', '_') }}",
+  "repository": "https://github.com/pulp/{{ cookiecutter.__project_name }}",
   "_copy_without_render": [
     "CHANGES/.TEMPLATE.md",
     ".github/workflows/collect_changes.yml",
