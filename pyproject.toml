@@ -70,6 +70,7 @@ namespaces = true
 # This section is co-managed by the cookiecutter templates.
 # Changes to existing keys should be preserved.
 app_label = ""
+repository = "https://github.com/pulp/pulp-cli"
 glue = true
 docs = true
 translations = true

@@ -3,7 +3,7 @@ requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "{{ cookiecutter.__project_slug }}"
+name = "{{ cookiecutter.__project_name }}"
 version = "{{ cookiecutter.version }}"
 description = "Command line interface to talk to pulpcore's REST API. ({{ cookiecutter.app_label | capitalize }} plugin commands)"
 readme = "README.md"
@@ -30,8 +30,8 @@ dependencies = [
 ]
 
 [project.urls]
-repository = "https://github.com/pulp/{{ cookiecutter.__project_slug }}"
-changelog = "https://github.com/pulp/{{ cookiecutter.__project_slug }}/blob/main/CHANGES.md"
+repository = "{{ cookiecutter.repository }}"
+changelog = "{{ cookiecutter.repository }}/blob/main/CHANGES.md"
 
 [project.entry-points."pulp_cli.plugins"]
 {{ cookiecutter.app_label }} = "pulpcore.cli.{{ cookiecutter.app_label }}"
