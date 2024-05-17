@@ -18,9 +18,13 @@ BLOCKING_REGEX = [
     "EXPERIMENT",
 ]
 CHANGELOG_EXTS = [f".{item['directory']}" for item in PYPROJECT_TOML["tool"]["towncrier"]["type"]]
+NOISSUE_MARKER = "[noissue]"
 
 sha = sys.argv[1]
 message = subprocess.check_output(["git", "log", "--format=%B", "-n 1", sha]).decode("utf-8")
+
+if NOISSUE_MARKER in message:
+    sys.exit("Do not add '[noissue]' in the commit message.")
 
 if any((re.match(pattern, message) for pattern in BLOCKING_REGEX)):
     sys.exit("This PR is not ready for consumption.")
