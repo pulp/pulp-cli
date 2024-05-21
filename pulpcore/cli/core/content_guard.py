@@ -5,7 +5,9 @@ from pulp_glue.certguard.context import PulpRHSMCertGuardContext, PulpX509CertGu
 from pulp_glue.common.context import PulpContentGuardContext, PulpEntityContext
 from pulp_glue.common.i18n import get_translation
 from pulp_glue.core.context import (
+    PulpCompositeContentGuardContext,
     PulpContentRedirectContentGuardContext,
+    PulpHeaderContentGuardContext,
     PulpRbacContentGuardContext,
 )
 
@@ -20,6 +22,7 @@ from pulpcore.cli.common.generic import (
     pass_entity_context,
     pass_pulp_context,
     pulp_group,
+    resource_option,
     role_command,
     show_command,
     update_command,
@@ -36,11 +39,71 @@ def content_guard(ctx: click.Context, pulp_ctx: PulpCLIContext) -> None:
     ctx.obj = PulpContentGuardContext(pulp_ctx)
 
 
-common_create_options = [click.option("--name", required=True), click.option("--description")]
+common_update_options = [
+    click.option("--description"),
+]
+common_create_options = [
+    click.option("--name", required=True),
+] + common_update_options
 filter_options = [click.option("--name")]
 lookup_options = [name_option, href_option]
 
 content_guard.add_command(list_command(decorators=filter_options))
+
+
+@content_guard.group()
+@pass_pulp_context
+@click.pass_context
+def composite(ctx: click.Context, pulp_ctx: PulpCLIContext) -> None:
+    ctx.obj = PulpCompositeContentGuardContext(pulp_ctx)
+
+
+composite_options = [
+    resource_option(
+        "--guard",
+        "guards",
+        context_table=PulpContentGuardContext.TYPE_REGISTRY,
+        default_plugin="core",
+        multiple=True,
+    ),
+]
+
+composite.add_command(list_command(decorators=filter_options))
+composite.add_command(create_command(decorators=common_create_options + composite_options))
+composite.add_command(show_command(decorators=lookup_options))
+composite.add_command(
+    update_command(decorators=lookup_options + common_update_options + composite_options)
+)
+composite.add_command(destroy_command(decorators=lookup_options))
+composite.add_command(role_command(decorators=lookup_options))
+
+
+@content_guard.group()
+@pass_pulp_context
+@click.pass_context
+def header(ctx: click.Context, pulp_ctx: PulpCLIContext) -> None:
+    ctx.obj = PulpHeaderContentGuardContext(pulp_ctx)
+
+
+header_create_options = [
+    click.option("--header-name", required=True),
+    click.option("--header-value", required=True),
+    click.option("--jq-filter"),
+]
+header_update_options = [
+    click.option("--header-name"),
+    click.option("--header-value"),
+    click.option("--jq-filter"),
+]
+
+header.add_command(list_command(decorators=filter_options))
+header.add_command(create_command(decorators=common_create_options + header_create_options))
+header.add_command(show_command(decorators=lookup_options))
+header.add_command(
+    update_command(decorators=lookup_options + common_update_options + header_update_options)
+)
+header.add_command(destroy_command(decorators=lookup_options))
+header.add_command(role_command(decorators=lookup_options))
 
 
 @content_guard.group()
@@ -53,7 +116,7 @@ def rbac(ctx: click.Context, pulp_ctx: PulpCLIContext) -> None:
 rbac.add_command(list_command(decorators=filter_options))
 rbac.add_command(create_command(decorators=common_create_options))
 rbac.add_command(show_command(decorators=lookup_options))
-rbac.add_command(update_command(decorators=lookup_options))
+rbac.add_command(update_command(decorators=lookup_options + common_update_options))
 rbac.add_command(destroy_command(decorators=lookup_options))
 rbac.add_command(role_command(decorators=lookup_options))
 
@@ -126,7 +189,7 @@ def redirect(ctx: click.Context, pulp_ctx: PulpCLIContext) -> None:
 redirect.add_command(list_command(decorators=filter_options))
 redirect.add_command(create_command(decorators=common_create_options))
 redirect.add_command(show_command(decorators=lookup_options))
-redirect.add_command(update_command(decorators=lookup_options))
+redirect.add_command(update_command(decorators=lookup_options + common_update_options))
 redirect.add_command(destroy_command(decorators=lookup_options))
 redirect.add_command(role_command(decorators=lookup_options))
 
