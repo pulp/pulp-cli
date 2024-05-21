@@ -262,16 +262,6 @@ class PulpGroupUserContext(PulpEntityContext):
         return {self.group_ctx.HREF: self.group_ctx.pulp_href}
 
 
-class PulpContentRedirectContentGuardContext(PulpContentGuardContext):
-    PLUGIN = "core"
-    RESOURCE_TYPE = "content_redirect"
-    ENTITY = "content redirect content guard"
-    ENTITIES = "content redirect content guards"
-    HREF = "content_redirect_content_guard_href"
-    ID_PREFIX = "contentguards_core_content_redirect"
-    NEEDS_PLUGINS = [PluginRequirement("core", specifier=">=3.18.0")]
-
-
 class PulpImporterContext(PulpEntityContext):
     ENTITY = _("Pulp importer")
     ENTITIES = _("Pulp importers")
@@ -296,6 +286,36 @@ class PulpOrphanContext(PulpViewSetContext):
                 self.pulp_ctx.needs_plugin(PluginRequirement("core", specifier=">=3.14.0"))
             result = self.pulp_ctx.call("orphans_delete")
         return result
+
+
+class PulpCompositeContentGuardContext(PulpContentGuardContext):
+    PLUGIN = "core"
+    RESOURCE_TYPE = "composite"
+    ENTITY = "composite content guard"
+    ENTITIES = "composite content guards"
+    HREF = "composite_content_guard_href"
+    ID_PREFIX = "contentguards_core_composite"
+    NEEDS_PLUGINS = [PluginRequirement("core", specifier=">=3.43.0")]
+
+
+class PulpContentRedirectContentGuardContext(PulpContentGuardContext):
+    PLUGIN = "core"
+    RESOURCE_TYPE = "content_redirect"
+    ENTITY = "content redirect content guard"
+    ENTITIES = "content redirect content guards"
+    HREF = "content_redirect_content_guard_href"
+    ID_PREFIX = "contentguards_core_content_redirect"
+    NEEDS_PLUGINS = [PluginRequirement("core", specifier=">=3.18.0")]
+
+
+class PulpHeaderContentGuardContext(PulpContentGuardContext):
+    PLUGIN = "core"
+    RESOURCE_TYPE = "header"
+    ENTITY = "header content guard"
+    ENTITIES = "header content guards"
+    HREF = "header_content_guard_href"
+    ID_PREFIX = "contentguards_core_header"
+    NEEDS_PLUGINS = [PluginRequirement("core", specifier=">=3.39.0")]
 
 
 class PulpRbacContentGuardContext(PulpContentGuardContext):

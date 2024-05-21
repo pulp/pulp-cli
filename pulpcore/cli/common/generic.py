@@ -838,7 +838,7 @@ def resource_option(*args: t.Any, **kwargs: t.Any) -> t.Callable[[FC], FC]:
         ctx: click.Context, param: click.Parameter, value: t.Iterable[t.Optional[str]]
     ) -> t.Iterable[EntityFieldDefinition]:
         if value:
-            return (_option_callback(ctx, param, item) for item in value)
+            return [_option_callback(ctx, param, item) for item in value]
         return tuple()
 
     if "cls" not in kwargs:
@@ -851,7 +851,7 @@ def resource_option(*args: t.Any, **kwargs: t.Any) -> t.Callable[[FC], FC]:
     if "help" not in kwargs:
         kwargs["help"] = _(
             "Referenced resource, in the form {plugin_form}{type_form}<name> or by href. "
-            "{plugin_default}{type_default}"
+            "{plugin_default}{type_default}{multiple_note}"
         ).format(
             plugin_form=_("[<plugin>:]") if default_plugin else _("<plugin>:"),
             type_form=_("[<resource_type>:]") if default_type else _("<resource_type>:"),
@@ -865,6 +865,7 @@ def resource_option(*args: t.Any, **kwargs: t.Any) -> t.Callable[[FC], FC]:
                 if default_type
                 else ""
             ),
+            multiple_note=(_("Can be specified multiple times.") if kwargs.get("multiple") else ""),
         )
 
     return click.option(*args, **kwargs)
