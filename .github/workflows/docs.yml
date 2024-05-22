@@ -15,17 +15,12 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pip-
 
-      - name: "Download wheels"
-        uses: "actions/download-artifact@v4"
-        with:
-          name: "pulp_cli_packages"
       - name: "Set up Python"
         uses: "actions/setup-python@v5"
         with:
           python-version: "3.11"
       - name: "Install Test Dependencies"
         run: |
-          # pip install dist/pulp_cli-*.whl pulp-glue/dist/pulp_glue-*.whl -r doc_requirements.txt
           pip install -r doc_requirements.txt
       - name: Build docs
         run: make docs

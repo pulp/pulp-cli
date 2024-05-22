@@ -27,6 +27,6 @@ find CHANGES/ \( -name "*.feature" -o -name "*.bugfix" -o -name "*.removal" -o -
 sed -i -e "1 i \\${NEW_BRANCH}" docs/versions.txt
 git add docs/versions.txt
 
-bump-my-version bump minor --commit --message $'Bump version to {new_version}\n\n[noissue]' --allow-dirty
+bump-my-version bump minor --commit --message $'Bump version to {new_version}' --allow-dirty
 
 git push origin "${NEW_BRANCH}"

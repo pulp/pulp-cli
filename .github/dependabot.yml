@@ -4,13 +4,13 @@ updates:
   directory: "/"
   schedule:
     interval: daily
-  open-pull-requests-limit: 10
   commit-message:
-    prefix: "[noissue]"
+    prefix: "[PIP] "
+  open-pull-requests-limit: 10
 - package-ecosystem: github-actions
   directory: "/"
   schedule:
-    interval: daily
-  open-pull-requests-limit: 10
+    interval: weekly
   commit-message:
-    prefix: "[noissue]"
+    prefix: "[GHA] "
+  open-pull-requests-limit: 10
