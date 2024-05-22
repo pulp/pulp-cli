@@ -1,1 +1,0 @@
-Fixed the logic to use requests defaults for tls verification.
