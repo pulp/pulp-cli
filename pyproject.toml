@@ -73,7 +73,7 @@ repository = "https://github.com/pulp/pulp-cli"
 glue = true
 docs = true
 translations = true
-main_package = ""
+main_package = "common"
 binary_dependencies = ""
 
 [tool.towncrier]
@@ -192,7 +192,6 @@ module = [
 ]
 ignore_missing_imports = true
 
-
 [tool.bumpversion]
 # This section is managed by the cookiecutter templates.
 current_version = "0.24.3.dev"
@@ -220,13 +219,13 @@ replace = "__version__ = \"{new_version}\""
 
 [[tool.bumpversion.files]]
 # This section is managed by the cookiecutter templates.
-filename = "./pulp-glue/pulp_glue//__init__.py"
+filename = "./pulp-glue/pulp_glue/common/__init__.py"
 search = "__version__ = \"{current_version}\""
 replace = "__version__ = \"{new_version}\""
 
 [[tool.bumpversion.files]]
 # This section is managed by the cookiecutter templates.
-filename = "./pulpcore/cli//__init__.py"
+filename = "./pulpcore/cli/common/__init__.py"
 search = "__version__ = \"{current_version}\""
 replace = "__version__ = \"{new_version}\""
 
