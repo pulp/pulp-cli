@@ -2,11 +2,13 @@ import os
 import re
 import subprocess
 import sys
+import tomllib
 from pathlib import Path
 
-import toml
 from github import Github
 
+with open("pyproject.toml", "rb") as fp:
+    PYPROJECT_TOML = tomllib.load(fp)
 KEYWORDS = ["fixes", "closes"]
 BLOCKING_REGEX = [
     "DRAFT",
@@ -15,13 +17,14 @@ BLOCKING_REGEX = [
     r"DO\s*NOT\s*MERGE",
     "EXPERIMENT",
 ]
-NO_ISSUE = "[noissue]"
-CHANGELOG_EXTS = [
-    f".{item['directory']}" for item in toml.load("pyproject.toml")["tool"]["towncrier"]["type"]
-]
+CHANGELOG_EXTS = [f".{item['directory']}" for item in PYPROJECT_TOML["tool"]["towncrier"]["type"]]
+NOISSUE_MARKER = "[noissue]"
 
 sha = sys.argv[1]
 message = subprocess.check_output(["git", "log", "--format=%B", "-n 1", sha]).decode("utf-8")
+
+if NOISSUE_MARKER in message:
+    sys.exit("Do not add '[noissue]' in the commit message.")
 
 if any((re.match(pattern, message) for pattern in BLOCKING_REGEX)):
     sys.exit("This PR is not ready for consumption.")
@@ -61,13 +64,5 @@ if issues:
         if not cherry_pick:
             check_status(issue)
             check_changelog(issue)
-else:
-    if NO_ISSUE in message:
-        print("Commit {sha} has no issues but is tagged {tag}.".format(sha=sha[0:7], tag=NO_ISSUE))
-    else:
-        sys.exit(
-            "Error: no attached issues found for {sha}. If this was intentional, add "
-            " '{tag}' to the commit message.".format(sha=sha[0:7], tag=NO_ISSUE)
-        )
 
 print("Commit message for {sha} passed.".format(sha=sha[0:7]))
