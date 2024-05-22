@@ -152,8 +152,8 @@ class OpenAPI:
             self._session.headers.update(headers)
         self._session.max_redirects = 0
 
-        verify: t.Optional[t.Union[bool, str]] = (
-            os.environ.get("PULP_CA_BUNDLE") if validate_certs is not False else False
+        verify: t.Optional[t.Union[bool, str]] = validate_certs and os.environ.get(
+            "PULP_CA_BUNDLE", True
         )
         session_settings = self._session.merge_environment_settings(
             base_url, {}, None, verify, None
