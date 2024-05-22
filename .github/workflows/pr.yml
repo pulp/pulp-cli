@@ -18,6 +18,10 @@ jobs:
     needs:
       - "lint"
     uses: "./.github/workflows/test.yml"
+  docs:
+    needs:
+      - "lint"
+    uses: "./.github/workflows/docs.yml"
   codeql:
     needs:
       - "lint"
@@ -56,6 +60,7 @@ jobs:
       - "check-commits"
       - "lint"
       - "test"
+      - "docs"
       - "codeql"
     if: "always()"
     steps:

@@ -36,9 +36,13 @@ tests/cli.toml:
 test: | tests/cli.toml
 	pytest -v tests
 
-servedocs:
-	mkdocs serve -w docs_theme -w pulp-glue/pulp_glue -w pulpcore/cli/common/generic.py
+docs:
+	pulp-docs build
 
+servedocs:
+	pulp-docs serve -w pulp-glue/pulp_glue -w pulpcore/cli/common/generic.py
+
+# This is for the old docs. We may need it once more to push redirect pages.
 site:
 	mkdocs build
 
@@ -66,5 +70,5 @@ $(foreach LANGUAGE,$(LANGUAGES),pulpcore/cli/%/locale/$(LANGUAGE)/LC_MESSAGES/me
 	msgfmt -o $@ $<
 
 compile_messages: $(foreach LANGUAGE,$(LANGUAGES),$(foreach GLUE_PLUGIN,$(GLUE_PLUGINS),pulp-glue/pulp_glue/$(GLUE_PLUGIN)/locale/$(LANGUAGE)/LC_MESSAGES/messages.mo)) $(foreach LANGUAGE,$(LANGUAGES),$(foreach CLI_PLUGIN,$(CLI_PLUGINS),pulpcore/cli/$(CLI_PLUGIN)/locale/$(LANGUAGE)/LC_MESSAGES/messages.mo))
-.PHONY: build info black lint test servedocs site
+.PHONY: build info black lint test docs servedocs site
 .PRECIOUS: $(foreach LANGUAGE,$(LANGUAGES),$(foreach GLUE_PLUGIN,$(GLUE_PLUGINS),pulp-glue/pulp_glue/$(GLUE_PLUGIN)/locale/$(LANGUAGE)/LC_MESSAGES/messages.po)) $(foreach LANGUAGE,$(LANGUAGES),$(foreach CLI_PLUGIN,$(CLI_PLUGINS),pulpcore/cli/$(CLI_PLUGIN)/locale/$(LANGUAGE)/LC_MESSAGES/messages.po))
