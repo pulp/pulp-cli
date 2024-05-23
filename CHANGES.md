@@ -10,6 +10,23 @@
 
 [//]: # (towncrier release notes start)
 
+## 0.25.2 (2024-05-22) {: #0.25.2 }
+
+
+
+No significant changes.
+
+
+### Pulp GLUE {: #0.25.2-pulp-glue }
+
+
+#### Bugfixes {: #0.25.2-pulp-glue-bugfix }
+
+- Fixed the logic to use requests defaults for tls verification.
+
+
+---
+
 ## 0.25.1 (2024-04-30) {: #0.25.1 }
 
 
@@ -90,6 +107,23 @@ No significant changes.
   The methods rely on the `entity` or `href` properties to be preloaded.
   e.g. `entity_ctx.update(href, body=body)` should be changed to `entity_ctx.href = href; entity_ctx.update(body=body)`.
 - Removed unused `format` parameter from `PulpContext`.
+
+
+---
+
+## 0.24.3 (2024-05-22) {: #0.24.3 }
+
+
+
+No significant changes.
+
+
+### Pulp GLUE {: #0.24.3-pulp-glue }
+
+
+#### Bugfixes {: #0.24.3-pulp-glue-bugfix }
+
+- Fixed the logic to use requests defaults for tls verification.
 
 
 ---
