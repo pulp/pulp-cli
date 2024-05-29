@@ -127,12 +127,12 @@ class OpenAPI:
         self.base_url: str = base_url
         self.doc_path: str = doc_path
         self.safe_calls_only: bool = safe_calls_only
+        self.auth_provider = auth_provider
 
         self._session: requests.Session = requests.session()
-        if auth_provider:
+        if self.auth_provider:
             if cert or key:
                 raise OpenAPIError(_("Cannot use both 'auth' and 'cert'."))
-            self.auth_provider = auth_provider
         else:
             if cert and key:
                 self._session.cert = (cert, key)

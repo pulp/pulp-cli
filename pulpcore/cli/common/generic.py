@@ -105,7 +105,8 @@ class PulpCLIContext(PulpContext):
     ) -> None:
         self.username = api_kwargs.pop("username", None)
         self.password = api_kwargs.pop("password", None)
-        api_kwargs["auth_provider"] = PulpCLIAuthProvider(pulp_ctx=self)
+        if not api_kwargs.get("cert"):
+            api_kwargs["auth_provider"] = PulpCLIAuthProvider(pulp_ctx=self)
         super().__init__(
             api_root=api_root,
             api_kwargs=api_kwargs,
