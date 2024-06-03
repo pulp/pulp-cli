@@ -10,6 +10,23 @@
 
 [//]: # (towncrier release notes start)
 
+## 0.25.3 (2024-06-03) {: #0.25.3 }
+
+
+
+#### Bugfixes {: #0.25.3-bugfix }
+
+- Fixed "Cannot use both 'auth' and 'cert'" error when trying to use pulp-cli with cert auth.
+
+
+### Pulp GLUE {: #0.25.3-pulp-glue }
+
+
+No significant changes.
+
+
+---
+
 ## 0.25.2 (2024-05-22) {: #0.25.2 }
 
 
