@@ -14,6 +14,7 @@ from pulp_glue.common.context import (
     PulpRemoteContext,
     PulpRepositoryContext,
     PulpRepositoryVersionContext,
+    PulpViewSetContext,
 )
 from pulp_glue.common.i18n import get_translation
 
@@ -356,3 +357,20 @@ class PulpRpmRepositoryContext(PulpRepositoryContext):
                 )
 
         return super().sync(body)
+
+
+class PulpRpmPruneContext(PulpViewSetContext):
+    ID_PREFIX: t.ClassVar[str] = "rpm_prune"
+    NEEDS_PLUGINS = [PluginRequirement("rpm", specifier=">=3.27.0.dev")]
+
+    def prune_packages(
+        self,
+        repo_hrefs: t.List[t.Union[str, PulpRpmRepositoryContext]],
+        keep_days: t.Optional[int],
+        dry_run: t.Optional[bool],
+    ) -> t.Any:
+        body: t.Dict[str, t.Any] = {}
+        body["repo_hrefs"] = repo_hrefs
+        body["keep_days"] = keep_days
+        body["dry_run"] = dry_run
+        return self.call("prune_packages", body=body)
