@@ -1,15 +1,15 @@
 import typing as t
 
 import click
-from pulp_glue.common.context import PluginRequirement, PulpEntityContext
+from pulp_glue.common.context import PluginRequirement, PulpViewSetContext
 from pulp_glue.common.i18n import get_translation
 from pulp_glue.core.context import PulpOrphanContext
 
 from pulpcore.cli.common.generic import (
     PulpCLIContext,
     load_json_callback,
-    pass_entity_context,
     pass_pulp_context,
+    pass_view_set_context,
     pulp_group,
     pulp_option,
 )
@@ -47,9 +47,9 @@ def orphan(ctx: click.Context, pulp_ctx: PulpCLIContext) -> None:
     ),
     needs_plugins=[PluginRequirement("core", specifier=">=3.15.0")],
 )
-@pass_entity_context
+@pass_view_set_context
 @pass_pulp_context
-def cleanup(pulp_ctx: PulpCLIContext, orphan_ctx: PulpEntityContext, **kwargs: t.Any) -> None:
+def cleanup(pulp_ctx: PulpCLIContext, orphan_ctx: PulpViewSetContext, **kwargs: t.Any) -> None:
     """
     Cleanup orphaned content.
     """

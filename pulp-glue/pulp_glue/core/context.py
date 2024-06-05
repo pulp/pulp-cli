@@ -11,6 +11,8 @@ from pulp_glue.common.context import (
     PulpContext,
     PulpEntityContext,
     PulpException,
+    PulpViewSetContext,
+    preprocess_payload,
 )
 from pulp_glue.common.i18n import get_translation
 
@@ -277,16 +279,18 @@ class PulpImporterContext(PulpEntityContext):
     ID_PREFIX = "importers_core_pulp"
 
 
-class PulpOrphanContext(PulpEntityContext):
+class PulpOrphanContext(PulpViewSetContext):
+    ID_PREFIX = "orphans_cleanup"
+
     def cleanup(self, body: t.Optional[t.Dict[str, t.Any]] = None) -> t.Any:
         if body is not None:
-            body = self.preprocess_entity(body)
+            body = preprocess_payload(body)
             if "orphan_protection_time" in body:
                 self.pulp_ctx.needs_plugin(PluginRequirement("core", specifier=">=3.15.0"))
         else:
             body = {}
         if self.pulp_ctx.has_plugin(PluginRequirement("core", specifier=">=3.14.0")):
-            result = self.pulp_ctx.call("orphans_cleanup_cleanup", body=body)
+            result = self.call("cleanup", body=body)
         else:
             if body:
                 self.pulp_ctx.needs_plugin(PluginRequirement("core", specifier=">=3.14.0"))
