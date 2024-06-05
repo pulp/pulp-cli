@@ -27,6 +27,7 @@ from pulp_glue.common.context import (
     PulpRemoteContext,
     PulpRepositoryContext,
     PulpRepositoryVersionContext,
+    PulpViewSetContext,
 )
 from pulp_glue.common.i18n import get_translation
 from pulp_glue.common.openapi import AuthProviderBase
@@ -237,6 +238,8 @@ class PulpCLIAuthProvider(AuthProviderBase):
 
 pass_pulp_context = click.make_pass_decorator(PulpCLIContext)
 """Decorator to make the Pulp context available to a command."""
+pass_view_set_context = click.make_pass_decorator(PulpViewSetContext)
+"""Decorator to make the nearest view set context available to a command."""
 pass_entity_context = click.make_pass_decorator(PulpEntityContext)
 """Decorator to make the nearest entity context available to a command."""
 pass_acs_context = click.make_pass_decorator(PulpACSContext)

@@ -533,15 +533,76 @@ class PulpContext:
             self._needed_plugins.append(plugin_requirement)
 
 
-class PulpEntityContext:
+class PulpViewSetContext:
+    """
+    Base class to interact with a generic viewset.
+
+    Parameters:
+        pulp_ctx: The server context to attach this viewset context to.
+    """
+
+    # Subclasses should provide appropriate values here
+    ID_PREFIX: t.ClassVar[str]
+    """Common prefix for the operations of this entity."""
+    NEEDS_PLUGINS: t.ClassVar[t.List[PluginRequirement]] = []
+    """List of plugin requirements to operate such an entity on the server."""
+
+    def __init__(self, pulp_ctx: PulpContext) -> None:
+        self.pulp_ctx: PulpContext = pulp_ctx
+
+        # Add requirements to the lazy evaluated list
+        for plugin_requirement in self.NEEDS_PLUGINS:
+            self.pulp_ctx.needs_plugin(plugin_requirement)
+
+    def call(
+        self,
+        operation: str,
+        non_blocking: bool = False,
+        parameters: t.Optional[t.Dict[str, t.Any]] = None,
+        body: t.Optional[EntityDefinition] = None,
+        validate_body: bool = True,
+    ) -> t.Any:
+        """
+        Perform an API call for operation.
+        Wait for triggered tasks to finish if not background.
+        Returns the operation result, or the finished task.
+
+        Parameters:
+            operation: The operation to be performed on the entity. Usually the openapi
+                operation_id is constructed by concatenating with the `ID_PREFIX`.
+            non_blocking: returns unfinished tasks if `True`.
+            parameters: Arguments that are to be sent as headers, querystrings or part of the URI.
+            body: Body payload for POST, PUT, PATCH calls.
+            validate_body: Indicate whether the body should be validated.
+
+        Returns:
+            The body of the response, or the task or task group if one was issued.
+
+        Raises:
+            PulpNoWait: in case the context has `background_tasks` set or a task (group) timed out.
+        """
+        operation_id: str = (
+            getattr(self, operation.upper() + "_ID", None) or self.ID_PREFIX + "_" + operation
+        )
+        return self.pulp_ctx.call(
+            operation_id,
+            non_blocking=non_blocking,
+            parameters=parameters,
+            body=body,
+            validate_body=validate_body,
+        )
+
+
+class PulpEntityContext(PulpViewSetContext):
     """
     Base class for entity specific contexts.
     This class provides the basic CRUD commands and ties its instances to the global
     PulpContext for api access.
+    It typically corresponds to a NamedModelViewset.
     Mostly specification is achieved by defining / extending the class attributes below.
 
     Parameters:
-        pulp_ctx: The server context to attach this entity to.
+        pulp_ctx: The server context to attach this entity context to.
         pulp_href: Specifying this is equivalent to assinging to `pulp_href` later.
         entity: Specifying this is equivalent to assinging to `entity` later.
     """
@@ -553,12 +614,8 @@ class PulpEntityContext:
     """Translatable plural of `ENTITY`."""
     HREF: t.ClassVar[str]
     """Name of the href parameter in the url patterns."""
-    ID_PREFIX: t.ClassVar[str]
-    """Common prefix for the operations of this entity."""
     NULLABLES: t.ClassVar[t.Set[str]] = set()
     """Set of fields that can be cleared by sending 'null'."""
-    NEEDS_PLUGINS: t.ClassVar[t.List[PluginRequirement]] = []
-    """List of plugin requirements to operate such an entity on the server."""
     CAPABILITIES: t.ClassVar[t.Dict[str, t.List[PluginRequirement]]] = {}
     """
     List of capabilities this entity provides.
@@ -657,55 +714,13 @@ class PulpEntityContext:
     ) -> None:
         assert pulp_href is None or entity is None
 
+        super().__init__(pulp_ctx)
         self.meta: t.Dict[str, str] = {}
-        self.pulp_ctx: PulpContext = pulp_ctx
-
-        # Add requirements to the lazy evaluated list
-        for plugin_requirement in self.NEEDS_PLUGINS:
-            self.pulp_ctx.needs_plugin(plugin_requirement)
 
         self._entity = None
         self._entity_lookup = entity or {}
         if pulp_href is not None:
             self.pulp_href = pulp_href
-
-    def call(
-        self,
-        operation: str,
-        non_blocking: bool = False,
-        parameters: t.Optional[t.Dict[str, t.Any]] = None,
-        body: t.Optional[EntityDefinition] = None,
-        validate_body: bool = True,
-    ) -> t.Any:
-        """
-        Perform an API call for operation.
-        Wait for triggered tasks to finish if not background.
-        Returns the operation result, or the finished task.
-
-        Parameters:
-            operation: The operation to be performed on the entity. Usually the openapi
-                operation_id is constructed by concatenating with the `ID_PREFIX`.
-            non_blocking: returns unfinished tasks if `True`.
-            parameters: Arguments that are to be sent as headers, querystrings or part of the URI.
-            body: Body payload for POST, PUT, PATCH calls.
-            validate_body: Indicate whether the body should be validated.
-
-        Returns:
-            The body of the response, or the task or task group if one was issued.
-
-        Raises:
-            PulpNoWait: in case the context has `background_tasks` set or a task (group) timed out.
-        """
-        operation_id: str = (
-            getattr(self, operation.upper() + "_ID", None) or self.ID_PREFIX + "_" + operation
-        )
-        return self.pulp_ctx.call(
-            operation_id,
-            non_blocking=non_blocking,
-            parameters=parameters,
-            body=body,
-            validate_body=validate_body,
-        )
 
     @classmethod
     def _preprocess_value(cls, key: str, value: t.Any) -> t.Any:
