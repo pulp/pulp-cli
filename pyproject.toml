@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pulp-cli"
-version = "0.25.5.dev"
+version = "0.25.5"
 description = "Command line interface to talk to pulpcore's REST API."
 readme = "README.md"
 requires-python = ">=3.8"
@@ -23,7 +23,7 @@ classifiers=[
   "Typing :: Typed",
 ]
 dependencies = [
-  "pulp-glue==0.25.5.dev",
+  "pulp-glue==0.25.5",
   "click>=8.0.0,<9.0.0",
   "packaging>=20.0,<25",
   "PyYAML>=5.3,<6.1",
@@ -79,7 +79,7 @@ binary_dependencies = ""
 
 [tool.bumpversion]
 # This section is managed by the cookiecutter templates.
-current_version = "0.25.5.dev"
+current_version = "0.25.5"
 commit = false
 tag = false
 parse = "(?P<major>\\d+)\\.(?P<minor>\\d+)\\.(?P<patch>\\d+)(\\.(?P<release>[a-z]+))?"
