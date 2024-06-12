@@ -88,7 +88,10 @@ def pulp_cli_settings(tmp_path_factory: pytest.TempPathFactory) -> t.Tuple[pathl
     It is most likely not useful to be included standalone.
     The `pulp_cli_env` fixture, however depends on it and sets $XDG_CONFIG_HOME up accordingly.
     """
-    settings = toml.load("tests/cli.toml")
+    settings = toml.load(os.environ.get("PULP_CLI_CONFIG", "tests/cli.toml"))
+    if os.environ.get("PULP_HTTPS"):
+        for key in settings:
+            settings[key]["base_url"] = settings[key]["base_url"].replace("http://", "https://")
     if os.environ.get("PULP_API_ROOT"):
         for key in settings:
             settings[key]["api_root"] = os.environ["PULP_API_ROOT"]

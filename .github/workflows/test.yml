@@ -18,6 +18,7 @@ jobs:
         include:
           - image_tag: "nightly"
             pulp_api_root: "/relocated/djnd/"
+            pulp_https: true
             python: "3.11"
           - image_tag: "latest"
             python: "3.11"
@@ -65,5 +66,6 @@ jobs:
           IMAGE_TAG: ${{ matrix.image_tag }}
           FROM_TAG: ${{ matrix.from_tag }}
           CONTAINER_FILE: ${{ matrix.container_file }}
+          PULP_HTTPS: ${{ matrix.pulp_https }}
           PULP_API_ROOT: ${{ matrix.pulp_api_root }}
         run: .ci/run_container.sh make test

@@ -2,8 +2,8 @@
 
 set -eu
 
-pulp --refresh-api --base-url "http://localhost:8080" ${PULP_API_ROOT:+--api-root "${PULP_API_ROOT}"} --username "admin" --password "password" debug has-plugin --name "deb" && HAS_DEB=true || HAS_DEB=""
-pulp --base-url "http://localhost:8080" ${PULP_API_ROOT:+--api-root "${PULP_API_ROOT}"} --username "admin" --password "password" debug has-plugin --name "ansible" && HAS_ANSIBLE=true || HAS_ANSIBLE=""
+pulp --config "${PULP_CLI_CONFIG}" debug has-plugin --name "deb" && HAS_DEB=true || HAS_DEB=""
+pulp --config "${PULP_CLI_CONFIG}" debug has-plugin --name "ansible" && HAS_ANSIBLE=true || HAS_ANSIBLE=""
 if [ "$HAS_DEB" ] || [ "$HAS_ANSIBLE" ]
 then
   echo "Setup the signing services"

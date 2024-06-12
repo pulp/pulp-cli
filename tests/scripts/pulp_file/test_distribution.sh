@@ -15,9 +15,14 @@ trap cleanup EXIT
 
 if [ "$VERIFY_SSL" = "false" ]
 then
-  curl_opt="-k"
+  curl_opt=("-k")
 else
-  curl_opt=""
+  if [ "${PULP_CA_BUNDLE:+x}" ]
+  then
+    curl_opt=("--cacert" "${PULP_CA_BUNDLE}")
+  else
+    curl_opt=()
+  fi
 fi
 
 expect_succ pulp file remote create --name "cli_test_file_remote" --url "$FILE_REMOTE_URL"
@@ -57,6 +62,6 @@ base_url="$(echo "$OUTPUT" | jq -r .[0].base_url)"
 expect_succ pulp file distribution list --base-path-contains "CLI"
 test "$(echo "$OUTPUT" | jq -r length)" -gt 0
 
-expect_succ curl "$curl_opt" --head --fail "${base_url}1.iso"
+expect_succ curl "${curl_opt[@]}" --head --fail "${base_url}1.iso"
 
 expect_succ pulp file distribution destroy --distribution "cli_test_file_distro"
