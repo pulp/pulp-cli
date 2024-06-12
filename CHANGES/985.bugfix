@@ -1,0 +1,1 @@
+Don't allow requests-2.32 due to https instability issues with that release.
