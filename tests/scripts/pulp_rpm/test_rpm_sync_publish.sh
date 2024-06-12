@@ -18,9 +18,14 @@ trap cleanup EXIT
 
 if [ "$VERIFY_SSL" = "false" ]
 then
-  curl_opt="-k"
+  curl_opt=("-k")
 else
-  curl_opt=""
+  if [ "${PULP_CA_BUNDLE:+x}" ]
+  then
+    curl_opt=("--cacert" "${PULP_CA_BUNDLE}")
+  else
+    curl_opt=()
+  fi
 fi
 
 # Add content using JSON file
@@ -83,9 +88,9 @@ DISTRIBUTION_BASE_URL=$(echo "$OUTPUT" | jq -r .base_url)
 
 if pulp debug has-plugin --name "rpm" --specifier "<3.23.0"
 then
-  expect_succ curl "$curl_opt" --head --fail "${DISTRIBUTION_BASE_URL}config.repo"
+  expect_succ curl "${curl_opt[@]}" --head --fail "${DISTRIBUTION_BASE_URL}config.repo"
 else
-  expect_fail curl "$curl_opt" --head --fail "${DISTRIBUTION_BASE_URL}config.repo"
+  expect_fail curl "${curl_opt[@]}" --head --fail "${DISTRIBUTION_BASE_URL}config.repo"
 fi
 
 if pulp debug has-plugin --name "rpm" --specifier ">=3.23.0"
@@ -95,7 +100,7 @@ then
     --publication "$PUBLICATION_HREF" \
     --generate-repo-config
   DISTRIBUTION_BASE_URL=$(echo "$OUTPUT" | jq -r .base_url)
-  expect_succ curl "$curl_opt" --head --fail "${DISTRIBUTION_BASE_URL}config.repo"
+  expect_succ curl "${curl_opt[@]}" --head --fail "${DISTRIBUTION_BASE_URL}config.repo"
   expect_succ pulp rpm distribution destroy --name "cli_test_rpm_distro2"
 fi
 

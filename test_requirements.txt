@@ -2,6 +2,7 @@
 pytest>=7.0.0,<=8.2.2
 pytest-subtests>=0.12.0,<=0.12.1
 python-gnupg==0.5.2
+trustme>=1.1.0,<1.2
 
 # No pinning here, because we only switch on optional dependencies here.
 pygments

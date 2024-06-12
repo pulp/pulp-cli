@@ -1,0 +1,7 @@
+Files in this directory of the form '<number>-<name>.sh' are executed in alphabetical order.
+They can assume to be provided with the following environmnent variables:
+* PULP_CLI_CONFIG a path to a config file for the ci container
+* CONTAINER_RUNTIME the command for interacting with containers
+* BASE_PATH the directory the 'run_container.sh' script lives in
+
+Also a running container named 'pulp-ephemeral'.
