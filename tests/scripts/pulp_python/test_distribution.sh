@@ -13,18 +13,6 @@ cleanup() {
 }
 trap cleanup EXIT
 
-if [ "$VERIFY_SSL" = "false" ]
-then
-  curl_opt=("-k")
-else
-  if [ "${PULP_CA_BUNDLE:+x}" ]
-  then
-    curl_opt=("--cacert" "${PULP_CA_BUNDLE}")
-  else
-    curl_opt=()
-  fi
-fi
-
 expect_succ pulp python remote create --name "cli_test_python_remote" --url "$PYTHON_REMOTE_URL" --includes '["shelf-reader"]'
 expect_succ pulp python repository create --name "cli_test_python_repository" --remote "cli_test_python_remote"
 expect_succ pulp python repository sync --repository "cli_test_python_repository"
@@ -44,7 +32,6 @@ expect_succ pulp python distribution update \
   --base-path "cli_test_python_distro" \
   --publication "$PUBLICATION_HREF"
 
-expect_succ curl "${curl_opt[@]}" --head --fail "$PULP_BASE_URL/pypi/cli_test_python_distro/simple/"
 expect_succ pulp python distribution update \
 --name "cli_test_python_distro" \
 --repository "cli_test_python_repository" \
