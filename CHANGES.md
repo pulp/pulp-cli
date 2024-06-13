@@ -10,6 +10,24 @@
 
 [//]: # (towncrier release notes start)
 
+## 0.25.5 (2024-06-12) {: #0.25.5 }
+
+
+
+#### Bugfixes {: #0.25.5-bugfix }
+
+- Don't allow requests-2.32 due to https instability issues with that release.
+  [#985](https://github.com/pulp/pulp-cli/issues/985)
+
+
+### Pulp GLUE {: #0.25.5-pulp-glue }
+
+
+No significant changes.
+
+
+---
+
 ## 0.25.4 (2024-06-07) {: #0.25.4 }
 
 
