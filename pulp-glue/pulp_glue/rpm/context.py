@@ -369,8 +369,26 @@ class PulpRpmPruneContext(PulpViewSetContext):
         keep_days: t.Optional[int],
         dry_run: t.Optional[bool],
     ) -> t.Any:
-        body: t.Dict[str, t.Any] = {}
-        body["repo_hrefs"] = repo_hrefs
-        body["keep_days"] = keep_days
-        body["dry_run"] = dry_run
+        body: t.Dict[str, t.Any] = {
+            "repo_hrefs": repo_hrefs,
+            "keep_days": keep_days,
+            "dry_run": dry_run,
+        }
         return self.call("prune_packages", body=body)
+
+
+class PulpRpmCopyContext(PulpViewSetContext):
+    COPY_ID: t.ClassVar[str] = "copy_content"
+
+    def copy(
+        self,
+        config: t.List[t.Dict[str, t.Any]],
+        dependency_solving: t.Optional[bool] = False,
+    ) -> t.Any:
+        body: t.Dict[str, t.Any] = {
+            "config": config,
+            "dependency_solving": dependency_solving,
+        }
+        # Validation fails because config is not a dict(), and
+        # drf-spectacular thinks all type:object refs must be dict
+        return self.call("copy", body=body, validate_body=False)
