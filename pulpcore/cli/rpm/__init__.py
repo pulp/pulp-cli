@@ -8,6 +8,7 @@ from pulpcore.cli.common.acs import acs_command
 from pulpcore.cli.common.generic import pulp_group
 from pulpcore.cli.rpm.comps import comps_upload
 from pulpcore.cli.rpm.content import content
+from pulpcore.cli.rpm.copy import copy
 from pulpcore.cli.rpm.distribution import distribution
 from pulpcore.cli.rpm.prune import prune_packages
 from pulpcore.cli.rpm.publication import publication
@@ -37,4 +38,5 @@ def mount(main: click.Group, **kwargs: t.Any) -> None:
     )
     rpm.add_command(comps_upload)
     rpm.add_command(prune_packages)
+    rpm.add_command(copy)
     main.add_command(rpm)
