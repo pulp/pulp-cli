@@ -310,7 +310,7 @@ class OpenAPI:
         if value is None and schema.get("nullable", False):
             return None
 
-        schema_type = schema.get("type", "string")
+        schema_type = schema.get("type")
         allOf = schema.get("allOf")
         anyOf = schema.get("anyOf")
         oneOf = schema.get("oneOf")
@@ -343,7 +343,7 @@ class OpenAPI:
                     found_valid = True
             if not found_valid:
                 raise OpenAPIValidationError(
-                    _("No schema in anyOf validated for {name}.").format(name=name)
+                    _("No schema in oneOf validated for {name}.").format(name=name)
                 )
         elif not_schema:
             try:
@@ -354,17 +354,31 @@ class OpenAPI:
                 raise OpenAPIValidationError(
                     _("Forbidden schema for {name} validated.").format(name=name)
                 )
+        elif schema_type is None:
+            # Schema type is not specified.
+            # JSONField
+            pass
         elif schema_type == "object":
+            # Serializer
             value = self.validate_object(schema, name, value)
         elif schema_type == "array":
+            # ListField
             value = self.validate_array(schema, name, value)
         elif schema_type == "string":
+            # CharField
+            # TextField
+            # DateTimeField etc.
+            # ChoiceField
+            # FielField (binary data)
             value = self.validate_string(schema, name, value)
         elif schema_type == "integer":
+            # IntegerField
             value = self.validate_integer(schema, name, value)
         elif schema_type == "number":
+            # FloatField
             value = self.validate_number(schema, name, value)
         elif schema_type == "boolean":
+            # BooleanField
             if not isinstance(value, bool):
                 raise OpenAPIValidationError(
                     _("'{name}' is expected to be a boolean.").format(name=name)
