@@ -15,11 +15,41 @@ from pulp_glue.common.context import (
     PulpRepositoryContext,
     PulpRepositoryVersionContext,
     PulpViewSetContext,
+    api_quirk,
 )
 from pulp_glue.common.i18n import get_translation
+from pulp_glue.common.openapi import OpenAPI
 
 translation = get_translation(__package__)
 _ = translation.gettext
+
+
+@api_quirk(PluginRequirement("rpm", specifier=">=3.3.0"))
+def patch_rpm_copy_scheme(api: OpenAPI) -> None:
+    path, operation = next(
+        (
+            (k, v["post"])
+            for k, v in api.api_spec["paths"].items()
+            if k.endswith("/api/v3/rpm/copy/")
+        )
+    )
+    api.api_spec["components"]["schemas"]["RpmCopy"] = {
+        "type": "object",
+        "description": "A serializer for Content Copy API.",
+        "properties": {
+            "config": {
+                "description": "A JSON document describing sources, destinations,"
+                " and content to be copied"
+            },
+            "dependency_solving": {"type": "boolean"},
+        },
+        "required": ["config"],
+    }
+    operation["operationId"] = "rpm_copy_content"
+    for item in operation["requestBody"]["content"].values():
+        item["schema"]["$ref"] = "#/components/schemas/RpmCopy"
+
+    api.operations["rpm_copy_content"] = ("post", path)
 
 
 class PulpRpmACSContext(PulpACSContext):
@@ -378,7 +408,8 @@ class PulpRpmPruneContext(PulpViewSetContext):
 
 
 class PulpRpmCopyContext(PulpViewSetContext):
-    COPY_ID: t.ClassVar[str] = "copy_content"
+    COPY_ID: t.ClassVar[str] = "rpm_copy_content"
+    NEEDS_PLUGINS = [PluginRequirement("rpm", specifier=">=3.3.0")]
 
     def copy(
         self,
@@ -389,6 +420,4 @@ class PulpRpmCopyContext(PulpViewSetContext):
             "config": config,
             "dependency_solving": dependency_solving,
         }
-        # Validation fails because config is not a dict(), and
-        # drf-spectacular thinks all type:object refs must be dict
-        return self.call("copy", body=body, validate_body=False)
+        return self.call("copy", body=body)
