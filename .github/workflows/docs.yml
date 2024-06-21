@@ -5,6 +5,7 @@ on:
 
 jobs:
   test:
+    if: "endsWith(github.base_ref, 'main')"
     runs-on: "ubuntu-20.04"
     steps:
       - uses: "actions/checkout@v4"
@@ -22,5 +23,12 @@ jobs:
       - name: "Install Test Dependencies"
         run: |
           pip install -r doc_requirements.txt
-      - name: Build docs
-        run: make docs
+      - name: "Build docs"
+        run: |
+          make docs
+  no-test:
+    if: "!endsWith(github.base_ref, 'main')"
+    runs-on: "ubuntu-20.04"
+    steps:
+      - run: |
+          echo "Skip docs testing on non-main branches."
