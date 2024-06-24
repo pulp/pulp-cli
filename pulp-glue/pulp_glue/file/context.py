@@ -131,7 +131,7 @@ class PulpFileRepositoryContext(PulpRepositoryContext):
         "pulpexport": [PluginRequirement("file")],
         "roles": [PluginRequirement("file", specifier=">=1.11.0")],
     }
-    NULLABLES = PulpRepositoryContext.NULLABLES.union({"manifest"})
+    NULLABLES = PulpRepositoryContext.NULLABLES.union({"manifest", "remote"})
     NEEDS_PLUGINS = [PluginRequirement("file", specifier=">=1.6.0")]
 
     def preprocess_entity(self, body: EntityDefinition, partial: bool = False) -> EntityDefinition:
