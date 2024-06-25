@@ -1,4 +1,6 @@
+import glob
 import typing as t
+from uuid import uuid4
 
 import click
 from pulp_glue.common.context import PulpEntityContext
@@ -6,6 +8,7 @@ from pulp_glue.common.i18n import get_translation
 from pulp_glue.core.context import PulpArtifactContext
 from pulp_glue.rpm.context import (
     PulpRpmAdvisoryContext,
+    PulpRpmCopyContext,
     PulpRpmDistributionTreeContext,
     PulpRpmModulemdContext,
     PulpRpmModulemdDefaultsContext,
@@ -264,9 +267,18 @@ content.add_command(
 @pulp_option(
     "--file",
     type=click.File("rb"),
-    required=True,
-    help=_("An RPM binary"),
+    help=_("An RPM binary. One of --file or --directory is required."),
     allowed_with_contexts=(PulpRpmPackageContext,),
+    required=False,
+)
+@pulp_option(
+    "--directory",
+    type=click.Path(exists=True, readable=True, file_okay=False, dir_okay=True),
+    help=_(
+        "A directory containing RPM binaries named .rpm. One of --file or --directory is required."
+    ),
+    allowed_with_contexts=(PulpRpmPackageContext,),
+    required=False,
 )
 @pulp_option(
     "--file",
@@ -285,10 +297,81 @@ def upload(
     chunk_size: int,
     **kwargs: t.Any,
 ) -> None:
-    """Create a content unit by uploading a file"""
-    body: t.Dict[str, t.Any]
+    """Create a content unit by uploading a file or files"""
     if isinstance(entity_ctx, PulpRpmPackageContext):
-        result = entity_ctx.upload(file=file, chunk_size=chunk_size, **kwargs)
+        directory = kwargs.get("directory")
+        if (not (file or directory)) or (file and directory):
+            raise click.ClickException(
+                _("You must specify one (and only one) of --file or --directory.")
+            )
+        if file:
+            result = entity_ctx.upload(file=file, chunk_size=chunk_size, **kwargs)
+        else:
+            # Create a temp-repo
+            dest_repo_ctx = kwargs["repository"]
+            tmp_repo_ctx = PulpRpmRepositoryContext(pulp_ctx)
+            body: t.Dict[str, t.Any] = {
+                "name": f"uploadtmp_{dest_repo_ctx.entity['name']}_{uuid4()}",
+                "retain_repo_versions": 1,
+                "autopublish": False,
+            }
+            result = tmp_repo_ctx.create(body=body)
+            # Do the deed
+            try:
+                rpms_path = f"{directory}/*.rpm"
+                rpm_names = glob.glob(rpms_path)
+                if not rpm_names:
+                    raise click.ClickException(
+                        _("Directory {} has no .rpm files in it.").format(directory)
+                    )
+                print(
+                    _(
+                        "About to upload {} files for {} into tmp-repository {}".format(
+                            len(rpm_names),
+                            dest_repo_ctx.entity["name"],
+                            tmp_repo_ctx.entity["name"],
+                        )
+                    )
+                )
+                # Upload all *.rpm into tmp-repo
+                for name in rpm_names:
+                    try:
+                        with open(name, "rb") as rpm:
+                            result = entity_ctx.upload(
+                                file=rpm,
+                                chunk_size=chunk_size,
+                                repository=tmp_repo_ctx,
+                                relative_path=kwargs["relative_path"],
+                            )
+                            print(_("Uploaded {}...").format(name))
+                    except Exception as e:
+                        print(_("Failed to upload file {} : {}".format(name, e)))
+                # Get a current-representation of the resulting repo, so we have latest-version
+                tmp_repo_rslt = tmp_repo_ctx.show()
+                # Copy all from tmp to specified-destination
+                copy_config = [
+                    {
+                        "source_repo_version": tmp_repo_rslt["latest_version_href"],
+                        "dest_repo": dest_repo_ctx.pulp_href,
+                    }
+                ]
+                copy_ctx = PulpRpmCopyContext(pulp_ctx)
+                print(
+                    _("Creating new version of repository {}".format(dest_repo_ctx.entity["name"]))
+                )
+                result = copy_ctx.copy(config=copy_config)
+                print(
+                    _(
+                        "Created new version in {}: {}".format(
+                            dest_repo_ctx.entity["name"], result["created_resources"][0]
+                        )
+                    )
+                )
+                return
+            finally:
+                # get rid of the tmp-repo
+                print(_("Removing tmp-repository {}".format(tmp_repo_ctx.entity["name"])))
+                tmp_repo_ctx.delete()
     elif isinstance(entity_ctx, PulpRpmAdvisoryContext):
         body = {"file": file}
         result = entity_ctx.create(body=body)
