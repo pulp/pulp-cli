@@ -13,13 +13,16 @@ RPM_FILENAME="lemon-0-1.noarch.rpm"
 RPM2_FILENAME="icecubes-2-3.noarch.rpm"
 RPM_NAME="lemon"
 RPM2_NAME="icecubes"
-REPO1_NAME="cli_test_rpm"
-REPO2_NAME="cli_test_modular"
+REPO1_NAME="cli_test_rpm_content"
+REPO2_NAME="cli_test_modular_content"
+UPLOAD_REPO_NAME="cli_test_rpm_content_upload"
 PACKAGE_HREF=
 ADVISORY_HREF=
 cleanup() {
+  rm -rf "$(dirname "$(realpath "$0")")"/test_rpm_upload
   pulp rpm repository destroy --name "${REPO1_NAME}" || true
   pulp rpm repository destroy --name "${REPO2_NAME}" || true
+  pulp rpm repository destroy --name "${UPLOAD_REPO_NAME}" || true
   pulp rpm remote destroy --name "${REPO1_NAME}" || true
   pulp rpm remote destroy --name "${REPO2_NAME}" || true
   # clean up everything else "asap"
@@ -33,6 +36,18 @@ wget --no-check-certificate "${RPM_WEAK_DEPS_URL}/${RPM_FILENAME}"
 expect_succ pulp rpm content upload --file "${RPM_FILENAME}" --relative-path "${RPM_FILENAME}"
 PACKAGE_HREF=$(echo "${OUTPUT}" | jq -r .pulp_href)
 expect_succ pulp rpm content show --href "${PACKAGE_HREF}"
+
+# Test rpm-package directory-upload
+mkdir "$(dirname "$(realpath "$0")")"/test_rpm_upload
+pushd "$(dirname "$(realpath "$0")")"/test_rpm_upload
+wget --no-check-certificate "${RPM_REMOTE_URL}/bear-4.1-1.noarch.rpm"
+wget --no-check-certificate "${RPM_REMOTE_URL}/camel-0.1-1.noarch.rpm"
+popd
+expect_succ pulp rpm repository create --name "${UPLOAD_REPO_NAME}" --no-autopublish
+expect_succ pulp rpm content upload --repository "rpm:rpm:${UPLOAD_REPO_NAME}" \
+--directory "$(dirname "$(realpath "$0")")"/test_rpm_upload \
+--use-temp-repository \
+--publish
 
 expect_succ pulp rpm remote create --name "${REPO1_NAME}" --url "$RPM_REMOTE_URL"
 expect_succ pulp rpm remote show --name "${REPO1_NAME}"

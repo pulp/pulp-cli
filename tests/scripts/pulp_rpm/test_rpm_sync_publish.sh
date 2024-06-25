@@ -149,5 +149,10 @@ expect_succ pulp rpm distribution create --name "cli_test_rpm_distro" \
   --repository "cli_test_rpm_repository"
 
 expect_succ pulp rpm repository sync --repository "cli_test_rpm_repository"
-expect_succ pulp rpm publication list
+if pulp debug has-plugin --name "rpm" --specifier ">=3.20.0"
+then
+  expect_succ pulp rpm publication list --repository rpm:rpm:cli_test_rpm_repository
+else
+  expect_succ pulp rpm publication list
+fi
 test "$(echo "$OUTPUT" | jq -r length)" -eq "1"
