@@ -1,3 +1,4 @@
+import glob
 import typing as t
 
 import click
@@ -14,6 +15,7 @@ from pulp_glue.rpm.context import (
     PulpRpmPackageEnvironmentContext,
     PulpRpmPackageGroupContext,
     PulpRpmPackageLangpacksContext,
+    PulpRpmPublicationContext,
     PulpRpmRepoMetadataFileContext,
     PulpRpmRepositoryContext,
 )
@@ -264,9 +266,18 @@ content.add_command(
 @pulp_option(
     "--file",
     type=click.File("rb"),
-    required=True,
-    help=_("An RPM binary"),
+    help=_("An RPM binary. One of --file or --directory is required."),
     allowed_with_contexts=(PulpRpmPackageContext,),
+    required=False,
+)
+@pulp_option(
+    "--directory",
+    type=click.Path(exists=True, readable=True, file_okay=False, dir_okay=True),
+    help=_(
+        "A directory containing RPM binaries named .rpm. One of --file or --directory is required."
+    ),
+    allowed_with_contexts=(PulpRpmPackageContext,),
+    required=False,
 )
 @pulp_option(
     "--file",
@@ -285,10 +296,60 @@ def upload(
     chunk_size: int,
     **kwargs: t.Any,
 ) -> None:
-    """Create a content unit by uploading a file"""
-    body: t.Dict[str, t.Any]
+    """Create a content unit by uploading a file or files"""
     if isinstance(entity_ctx, PulpRpmPackageContext):
-        result = entity_ctx.upload(file=file, chunk_size=chunk_size, **kwargs)
+        directory = kwargs.get("directory")
+        if (not (file or directory)) or (file and directory):
+            raise click.ClickException(
+                _("You must specify one (and only one) of --file or --directory.")
+            )
+        if file:
+            result = entity_ctx.upload(file=file, chunk_size=chunk_size, **kwargs)
+        else:
+            # Upload a directory-full of RPMs
+            dest_repo_ctx = kwargs["repository"]
+            rpms_path = f"{directory}/*.rpm"
+            rpm_names = glob.glob(rpms_path)
+            if not rpm_names:
+                raise click.ClickException(
+                    _("Directory {} has no .rpm files in it.").format(directory)
+                )
+            print(
+                _(
+                    "About to upload {} files for {}.".format(
+                        len(rpm_names),
+                        dest_repo_ctx.entity["name"],
+                    )
+                )
+            )
+            # Upload all *.rpm into the destination
+            for name in rpm_names:
+                try:
+                    with open(name, "rb") as rpm:
+                        result = entity_ctx.upload(
+                            file=rpm,
+                            chunk_size=chunk_size,
+                            repository=dest_repo_ctx,
+                            relative_path=kwargs["relative_path"],
+                        )
+                        print(_("Uploaded {}...").format(name))
+                except Exception as e:
+                    print(_("Failed to upload file {} : {}".format(name, e)))
+            # Get a current-representation of the resulting repo, so we have latest-version
+            repo_result = dest_repo_ctx.show()
+            final_version_number = repo_result["latest_version_href"].split("/")[-2]
+            print(
+                _(
+                    "Created new version {} in {}".format(
+                        final_version_number, dest_repo_ctx.entity["name"]
+                    )
+                )
+            )
+            # Finished - now publish to generate the resulting metadata
+            print(_("Publishing repository {}.".format(dest_repo_ctx.entity["name"])))
+            publication_ctx = PulpRpmPublicationContext(pulp_ctx)
+            body = {"repository": dest_repo_ctx.pulp_href, "version": final_version_number}
+            result = publication_ctx.create(body)
     elif isinstance(entity_ctx, PulpRpmAdvisoryContext):
         body = {"file": file}
         result = entity_ctx.create(body=body)
