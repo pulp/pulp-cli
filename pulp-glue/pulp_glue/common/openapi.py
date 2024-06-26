@@ -604,7 +604,11 @@ class OpenAPI:
             "security", self.api_spec.get("security", {})
         )
         if security and self.auth_provider:
-            auth = self.auth_provider(security, self.api_spec["components"]["securitySchemes"])
+            if "Authorization" in self._session.headers:
+                # Bad idea, but you wanted it that way.
+                auth = None
+            else:
+                auth = self.auth_provider(security, self.api_spec["components"]["securitySchemes"])
         else:
             # No auth required? Don't provide it.
             # No auth_provider available? Hope for the best (should do the trick for cert auth).

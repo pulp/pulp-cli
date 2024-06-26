@@ -1,0 +1,1 @@
+A provided "Authorization" header will no longer be overruled by other authentication mechanisms.
