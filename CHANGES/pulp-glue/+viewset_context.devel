@@ -1,2 +1,0 @@
-Added a `PulpViewSetContext` to represent a view set not attached to a specific type of entity.
-Accordingly, `PulpEntityContext` should only be used when that API is defined by a `NamedModelViewset`.
