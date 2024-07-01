@@ -1,1 +1,0 @@
-Deprecated `settings.toml` in favor of `cli.toml` in `$XDG_CONFIG_HOME` for settings.
