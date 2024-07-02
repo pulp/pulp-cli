@@ -10,6 +10,67 @@
 
 [//]: # (towncrier release notes start)
 
+## 0.26.0 (2024-07-01) {: #0.26.0 }
+
+
+
+#### Features {: #0.26.0-feature }
+
+- Added the "pulp rpm prune-packages" command to support new RPM feature.
+
+  See [2909](https://github.com/pulp/pulp_rpm/issues/2909) for details.
+  [#979](https://github.com/pulp/pulp-cli/issues/979)
+- Added "pulp rpm copy --config --dependency-solve" support.
+  [#990](https://github.com/pulp/pulp-cli/issues/990)
+
+
+#### Bugfixes {: #0.26.0-bugfix }
+
+- Don't allow requests-2.32 due to https instability issues with that release.
+  [#985](https://github.com/pulp/pulp-cli/issues/985)
+- A provided "Authorization" header will no longer be overruled by other authentication mechanisms.
+- Fixed "Cannot use both 'auth' and 'cert'" error when trying to use pulp-cli with cert auth.
+
+
+#### Deprecations and Removals {: #0.26.0-removal }
+
+- Deprecated `settings.toml` in favor of `cli.toml` in `$XDG_CONFIG_HOME` for settings.
+
+
+#### Developer Notes {: #0.26.0-devel }
+
+- Added `pass_view_set_context` decorator to lookup `PulpViewSetContext` objects.
+- Added an automatic PR labeler for "no-issue", "no-changelog", "multi-commit", "wip" and "cherry-pick".
+  It is no longer necessary to put the [noissue] tag in to commits without a link to an issue.
+  Instead, the reviewer should take note of the "noissue"-label and decide whether to ask for one.
+
+
+#### Misc {: #0.26.0-misc }
+
+- [#932](https://github.com/pulp/pulp-cli/issues/932)
+
+
+### Pulp GLUE {: #0.26.0-pulp-glue }
+
+
+#### Bugfixes {: #0.26.0-pulp-glue-bugfix }
+
+- Fixed the logic to use requests defaults for tls verification.
+
+
+#### Deprecations and Removals {: #0.26.0-pulp-glue-removal }
+
+- Removed unused (and undocumented) `isatty` attribute from `PulpContext`.
+
+
+#### Developer Notes {: #0.26.0-pulp-glue-devel }
+
+- Added a `PulpViewSetContext` to represent a view set not attached to a specific type of entity.
+  Accordingly, `PulpEntityContext` should only be used when that API is defined by a `NamedModelViewset`.
+
+
+---
+
 ## 0.25.7 (2024-06-20) {: #0.25.7 }
 
 
