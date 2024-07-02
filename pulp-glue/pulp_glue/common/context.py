@@ -88,6 +88,12 @@ class PulpException(Exception):
     pass
 
 
+class PulpEntityNotFound(PulpException):
+    """Exception to signify that an entity was not found."""
+
+    pass
+
+
 class PulpHTTPError(PulpException):
     """Exception to indicate HTTP error responses."""
 
@@ -802,7 +808,8 @@ class PulpEntityContext(PulpViewSetContext):
             The entity if one was found uniquely.
 
         Raises:
-            PulpException: if no entity satisfies the search parameters uniquely.
+            PulpEntityNotFound: if no entity satisfies the search parameters.
+            PulpException: if multiple entities satisfy the search parameters.
         """
         payload: t.Dict[str, t.Any] = kwargs.copy()
         payload.update(self.scope)
@@ -810,7 +817,7 @@ class PulpEntityContext(PulpViewSetContext):
         payload["limit"] = 1
         result: t.Mapping[str, t.Any] = self.call("list", parameters=payload)
         if result["count"] == 0:
-            raise PulpException(
+            raise PulpEntityNotFound(
                 _("Could not find {entity} with {kwargs}.").format(
                     entity=self.ENTITY, kwargs=kwargs
                 )
@@ -923,9 +930,11 @@ class PulpEntityContext(PulpViewSetContext):
         Returns:
             The record of the delete task.
         """
-        return self.call(
+        result = self.call(
             "delete", parameters={self.HREF: self.pulp_href}, non_blocking=non_blocking
         )
+        self.entity = None
+        return result
 
     def set_label(self, key: str, value: str, non_blocking: bool = False) -> t.Any:
         """
@@ -1019,6 +1028,48 @@ class PulpEntityContext(PulpViewSetContext):
             parameters={self.HREF: self.pulp_href},
             body={"role": role, "users": users, "groups": groups},
         )
+
+    def converge(
+        self, desired_attributes: t.Optional[t.Dict[str, t.Any]]
+    ) -> t.Tuple[bool, t.Optional[EntityDefinition], t.Optional[EntityDefinition]]:
+        """
+        Converge an entity to have a set of desired attributes.
+
+        This will look for the entity, and depending on what it found and what should be, create,
+        delete or update the entity.
+
+        Parameters:
+            desired_attributes: Dictionary of attributes the entity should have.
+
+        Returns:
+            Tuple of (changed, before, after)
+        """
+        try:
+            entity = self.entity
+        except PulpEntityNotFound:
+            entity = None
+
+        if desired_attributes is None:
+            if entity is not None:
+                self.delete()
+                return True, entity, None
+        else:
+            if entity is None:
+                desired_entity = self._entity_lookup | desired_attributes
+                desired_entity.pop("pulp_href", None)
+                return True, None, self.create(desired_entity)
+            else:
+                update_attributes = {}
+                for k, v in self.preprocess_entity(desired_attributes, partial=True).items():
+                    if entity.get(k) != v:
+                        update_attributes[k] = v
+                if update_attributes:
+                    return (
+                        True,
+                        entity,
+                        self.update(PreprocessedEntityDefinition(update_attributes)),
+                    )
+        return False, entity, entity
 
     def capable(self, capability: str) -> bool:
         """
