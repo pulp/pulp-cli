@@ -58,7 +58,14 @@ class PulpFileContentContext(PulpContentContext):
             body["artifact"] = PulpArtifactContext(
                 self.pulp_ctx, entity={"sha256": body.pop("sha256")}
             )
-        return super().create(body=body, parameters=parameters, non_blocking=non_blocking)
+        result = super().create(body=body, parameters=parameters, non_blocking=non_blocking)
+        if self.pulp_ctx.fake_mode and "artifact" in body:
+            sha256 = body["artifact"].entity.get("sha256")
+            if sha256:
+                assert self._entity is not None
+                self._entity["sha256"] = sha256
+                result = self._entity
+        return result
 
 
 class PulpFileDistributionContext(PulpDistributionContext):

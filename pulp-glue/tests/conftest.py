@@ -28,3 +28,22 @@ def pulp_ctx(
         background_tasks=False,
         timeout=settings.get("timeout", 120),
     )
+
+
+@pytest.fixture
+def fake_pulp_ctx(
+    request: pytest.FixtureRequest, pulp_cli_settings: t.Dict[str, t.Dict[str, t.Any]]
+) -> PulpContext:
+    verbose = request.config.getoption("verbose")
+    settings = pulp_cli_settings["cli"]
+    return PulpTestContext(
+        api_kwargs={
+            "base_url": settings["base_url"],
+            "auth_provider": BasicAuthProvider(settings.get("username"), settings.get("password")),
+            "debug_callback": lambda i, s: i <= verbose and print(s),
+        },
+        api_root=settings.get("api_root", "pulp/"),
+        background_tasks=False,
+        timeout=settings.get("timeout", 120),
+        fake_mode=True,
+    )
