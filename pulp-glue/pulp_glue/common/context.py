@@ -9,7 +9,7 @@ from packaging.specifiers import SpecifierSet
 from requests import HTTPError
 
 from pulp_glue.common.i18n import get_translation
-from pulp_glue.common.openapi import BasicAuthProvider, OpenAPI, OpenAPIError
+from pulp_glue.common.openapi import BasicAuthProvider, OpenAPI, OpenAPIError, UnsafeCallError
 
 translation = get_translation(__package__)
 _ = translation.gettext
@@ -105,6 +105,10 @@ class PulpHTTPError(PulpException):
 class PulpNoWait(Exception):
     """Exception to indicate that a task continues running in the background."""
 
+    pass
+
+
+class NotImplementedFake(NotImplementedError):
     pass
 
 
@@ -225,6 +229,9 @@ class PulpContext:
             immediately raise `PulpNoWait`.
         timeout: Limit of time to wait for unfinished tasks.
         domain: Name of the domain to interact with.
+        fake_mode: In fake mode, no modifying calls will be performed.
+            Where possible, instead of failing, the requested result will be faked.
+            This implies `safe_calls_only=True` on the `api_kwargs`.
     """
 
     def echo(self, message: str, nl: bool = True, err: bool = False) -> None:
@@ -252,6 +259,7 @@ class PulpContext:
         background_tasks: bool,
         timeout: t.Union[int, datetime.timedelta],
         domain: str = "default",
+        fake_mode: bool = False,
     ) -> None:
         self._api: t.Optional[OpenAPI] = None
         self._api_root: str = api_root
@@ -265,6 +273,9 @@ class PulpContext:
         if isinstance(timeout, int):
             timeout = datetime.timedelta(seconds=timeout)
         self.timeout: datetime.timedelta = timeout
+        self.fake_mode: bool = fake_mode
+        if self.fake_mode:
+            self._api_kwargs["safe_calls_only"] = True
 
     def _patch_api_spec(self) -> None:
         # A place for last minute fixes to the api_spec.
@@ -347,6 +358,9 @@ class PulpContext:
 
         Raises:
             PulpNoWait: in case the context has `background_tasks` set or a task (group) timed out.
+            NotImplementedFake: if an unsafe call was attempted in `fake_mode`
+            PulpHTTPError: for unhandeld REST API errors
+            PulpException: for all unhandeld openapi and http connection exceptions
         """
         if parameters is None:
             parameters = {}
@@ -364,6 +378,8 @@ class PulpContext:
                 body=body,
                 validate_body=validate_body,
             )
+        except UnsafeCallError:
+            raise NotImplementedFake(f"Operation {operation_id} was attempted in fake mode.")
         except OpenAPIError as e:
             raise PulpException(str(e))
         except HTTPError as e:
@@ -661,6 +677,11 @@ class PulpEntityContext(PulpViewSetContext):
         You can specify lookup parameters by assigning a dictionary to it,
         or assign an href to the `pulp_href` property.
         To reset to having no attached entity you can assign `None`.
+
+        !!!note:
+            `A # type: ignore[assignment]` comment is needed due to a mypy limitation.
+            https://github.com/python/mypy/issues/3004
+
         Assigning to it will reset the lazy lookup behaviour.
         """
         if self._entity is None:
@@ -868,6 +889,12 @@ class PulpEntityContext(PulpViewSetContext):
             _parameters.update(parameters)
         if body is not None:
             body = self.preprocess_entity(body, partial=False)
+        if self.pulp_ctx.fake_mode:
+            body["pulp_href"] = "<FAKE ENTITY>"
+            self._entity = body
+            self._entity_lookup = {}
+            return self._entity
+
         result = self.call(
             "create",
             parameters=_parameters,
@@ -878,8 +905,13 @@ class PulpEntityContext(PulpViewSetContext):
             if not non_blocking:
                 self.pulp_href = result["created_resources"][0]
                 result = self.entity
+            else:
+                # Properties with different types on setters and getters are not accepted by mypy.
+                # https://github.com/python/mypy/issues/3004
+                self.entity = None  # type: ignore[assignment]
         else:
             self._entity = result
+            self._entity_lookup = {}
 
         return result
 
@@ -905,6 +937,12 @@ class PulpEntityContext(PulpViewSetContext):
             _parameters.update(parameters)
         if body is not None:
             body = self.preprocess_entity(body, partial=False)
+        if self.pulp_ctx.fake_mode:
+            assert self._entity is not None
+            if body is not None:
+                self._entity.update(body)
+            return self._entity
+
         result = self.call(
             "partial_update",
             parameters=_parameters,
@@ -912,11 +950,12 @@ class PulpEntityContext(PulpViewSetContext):
             non_blocking=non_blocking,
         )
         if result["pulp_href"].startswith(self.pulp_ctx.api_path + "tasks/"):
+            self.pulp_href = self.pulp_href  # reenable lazy lookup
             if not non_blocking:
-                self.pulp_href = self.pulp_href  # reload from server
-                result = self.entity
+                result = self.entity  # reload from server
         else:
             self._entity = result
+            self._entity_lookup = {}
 
         return result
 
@@ -930,12 +969,18 @@ class PulpEntityContext(PulpViewSetContext):
         Returns:
             The record of the delete task.
         """
+        if self.pulp_ctx.fake_mode:
+            # Properties with different types on setters and getters are not accepted by mypy.
+            # https://github.com/python/mypy/issues/3004
+            self.entity = None  # type: ignore[assignment]
+            return None
+
         result = self.call(
             "delete", parameters={self.HREF: self.pulp_href}, non_blocking=non_blocking
         )
         # Properties with different types on setters and getters are not accepted by mypy.
         # https://github.com/python/mypy/issues/3004
-        self.entity = None  # type: ignore
+        self.entity = None  # type: ignore[assignment]
         return result
 
     def set_label(self, key: str, value: str, non_blocking: bool = False) -> t.Any:
@@ -948,6 +993,11 @@ class PulpEntityContext(PulpViewSetContext):
             non_blocking: Whether the result of the operation should be awaited on.
                 This no longer relevant for pulpcore>=3.34, because the synchronous api is used.
         """
+        if self.pulp_ctx.fake_mode:
+            self.entity  # perform lookup
+            assert self._entity is not None
+            self._entity["pulp_labels"][key] = value
+            return None
         if self.pulp_ctx.has_plugin(PluginRequirement("core", specifier=">=3.34.0")):
             try:
                 return self.call(
@@ -972,6 +1022,11 @@ class PulpEntityContext(PulpViewSetContext):
             non_blocking: Whether the result of the operation should be awaited on.
                 This no longer relevant for pulpcore>=3.34, because the synchronous api is used.
         """
+        if self.pulp_ctx.fake_mode:
+            self.entity  # perform lookup
+            assert self._entity is not None
+            self._entity["pulp_labels"].pop(key)
+            return None
         if self.pulp_ctx.has_plugin(PluginRequirement("core", specifier=">=3.34.0")):
             try:
                 return self.call(
