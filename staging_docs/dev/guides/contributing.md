@@ -4,14 +4,14 @@ There are many ways to contribute to this project, and all are welcome.
 
 ## Get in Touch
 
-If you want to connect with the Pulp community, ask some not-so-frequently-asked-questions or just leave general feedback, you can reach us in different ways summed up on [pulpproject.org](https://pulpproject.org/get_involved/).
+If you want to connect with the Pulp community, ask some not-so-frequently-asked-questions or just leave general feedback, you can reach us in different ways summed up on [pulpproject.org](site:help/community/get-involved/).
 
 
 ## Doc Contributions
 
 If you see something wrong with the docs, we welcome [documentation PRs](https://github.com/pulp/pulp-cli).
 
-If you are using the Pulp CLI and have written end-to-end steps for Pulp workflows, we would greatly appreciate if you would contribute docs to the relevant [plugins](https://docs.pulpproject.org/pulpcore/plugins/index.html).
+If you are using the Pulp CLI and have written end-to-end steps for Pulp workflows, we would greatly appreciate if you would contribute docs to the relevant [plugins](site:help/).
 
 
 ## Code Conventions

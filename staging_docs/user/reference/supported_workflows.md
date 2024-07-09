@@ -1,5 +1,8 @@
 # Supported Workflows
 
+!!! warning
+    This file is probably outdated by the time of reading it.
+
 `pulp-cli` is still in beta, so the features and workflows listed here are subject to change.
 `pulp-cli` is tested against the five most-recent pulpcore releases as of the date of the pulp-cli
 release. It comes with support for five Pulp plugins: `pulp_ansible`, `pulp_container`, `pulp_file`,

@@ -7,16 +7,15 @@ Here you can find information about how to install the Pulp 3 CLI, and general u
 Currently `pulp-cli` supports pulpcore and 6 of Pulp's plugins: `pulp_ansible`, `pulp-certguard`, `pulp_container`, `pulp_file`, `pulp_python` and `pulp_rpm`.
 See section below for information on how to extend the CLI to support other Pulp plugins.
 
-Check out the [supported workflows section](supported_workflows.md) to learn about the capabilities of the CLI.
-You can find more workflow examples for the Pulp 3 CLI throughout the [plugin documentation](https://docs.pulpproject.org/pulpcore/plugins/index.html).
-For example, [synchronizing a File repository](https://docs.pulpproject.org/pulp_file/workflows/sync.html).
+You can find workflow examples for the Pulp 3 CLI throughout the [plugin documentation](site:help/).
+For example, [synchronizing a File repository](site:/pulp_file/docs/user/guides/01-sync/).
 
 Use the links on the left to navigate.
 
 ## CLI Plugins
 
 The CLI can be extended via external plugins.
-See the [installation](installation.md) instructions.
+See the [installation](docs/user/guides/installation/) instructions.
 
 Known plugins include:
 
