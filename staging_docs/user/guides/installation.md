@@ -37,7 +37,7 @@ You can add optional dependencies in the usual way.
 pipx install pulp-cli[pygments,shell]
 ```
 
-[Additional plugins](index.md#cli-plugins) need to be injected into the apps virtual environment like this:
+[Additional plugins](site:pulp-cli/#cli-plugins) need to be injected into the apps virtual environment like this:
 ```bash
 pipx inject pulp-cli pulp-cli-deb
 ```

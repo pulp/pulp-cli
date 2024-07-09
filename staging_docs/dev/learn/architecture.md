@@ -2,13 +2,13 @@
 
 ## Pulp Glue
 
-Pulp CLI uses the [`pulp-glue`](site:pulp-glue/docs/learn/architecture) library as an abstraction layer to perform high-level operations in pulp.
+Pulp CLI uses the [`pulp-glue`](site:pulp-glue/docs/dev/learn/architecture/) library as an abstraction layer to perform high-level operations in pulp.
 
 ## Deferred Api and Entity lookup
 
 In order to be able to access every (sub-)command's help page,
 it is necessary that no code outside of the final performing command callback accesses the `api` property of the `PulpContext`.
-See `pulp-glue` section about [deferred lookup](site:pulp-glue/docs/learn/architecture#deferred_api_and_entity_lookup).
+See `pulp-glue` section about [deferred lookup](site:pulp-glue/docs/dev/learn/architecture/#deferred-api-and-entity-lookup).
 
 ## Plugin System
 

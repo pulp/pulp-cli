@@ -42,10 +42,6 @@ docs:
 servedocs:
 	pulp-docs serve -w pulp-glue/pulp_glue -w pulpcore/cli/common/generic.py
 
-# This is for the old docs. We may need it once more to push redirect pages.
-site:
-	mkdocs build
-
 pulp-glue/pulp_glue/%/locale/messages.pot: pulp-glue/pulp_glue/%/*.py
 	xgettext -d $* -o $@ pulp-glue/pulp_glue/$*/*.py
 	sed -i 's/charset=CHARSET/charset=UTF-8/g' $@
@@ -70,5 +66,5 @@ $(foreach LANGUAGE,$(LANGUAGES),pulpcore/cli/%/locale/$(LANGUAGE)/LC_MESSAGES/me
 	msgfmt -o $@ $<
 
 compile_messages: $(foreach LANGUAGE,$(LANGUAGES),$(foreach GLUE_PLUGIN,$(GLUE_PLUGINS),pulp-glue/pulp_glue/$(GLUE_PLUGIN)/locale/$(LANGUAGE)/LC_MESSAGES/messages.mo)) $(foreach LANGUAGE,$(LANGUAGES),$(foreach CLI_PLUGIN,$(CLI_PLUGINS),pulpcore/cli/$(CLI_PLUGIN)/locale/$(LANGUAGE)/LC_MESSAGES/messages.mo))
-.PHONY: build info black lint test docs servedocs site
+.PHONY: build info black lint test docs servedocs
 .PRECIOUS: $(foreach LANGUAGE,$(LANGUAGES),$(foreach GLUE_PLUGIN,$(GLUE_PLUGINS),pulp-glue/pulp_glue/$(GLUE_PLUGIN)/locale/$(LANGUAGE)/LC_MESSAGES/messages.po)) $(foreach LANGUAGE,$(LANGUAGES),$(foreach CLI_PLUGIN,$(CLI_PLUGINS),pulpcore/cli/$(CLI_PLUGIN)/locale/$(LANGUAGE)/LC_MESSAGES/messages.po))

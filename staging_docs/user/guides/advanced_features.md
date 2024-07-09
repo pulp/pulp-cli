@@ -8,7 +8,7 @@ You can specify a custom CA bundle for the connection to a Pulp server by provid
 ## Shell Completion
 
 The CLI uses the click package which supports shell completion.
-To configure this, check out [click's documentation](https://click.palletsprojects.com/en/8.0.x/shell_completion/).
+To configure this, check out [click's documentation](https://click.palletsprojects.com/shell-completion/).
 As an example, here is what to add to your `~/.bashrc` file if you're using bash:
 
 ```bash
