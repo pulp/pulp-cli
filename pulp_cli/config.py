@@ -220,11 +220,17 @@ def create(
     def prompt_config_option(name: str) -> t.Any:
         """Find the option from the root command and prompt."""
         option = next(p for p in ctx.command.params if p.name == name)
-        if isinstance(option, click.Option) and option.help:
-            help = option.help
+        if option.multiple:
+            assert option.type == click.types.STRING
+            assert option.default is None
+            result = []
+            value = click.prompt(f"{name} (end with an empty line)", default="", type=option.type)
+            while value:
+                result.append(value)
+                value = click.prompt(f"{name} (continued)", default="", type=option.type)
+            return result
         else:
-            help = name
-        return click.prompt(help, default=(option.default), type=option.type)
+            return click.prompt(name, default=option.default, type=option.type)
 
     settings: t.MutableMapping[str, t.Any] = kwargs
     if not settings["plugins"]:
