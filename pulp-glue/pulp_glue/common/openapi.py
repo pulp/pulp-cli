@@ -73,10 +73,10 @@ class AuthProviderBase:
         for proposal in security:
             for name in proposal:
                 authorized_schemes.append(security_schemes[name])
-                authorized_schemes_types.add(security_schemes[name]['type'])
+                authorized_schemes_types.add(security_schemes[name]["type"])
 
         if "oauth2" in authorized_schemes_types:
-            oauth_flow = [flow for flow in authorized_schemes if flow['type'] == "oauth2"][0]
+            oauth_flow = [flow for flow in authorized_schemes if flow["type"] == "oauth2"][0]
             result = self.auth(oauth_flow)
         elif "http" in authorized_schemes_types:
             result = self.basic_auth()
@@ -106,8 +106,6 @@ class OAuth2AuthProvider(AuthProviderBase):
         self.client_secret = password
 
     def auth(self, oauth_payload) -> requests.auth.AuthBase:
-        __import__('ipdb').set_trace()
-        response: requests.Response = requests.get()
         pass
 
 
@@ -634,7 +632,9 @@ class OpenAPI:
                 # Bad idea, but you wanted it that way.
                 auth = None
             else:
-                auth: AuthProviderBase = self.auth_provider(security, self.api_spec["components"]["securitySchemes"])
+                auth: AuthProviderBase = self.auth_provider(
+                    security, self.api_spec["components"]["securitySchemes"]
+                )
         else:
             # No auth required? Don't provide it.
             # No auth_provider available? Hope for the best (should do the trick for cert auth).

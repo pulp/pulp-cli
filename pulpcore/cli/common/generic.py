@@ -240,27 +240,30 @@ class PulpCLIAuthProvider(AuthProviderBase):
         class OAuth2AuthBase(requests.auth.AuthBase):
 
             def __init__(self, *args, **kwargs):
-                self.client_id = kwargs.get('username')
-                self.client_secret = kwargs.get('password')
-                self.flow = kwargs.get('flow')
-                self.token_url = self.flow['flows']['clientCredentials']['tokenUrl']
-                self.scope = [*self.flow['flows']['clientCredentials']['scopes']][0]
+                self.client_id = kwargs.get("username")
+                self.client_secret = kwargs.get("password")
+                self.flow = kwargs.get("flow")
+                self.token_url = self.flow["flows"]["clientCredentials"]["tokenUrl"]
+                self.scope = [*self.flow["flows"]["clientCredentials"]["scopes"]][0]
 
             def __call__(self, request):
-                data = {'client_id': self.client_id,
-                        'client_secret': self.client_secret,
-                        'scope': self.scope,
-                        'grant_type': 'client_credentials'
-                        }
+                data = {
+                    "client_id": self.client_id,
+                    "client_secret": self.client_secret,
+                    "scope": self.scope,
+                    "grant_type": "client_credentials",
+                }
 
                 response: requests.Response = requests.post(self.token_url, data=data)
 
                 token = response.json() if response.status_code == 200 else None
 
-                request.headers['Authorization'] = f"Bearer {token['access_token']}"
+                request.headers["Authorization"] = f"Bearer {token['access_token']}"
                 return request
 
-        return OAuth2AuthBase(username=self.pulp_ctx.username, password=self.pulp_ctx.password, flow=flow)
+        return OAuth2AuthBase(
+            username=self.pulp_ctx.username, password=self.pulp_ctx.password, flow=flow
+        )
 
 
 ##############################################################################
