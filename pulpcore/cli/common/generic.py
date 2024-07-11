@@ -10,6 +10,7 @@ import click
 import requests
 import schema as s
 import yaml
+from pulp_glue.common.authentication import OAuth2ClientCredentialsAuth
 from pulp_glue.common.context import (
     DATETIME_FORMATS,
     DEFAULT_LIMIT,
@@ -230,6 +231,21 @@ class PulpCLIAuthProvider(AuthProviderBase):
             else:
                 self.pulp_ctx.password = click.prompt("Password", hide_input=True)
         return (self.pulp_ctx.username, self.pulp_ctx.password)
+
+    def oauth2_client_credentials_auth(
+        self, oauth2_flow: t.Any
+    ) -> t.Optional[requests.auth.AuthBase]:
+        if self.pulp_ctx.username is None:
+            self.pulp_ctx.username = click.prompt("Username/ClientID")
+        if self.pulp_ctx.password is None:
+            self.pulp_ctx.password = click.prompt("Password/ClientSecret")
+
+        return OAuth2ClientCredentialsAuth(
+            client_id=self.pulp_ctx.username,
+            client_secret=self.pulp_ctx.password,
+            token_url=oauth2_flow.token_url,
+            scopes=oauth2_flow.scopes,
+        )
 
 
 ##############################################################################
