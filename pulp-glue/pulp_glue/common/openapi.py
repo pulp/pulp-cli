@@ -24,6 +24,7 @@ UploadType = t.Union[bytes, t.IO[bytes]]
 SAFE_METHODS = ["GET", "HEAD", "OPTIONS"]
 ISO_DATE_FORMAT = "%Y-%m-%d"
 ISO_DATETIME_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
+AUTH_PRIORITY = ("oauth2", "basic")
 
 
 class OpenAPIError(Exception):
@@ -57,18 +58,31 @@ class AuthProviderBase:
         """Implement this to provide means of http basic auth."""
         return None
 
+    def auth(self) -> t.Optional[t.Union[t.Tuple[str, str], requests.auth.AuthBase]]:
+        return
+
     def __call__(
         self,
         security: t.List[t.Dict[str, t.List[str]]],
         security_schemes: t.Dict[str, t.Dict[str, t.Any]],
     ) -> t.Optional[t.Union[t.Tuple[str, str], requests.auth.AuthBase]]:
+
+        authorized_schemes = []
+        authorized_schemes_types = set()
+
         for proposal in security:
-            if [security_schemes[name] for name in proposal] == [
-                {"type": "http", "scheme": "basic"}
-            ]:
-                result = self.basic_auth()
-                if result:
-                    return result
+            for name in proposal:
+                authorized_schemes.append(security_schemes[name])
+                authorized_schemes_types.add(security_schemes[name]['type'])
+
+        if "oauth2" in authorized_schemes_types:
+            oauth_flow = [flow for flow in authorized_schemes if flow['type'] == "oauth2"][0]
+            result = self.auth(oauth_flow)
+        elif "http" in authorized_schemes_types:
+            result = self.basic_auth()
+
+        if result:
+            return result
         raise OpenAPIError(_("No suitable auth scheme found."))
 
 
@@ -83,6 +97,18 @@ class BasicAuthProvider(AuthProviderBase):
 
     def basic_auth(self) -> t.Optional[t.Union[t.Tuple[str, str], requests.auth.AuthBase]]:
         return (self.username, self.password)
+
+
+class OAuth2AuthProvider(AuthProviderBase):
+
+    def __init__(self, username: str, password: str):
+        self.client_id = username
+        self.client_secret = password
+
+    def auth(self, oauth_payload) -> requests.auth.AuthBase:
+        __import__('ipdb').set_trace()
+        response: requests.Response = requests.get()
+        pass
 
 
 class OpenAPI:
@@ -608,7 +634,7 @@ class OpenAPI:
                 # Bad idea, but you wanted it that way.
                 auth = None
             else:
-                auth = self.auth_provider(security, self.api_spec["components"]["securitySchemes"])
+                auth: AuthProviderBase = self.auth_provider(security, self.api_spec["components"]["securitySchemes"])
         else:
             # No auth required? Don't provide it.
             # No auth_provider available? Hope for the best (should do the trick for cert auth).
