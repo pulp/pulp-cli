@@ -24,6 +24,7 @@ UploadType = t.Union[bytes, t.IO[bytes]]
 SAFE_METHODS = ["GET", "HEAD", "OPTIONS"]
 ISO_DATE_FORMAT = "%Y-%m-%d"
 ISO_DATETIME_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
+AUTH_PRIORITY = ("oauth2", "basic")
 
 
 class OpenAPIError(Exception):
@@ -44,6 +45,30 @@ class UnsafeCallError(OpenAPIError):
     pass
 
 
+class OpenAPISecurityScheme:
+    def __init__(self, security_scheme: t.Dict[str, t.Any]):
+        self.security_scheme = security_scheme
+
+        self.security_type = self.security_scheme["type"]
+        self.description = self.security_scheme.get("description", "")
+
+        if self.security_type == "oauth2":
+            try:
+                self.flows: t.Dict[str, t.Any] = self.security_scheme["flows"]
+                client_credentials: t.Optional[t.Dict[str, t.Any]] = self.flows.get(
+                    "clientCredentials"
+                )
+                if client_credentials:
+                    self.flow_type: str = "clientCredentials"
+                    self.token_url: str = client_credentials["tokenUrl"]
+                    self.scopes: t.List[str] = list(client_credentials["scopes"].keys())
+            except KeyError:
+                raise OpenAPIValidationError
+
+        if self.security_type == "http":
+            self.scheme = self.security_scheme["scheme"]
+
+
 class AuthProviderBase:
     """
     Base class for auth providers.
@@ -57,18 +82,39 @@ class AuthProviderBase:
         """Implement this to provide means of http basic auth."""
         return None
 
+    def oauth2_client_credentials_auth(
+        self, flow: t.Any
+    ) -> t.Optional[t.Union[t.Tuple[str, str], requests.auth.AuthBase]]:
+        """Implement this to provide other authentication methods."""
+        return None
+
     def __call__(
         self,
         security: t.List[t.Dict[str, t.List[str]]],
         security_schemes: t.Dict[str, t.Dict[str, t.Any]],
     ) -> t.Optional[t.Union[t.Tuple[str, str], requests.auth.AuthBase]]:
+
+        authorized_schemes = []
+        authorized_schemes_types = set()
+
         for proposal in security:
-            if [security_schemes[name] for name in proposal] == [
-                {"type": "http", "scheme": "basic"}
-            ]:
-                result = self.basic_auth()
-                if result:
-                    return result
+            for name in proposal:
+                authorized_schemes.append(security_schemes[name])
+                authorized_schemes_types.add(security_schemes[name]["type"])
+
+        if "oauth2" in authorized_schemes_types:
+            for flow in authorized_schemes:
+                if flow["type"] == "oauth2":
+                    oauth2_flow = OpenAPISecurityScheme(flow)
+
+            if oauth2_flow.flow_type == "client_credentials":
+                result = self.oauth2_client_credentials_auth(oauth2_flow)
+            if result:
+                return result
+        elif "http" in authorized_schemes_types:
+            result = self.basic_auth()
+            if result:
+                return result
         raise OpenAPIError(_("No suitable auth scheme found."))
 
 
