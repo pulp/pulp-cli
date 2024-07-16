@@ -49,7 +49,7 @@ tests/cli.toml:
 	@echo "In order to configure the tests to talk to your test server, you might need to edit $@ ."
 
 test: | tests/cli.toml
-	pytest -v tests
+	python3 -m pytest -v tests {%- if cookiecutter.glue %} pulp-glue{{ cookiecutter.__app_label_suffix }}/tests {%- endif %}
 {%- if cookiecutter.docs %}
 
 docs:
@@ -57,10 +57,6 @@ docs:
 
 servedocs:
 	pulp-docs serve -w pulp-glue/pulp_glue -w pulpcore/cli/common/generic.py
-
-# This is for the old docs. We may need it once more to push redirect pages.
-site:
-	mkdocs build
 {%- endif %}
 {%- if cookiecutter.translations %}
 {%- if cookiecutter.glue %}
@@ -94,7 +90,7 @@ $(foreach LANGUAGE,$(LANGUAGES),pulpcore/cli/%/locale/$(LANGUAGE)/LC_MESSAGES/me
 compile_messages: {%- if cookiecutter.glue %} $(foreach LANGUAGE,$(LANGUAGES),$(foreach GLUE_PLUGIN,$(GLUE_PLUGINS),pulp-glue{{ cookiecutter.__app_label_suffix }}/pulp_glue/$(GLUE_PLUGIN)/locale/$(LANGUAGE)/LC_MESSAGES/messages.mo)) {%- endif %} $(foreach LANGUAGE,$(LANGUAGES),$(foreach CLI_PLUGIN,$(CLI_PLUGINS),pulpcore/cli/$(CLI_PLUGIN)/locale/$(LANGUAGE)/LC_MESSAGES/messages.mo))
 
 {%- endif %}
-.PHONY: build info black lint test {%- if cookiecutter.docs %} docs servedocs site {%- endif %}
+.PHONY: build info black lint test {%- if cookiecutter.docs %} docs servedocs {%- endif %}
 {%- if cookiecutter.translations %}
 .PRECIOUS: {%- if cookiecutter.glue %} $(foreach LANGUAGE,$(LANGUAGES),$(foreach GLUE_PLUGIN,$(GLUE_PLUGINS),pulp-glue{{ cookiecutter.__app_label_suffix }}/pulp_glue/$(GLUE_PLUGIN)/locale/$(LANGUAGE)/LC_MESSAGES/messages.po)) {%- endif %} $(foreach LANGUAGE,$(LANGUAGES),$(foreach CLI_PLUGIN,$(CLI_PLUGINS),pulpcore/cli/$(CLI_PLUGIN)/locale/$(LANGUAGE)/LC_MESSAGES/messages.po))
 {%- endif %}

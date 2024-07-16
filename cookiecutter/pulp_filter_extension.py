@@ -11,6 +11,10 @@ def _assert_key(key: t.Any) -> str:
     return key
 
 
+def _quote(s: str) -> str:
+    return '"' + s.replace("\\", "\\\\").replace("\"", "\\\"") + '"'
+
+
 def to_nice_yaml(data: t.Any, level: int = 0, embed_in: str = "") -> str:
     """Filter for Jinja 2 templates to render human readable YAML."""
     # Don't even believe this is complete!
