@@ -10,6 +10,45 @@
 
 [//]: # (towncrier release notes start)
 
+## 0.27.0 (2024-07-17) {: #0.27.0 }
+
+
+
+#### Features {: #0.27.0-feature }
+
+- Expanded on options available to `rpm content -t package upload`.
+
+  The user can now:
+    * Upload an entire directory of RPMs.
+    * Choose to have them added to their desired destination as a single new repository-version.
+    * Choose to have a new Publication created at the end of the uploads.
+  [#994](https://github.com/pulp/pulp-cli/issues/994)
+
+
+#### Bugfixes {: #0.27.0-bugfix }
+
+- Fixed the interactive config generation in the face of options allowing multiple values.
+  [#1008](https://github.com/pulp/pulp-cli/issues/1008)
+
+
+#### Improved Documentation {: #0.27.0-doc }
+
+- Fixed some docs pages and improved the table of contents.
+
+
+### Pulp GLUE {: #0.27.0-pulp-glue }
+
+
+#### Features {: #0.27.0-pulp-glue-feature }
+
+- Added `converge` to the `PulpEntityContext` to allow converging on a desired entity state.
+- Implemented a `fake_mode` flag on the `PulpContext` that indicates to users of the context that modifying operations should not be carried out, but faked.
+  This will imply the `safe_calls_only` flag in the `api_kwargs` that will serve as a safeguard for any POST, PUT, PATCH or DELETE that still made it through.
+  A `NotImplementedFake` exception will be issued in that case.
+
+
+---
+
 ## 0.26.0 (2024-07-01) {: #0.26.0 }
 
 
