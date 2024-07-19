@@ -17,12 +17,11 @@
 #### Features {: #0.27.0-feature }
 
 - Expanded on options available to `rpm content -t package upload`.
-
-  The user can now:
-    * Upload an entire directory of RPMs.
-    * Choose to have them added to their desired destination as a single new repository-version.
-    * Choose to have a new Publication created at the end of the uploads.
   [#994](https://github.com/pulp/pulp-cli/issues/994)
+  The user can now:
+    - Upload an entire directory of RPMs.
+    - Choose to have them added to their desired destination as a single new repository-version.
+    - Choose to have a new Publication created at the end of the uploads.
 
 
 #### Bugfixes {: #0.27.0-bugfix }
@@ -56,8 +55,7 @@
 #### Features {: #0.26.0-feature }
 
 - Added the "pulp rpm prune-packages" command to support new RPM feature.
-
-  See [2909](https://github.com/pulp/pulp_rpm/issues/2909) for details.
+  See [pulp\_rpm#2909](https://github.com/pulp/pulp_rpm/issues/2909) for details.
   [#979](https://github.com/pulp/pulp-cli/issues/979)
 - Added "pulp rpm copy --config --dependency-solve" support.
   [#990](https://github.com/pulp/pulp-cli/issues/990)
