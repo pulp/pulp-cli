@@ -67,6 +67,10 @@ class PulpArtifactContext(PulpEntityContext):
 
         self.pulp_ctx.echo(_("Uploading file {filename}").format(filename=file.name), err=True)
 
+        if self.pulp_ctx.fake_mode:
+            self._entity = {"pulp_href": "<FAKE_ENTITY>", "sha256": sha256, "size": size}
+            self._entity_lookup = {}
+            return self._entity["pulp_href"]
         if chunk_size > size:
             # if chunk_size is bigger than the file size, just upload it directly
             artifact: t.Dict[str, t.Any] = self.create({"sha256": sha256_digest, "file": file})
