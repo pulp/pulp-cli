@@ -1383,6 +1383,8 @@ class PulpRepositoryContext(PulpEntityContext):
             body["remove_content_units"] = remove_content
         if base_version is not None:
             body["base_version"] = base_version
+        if self.pulp_ctx.fake_mode:
+            return {"state": "conpleted"}  # Fake a task
         return self.call("modify", parameters={self.HREF: self.pulp_href}, body=body)
 
 
@@ -1449,20 +1451,21 @@ class PulpContentContext(PulpEntityContext):
         self.needs_capability("upload")
         size = os.path.getsize(file.name)
         body: t.Dict[str, t.Any] = {**kwargs}
-        if chunk_size > size:
-            body["file"] = file
-        elif self.pulp_ctx.has_plugin(PluginRequirement("core", specifier=">=3.20.0")):
-            from pulp_glue.core.context import PulpUploadContext
+        if not self.pulp_ctx.fake_mode:  # Skip the uploading part in fake_mode
+            if chunk_size > size:
+                body["file"] = file
+            elif self.pulp_ctx.has_plugin(PluginRequirement("core", specifier=">=3.20.0")):
+                from pulp_glue.core.context import PulpUploadContext
 
-            upload_href = PulpUploadContext(self.pulp_ctx).upload_file(file, chunk_size)
-            body["upload"] = upload_href
-        else:
-            from pulp_glue.core.context import PulpArtifactContext
+                upload_href = PulpUploadContext(self.pulp_ctx).upload_file(file, chunk_size)
+                body["upload"] = upload_href
+            else:
+                from pulp_glue.core.context import PulpArtifactContext
 
-            artifact_href = PulpArtifactContext(self.pulp_ctx).upload(file, chunk_size)
-            body["artifact"] = artifact_href
-        if repository:
-            body["repository"] = repository
+                artifact_href = PulpArtifactContext(self.pulp_ctx).upload(file, chunk_size)
+                body["artifact"] = artifact_href
+            if repository:
+                body["repository"] = repository
         return self.create(body=body)
 
 
