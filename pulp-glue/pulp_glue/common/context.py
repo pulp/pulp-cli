@@ -903,8 +903,22 @@ class PulpEntityContext(PulpViewSetContext):
         )
         if result["pulp_href"].startswith(self.pulp_ctx.api_path + "tasks/"):
             if not non_blocking:
-                self.pulp_href = result["created_resources"][0]
-                result = self.entity
+                try:
+                    if getattr(self, "HREF_PATTERN", None):
+                        self.pulp_href = next(
+                            (
+                                h
+                                for h in result["created_resources"]
+                                if re.match(
+                                    re.escape(self.pulp_ctx.api_path) + self.HREF_PATTERN, h
+                                )
+                            )
+                        )
+                    else:
+                        self.pulp_href = result["created_resources"][0]  # YOLO
+                    result = self.entity
+                except (KeyError, StopIteration):
+                    raise PulpException(_("No suitable resource got created."))
             else:
                 # Properties with different types on setters and getters are not accepted by mypy.
                 # https://github.com/python/mypy/issues/3004
@@ -1420,6 +1434,7 @@ class PulpContentContext(PulpEntityContext):
     ENTITY = _("content")
     ENTITIES = _("content")
     ID_PREFIX = "content"
+    HREF_PATTERN = r"content/(?P<plugin>[\w\-_]+)/(?P<resource_type>[\w\-_]+)/"
     TYPE_REGISTRY: t.Final[t.Dict[str, t.Type["PulpContentContext"]]] = {}
 
     def __init_subclass__(cls, **kwargs: t.Any) -> None:
