@@ -5,7 +5,6 @@ import sys
 import typing as t
 from contextlib import closing
 from functools import lru_cache, wraps
-from pathlib import Path
 
 import click
 import requests
@@ -32,6 +31,7 @@ from pulp_glue.common.context import (
 )
 from pulp_glue.common.i18n import get_translation
 from pulp_glue.common.openapi import AuthProviderBase
+from pulp_glue.common.authentication import OAuth2Auth
 
 try:
     from pygments import highlight
@@ -238,60 +238,7 @@ class PulpCLIAuthProvider(AuthProviderBase):
         if self.pulp_ctx.password is None:
             self.pulp_ctx.password = click.prompt("Password/ClientSecret")
 
-        class OAuth2AuthBase(requests.auth.AuthBase):
-
-            def __init__(self, *args, **kwargs):
-                self.client_id = kwargs.get("username")
-                self.client_secret = kwargs.get("password")
-                self.flow = kwargs.get("flow")
-                self.token_url = self.flow["flows"]["clientCredentials"]["tokenUrl"]
-                self.scope = [*self.flow["flows"]["clientCredentials"]["scopes"]][0]
-                self.token = ""
-
-            def __call__(self, request):
-                self.retrieve_local_token()
-                if self.is_token_expired():
-                    self.retrieve_token()
-
-                request.headers["Authorization"] = f"Bearer {self.token['access_token']}"
-                return request
-
-            def is_token_expired(self):
-                if self.token:
-                    issued_at = datetime.datetime.fromisoformat(self.token["issued_at"])
-                    expires_in = datetime.timedelta(seconds=self.token["expires_in"])
-                    timedelta = issued_at + expires_in - datetime.timedelta(seconds=5)
-                    if timedelta >= datetime.datetime.now():
-                        return False
-                return True
-
-            def store_local_token(self):
-                TOKEN_LOCATION = (Path(click.utils.get_app_dir("pulp"), "token.json"))
-                with Path(TOKEN_LOCATION).open("w") as token_file:
-                    token = json.dumps(self.token)
-                    token_file.write(token)
-
-            def retrieve_local_token(self):
-                TOKEN_LOCATION = (Path(click.utils.get_app_dir("pulp"), "token.json"))
-                with Path(TOKEN_LOCATION).open("r") as token_file:
-                    token_json = token_file.read()
-                    self.token = json.loads(token_json)
-
-            def retrieve_token(self):
-                data = {
-                    "client_id": self.client_id,
-                    "client_secret": self.client_secret,
-                    "scope": self.scope,
-                    "grant_type": "client_credentials",
-                }
-
-                response: requests.Response = requests.post(self.token_url, data=data)
-
-                self.token = response.json() if response.status_code == 200 else None
-                self.token["issued_at"] = datetime.datetime.now().isoformat()
-                self.store_local_token()
-
-        return OAuth2AuthBase(
+        return OAuth2Auth(
             username=self.pulp_ctx.username, password=self.pulp_ctx.password, flow=flow
         )
 

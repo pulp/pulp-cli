@@ -15,6 +15,7 @@ import urllib3
 
 from pulp_glue.common import __version__
 from pulp_glue.common.i18n import get_translation
+from pulp_glue.common.authentication import OAuth2Auth
 
 translation = get_translation(__package__)
 _ = translation.gettext
@@ -105,7 +106,7 @@ class OAuth2AuthProvider(AuthProviderBase):
         self.client_id = username
         self.client_secret = password
 
-    def auth(self, oauth_payload) -> requests.auth.AuthBase:
+    def auth(self, oauth_payload: dict) -> requests.auth.AuthBase:
         pass
 
 
