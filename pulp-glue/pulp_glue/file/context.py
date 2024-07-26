@@ -14,7 +14,6 @@ from pulp_glue.common.context import (
 )
 from pulp_glue.common.i18n import get_translation
 from pulp_glue.common.openapi import OpenAPI
-from pulp_glue.core.context import PulpArtifactContext
 
 translation = get_translation(__package__)
 _ = translation.gettext
@@ -55,16 +54,19 @@ class PulpFileContentContext(PulpContentContext):
     ) -> t.Any:
         if "sha256" in body:
             body = body.copy()
-            body["artifact"] = PulpArtifactContext(
-                self.pulp_ctx, entity={"sha256": body.pop("sha256")}
-            )
+            sha256: t.Optional[str] = body.pop("sha256")
+        else:
+            sha256 = None
         result = super().create(body=body, parameters=parameters, non_blocking=non_blocking)
-        if self.pulp_ctx.fake_mode and "artifact" in body:
-            sha256 = body["artifact"].entity.get("sha256")
-            if sha256:
+        if sha256:
+            if self.pulp_ctx.fake_mode:
                 assert self._entity is not None
                 self._entity["sha256"] = sha256
                 result = self._entity
+            else:
+                # It would be nicer if the server would accept that value and do the checking.
+                assert result["sha256"] == sha256
+
         return result
 
 

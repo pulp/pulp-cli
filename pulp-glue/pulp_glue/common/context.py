@@ -1134,7 +1134,9 @@ class PulpEntityContext(PulpViewSetContext):
         )
 
     def converge(
-        self, desired_attributes: t.Optional[t.Dict[str, t.Any]]
+        self,
+        desired_attributes: t.Optional[t.Dict[str, t.Any]],
+        defaults: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> t.Tuple[bool, t.Optional[EntityDefinition], t.Optional[EntityDefinition]]:
         """
         Converge an entity to have a set of desired attributes.
@@ -1143,7 +1145,10 @@ class PulpEntityContext(PulpViewSetContext):
         delete or update the entity.
 
         Parameters:
-            desired_attributes: Dictionary of attributes the entity should have.
+            desired_attributes: Dictionary of attributes the entity should have. `None` if the
+                entity is supposed to be absent.
+            defaults: Optional dict with default and extra values to be used when creating a new
+                entity.
 
         Returns:
             Tuple of (changed, before, after)
@@ -1159,12 +1164,11 @@ class PulpEntityContext(PulpViewSetContext):
                 return True, entity, None
         else:
             if entity is None:
-                # --- Not in Python 3.8 ---
-                # desired_entity = self._entity_lookup | desired_attributes
                 desired_entity: t.Dict[str, t.Any] = {}
-                desired_entity.update(self._entity_lookup)
+                if defaults:
+                    desired_entity.update(defaults)
                 desired_entity.update(desired_attributes)
-                # -------------------------
+                desired_entity.update(self._entity_lookup)
                 desired_entity.pop("pulp_href", None)
                 return True, None, self.create(desired_entity)
             else:
