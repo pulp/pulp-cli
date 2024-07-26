@@ -15,7 +15,6 @@ import urllib3
 
 from pulp_glue.common import __version__
 from pulp_glue.common.i18n import get_translation
-from pulp_glue.common.authentication import OAuth2Auth
 
 translation = get_translation(__package__)
 _ = translation.gettext
@@ -59,8 +58,11 @@ class AuthProviderBase:
         """Implement this to provide means of http basic auth."""
         return None
 
-    def auth(self) -> t.Optional[t.Union[t.Tuple[str, str], requests.auth.AuthBase]]:
-        return
+    def auth(
+        self, flow: t.Dict[t.Any, t.Any]
+    ) -> t.Optional[t.Union[t.Tuple[str, str], requests.auth.AuthBase]]:
+        """Implement this to provide other authentication methods."""
+        return None
 
     def __call__(
         self,
@@ -79,11 +81,12 @@ class AuthProviderBase:
         if "oauth2" in authorized_schemes_types:
             oauth_flow = [flow for flow in authorized_schemes if flow["type"] == "oauth2"][0]
             result = self.auth(oauth_flow)
+            if result:
+                return result
         elif "http" in authorized_schemes_types:
             result = self.basic_auth()
-
-        if result:
-            return result
+            if result:
+                return result
         raise OpenAPIError(_("No suitable auth scheme found."))
 
 
@@ -106,7 +109,7 @@ class OAuth2AuthProvider(AuthProviderBase):
         self.client_id = username
         self.client_secret = password
 
-    def auth(self, oauth_payload: dict) -> requests.auth.AuthBase:
+    def auth(self, flow: dict[t.Any, t.Any]) -> t.Optional[requests.auth.AuthBase]:
         pass
 
 
@@ -628,14 +631,13 @@ class OpenAPI:
         security: t.List[t.Dict[str, t.List[str]]] = method_spec.get(
             "security", self.api_spec.get("security", {})
         )
+        auth: t.Optional[t.Union[tuple[str, str], requests.auth.AuthBase]] = None
         if security and self.auth_provider:
             if "Authorization" in self._session.headers:
                 # Bad idea, but you wanted it that way.
                 auth = None
             else:
-                auth: AuthProviderBase = self.auth_provider(
-                    security, self.api_spec["components"]["securitySchemes"]
-                )
+                auth = self.auth_provider(security, self.api_spec["components"]["securitySchemes"])
         else:
             # No auth required? Don't provide it.
             # No auth_provider available? Hope for the best (should do the trick for cert auth).

@@ -1,21 +1,21 @@
-import click
 import json
-import requests
-
-from typing import NoReturn
+import typing as t
 from datetime import datetime, timedelta
 from pathlib import Path
+
+import click
+import requests
 
 
 class OAuth2Auth(requests.auth.AuthBase):
 
-    def __init__(self, *args, **kwargs):
-        self.client_id: str = kwargs.get("username")
-        self.client_secret: str = kwargs.get("password")
-        self.flow: list = kwargs.get("flow")
-        self.token_url: str = self.flow["flows"]["clientCredentials"]["tokenUrl"]
-        self.scope: str = [*self.flow["flows"]["clientCredentials"]["scopes"]][0]
-        self.token: dict = {}
+    def __init__(self, *args: t.List[t.Any], **kwargs: t.Dict[t.Any, t.Any]):
+        self.client_id = kwargs.get("username")
+        self.client_secret = kwargs.get("password")
+        self.flow: t.Dict[t.Any, t.Any] = kwargs["flow"]
+        self.token_url = self.flow["flows"]["clientCredentials"]["tokenUrl"]
+        self.scope = [*self.flow["flows"]["clientCredentials"]["scopes"]][0]
+        self.token: t.Dict[t.Any, t.Any] = {}
 
     def __call__(self, request: requests.PreparedRequest) -> requests.PreparedRequest:
         self.retrieve_local_token()
@@ -23,29 +23,31 @@ class OAuth2Auth(requests.auth.AuthBase):
         access_token = self.token.get("access_token")
         request.headers["Authorization"] = f"Bearer {access_token}"
 
-        request.register_hook("response", self.handle401)
+        request.register_hook("response", self.handle401)  # type: ignore
 
         return request
 
-    def handle401(self, request: requests.PreparedRequest, **kwargs) -> requests.PreparedRequest:
-        if request.status_code != 401:
-            return request
+    def handle401(
+        self, response: requests.Response, **kwargs: t.Dict[t.Any, t.Any]
+    ) -> requests.Response:
+        if response.status_code != 401:
+            return response
 
         self.retrieve_local_token()
         if self.is_token_expired():
             self.retrieve_token()
 
-        request.content
-        prep = request.request.copy()
+        response.content
+        prep = response.request.copy()
 
-        access_token = self.token.get('access_token')
+        access_token = self.token.get("access_token")
         prep.headers["Authorization"] = f"Bearer {access_token}"
 
-        _request = request.connection.send(prep, **kwargs)
-        _request.history.append(request)
-        _request.request = prep
+        _response: requests.Response = response.connection.send(prep, **kwargs)  # type: ignore
+        _response.history.append(response)
+        _response.request = prep
 
-        return _request
+        return _response
 
     def is_token_expired(self) -> bool:
         if self.token:
@@ -58,19 +60,20 @@ class OAuth2Auth(requests.auth.AuthBase):
 
         return True
 
-    def store_local_token(self) -> NoReturn:
-        TOKEN_LOCATION = (Path(click.utils.get_app_dir("pulp"), "token.json"))
+    def store_local_token(self) -> None:
+        TOKEN_LOCATION = Path(click.utils.get_app_dir("pulp"), "token.json")
         with Path(TOKEN_LOCATION).open("w") as token_file:
             token = json.dumps(self.token)
             token_file.write(token)
 
-    def retrieve_local_token(self) -> NoReturn:
-        TOKEN_LOCATION = (Path(click.utils.get_app_dir("pulp"), "token.json"))
-        with Path(TOKEN_LOCATION).open("r") as token_file:
-            token_json = token_file.read()
-            self.token = json.loads(token_json)
+    def retrieve_local_token(self) -> None:
+        token_file = Path(click.utils.get_app_dir("pulp"), "token.json")
+        if token_file.exists():
+            with token_file.open("r") as tf:
+                token_json = tf.read()
+                self.token = json.loads(token_json)
 
-    def retrieve_token(self) -> NoReturn:
+    def retrieve_token(self) -> None:
         data = {
             "client_id": self.client_id,
             "client_secret": self.client_secret,
