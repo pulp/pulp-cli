@@ -1,3 +1,4 @@
+---
 name: "Build"
 
 on:
@@ -34,3 +35,4 @@ jobs:
             dist/
           if-no-files-found: "error"
           retention-days: 5
+...

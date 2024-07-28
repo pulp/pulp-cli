@@ -15,13 +15,13 @@ namespaces = true
 [tool.pulp_cli_template]
 # This section is co-managed by the cookiecutter templates.
 # Changes to existing keys should be preserved.
-app_label = {{ cookiecutter.app_label | to_toml_value }}
-repository = {{ cookiecutter.repository | to_toml_value }}
-glue = {{ cookiecutter.glue | to_toml_value }}
-docs = {{ cookiecutter.docs | to_toml_value }}
-translations = {{ cookiecutter.translations | to_toml_value }}
-main_package = {{ cookiecutter.main_package | to_toml_value }}
-binary_dependencies = {{ cookiecutter.binary_dependencies | to_toml_value }}
+app_label = {{ cookiecutter.app_label | toml_value }}
+repository = {{ cookiecutter.repository | toml_value }}
+glue = {{ cookiecutter.glue | toml_value }}
+docs = {{ cookiecutter.docs | toml_value }}
+translations = {{ cookiecutter.translations | toml_value }}
+main_package = {{ cookiecutter.main_package | toml_value }}
+binary_dependencies = {{ cookiecutter.binary_dependencies | toml_value }}
 
 [tool.bumpversion]
 # This section is managed by the cookiecutter templates.

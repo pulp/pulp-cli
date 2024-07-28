@@ -1,3 +1,4 @@
+---
 name: "pulp-cli CI"
 
 on:
@@ -69,3 +70,4 @@ jobs:
           echo '${{toJson(needs)}}' | jq -r 'to_entries[]|select(.value.result!="success")|.key + ": " + .value.result'
           echo '${{toJson(needs)}}' | jq -e 'to_entries|map(select(.value.result!="success"))|length == 0'
           echo "CI says: Looks good!"
+...

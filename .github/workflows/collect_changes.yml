@@ -1,3 +1,4 @@
+---
 name: "Collect changes"
 on:
   workflow_call:
@@ -30,3 +31,4 @@ jobs:
           body: ""
           branch: "update_changes"
           delete-branch: true
+...

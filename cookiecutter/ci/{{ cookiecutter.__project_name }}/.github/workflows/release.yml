@@ -1,3 +1,4 @@
+---
 name: "pulp-cli Release"
 
 on:
@@ -26,3 +27,4 @@ jobs:
       - name: "Release"
         run: |
           .ci/scripts/release.sh
+...

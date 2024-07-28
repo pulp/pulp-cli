@@ -30,3 +30,4 @@ jobs:
           body: ""
           branch: "bump_version"
           delete-branch: true
+...

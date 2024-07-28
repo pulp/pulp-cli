@@ -1,3 +1,4 @@
+---
 name: "Lint"
 
 on:
@@ -35,3 +36,4 @@ jobs:
       - name: "Lint code"
         run: |
           make lint
+...

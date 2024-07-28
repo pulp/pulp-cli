@@ -12,18 +12,17 @@ def _assert_key(key: t.Any) -> str:
 
 
 def _quote(s: str) -> str:
-    return '"' + s.replace("\\", "\\\\").replace("\"", "\\\"") + '"'
+    return '"' + s.replace("\\", "\\\\").replace('"', '\\"') + '"'
 
 
-def to_nice_yaml(data: t.Any, level: int = 0, embed_in: str = "") -> str:
+def to_jaml(data: t.Any, level: int = 0, embed_in: str = "") -> str:
     """Filter for Jinja 2 templates to render human readable YAML."""
     # Don't even believe this is complete!
     # Yes, I have checked pyyaml and ruamel.
-    # Should I call this markup language "jaml" or "yson"?
 
     nl = False
     if isinstance(data, str):
-        result = f'"{data}"'
+        result = _quote(data)
     elif data is True:
         result = "true"
     elif data is False:
@@ -34,7 +33,7 @@ def to_nice_yaml(data: t.Any, level: int = 0, embed_in: str = "") -> str:
         if len(data):
             nl = embed_in == "dict"
             result = ("\n" + "  " * level).join(
-                ("-" + to_nice_yaml(item, level + 1, "list") for item in data)
+                ("-" + to_jaml(item, level + 1, "list") for item in data)
             )
         else:
             result = "[]"
@@ -43,19 +42,21 @@ def to_nice_yaml(data: t.Any, level: int = 0, embed_in: str = "") -> str:
             nl = embed_in == "dict"
             result = ("\n" + "  " * level).join(
                 (
-                    f"{_assert_key(key)}:" + to_nice_yaml(value, level + 1, "dict")
+                    f"{_assert_key(key)}:" + to_jaml(value, level + 1, "dict")
                     for key, value in sorted(data.items())
                 )
             )
         else:
             result = "{}"
     else:
-        raise NotImplementedError("YAML sucks!")
+        raise NotImplementedError("This object is not serializable.")
     if nl:
         return "\n" + "  " * level + result
-    elif embed_in:
+    elif embed_in in ("dict", "list"):
         return " " + result
-    else:
+    elif embed_in == "document":
+        if level != 0:
+            warnings.warn("jaml: Level should be 0 when embedding in 'document'.")
         return result
 
 
@@ -91,8 +92,8 @@ class PulpFilterExtension(Extension):
         environment.filters["caps"] = str.upper
         environment.filters["dash"] = to_dash
         environment.filters["snake"] = to_snake
-        environment.filters["to_nice_yaml"] = to_nice_yaml
-        environment.filters["to_toml_value"] = to_toml_value
+        environment.filters["jaml"] = to_jaml
+        environment.filters["toml_value"] = to_toml_value
         environment.filters["shquote"] = shlex.quote
 
 
@@ -105,9 +106,10 @@ else:
     @pytest.mark.parametrize(
         "value,level,embed_in,out",
         [
-            ([], 0, "", "[]"),
-            ({}, 0, "", "{}"),
-            ("test", 0, "", '"test"'),
+            ([], 0, "", "---\n[]\n...\n"),
+            ({}, 0, "", "---\n{}\n...\n"),
+            ("test", 0, "", '---\n"test\n...\n"'),
+            ("test", 0, "document", '"test"'),
             ({}, 1, "dict", " {}"),
             ([], 1, "list", " []"),
             ({}, 1, "list", " {}"),
@@ -127,5 +129,5 @@ else:
             ({"b": 1, "a": 0}, 0, "", "a: 0\nb: 1"),
         ],
     )
-    def test_to_nice_yaml(value, level, embed_in, out):
-        assert to_nice_yaml(value, level, embed_in) == out
+    def test_to_jaml(value, level, embed_in, out):
+        assert to_jaml(value, level, embed_in) == out

@@ -1,3 +1,4 @@
+---
 name: "Test"
 
 on:
@@ -60,12 +61,14 @@ jobs:
           else
             pip install dist/pulp_cli-*.whl pulp-glue/dist/pulp_glue-*.whl -r test_requirements.txt
           fi
-      - name: Run tests
+      - name: "Run tests"
         env:
-          CONTAINER_RUNTIME: ${{ matrix.container_runtime }}
-          IMAGE_TAG: ${{ matrix.image_tag }}
-          FROM_TAG: ${{ matrix.from_tag }}
-          CONTAINER_FILE: ${{ matrix.container_file }}
-          PULP_HTTPS: ${{ matrix.pulp_https }}
-          PULP_API_ROOT: ${{ matrix.pulp_api_root }}
-        run: .ci/run_container.sh make test
+          CONTAINER_RUNTIME: "${{ matrix.container_runtime }}"
+          IMAGE_TAG: "${{ matrix.image_tag }}"
+          FROM_TAG: "${{ matrix.from_tag }}"
+          CONTAINER_FILE: "${{ matrix.container_file }}"
+          PULP_HTTPS: "${{ matrix.pulp_https }}"
+          PULP_API_ROOT: "${{ matrix.pulp_api_root }}"
+        run: |
+          .ci/run_container.sh make test
+...

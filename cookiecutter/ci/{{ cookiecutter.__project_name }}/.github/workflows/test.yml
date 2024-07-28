@@ -1,3 +1,4 @@
+---
 name: "Test"
 
 on:
@@ -14,7 +15,7 @@ jobs:
     runs-on: "ubuntu-20.04"
     strategy:
       fail-fast: false
-      matrix:{{ cookiecutter.test_matrix | to_nice_yaml(level=4, embed_in="dict") }}
+      matrix:{{ cookiecutter.test_matrix | jaml(level=4, embed_in="dict") }}
     steps:
       - uses: "actions/checkout@v4"
       {%- include "cache_action" %}
@@ -39,14 +40,16 @@ jobs:
           else
             pip install dist/pulp_cli{{ cookiecutter.__app_label_suffix | replace("-", "_") }}-*.whl {%- if cookiecutter.glue %} pulp-glue{{ cookiecutter.__app_label_suffix }}/dist/pulp_glue{{ cookiecutter.__app_label_suffix | replace("-", "_") }}-*.whl {%- endif %} -r test_requirements.txt
           fi
-      - name: Run tests
+      - name: "Run tests"
         env:
           {%- raw %}
-          CONTAINER_RUNTIME: ${{ matrix.container_runtime }}
-          IMAGE_TAG: ${{ matrix.image_tag }}
-          FROM_TAG: ${{ matrix.from_tag }}
-          CONTAINER_FILE: ${{ matrix.container_file }}
-          PULP_HTTPS: ${{ matrix.pulp_https }}
-          PULP_API_ROOT: ${{ matrix.pulp_api_root }}
+          CONTAINER_RUNTIME: "${{ matrix.container_runtime }}"
+          IMAGE_TAG: "${{ matrix.image_tag }}"
+          FROM_TAG: "${{ matrix.from_tag }}"
+          CONTAINER_FILE: "${{ matrix.container_file }}"
+          PULP_HTTPS: "${{ matrix.pulp_https }}"
+          PULP_API_ROOT: "${{ matrix.pulp_api_root }}"
           {%- endraw %}
-        run: .ci/run_container.sh make test
+        run: |
+          .ci/run_container.sh make test
+...

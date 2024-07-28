@@ -1,3 +1,4 @@
+---
 name: "pulp-cli Publish"
 
 on:
@@ -35,3 +36,4 @@ jobs:
           twine upload dist/*
           cd ..
           twine upload dist/*
+...
