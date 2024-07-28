@@ -7,7 +7,7 @@ name = "pulp-cli"
 version = "0.28.0.dev"
 description = "Command line interface to talk to pulpcore's REST API."
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.8,<3.13"
 license = {text = "GPLv2+"}
 authors = [
   {name = "Pulp Team", email = "pulp-list@redhat.com"},
