@@ -1,2 +1,0 @@
-Fixed a bug where `create` always returned the first entry of created resources.
-Where possible, it now compares the results with `HREF_PATTERN` to select the resource to return.
