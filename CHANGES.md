@@ -10,6 +10,27 @@
 
 [//]: # (towncrier release notes start)
 
+## 0.27.1 (2024-07-31) {: #0.27.1 }
+
+
+
+#### Bugfixes {: #0.27.1-bugfix }
+
+- Fix fake mode for uploading content.
+
+
+### Pulp GLUE {: #0.27.1-pulp-glue }
+
+
+#### Bugfixes {: #0.27.1-pulp-glue-bugfix }
+
+- Fixed a bug where `create` always returned the first entry of created resources.
+  Where possible, it now compares the results with `HREF_PATTERN` to select the resource to return.
+- Fixed the api spec of the RPM copy command so it does not collide with other copy implementations.
+
+
+---
+
 ## 0.27.0 (2024-07-17) {: #0.27.0 }
 
 
