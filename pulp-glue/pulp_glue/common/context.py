@@ -780,39 +780,69 @@ class PulpEntityContext(PulpViewSetContext):
             }
         )
 
+    def list_iterator(
+        self,
+        parameters: t.Optional[t.Dict[str, t.Any]] = None,
+        offset: int = 0,
+        batch_size: int = BATCH_SIZE,
+        stats: t.Optional[t.Dict[str, t.Any]] = None,
+    ) -> t.Iterator[t.Any]:
+        """
+        List entities from this context in a batched iterator.
+
+        Parameters:
+            parameters: Search or sorting criteria.
+            offset: Number of entities to skip.
+            batch_size: Size of the batches to fetch.
+                Maximally BATCH_SIZE will be used.
+            stats: If provided, a dictionary that will be filled with metadata:
+                count: Number of entities reported by the server to match the criteria.
+
+        Returns:
+            Iterator of entities matching the search conditions.
+        """
+        payload: t.Dict[str, t.Any] = parameters.copy() if parameters else {}
+        payload.update(self.scope)
+        payload["offset"] = offset
+        payload["limit"] = min(batch_size, BATCH_SIZE)
+        while True:
+            response: t.Mapping[str, t.Any] = self.call("list", parameters=payload)
+            if stats is not None:
+                stats["count"] = response["count"]
+            payload["offset"] += len(response["results"])
+            yield from response["results"]
+            if response["next"] is None:
+                break
+
     def list(self, limit: int, offset: int, parameters: t.Dict[str, t.Any]) -> t.List[t.Any]:
         """
         List entities by the type of this context.
 
         Parameters:
-            limit: Maximal number of entities to return.
+            limit: Maximal number of entities to return
+                Use 0 to loop until all entries are retrieved.
             offset: Number of entities to skip at the front of the list.
             parameters: Additional search or sorting criteria.
 
         Returns:
             List of entities matching the conditions.
         """
-        count: int = -1
-        entities: t.List[t.Any] = []
-        payload: t.Dict[str, t.Any] = parameters.copy()
-        payload.update(self.scope)
-        payload["offset"] = offset
-        payload["limit"] = BATCH_SIZE
-        while limit != 0:
-            if limit > BATCH_SIZE:
-                limit -= BATCH_SIZE
+        entities = []
+        stats: t.Dict[str, t.Any] = {}
+        try:
+            if limit > 0:
+                iterator = self.list_iterator(
+                    parameters=parameters, offset=offset, batch_size=limit, stats=stats
+                )
+                for i in range(limit):
+                    entities.append(next(iterator))
             else:
-                payload["limit"] = limit
-                limit = 0
-            result: t.Mapping[str, t.Any] = self.call("list", parameters=payload)
-            count = result["count"]
-            entities.extend(result["results"])
-            if result["next"] is None:
-                break
-            payload["offset"] += payload["limit"]
-        else:
+                entities.extend(
+                    self.list_iterator(parameters=parameters, offset=offset, stats=stats)
+                )
+        except StopIteration:
             self.pulp_ctx.echo(
-                _("Not all {count} entries were shown.").format(count=count), err=True
+                _("Not all {count} entries were shown.").format(count=stats["count"]), err=True
             )
         return entities
 
