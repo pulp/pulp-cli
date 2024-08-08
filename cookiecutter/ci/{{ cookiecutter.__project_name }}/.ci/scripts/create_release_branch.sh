@@ -32,3 +32,8 @@ git add docs/versions.txt
 bump-my-version bump minor --commit --message $'Bump version to {new_version}' --allow-dirty
 
 git push origin "${NEW_BRANCH}"
+
+if [ "${GITHUB_ENV:-}" ]
+then
+  echo "NEW_BRANCH=${NEW_BRANCH}" >> "${GITHUB_ENV}"
+fi
