@@ -30,4 +30,17 @@ jobs:
           body: ""
           branch: "bump_version"
           delete-branch: true
+      - name: "Add Backport Label for new Branch"
+        uses: "actions/github-script@v7"
+        with:
+          script: |
+            const { NEW_BRANCH } = process.env;
+            const labelName = "backport-" + NEW_BRANCH;
+
+            await github.rest.issues.createLabel({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              name: labelName,
+              color: "C8780A",
+            });
 ...
