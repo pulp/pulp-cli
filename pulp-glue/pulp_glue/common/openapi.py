@@ -24,6 +24,7 @@ UploadType = t.Union[bytes, t.IO[bytes]]
 SAFE_METHODS = ["GET", "HEAD", "OPTIONS"]
 ISO_DATE_FORMAT = "%Y-%m-%d"
 ISO_DATETIME_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
+AUTH_PRIORITY = ("oauth2", "basic")
 
 
 class OpenAPIError(Exception):
@@ -57,18 +58,35 @@ class AuthProviderBase:
         """Implement this to provide means of http basic auth."""
         return None
 
+    def auth(
+        self, flow: t.Dict[t.Any, t.Any]
+    ) -> t.Optional[t.Union[t.Tuple[str, str], requests.auth.AuthBase]]:
+        """Implement this to provide other authentication methods."""
+        return None
+
     def __call__(
         self,
         security: t.List[t.Dict[str, t.List[str]]],
         security_schemes: t.Dict[str, t.Dict[str, t.Any]],
     ) -> t.Optional[t.Union[t.Tuple[str, str], requests.auth.AuthBase]]:
+
+        authorized_schemes = []
+        authorized_schemes_types = set()
+
         for proposal in security:
-            if [security_schemes[name] for name in proposal] == [
-                {"type": "http", "scheme": "basic"}
-            ]:
-                result = self.basic_auth()
-                if result:
-                    return result
+            for name in proposal:
+                authorized_schemes.append(security_schemes[name])
+                authorized_schemes_types.add(security_schemes[name]["type"])
+
+        if "oauth2" in authorized_schemes_types:
+            oauth_flow = [flow for flow in authorized_schemes if flow["type"] == "oauth2"][0]
+            result = self.auth(oauth_flow)
+            if result:
+                return result
+        elif "http" in authorized_schemes_types:
+            result = self.basic_auth()
+            if result:
+                return result
         raise OpenAPIError(_("No suitable auth scheme found."))
 
 
@@ -83,6 +101,16 @@ class BasicAuthProvider(AuthProviderBase):
 
     def basic_auth(self) -> t.Optional[t.Union[t.Tuple[str, str], requests.auth.AuthBase]]:
         return (self.username, self.password)
+
+
+class OAuth2AuthProvider(AuthProviderBase):
+
+    def __init__(self, username: str, password: str):
+        self.client_id = username
+        self.client_secret = password
+
+    def auth(self, flow: dict[t.Any, t.Any]) -> t.Optional[requests.auth.AuthBase]:
+        pass
 
 
 class OpenAPI:
@@ -603,6 +631,7 @@ class OpenAPI:
         security: t.List[t.Dict[str, t.List[str]]] = method_spec.get(
             "security", self.api_spec.get("security", {})
         )
+        auth: t.Optional[t.Union[tuple[str, str], requests.auth.AuthBase]] = None
         if security and self.auth_provider:
             if "Authorization" in self._session.headers:
                 # Bad idea, but you wanted it that way.
