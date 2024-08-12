@@ -76,6 +76,7 @@ export PULP_CONTENT_ORIGIN
   --detach \
   --name "pulp-ephemeral" \
   --volume "${TMPDIR}/settings:/etc/pulp${SELINUX:+:Z}" \
+  --network bridge \
   --publish "8080:${PORT}" \
   "ghcr.io/pulp/pulp:${IMAGE_TAG}"
 

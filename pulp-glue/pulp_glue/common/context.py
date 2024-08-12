@@ -4,6 +4,7 @@ import re
 import time
 import typing as t
 import warnings
+from contextlib import ExitStack
 
 from packaging.specifiers import SpecifierSet
 from requests import HTTPError
@@ -1448,6 +1449,64 @@ class PulpContentContext(PulpEntityContext):
         if hasattr(cls, "PLUGIN") and hasattr(cls, "RESOURCE_TYPE"):
             cls.TYPE_REGISTRY[f"{cls.PLUGIN}:{cls.RESOURCE_TYPE}"] = cls
 
+    def __init__(
+        self,
+        pulp_ctx: PulpContext,
+        pulp_href: t.Optional[str] = None,
+        entity: t.Optional[EntityDefinition] = None,
+        repository_ctx: t.Optional[PulpRepositoryContext] = None,
+    ):
+        super().__init__(pulp_ctx, pulp_href=pulp_href, entity=entity)
+        self.repository_ctx = repository_ctx
+
+    def list(self, limit: int, offset: int, parameters: t.Dict[str, t.Any]) -> t.List[t.Any]:
+        if self.repository_ctx is not None:
+            parameters = parameters.copy()
+            parameters["repository_version"] = self.repository_ctx.entity["latest_version_href"]
+        return super().list(limit, offset, parameters)
+
+    def find(self, **kwargs: t.Any) -> t.Any:
+        if self.repository_ctx is not None:
+            kwargs["repository_version"] = self.repository_ctx.entity["latest_version_href"]
+        return super().find(**kwargs)
+
+    def create(
+        self,
+        body: EntityDefinition,
+        parameters: t.Optional[t.Mapping[str, t.Any]] = None,
+        non_blocking: bool = False,
+    ) -> t.Any:
+        with ExitStack() as cleanup:
+            body = body.copy()
+            file = body.pop("file", None)
+            chunk_size: t.Optional[int] = body.pop("chunk_size", None)
+            if file:
+                if isinstance(file, str):
+                    file = open(file, "rb")
+                    cleanup.enter_context(file)
+                size = os.path.getsize(file.name)
+                if not self.pulp_ctx.fake_mode:  # Skip the uploading part in fake_mode
+                    if chunk_size is None or chunk_size > size:
+                        body["file"] = file
+                    elif self.pulp_ctx.has_plugin(PluginRequirement("core", specifier=">=3.20.0")):
+                        self.needs_capability("upload")
+                        from pulp_glue.core.context import PulpUploadContext
+
+                        upload_href = PulpUploadContext(self.pulp_ctx).upload_file(file, chunk_size)
+                        body["upload"] = upload_href
+                    else:
+                        from pulp_glue.core.context import PulpArtifactContext
+
+                        artifact_href = PulpArtifactContext(self.pulp_ctx).upload(file, chunk_size)
+                        body["artifact"] = artifact_href
+            if self.repository_ctx is not None:
+                body["repository"] = self.repository_ctx
+            return super().create(body=body, parameters=parameters, non_blocking=non_blocking)
+
+    def delete(self, non_blocking: bool = False) -> None:
+        assert self.repository_ctx is not None
+        self.repository_ctx.modify(remove_content=[self.pulp_href])
+
     def upload(
         self,
         file: t.IO[bytes],
@@ -1457,6 +1516,8 @@ class PulpContentContext(PulpEntityContext):
     ) -> t.Any:
         """
         Create a content unit by uploading a file.
+
+        This function is deprecated. The create call can handle the upload logic transparently.
 
         Parameters:
             file: A file like object that supports `os.path.getsize`.
