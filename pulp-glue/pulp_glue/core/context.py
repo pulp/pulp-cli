@@ -288,7 +288,11 @@ class PulpOrphanContext(PulpViewSetContext):
         else:
             if body:
                 self.pulp_ctx.needs_plugin(PluginRequirement("core", specifier=">=3.14.0"))
-            result = self.pulp_ctx.call("orphans_delete")
+            if not self.pulp_ctx.fake_mode:
+                result = self.pulp_ctx.call("orphans_delete")
+            else:
+                # Do we need something better?
+                result = {}
         return result
 
 
