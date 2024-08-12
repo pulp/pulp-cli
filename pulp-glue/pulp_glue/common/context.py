@@ -378,8 +378,11 @@ class PulpContext:
                 body=body,
                 validate_body=validate_body,
             )
-        except UnsafeCallError:
-            raise NotImplementedFake(f"Operation {operation_id} was attempted in fake mode.")
+        except UnsafeCallError as e:
+            if self.fake_mode:
+                raise NotImplementedFake(f"Operation {operation_id} was attempted in fake mode.")
+            else:
+                raise PulpException(str(e))
         except OpenAPIError as e:
             raise PulpException(str(e))
         except HTTPError as e:
