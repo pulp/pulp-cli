@@ -10,6 +10,24 @@
 
 [//]: # (towncrier release notes start)
 
+## 0.27.2 (2024-08-15) {: #0.27.2 }
+
+
+
+No significant changes.
+
+
+### Pulp GLUE {: #0.27.2-pulp-glue }
+
+
+#### Bugfixes {: #0.27.2-pulp-glue-bugfix }
+
+- Fixed an error where safemode wrongly complained to be in `fake_mode`.
+  [#1037](https://github.com/pulp/pulp-cli/issues/1037)
+
+
+---
+
 ## 0.27.1 (2024-07-31) {: #0.27.1 }
 
 
