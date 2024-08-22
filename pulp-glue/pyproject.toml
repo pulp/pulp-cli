@@ -29,9 +29,9 @@ dependencies = [
 ]
 
 [project.urls]
-documentation = "https://docs.pulpproject.org/pulp_cli/"
+documentation = "https://pulpproject.org/pulp-glue/docs/dev/"
 repository = "https://github.com/pulp/pulp-cli"
-changelog = "https://docs.pulpproject.org/pulp_cli/CHANGES/"
+changelog = "https://pulpproject.org/pulp-cli/changes/"
 
 [tool.setuptools.packages.find]
 where = ["."]
