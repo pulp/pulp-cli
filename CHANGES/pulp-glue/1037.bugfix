@@ -1,1 +1,0 @@
-Fixed an error where safemode wrongly complained to be in `fake_mode`.
