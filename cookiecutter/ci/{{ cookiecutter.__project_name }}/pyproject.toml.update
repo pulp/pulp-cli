@@ -85,14 +85,6 @@ filename = "./pyproject.toml"
 search = "\"pulp-glue{{ cookiecutter.__app_label_suffix }}=={current_version}\""
 replace = "\"pulp-glue{{ cookiecutter.__app_label_suffix }}=={new_version}\""
 {%- endif %}
-{%- if cookiecutter.docs %}
-
-[[tool.bumpversion.files]]
-# This section is managed by the cookiecutter templates.
-filename = "./mkdocs.yml"
-search = "version: \"{current_version}\""
-replace = "version: \"{new_version}\""
-{%- endif %}
 
 [tool.towncrier]
 # This section is managed by the cookiecutter templates.
