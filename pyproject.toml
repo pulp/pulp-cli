@@ -38,9 +38,9 @@ shell = ["click-shell~=2.1"]
 password-manager = ["SecretStorage>=3.3.3,<3.3.4"]
 
 [project.urls]
-documentation = "https://staging-docs.pulpproject.org/pulp-cli/docs/user/"
+documentation = "https://pulpproject.org/pulp-cli/docs/user/guides/installation/"
 repository = "https://github.com/pulp/pulp-cli"
-changelog = "https://staging-docs.pulpproject.org/pulp-cli/changes/changelog/"
+changelog = "https://pulpproject.org/pulp-cli/changes/"
 
 [project.scripts]
 pulp = "pulp_cli:main"
