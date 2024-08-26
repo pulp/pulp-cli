@@ -10,6 +10,23 @@
 
 [//]: # (towncrier release notes start)
 
+## 0.28.1 (2024-08-26) {: #0.28.1 }
+
+
+
+No significant changes.
+
+
+### Pulp GLUE {: #0.28.1-pulp-glue }
+
+
+#### Bugfixes {: #0.28.1-pulp-glue-bugfix }
+
+- Addressed some edge-case failures in the oauth2-client workflow.
+
+
+---
+
 ## 0.28.0 (2024-08-22) {: #0.28.0 }
 
 
