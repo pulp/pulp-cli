@@ -3,7 +3,7 @@ black==24.8.0
 flake8==7.1.1
 flake8-pyproject==1.2.3
 isort==5.13.2
-mypy==1.11.1
+mypy==1.11.2
 shellcheck-py==0.10.0.1
 
 # Type annotation stubs
