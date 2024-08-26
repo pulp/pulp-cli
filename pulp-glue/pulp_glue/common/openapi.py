@@ -102,16 +102,20 @@ class AuthProviderBase:
                 authorized_schemes.append(security_schemes[name])
                 authorized_schemes_types.add(security_schemes[name]["type"])
 
+        # Check for oauth2 scheme first
         if "oauth2" in authorized_schemes_types:
             for flow in authorized_schemes:
                 if flow["type"] == "oauth2":
                     oauth2_flow = OpenAPISecurityScheme(flow)
 
+            # We "know" we'll have an outh2-flow here
             if oauth2_flow.flow_type == "client_credentials":
                 result = self.oauth2_client_credentials_auth(oauth2_flow)
-            if result:
-                return result
-        elif "http" in authorized_schemes_types:
+                if result:
+                    return result
+
+        # if we get here, either no-oauth2, OR we couldn't find creds
+        if "http" in authorized_schemes_types:
             result = self.basic_auth()
             if result:
                 return result
