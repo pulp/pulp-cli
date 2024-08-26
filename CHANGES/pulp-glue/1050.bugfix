@@ -1,0 +1,1 @@
+Fixed sending no scope instead an empty scope when using the `OAuth2ClientCredentialsAuth` authentication class.

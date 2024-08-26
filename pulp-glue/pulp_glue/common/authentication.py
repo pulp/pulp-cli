@@ -15,7 +15,7 @@ class OAuth2ClientCredentialsAuth(requests.auth.AuthBase):
         client_id: str,
         client_secret: str,
         token_url: str,
-        scopes: t.List[str],
+        scopes: t.Optional[t.List[str]] = None,
     ):
         self.client_id = client_id
         self.client_secret = client_secret
@@ -78,9 +78,11 @@ class OAuth2ClientCredentialsAuth(requests.auth.AuthBase):
         data = {
             "client_id": self.client_id,
             "client_secret": self.client_secret,
-            "scope": " ".join(self.scopes),
             "grant_type": "client_credentials",
         }
+
+        if self.scopes:
+            data["scope"] = " ".join(self.scopes)
 
         response: requests.Response = requests.post(self.token_url, data=data)
 
