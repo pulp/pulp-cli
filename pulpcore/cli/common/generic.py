@@ -219,7 +219,7 @@ class PulpCLIAuthProvider(AuthProviderBase):
     def __init__(self, pulp_ctx: PulpCLIContext):
         self.pulp_ctx = pulp_ctx
 
-    def basic_auth(self) -> t.Optional[t.Union[t.Tuple[str, str], requests.auth.AuthBase]]:
+    def basic_auth(self, scopes: t.List[str]) -> t.Optional[requests.auth.AuthBase]:
         if self.pulp_ctx.username is None:
             self.pulp_ctx.username = click.prompt("Username")
         if self.pulp_ctx.password is None:
@@ -230,10 +230,10 @@ class PulpCLIAuthProvider(AuthProviderBase):
                 return SecretStorageBasicAuth(self.pulp_ctx)
             else:
                 self.pulp_ctx.password = click.prompt("Password", hide_input=True)
-        return (self.pulp_ctx.username, self.pulp_ctx.password)
+        return requests.auth.HTTPBasicAuth(self.pulp_ctx.username, self.pulp_ctx.password)
 
     def oauth2_client_credentials_auth(
-        self, oauth2_flow: t.Any
+        self, flow: t.Any, scopes: t.List[str]
     ) -> t.Optional[requests.auth.AuthBase]:
         if self.pulp_ctx.username is None:
             self.pulp_ctx.username = click.prompt("Username/ClientID")
@@ -243,8 +243,9 @@ class PulpCLIAuthProvider(AuthProviderBase):
         return OAuth2ClientCredentialsAuth(
             client_id=self.pulp_ctx.username,
             client_secret=self.pulp_ctx.password,
-            token_url=oauth2_flow.token_url,
-            scopes=oauth2_flow.scopes,
+            token_url=flow["tokenUrl"],
+            # Try to request all possible scopes.
+            scopes=flow["scopes"],
         )
 
 
