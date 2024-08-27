@@ -6,6 +6,7 @@ import datetime
 import json
 import os
 import typing as t
+from collections import defaultdict
 from contextlib import suppress
 from io import BufferedReader
 from urllib.parse import urljoin
@@ -24,7 +25,6 @@ UploadType = t.Union[bytes, t.IO[bytes]]
 SAFE_METHODS = ["GET", "HEAD", "OPTIONS"]
 ISO_DATE_FORMAT = "%Y-%m-%d"
 ISO_DATETIME_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
-AUTH_PRIORITY = ("oauth2", "basic")
 
 
 class OpenAPIError(Exception):
@@ -45,30 +45,6 @@ class UnsafeCallError(OpenAPIError):
     pass
 
 
-class OpenAPISecurityScheme:
-    def __init__(self, security_scheme: t.Dict[str, t.Any]):
-        self.security_scheme = security_scheme
-
-        self.security_type = self.security_scheme["type"]
-        self.description = self.security_scheme.get("description", "")
-
-        if self.security_type == "oauth2":
-            try:
-                self.flows: t.Dict[str, t.Any] = self.security_scheme["flows"]
-                client_credentials: t.Optional[t.Dict[str, t.Any]] = self.flows.get(
-                    "clientCredentials"
-                )
-                if client_credentials:
-                    self.flow_type: str = "clientCredentials"
-                    self.token_url: str = client_credentials["tokenUrl"]
-                    self.scopes: t.List[str] = list(client_credentials["scopes"].keys())
-            except KeyError:
-                raise OpenAPIValidationError
-
-        if self.security_type == "http":
-            self.scheme = self.security_scheme["scheme"]
-
-
 class AuthProviderBase:
     """
     Base class for auth providers.
@@ -78,61 +54,89 @@ class AuthProviderBase:
     Returned auth objects need to be compatible with `requests.auth.AuthBase`.
     """
 
-    def basic_auth(self) -> t.Optional[t.Union[t.Tuple[str, str], requests.auth.AuthBase]]:
+    def basic_auth(self, scopes: t.List[str]) -> t.Optional[requests.auth.AuthBase]:
         """Implement this to provide means of http basic auth."""
         return None
 
+    def http_auth(
+        self, security_scheme: t.Dict[str, t.Any], scopes: t.List[str]
+    ) -> t.Optional[requests.auth.AuthBase]:
+        """Select a suitable http auth scheme or return None."""
+        # https://www.iana.org/assignments/http-authschemes/http-authschemes.xhtml
+        if security_scheme["scheme"] == "basic":
+            result = self.basic_auth(scopes)
+            if result:
+                return result
+        return None
+
     def oauth2_client_credentials_auth(
-        self, flow: t.Any
-    ) -> t.Optional[t.Union[t.Tuple[str, str], requests.auth.AuthBase]]:
+        self, flow: t.Any, scopes: t.List[str]
+    ) -> t.Optional[requests.auth.AuthBase]:
         """Implement this to provide other authentication methods."""
+        return None
+
+    def oauth2_auth(
+        self, security_scheme: t.Dict[str, t.Any], scopes: t.List[str]
+    ) -> t.Optional[requests.auth.AuthBase]:
+        """Select a suitable oauth2 flow or return None."""
+        # Check flows by preference.
+        if "clientCredentials" in security_scheme["flows"]:
+            flow = security_scheme["flows"]["clientCredentials"]
+            # Select this flow only if it claims to provide all the necessary scopes.
+            # This will allow subsequent auth proposals to be considered.
+            if set(scopes) - set(flow["scopes"]):
+                return None
+
+            result = self.oauth2_client_credentials_auth(flow, scopes)
+            if result:
+                return result
         return None
 
     def __call__(
         self,
         security: t.List[t.Dict[str, t.List[str]]],
         security_schemes: t.Dict[str, t.Dict[str, t.Any]],
-    ) -> t.Optional[t.Union[t.Tuple[str, str], requests.auth.AuthBase]]:
+    ) -> t.Optional[requests.auth.AuthBase]:
 
-        authorized_schemes = []
-        authorized_schemes_types = set()
-
+        # Reorder the proposals by their type to prioritize properly.
+        # Select only single mechanism proposals on the way.
+        proposed_schemes: t.Dict[str, t.Dict[str, t.List[str]]] = defaultdict(dict)
         for proposal in security:
-            for name in proposal:
-                authorized_schemes.append(security_schemes[name])
-                authorized_schemes_types.add(security_schemes[name]["type"])
+            if len(proposal) == 0:
+                # Empty proposal: No authentication needed. Shortcut return.
+                return None
+            if len(proposal) == 1:
+                name, scopes = list(proposal.items())[0]
+                proposed_schemes[security_schemes[name]["type"]][name] = scopes
+            # Ignore all proposals with more than one required auth mechanism.
 
-        # Check for oauth2 scheme first
-        if "oauth2" in authorized_schemes_types:
-            for flow in authorized_schemes:
-                if flow["type"] == "oauth2":
-                    oauth2_flow = OpenAPISecurityScheme(flow)
-
-            # We "know" we'll have an outh2-flow here
-            if oauth2_flow.flow_type == "client_credentials":
-                result = self.oauth2_client_credentials_auth(oauth2_flow)
+        # Check for auth schemes by preference.
+        if "oauth2" in proposed_schemes:
+            for name, scopes in proposed_schemes["oauth2"].items():
+                result = self.oauth2_auth(security_schemes[name], scopes)
                 if result:
                     return result
 
         # if we get here, either no-oauth2, OR we couldn't find creds
-        if "http" in authorized_schemes_types:
-            result = self.basic_auth()
-            if result:
-                return result
+        if "http" in proposed_schemes:
+            for name, scopes in proposed_schemes["http"].items():
+                result = self.http_auth(security_schemes[name], scopes)
+                if result:
+                    return result
+
         raise OpenAPIError(_("No suitable auth scheme found."))
 
 
 class BasicAuthProvider(AuthProviderBase):
     """
-    Reference Implementation for AuthProviderBase providing basic auth with `username`, `password`.
+    Implementation for AuthProviderBase providing basic auth with fixed `username`, `password`.
     """
 
     def __init__(self, username: str, password: str):
-        self.username = username
-        self.password = password
+        self.auth = requests.auth.HTTPBasicAuth(username, password)
 
-    def basic_auth(self) -> t.Optional[t.Union[t.Tuple[str, str], requests.auth.AuthBase]]:
-        return (self.username, self.password)
+    def basic_auth(self, scopes: t.List[str]) -> t.Optional[requests.auth.AuthBase]:
+        return self.auth
 
 
 class OpenAPI:
