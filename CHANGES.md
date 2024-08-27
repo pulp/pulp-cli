@@ -10,6 +10,73 @@
 
 [//]: # (towncrier release notes start)
 
+## 0.28.1 (2024-08-26) {: #0.28.1 }
+
+
+
+No significant changes.
+
+
+### Pulp GLUE {: #0.28.1-pulp-glue }
+
+
+#### Bugfixes {: #0.28.1-pulp-glue-bugfix }
+
+- Addressed some edge-case failures in the oauth2-client workflow.
+
+
+---
+
+## 0.28.0 (2024-08-22) {: #0.28.0 }
+
+
+
+#### Features {: #0.28.0-feature }
+
+- Added the following filters to `pulp rpm content list`:
+    - `--arch-contains`
+    - `--arch-startswith`
+    - `--name-contains`
+    - `--name-startswith`
+    - `--release-contains`
+    - `--release-startswith`
+  [#687](https://github.com/pulp/pulp-cli/issues/687)
+- Added support to OAuth2 ClientCredentials grant flow as authentication method.
+  This is tech preview and may change without previous warning.
+  [#926](https://github.com/pulp/pulp-cli/issues/926)
+- Added commands for composite and header content guards.
+  [#969](https://github.com/pulp/pulp-cli/issues/969)
+
+
+#### Bugfixes {: #0.28.0-bugfix }
+
+- Fix fake mode for uploading content.
+
+
+### Pulp GLUE {: #0.28.0-pulp-glue }
+
+
+#### Features {: #0.28.0-pulp-glue-feature }
+
+- Added contexts for composite and header content guards.
+  [#969](https://github.com/pulp/pulp-cli/issues/969)
+- Added a batched `list_iterator` added to entity context.
+- Added a repository scope to `PulpContentContext` to allow to operate on "content in a repository" in a natural way.
+- Allow to pass limit=0 to EntityContext.list to fetch all entities.
+
+
+#### Bugfixes {: #0.28.0-pulp-glue-bugfix }
+
+- Fixed an error where safemode wrongly complained to be in `fake_mode`.
+  [#1037](https://github.com/pulp/pulp-cli/issues/1037)
+- Added missing `defaults` argument to `converge`.
+- Fixed a bug where `create` always returned the first entry of created resources.
+  Where possible, it now compares the results with `HREF_PATTERN` to select the resource to return.
+- Fixed the api spec of the RPM copy command so it does not collide with other copy implementations.
+
+
+---
+
 ## 0.27.2 (2024-08-15) {: #0.27.2 }
 
 
