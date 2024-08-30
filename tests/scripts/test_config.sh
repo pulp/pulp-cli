@@ -33,7 +33,7 @@ expect_fail pulp --key "/some/path" task list
 # CONFIG PROFILE
 
 cp "$bad_settings" "$profile_settings"
-sed -e 's/\[cli\]/[cli-profile1]/' "$good_settings" >> "$profile_settings"
+sed -e 's/\[cli\(.*\)\]/[cli-profile1\1]/' "$good_settings" >> "$profile_settings"
 
 expect_fail pulp --config "$profile_settings" task list
 expect_succ pulp --config "$profile_settings" --profile profile1 task list

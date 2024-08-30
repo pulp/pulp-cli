@@ -18,17 +18,17 @@ expect_succ pulp user create --username "clitest" --password "${USERPASS}"
 expect_succ pulp group create --name "clitest"
 expect_succ pulp group user add --group "clitest" --username "clitest"
 
-expect_succ pulp --username clitest --password "${USERPASS}" container repository list
+expect_succ pulp -p noauth --username clitest --password "${USERPASS}" container repository list
 test "$(echo "${OUTPUT}" | jq -r 'length' )" = "0"
 
-expect_deny pulp --username clitest --password "${USERPASS}" container repository create --name "clitest"
+expect_deny pulp -p noauth --username clitest --password "${USERPASS}" container repository create --name "clitest"
 expect_succ pulp container repository create --name "clitest"
 REPOSITORY_HREF=$(jq -r '.pulp_href' <<<"${OUTPUT}")
-expect_fail pulp --username clitest --password "${USERPASS}" container repository show --repository "clitest"
-expect_fail pulp --username clitest --password "${USERPASS}" container repository show --repository "${REPOSITORY_HREF}"
+expect_fail pulp -p noauth --username clitest --password "${USERPASS}" container repository show --repository "clitest"
+expect_fail pulp -p noauth --username clitest --password "${USERPASS}" container repository show --repository "${REPOSITORY_HREF}"
 
 expect_succ pulp container repository role add --name "clitest" --user "clitest" --role "container.containerrepository_viewer"
-expect_succ pulp --username clitest --password "${USERPASS}" container repository show --repository "clitest"
-expect_succ pulp --username clitest --password "${USERPASS}" container repository show --repository "${REPOSITORY_HREF}"
+expect_succ pulp -p noauth --username clitest --password "${USERPASS}" container repository show --repository "clitest"
+expect_succ pulp -p noauth --username clitest --password "${USERPASS}" container repository show --repository "${REPOSITORY_HREF}"
 
-expect_deny pulp --username clitest --password "${USERPASS}" container repository update --href "${REPOSITORY_HREF}" --retain-repo-versions 1
+expect_deny pulp -p noauth --username clitest --password "${USERPASS}" container repository update --href "${REPOSITORY_HREF}" --retain-repo-versions 1

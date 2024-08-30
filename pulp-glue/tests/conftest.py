@@ -21,7 +21,13 @@ def pulp_ctx(
     return PulpTestContext(
         api_kwargs={
             "base_url": settings["base_url"],
-            "auth_provider": BasicAuthProvider(settings.get("username"), settings.get("password")),
+            "auth_provider": (
+                BasicAuthProvider(settings.get("username"), settings.get("password"))
+                if "username" in settings
+                else None
+            ),
+            "cert": settings.get("cert"),
+            "key": settings.get("key"),
             "debug_callback": lambda i, s: i <= verbose and print(s),
         },
         api_root=settings.get("api_root", "pulp/"),
@@ -39,7 +45,13 @@ def fake_pulp_ctx(
     return PulpTestContext(
         api_kwargs={
             "base_url": settings["base_url"],
-            "auth_provider": BasicAuthProvider(settings.get("username"), settings.get("password")),
+            "auth_provider": (
+                BasicAuthProvider(settings.get("username"), settings.get("password"))
+                if "username" in settings
+                else None
+            ),
+            "cert": settings.get("cert"),
+            "key": settings.get("key"),
             "debug_callback": lambda i, s: i <= verbose and print(s),
         },
         api_root=settings.get("api_root", "pulp/"),

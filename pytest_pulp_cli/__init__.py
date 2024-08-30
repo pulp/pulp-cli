@@ -88,13 +88,25 @@ def pulp_cli_settings() -> t.Dict[str, t.Dict[str, t.Any]]:
     It is most likely not useful to be included standalone.
     The `pulp_cli_env` fixture, however depends on it and sets $XDG_CONFIG_HOME up accordingly.
     """
-    settings = toml.load(os.environ.get("PULP_CLI_CONFIG", "tests/cli.toml"))
+    pulp_cli_test_tmpdir = pathlib.Path(os.environ.get("PULP_CLI_TEST_TMPDIR", "."))
+    settings = {"cli": toml.load(os.environ.get("PULP_CLI_CONFIG", "tests/cli.toml"))["cli"]}
     if os.environ.get("PULP_HTTPS"):
-        for key in settings:
-            settings[key]["base_url"] = settings[key]["base_url"].replace("http://", "https://")
+        settings["cli"]["base_url"] = settings["cli"]["base_url"].replace("http://", "https://")
+        client_cert_path = pulp_cli_test_tmpdir / "settings" / "certs" / "client.pem"
+        client_key_path = pulp_cli_test_tmpdir / "settings" / "certs" / "client.key"
+        if client_cert_path.exists():
+            settings["cli"].pop("username", None)
+            settings["cli"].pop("password", None)
+            settings["cli"]["cert"] = str(client_cert_path)
+            if client_key_path.exists():
+                settings["cli"]["key"] = str(client_key_path)
+
     if os.environ.get("PULP_API_ROOT"):
-        for key in settings:
-            settings[key]["api_root"] = os.environ["PULP_API_ROOT"]
+        settings["cli"]["api_root"] = os.environ["PULP_API_ROOT"]
+
+    settings["cli-noauth"] = {
+        k: v for k, v in settings["cli"].items() if k not in {"username", "password", "cert", "key"}
+    }
     return settings
 
 

@@ -24,31 +24,31 @@ expect_succ pulp group create --name "clitest"
 GROUP_HREF=$(jq -r '.pulp_href' <<<"${OUTPUT}")
 expect_succ pulp group user add --group "clitest" --username "clitest"
 
-expect_succ pulp --username clitest --password "${USERPASS}" task list
+expect_succ pulp -p noauth --username clitest --password "${USERPASS}" task list
 test "$(echo "${OUTPUT}" | jq -r 'length' )" = "0"
 
-expect_fail pulp --username clitest --password "${USERPASS}" group show --name "clitest"
+expect_fail pulp -p noauth --username clitest --password "${USERPASS}" group show --name "clitest"
 
 expect_succ pulp user role-assignment add --username "clitest" --role "clitest.group_viewer" --object "${GROUP_HREF}"
 expect_succ pulp user role-assignment list --username "clitest" --role "clitest.group_viewer" --object "${GROUP_HREF}"
 test "$(echo "${OUTPUT}" | jq -r 'length' )" = "1"
 expect_succ pulp user role-assignment list --username "clitest" --role-in "clitest.group_viewer" --object "${GROUP_HREF}"
 test "$(echo "${OUTPUT}" | jq -r 'length' )" = "1"
-expect_succ pulp --username clitest --password "${USERPASS}" group show --name "clitest"
+expect_succ pulp -p noauth --username clitest --password "${USERPASS}" group show --name "clitest"
 expect_succ pulp user role-assignment remove --username "clitest" --role "clitest.group_viewer" --object "${GROUP_HREF}"
-expect_fail pulp --username clitest --password "${USERPASS}" group show --name "clitest"
+expect_fail pulp -p noauth --username clitest --password "${USERPASS}" group show --name "clitest"
 
 expect_succ pulp group role-assignment add --group "clitest" --role "clitest.group_viewer" --object "${GROUP_HREF}"
 expect_succ pulp group role-assignment list --group "clitest" --role "clitest.group_viewer" --object "${GROUP_HREF}"
 test "$(echo "${OUTPUT}" | jq -r 'length' )" = "1"
 expect_succ pulp group role-assignment list --group "clitest" --role-in "clitest.group_viewer" --object "${GROUP_HREF}"
 test "$(echo "${OUTPUT}" | jq -r 'length' )" = "1"
-expect_succ pulp --username clitest --password "${USERPASS}" group show --name "clitest"
+expect_succ pulp -p noauth --username clitest --password "${USERPASS}" group show --name "clitest"
 expect_succ pulp group role-assignment remove --group "clitest" --role "clitest.group_viewer" --object "${GROUP_HREF}"
-expect_fail pulp --username clitest --password "${USERPASS}" group show --name "clitest"
+expect_fail pulp -p noauth --username clitest --password "${USERPASS}" group show --name "clitest"
 
 expect_succ pulp user role-assignment add --username "clitest" --role "core.group_creator" --object ""
-expect_succ pulp --username clitest --password "${USERPASS}" group create --name "clitest2"
-expect_succ pulp --username clitest --password "${USERPASS}" group role my-permissions --name "clitest2"
+expect_succ pulp -p noauth --username clitest --password "${USERPASS}" group create --name "clitest2"
+expect_succ pulp -p noauth --username clitest --password "${USERPASS}" group role my-permissions --name "clitest2"
 
 expect_succ pulp role destroy --name "clitest.group_viewer"
