@@ -1,3 +1,0 @@
-Fixed regressions in the auth selection algorithm of `AuthProviderBase`.
-In particular, proposals requiring multiple mechanisms are ignored for now instead of considering each constituent individually,
-"HTTP Bearer" and other IANA schemes are no longer interpreted as "HTTP Basic" and the empty proposal rightfully reflects no needed authentication.
