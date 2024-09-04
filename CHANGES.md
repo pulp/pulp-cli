@@ -10,6 +10,25 @@
 
 [//]: # (towncrier release notes start)
 
+## 0.28.2 (2024-09-03) {: #0.28.2 }
+
+
+
+No significant changes.
+
+
+### Pulp GLUE {: #0.28.2-pulp-glue }
+
+
+#### Bugfixes {: #0.28.2-pulp-glue-bugfix }
+
+- Fixed regressions in the auth selection algorithm of `AuthProviderBase`.
+  In particular, proposals requiring multiple mechanisms are ignored for now instead of considering each constituent individually,
+  "HTTP Bearer" and other IANA schemes are no longer interpreted as "HTTP Basic" and the empty proposal rightfully reflects no needed authentication.
+
+
+---
+
 ## 0.28.1 (2024-08-26) {: #0.28.1 }
 
 
