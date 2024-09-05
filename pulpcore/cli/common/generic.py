@@ -132,9 +132,15 @@ class PulpCLIContext(PulpContext):
         timeout: int,
         format: str,
         domain: str = "default",
+        username: t.Optional[str] = None,
+        password: t.Optional[str] = None,
+        oauth2_client_id: t.Optional[str] = None,
+        oauth2_client_secret: t.Optional[str] = None,
     ) -> None:
-        self.username = api_kwargs.pop("username", None)
-        self.password = api_kwargs.pop("password", None)
+        self.username = username
+        self.password = password
+        self.oauth2_client_id = oauth2_client_id
+        self.oauth2_client_secret = oauth2_client_secret
         if not api_kwargs.get("cert"):
             api_kwargs["auth_provider"] = PulpCLIAuthProvider(pulp_ctx=self)
         super().__init__(
@@ -170,6 +176,8 @@ if SECRET_STORAGE:
     class SecretStorageBasicAuth(requests.auth.AuthBase):
         def __init__(self, pulp_ctx: PulpCLIContext):
             self.pulp_ctx = pulp_ctx
+            assert self.pulp_ctx.username is not None
+
             self.attr: t.Dict[str, str] = {
                 "service": "pulp-cli",
                 "base_url": self.pulp_ctx.api.base_url,
@@ -199,6 +207,7 @@ if SECRET_STORAGE:
             return response
 
         def __call__(self, request: requests.PreparedRequest) -> requests.PreparedRequest:
+            assert self.pulp_ctx.username is not None
             with closing(secretstorage.dbus_init()) as connection:
                 collection = secretstorage.get_default_collection(connection)
                 item = next(collection.search_items(self.attr), None)
@@ -236,15 +245,15 @@ class PulpCLIAuthProvider(AuthProviderBase):
     def oauth2_client_credentials_auth(
         self, flow: t.Any, scopes: t.List[str]
     ) -> t.Optional[requests.auth.AuthBase]:
-        if self.pulp_ctx.username is None:
-            # No username -> No basic auth.
+        if self.pulp_ctx.oauth2_client_id is None:
+            # No client_id -> No oauth2 client credentials.
             return None
-        if self.pulp_ctx.password is None:
-            self.pulp_ctx.password = click.prompt("Password/ClientSecret")
+        if self.pulp_ctx.oauth2_client_secret is None:
+            self.pulp_ctx.oauth2_client_secret = click.prompt("Client Secret")
 
         return OAuth2ClientCredentialsAuth(
-            client_id=self.pulp_ctx.username,
-            client_secret=self.pulp_ctx.password,
+            client_id=self.pulp_ctx.oauth2_client_id,
+            client_secret=self.pulp_ctx.oauth2_client_secret,
             token_url=flow["tokenUrl"],
             # Try to request all possible scopes.
             scopes=flow["scopes"],

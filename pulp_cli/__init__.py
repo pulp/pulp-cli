@@ -188,6 +188,8 @@ def main(
     headers: t.List[str],
     username: t.Optional[str],
     password: t.Optional[str],
+    client_id: t.Optional[str],
+    client_secret: t.Optional[str],
     cert: t.Optional[str],
     key: t.Optional[str],
     verify_ssl: bool,
@@ -206,8 +208,6 @@ def main(
     api_kwargs = dict(
         base_url=base_url,
         headers=dict((header.split(":", maxsplit=1) for header in headers)),
-        username=username,
-        password=password,
         cert=cert,
         key=key,
         validate_certs=verify_ssl,
@@ -224,6 +224,10 @@ def main(
         format=format,
         background_tasks=background,
         timeout=timeout,
+        username=username,
+        password=password,
+        oauth2_client_id=client_id,
+        oauth2_client_secret=client_secret,
     )
 
 
