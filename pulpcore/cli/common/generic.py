@@ -221,7 +221,8 @@ class PulpCLIAuthProvider(AuthProviderBase):
 
     def basic_auth(self, scopes: t.List[str]) -> t.Optional[requests.auth.AuthBase]:
         if self.pulp_ctx.username is None:
-            self.pulp_ctx.username = click.prompt("Username")
+            # No username -> No basic auth.
+            return None
         if self.pulp_ctx.password is None:
             # TODO give the user a chance to opt out.
             if SECRET_STORAGE:
@@ -236,7 +237,8 @@ class PulpCLIAuthProvider(AuthProviderBase):
         self, flow: t.Any, scopes: t.List[str]
     ) -> t.Optional[requests.auth.AuthBase]:
         if self.pulp_ctx.username is None:
-            self.pulp_ctx.username = click.prompt("Username/ClientID")
+            # No username -> No basic auth.
+            return None
         if self.pulp_ctx.password is None:
             self.pulp_ctx.password = click.prompt("Password/ClientSecret")
 
