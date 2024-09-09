@@ -132,6 +132,7 @@ filename = "./pyproject.toml"
 search = "\"pulp-glue=={current_version}\""
 replace = "\"pulp-glue=={new_version}\""
 
+
 [tool.towncrier]
 # This section is managed by the cookiecutter templates.
 filename = "CHANGES.md"
