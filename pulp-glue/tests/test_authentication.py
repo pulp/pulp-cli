@@ -16,7 +16,7 @@ def test_sending_no_scope_when_empty(monkeypatch: pytest.MonkeyPatch) -> None:
         def json(self):
             return {"expires_in": 1, "access_token": "aaa"}
 
-    def _requests_post_mocked(url: str, data: t.Dict[str, t.Any]):
+    def _requests_post_mocked(url: str, data: t.Dict[str, t.Any], **kwargs: t.Any):
         assert "scope" not in data
         return OAuth2MockResponse()
 
