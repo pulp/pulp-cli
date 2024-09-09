@@ -98,22 +98,30 @@ def pulp_cli_settings() -> t.Dict[str, t.Dict[str, t.Any]]:
     pulp_cli_test_tmpdir = pathlib.Path(os.environ.get("PULP_CLI_TEST_TMPDIR", "."))
     with open(os.environ.get("PULP_CLI_CONFIG", "tests/cli.toml"), "rb") as fp:
         settings = {"cli": tomllib.load(fp)["cli"]}
-    if os.environ.get("PULP_HTTPS"):
+    if os.environ.get("PULP_HTTPS", "false").lower() == "true":
         settings["cli"]["base_url"] = settings["cli"]["base_url"].replace("http://", "https://")
-        client_cert_path = pulp_cli_test_tmpdir / "settings" / "certs" / "client.pem"
-        client_key_path = pulp_cli_test_tmpdir / "settings" / "certs" / "client.key"
-        if client_cert_path.exists():
+        if os.environ.get("PULP_OAUTH2", "false").lower() == "true":
             settings["cli"].pop("username", None)
             settings["cli"].pop("password", None)
-            settings["cli"]["cert"] = str(client_cert_path)
-            if client_key_path.exists():
-                settings["cli"]["key"] = str(client_key_path)
+            settings["cli"]["client_id"] = "service_acct"
+            settings["cli"]["client_secret"] = "secret"
+        else:
+            client_cert_path = pulp_cli_test_tmpdir / "settings" / "certs" / "client.pem"
+            client_key_path = pulp_cli_test_tmpdir / "settings" / "certs" / "client.key"
+            if client_cert_path.exists():
+                settings["cli"].pop("username", None)
+                settings["cli"].pop("password", None)
+                settings["cli"]["cert"] = str(client_cert_path)
+                if client_key_path.exists():
+                    settings["cli"]["key"] = str(client_key_path)
 
     if os.environ.get("PULP_API_ROOT"):
         settings["cli"]["api_root"] = os.environ["PULP_API_ROOT"]
 
     settings["cli-noauth"] = {
-        k: v for k, v in settings["cli"].items() if k not in {"username", "password", "cert", "key"}
+        k: v
+        for k, v in settings["cli"].items()
+        if k not in {"username", "password", "cert", "key", "client_id", "client_secret"}
     }
     return settings
 
