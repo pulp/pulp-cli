@@ -17,8 +17,7 @@ class OAuth2ClientCredentialsAuth(requests.auth.AuthBase):
         token_url: str,
         scopes: t.Optional[t.List[str]] = None,
     ):
-        self.client_id = client_id
-        self.client_secret = client_secret
+        self.token_auth = requests.auth.HTTPBasicAuth(client_id, client_secret)
         self.token_url = token_url
         self.scopes = scopes
 
@@ -76,15 +75,13 @@ class OAuth2ClientCredentialsAuth(requests.auth.AuthBase):
 
     def retrieve_token(self) -> None:
         data = {
-            "client_id": self.client_id,
-            "client_secret": self.client_secret,
             "grant_type": "client_credentials",
         }
 
         if self.scopes:
             data["scope"] = " ".join(self.scopes)
 
-        response: requests.Response = requests.post(self.token_url, data=data)
+        response: requests.Response = requests.post(self.token_url, data=data, auth=self.token_auth)
 
         response.raise_for_status()
 
