@@ -16,11 +16,12 @@ then
 fi
 export CONTAINER_RUNTIME
 
-TMPDIR="$(mktemp -d)"
+PULP_CLI_TEST_TMPDIR="$(mktemp -d)"
+export PULP_CLI_TEST_TMPDIR
 
 cleanup () {
   "${CONTAINER_RUNTIME}" stop pulp-ephemeral && true
-  rm -rf "${TMPDIR}"
+  rm -rf "${PULP_CLI_TEST_TMPDIR}"
 }
 
 trap cleanup EXIT
@@ -48,8 +49,8 @@ else
     SELINUX=""
 fi;
 
-mkdir -p "${TMPDIR}/settings/certs"
-cp "${BASEPATH}/settings/settings.py" "${TMPDIR}/settings"
+mkdir -p "${PULP_CLI_TEST_TMPDIR}/settings/certs"
+cp "${BASEPATH}/settings/settings.py" "${PULP_CLI_TEST_TMPDIR}/settings"
 
 if [ -z "${PULP_HTTPS:+x}" ]
 then
@@ -60,10 +61,16 @@ else
   PROTOCOL="https"
   PORT="443"
   PULP_CONTENT_ORIGIN="https://localhost:8080/"
-  python3 -m trustme -d "${TMPDIR}/settings/certs"
-  export PULP_CA_BUNDLE="${TMPDIR}/settings/certs/client.pem"
-  ln -fs server.pem "${TMPDIR}/settings/certs/pulp_webserver.crt"
-  ln -fs server.key "${TMPDIR}/settings/certs/pulp_webserver.key"
+  python3 "${BASEPATH}/gen_certs.py" -d "${PULP_CLI_TEST_TMPDIR}/settings/certs"
+  export PULP_CA_BUNDLE="${PULP_CLI_TEST_TMPDIR}/settings/certs/ca.pem"
+  ln -fs server.pem "${PULP_CLI_TEST_TMPDIR}/settings/certs/pulp_webserver.crt"
+  ln -fs server.key "${PULP_CLI_TEST_TMPDIR}/settings/certs/pulp_webserver.key"
+  {
+    echo "AUTHENTICATION_BACKENDS = '@merge django.contrib.auth.backends.RemoteUserBackend'"
+    echo "MIDDLEWARE  = '@merge django.contrib.auth.middleware.RemoteUserMiddleware'"
+    echo "REST_FRAMEWORK__DEFAULT_AUTHENTICATION_CLASSES = '@merge pulpcore.app.authentication.PulpRemoteUserAuthentication'"
+    echo "REMOTE_USER_ENVIRON_NAME = 'HTTP_REMOTEUSER'"
+  } >> "${PULP_CLI_TEST_TMPDIR}/settings/settings.py"
 fi
 export PULP_CONTENT_ORIGIN
 
@@ -75,7 +82,9 @@ export PULP_CONTENT_ORIGIN
   --env PULP_CONTENT_ORIGIN \
   --detach \
   --name "pulp-ephemeral" \
-  --volume "${TMPDIR}/settings:/etc/pulp${SELINUX:+:Z}" \
+  --volume "${PULP_CLI_TEST_TMPDIR}/settings:/etc/pulp${SELINUX:+:Z}" \
+  --volume "${BASEPATH}/nginx.conf.j2:/nginx/nginx.conf.j2${SELINUX:+:Z}" \
+  --network bridge \
   --publish "8080:${PORT}" \
   "ghcr.io/pulp/pulp:${IMAGE_TAG}"
 
@@ -104,7 +113,7 @@ done
 "${CONTAINER_RUNTIME}" exec "pulp-ephemeral" pulpcore-manager reset-admin-password --password password
 
 # Create pulp config
-PULP_CLI_CONFIG="${TMPDIR}/settings/certs/cli.toml"
+PULP_CLI_CONFIG="${PULP_CLI_TEST_TMPDIR}/settings/certs/cli.toml"
 export PULP_CLI_CONFIG
 pulp config create --overwrite --location "${PULP_CLI_CONFIG}" --base-url "${PROTOCOL}://localhost:8080" ${PULP_API_ROOT:+--api-root "${PULP_API_ROOT}"} --username "admin" --password "password"
 # show pulpcore/plugin versions we're using

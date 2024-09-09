@@ -15,7 +15,8 @@
     ".github/workflows/collect_changes.yml",
     ".github/workflows/release.yml",
     ".github/workflows/release_branch.yml",
-    ".github/workflows/pr_checks.yml"
+    ".github/workflows/pr_checks.yml",
+    ".ci/nginx.conf.j2"
   ],
   "_extensions": [".pulp_filter_extension.PulpFilterExtension"]
 }

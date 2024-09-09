@@ -29,14 +29,14 @@ jobs:
           - image_tag: "3.39"
             python: "3.12"
           - image_tag: "3.28"
-            python: "3.12"
             lower_bounds: true
+            python: "3.12"
           - image_tag: "3.22"
             python: "3.8"
           - image_tag: "3.21"
+            lower_bounds: true
             pulp_api_root: "/relocated/djnd/"
             python: "3.9"
-            lower_bounds: true
     steps:
       - uses: "actions/checkout@v4"
       - uses: "actions/cache@v4"
