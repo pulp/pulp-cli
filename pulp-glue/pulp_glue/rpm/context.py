@@ -1,7 +1,5 @@
 import typing as t
 
-import click
-
 from pulp_glue.common.context import (
     EntityDefinition,
     PluginRequirement,
@@ -70,7 +68,7 @@ class PulpRpmCompsXmlContext(PulpEntityContext):
     def upload_comps(
         self, file: t.IO[bytes], repo_href: t.Optional[str], replace: t.Optional[bool]
     ) -> t.Any:
-        click.echo(_("Uploading file {filename}").format(filename=file.name), err=True)
+        self.pulp_ctx.echo(_("Uploading file {filename}").format(filename=file.name), err=True)
         file.seek(0)
         return self.call(
             "upload_comps",
