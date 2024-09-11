@@ -1,0 +1,28 @@
+From c43dca9e3b983289e6b7a5de4d6bd08e01e2cab9 Mon Sep 17 00:00:00 2001
+From: Matthias Dellweg <mdellweg@redhat.com>
+Date: Thu, 12 Sep 2024 14:45:31 +0200
+Subject: [PATCH] Relax dependencies on test requirements
+
+In this case we do this specifically to ease the packaging process.
+---
+ test_requirements.txt | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/test_requirements.txt b/test_requirements.txt
+index 0e1a213..ffe4acc 100644
+--- a/test_requirements.txt
++++ b/test_requirements.txt
+@@ -1,7 +1,7 @@
+ # Test requirements
+-pytest>=7.0.0,<=8.3.2
+-pytest-subtests>=0.12.0,<=0.13.1
+-python-gnupg==0.5.2
++pytest>=7.0.0,<8.4
++pytest-subtests>=0.12.0,<0.14
++python-gnupg>=0.5.0,<0.6
+ trustme>=1.1.0,<1.2
+ 
+ # No pinning here, because we only switch on optional dependencies here.
+-- 
+2.45.2
+

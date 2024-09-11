@@ -1,0 +1,24 @@
+---
+name: "pulp-cli Packaging"
+
+on:
+  pull_request:
+    branches:
+      - "rel-eng"
+
+concurrency:
+  group: "main-${{ github.ref_name }}-${{ github.workflow }}"
+  cancel-in-progress: true
+
+jobs:
+  check-commits:
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: "actions/checkout@v4"
+        with:
+          fetch-depth: 0
+      - name: "Run Fedora packaging"
+        run: |
+          podman pull registry.fedoraproject.org/fedora
+          podman run --rm --privileged -it --volume ./:/pulp-cli fedora /pulp-cli/test_build.sh
+...
