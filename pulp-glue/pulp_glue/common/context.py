@@ -239,9 +239,8 @@ class PulpContext:
         Abstract function that will be called to emit warnings and task progress.
 
         Warning:
-            This function needs to be implemented.
+            This function does nothing until implemented by a subclass.
         """
-        raise NotImplementedError("PulpContext is an abstract class.")
 
     def prompt(self, text: str, hide_input: bool = False) -> str:
         """
@@ -249,6 +248,7 @@ class PulpContext:
 
         Note:
             If a password is provided non-interactively, this function need not be implemented.
+            Doing so is deprecated.
         """
         raise NotImplementedError("PulpContext is an abstract class.")
 
