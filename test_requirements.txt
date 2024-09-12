@@ -1,7 +1,7 @@
 # Test requirements
-pytest>=7.0.0,<=8.3.2
-pytest-subtests>=0.12.0,<=0.13.1
-python-gnupg==0.5.2
+pytest>=7.0.0,<8.4
+pytest-subtests>=0.12.0,<0.14
+python-gnupg>=0.5.0,<0.6
 trustme>=1.1.0,<1.2
 
 # No pinning here, because we only switch on optional dependencies here.
