@@ -12,6 +12,13 @@ from requests import HTTPError
 from pulp_glue.common.i18n import get_translation
 from pulp_glue.common.openapi import BasicAuthProvider, OpenAPI, OpenAPIError, UnsafeCallError
 
+try:
+    import tomllib
+except ImportError:
+    TOMLLIB = False
+else:
+    TOMLLIB = True
+
 translation = get_translation(__package__)
 _ = translation.gettext
 
@@ -257,8 +264,8 @@ class PulpContext:
         self,
         api_root: str,
         api_kwargs: t.Dict[str, t.Any],
-        background_tasks: bool,
-        timeout: t.Union[int, datetime.timedelta],
+        background_tasks: bool = False,
+        timeout: t.Union[int, datetime.timedelta] = 300,
         domain: str = "default",
         fake_mode: bool = False,
     ) -> None:
@@ -277,6 +284,84 @@ class PulpContext:
         self.fake_mode: bool = fake_mode
         if self.fake_mode:
             self._api_kwargs["safe_calls_only"] = True
+
+    @classmethod
+    def from_config_files(
+        cls, profile: t.Optional[str] = None, config_locations: t.Optional[t.List[str]] = None
+    ) -> "t.Self":
+        """
+        Create a `PulpContext` object from config files.
+
+        Note:
+            This feature needs Python >=3.11 to work for now, because we don't want to add another
+            dependency to pulp-glue.
+
+        Parameters:
+            profile: Select a different profile from the config.
+            config_locations: If provided these config files will be merged (last on wins) instead
+                of the default locations.
+        Returns:
+            A configured `PulpContext` object.
+        """
+        if not TOMLLIB:
+            raise NotImplementedError(_("PulpContext.from_config_files requires Python >= 3.11."))
+        if config_locations is None:
+            config_locations = [
+                "/etc/pulp/cli.toml",
+                (os.environ.get("XDG_CONFIG_HOME") or os.environ["HOME"] + "/.config")
+                + "/pulp/cli.toml",
+            ]
+        configs: t.Dict[str, t.Dict[str, t.Any]] = {}
+        for location in config_locations:
+            try:
+                with open(location, "rb") as fp:
+                    new_configs = tomllib.load(fp)
+            except (FileNotFoundError, PermissionError):
+                pass
+            else:
+                # level 1 merge
+                for key in new_configs:
+                    if key in configs:
+                        configs[key].update(new_configs[key])
+                    else:
+                        configs[key] = new_configs[key]
+        profile_key: str = "cli" if profile is None else "cli-" + profile
+        return cls.from_config(configs[profile_key])
+
+    @classmethod
+    def from_config(cls, config: t.Dict[str, t.Any]) -> "t.Self":
+        """
+        Create a `PulpContext` object from a config dictionary.
+
+        Parameters:
+            config: dictionary of configuration values.
+        Returns:
+            A configured `PulpContext` object.
+        """
+        api_kwargs: t.Dict[str, t.Any] = {
+            "base_url": config["base_url"],
+        }
+        if "username" in config:
+            api_kwargs["auth_provider"] = BasicAuthProvider(config["username"], config["password"])
+        if "headers" in config:
+            api_kwargs["headers"] = (
+                dict((header.split(":", maxsplit=1) for header in config["headers"])),
+            )
+        for key in ["cert", "key", "user_agent", "cid"]:
+            if key in config:
+                api_kwargs[key] = config[key]
+        for key0, key1 in [
+            ["verify_ssl", "validate_certs"],
+            ["dry_run", "safe_calls_only"],
+        ]:
+            if key0 in config:
+                api_kwargs[key1] = config[key0]
+
+        return cls(
+            api_root=config.get("api_root", "/pulp/"),
+            domain=config.get("domain", "default"),
+            api_kwargs=api_kwargs,
+        )
 
     def _patch_api_spec(self) -> None:
         # A place for last minute fixes to the api_spec.
