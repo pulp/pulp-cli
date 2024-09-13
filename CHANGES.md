@@ -10,6 +10,21 @@
 
 [//]: # (towncrier release notes start)
 
+## 0.28.3 (2024-09-12) {: #0.28.3 }
+
+
+
+No significant changes.
+
+
+### Pulp GLUE {: #0.28.3-pulp-glue }
+
+
+No significant changes.
+
+
+---
+
 ## 0.28.2 (2024-09-03) {: #0.28.2 }
 
 
@@ -92,6 +107,21 @@ No significant changes.
 - Fixed a bug where `create` always returned the first entry of created resources.
   Where possible, it now compares the results with `HREF_PATTERN` to select the resource to return.
 - Fixed the api spec of the RPM copy command so it does not collide with other copy implementations.
+
+
+---
+
+## 0.27.3 (2024-09-12) {: #0.27.3 }
+
+
+
+No significant changes.
+
+
+### Pulp GLUE {: #0.27.3-pulp-glue }
+
+
+No significant changes.
 
 
 ---
