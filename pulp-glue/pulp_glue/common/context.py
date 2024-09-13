@@ -845,6 +845,8 @@ class PulpEntityContext(PulpViewSetContext):
                     self.list_iterator(parameters=parameters, offset=offset, stats=stats)
                 )
         except StopIteration:
+            pass
+        else:
             self.pulp_ctx.echo(
                 _("Not all {count} entries were shown.").format(count=stats["count"]), err=True
             )
