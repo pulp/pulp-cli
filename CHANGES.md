@@ -10,6 +10,24 @@
 
 [//]: # (towncrier release notes start)
 
+## 0.28.4 (2024-09-13) {: #0.28.4 }
+
+
+
+No significant changes.
+
+
+### Pulp GLUE {: #0.28.4-pulp-glue }
+
+
+#### Bugfixes {: #0.28.4-pulp-glue-bugfix }
+
+- Fixed the "list" commands to show the notification about not displaying all items when it shouldn't and the other way around.
+  [#1068](https://github.com/pulp/pulp-cli/issues/1068)
+
+
+---
+
 ## 0.28.3 (2024-09-12) {: #0.28.3 }
 
 
