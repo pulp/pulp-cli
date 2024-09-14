@@ -7,6 +7,15 @@ updates:
   commit-message:
     prefix: "[PIP] "
   open-pull-requests-limit: 10
+{%- if cookiecutter.glue %}
+- package-ecosystem: pip
+  directory: "/pulp-glue{{ cookiecutter.__app_label_suffix }}"
+  schedule:
+    interval: daily
+  commit-message:
+    prefix: "[PIP] "
+  open-pull-requests-limit: 10
+{%- endif %}
 - package-ecosystem: github-actions
   directory: "/"
   schedule:
