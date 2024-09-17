@@ -10,6 +10,48 @@
 
 [//]: # (towncrier release notes start)
 
+## 0.29.0 (2024-09-17) {: #0.29.0 }
+
+
+
+#### Features {: #0.29.0-feature }
+
+- Added memoization to CLI auth provider. This helps to reuse a retrieved oauth token for the lifetime of the process.
+- Changed the way OAuth2 Client Credentials are provided to give the user some choice over the authentication to use.
+  The new parameters `--client-id` and `--client-secret` were added and `--username`, `--password` are now restricted to HTTP Basic.
+
+
+#### Deprecations and Removals {: #0.29.0-removal }
+
+- Removed the prompt for a username.
+  Starting with this release the user needs to provide the username in the settings, or via `--username` to allow http basic auth.
+  If no authentication is needed or another authentication mechanism should be used, it can be omitted.
+
+
+### Pulp GLUE {: #0.29.0-pulp-glue }
+
+
+#### Features {: #0.29.0-pulp-glue-feature }
+
+- Added `from_config` constructor to `PulpContext` class.
+  [#1060](https://github.com/pulp/pulp-cli/issues/1060)
+
+
+#### Bugfixes {: #0.29.0-pulp-glue-bugfix }
+
+- Fixed sending no scope instead an empty scope when using the `OAuth2ClientCredentialsAuth` authentication class.
+  [#1050](https://github.com/pulp/pulp-cli/issues/1050)
+- Fixed the "list" commands to show the notification about not displaying all items when it shouldn't and the other way around.
+  [#1068](https://github.com/pulp/pulp-cli/issues/1068)
+- Addressed some edge-case failures in the oauth2-client workflow.
+- Fixed regressions in the auth selection algorithm of `AuthProviderBase`.
+  In particular, proposals requiring multiple mechanisms are ignored for now instead of considering each constituent individually,
+  "HTTP Bearer" and other IANA schemes are no longer interpreted as "HTTP Basic" and the empty proposal rightfully reflects no needed authentication.
+- Use BasicAuth for token retrieval to comply with RFC6749.
+
+
+---
+
 ## 0.28.4 (2024-09-13) {: #0.28.4 }
 
 
