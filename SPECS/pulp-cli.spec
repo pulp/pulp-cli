@@ -1,5 +1,5 @@
 Name: pulp-cli
-Version: 0.29.0
+Version: 0.29.1
 Release: 1%{?dist}
 Summary: Command line interface to talk to the Pulp 3 REST API
 
@@ -50,6 +50,9 @@ handles waiting on tasks on behalf of the user.}
 
 
 %changelog
+* Tue Sep 17 2024 Matthias Dellweg <x9c4@redhat.com> - 0.29.1-1
+- new version
+
 * Tue Sep 17 2024 Matthias Dellweg <x9c4@redhat.com> - 0.29.0-1
 - Bump version to 0.29.0.
 
