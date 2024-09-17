@@ -30,7 +30,7 @@ jobs:
             python: "3.12"
           - image_tag: "3.28"
             lower_bounds: true
-            python: "3.12"
+            python: "3.13"
           - image_tag: "3.22"
             python: "3.8"
           - image_tag: "3.21"
@@ -54,6 +54,7 @@ jobs:
         uses: "actions/setup-python@v5"
         with:
           python-version: "${{ matrix.python }}"
+          allow-prereleases: true
       - name: "Install Python Test Dependencies"
         run: |
           if [ "${{matrix.lower_bounds}}" ]
