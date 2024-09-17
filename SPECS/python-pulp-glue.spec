@@ -1,5 +1,5 @@
 Name: python-pulp-glue
-Version: 0.28.4
+Version: 0.29.0
 Release: 1%{?dist}
 Summary: The version agnostic Pulp 3 client library in python
 
@@ -56,5 +56,8 @@ Summary: %{summary}
 
 
 %changelog
+* Tue Sep 17 2024 Matthias Dellweg <x9c4@redhat.com> - 0.29.0-1
+- Bump version to 0.29.0.
+
 * Wed Sep 11 2024 Matthias Dellweg <x9c4@redhat.com> - 0.28.3-1
 - Initial specfile

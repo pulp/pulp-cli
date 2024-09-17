@@ -11,12 +11,10 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  check-commits:
+  fedora:
     runs-on: "ubuntu-latest"
     steps:
       - uses: "actions/checkout@v4"
-        with:
-          fetch-depth: 0
       - name: "Run Fedora packaging"
         run: |
           podman pull registry.fedoraproject.org/fedora

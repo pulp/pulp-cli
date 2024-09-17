@@ -1,5 +1,5 @@
 Name: pulp-cli
-Version: 0.28.4
+Version: 0.29.0
 Release: 1%{?dist}
 Summary: Command line interface to talk to the Pulp 3 REST API
 
@@ -10,6 +10,7 @@ Source: %{url}/archive/%{version}/pulp-cli-%{version}.tar.gz
 BuildArch: noarch
 BuildRequires: python3-devel
 # BuildRequires: pyproject-rpm-macros
+Recommends: python3-pygments python3-click-shell python3-secretstorage
 
 %global _description %{expand:
 pulp-cli provides the "pulp" command, able to communicate with the Pulp3 API in
@@ -18,13 +19,6 @@ referenced by their href, but also their natural key (e.g. name). It also
 handles waiting on tasks on behalf of the user.}
 
 %description %_description
-
-
-%dnl %package -n pulp-cli
-# Summary: %{summary}
-Recommends: python3-pygments python3-click-shell python3-secretstorage
-
-%dnl %description -n pulp-cli %_description
 
 
 %prep
@@ -56,5 +50,8 @@ Recommends: python3-pygments python3-click-shell python3-secretstorage
 
 
 %changelog
+* Tue Sep 17 2024 Matthias Dellweg <x9c4@redhat.com> - 0.29.0-1
+- Bump version to 0.29.0.
+
 * Wed Sep 11 2024 Matthias Dellweg <x9c4@redhat.com> - 0.28.3-1
 - Initial specfile
