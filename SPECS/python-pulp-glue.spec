@@ -9,10 +9,9 @@ Source: %{url}/archive/%{version}/pulp-cli-%{version}.tar.gz
 
 BuildArch: noarch
 BuildRequires: python3-devel
-# BuildRequires: pyproject-rpm-macros
 
 %global _description %{expand:
-pulp-glue is a library to ease the programatic communication with the Pulp3
+pulp-glue is a library to ease the programmatic communication with the Pulp3
 API. It helps to abstract different resource types with so called contexts and
 allows to build or even provides complex workflows like chunked upload or
 waiting on tasks.
