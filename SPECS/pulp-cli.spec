@@ -9,7 +9,6 @@ Source: %{url}/archive/%{version}/pulp-cli-%{version}.tar.gz
 
 BuildArch: noarch
 BuildRequires: python3-devel
-# BuildRequires: pyproject-rpm-macros
 Recommends: python3-pygments python3-click-shell python3-secretstorage
 
 %global _description %{expand:
