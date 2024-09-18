@@ -9,7 +9,7 @@ set -eu
 #
 # # /pulp-cli/test_build.sh
 
-dnf install -y rpmdevtools rpmlint 'dnf-command(builddep)' git mock
+dnf install --setopt install_weak_deps=false -y rpmdevtools rpmlint git mock
 
 VERSION="$(rpmspec -q --qf='%{version}\n' --srpm /pulp-cli/SPECS/pulp-cli.spec)"
 RELEASE="$(rpmspec -q --qf='%{release}\n' --srpm /pulp-cli/SPECS/pulp-cli.spec)"
@@ -28,6 +28,6 @@ pushd /root/rpmbuild
 mock --isolation=simple --chain -r fedora-40-x86_64 --localrepo . "SRPMS/python-pulp-glue-${VERSION}-${RELEASE}.src.rpm" "SRPMS/pulp-cli-${VERSION}-${RELEASE}.src.rpm"
 popd
 
-dnf install -y --repofrompath pulp-cli,/root/rpmbuild/results/fedora-40-x86_64/ --setopt=pulp-cli.gpgcheck=false pulp-cli
+dnf install --setopt install_weak_deps=false -y --repofrompath pulp-cli,/root/rpmbuild/results/fedora-40-x86_64/ --setopt=pulp-cli.gpgcheck=false pulp-cli
 
 pulp --version
