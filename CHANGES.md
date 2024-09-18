@@ -16,7 +16,7 @@
 
 #### Misc {: #0.29.1-misc }
 
-- 
+- Added experimental support for Python 3.13
 
 
 ### Pulp GLUE {: #0.29.1-pulp-glue }
@@ -24,7 +24,7 @@
 
 #### Misc {: #0.29.1-pulp-glue-misc }
 
-- 
+- Added experimental support for Python 3.13
 
 
 ---
