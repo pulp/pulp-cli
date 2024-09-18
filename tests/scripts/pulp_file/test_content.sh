@@ -37,6 +37,10 @@ sha256=$(sha256sum test.txt | cut -d' ' -f1)
 
 expect_succ pulp artifact upload --file test.txt
 expect_succ pulp file content create --sha256 "$sha256" --relative-path upload_test/test.txt
+if pulp debug has-plugin --name "core" --specifier ">=3.56.1"
+then
+  expect_succ pulp file content create --file-url "$FILE_REMOTE_URL" --relative-path PULP_MANIFEST
+fi
 
 expect_succ pulp file repository create --name "cli_test_file_repository"
 # New content commands

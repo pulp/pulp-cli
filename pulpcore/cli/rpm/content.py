@@ -276,10 +276,14 @@ create_options = [
     pulp_option(
         "--sha256",
         "artifact",
-        required=True,
-        help=_("Digest of the artifact to use"),
+        help=_("Digest of the artifact to use [deprecated]"),
         callback=_sha256_artifact_callback,
         allowed_with_contexts=(PulpRpmPackageContext,),
+    ),
+    pulp_option(
+        "--file-url",
+        help=_("Remote url to download and create rpm content from"),
+        needs_plugins=[PluginRequirement("core", specifier=">=3.56.1")],
     ),
     repository_option,
 ]
