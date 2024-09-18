@@ -1,7 +1,7 @@
 import typing as t
 
 import click
-from pulp_glue.common.context import PulpEntityContext
+from pulp_glue.common.context import PluginRequirement, PulpEntityContext
 from pulp_glue.common.i18n import get_translation
 from pulp_glue.core.context import PulpArtifactContext
 from pulp_glue.python.context import PulpPythonContentContext, PulpPythonRepositoryContext
@@ -15,6 +15,7 @@ from pulpcore.cli.common.generic import (
     pass_entity_context,
     pass_pulp_context,
     pulp_group,
+    pulp_option,
     resource_option,
     show_command,
 )
@@ -71,9 +72,13 @@ create_options = [
     click.option(
         "--sha256",
         "artifact",
-        required=True,
-        help=_("Digest of the artifact to use"),
+        help=_("Digest of the artifact to use [deprecated]"),
         callback=_sha256_artifact_callback,
+    ),
+    pulp_option(
+        "--file-url",
+        help=_("Remote url to download and create python content from"),
+        needs_plugins=[PluginRequirement("core", specifier=">=3.56.1")],
     ),
 ]
 content.add_command(

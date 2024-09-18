@@ -48,6 +48,10 @@ expect_succ pulp rpm content upload --repository "rpm:rpm:${UPLOAD_REPO_NAME}" \
 --directory "$(dirname "$(realpath "$0")")"/test_rpm_upload \
 --use-temp-repository \
 --publish
+if pulp debug has-plugin --name "core" --specifier ">=3.56.1"
+then
+  expect_succ pulp rpm content create --file-url "${RPM_REMOTE_URL}/bear-4.1-1.noarch.rpm" --relative-path "bear-4.1-1.noarch.rpm"
+fi
 
 expect_succ pulp rpm remote create --name "${REPO1_NAME}" --url "$RPM_REMOTE_URL"
 expect_succ pulp rpm remote show --name "${REPO1_NAME}"
