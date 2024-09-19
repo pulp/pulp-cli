@@ -9,7 +9,9 @@ Source: %{url}/archive/%{version}/pulp-cli-%{version}.tar.gz
 
 BuildArch: noarch
 BuildRequires: python3-devel
-Recommends: python3-pygments python3-click-shell python3-secretstorage
+Recommends: python3-pygments
+Recommends: python3-click-shell
+Recommends: python3-secretstorage
 
 %global _description %{expand:
 pulp-cli provides the "pulp" command, able to communicate with the Pulp3 API in
