@@ -1,0 +1,220 @@
+From 4fdcdcee53bbf15ed0ae1e8259a07f514209d8c0 Mon Sep 17 00:00:00 2001
+From: Matthias Dellweg <mdellweg@redhat.com>
+Date: Fri, 26 Apr 2024 12:26:10 +0200
+Subject: [PATCH] Remove python-toml dependency
+
+Python 3.11 ships tomllib instead. For older versions we can use tomli
+with the same interface, and tomli-w allows dumping toml files.
+Specifically for packaging in fedora, this is needed, because
+python-toml has been deprecated there.
+
+fixes #1084
+---
+ CHANGES/1084.misc           |  1 +
+ pulp_cli/__init__.py        | 13 ++++++++++---
+ pulp_cli/config.py          | 30 ++++++++++++++++++++----------
+ pyproject.toml              |  3 ++-
+ pytest_pulp_cli/__init__.py | 16 ++++++++++++----
+ 5 files changed, 45 insertions(+), 18 deletions(-)
+ create mode 100644 CHANGES/1084.misc
+
+diff --git a/CHANGES/1084.misc b/CHANGES/1084.misc
+new file mode 100644
+index 0000000..e845a38
+--- /dev/null
++++ b/CHANGES/1084.misc
+@@ -0,0 +1 @@
++Replaced python-toml dependency with a delicate combination of tomllib, tomli and tomli-w.
+diff --git a/pulp_cli/__init__.py b/pulp_cli/__init__.py
+index 74b14ff..75a989e 100644
+--- a/pulp_cli/__init__.py
++++ b/pulp_cli/__init__.py
+@@ -4,7 +4,6 @@ import typing as t
+ from types import ModuleType
+ 
+ import click
+-import toml
+ from pulp_glue.common.i18n import get_translation
+ 
+ from pulp_cli.config import CONFIG_LOCATIONS, config, config_options, validate_config
+@@ -15,6 +14,12 @@ if sys.version_info >= (3, 10):
+ else:
+     from importlib_metadata import entry_points
+ 
++if sys.version_info >= (3, 11):
++    import tomllib
++else:
++    import tomli as tomllib
++
++
+ try:
+     from click_shell import make_click_shell
+ 
+@@ -84,12 +89,14 @@ def _load_config(ctx: click.Context) -> None:
+         config_path = ctx.meta[CONFIG_KEY]
+         profile_key = ctx.meta[PROFILE_KEY]
+         if config_path is not None:
+-            config = toml.load(config_path)
++            with open(config_path, "rb") as fp:
++                config = tomllib.load(fp)
+         else:
+             config = {"cli": {}}
+             for location in CONFIG_LOCATIONS:
+                 try:
+-                    new_config = toml.load(location)
++                    with open(location, "rb") as fp:
++                        new_config = tomllib.load(fp)
+                 except (FileNotFoundError, PermissionError):
+                     pass
+                 else:
+diff --git a/pulp_cli/config.py b/pulp_cli/config.py
+index fd4c080..0ccc9cf 100644
+--- a/pulp_cli/config.py
++++ b/pulp_cli/config.py
+@@ -1,14 +1,21 @@
+ import re
++import sys
+ import typing as t
+ from pathlib import Path
+ from urllib.parse import urlparse
+ 
+ import click
+-import toml
++import tomli_w
+ from pulp_glue.common.i18n import get_translation
+ 
+ from pulpcore.cli.common.generic import REGISTERED_OUTPUT_FORMATTERS, pulp_group
+ 
++if sys.version_info >= (3, 11):
++    import tomllib
++else:
++    import tomli as tomllib
++
++
+ translation = get_translation(__package__)
+ _ = translation.gettext
+ 
+@@ -225,7 +232,7 @@ def create(
+                 ).format(location=location)
+             )
+ 
+-    def prompt_config_option(name: str) -> t.Any:
++    def _prompt_config_option(name: str) -> t.Any:
+         """Find the option from the root command and prompt."""
+         option = next(p for p in ctx.command.params if p.name == name)
+         if option.multiple:
+@@ -248,20 +255,22 @@ def create(
+         location = click.prompt(_("Config file location"), default=location)
+         _check_location(location)
+         for setting in SETTINGS:
+-            settings[setting] = prompt_config_option(setting)
++            settings[setting] = _prompt_config_option(setting)
+     else:
+         _check_location(location)
+ 
+-    output: str = toml.dumps({"cli": settings})
++    # Sanitize
++    settings = {k: v for k, v in settings.items() if v is not None}
++    output: str = tomli_w.dumps({"cli": settings})
+ 
+     if editor:
+         output = not_none(
+             click.edit(output), click.ClickException(_("No output from editor. Aborting."))
+         )
+     try:
+-        settings = toml.loads(output)
++        settings = tomllib.loads(output)
+         validate_settings(settings)
+-    except (ValueError, toml.TomlDecodeError) as e:
++    except (ValueError, tomllib.TOMLDecodeError) as e:
+         raise click.ClickException(str(e))
+ 
+     Path(location).parent.mkdir(parents=True, exist_ok=True)
+@@ -289,10 +298,10 @@ def edit(location: str) -> None:
+             click.edit(output), click.ClickException(_("No output from editor. Aborting."))
+         )
+         try:
+-            settings = toml.loads(output)
++            settings = tomllib.loads(output)
+             validate_settings(settings)
+             break
+-        except (ValueError, toml.TomlDecodeError) as e:
++        except (ValueError, tomllib.TOMLDecodeError) as e:
+             click.echo(str(e), err=True)
+             click.confirm(_("Retry"), abort=True)
+     with Path(location).open("w") as sfile:
+@@ -304,8 +313,9 @@ def edit(location: str) -> None:
+ @click.option("--strict", is_flag=True, help=_("Validate that all settings are present"))
+ def validate(location: str, strict: bool) -> None:
+     try:
+-        settings = toml.load(location)
+-    except toml.TomlDecodeError:
++        with open(location, "rb") as fp:
++            settings = tomllib.load(fp)
++    except tomllib.TOMLDecodeError:
+         raise click.ClickException(_("Invalid toml file '{location}'.").format(location=location))
+ 
+     try:
+diff --git a/pyproject.toml b/pyproject.toml
+index b583e12..6acabaa 100644
+--- a/pyproject.toml
++++ b/pyproject.toml
+@@ -28,7 +28,8 @@ dependencies = [
+   "packaging>=20.0,<25",
+   "PyYAML>=5.3,<6.1",
+   "schema>=0.7.5,<0.8",
+-  "toml>=0.10.2,<0.11",
++  "tomli>=2.0.0,<2.1;python_version<'3.11'",
++  "tomli-w>=1.0.0,<1.1",
+   "importlib_metadata>=4.8.0,<7.1;python_version<'3.10'",
+ ]
+ 
+diff --git a/pytest_pulp_cli/__init__.py b/pytest_pulp_cli/__init__.py
+index f8bfd5c..c132166 100644
+--- a/pytest_pulp_cli/__init__.py
++++ b/pytest_pulp_cli/__init__.py
+@@ -1,12 +1,19 @@
+ import os
+ import pathlib
+ import subprocess
++import sys
+ import typing as t
+ 
+ import gnupg
+ import pytest
+ import requests
+-import toml
++import tomli_w
++
++if sys.version_info >= (3, 11):
++    import tomllib
++else:
++    import tomli as tomllib
++
+ 
+ if t.TYPE_CHECKING:
+     from _pytest._code.code import ExceptionInfo, TerminalRepr
+@@ -89,7 +96,8 @@ def pulp_cli_settings() -> t.Dict[str, t.Dict[str, t.Any]]:
+     The `pulp_cli_env` fixture, however depends on it and sets $XDG_CONFIG_HOME up accordingly.
+     """
+     pulp_cli_test_tmpdir = pathlib.Path(os.environ.get("PULP_CLI_TEST_TMPDIR", "."))
+-    settings = {"cli": toml.load(os.environ.get("PULP_CLI_CONFIG", "tests/cli.toml"))["cli"]}
++    with open(os.environ.get("PULP_CLI_CONFIG", "tests/cli.toml"), "rb") as fp:
++        settings = {"cli": tomllib.load(fp)["cli"]}
+     if os.environ.get("PULP_HTTPS"):
+         settings["cli"]["base_url"] = settings["cli"]["base_url"].replace("http://", "https://")
+         client_cert_path = pulp_cli_test_tmpdir / "settings" / "certs" / "client.pem"
+@@ -116,8 +124,8 @@ def pulp_cli_settings_path(
+ ) -> pathlib.Path:
+     settings_path = tmp_path_factory.mktemp("config", numbered=False)
+     (settings_path / "pulp").mkdir(parents=True)
+-    with open(settings_path / "pulp" / "cli.toml", "w") as settings_file:
+-        toml.dump(pulp_cli_settings, settings_file)
++    with open(settings_path / "pulp" / "cli.toml", "wb") as fp:
++        tomli_w.dump(pulp_cli_settings, fp)
+     return settings_path
+ 
+ 
+-- 
+2.45.2
+
