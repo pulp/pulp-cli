@@ -6,6 +6,8 @@ Summary: Command line interface to talk to the Pulp 3 REST API
 License: GPL-2.0-or-later
 URL: https://github.com/pulp/pulp-cli
 Source: %{url}/archive/%{version}/pulp-cli-%{version}.tar.gz
+# See https://github.com/pulp/pulp-cli/pull/1085
+Patch0: 0001-Remove-python-toml-dependency.patch
 
 BuildArch: noarch
 BuildRequires: python3-devel
