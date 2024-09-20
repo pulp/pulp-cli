@@ -19,7 +19,7 @@ rpmdev-setuptree
 pushd /pulp-cli
 git archive --format tgz --prefix "pulp-cli-${VERSION}/" -o "/root/rpmbuild/SOURCES/pulp-cli-${VERSION}.tar.gz" "${VERSION}"
 popd
-cp /pulp-cli/SOURCES/* /root/rpmbuild/SOURCES
+cp /pulp-cli/SPECS/*.patch /root/rpmbuild/SOURCES
 
 rpmbuild -bs /pulp-cli/SPECS/python-pulp-glue.spec
 rpmbuild -bs /pulp-cli/SPECS/pulp-cli.spec
