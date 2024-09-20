@@ -1,6 +1,7 @@
 import datetime
 import os
 import re
+import sys
 import time
 import typing as t
 import warnings
@@ -20,12 +21,10 @@ from pulp_glue.common.exceptions import (
 from pulp_glue.common.i18n import get_translation
 from pulp_glue.common.openapi import BasicAuthProvider, OpenAPI
 
-try:
+if sys.version_info >= (3, 11):
     import tomllib
-except ImportError:
-    TOMLLIB = False
 else:
-    TOMLLIB = True
+    import tomli as tomllib
 
 translation = get_translation(__package__)
 _ = translation.gettext
@@ -274,7 +273,10 @@ class PulpContext:
 
     @classmethod
     def from_config_files(
-        cls, profile: t.Optional[str] = None, config_locations: t.Optional[t.List[str]] = None
+        cls,
+        profile: t.Optional[str] = None,
+        config_locations: t.Optional[t.List[str]] = None,
+        overrides: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> "t.Self":
         """
         Create a `PulpContext` object from config files.
@@ -287,11 +289,10 @@ class PulpContext:
             profile: Select a different profile from the config.
             config_locations: If provided these config files will be merged (last on wins) instead
                 of the default locations.
+            overrides: Values with higer priority than that from the config files.
         Returns:
             A configured `PulpContext` object.
         """
-        if not TOMLLIB:
-            raise NotImplementedError(_("PulpContext.from_config_files requires Python >= 3.11."))
         if config_locations is None:
             config_locations = [
                 "/etc/pulp/cli.toml",
@@ -313,7 +314,10 @@ class PulpContext:
                     else:
                         configs[key] = new_configs[key]
         profile_key: str = "cli" if profile is None else "cli-" + profile
-        return cls.from_config(configs[profile_key])
+        config = configs[profile_key]
+        if overrides is not None:
+            config.update(overrides)
+        return cls.from_config(config)
 
     @classmethod
     def from_config(cls, config: t.Dict[str, t.Any]) -> "t.Self":
