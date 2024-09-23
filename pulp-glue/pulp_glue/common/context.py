@@ -344,8 +344,8 @@ class PulpContext:
         if "username" in config:
             api_kwargs["auth_provider"] = BasicAuthProvider(config["username"], config["password"])
         if "headers" in config:
-            api_kwargs["headers"] = (
-                dict((header.split(":", maxsplit=1) for header in config["headers"])),
+            api_kwargs["headers"] = dict(
+                (header.split(":", maxsplit=1) for header in config["headers"])
             )
         for key in ["cert", "key", "user_agent", "cid"]:
             if key in config:
