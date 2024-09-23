@@ -1,0 +1,1 @@
+Fixes `from_config` call that messed up the headers attribute.
