@@ -155,6 +155,8 @@ def validate_config(config: t.Dict[str, t.Any], strict: bool = False) -> None:
         errors.append(_("'api_root' must begin and end with '/'"))
     if "format" in config and config["format"].lower() not in FORMAT_CHOICES:
         errors.append(_("'format' is not one of {choices}").format(choices=FORMAT_CHOICES))
+    if "verify_ssl" in config and not isinstance(config["verify_ssl"], bool):
+        errors.append(_("'verify_ssl' is not a bool"))
     if "dry_run" in config and not isinstance(config["dry_run"], bool):
         errors.append(_("'dry_run' is not a bool"))
     if "timeout" in config and not isinstance(config["timeout"], int):

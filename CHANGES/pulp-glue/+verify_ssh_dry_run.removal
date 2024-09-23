@@ -1,0 +1,1 @@
+Rename the `PulpContext` `api_kwargs` parameters `validate_certs` to `verify_ssl` and `safe_calls_only` to `dry_run`.

@@ -16,12 +16,12 @@ class OAuth2ClientCredentialsAuth(requests.auth.AuthBase):
         client_secret: str,
         token_url: str,
         scopes: t.Optional[t.List[str]] = None,
-        verify: t.Optional[t.Union[str, bool]] = None,
+        verify_ssl: t.Optional[t.Union[str, bool]] = None,
     ):
         self._token_server_auth = requests.auth.HTTPBasicAuth(client_id, client_secret)
         self._token_url = token_url
         self._scopes = scopes
-        self._verify = verify
+        self._verify_ssl = verify_ssl
 
         self._access_token: t.Optional[str] = None
         self._expire_at: t.Optional[datetime] = None
@@ -87,7 +87,7 @@ class OAuth2ClientCredentialsAuth(requests.auth.AuthBase):
             self._token_url,
             data=data,
             auth=self._token_server_auth,
-            verify=self._verify,
+            verify=self._verify_ssl,
         )
 
         response.raise_for_status()
