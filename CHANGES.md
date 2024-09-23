@@ -10,6 +10,23 @@
 
 [//]: # (towncrier release notes start)
 
+## 0.29.2 (2024-09-23) {: #0.29.2 }
+
+
+
+#### Bugfixes {: #0.29.2-bugfix }
+
+- Fixes `from_config` call that messed up the headers attribute.
+
+
+### Pulp GLUE {: #0.29.2-pulp-glue }
+
+
+No significant changes.
+
+
+---
+
 ## 0.29.1 (2024-09-17) {: #0.29.1 }
 
 
