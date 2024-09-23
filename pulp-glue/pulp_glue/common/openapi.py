@@ -4,6 +4,7 @@
 import json
 import os
 import typing as t
+import warnings
 from collections import defaultdict
 from dataclasses import dataclass
 from io import BufferedReader
@@ -147,12 +148,14 @@ class OpenAPI:
         auth_provider: Object that returns requests auth objects according to the api spec.
         cert: Client certificate used for auth.
         key: Matching key for `cert` if not already included.
-        verify: Whether to check server TLS certificates agains a CA (requests semantic).
+        verify_ssl: Whether to check server TLS certificates agains a CA (requests semantic).
         refresh_cache: Whether to fetch the api doc regardless.
-        safe_calls_only: Flag to disallow issuing POST, PUT, PATCH or DELETE calls.
+        dry_run: Flag to disallow issuing POST, PUT, PATCH or DELETE calls.
         debug_callback: Callback that will be called with strings useful for logging or debugging.
         user_agent: String to use in the User-Agent header.
         cid: Correlation ID to send with all requests.
+        validate_certs: DEPRECATED use verify_ssl instead.
+        safe_calls_only: DEPRECATED use dry_run instead.
     """
 
     def __init__(
@@ -163,19 +166,28 @@ class OpenAPI:
         auth_provider: t.Optional[AuthProviderBase] = None,
         cert: t.Optional[str] = None,
         key: t.Optional[str] = None,
-        verify: t.Optional[t.Union[bool, str]] = True,
+        verify_ssl: t.Optional[t.Union[bool, str]] = True,
         refresh_cache: bool = False,
-        safe_calls_only: bool = False,
+        dry_run: bool = False,
         debug_callback: t.Optional[t.Callable[[int, str], t.Any]] = None,
         user_agent: t.Optional[str] = None,
         cid: t.Optional[str] = None,
+        validate_certs: t.Optional[bool] = None,
+        safe_calls_only: t.Optional[bool] = None,
     ):
+        if validate_certs is not None:
+            warnings.warn("validate_certs is deprecated; use verify_ssl instead.")
+            verify_ssl = validate_certs
+        if safe_calls_only is not None:
+            warnings.warn("safe_calls_only is deprecated; use dry_run instead.")
+            dry_run = safe_calls_only
+
         self._debug_callback: t.Callable[[int, str], t.Any] = debug_callback or (lambda i, x: None)
         self._base_url: str = base_url
         self._doc_path: str = doc_path
-        self._safe_calls_only: bool = safe_calls_only
+        self._dry_run: bool = dry_run
         self._headers = CIMultiDict(headers or {})
-        self._verify = verify
+        self._verify_ssl = verify_ssl
         self._auth_provider = auth_provider
         self._cert = cert
         self._key = key
@@ -196,7 +208,7 @@ class OpenAPI:
     def _setup_session(self) -> None:
         # This is specific requests library.
 
-        if self._verify is False:
+        if self._verify_ssl is False:
             urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
         self._session: requests.Session = requests.session()
@@ -214,7 +226,7 @@ class OpenAPI:
             elif self._key:
                 raise OpenAPIError(_("Cert is required if key is set."))
         session_settings = self._session.merge_environment_settings(
-            self._base_url, {}, None, self._verify, None
+            self._base_url, {}, None, self._verify_ssl, None
         )
         self._session.verify = session_settings["verify"]
         self._session.proxies = session_settings["proxies"]
@@ -511,7 +523,7 @@ class OpenAPI:
             self._debug_callback(2, f"  {key}: {value}")
         if request.body is not None:
             self._debug_callback(3, f"{request.body!r}")
-        if self._safe_calls_only and method.upper() not in SAFE_METHODS:
+        if self._dry_run and method.upper() not in SAFE_METHODS:
             raise UnsafeCallError(_("Call aborted due to safe mode"))
         try:
             response = self._session.send(request)

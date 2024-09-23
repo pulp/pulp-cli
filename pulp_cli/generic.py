@@ -144,9 +144,12 @@ class PulpCLIContext(PulpContext):
         self.oauth2_client_secret = oauth2_client_secret
         if not api_kwargs.get("cert"):
             api_kwargs["auth_provider"] = PulpCLIAuthProvider(pulp_ctx=self)
+
+        verify_ssl: t.Optional[bool] = api_kwargs.pop("verify_ssl", None)
         super().__init__(
             api_root=api_root,
             api_kwargs=api_kwargs,
+            verify_ssl=verify_ssl,
             background_tasks=background_tasks,
             timeout=timeout,
             domain=domain,
@@ -269,7 +272,7 @@ class PulpCLIAuthProvider(AuthProviderBase):
                     token_url=flow["tokenUrl"],
                     # Try to request all possible scopes.
                     scopes=flow["scopes"],
-                    verify=self.pulp_ctx.verify,
+                    verify_ssl=self.pulp_ctx.verify_ssl,
                 )
             else:
                 self._memoized[key] = OAuth2ClientCredentialsAuth(
@@ -278,7 +281,7 @@ class PulpCLIAuthProvider(AuthProviderBase):
                     token_url=flow["tokenUrl"],
                     # Try to request all possible scopes.
                     scopes=flow["scopes"],
-                    verify=self.pulp_ctx.verify,
+                    verify_ssl=self.pulp_ctx.verify_ssl,
                 )
         return self._memoized[key]
 

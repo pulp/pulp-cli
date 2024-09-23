@@ -216,8 +216,8 @@ class PulpContext:
         domain: Name of the domain to interact with.
         fake_mode: In fake mode, no modifying calls will be performed.
             Where possible, instead of failing, the requested result will be faked.
-            This implies `safe_calls_only=True` on the `api_kwargs`.
-        verify: A boolean or a path to the CA bundle.
+            This implies `dry_run=True` on the `api_kwargs`.
+        verify_ssl: A boolean or a path to the CA bundle.
     """
 
     def echo(self, message: str, nl: bool = True, err: bool = False) -> None:
@@ -246,18 +246,21 @@ class PulpContext:
         timeout: t.Union[int, datetime.timedelta] = 300,
         domain: str = "default",
         fake_mode: bool = False,
-        verify: t.Optional[t.Union[bool, str]] = None,
+        verify_ssl: t.Optional[t.Union[bool, str]] = None,
+        verify: t.Optional[t.Union[bool, str]] = None,  # Deprecated
     ) -> None:
         self._api: t.Optional[OpenAPI] = None
         self._api_root: str = api_root
         self._api_kwargs = api_kwargs
-        self.verify = verify
-        if self.verify is None:
+        self.verify_ssl = verify_ssl
+        if self.verify_ssl is None:
             # Regrets, regrets...
-            self.verify = self._api_kwargs.pop("validate_certs", True)
-        if self.verify is True:
+            self.verify_ssl = (
+                verify if verify is not None else self._api_kwargs.pop("validate_certs", True)
+            )
+        if self.verify_ssl is True:
             # If this is "only" true and we have the PULP_CA_BUNDLE variable set, use it.
-            self.verify = os.environ.get("PULP_CA_BUNDLE", True)
+            self.verify_ssl = os.environ.get("PULP_CA_BUNDLE", True)
         self._needed_plugins: t.List[PluginRequirement] = [
             PluginRequirement("core", specifier=">=3.11.0")
         ]
@@ -269,7 +272,7 @@ class PulpContext:
         self.timeout: datetime.timedelta = timeout
         self.fake_mode: bool = fake_mode
         if self.fake_mode:
-            self._api_kwargs["safe_calls_only"] = True
+            self._api_kwargs["dry_run"] = True
 
     @classmethod
     def from_config_files(
@@ -338,19 +341,14 @@ class PulpContext:
             api_kwargs["headers"] = dict(
                 (header.split(":", maxsplit=1) for header in config["headers"])
             )
-        for key in ["cert", "key", "user_agent", "cid"]:
+        for key in ["cert", "key", "user_agent", "cid", "dry_run"]:
             if key in config:
                 api_kwargs[key] = config[key]
-        for key0, key1 in [
-            ["verify_ssl", "validate_certs"],
-            ["dry_run", "safe_calls_only"],
-        ]:
-            if key0 in config:
-                api_kwargs[key1] = config[key0]
 
         return cls(
             api_root=config.get("api_root", "/pulp/"),
             domain=config.get("domain", "default"),
+            verify_ssl=config.get("verify_ssl", True),
             api_kwargs=api_kwargs,
         )
 
@@ -396,7 +394,7 @@ class PulpContext:
             try:
                 self._api = OpenAPI(
                     doc_path=f"{self._api_root}api/v3/docs/api.json",
-                    verify=self.verify,
+                    verify_ssl=self.verify_ssl,
                     **self._api_kwargs,
                 )
             except OpenAPIError as e:
