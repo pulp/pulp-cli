@@ -287,7 +287,7 @@ def edit(location: str) -> None:
         raise click.ClickException(
             _(
                 "File '{location}' does not exists. If you wish to create the file, use the pulp "
-                "create command."
+                "config create command."
             ).format(location=location)
         )
 
