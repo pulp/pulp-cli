@@ -23,9 +23,12 @@ eval "$(LC_ALL=C _PULP_COMPLETE=bash_source pulp)"
 
 ## Interactive shell mode
 
-* To use the shell mode, you need to install the the extra requirements tagged "shell". *
+!!! note
+
+    To use the shell mode, you need to install the the extra requirements tagged "shell".
 
 Starting the CLI with "pulp shell" drops you into the shell:
+
 ```plain
 (pulp) [vagrant@pulp3 ~]$ pulp shell
 Starting Pulp3 interactive shell...
@@ -47,14 +50,5 @@ pulp> status
 }
 
 pulp> exit
-(pulp) [vagrant@pulp3 ~]$
-```
-
-Issuing the command with arguments works as it does currently:
-```plain
-(pulp) [vagrant@pulp3 ~]$ pulp status
-{
-    ...
-}
 (pulp) [vagrant@pulp3 ~]$
 ```
