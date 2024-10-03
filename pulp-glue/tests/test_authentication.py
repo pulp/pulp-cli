@@ -22,8 +22,8 @@ def test_sending_no_scope_when_empty(monkeypatch: pytest.MonkeyPatch) -> None:
 
     monkeypatch.setattr("requests.post", _requests_post_mocked)
 
-    OAuth2ClientCredentialsAuth(token_url="", client_id="", client_secret="").retrieve_token()
+    OAuth2ClientCredentialsAuth(token_url="", client_id="", client_secret="")._retrieve_token()
 
     OAuth2ClientCredentialsAuth(
         token_url="", client_id="", client_secret="", scopes=[]
-    ).retrieve_token()
+    )._retrieve_token()

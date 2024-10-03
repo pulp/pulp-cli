@@ -268,6 +268,7 @@ class PulpCLIAuthProvider(AuthProviderBase):
                     token_url=flow["tokenUrl"],
                     # Try to request all possible scopes.
                     scopes=flow["scopes"],
+                    verify=self.pulp_ctx.verify,
                 )
             else:
                 self._memoized[key] = OAuth2ClientCredentialsAuth(
@@ -276,6 +277,7 @@ class PulpCLIAuthProvider(AuthProviderBase):
                     token_url=flow["tokenUrl"],
                     # Try to request all possible scopes.
                     scopes=flow["scopes"],
+                    verify=self.pulp_ctx.verify,
                 )
         return self._memoized[key]
 

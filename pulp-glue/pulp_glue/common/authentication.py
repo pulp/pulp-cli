@@ -16,28 +16,30 @@ class OAuth2ClientCredentialsAuth(requests.auth.AuthBase):
         client_secret: str,
         token_url: str,
         scopes: t.Optional[t.List[str]] = None,
+        verify: t.Optional[t.Union[str, bool]] = None,
     ):
-        self.token_auth = requests.auth.HTTPBasicAuth(client_id, client_secret)
-        self.token_url = token_url
-        self.scopes = scopes
+        self._token_server_auth = requests.auth.HTTPBasicAuth(client_id, client_secret)
+        self._token_url = token_url
+        self._scopes = scopes
+        self._verify = verify
 
-        self.access_token: t.Optional[str] = None
-        self.expire_at: t.Optional[datetime] = None
+        self._access_token: t.Optional[str] = None
+        self._expire_at: t.Optional[datetime] = None
 
     def __call__(self, request: requests.PreparedRequest) -> requests.PreparedRequest:
-        if self.expire_at is None or self.expire_at < datetime.now():
-            self.retrieve_token()
+        if self._expire_at is None or self._expire_at < datetime.now():
+            self._retrieve_token()
 
-        assert self.access_token is not None
+        assert self._access_token is not None
 
-        request.headers["Authorization"] = f"Bearer {self.access_token}"
+        request.headers["Authorization"] = f"Bearer {self._access_token}"
 
         # Call to untyped function "register_hook" in typed context
-        request.register_hook("response", self.handle401)  # type: ignore[no-untyped-call]
+        request.register_hook("response", self._handle401)  # type: ignore[no-untyped-call]
 
         return request
 
-    def handle401(
+    def _handle401(
         self,
         response: requests.Response,
         **kwargs: t.Any,
@@ -48,9 +50,9 @@ class OAuth2ClientCredentialsAuth(requests.auth.AuthBase):
         # If we get this far, probably the token is not valid anymore.
 
         # Try to reach for a new token once.
-        self.retrieve_token()
+        self._retrieve_token()
 
-        assert self.access_token is not None
+        assert self._access_token is not None
 
         # Consume content and release the original connection
         # to allow our new request to reuse the same one.
@@ -58,12 +60,12 @@ class OAuth2ClientCredentialsAuth(requests.auth.AuthBase):
         response.close()
         prepared_new_request = response.request.copy()
 
-        prepared_new_request.headers["Authorization"] = f"Bearer {self.access_token}"
+        prepared_new_request.headers["Authorization"] = f"Bearer {self._access_token}"
 
         # Avoid to enter into an infinity loop.
         # Call to untyped function "deregister_hook" in typed context
         prepared_new_request.deregister_hook(  # type: ignore[no-untyped-call]
-            "response", self.handle401
+            "response", self._handle401
         )
 
         # "Response" has no attribute "connection"
@@ -73,18 +75,23 @@ class OAuth2ClientCredentialsAuth(requests.auth.AuthBase):
 
         return new_response
 
-    def retrieve_token(self) -> None:
+    def _retrieve_token(self) -> None:
         data = {
             "grant_type": "client_credentials",
         }
 
-        if self.scopes:
-            data["scope"] = " ".join(self.scopes)
+        if self._scopes:
+            data["scope"] = " ".join(self._scopes)
 
-        response: requests.Response = requests.post(self.token_url, data=data, auth=self.token_auth)
+        response: requests.Response = requests.post(
+            self._token_url,
+            data=data,
+            auth=self._token_server_auth,
+            verify=self._verify,
+        )
 
         response.raise_for_status()
 
         token = response.json()
-        self.expire_at = datetime.now() + timedelta(seconds=token["expires_in"])
-        self.access_token = token["access_token"]
+        self._expire_at = datetime.now() + timedelta(seconds=token["expires_in"])
+        self._access_token = token["access_token"]
