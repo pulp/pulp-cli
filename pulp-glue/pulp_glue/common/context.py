@@ -240,6 +240,7 @@ class PulpContext:
         fake_mode: In fake mode, no modifying calls will be performed.
             Where possible, instead of failing, the requested result will be faked.
             This implies `safe_calls_only=True` on the `api_kwargs`.
+        verify: A boolean or a path to the CA bundle.
     """
 
     def echo(self, message: str, nl: bool = True, err: bool = False) -> None:
@@ -268,10 +269,18 @@ class PulpContext:
         timeout: t.Union[int, datetime.timedelta] = 300,
         domain: str = "default",
         fake_mode: bool = False,
+        verify: t.Optional[t.Union[bool, str]] = None,
     ) -> None:
         self._api: t.Optional[OpenAPI] = None
         self._api_root: str = api_root
         self._api_kwargs = api_kwargs
+        self.verify = verify
+        if self.verify is None:
+            # Regrets, regrets...
+            self.verify = self._api_kwargs.pop("validate_certs", True)
+        if self.verify is True:
+            # If this is "only" true and we have the PULP_CA_BUNDLE variable set, use it.
+            self.verify = os.environ.get("PULP_CA_BUNDLE", True)
         self._needed_plugins: t.List[PluginRequirement] = [
             PluginRequirement("core", specifier=">=3.11.0")
         ]
@@ -404,7 +413,9 @@ class PulpContext:
                 )
             try:
                 self._api = OpenAPI(
-                    doc_path=f"{self._api_root}api/v3/docs/api.json", **self._api_kwargs
+                    doc_path=f"{self._api_root}api/v3/docs/api.json",
+                    verify=self.verify,
+                    **self._api_kwargs,
                 )
             except OpenAPIError as e:
                 raise PulpException(str(e))

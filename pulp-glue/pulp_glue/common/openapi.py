@@ -151,7 +151,7 @@ class OpenAPI:
         auth_provider: Object that returns requests auth objects according to the api spec.
         cert: Client certificate used for auth.
         key: Matching key for `cert` if not already included.
-        validate_certs: Whether to check server TLS certificates agains a CA.
+        verify: Whether to check server TLS certificates agains a CA (requests semantic).
         refresh_cache: Whether to fetch the api doc regardless.
         safe_calls_only: Flag to disallow issuing POST, PUT, PATCH or DELETE calls.
         debug_callback: Callback that will be called with strings useful for logging or debugging.
@@ -167,14 +167,14 @@ class OpenAPI:
         auth_provider: t.Optional[AuthProviderBase] = None,
         cert: t.Optional[str] = None,
         key: t.Optional[str] = None,
-        validate_certs: bool = True,
+        verify: t.Optional[t.Union[bool, str]] = True,
         refresh_cache: bool = False,
         safe_calls_only: bool = False,
         debug_callback: t.Optional[t.Callable[[int, str], t.Any]] = None,
         user_agent: t.Optional[str] = None,
         cid: t.Optional[str] = None,
     ):
-        if not validate_certs:
+        if verify is False:
             urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
         self.debug_callback: t.Callable[[int, str], t.Any] = debug_callback or (lambda i, x: None)
@@ -206,9 +206,6 @@ class OpenAPI:
             self._session.headers.update(headers)
         self._session.max_redirects = 0
 
-        verify: t.Optional[t.Union[bool, str]] = validate_certs and os.environ.get(
-            "PULP_CA_BUNDLE", True
-        )
         session_settings = self._session.merge_environment_settings(
             base_url, {}, None, verify, None
         )
