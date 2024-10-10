@@ -37,7 +37,7 @@ jobs:
             lower_bounds: true
             python: "3.13"
           - image_tag: "3.22"
-            python: "3.8"
+            python: "3.9"
           - image_tag: "3.21"
             lower_bounds: true
             pulp_api_root: "/relocated/djnd/"
