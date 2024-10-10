@@ -51,13 +51,18 @@ def to_jaml(data: t.Any, level: int = 0, embed_in: str = "") -> str:
     else:
         raise NotImplementedError("This object is not serializable.")
     if nl:
-        return "\n" + "  " * level + result
+        result = "\n" + "  " * level + result
     elif embed_in in ("dict", "list"):
-        return " " + result
+        result = " " + result
     elif embed_in == "document":
         if level != 0:
             warnings.warn("jaml: Level should be 0 when embedding in 'document'.")
         return result
+    else:
+        if level != 0:
+            warnings.warn("jaml: Level should be 0 when serializing a docoment.")
+        result = "---\n" + result + "\n...\n"
+    return result
 
 
 def to_toml_value(value: t.Any) -> str:
@@ -108,14 +113,14 @@ else:
         [
             ([], 0, "", "---\n[]\n...\n"),
             ({}, 0, "", "---\n{}\n...\n"),
-            ("test", 0, "", '---\n"test\n...\n"'),
+            ("test", 0, "", '---\n"test"\n...\n'),
             ("test", 0, "document", '"test"'),
             ({}, 1, "dict", " {}"),
             ([], 1, "list", " []"),
             ({}, 1, "list", " {}"),
             ([], 1, "dict", " []"),
-            ([{}], 0, "", "- {}"),
-            ([[[]]], 0, "", "- - []"),
+            ([{}], 0, "", "---\n- {}\n...\n"),
+            ([[[]]], 0, "document", "- - []"),
             (
                 {"a": [], "b": "test", "c": [True, False]},
                 2,
@@ -126,7 +131,8 @@ else:
       - true
       - false""",
             ),
-            ({"b": 1, "a": 0}, 0, "", "a: 0\nb: 1"),
+            ({"b": 1, "a": 0}, 0, "document", "a: 0\nb: 1"),
+            ({"b": 1, "a": 0}, 0, "", "---\na: 0\nb: 1\n...\n"),
         ],
     )
     def test_to_jaml(value, level, embed_in, out):

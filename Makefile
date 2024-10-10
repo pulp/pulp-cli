@@ -34,7 +34,7 @@ tests/cli.toml:
 	@echo "In order to configure the tests to talk to your test server, you might need to edit $@ ."
 
 test: | tests/cli.toml
-	python3 -m pytest -v tests pulp-glue/tests
+	python3 -m pytest -v tests pulp-glue/tests cookiecutter/pulp_filter_extension.py
 
 docs:
 	pulp-docs build

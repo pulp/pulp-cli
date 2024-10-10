@@ -50,6 +50,7 @@ tests/cli.toml:
 
 test: | tests/cli.toml
 	python3 -m pytest -v tests {%- if cookiecutter.glue %} pulp-glue{{ cookiecutter.__app_label_suffix }}/tests {%- endif %}
+	{%- if cookiecutter.__app_label_suffix == "" %} cookiecutter/pulp_filter_extension.py {%- endif %}
 {%- if cookiecutter.docs %}
 
 docs:
