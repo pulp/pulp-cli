@@ -50,7 +50,8 @@ else
 fi;
 
 mkdir -p "${PULP_CLI_TEST_TMPDIR}/settings/certs"
-cp "${BASEPATH}/settings/settings.py" "${PULP_CLI_TEST_TMPDIR}/settings"
+cp "${BASEPATH}/settings/settings.py" "${PULP_CLI_TEST_TMPDIR}/settings/settings.py"
+echo "service_acct:$(openssl passwd secret)" > "${PULP_CLI_TEST_TMPDIR}/settings/certs/oauth2passwd"
 
 if [ -z "${PULP_HTTPS:+x}" ]
 then
@@ -65,12 +66,6 @@ else
   export PULP_CA_BUNDLE="${PULP_CLI_TEST_TMPDIR}/settings/certs/ca.pem"
   ln -fs server.pem "${PULP_CLI_TEST_TMPDIR}/settings/certs/pulp_webserver.crt"
   ln -fs server.key "${PULP_CLI_TEST_TMPDIR}/settings/certs/pulp_webserver.key"
-  {
-    echo "AUTHENTICATION_BACKENDS = '@merge django.contrib.auth.backends.RemoteUserBackend'"
-    echo "MIDDLEWARE  = '@merge django.contrib.auth.middleware.RemoteUserMiddleware'"
-    echo "REST_FRAMEWORK__DEFAULT_AUTHENTICATION_CLASSES = '@merge pulpcore.app.authentication.PulpRemoteUserAuthentication'"
-    echo "REMOTE_USER_ENVIRON_NAME = 'HTTP_REMOTEUSER'"
-  } >> "${PULP_CLI_TEST_TMPDIR}/settings/settings.py"
 fi
 export PULP_CONTENT_ORIGIN
 
@@ -78,6 +73,7 @@ export PULP_CONTENT_ORIGIN
   run ${RM:+--rm} \
   --env S6_KEEP_ENV=1 \
   ${PULP_HTTPS:+--env PULP_HTTPS} \
+  ${PULP_OAUTH2:+--env PULP_OAUTH2} \
   ${PULP_API_ROOT:+--env PULP_API_ROOT} \
   --env PULP_CONTENT_ORIGIN \
   --detach \
