@@ -38,6 +38,10 @@ jobs:
           if [ "{{ "${{matrix.lower_bounds}}" }}" ]
           then
             pip install dist/pulp_cli{{ cookiecutter.__app_label_suffix | replace("-", "_") }}-*.whl {%- if cookiecutter.glue %} pulp-glue{{ cookiecutter.__app_label_suffix }}/dist/pulp_glue{{ cookiecutter.__app_label_suffix | replace("-", "_") }}-*.whl {%- endif %} -r test_requirements.txt -c lower_bounds_constraints.lock
+          elif [ "{{ "${{matrix.upper_bounds}}" }}" ]
+          then
+            .ci/scripts/calc_constraints.py pyproject.toml {%- if cookiecutter.glue %} pulp-glue{{ cookiecutter.__app_label_suffix }}/pyproject.toml {%- endif %}  --upper > upper_bounds_constraints.lock
+            pip install dist/pulp_cli{{ cookiecutter.__app_label_suffix | replace("-", "_") }}-*.whl {%- if cookiecutter.glue %} pulp-glue{{ cookiecutter.__app_label_suffix }}/dist/pulp_glue{{ cookiecutter.__app_label_suffix | replace("-", "_") }}-*.whl {%- endif %} -r test_requirements.txt -c upper_bounds_constraints.lock
           else
             pip install dist/pulp_cli{{ cookiecutter.__app_label_suffix | replace("-", "_") }}-*.whl {%- if cookiecutter.glue %} pulp-glue{{ cookiecutter.__app_label_suffix }}/dist/pulp_glue{{ cookiecutter.__app_label_suffix | replace("-", "_") }}-*.whl {%- endif %} -r test_requirements.txt
           fi
@@ -49,6 +53,7 @@ jobs:
           FROM_TAG: "${{ matrix.from_tag }}"
           CONTAINER_FILE: "${{ matrix.container_file }}"
           PULP_HTTPS: "${{ matrix.pulp_https }}"
+          PULP_OAUTH2: "${{ matrix.pulp_oauth2 }}"
           PULP_API_ROOT: "${{ matrix.pulp_api_root }}"
           {%- endraw %}
         run: |

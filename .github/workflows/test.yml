@@ -67,7 +67,7 @@ jobs:
             pip install dist/pulp_cli-*.whl pulp-glue/dist/pulp_glue-*.whl -r test_requirements.txt -c lower_bounds_constraints.lock
           elif [ "${{matrix.upper_bounds}}" ]
           then
-            .ci/scripts/calc_constraints.py pyproject.toml --upper > upper_bounds_constraints.lock
+            .ci/scripts/calc_constraints.py pyproject.toml pulp-glue/pyproject.toml  --upper > upper_bounds_constraints.lock
             pip install dist/pulp_cli-*.whl pulp-glue/dist/pulp_glue-*.whl -r test_requirements.txt -c upper_bounds_constraints.lock
           else
             pip install dist/pulp_cli-*.whl pulp-glue/dist/pulp_glue-*.whl -r test_requirements.txt
