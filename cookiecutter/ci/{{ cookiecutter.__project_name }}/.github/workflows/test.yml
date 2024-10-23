@@ -11,8 +11,33 @@ env:
   CONTAINER_RUNTIME: "docker"
 
 jobs:
+  {%- if cookiecutter.unittests %}
+  unittest:
+    runs-on: "ubuntu-20.04"
+    steps:
+      - uses: "actions/checkout@v4"
+      {%- include "cache_action" %}
+      - name: "Download wheels"
+        uses: "actions/download-artifact@v4"
+        with:
+          name: "pulp_cli_packages"
+      - name: "Set up Python"
+        uses: "actions/setup-python@v5"
+        with:
+          python-version: "3.12"
+      - name: "Install Python Test Dependencies"
+        run: |
+          pip install dist/pulp_cli{{ cookiecutter.__app_label_suffix | replace("-", "_") }}-*.whl {%- if cookiecutter.glue %} pulp-glue{{ cookiecutter.__app_label_suffix }}/dist/pulp_glue{{ cookiecutter.__app_label_suffix | replace("-", "_") }}-*.whl {%- endif %} -r test_requirements.txt
+      - name: "Run tests"
+        run: |
+          make unittest
+  {%- endif %}
   test:
     runs-on: "ubuntu-20.04"
+    {%- if cookiecutter.unittests %}
+    needs:
+      - "unittest"
+    {%- endif %}
     strategy:
       fail-fast: false
       matrix:{{ cookiecutter.test_matrix | jaml(level=4, embed_in="dict") }}
@@ -26,7 +51,9 @@ jobs:
       - name: "Set up Python"
         uses: "actions/setup-python@v5"
         with:
-          python-version: "{{ "${{ matrix.python }}" }}"
+          {%- raw %}
+          python-version: "${{ matrix.python }}"
+          {%- endraw %}
           allow-prereleases: true
       {%- if cookiecutter.binary_dependencies %}
       - name: "Install Binary Test Dependencies"
@@ -57,5 +84,5 @@ jobs:
           PULP_API_ROOT: "${{ matrix.pulp_api_root }}"
           {%- endraw %}
         run: |
-          .ci/run_container.sh make test
+          .ci/run_container.sh make {% if cookiecutter.unittests %}live{% endif %}test
 ...

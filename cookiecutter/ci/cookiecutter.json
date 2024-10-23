@@ -7,6 +7,7 @@
   "binary_dependencies": "",
   "current_version": "0.0.1.dev",
   "test_matrix": null,
+  "unittests": false,
   "__app_label_suffix": "{{ cookiecutter.app_label and '-' + cookiecutter.app_label }}",
   "__project_name": "pulp-cli{{ cookiecutter.__app_label_suffix }}",
   "repository": "https://github.com/pulp/{{ cookiecutter.__project_name }}",

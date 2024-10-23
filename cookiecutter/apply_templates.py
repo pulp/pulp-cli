@@ -15,7 +15,7 @@ from cookiecutter.main import cookiecutter
 @click.option("--bootstrap/--no-bootstrap")
 @click.option("--force/--no-force")
 @click.command()
-def main(bootstrap: bool, force: bool):
+def main(bootstrap: bool, force: bool) -> None:
     cutter_path = Path(__file__).parent
 
     if bootstrap:

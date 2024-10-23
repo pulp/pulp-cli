@@ -20,7 +20,9 @@ build:
 {%- endif %}
 	pyproject-build -n
 
-black:
+black: format
+
+format:
 	isort .
 {%- if cookiecutter.glue %}
 	cd pulp-glue{{ cookiecutter.__app_label_suffix }}; isort .
@@ -51,6 +53,18 @@ tests/cli.toml:
 test: | tests/cli.toml
 	python3 -m pytest -v tests {%- if cookiecutter.glue %} pulp-glue{{ cookiecutter.__app_label_suffix }}/tests {%- endif %}
 	{%- if cookiecutter.__app_label_suffix == "" %} cookiecutter/pulp_filter_extension.py {%- endif %}
+
+livetest: | tests/cli.toml
+	python3 -m pytest -v tests {%- if cookiecutter.glue %} pulp-glue{{ cookiecutter.__app_label_suffix }}/tests {%- endif %} -m live
+
+unittest:
+	python3 -m pytest -v tests {%- if cookiecutter.glue %} pulp-glue{{ cookiecutter.__app_label_suffix }}/tests {%- endif %}
+	{%- if cookiecutter.__app_label_suffix == "" %} cookiecutter/pulp_filter_extension.py {%- endif %} -m "not live"
+{%- if cookiecutter.glue %}
+
+unittest_glue:
+	python3 -m pytest -v pulp-glue{{ cookiecutter.__app_label_suffix }}/tests -m "not live"
+{%- endif %}
 {%- if cookiecutter.docs %}
 
 docs:
