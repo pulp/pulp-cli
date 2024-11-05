@@ -4,10 +4,12 @@
 import json
 import logging
 import os
+import ssl
 import typing as t
 import warnings
 from collections import defaultdict
 from dataclasses import dataclass
+from functools import cached_property
 from io import BufferedReader
 from urllib.parse import urlencode, urljoin
 
@@ -199,6 +201,7 @@ class OpenAPI:
         self._dry_run: bool = dry_run
         self._headers = CIMultiDict(headers or {})
         self._verify_ssl = verify_ssl
+
         self._auth_provider = auth_provider
         self._cert = cert
         self._key = key
@@ -217,7 +220,7 @@ class OpenAPI:
         self.load_api(refresh_cache=refresh_cache)
 
     def _setup_session(self) -> None:
-        # This is specific requests library.
+        # This is specific for the requests library.
 
         if self._verify_ssl is False:
             urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -249,6 +252,20 @@ class OpenAPI:
     @property
     def cid(self) -> str | None:
         return self._headers.get("Correlation-Id")
+
+    @cached_property
+    def ssl_context(self) -> t.Union[ssl.SSLContext, bool]:
+        _ssl_context: t.Union[ssl.SSLContext, bool]
+        if self._verify_ssl is False:
+            _ssl_context = False
+        else:
+            if isinstance(self._verify_ssl, str):
+                _ssl_context = ssl.create_default_context(cafile=self._verify_ssl)
+            else:
+                _ssl_context = ssl.create_default_context()
+            if self._cert is not None:
+                _ssl_context.load_cert_chain(self._cert, self._key)
+        return _ssl_context
 
     def load_api(self, refresh_cache: bool = False) -> None:
         # TODO: Find a way to invalidate caches on upstream change
