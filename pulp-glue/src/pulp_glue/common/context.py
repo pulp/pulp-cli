@@ -10,6 +10,7 @@ from pathlib import Path
 
 from packaging.specifiers import SpecifierSet
 
+from pulp_glue.common.authentication import GlueAuthProvider
 from pulp_glue.common.exceptions import (
     NotImplementedFake,
     OpenAPIError,
@@ -20,7 +21,7 @@ from pulp_glue.common.exceptions import (
     UnsafeCallError,
 )
 from pulp_glue.common.i18n import get_translation
-from pulp_glue.common.openapi import BasicAuthProvider, OpenAPI
+from pulp_glue.common.openapi import OpenAPI
 
 if sys.version_info >= (3, 11):
     import tomllib
@@ -203,6 +204,20 @@ def patch_upstream_pulp_replicate_request_body(api: OpenAPI) -> None:
     operation.pop("requestBody", None)
 
 
+@api_quirk(PluginRequirement("core", specifier="<3.85"))
+def patch_security_scheme_mutual_tls(api: OpenAPI) -> None:
+    # Trick to allow tls cert auth on older Pulp.
+    if (components := api.api_spec.get("components")) is not None:
+        if (security_schemes := components.get("securitySchemes")) is not None:
+            # Only if it is going to be idempotent...
+            if "gluePatchTLS" not in security_schemes:
+                security_schemes["gluePatchTLS"] = {"type": "mutualTLS"}
+                for method, path in api.operations.values():
+                    operation = api.api_spec["paths"][path][method]
+                    if "security" in operation:
+                        operation["security"].append({"gluePatchTLS": []})
+
+
 class PulpContext:
     """
     Abstract class for the global PulpContext object.
@@ -338,8 +353,13 @@ class PulpContext:
         api_kwargs: dict[str, t.Any] = {
             "base_url": config["base_url"],
         }
-        if "username" in config:
-            api_kwargs["auth_provider"] = BasicAuthProvider(config["username"], config["password"])
+        api_kwargs["auth_provider"] = GlueAuthProvider(
+            **{
+                k: v
+                for k, v in config.items()
+                if k in {"username", "password", "client_id", "client_secret", "cert", "key"}
+            }
+        )
         if "headers" in config:
             api_kwargs["headers"] = dict(
                 (header.split(":", maxsplit=1) for header in config["headers"])
@@ -388,7 +408,9 @@ class PulpContext:
                 # Deprecated for 'auth'.
                 if not password:
                     password = self.prompt("password", hide_input=True)
-                self._api_kwargs["auth_provider"] = BasicAuthProvider(username, password)
+                self._api_kwargs["auth_provider"] = GlueAuthProvider(
+                    username=username, password=password
+                )
                 warnings.warn(
                     "Using 'username' and 'password' with 'PulpContext' is deprecated. "
                     "Use an auth provider with the 'auth_provider' argument instead.",
@@ -402,10 +424,10 @@ class PulpContext:
                 )
             except OpenAPIError as e:
                 raise PulpException(str(e))
+            self._patch_api_spec()
             # Rerun scheduled version checks
             for plugin_requirement in self._needed_plugins:
                 self.needs_plugin(plugin_requirement)
-            self._patch_api_spec()
         return self._api
 
     @property

@@ -37,25 +37,28 @@ CONFIG_LOCATIONS = [
     str(Path(click.utils.get_app_dir("pulp"), "cli.toml")),
 ]
 FORMAT_CHOICES = list(REGISTERED_OUTPUT_FORMATTERS.keys())
-SETTINGS = [
+REQUIRED_SETTINGS = {
     "base_url",
     "api_root",
     "domain",
     "headers",
+    "verify_ssl",
+    "format",
+    "dry_run",
+    "timeout",
+    "verbose",
+}
+OPTIONAL_SETTINGS = {
     "username",
     "password",
     "client_id",
     "client_secret",
     "cert",
     "key",
-    "verify_ssl",
-    "format",
     "chunk_size",
-    "dry_run",
-    "timeout",
-    "verbose",
     "plugins",
-]
+}
+SETTINGS = REQUIRED_SETTINGS | OPTIONAL_SETTINGS
 
 
 def headers_callback(
@@ -96,10 +99,10 @@ CONFIG_OPTIONS = [
     click.option("--password", default=None, help=_("Password on pulp server")),
     click.option("--client-id", default=None, help=_("OAuth2 client ID")),
     click.option("--client-secret", default=None, help=_("OAuth2 client secret")),
-    click.option("--cert", default="", help=_("Path to client certificate")),
+    click.option("--cert", default=None, help=_("Path to client certificate")),
     click.option(
         "--key",
-        default="",
+        default=None,
         help=_("Path to client private key. Not required if client cert contains this."),
     ),
     click.option("--verify-ssl/--no-verify-ssl", default=True, help=_("Verify SSL connection")),
@@ -198,15 +201,11 @@ def validate_config(config: dict[str, t.Any], strict: bool = False) -> None:
         and all((isinstance(item, str) for item in config["plugins"]))
     ):
         errors.append(_("'plugins' must be a list of strings"))
-    unknown_settings = set(config.keys()) - set(SETTINGS)
+    unknown_settings = set(config.keys()) - SETTINGS
     if unknown_settings:
         errors.append(_("Unknown settings: '{}'.").format("','".join(unknown_settings)))
     if strict:
-        missing_settings = (
-            set(SETTINGS)
-            - set(config.keys())
-            - {"plugins", "username", "password", "client_id", "client_secret", "chunk_size"}
-        )
+        missing_settings = REQUIRED_SETTINGS - set(config.keys())
         if missing_settings:
             errors.append(_("Missing settings: '{}'.").format("','".join(missing_settings)))
     if errors:
