@@ -3,6 +3,7 @@ import os
 ALLOWED_EXPORT_PATHS = ["/tmp"]
 ANALYTICS = False
 ALLOWED_CONTENT_CHECKSUMS = ["sha1", "sha256", "sha512"]
+TASK_DIAGNOSTICS = ["memory"]
 
 pulp_https = os.environ.get("PULP_HTTPS", "false").lower() == "true"
 pulp_oauth2 = os.environ.get("PULP_OAUTH2", "false").lower() == "true"
