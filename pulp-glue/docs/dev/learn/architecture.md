@@ -8,7 +8,7 @@ To this end, `pulp-glue` is the go-to place for all known version-dependent Pulp
 
 ## OpenAPI
 
-This is the part in `pulp_glue` that uses [`requests`](https://requests.readthedocs.io/) to perform low level communication with an `OpenAPI 3` compatible server.
+This is the part in `pulp_glue` that uses http to perform low level communication with an `OpenAPI 3` compatible server.
 It is not anticipated that users of Pulp Glue need to interact with this abstraction layer.
 
 ## Contexts
