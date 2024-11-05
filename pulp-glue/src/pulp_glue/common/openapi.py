@@ -1,10 +1,14 @@
+import asyncio
 import json
 import logging
 import os
+import ssl
 import typing as t
 import warnings
-from collections import defaultdict
+from base64 import b64encode
 from dataclasses import dataclass
+from datetime import datetime, timedelta
+from functools import cached_property
 from io import BufferedReader
 from urllib.parse import urlencode, urljoin
 
@@ -13,6 +17,7 @@ import urllib3
 from multidict import CIMultiDict, CIMultiDictProxy, MutableMultiMapping
 
 from pulp_glue.common import __version__
+from pulp_glue.common.authentication import AuthProviderBase
 from pulp_glue.common.exceptions import (
     OpenAPIError,
     PulpAuthenticationFailed,
@@ -38,7 +43,7 @@ class _Request:
     operation_id: str
     method: str
     url: str
-    headers: MutableMultiMapping[str] | CIMultiDictProxy[str] | t.MutableMapping[str, str]
+    headers: MutableMultiMapping[str] | CIMultiDict[str] | t.MutableMapping[str, str]
     params: dict[str, str] | None = None
     data: dict[str, t.Any] | str | None = None
     files: dict[str, tuple[str, UploadType, str]] | None = None
@@ -52,99 +57,6 @@ class _Response:
     body: bytes
 
 
-class AuthProviderBase:
-    """
-    Base class for auth providers.
-
-    This abstract base class will analyze the authentication proposals of the openapi specs.
-    Different authentication schemes should be implemented by subclasses.
-    Returned auth objects need to be compatible with `requests.auth.AuthBase`.
-    """
-
-    def basic_auth(self, scopes: list[str]) -> requests.auth.AuthBase | None:
-        """Implement this to provide means of http basic auth."""
-        return None
-
-    def http_auth(
-        self, security_scheme: dict[str, t.Any], scopes: list[str]
-    ) -> requests.auth.AuthBase | None:
-        """Select a suitable http auth scheme or return None."""
-        # https://www.iana.org/assignments/http-authschemes/http-authschemes.xhtml
-        if security_scheme["scheme"] == "basic":
-            result = self.basic_auth(scopes)
-            if result:
-                return result
-        return None
-
-    def oauth2_client_credentials_auth(
-        self, flow: t.Any, scopes: list[str]
-    ) -> requests.auth.AuthBase | None:
-        """Implement this to provide other authentication methods."""
-        return None
-
-    def oauth2_auth(
-        self, security_scheme: dict[str, t.Any], scopes: list[str]
-    ) -> requests.auth.AuthBase | None:
-        """Select a suitable oauth2 flow or return None."""
-        # Check flows by preference.
-        if "clientCredentials" in security_scheme["flows"]:
-            flow = security_scheme["flows"]["clientCredentials"]
-            # Select this flow only if it claims to provide all the necessary scopes.
-            # This will allow subsequent auth proposals to be considered.
-            if set(scopes) - set(flow["scopes"]):
-                return None
-
-            result = self.oauth2_client_credentials_auth(flow, scopes)
-            if result:
-                return result
-        return None
-
-    def __call__(
-        self,
-        security: list[dict[str, list[str]]],
-        security_schemes: dict[str, dict[str, t.Any]],
-    ) -> requests.auth.AuthBase | None:
-        # Reorder the proposals by their type to prioritize properly.
-        # Select only single mechanism proposals on the way.
-        proposed_schemes: dict[str, dict[str, list[str]]] = defaultdict(dict)
-        for proposal in security:
-            if len(proposal) == 0:
-                # Empty proposal: No authentication needed. Shortcut return.
-                return None
-            if len(proposal) == 1:
-                name, scopes = list(proposal.items())[0]
-                proposed_schemes[security_schemes[name]["type"]][name] = scopes
-            # Ignore all proposals with more than one required auth mechanism.
-
-        # Check for auth schemes by preference.
-        if "oauth2" in proposed_schemes:
-            for name, scopes in proposed_schemes["oauth2"].items():
-                result = self.oauth2_auth(security_schemes[name], scopes)
-                if result:
-                    return result
-
-        # if we get here, either no-oauth2, OR we couldn't find creds
-        if "http" in proposed_schemes:
-            for name, scopes in proposed_schemes["http"].items():
-                result = self.http_auth(security_schemes[name], scopes)
-                if result:
-                    return result
-
-        raise OpenAPIError(_("No suitable auth scheme found."))
-
-
-class BasicAuthProvider(AuthProviderBase):
-    """
-    Implementation for AuthProviderBase providing basic auth with fixed `username`, `password`.
-    """
-
-    def __init__(self, username: str, password: str):
-        self.auth = requests.auth.HTTPBasicAuth(username, password)
-
-    def basic_auth(self, scopes: list[str]) -> requests.auth.AuthBase | None:
-        return self.auth
-
-
 class OpenAPI:
     """
     The abstraction Layer to interact with a server providing an openapi v3 specification.
@@ -154,7 +66,7 @@ class OpenAPI:
             served api.
         doc_path: Path of the json api doc schema relative to the `base_url`.
         headers: Dictionary of additional request headers.
-        auth_provider: Object that returns requests auth objects according to the api spec.
+        auth_provider: Object that can be questioned for credentials according to the api spec.
         cert: Client certificate used for auth.
         key: Matching key for `cert` if not already included.
         verify_ssl: Whether to check server TLS certificates agains a CA.
@@ -210,9 +122,8 @@ class OpenAPI:
         self._dry_run: bool = dry_run
         self._headers = CIMultiDict(headers or {})
         self._verify_ssl = verify_ssl
+
         self._auth_provider = auth_provider
-        self._cert = cert
-        self._key = key
 
         self._headers.update(
             {
@@ -224,6 +135,10 @@ class OpenAPI:
             self._headers["Correlation-Id"] = cid
 
         self._setup_session()
+
+        self._oauth2_lock = asyncio.Lock()
+        self._oauth2_token: str | None = None
+        self._oauth2_expires: datetime = datetime.now()
 
         self.load_api(refresh_cache=refresh_cache)
 
@@ -237,21 +152,18 @@ class OpenAPI:
         # Don't redirect, because carrying auth accross redirects is unsafe.
         self._session.max_redirects = 0
         self._session.headers.update(self._headers)
-        if self._auth_provider:
-            if self._cert or self._key:
-                raise OpenAPIError(_("Cannot use both 'auth' and 'cert'."))
-        else:
-            if self._cert and self._key:
-                self._session.cert = (self._cert, self._key)
-            elif self._cert:
-                self._session.cert = self._cert
-            elif self._key:
-                raise OpenAPIError(_("Cert is required if key is set."))
         session_settings = self._session.merge_environment_settings(
             self._base_url, {}, None, self._verify_ssl, None
         )
         self._session.verify = session_settings["verify"]
         self._session.proxies = session_settings["proxies"]
+
+        if self._auth_provider is not None and self._auth_provider.can_complete_mutualTLS():
+            cert, key = self._auth_provider.tls_credentials()
+            if key is not None:
+                self._session.cert = (cert, key)
+            else:
+                self._session.cert = cert
 
     @property
     def base_url(self) -> str:
@@ -260,6 +172,20 @@ class OpenAPI:
     @property
     def cid(self) -> str | None:
         return self._headers.get("Correlation-Id")
+
+    @cached_property
+    def ssl_context(self) -> t.Union[ssl.SSLContext, bool]:
+        _ssl_context: t.Union[ssl.SSLContext, bool]
+        if self._verify_ssl is False:
+            _ssl_context = False
+        else:
+            if isinstance(self._verify_ssl, str):
+                _ssl_context = ssl.create_default_context(cafile=self._verify_ssl)
+            else:
+                _ssl_context = ssl.create_default_context()
+            if self._auth_provider is not None and self._auth_provider.can_complete_mutualTLS():
+                _ssl_context.load_cert_chain(*self._auth_provider.tls_credentials())
+        return _ssl_context
 
     def load_api(self, refresh_cache: bool = False) -> None:
         # TODO: Find a way to invalidate caches on upstream change
@@ -272,6 +198,7 @@ class OpenAPI:
         )
         try:
             if refresh_cache:
+                # Fake that we did not find the cache.
                 raise OSError()
             with open(apidoc_cache, "rb") as f:
                 data: bytes = f.read()
@@ -554,23 +481,100 @@ class OpenAPI:
             for key, (name, _dummy, content_type) in request.files.items():
                 self._debug_callback(3, f"{key} <- {name} [{content_type}]")
 
+    def _select_proposal(
+        self,
+        request: _Request,
+    ) -> dict[str, list[str]] | None:
+        proposal = None
+        if (
+            request.security
+            and "Authorization" not in request.headers
+            and "Authorization" not in self._session.headers
+            and self._auth_provider is not None
+        ):
+            security_schemes: dict[str, dict[str, t.Any]] = self.api_spec["components"][
+                "securitySchemes"
+            ]
+            try:
+                proposal = next(
+                    (
+                        p
+                        for p in request.security
+                        if self._auth_provider.can_complete(p, security_schemes)
+                    )
+                )
+            except StopIteration:
+                raise OpenAPIError(_("No suitable auth scheme found."))
+        return proposal
+
+    async def _authenticate_request(
+        self,
+        request: _Request,
+        proposal: dict[str, list[str]],
+    ) -> bool:
+        assert self._auth_provider is not None
+
+        may_retry = False
+        security_schemes = self.api_spec["components"]["securitySchemes"]
+        for scheme_name, scopes in proposal.items():
+            scheme = security_schemes[scheme_name]
+            if scheme["type"] == "http":
+                if scheme["scheme"] == "basic":
+                    username, password = await self._auth_provider.http_basic_credentials()
+                    secret = b64encode(username + b":" + password)
+                    # TODO Should we add, amend or replace the existing auth header?
+                    request.headers["Authorization"] = f"Basic {secret.decode()}"
+                else:
+                    raise NotImplementedError("Auth scheme: http " + scheme["scheme"])
+            elif scheme["type"] == "oauth2":
+                flow = scheme["flows"].get("clientCredentials")
+                if flow is None:
+                    raise NotImplementedError("OAuth2: Only client credential flow is available.")
+                # Allow retry if the token was taken from cache.
+                may_retry = not await self._fetch_oauth2_token(flow)
+                request.headers["Authorization"] = f"Bearer {self._oauth2_token}"
+            elif scheme["type"] == "mutualTLS":
+                # At this point, we assume the cert has already been loaded into the sslcontext.
+                pass
+            else:
+                raise NotImplementedError("Auth type: " + scheme["type"])
+        return may_retry
+
+    async def _fetch_oauth2_token(self, flow: dict[str, t.Any]) -> bool:
+        assert self._auth_provider is not None
+
+        new_token = False
+        async with self._oauth2_lock:
+            now = datetime.now()
+            if self._oauth2_token is None or self._oauth2_expires < now:
+                # Get or refresh token.
+                client_id, client_secret = await self._auth_provider.oauth2_client_credentials()
+                secret = b64encode(client_id + b":" + client_secret)
+                data: dict[str, t.Any] = {"grant_type": "client_credentials"}
+                scopes = flow.get("scopes")
+                if scopes:
+                    data["scopes"] = " ".join(scopes)
+                request = _Request(
+                    operation_id="",
+                    method="post",
+                    url=flow["tokenUrl"],
+                    headers={"Authorization": f"Basic {secret.decode()}"},
+                    data=data,
+                )
+                response = self._send_request(request)
+                if response.status_code < 200 or response.status_code >= 300:
+                    raise OpenAPIError("Failed to fetch OAuth2 token")
+                result = json.loads(response.body)
+                self._oauth2_token = result["access_token"]
+                self._oauth2_expires = now + timedelta(seconds=result["expires_in"])
+                new_token = True
+        return new_token
+
     def _send_request(
         self,
         request: _Request,
     ) -> _Response:
         # This function uses requests to translate the _Request into a _Response.
-        if request.security and self._auth_provider:
-            if "Authorization" in self._session.headers:
-                # Bad idea, but you wanted it that way.
-                auth = None
-            else:
-                auth = self._auth_provider(
-                    request.security, self.api_spec["components"]["securitySchemes"]
-                )
-        else:
-            # No auth required? Don't provide it.
-            # No auth_provider available? Hope for the best (should do the trick for cert auth).
-            auth = None
         try:
             r = self._session.request(
                 request.method,
@@ -579,7 +583,6 @@ class OpenAPI:
                 headers=request.headers,
                 data=request.data,
                 files=request.files,
-                auth=auth,
             )
             response = _Response(status_code=r.status_code, headers=r.headers, body=r.content)
         except requests.TooManyRedirects as e:
@@ -676,8 +679,9 @@ class OpenAPI:
 
         headers = self._extract_params("header", path_spec, method_spec, parameters)
 
+        rel_url = path
         for name, value in self._extract_params("path", path_spec, method_spec, parameters).items():
-            path = path.replace("{" + name + "}", value)
+            rel_url = path.replace("{" + name + "}", value)
 
         query_params = self._extract_params("query", path_spec, method_spec, parameters)
 
@@ -687,7 +691,7 @@ class OpenAPI:
                     names=", ".join(parameters.keys()), operation_id=operation_id
                 )
             )
-        url = urljoin(self._base_url, path)
+        url = urljoin(self._base_url, rel_url)
 
         request = self._render_request(
             path_spec,
@@ -703,7 +707,32 @@ class OpenAPI:
         if self._dry_run and request.method.upper() not in SAFE_METHODS:
             raise UnsafeCallError(_("Call aborted due to safe mode"))
 
+        may_retry = False
+        if proposal := self._select_proposal(request):
+            assert len(proposal) == 1, "More complex security proposals are not implemented."
+            may_retry = asyncio.run(self._authenticate_request(request, proposal))
+
         response = self._send_request(request)
+
+        if proposal is not None:
+            assert self._auth_provider is not None
+            if may_retry and response.status_code == 401:
+                self._oauth2_token = None
+                asyncio.run(self._authenticate_request(request, proposal))
+                response = self._send_request(request)
+
+            if response.status_code >= 200 and response.status_code < 300:
+                asyncio.run(
+                    self._auth_provider.auth_success_hook(
+                        proposal, self.api_spec["components"]["securitySchemes"]
+                    )
+                )
+            elif response.status_code == 401:
+                asyncio.run(
+                    self._auth_provider.auth_failure_hook(
+                        proposal, self.api_spec["components"]["securitySchemes"]
+                    )
+                )
 
         self._log_response(response)
         return self._parse_response(method_spec, response)

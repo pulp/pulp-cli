@@ -1,11 +1,11 @@
 import json
-import os
 import typing as t
 
 import pytest
 
+from pulp_glue.common.authentication import GlueAuthProvider
 from pulp_glue.common.context import PulpContext
-from pulp_glue.common.openapi import BasicAuthProvider, OpenAPI
+from pulp_glue.common.openapi import OpenAPI
 
 FAKE_OPENAPI_SPEC = json.dumps(
     {
@@ -23,8 +23,6 @@ def pulp_ctx(
     if not any((mark.name == "live" for mark in request.node.iter_markers())):
         pytest.fail("This fixture can only be used in live (integration) tests.")
 
-    if os.environ.get("PULP_OAUTH2", "").lower() == "true":
-        pytest.skip("Pulp-glue in isolation does not support OAuth2 atm.")
     verbose = request.config.getoption("verbose")
     settings = pulp_cli_settings["cli"].copy()
     settings["debug_callback"] = lambda i, s: i <= verbose and print(s)
@@ -58,18 +56,15 @@ def fake_pulp_ctx(
     if not any((mark.name == "live" for mark in request.node.iter_markers())):
         pytest.fail("This fixture can only be used in live (integration) tests.")
 
-    if os.environ.get("PULP_OAUTH2", "").lower() == "true":
-        pytest.skip("Pulp-glue in isolation does not support OAuth2 atm.")
     verbose = request.config.getoption("verbose")
     settings = pulp_cli_settings["cli"]
-    if "username" in settings:
-        username = settings.get("username")
-        assert isinstance(username, str)
-        password = settings.get("password")
-        assert isinstance(password, str)
-        auth_provider = BasicAuthProvider(username, password)
-    else:
-        auth_provider = None
+    auth_provider = GlueAuthProvider(
+        **{
+            k: v
+            for k, v in settings.items()
+            if k in {"username", "password", "client_id", "client_secret", "cert", "key"}
+        }
+    )
     return PulpContext(
         api_kwargs={
             "base_url": settings["base_url"],

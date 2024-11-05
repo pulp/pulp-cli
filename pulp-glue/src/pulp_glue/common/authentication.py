@@ -1,97 +1,140 @@
 import typing as t
-from datetime import datetime, timedelta
-
-import requests
 
 
-class OAuth2ClientCredentialsAuth(requests.auth.AuthBase):
+class AuthProviderBase:
     """
-    This implements the OAuth2 ClientCredentials Grant authentication flow.
-    https://datatracker.ietf.org/doc/html/rfc6749#section-4.4
+    Base class for auth providers.
+
+    This abstract base class will analyze the authentication proposals of the openapi specs.
+    Different authentication schemes can be implemented in subclasses.
+    """
+
+    def can_complete_http_basic(self) -> bool:
+        return False
+
+    def can_complete_mutualTLS(self) -> bool:
+        return False
+
+    def can_complete_oauth2_client_credentials(self, scopes: list[str]) -> bool:
+        return False
+
+    def can_complete_scheme(self, scheme: dict[str, t.Any], scopes: list[str]) -> bool:
+        if scheme["type"] == "http":
+            if scheme["scheme"] == "basic":
+                return self.can_complete_http_basic()
+        elif scheme["type"] == "mutualTLS":
+            return self.can_complete_mutualTLS()
+        elif scheme["type"] == "oauth2":
+            for flow_name, flow in scheme["flows"].items():
+                if flow_name == "clientCredentials" and self.can_complete_oauth2_client_credentials(
+                    flow["scopes"]
+                ):
+                    return True
+        return False
+
+    def can_complete(
+        self, proposal: dict[str, list[str]], security_schemes: dict[str, dict[str, t.Any]]
+    ) -> bool:
+        for name, scopes in proposal.items():
+            scheme = security_schemes.get(name)
+            if scheme is None or not self.can_complete_scheme(scheme, scopes):
+                return False
+        # This covers the case where `[]` allows for no auth at all.
+        return True
+
+    async def auth_success_hook(
+        self, proposal: dict[str, list[str]], security_schemes: dict[str, dict[str, t.Any]]
+    ) -> None:
+        pass
+
+    async def auth_failure_hook(
+        self, proposal: dict[str, list[str]], security_schemes: dict[str, dict[str, t.Any]]
+    ) -> None:
+        pass
+
+    async def http_basic_credentials(self) -> tuple[bytes, bytes]:
+        raise NotImplementedError()
+
+    async def oauth2_client_credentials(self) -> tuple[bytes, bytes]:
+        raise NotImplementedError()
+
+    def tls_credentials(self) -> tuple[str, str | None]:
+        raise NotImplementedError()
+
+
+class BasicAuthProvider(AuthProviderBase):
+    """
+    AuthProvider providing basic auth with fixed `username`, `password`.
+    """
+
+    def __init__(self, username: t.AnyStr, password: t.AnyStr):
+        super().__init__()
+        self.username: bytes = username.encode("latin1") if isinstance(username, str) else username
+        self.password: bytes = password.encode("latin1") if isinstance(password, str) else password
+
+    def can_complete_http_basic(self) -> bool:
+        return True
+
+    async def http_basic_credentials(self) -> tuple[bytes, bytes]:
+        return self.username, self.password
+
+
+class GlueAuthProvider(AuthProviderBase):
+    """
+    AuthProvider allowing to be used with prepared credentials.
     """
 
     def __init__(
         self,
-        client_id: str,
-        client_secret: str,
-        token_url: str,
-        scopes: list[str] | None = None,
-        verify_ssl: str | bool | None = None,
+        *,
+        username: t.AnyStr | None = None,
+        password: t.AnyStr | None = None,
+        client_id: t.AnyStr | None = None,
+        client_secret: t.AnyStr | None = None,
+        cert: str | None = None,
+        key: str | None = None,
     ):
-        self._token_server_auth = requests.auth.HTTPBasicAuth(client_id, client_secret)
-        self._token_url = token_url
-        self._scopes = scopes
-        self._verify_ssl = verify_ssl
+        super().__init__()
+        self.username: bytes | None = None
+        self.password: bytes | None = None
+        self.client_id: bytes | None = None
+        self.client_secret: bytes | None = None
+        self.cert: str | None = cert
+        self.key: str | None = key
 
-        self._access_token: str | None = None
-        self._expire_at: datetime | None = None
+        if username is not None:
+            assert password is not None
+            self.username = username.encode("latin1") if isinstance(username, str) else username
+            self.password = password.encode("latin1") if isinstance(password, str) else password
+        if client_id is not None:
+            assert client_secret is not None
+            self.client_id = client_id.encode("latin1") if isinstance(client_id, str) else client_id
+            self.client_secret = (
+                client_secret.encode("latin1") if isinstance(client_secret, str) else client_secret
+            )
 
-    def __call__(self, request: requests.PreparedRequest) -> requests.PreparedRequest:
-        if self._expire_at is None or self._expire_at < datetime.now():
-            self._retrieve_token()
+        if cert is None and key is not None:
+            raise RuntimeError("Key can only be used together with a cert.")
 
-        assert self._access_token is not None
+    def can_complete_http_basic(self) -> bool:
+        return self.username is not None
 
-        request.headers["Authorization"] = f"Bearer {self._access_token}"
+    def can_complete_oauth2_client_credentials(self, scopes: list[str]) -> bool:
+        return self.client_id is not None
 
-        # Call to untyped function "register_hook" in typed context
-        request.register_hook("response", self._handle401)  # type: ignore[no-untyped-call]
+    def can_complete_mutualTLS(self) -> bool:
+        return self.cert is not None
 
-        return request
+    async def http_basic_credentials(self) -> tuple[bytes, bytes]:
+        assert self.username is not None
+        assert self.password is not None
+        return self.username, self.password
 
-    def _handle401(
-        self,
-        response: requests.Response,
-        **kwargs: t.Any,
-    ) -> requests.Response:
-        if response.status_code != 401:
-            return response
+    async def oauth2_client_credentials(self) -> tuple[bytes, bytes]:
+        assert self.client_id is not None
+        assert self.client_secret is not None
+        return self.client_id, self.client_secret
 
-        # If we get this far, probably the token is not valid anymore.
-
-        # Try to reach for a new token once.
-        self._retrieve_token()
-
-        assert self._access_token is not None
-
-        # Consume content and release the original connection
-        # to allow our new request to reuse the same one.
-        response.content
-        response.close()
-        prepared_new_request = response.request.copy()
-
-        prepared_new_request.headers["Authorization"] = f"Bearer {self._access_token}"
-
-        # Avoid to enter into an infinity loop.
-        # Call to untyped function "deregister_hook" in typed context
-        prepared_new_request.deregister_hook(  # type: ignore[no-untyped-call]
-            "response", self._handle401
-        )
-
-        # "Response" has no attribute "connection"
-        new_response: requests.Response = response.connection.send(prepared_new_request, **kwargs)
-        new_response.history.append(response)
-        new_response.request = prepared_new_request
-
-        return new_response
-
-    def _retrieve_token(self) -> None:
-        data = {
-            "grant_type": "client_credentials",
-        }
-
-        if self._scopes:
-            data["scope"] = " ".join(self._scopes)
-
-        response: requests.Response = requests.post(
-            self._token_url,
-            data=data,
-            auth=self._token_server_auth,
-            verify=self._verify_ssl,
-        )
-
-        response.raise_for_status()
-
-        token = response.json()
-        self._expire_at = datetime.now() + timedelta(seconds=token["expires_in"])
-        self._access_token = token["access_token"]
+    def tls_credentials(self) -> tuple[str, str | None]:
+        assert self.cert is not None
+        return (self.cert, self.key)
