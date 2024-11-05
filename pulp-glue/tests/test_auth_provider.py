@@ -70,10 +70,7 @@ class TestBasicAuthProvider:
         assert provider.can_complete_http_basic()
 
     def test_provides_username_and_password(self, provider: AuthProviderBase) -> None:
-        assert asyncio.run(provider.http_basic_credentials()) == (
-            b"user1",
-            b"password1",
-        )
+        assert asyncio.run(provider.http_basic_credentials()) == (b"user1", b"password1")
 
     def test_cannot_complete_mutualTLS(self, provider: AuthProviderBase) -> None:
         assert not provider.can_complete_mutualTLS()
