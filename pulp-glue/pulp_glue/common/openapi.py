@@ -30,19 +30,13 @@ ISO_DATETIME_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 class OpenAPIError(Exception):
     """Base Exception for errors related to using the openapi spec."""
 
-    pass
-
 
 class OpenAPIValidationError(OpenAPIError):
     """Exception raised for failed client side validation of parameters or request bodies."""
 
-    pass
-
 
 class UnsafeCallError(OpenAPIError):
     """Exception raised for POST, PUT, PATCH or DELETE calls with `safe_calls_only=True`."""
-
-    pass
 
 
 class AuthProviderBase:
@@ -174,45 +168,62 @@ class OpenAPI:
         user_agent: t.Optional[str] = None,
         cid: t.Optional[str] = None,
     ):
-        if verify is False:
-            urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+        self._debug_callback: t.Callable[[int, str], t.Any] = debug_callback or (lambda i, x: None)
+        self._base_url: str = base_url
+        self._doc_path: str = doc_path
+        self._safe_calls_only: bool = safe_calls_only
+        self._headers = headers or {}
+        self._verify = verify
+        self._auth_provider = auth_provider
+        self._cert = cert
+        self._key = key
 
-        self.debug_callback: t.Callable[[int, str], t.Any] = debug_callback or (lambda i, x: None)
-        self.base_url: str = base_url
-        self.doc_path: str = doc_path
-        self.safe_calls_only: bool = safe_calls_only
-        self.auth_provider = auth_provider
-
-        self._session: requests.Session = requests.session()
-        if self.auth_provider:
-            if cert or key:
-                raise OpenAPIError(_("Cannot use both 'auth' and 'cert'."))
-        else:
-            if cert and key:
-                self._session.cert = (cert, key)
-            elif cert:
-                self._session.cert = cert
-            elif key:
-                raise OpenAPIError(_("Cert is required if key is set."))
-        self._session.headers.update(
+        self._headers.update(
             {
                 "User-Agent": user_agent or f"Pulp-glue openapi parser ({__version__})",
                 "Accept": "application/json",
             }
         )
         if cid:
-            self._session.headers["Correlation-Id"] = cid
-        if headers:
-            self._session.headers.update(headers)
-        self._session.max_redirects = 0
+            self._headers["Correlation-Id"] = cid
 
+        self._setup_session()
+
+        self.load_api(refresh_cache=refresh_cache)
+
+    def _setup_session(self) -> None:
+        # This is specific requests library.
+
+        if self._verify is False:
+            urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+        self._session: requests.Session = requests.session()
+        # Don't redirect, because carrying auth accross redirects is unsafe.
+        self._session.max_redirects = 0
+        self._session.headers.update(self._headers)
+        if self._auth_provider:
+            if self._cert or self._key:
+                raise OpenAPIError(_("Cannot use both 'auth' and 'cert'."))
+        else:
+            if self._cert and self._key:
+                self._session.cert = (self._cert, self._key)
+            elif self._cert:
+                self._session.cert = self._cert
+            elif self._key:
+                raise OpenAPIError(_("Cert is required if key is set."))
         session_settings = self._session.merge_environment_settings(
-            base_url, {}, None, verify, None
+            self._base_url, {}, None, self._verify, None
         )
         self._session.verify = session_settings["verify"]
         self._session.proxies = session_settings["proxies"]
 
-        self.load_api(refresh_cache=refresh_cache)
+    @property
+    def base_url(self) -> str:
+        return self._base_url
+
+    @property
+    def cid(self) -> t.Optional[str]:
+        return self._headers.get("Correlation-Id")
 
     def load_api(self, refresh_cache: bool = False) -> None:
         # TODO: Find a way to invalidate caches on upstream change
@@ -220,7 +231,8 @@ class OpenAPI:
         apidoc_cache: str = os.path.join(
             os.path.expanduser(xdg_cache_home),
             "squeezer",
-            (self.base_url + "_" + self.doc_path).replace(":", "_").replace("/", "_") + "api.json",
+            (self._base_url + "_" + self._doc_path).replace(":", "_").replace("/", "_")
+            + "api.json",
         )
         try:
             if refresh_cache:
@@ -252,24 +264,26 @@ class OpenAPI:
 
     def _download_api(self) -> bytes:
         try:
-            response: requests.Response = self._session.get(urljoin(self.base_url, self.doc_path))
+            response: requests.Response = self._session.get(urljoin(self._base_url, self._doc_path))
         except requests.RequestException as e:
             raise OpenAPIError(str(e))
         response.raise_for_status()
-        if "Correlation-ID" in response.headers:
-            self._set_correlation_id(response.headers["Correlation-ID"])
+        if "Correlation-Id" in response.headers:
+            self._set_correlation_id(response.headers["Correlation-Id"])
         return response.content
 
     def _set_correlation_id(self, correlation_id: str) -> None:
-        if "Correlation-ID" in self._session.headers:
-            if self._session.headers["Correlation-ID"] != correlation_id:
+        if "Correlation-Id" in self._headers:
+            if self._headers["Correlation-Id"] != correlation_id:
                 raise OpenAPIError(
                     _("Correlation ID returned from server did not match. {} != {}").format(
-                        self._session.headers["Correlation-ID"], correlation_id
+                        self._headers["Correlation-Id"], correlation_id
                     )
                 )
         else:
-            self._session.headers["Correlation-ID"] = correlation_id
+            self._headers["Correlation-Id"] = correlation_id
+            # Do it for requests too...
+            self._session.headers["Correlation-Id"] = correlation_id
 
     def param_spec(
         self, operation_id: str, param_type: str, required: bool = False
@@ -420,7 +434,7 @@ class OpenAPI:
             # TextField
             # DateTimeField etc.
             # ChoiceField
-            # FielField (binary data)
+            # FileField (binary data)
             value = self.validate_string(schema, name, value)
         elif schema_type == "integer":
             # IntegerField
@@ -654,12 +668,12 @@ class OpenAPI:
         security: t.List[t.Dict[str, t.List[str]]] = method_spec.get(
             "security", self.api_spec.get("security", {})
         )
-        if security and self.auth_provider:
+        if security and self._auth_provider:
             if "Authorization" in self._session.headers:
                 # Bad idea, but you wanted it that way.
                 auth = None
             else:
-                auth = self.auth_provider(security, self.api_spec["components"]["securitySchemes"])
+                auth = self._auth_provider(security, self.api_spec["components"]["securitySchemes"])
         else:
             # No auth required? Don't provide it.
             # No auth_provider available? Hope for the best (should do the trick for cert auth).
@@ -684,7 +698,7 @@ class OpenAPI:
 
     def parse_response(self, method_spec: t.Dict[str, t.Any], response: requests.Response) -> t.Any:
         if response.status_code == 204:
-            return "{}"
+            return {}
 
         try:
             response_spec = method_spec["responses"][str(response.status_code)]
@@ -751,7 +765,7 @@ class OpenAPI:
                     names=", ".join(parameters.keys()), operation_id=operation_id
                 )
             )
-        url = urljoin(self.base_url, path)
+        url = urljoin(self._base_url, path)
 
         request: requests.PreparedRequest = self.render_request(
             path_spec,
@@ -763,12 +777,12 @@ class OpenAPI:
             validate_body=validate_body,
         )
 
-        self.debug_callback(1, f"{operation_id} : {method} {request.url}")
+        self._debug_callback(1, f"{operation_id} : {method} {request.url}")
         for key, value in request.headers.items():
-            self.debug_callback(2, f"  {key}: {value}")
+            self._debug_callback(2, f"  {key}: {value}")
         if request.body is not None:
-            self.debug_callback(3, f"{request.body!r}")
-        if self.safe_calls_only and method.upper() not in SAFE_METHODS:
+            self._debug_callback(3, f"{request.body!r}")
+        if self._safe_calls_only and method.upper() not in SAFE_METHODS:
             raise UnsafeCallError(_("Call aborted due to safe mode"))
         try:
             response: requests.Response = self._session.send(request)
@@ -781,14 +795,14 @@ class OpenAPI:
             )
         except requests.RequestException as e:
             raise OpenAPIError(str(e))
-        self.debug_callback(
+        self._debug_callback(
             1, _("Response: {status_code}").format(status_code=response.status_code)
         )
         for key, value in response.headers.items():
-            self.debug_callback(2, f"  {key}: {value}")
+            self._debug_callback(2, f"  {key}: {value}")
         if response.text:
-            self.debug_callback(3, f"{response.text}")
-        if "Correlation-ID" in response.headers:
-            self._set_correlation_id(response.headers["Correlation-ID"])
+            self._debug_callback(3, f"{response.text}")
+        if "Correlation-Id" in response.headers:
+            self._set_correlation_id(response.headers["Correlation-Id"])
         response.raise_for_status()
         return self.parse_response(method_spec, response)
