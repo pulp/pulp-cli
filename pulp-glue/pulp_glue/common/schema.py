@@ -42,6 +42,8 @@ def encode_param(value: t.Any) -> t.Any:
         return value.strftime(ISO_DATETIME_FORMAT)
     elif isinstance(value, datetime.date):
         return value.strftime(ISO_DATE_FORMAT)
+    elif isinstance(value, bool):
+        return "true" if value else "false"
     else:
         return value
 
