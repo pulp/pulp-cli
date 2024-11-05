@@ -1,6 +1,4 @@
-# copyright (c) 2020, Matthias Dellweg
-# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
-
+import asyncio
 import json
 import logging
 import os
@@ -13,6 +11,8 @@ from functools import cached_property
 from io import BufferedReader
 from urllib.parse import urlencode, urljoin
 
+import aiofiles
+import aiohttp
 import requests
 import urllib3
 from multidict import CIMultiDict, MutableMultiMapping
@@ -284,7 +284,7 @@ class OpenAPI:
             self._parse_api(data)
         except Exception:
             # Try again with a freshly downloaded version
-            data = self._download_api()
+            data = asyncio.run(self._download_api())
             self._parse_api(data)
             # Write to cache as it seems to be valid
             os.makedirs(os.path.dirname(apidoc_cache), exist_ok=True)
@@ -304,15 +304,20 @@ class OpenAPI:
             if method in {"get", "put", "post", "delete", "options", "head", "patch", "trace"}
         }
 
-    def _download_api(self) -> bytes:
+    async def _download_api(self) -> bytes:
         try:
-            response: requests.Response = self._session.get(urljoin(self._base_url, self._doc_path))
-        except requests.RequestException as e:
+            connector = aiohttp.TCPConnector(ssl=self.ssl_context)
+            async with aiohttp.ClientSession(
+                connector=connector, headers=self._headers, ssl=self.ssl_context
+            ) as session:
+                async with session.get(urljoin(self._base_url, self._doc_path)) as response:
+                    response.raise_for_status()
+                    data = await response.read()
+                if "Correlation-Id" in response.headers:
+                    self._set_correlation_id(response.headers["Correlation-Id"])
+        except aiohttp.ClientError as e:
             raise OpenAPIError(str(e))
-        response.raise_for_status()
-        if "Correlation-Id" in response.headers:
-            self._set_correlation_id(response.headers["Correlation-Id"])
-        return response.content
+        return data
 
     def _set_correlation_id(self, correlation_id: str) -> None:
         if "Correlation-Id" in self._headers:
