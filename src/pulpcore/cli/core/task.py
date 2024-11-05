@@ -1,13 +1,17 @@
+import asyncio
 import re
 from contextlib import suppress
 from datetime import datetime
 from pathlib import Path
 
+import aiofiles
+import aiohttp
 import click
 
 from pulp_glue.common.context import (
     DATETIME_FORMATS,
     PluginRequirement,
+    PulpContext,
     PulpEntityContext,
 )
 from pulp_glue.common.exceptions import PulpException
@@ -175,6 +179,20 @@ def cancel(
         task_ctx.cancel(task_ctx.pulp_href)
 
 
+async def _download_artifacts(
+    pulp_ctx: PulpContext, urls: dict[str, str], profile_artifact_dir: Path
+) -> None:
+    async with aiohttp.ClientSession() as session:
+        for name, url in urls.items():
+            profile_artifact_path = profile_artifact_dir / name
+            click.echo(_("Downloading {path}").format(path=profile_artifact_path))
+            async with session.get(url, ssl=pulp_ctx.api.ssl_context) as response:
+                assert response.status == 200
+                async with aiofiles.open(profile_artifact_path, "wb") as fp:
+                    async for chunk in response.content.iter_chunked(1024):
+                        await fp.write(chunk)
+
+
 @task.command()
 @href_option
 @uuid_option
@@ -197,13 +215,7 @@ def profile_artifact_urls(
         uuid = uuid_match.group("uuid")
         profile_artifact_dir = Path(".") / f"task_profile-{task_name}-{uuid}"
         profile_artifact_dir.mkdir(exist_ok=True)
-        with pulp_ctx.api._session as session:
-            for name, url in urls.items():
-                profile_artifact_path = profile_artifact_dir / name
-                click.echo(_("Downloading {path}").format(path=profile_artifact_path))
-                response = session.get(url)
-                response.raise_for_status()
-                profile_artifact_path.write_bytes(response.content)
+        asyncio.run(_download_artifacts(pulp_ctx, urls, profile_artifact_dir))
 
 
 @task.command()
