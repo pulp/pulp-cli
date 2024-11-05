@@ -213,8 +213,6 @@ def main(
     api_kwargs = dict(
         base_url=base_url,
         headers=dict((header.split(":", maxsplit=1) for header in headers)),
-        cert=cert,
-        key=key,
         verify_ssl=verify_ssl,
         refresh_cache=refresh_api,
         dry_run=dry_run,
@@ -230,6 +228,8 @@ def main(
         timeout=timeout,
         username=username,
         password=password,
+        cert=cert,
+        key=key,
         oauth2_client_id=client_id,
         oauth2_client_secret=client_secret,
         chunk_size=chunk_size,

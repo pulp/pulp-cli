@@ -1,3 +1,4 @@
+import asyncio
 import datetime
 import json
 import re
@@ -7,11 +8,10 @@ from contextlib import closing
 from functools import lru_cache, wraps
 
 import click
-import requests
 import schema as s
 import yaml
 
-from pulp_glue.common.authentication import OAuth2ClientCredentialsAuth
+from pulp_glue.common.authentication import AuthProviderBase
 from pulp_glue.common.context import (
     DATETIME_FORMATS,
     DEFAULT_LIMIT,
@@ -31,7 +31,6 @@ from pulp_glue.common.context import (
 )
 from pulp_glue.common.exceptions import PulpException, PulpNoWait
 from pulp_glue.common.i18n import get_translation
-from pulp_glue.common.openapi import AuthProviderBase
 
 if sys.version_info >= (3, 13):
     from warnings import deprecated
@@ -165,6 +164,8 @@ class PulpCLIContext(PulpContext):
         domain: str = "default",
         username: str | None = None,
         password: str | None = None,
+        cert: str | None = None,
+        key: str | None = None,
         oauth2_client_id: str | None = None,
         oauth2_client_secret: str | None = None,
         chunk_size: int | None = None,
@@ -173,8 +174,9 @@ class PulpCLIContext(PulpContext):
         self.password = password
         self.oauth2_client_id = oauth2_client_id
         self.oauth2_client_secret = oauth2_client_secret
-        if not api_kwargs.get("cert"):
-            api_kwargs["auth_provider"] = PulpCLIAuthProvider(pulp_ctx=self)
+        self.cert = cert
+        self.key = key
+        api_kwargs["auth_provider"] = PulpCLIAuthProvider(pulp_ctx=self)
 
         verify_ssl: bool | None = api_kwargs.pop("verify_ssl", None)
         super().__init__(
@@ -207,115 +209,133 @@ class PulpCLIContext(PulpContext):
         click.echo(formatter(result))
 
 
-if SECRET_STORAGE:
+class PulpCLIAuthProvider(AuthProviderBase):
+    """
+    The auth provider using cli promts to ask for missing passwords.
+    """
 
-    class SecretStorageBasicAuth(requests.auth.AuthBase):
-        def __init__(self, pulp_ctx: PulpCLIContext):
-            self.pulp_ctx = pulp_ctx
+    def __init__(self, pulp_ctx: PulpCLIContext):
+        super().__init__()
+        self.pulp_ctx = pulp_ctx
+        self._http_basic: tuple[bytes, bytes] | None = None
+        self._password_in_secretstorage: bool | None = None
+        self._oauth2_client_credentials: tuple[bytes, bytes] | None = None
+
+    def can_complete_http_basic(self) -> bool:
+        return self.pulp_ctx.username is not None
+
+    def can_complete_oauth2_client_credentials(self, scopes: list[str]) -> bool:
+        return self.pulp_ctx.oauth2_client_id is not None
+
+    def can_complete_mutualTLS(self) -> bool:
+        return self.pulp_ctx.cert is not None
+
+    def _fetch_password(self) -> bytes:
+        if SECRET_STORAGE:
             assert self.pulp_ctx.username is not None
-            self.password: str | None = None
-
-            self.attr: dict[str, str] = {
+            secret_attr: dict[str, str] = {
                 "service": "pulp-cli",
                 "base_url": self.pulp_ctx.api.base_url,
                 "api_path": self.pulp_ctx.api_path,
                 "username": self.pulp_ctx.username,
             }
-
-        def response_hook(self, response: requests.Response, **kwargs: t.Any) -> requests.Response:
-            # Example adapted from:
-            # https://docs.python-requests.org/en/latest/_modules/requests/auth/#HTTPDigestAuth
-            if 200 <= response.status_code < 300 and not self.password_in_manager:
-                if click.confirm(_("Add password to password manager?")):
-                    assert isinstance(self.password, str)
-
-                    with closing(secretstorage.dbus_init()) as connection:
-                        collection = secretstorage.get_default_collection(connection)
-                        collection.create_item(
-                            "Pulp CLI", self.attr, self.password.encode(), replace=True
-                        )
-            elif response.status_code == 401 and self.password_in_manager:
-                if click.confirm(_("Remove failed password from password manager?")):
-                    with closing(secretstorage.dbus_init()) as connection:
-                        collection = secretstorage.get_default_collection(connection)
-                        item = next(collection.search_items(self.attr), None)
-                        if item is not None:
-                            item.delete()
-                self.password = None
-            return response
-
-        def __call__(self, request: requests.PreparedRequest) -> requests.PreparedRequest:
-            assert self.pulp_ctx.username is not None
-            if self.password is None:
-                with closing(secretstorage.dbus_init()) as connection:
-                    collection = secretstorage.get_default_collection(connection)
-                    item = next(collection.search_items(self.attr), None)
-                    if item:
-                        self.password = item.get_secret().decode()
-                        self.password_in_manager = True
-                    else:
-                        self.password = str(click.prompt("Password", hide_input=True))
-                        self.password_in_manager = False
-            request.register_hook("response", self.response_hook)  # type: ignore [no-untyped-call]
-            return requests.auth.HTTPBasicAuth(  # type: ignore [no-any-return]
-                self.pulp_ctx.username, self.password
-            )(request)
-
-
-class PulpCLIAuthProvider(AuthProviderBase):
-    def __init__(self, pulp_ctx: PulpCLIContext):
-        self.pulp_ctx = pulp_ctx
-        self._memoized: dict[str, requests.auth.AuthBase | None] = {}
-
-    def basic_auth(self, scopes: list[str]) -> requests.auth.AuthBase | None:
-        if "BASIC_AUTH" not in self._memoized:
-            if self.pulp_ctx.username is None:
-                # No username -> No basic auth.
-                self._memoized["BASIC_AUTH"] = None
-            elif self.pulp_ctx.password is None:
-                # TODO give the user a chance to opt out.
-                if SECRET_STORAGE:
-                    # We could just try to fetch the password here,
-                    # but we want to get a grip on the response_hook.
-                    self._memoized["BASIC_AUTH"] = SecretStorageBasicAuth(self.pulp_ctx)
+            with closing(secretstorage.dbus_init()) as connection:
+                collection = secretstorage.get_default_collection(connection)
+                item = next(collection.search_items(secret_attr), None)
+                if item:
+                    password = item.get_secret()
+                    self._password_in_secretstorage = True
                 else:
-                    self._memoized["BASIC_AUTH"] = requests.auth.HTTPBasicAuth(
-                        self.pulp_ctx.username, click.prompt("Password", hide_input=True)
-                    )
-            else:
-                self._memoized["BASIC_AUTH"] = requests.auth.HTTPBasicAuth(
-                    self.pulp_ctx.username, self.pulp_ctx.password
-                )
-        return self._memoized["BASIC_AUTH"]
+                    password = click.prompt("Password", hide_input=True).encode("latin1")
+                    self._password_in_secretstorage = False
+        else:
+            password = click.prompt("Password", hide_input=True).encode("latin1")
+        return password
 
-    def oauth2_client_credentials_auth(
-        self, flow: t.Any, scopes: list[str]
-    ) -> requests.auth.AuthBase | None:
-        token_url = flow["tokenUrl"]
-        key = "OAUTH2_CLIENT_CREDENTIALS;" + token_url + ";" + ":".join(scopes)
-        if key not in self._memoized:
-            if self.pulp_ctx.oauth2_client_id is None:
-                # No client_id -> No oauth2 client credentials.
-                self._memoized[key] = None
-            elif self.pulp_ctx.oauth2_client_secret is None:
-                self._memoized[key] = OAuth2ClientCredentialsAuth(
-                    client_id=self.pulp_ctx.oauth2_client_id,
-                    client_secret=click.prompt("Client Secret"),
-                    token_url=flow["tokenUrl"],
-                    # Try to request all possible scopes.
-                    scopes=flow["scopes"],
-                    verify_ssl=self.pulp_ctx.verify_ssl,
-                )
+    async def http_basic_credentials(self) -> tuple[bytes, bytes]:
+        if self._http_basic is None:
+            assert self.pulp_ctx.username is not None
+
+            if self.pulp_ctx.password is not None:
+                password = self.pulp_ctx.password.encode("latin1")
             else:
-                self._memoized[key] = OAuth2ClientCredentialsAuth(
-                    client_id=self.pulp_ctx.oauth2_client_id,
-                    client_secret=self.pulp_ctx.oauth2_client_secret,
-                    token_url=flow["tokenUrl"],
-                    # Try to request all possible scopes.
-                    scopes=flow["scopes"],
-                    verify_ssl=self.pulp_ctx.verify_ssl,
+                password = await asyncio.get_running_loop().run_in_executor(
+                    None, self._fetch_password
                 )
-        return self._memoized[key]
+            self._http_basic = self.pulp_ctx.username.encode("latin1"), password
+        return self._http_basic
+
+    def _save_password_to_storage(self) -> None:
+        if click.confirm(_("Add password to password manager?")):
+            with closing(secretstorage.dbus_init()) as connection:
+                assert self.pulp_ctx.username is not None
+                assert self._http_basic is not None
+
+                secret_attr: dict[str, str] = {
+                    "service": "pulp-cli",
+                    "base_url": self.pulp_ctx.api.base_url,
+                    "api_path": self.pulp_ctx.api_path,
+                    "username": self.pulp_ctx.username,
+                }
+                password = self._http_basic[1]
+                collection = secretstorage.get_default_collection(connection)
+                collection.create_item("Pulp CLI", secret_attr, password, replace=True)
+
+    async def auth_success_hook(
+        self, proposal: dict[str, list[str]], security_schemes: dict[str, dict[str, t.Any]]
+    ) -> None:
+        if SECRET_STORAGE and self._password_in_secretstorage is False:
+            await asyncio.get_running_loop().run_in_executor(None, self._save_password_to_storage)
+        self._password_in_secretstorage = None
+
+    def _remove_password_from_storage(self) -> None:
+        if click.confirm(_("Remove failed password from password manager?")):
+            with closing(secretstorage.dbus_init()) as connection:
+                assert self.pulp_ctx.username is not None
+
+                secret_attr: dict[str, str] = {
+                    "service": "pulp-cli",
+                    "base_url": self.pulp_ctx.api.base_url,
+                    "api_path": self.pulp_ctx.api_path,
+                    "username": self.pulp_ctx.username,
+                }
+                collection = secretstorage.get_default_collection(connection)
+                item = next(collection.search_items(secret_attr), None)
+                if item is not None:
+                    item.delete()
+        self.password = None
+
+    async def auth_failure_hook(
+        self, proposal: dict[str, list[str]], security_schemes: dict[str, dict[str, t.Any]]
+    ) -> None:
+        if SECRET_STORAGE and self._password_in_secretstorage is True:
+            await asyncio.get_running_loop().run_in_executor(
+                None, self._remove_password_from_storage
+            )
+        self._password_in_secretstorage = None
+        self._http_basic = None
+        self._oauth2_client_credentials = None
+
+    def tls_credentials(self) -> tuple[str, str | None]:
+        assert self.pulp_ctx.cert is not None
+
+        return self.pulp_ctx.cert, self.pulp_ctx.key
+
+    def _fetch_client_secret(self) -> str:
+        return self.pulp_ctx.oauth2_client_secret or click.prompt("Client Secret", hide_input=True)
+
+    async def oauth2_client_credentials(self) -> tuple[bytes, bytes]:
+        if self._oauth2_client_credentials is None:
+            assert self.pulp_ctx.oauth2_client_id is not None
+
+            client_secret = await asyncio.get_running_loop().run_in_executor(
+                None, self._fetch_client_secret
+            )
+            self._oauth2_client_credentials = (
+                self.pulp_ctx.oauth2_client_id.encode("latin1"),
+                client_secret.encode("latin1"),
+            )
+        return self._oauth2_client_credentials
 
 
 ##############################################################################
