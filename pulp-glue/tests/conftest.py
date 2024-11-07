@@ -27,14 +27,18 @@ def fake_pulp_ctx(
         pytest.skip("Pulp-glue in isolation does not support OAuth2 atm.")
     verbose = request.config.getoption("verbose")
     settings = pulp_cli_settings["cli"]
+    if "username" in settings:
+        username = settings.get("username")
+        assert isinstance(username, str)
+        password = settings.get("password")
+        assert isinstance(password, str)
+        auth_provider = BasicAuthProvider(username, password)
+    else:
+        auth_provider = None
     return PulpContext(
         api_kwargs={
             "base_url": settings["base_url"],
-            "auth_provider": (
-                BasicAuthProvider(settings.get("username"), settings.get("password"))
-                if "username" in settings
-                else None
-            ),
+            "auth_provider": auth_provider,
             "cert": settings.get("cert"),
             "key": settings.get("key"),
             "debug_callback": lambda i, s: i <= verbose and print(s),

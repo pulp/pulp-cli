@@ -10,13 +10,15 @@ pytestmark = pytest.mark.glue
 def test_sending_no_scope_when_empty(monkeypatch: pytest.MonkeyPatch) -> None:
 
     class OAuth2MockResponse:
-        def raise_for_status(self):
+        def raise_for_status(self) -> None:
             return None
 
-        def json(self):
+        def json(self) -> t.Dict[str, t.Any]:
             return {"expires_in": 1, "access_token": "aaa"}
 
-    def _requests_post_mocked(url: str, data: t.Dict[str, t.Any], **kwargs: t.Any):
+    def _requests_post_mocked(
+        url: str, data: t.Dict[str, t.Any], **kwargs: t.Any
+    ) -> OAuth2MockResponse:
         assert "scope" not in data
         return OAuth2MockResponse()
 

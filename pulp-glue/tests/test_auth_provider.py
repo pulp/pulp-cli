@@ -1,11 +1,14 @@
+import typing as t
+
 import pytest
+from requests.auth import AuthBase
 
 from pulp_glue.common.openapi import AuthProviderBase, OpenAPIError
 
 pytestmark = pytest.mark.glue
 
 
-SECURITY_SCHEMES = {
+SECURITY_SCHEMES: t.Dict[str, dict[str, t.Any]] = {
     "A": {"type": "http", "scheme": "bearer"},
     "B": {"type": "http", "scheme": "basic"},
     "C": {
@@ -50,44 +53,53 @@ SECURITY_SCHEMES = {
 }
 
 
+class MockBasicAuth(AuthBase):
+    pass
+
+
+class MockOAuth2CCAuth(AuthBase):
+    pass
+
+
 def test_auth_provider_select_mechanism(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(AuthProviderBase, "basic_auth", lambda *args: "BASIC")
+    monkeypatch.setattr(AuthProviderBase, "basic_auth", lambda *args: MockBasicAuth())
     monkeypatch.setattr(
         AuthProviderBase,
         "oauth2_client_credentials_auth",
-        lambda *args: "OAUTH2_CLIENT_CREDENTIALS",
+        lambda *args: MockOAuth2CCAuth(),
     )
+    provider = AuthProviderBase()
 
     # Error if no auth scheme is available.
     with pytest.raises(OpenAPIError):
-        AuthProviderBase()([], SECURITY_SCHEMES)
+        provider([], SECURITY_SCHEMES)
 
     # Error if a nonexisting mechanism is proposed.
     with pytest.raises(KeyError):
-        AuthProviderBase()([{"foo": []}], SECURITY_SCHEMES)
+        provider([{"foo": []}], SECURITY_SCHEMES)
 
     # Succeed without mechanism for an empty proposal.
-    assert AuthProviderBase()([{}], SECURITY_SCHEMES) is None
+    assert provider([{}], SECURITY_SCHEMES) is None
 
     # Try select a not implemented auth.
     with pytest.raises(OpenAPIError):
-        AuthProviderBase()([{"A": []}], SECURITY_SCHEMES)
+        provider([{"A": []}], SECURITY_SCHEMES)
 
     # Ignore proposals with multiple mechanisms.
     with pytest.raises(OpenAPIError):
-        AuthProviderBase()([{"B": [], "C": []}], SECURITY_SCHEMES)
+        provider([{"B": [], "C": []}], SECURITY_SCHEMES)
 
     # Select Basic auth alone and from multiple.
-    assert AuthProviderBase()([{"B": []}], SECURITY_SCHEMES) == "BASIC"
-    assert AuthProviderBase()([{"A": []}, {"B": []}], SECURITY_SCHEMES) == "BASIC"
+    assert isinstance(provider([{"B": []}], SECURITY_SCHEMES), MockBasicAuth)
+    assert isinstance(provider([{"A": []}, {"B": []}], SECURITY_SCHEMES), MockBasicAuth)
 
     # Select oauth2 client credentials alone and over basic auth if scopes match.
-    assert AuthProviderBase()([{"D": []}], SECURITY_SCHEMES) == "OAUTH2_CLIENT_CREDENTIALS"
-    assert (
-        AuthProviderBase()([{"B": []}, {"D": []}], SECURITY_SCHEMES) == "OAUTH2_CLIENT_CREDENTIALS"
+    assert isinstance(provider([{"D": []}], SECURITY_SCHEMES), MockOAuth2CCAuth)
+    assert isinstance(provider([{"B": []}, {"D": []}], SECURITY_SCHEMES), MockOAuth2CCAuth)
+    assert isinstance(
+        provider([{"B": []}, {"D": ["read:pets"]}], SECURITY_SCHEMES), MockOAuth2CCAuth
     )
-    assert (
-        AuthProviderBase()([{"B": []}, {"D": ["read:pets"]}], SECURITY_SCHEMES)
-        == "OAUTH2_CLIENT_CREDENTIALS"
+    # Fall back to basic if scope does not match.
+    assert isinstance(
+        provider([{"B": []}, {"D": ["read:cattle"]}], SECURITY_SCHEMES), MockBasicAuth
     )
-    assert AuthProviderBase()([{"B": []}, {"D": ["read:cattle"]}], SECURITY_SCHEMES) == "BASIC"
