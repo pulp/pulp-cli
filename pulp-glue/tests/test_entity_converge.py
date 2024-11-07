@@ -11,7 +11,7 @@ pytestmark = pytest.mark.glue
 
 
 @pytest.fixture
-def file_remote(pulp_ctx: PulpContext) -> t.Dict[str, t.Any]:
+def file_remote(pulp_ctx: PulpContext) -> t.Iterator[t.Dict[str, t.Any]]:
     name = "".join(random.choices(string.ascii_letters, k=8))
     file_remote_ctx = PulpFileRemoteContext(pulp_ctx)
     yield file_remote_ctx.create(body={"name": name, "url": "https://localhost/"})
@@ -19,7 +19,7 @@ def file_remote(pulp_ctx: PulpContext) -> t.Dict[str, t.Any]:
 
 
 @pytest.fixture
-def file_repository(pulp_ctx: PulpContext) -> t.Dict[str, t.Any]:
+def file_repository(pulp_ctx: PulpContext) -> t.Iterator[t.Dict[str, t.Any]]:
     name = "".join(random.choices(string.ascii_letters, k=8))
     file_repository_ctx = PulpFileRepositoryContext(pulp_ctx)
     yield file_repository_ctx.create(body={"name": name})
