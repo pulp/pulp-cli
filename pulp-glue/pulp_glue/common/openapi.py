@@ -13,7 +13,7 @@ import urllib3
 
 from pulp_glue.common import __version__
 from pulp_glue.common.i18n import get_translation
-from pulp_glue.common.schema import ValidationError, transform
+from pulp_glue.common.schema import ValidationError, transform, encode_json
 
 translation = get_translation(__package__)
 _ = translation.gettext
@@ -364,15 +364,14 @@ class OpenAPI:
         except ValidationError as e:
             raise OpenAPIValidationError(str(e)) from e
 
-    def render_request_body(
+    def _render_request_body(
         self,
         method_spec: t.Dict[str, t.Any],
         body: t.Optional[t.Dict[str, t.Any]] = None,
         validate_body: bool = True,
     ) -> t.Tuple[
         t.Optional[str],
-        t.Optional[t.Dict[str, t.Any]],
-        t.Optional[t.Dict[str, t.Any]],
+        t.Optional[t.Union[t.Dict[str, t.Any], str]],
         t.Optional[t.List[t.Tuple[str, t.Tuple[str, UploadType, str]]]],
     ]:
         content_types: t.List[str] = []
@@ -381,18 +380,17 @@ class OpenAPI:
         except KeyError:
             if body is not None:
                 raise OpenAPIError(_("This operation does not expect a request body."))
-            return None, None, None, None
+            return None, None, None
         else:
             body_required = request_body_spec.get("required", False)
             if body is None and not body_required:
                 # shortcut
-                return None, None, None, None
+                return None, None, None
             content_types = list(request_body_spec["content"].keys())
         assert body is not None
 
         content_type: t.Optional[str] = None
-        data: t.Optional[t.Dict[str, t.Any]] = None
-        json: t.Optional[t.Dict[str, t.Any]] = None
+        data: t.Optional[t.Union[t.Dict[str, t.Any], str]] = None
         files: t.Optional[t.List[t.Tuple[str, t.Tuple[str, UploadType, str]]]] = None
 
         candidate_content_types = [
@@ -427,7 +425,7 @@ class OpenAPI:
                         continue
 
                 if content_type.startswith("application/json"):
-                    json = body
+                    data = encode_json(body)
                 elif content_type.startswith("application/x-www-form-urlencoded"):
                     data = body
                 elif content_type.startswith("multipart/form-data"):
@@ -459,7 +457,7 @@ class OpenAPI:
             else:
                 raise OpenAPIError(_("No valid content type found."))
 
-        return content_type, data, json, files
+        return content_type, data, files
 
     def render_request(
         self,
@@ -472,7 +470,7 @@ class OpenAPI:
         validate_body: bool = True,
     ) -> requests.PreparedRequest:
         method_spec = path_spec[method]
-        content_type, data, json, files = self.render_request_body(method_spec, body, validate_body)
+        content_type, data, files = self._render_request_body(method_spec, body, validate_body)
         security: t.List[t.Dict[str, t.List[str]]] = method_spec.get(
             "security", self.api_spec.get("security", {})
         )
@@ -486,6 +484,10 @@ class OpenAPI:
             # No auth required? Don't provide it.
             # No auth_provider available? Hope for the best (should do the trick for cert auth).
             auth = None
+        # For we encode the json on our side.
+        # Somehow this does not work properly for multipart...
+        if content_type is not None and content_type.startswith("application/json"):
+            headers["content-type"] = content_type
         request = self._session.prepare_request(
             requests.Request(
                 method,
@@ -494,7 +496,6 @@ class OpenAPI:
                 params=params,
                 headers=headers,
                 data=data,
-                json=json,
                 files=files,
             )
         )

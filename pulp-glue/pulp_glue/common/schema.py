@@ -1,6 +1,7 @@
 import base64
 import datetime
 import io
+import json
 import typing as t
 from contextlib import suppress
 
@@ -19,6 +20,20 @@ class SchemaError(ValueError):
 
 class ValidationError(ValueError):
     pass
+
+
+class OpenApi3JsonEncoder(json.JSONEncoder):
+    def default(self, o: t.Any) -> t.Any:
+        if isinstance(o, datetime.datetime):
+            return o.strftime(ISO_DATETIME_FORMAT)
+        elif isinstance(o, datetime.date):
+            return o.strftime(ISO_DATE_FORMAT)
+        else:
+            return super().default(o)
+
+
+def encode_json(o: t.Any) -> str:
+    return json.dumps(o, cls=OpenApi3JsonEncoder)
 
 
 def _assert_type(
