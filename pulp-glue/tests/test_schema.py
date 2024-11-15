@@ -4,7 +4,7 @@ import typing as t
 
 import pytest
 
-from pulp_glue.common.schema import SchemaError, ValidationError, transform
+from pulp_glue.common.schema import SchemaError, ValidationError, transform, encode_json
 
 COMPONENTS = {
     "aString": {"type": "string"},
@@ -363,3 +363,26 @@ def test_validation_failed(schema: t.Any, value: t.Any) -> None:
 def test_invalid_schema_raises(schema: t.Any, value: t.Any, exc_type: t.Type[Exception]) -> None:
     with pytest.raises(exc_type):
         assert transform(schema, "testvar", value, COMPONENTS)
+
+
+@pytest.mark.parametrize(
+    "obj, output",
+    [
+        pytest.param(None, "null", id="null"),
+        pytest.param(1, "1", id="integer"),
+        pytest.param(datetime.date(1970, 1, 1), '"1970-01-01"'),
+        pytest.param(datetime.datetime(1970, 1, 1, 12), '"1970-01-01T12:00:00.000000Z"'),
+    ],
+)
+def test_json_encoder(obj: t.Any, output: str) -> None:
+    assert encode_json(obj) == output
+
+
+def test_json_encoder_rejects_binary() -> None:
+    with pytest.raises(TypeError):
+        encode_json({"a": b"asdf"})
+
+
+def test_json_encoder_rejects_stream() -> None:
+    with pytest.raises(TypeError):
+        encode_json({"a": SOME_BYTES})
