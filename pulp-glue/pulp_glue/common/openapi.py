@@ -454,7 +454,7 @@ class OpenAPI:
 
         return content_type, data, files
 
-    def render_request(
+    def _send_request(
         self,
         path_spec: t.Dict[str, t.Any],
         method: str,
@@ -463,7 +463,7 @@ class OpenAPI:
         headers: t.Dict[str, str],
         body: t.Optional[t.Dict[str, t.Any]] = None,
         validate_body: bool = True,
-    ) -> requests.PreparedRequest:
+    ) -> requests.Response:
         method_spec = path_spec[method]
         content_type, data, files = self._render_request_body(method_spec, body, validate_body)
         security: t.List[t.Dict[str, t.List[str]]] = method_spec.get(
@@ -498,7 +498,45 @@ class OpenAPI:
             assert request.headers["content-type"].startswith(
                 content_type
             ), f"{request.headers['content-type']} != {content_type}"
-        return request
+        for key, value in request.headers.items():
+            self._debug_callback(2, f"  {key}: {value}")
+        if request.body is not None:
+            self._debug_callback(3, f"{request.body!r}")
+        if self._safe_calls_only and method.upper() not in SAFE_METHODS:
+            raise UnsafeCallError(_("Call aborted due to safe mode"))
+        try:
+            response = self._session.send(request)
+        except requests.TooManyRedirects as e:
+            assert e.response is not None
+            raise OpenAPIError(
+                _("Received redirect to '{url}'. Please check your CLI configuration.").format(
+                    url=e.response.headers["location"]
+                )
+            )
+        except requests.RequestException as e:
+            raise OpenAPIError(str(e))
+        self._debug_callback(
+            1, _("Response: {status_code}").format(status_code=response.status_code)
+        )
+        for key, value in response.headers.items():
+            self._debug_callback(2, f"  {key}: {value}")
+        if response.text:
+            self._debug_callback(3, f"{response.text}")
+        if "Correlation-Id" in response.headers:
+            self._set_correlation_id(response.headers["Correlation-Id"])
+        if response.status_code == 401:
+            raise PulpAuthenticationFailed(method_spec["operationId"])
+        if response.status_code == 403:
+            raise PulpNotAutorized(method_spec["operationId"])
+        try:
+            response.raise_for_status()
+        except requests.HTTPError as e:
+            if e.response is not None:
+                raise PulpHTTPError(str(e.response.text), e.response.status_code)
+            else:
+                raise PulpException(str(e))
+        # The next line still breaks the encapsulation of requests.
+        return response
 
     def parse_response(self, method_spec: t.Dict[str, t.Any], response: requests.Response) -> t.Any:
         if response.status_code == 204:
@@ -571,7 +609,9 @@ class OpenAPI:
             )
         url = urljoin(self._base_url, path)
 
-        request: requests.PreparedRequest = self.render_request(
+        self._debug_callback(1, f"{operation_id} : {method} {url}")
+
+        response: requests.Response = self._send_request(
             path_spec,
             method,
             url,
@@ -581,42 +621,4 @@ class OpenAPI:
             validate_body=validate_body,
         )
 
-        self._debug_callback(1, f"{operation_id} : {method} {request.url}")
-        for key, value in request.headers.items():
-            self._debug_callback(2, f"  {key}: {value}")
-        if request.body is not None:
-            self._debug_callback(3, f"{request.body!r}")
-        if self._safe_calls_only and method.upper() not in SAFE_METHODS:
-            raise UnsafeCallError(_("Call aborted due to safe mode"))
-        try:
-            response: requests.Response = self._session.send(request)
-        except requests.TooManyRedirects as e:
-            assert e.response is not None
-            raise OpenAPIError(
-                _("Received redirect to '{url}'. Please check your CLI configuration.").format(
-                    url=e.response.headers["location"]
-                )
-            )
-        except requests.RequestException as e:
-            raise OpenAPIError(str(e))
-        self._debug_callback(
-            1, _("Response: {status_code}").format(status_code=response.status_code)
-        )
-        for key, value in response.headers.items():
-            self._debug_callback(2, f"  {key}: {value}")
-        if response.text:
-            self._debug_callback(3, f"{response.text}")
-        if "Correlation-Id" in response.headers:
-            self._set_correlation_id(response.headers["Correlation-Id"])
-        if response.status_code == 401:
-            raise PulpAuthenticationFailed(operation_id)
-        if response.status_code == 403:
-            raise PulpNotAutorized(operation_id)
-        try:
-            response.raise_for_status()
-        except requests.HTTPError as e:
-            if e.response is not None:
-                raise PulpHTTPError(str(e.response.text), e.response.status_code)
-            else:
-                raise PulpException(str(e))
         return self.parse_response(method_spec, response)
