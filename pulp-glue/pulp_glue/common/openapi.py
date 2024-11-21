@@ -13,7 +13,7 @@ import urllib3
 
 from pulp_glue.common import __version__
 from pulp_glue.common.i18n import get_translation
-from pulp_glue.common.schema import ValidationError, transform, encode_json
+from pulp_glue.common.schema import ValidationError, encode_json, encode_param, validate
 
 translation = get_translation(__package__)
 _ = translation.gettext
@@ -329,10 +329,11 @@ class OpenAPI:
                 param = params.pop(name)
                 param_spec = param_specs.pop(name)
                 param_schema = param_spec.get("schema")
-                if param_schema:
-                    param = self.validate_schema(param_schema, name, param)
+                if param_schema is not None:
+                    self.validate_schema(param_schema, name, param)
 
-                if isinstance(param, t.List):
+                param = encode_param(param)
+                if isinstance(param, list):
                     if not param:
                         # Don't propagate an empty list here
                         continue
@@ -358,9 +359,9 @@ class OpenAPI:
             )
         return result
 
-    def validate_schema(self, schema: t.Any, name: str, value: t.Any) -> t.Any:
+    def validate_schema(self, schema: t.Any, name: str, value: t.Any) -> None:
         try:
-            return transform(schema, name, value, self.api_spec["components"]["schemas"])
+            validate(schema, name, value, self.api_spec["components"]["schemas"])
         except ValidationError as e:
             raise OpenAPIValidationError(str(e)) from e
 
@@ -414,7 +415,7 @@ class OpenAPI:
             if content_type:
                 if validate_body:
                     try:
-                        body = self.validate_schema(
+                        self.validate_schema(
                             request_body_spec["content"][content_type]["schema"],
                             "body",
                             body,
