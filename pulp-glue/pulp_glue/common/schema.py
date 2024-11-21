@@ -1,4 +1,3 @@
-import base64
 import datetime
 import io
 import json
@@ -34,6 +33,17 @@ class OpenApi3JsonEncoder(json.JSONEncoder):
 
 def encode_json(o: t.Any) -> str:
     return json.dumps(o, cls=OpenApi3JsonEncoder)
+
+
+def encode_param(value: t.Any) -> t.Any:
+    if isinstance(value, list):
+        return [encode_param(item) for item in value]
+    if isinstance(value, datetime.datetime):
+        return value.strftime(ISO_DATETIME_FORMAT)
+    elif isinstance(value, datetime.date):
+        return value.strftime(ISO_DATE_FORMAT)
+    else:
+        return value
 
 
 def _assert_type(
@@ -81,18 +91,19 @@ def _assert_min_max(schema: t.Any, name: str, value: t.Any) -> None:
                 )
 
 
-def transform(schema: t.Any, name: str, value: t.Any, components: t.Dict[str, t.Any]) -> t.Any:
+def validate(schema: t.Any, name: str, value: t.Any, components: t.Dict[str, t.Any]) -> None:
     if (schema_ref := schema.get("$ref")) is not None:
         # From json-schema:
         # "All other properties in a "$ref" object MUST be ignored."
-        return transform_ref(schema_ref, name, value, components)
+        _validate_ref(schema_ref, name, value, components)
+        return
 
     if value is None:
         if schema.get("nullable", False):
-            return None
+            return
 
     if (schema_type := schema.get("type")) is not None:
-        if (typed_transform := _TYPED_TRANSFORMS.get(schema_type)) is not None:
+        if (typed_transform := _TYPED_VALIDATORS.get(schema_type)) is not None:
             value = typed_transform(schema, name, value, components)
         else:
             raise NotImplementedError(
@@ -104,36 +115,32 @@ def transform(schema: t.Any, name: str, value: t.Any, components: t.Dict[str, t.
         if isinstance(value, dict):
             value = value.copy()
             for sub_schema in all_of:
-                value = transform(sub_schema, name, value, components)
+                validate(sub_schema, name, value, components)
         else:
             # This may not even be a valid case according to the specification.
             # But it is used by drf-spectacular to reference enum-strings.
-            value = [transform(sub_schema, name, value, components) for sub_schema in all_of][0]
+            for sub_schema in all_of:
+                validate(sub_schema, name, value, components)
 
     if (any_of := schema.get("anyOf")) is not None:
         for sub_schema in any_of:
             with suppress(ValidationError):
-                value = transform(sub_schema, name, value, components)
+                validate(sub_schema, name, value, components)
                 break
         else:
             raise ValidationError(
                 _("'{name}' does not match any of the provide schemata.").format(name=name)
             )
-    return value
 
 
-def transform_ref(
-    schema_ref: str, name: str, value: t.Any, components: t.Dict[str, t.Any]
-) -> t.Any:
+def _validate_ref(schema_ref: str, name: str, value: t.Any, components: t.Dict[str, t.Any]) -> None:
     if not schema_ref.startswith("#/components/schemas/"):
         raise SchemaError(_("'{name}' contains an invalid reference.").format(name=name))
     schema_name = schema_ref[21:]
-    return transform(components[schema_name], name, value, components)
+    validate(components[schema_name], name, value, components)
 
 
-def transform_array(
-    schema: t.Any, name: str, value: t.Any, components: t.Dict[str, t.Any]
-) -> t.Any:
+def _validate_array(schema: t.Any, name: str, value: t.Any, components: t.Dict[str, t.Any]) -> None:
     _assert_type(name, value, list, "array")
     if (min_items := schema.get("minItems")) is not None:
         if len(value) < min_items:
@@ -153,22 +160,19 @@ def transform_array(
         if len(set(value)) != len(value):
             raise ValidationError(_("'{name}' is expected to have unique items.").format(name=name))
 
-    value = [
-        transform(schema["items"], f"{name}[{i}]", item, components) for i, item in enumerate(value)
-    ]
-    return value
+    for i, item in enumerate(value):
+        validate(schema["items"], f"{name}[{i}]", item, components)
 
 
-def transform_boolean(
+def _validate_boolean(
     schema: t.Any, name: str, value: t.Any, components: t.Dict[str, t.Any]
-) -> t.Any:
+) -> None:
     _assert_type(name, value, bool, "boolean")
-    return value
 
 
-def transform_integer(
+def _validate_integer(
     schema: t.Any, name: str, value: t.Any, components: t.Dict[str, t.Any]
-) -> t.Any:
+) -> None:
     _assert_type(name, value, int, "integer")
     _assert_min_max(schema, name, value)
 
@@ -180,71 +184,59 @@ def transform_integer(
                 )
             )
 
-    return value
 
-
-def transform_number(
+def _validate_number(
     schema: t.Any, name: str, value: t.Any, components: t.Dict[str, t.Any]
-) -> t.Any:
+) -> None:
     _assert_type(name, value, (float, int), "number")
     _assert_min_max(schema, name, value)
-    return value
 
 
-def transform_object(
+def _validate_object(
     schema: t.Any, name: str, value: t.Any, components: t.Dict[str, t.Any]
-) -> t.Any:
+) -> None:
     _assert_type(name, value, dict, "object")
-    new_value = {}
-    extra_value = {}
+    extra_values = {}
     properties = schema.get("properties", {})
     for pname, pvalue in value.items():
         if (pschema := properties.get(pname)) is not None:
-            new_value[pname] = transform(pschema, f"{name}[{pname}]", pvalue, components)
+            validate(pschema, f"{name}[{pname}]", pvalue, components)
         else:
-            extra_value[pname] = pvalue
+            extra_values[pname] = pvalue
     additional_properties: t.Union[bool, t.Dict[str, t.Any]] = schema.get(
         "additionalProperties", {}
     )
-    if len(extra_value) > 0:
+    if len(extra_values) > 0:
         if additional_properties is False:
             raise ValidationError(
                 _("'{name}' does not allow additional properties.").format(name=name)
             )
         elif isinstance(additional_properties, dict):
-            extra_value = {
-                pname: transform(additional_properties, f"{name}[{pname}]", pvalue, components)
-                for pname, pvalue in extra_value.items()
-            }
-    new_value.update(extra_value)
+            for value in extra_values.values():
+                validate(additional_properties, f"{name}[{pname}]", pvalue, components)
     if (required := schema.get("required")) is not None:
-        if missing_keys := set(required) - set(new_value.keys()):
+        if missing_keys := set(required) - set(value.keys()):
             raise ValidationError(
                 _("'{name}' is missing properties ({missing}).").format(
                     name=name, missing=", ".join(missing_keys)
                 )
             )
 
-    return new_value
 
-
-def transform_string(
+def _validate_string(
     schema: t.Any, name: str, value: t.Any, components: t.Dict[str, t.Any]
-) -> t.Any:
+) -> None:
     schema_format = schema.get("format")
     if schema_format == "byte":
         _assert_type(name, value, bytes, "bytes")
-        value = base64.b64encode(value).decode()
     elif schema_format == "binary":
         # This is not really useful for json serialization.
         # It is there for file transfer, e.g. in multipart.
         _assert_type(name, value, (bytes, io.BufferedReader, io.BytesIO), "binary")
     elif schema_format == "date":
         _assert_type(name, value, datetime.date, "date")
-        value = value.strftime(ISO_DATE_FORMAT)
     elif schema_format == "date-time":
         _assert_type(name, value, datetime.datetime, "date-time")
-        value = value.strftime(ISO_DATETIME_FORMAT)
     else:
         _assert_type(name, value, str, "string")
     if (enum := schema.get("enum")) is not None:
@@ -254,14 +246,13 @@ def transform_string(
                     name=name, enums=", ".join(enum)
                 )
             )
-    return value
 
 
-_TYPED_TRANSFORMS = {
-    "array": transform_array,
-    "boolean": transform_boolean,
-    "integer": transform_integer,
-    "number": transform_number,
-    "object": transform_object,
-    "string": transform_string,
+_TYPED_VALIDATORS = {
+    "array": _validate_array,
+    "boolean": _validate_boolean,
+    "integer": _validate_integer,
+    "number": _validate_number,
+    "object": _validate_object,
+    "string": _validate_string,
 }

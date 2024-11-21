@@ -4,7 +4,13 @@ import typing as t
 
 import pytest
 
-from pulp_glue.common.schema import SchemaError, ValidationError, transform, encode_json
+from pulp_glue.common.schema import (
+    SchemaError,
+    ValidationError,
+    encode_json,
+    encode_param,
+    validate,
+)
 
 COMPONENTS = {
     "aString": {"type": "string"},
@@ -56,165 +62,101 @@ SOME_BYTES = io.BytesIO(b"\000\001\002")
 
 
 @pytest.mark.parametrize(
-    "schema,value,expected",
+    "schema,value",
     [
-        pytest.param({}, None, None, id="empty_allows_null"),
-        pytest.param({}, "asdf", "asdf", id="empty_allows_string"),
-        pytest.param({}, 1, 1, id="empty_allows_int"),
-        pytest.param({"nullable": True}, None, None, id="nullable_allows_null"),
+        pytest.param({}, None, id="empty_allows_null"),
+        pytest.param({}, "asdf", id="empty_allows_string"),
+        pytest.param({}, 1, id="empty_allows_int"),
+        pytest.param({"nullable": True}, None, id="nullable_allows_null"),
+        pytest.param({"type": "string", "nullable": True}, None, id="typed_nullable_allows_null"),
+        pytest.param({"type": "string"}, "asdf", id="string"),
+        pytest.param({"type": "string", "format": "byte"}, b"\000\001\002", id="string_bytes"),
         pytest.param(
-            {"type": "string", "nullable": True}, None, None, id="typed_nullable_allows_null"
-        ),
-        pytest.param({"type": "string"}, "asdf", "asdf", id="string"),
-        pytest.param(
-            {"type": "string", "format": "byte"}, b"\000\001\002", "AAEC", id="string_bytes"
-        ),
-        pytest.param(
-            {"type": "string", "format": "binary"},
-            b"\000\001\002",
-            b"\000\001\002",
-            id="string_binary_allows_bytes",
+            {"type": "string", "format": "binary"}, b"\000\001\002", id="string_binary_allows_bytes"
         ),
         pytest.param(
-            {"type": "string", "format": "binary"},
-            SOME_BYTES,
-            SOME_BYTES,
-            id="string_binary_allows_bytestream",
+            {"type": "string", "format": "binary"}, SOME_BYTES, id="string_binary_allows_bytestream"
         ),
         pytest.param(
-            {"type": "string", "format": "date"},
-            datetime.date(2000, 1, 2),
-            "2000-01-02",
-            id="string_date",
+            {"type": "string", "format": "date"}, datetime.date(2000, 1, 2), id="string_date"
         ),
         pytest.param(
             {"type": "string", "format": "date"},
             datetime.datetime(2000, 1, 2, 12, 1),
-            "2000-01-02",
             id="string_date_allows_datetime",
         ),
         pytest.param(
             {"type": "string", "format": "date-time"},
             datetime.datetime(2000, 1, 2, 12, 2),
-            "2000-01-02T12:02:00.000000Z",
             id="string_date_allows_datetime",
         ),
+        pytest.param({"type": "string", "enum": ["a", "b", "c"]}, "b", id="string_enum"),
+        pytest.param({"type": "integer"}, 1, id="integer"),
+        pytest.param({"type": "integer", "maximum": 10}, 9, id="integer_max"),
         pytest.param(
-            {"type": "string", "enum": ["a", "b", "c"]},
-            "b",
-            "b",
-            id="string_enum",
+            {"type": "integer", "exclusiveMaximum": True, "maximum": 10}, 9, id="integer_exmax"
         ),
-        pytest.param({"type": "integer"}, 1, 1, id="integer"),
-        pytest.param({"type": "integer", "maximum": 10}, 9, 9, id="integer_max"),
+        pytest.param({"type": "integer", "maximum": 10}, 10, id="integer_max_1"),
+        pytest.param({"type": "integer", "minimum": 5}, 6, id="integer_min"),
         pytest.param(
-            {"type": "integer", "exclusiveMaximum": True, "maximum": 10}, 9, 9, id="integer_exmax"
+            {"type": "integer", "exclusiveMinimum": True, "minimum": 5}, 6, id="integer_exmin"
         ),
-        pytest.param({"type": "integer", "maximum": 10}, 10, 10, id="integer_max_1"),
-        pytest.param({"type": "integer", "minimum": 5}, 6, 6, id="integer_min"),
-        pytest.param(
-            {"type": "integer", "exclusiveMinimum": True, "minimum": 5}, 6, 6, id="integer_exmin"
-        ),
-        pytest.param({"type": "integer", "minimum": 5}, 5, 5, id="integer_min_1"),
-        pytest.param({"type": "integer", "maximum": 10, "minimum": 5}, 7, 7, id="integer_minmax"),
-        pytest.param({"type": "integer", "multipleOf": 7}, 14, 14, id="integer_multiple_of"),
-        pytest.param({"type": "boolean"}, False, False, id="boolean_false"),
-        pytest.param({"type": "boolean"}, True, True, id="boolean_true"),
-        pytest.param({"type": "number"}, 1.5, 1.5, id="number"),
-        pytest.param({"type": "number"}, 1.0, 1.0, id="whole_number"),
-        pytest.param({"type": "number"}, 1, 1, id="number_allows_integer"),
-        pytest.param({"$ref": "#/components/schemas/aString"}, "asdf", "asdf", id="reference"),
-        pytest.param(
-            {"$ref": "#/components/schemas/aReference"}, "asdf", "asdf", id="double_reference"
-        ),
+        pytest.param({"type": "integer", "minimum": 5}, 5, id="integer_min_1"),
+        pytest.param({"type": "integer", "maximum": 10, "minimum": 5}, 7, id="integer_minmax"),
+        pytest.param({"type": "integer", "multipleOf": 7}, 14, id="integer_multiple_of"),
+        pytest.param({"type": "boolean"}, False, id="boolean_false"),
+        pytest.param({"type": "boolean"}, True, id="boolean_true"),
+        pytest.param({"type": "number"}, 1.5, id="number"),
+        pytest.param({"type": "number"}, 1.0, id="whole_number"),
+        pytest.param({"type": "number"}, 1, id="number_allows_integer"),
+        pytest.param({"$ref": "#/components/schemas/aString"}, "asdf", id="reference"),
+        pytest.param({"$ref": "#/components/schemas/aReference"}, "asdf", id="double_reference"),
         pytest.param(
             {"$ref": "#/components/schemas/anInteger", "type": "string"},
             1,
-            1,
             id="reference_ignores_all_properties",
         ),
+        pytest.param({"$ref": "#/components/schemas/intArray"}, [], id="reference_array"),
         pytest.param(
-            {"$ref": "#/components/schemas/intArray"},
-            [],
-            [],
-            id="reference_array",
+            {"$ref": "#/components/schemas/intArray"}, [1, 1, 2, 3, 5], id="array_of_integer"
         ),
         pytest.param(
-            {"$ref": "#/components/schemas/intArray"},
-            [1, 1, 2, 3, 5],
-            [1, 1, 2, 3, 5],
-            id="array_of_integer",
+            {"$ref": "#/components/schemas/strArray"}, ["a", "b", "c"], id="array_of_strings"
         ),
+        pytest.param({"$ref": "#/components/schemas/minMaxArray"}, [1, 1, 3], id="min_max_array"),
         pytest.param(
-            {"$ref": "#/components/schemas/strArray"},
-            ["a", "b", "c"],
-            ["a", "b", "c"],
-            id="array_of_strings",
-        ),
-        pytest.param(
-            {"$ref": "#/components/schemas/minMaxArray"},
-            [1, 1, 3],
-            [1, 1, 3],
-            id="min_max_array",
+            {"$ref": "#/components/schemas/unspecifiedObject"}, {}, id="unspecified_object"
         ),
         pytest.param(
             {"$ref": "#/components/schemas/unspecifiedObject"},
-            {},
-            {},
-            id="unspecified_object",
-        ),
-        pytest.param(
-            {"$ref": "#/components/schemas/unspecifiedObject"},
-            {"a": 1},
             {"a": 1},
             id="unspecified_object_validates_anything",
         ),
+        pytest.param({"$ref": "#/components/schemas/emptyObject"}, {}, id="empty_object"),
         pytest.param(
-            {"$ref": "#/components/schemas/emptyObject"},
-            {},
-            {},
-            id="empty_object",
-        ),
-        pytest.param(
-            {"$ref": "#/components/schemas/objectAInt"},
-            {"a": 1},
-            {"a": 1},
-            id="object_with_properties",
+            {"$ref": "#/components/schemas/objectAInt"}, {"a": 1}, id="object_with_properties"
         ),
         pytest.param(
             {"$ref": "#/components/schemas/objectRequiredA"},
             {"a": 1},
-            {"a": 1},
             id="object_with_required_property",
         ),
-        pytest.param(
-            {"$ref": "#/components/schemas/allOfEnum"},
-            "b",
-            "b",
-            id="all_of",
-        ),
+        pytest.param({"$ref": "#/components/schemas/allOfEnum"}, "b", id="all_of"),
         pytest.param(
             {"allOf": [{"type": "date-time"}], "nullable": True},
             None,
-            None,
             id="all_composes_with_current_schema",
         ),
-        pytest.param(
-            {"$ref": "#/components/schemas/anyOfEnum"},
-            "f",
-            "f",
-            id="any_of_matches_one",
-        ),
+        pytest.param({"$ref": "#/components/schemas/anyOfEnum"}, "f", id="any_of_matches_one"),
         pytest.param(
             {"$ref": "#/components/schemas/allOfCompose"},
             {"a": datetime.date(2000, 1, 1), "b": datetime.date(2000, 1, 2)},
-            {"a": "2000-01-01", "b": "2000-01-02"},
             id="any_of_matches_one",
         ),
     ],
 )
-def test_transforms(schema: t.Any, value: t.Any, expected: t.Any) -> None:
-    assert transform(schema, "testvar", value, COMPONENTS) == expected
+def test_validates(schema: t.Any, value: t.Any) -> None:
+    validate(schema, "testvar", value, COMPONENTS)
 
 
 @pytest.mark.parametrize(
@@ -349,7 +291,7 @@ def test_transforms(schema: t.Any, value: t.Any, expected: t.Any) -> None:
 )
 def test_validation_failed(schema: t.Any, value: t.Any) -> None:
     with pytest.raises(ValidationError, match=r"'testvar.*'"):
-        transform(schema, "testvar", value, COMPONENTS)
+        validate(schema, "testvar", value, COMPONENTS)
 
 
 @pytest.mark.parametrize(
@@ -362,7 +304,7 @@ def test_validation_failed(schema: t.Any, value: t.Any) -> None:
 )
 def test_invalid_schema_raises(schema: t.Any, value: t.Any, exc_type: t.Type[Exception]) -> None:
     with pytest.raises(exc_type):
-        assert transform(schema, "testvar", value, COMPONENTS)
+        validate(schema, "testvar", value, COMPONENTS)
 
 
 @pytest.mark.parametrize(
@@ -386,3 +328,27 @@ def test_json_encoder_rejects_binary() -> None:
 def test_json_encoder_rejects_stream() -> None:
     with pytest.raises(TypeError):
         encode_json({"a": SOME_BYTES})
+
+
+@pytest.mark.parametrize(
+    "value",
+    (
+        pytest.param("asdf", id="string"),
+        pytest.param(42, id="integer"),
+    ),
+)
+def test_encode_param_keeps(value: t.Any) -> None:
+    assert encode_param(value) == value
+
+
+@pytest.mark.parametrize(
+    "value,expected",
+    (
+        pytest.param(datetime.date(2000, 1, 1), "2000-01-01", id="date"),
+        pytest.param(
+            datetime.datetime(2000, 1, 1, 12, 30), "2000-01-01T12:30:00.000000Z", id="datetime"
+        ),
+    ),
+)
+def test_encode_param_transforms(value: t.Any, expected: t.Any) -> None:
+    assert encode_param(value) == expected
