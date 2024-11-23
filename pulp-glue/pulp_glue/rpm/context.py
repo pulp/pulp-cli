@@ -7,7 +7,6 @@ from pulp_glue.common.context import (
     PulpContentContext,
     PulpDistributionContext,
     PulpEntityContext,
-    PulpException,
     PulpPublicationContext,
     PulpRemoteContext,
     PulpRepositoryContext,
@@ -15,6 +14,7 @@ from pulp_glue.common.context import (
     PulpViewSetContext,
     api_quirk,
 )
+from pulp_glue.common.exceptions import PulpException
 from pulp_glue.common.i18n import get_translation
 from pulp_glue.common.openapi import OpenAPI
 

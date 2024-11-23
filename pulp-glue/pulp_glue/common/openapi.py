@@ -12,8 +12,17 @@ import requests
 import urllib3
 
 from pulp_glue.common import __version__
+from pulp_glue.common.exceptions import (
+    OpenAPIError,
+    PulpAuthenticationFailed,
+    PulpException,
+    PulpHTTPError,
+    PulpNotAutorized,
+    UnsafeCallError,
+    ValidationError,
+)
 from pulp_glue.common.i18n import get_translation
-from pulp_glue.common.schema import ValidationError, encode_json, encode_param, validate
+from pulp_glue.common.schema import encode_json, encode_param, validate
 
 translation = get_translation(__package__)
 _ = translation.gettext
@@ -21,18 +30,6 @@ _ = translation.gettext
 UploadType = t.Union[bytes, t.IO[bytes]]
 
 SAFE_METHODS = ["GET", "HEAD", "OPTIONS"]
-
-
-class OpenAPIError(Exception):
-    """Base Exception for errors related to using the openapi spec."""
-
-
-class OpenAPIValidationError(OpenAPIError):
-    """Exception raised for failed client side validation of parameters or request bodies."""
-
-
-class UnsafeCallError(OpenAPIError):
-    """Exception raised for POST, PUT, PATCH or DELETE calls with `safe_calls_only=True`."""
 
 
 class AuthProviderBase:
@@ -360,10 +357,7 @@ class OpenAPI:
         return result
 
     def validate_schema(self, schema: t.Any, name: str, value: t.Any) -> None:
-        try:
-            validate(schema, name, value, self.api_spec["components"]["schemas"])
-        except ValidationError as e:
-            raise OpenAPIValidationError(str(e)) from e
+        validate(schema, name, value, self.api_spec["components"]["schemas"])
 
     def _render_request_body(
         self,
@@ -420,7 +414,7 @@ class OpenAPI:
                             "body",
                             body,
                         )
-                    except OpenAPIValidationError as e:
+                    except ValidationError as e:
                         errors.append(f"{content_type}: {e}")
                         # Try the next content-type
                         continue
@@ -449,14 +443,14 @@ class OpenAPI:
         else:
             # No known content-type left
             if errors:
-                raise OpenAPIError(
+                raise ValidationError(
                     _("Validation failed for '{operation_id}':\n  ").format(
                         operation_id=method_spec["operationId"]
                     )
                     + "\n  ".join(errors)
                 )
             else:
-                raise OpenAPIError(_("No valid content type found."))
+                raise ValidationError(_("No valid content type found."))
 
         return content_type, data, files
 
@@ -614,5 +608,15 @@ class OpenAPI:
             self._debug_callback(3, f"{response.text}")
         if "Correlation-Id" in response.headers:
             self._set_correlation_id(response.headers["Correlation-Id"])
-        response.raise_for_status()
+        if response.status_code == 401:
+            raise PulpAuthenticationFailed(operation_id)
+        if response.status_code == 403:
+            raise PulpNotAutorized(operation_id)
+        try:
+            response.raise_for_status()
+        except requests.HTTPError as e:
+            if e.response is not None:
+                raise PulpHTTPError(str(e.response.text), e.response.status_code)
+            else:
+                raise PulpException(str(e))
         return self.parse_response(method_spec, response)

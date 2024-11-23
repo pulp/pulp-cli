@@ -64,7 +64,7 @@ expect_deny () {
     cat log.err >&3
     false
   else
-    if grep -q "You do not have permission" log.err
+    if grep -q "Operation .* not authorized." log.err
     then
       echo "SUCCESS [! $@]" >&3
       OUTPUT="$(cat log.out)"

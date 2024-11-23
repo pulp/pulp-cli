@@ -7,10 +7,18 @@ import warnings
 from contextlib import ExitStack
 
 from packaging.specifiers import SpecifierSet
-from requests import HTTPError
 
+from pulp_glue.common.exceptions import (
+    NotImplementedFake,
+    OpenAPIError,
+    PulpEntityNotFound,
+    PulpException,
+    PulpHTTPError,
+    PulpNoWait,
+    UnsafeCallError,
+)
 from pulp_glue.common.i18n import get_translation
-from pulp_glue.common.openapi import BasicAuthProvider, OpenAPI, OpenAPIError, UnsafeCallError
+from pulp_glue.common.openapi import BasicAuthProvider, OpenAPI
 
 try:
     import tomllib
@@ -88,36 +96,6 @@ class PluginRequirement:
         return f"{self.__class__.__name__}({self.name}{self.specifier})"
 
     __repr__ = __str__
-
-
-class PulpException(Exception):
-    """The base exception `pulp-glue` will emit on expected error paths."""
-
-    pass
-
-
-class PulpEntityNotFound(PulpException):
-    """Exception to signify that an entity was not found."""
-
-    pass
-
-
-class PulpHTTPError(PulpException):
-    """Exception to indicate HTTP error responses."""
-
-    def __init__(self, msg: str, status_code: int) -> None:
-        super().__init__(msg)
-        self.status_code = status_code
-
-
-class PulpNoWait(Exception):
-    """Exception to indicate that a task continues running in the background."""
-
-    pass
-
-
-class NotImplementedFake(NotImplementedError):
-    pass
 
 
 def _preprocess_value(value: t.Any) -> t.Any:
@@ -475,18 +453,11 @@ class PulpContext:
                 body=body,
                 validate_body=validate_body,
             )
-        except UnsafeCallError as e:
+        except UnsafeCallError:
             if self.fake_mode:
                 raise NotImplementedFake(f"Operation {operation_id} was attempted in fake mode.")
             else:
-                raise PulpException(str(e))
-        except OpenAPIError as e:
-            raise PulpException(str(e))
-        except HTTPError as e:
-            if e.response is not None:
-                raise PulpHTTPError(str(e.response.text), e.response.status_code)
-            else:
-                raise PulpException(str(e))
+                raise
         # Asynchronous tasks seem to be reported by a dict containing only one key "task"
         if isinstance(result, dict) and ["task"] == list(result.keys()):
             task_href = result["task"]
