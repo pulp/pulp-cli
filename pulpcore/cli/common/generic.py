@@ -23,13 +23,12 @@ from pulp_glue.common.context import (
     PulpContext,
     PulpDistributionContext,
     PulpEntityContext,
-    PulpException,
-    PulpNoWait,
     PulpRemoteContext,
     PulpRepositoryContext,
     PulpRepositoryVersionContext,
     PulpViewSetContext,
 )
+from pulp_glue.common.exceptions import PulpException, PulpNoWait
 from pulp_glue.common.i18n import get_translation
 from pulp_glue.common.openapi import AuthProviderBase
 

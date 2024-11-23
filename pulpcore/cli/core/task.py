@@ -3,12 +3,8 @@ from contextlib import suppress
 from datetime import datetime
 
 import click
-from pulp_glue.common.context import (
-    DATETIME_FORMATS,
-    PluginRequirement,
-    PulpEntityContext,
-    PulpException,
-)
+from pulp_glue.common.context import DATETIME_FORMATS, PluginRequirement, PulpEntityContext
+from pulp_glue.common.exceptions import PulpException
 from pulp_glue.common.i18n import get_translation
 from pulp_glue.core.context import PulpTaskContext
 

@@ -10,10 +10,10 @@ from pulp_glue.common.context import (
     PulpContentGuardContext,
     PulpContext,
     PulpEntityContext,
-    PulpException,
     PulpViewSetContext,
     preprocess_payload,
 )
+from pulp_glue.common.exceptions import PulpException
 from pulp_glue.common.i18n import get_translation
 
 translation = get_translation(__package__)

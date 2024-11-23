@@ -2,7 +2,7 @@ import gettext
 import typing as t
 
 import click
-from pulp_glue.common.context import PulpException
+from pulp_glue.common.exceptions import PulpException
 from pulp_glue.rpm.context import PulpRpmPruneContext, PulpRpmRepositoryContext
 
 from pulpcore.cli.common.generic import (
