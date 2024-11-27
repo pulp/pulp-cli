@@ -18,15 +18,18 @@ def file_repository(pulp_ctx: PulpContext) -> t.Iterator[t.Dict[str, t.Any]]:
     repository_ctx.delete()
 
 
+@pytest.mark.live
 def test_fake_status(fake_pulp_ctx: PulpContext) -> None:
     fake_pulp_ctx.call("status_read")
 
 
+@pytest.mark.live
 def test_fake_repository_read(fake_pulp_ctx: PulpContext) -> None:
     repository_ctx = PulpFileRepositoryContext(fake_pulp_ctx)
     repository_ctx.list(limit=0, offset=0, parameters={})
 
 
+@pytest.mark.live
 def test_fake_repository_create(fake_pulp_ctx: PulpContext) -> None:
     name = "".join(random.choices(string.ascii_letters, k=8))
     repository_ctx = PulpFileRepositoryContext(fake_pulp_ctx)
@@ -35,6 +38,7 @@ def test_fake_repository_create(fake_pulp_ctx: PulpContext) -> None:
     assert result["pulp_href"] == "<FAKE ENTITY>"
 
 
+@pytest.mark.live
 def test_fake_repository_update(
     fake_pulp_ctx: PulpContext, file_repository: t.Dict[str, t.Any]
 ) -> None:
@@ -51,6 +55,7 @@ def test_fake_repository_update(
     repository_ctx.entity == file_repository
 
 
+@pytest.mark.live
 def test_fake_repository_delete(
     fake_pulp_ctx: PulpContext, file_repository: t.Dict[str, t.Any]
 ) -> None:
@@ -65,6 +70,7 @@ def test_fake_repository_delete(
     repository_ctx.entity == file_repository
 
 
+@pytest.mark.live
 def test_fake_raises(fake_pulp_ctx: PulpContext) -> None:
     name = "".join(random.choices(string.ascii_letters, k=8))
     with pytest.raises(NotImplementedFake):

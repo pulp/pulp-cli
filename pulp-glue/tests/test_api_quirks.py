@@ -7,6 +7,7 @@ from pulp_glue.common.context import _REGISTERED_API_QUIRKS, PulpContext
 pytestmark = pytest.mark.glue
 
 
+@pytest.mark.live
 def test_api_quirks_idempotent(pulp_ctx: PulpContext) -> None:
     """
     Test, that the applied api quirks can be applied twice without failing.

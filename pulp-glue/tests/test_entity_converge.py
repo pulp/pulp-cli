@@ -26,6 +26,7 @@ def file_repository(pulp_ctx: PulpContext) -> t.Dict[str, t.Any]:
     file_repository_ctx.delete()
 
 
+@pytest.mark.live
 def test_converge_crud(pulp_ctx: PulpContext) -> None:
     name = "".join(random.choices(string.ascii_letters, k=8))
     description = "".join(random.choices(string.ascii_letters, k=8))
@@ -54,6 +55,7 @@ def test_converge_crud(pulp_ctx: PulpContext) -> None:
     assert entity_ctx.converge(None)[0] is False
 
 
+@pytest.mark.live
 def test_converge_linked_object(
     pulp_ctx: PulpContext, file_repository: t.Dict[str, t.Any], file_remote: t.Dict[str, t.Any]
 ) -> None:
@@ -75,6 +77,7 @@ def test_converge_linked_object(
     assert entity_ctx.converge({"remote": ""})[0] is False
 
 
+@pytest.mark.live
 def test_converge_href(pulp_ctx: PulpContext, file_repository: t.Dict[str, t.Any]) -> None:
     entity_ctx = PulpFileRepositoryContext(pulp_ctx, pulp_href=file_repository["pulp_href"])
     assert entity_ctx.converge({})[0] is False

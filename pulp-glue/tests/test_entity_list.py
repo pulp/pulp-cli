@@ -18,6 +18,7 @@ def file_repository(pulp_ctx: PulpContext) -> t.Dict[str, t.Any]:
     file_repository_ctx.delete()
 
 
+@pytest.mark.live
 def test_converge_href(pulp_ctx: PulpContext, file_repository: t.Dict[str, t.Any]) -> None:
     entity_ctx = PulpFileRepositoryContext(pulp_ctx)
     assert (

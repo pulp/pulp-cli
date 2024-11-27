@@ -13,7 +13,9 @@ build:
 	cd pulp-glue; pyproject-build -n
 	pyproject-build -n
 
-black:
+black: format
+
+format:
 	isort .
 	cd pulp-glue; isort .
 	black .
@@ -35,6 +37,15 @@ tests/cli.toml:
 
 test: | tests/cli.toml
 	python3 -m pytest -v tests pulp-glue/tests cookiecutter/pulp_filter_extension.py
+
+livetest: | tests/cli.toml
+	python3 -m pytest -v tests pulp-glue/tests -m live
+
+unittest:
+	python3 -m pytest -v tests pulp-glue/tests cookiecutter/pulp_filter_extension.py -m "not live"
+
+unittest_glue:
+	python3 -m pytest -v pulp-glue/tests -m "not live"
 
 docs:
 	pulp-docs build

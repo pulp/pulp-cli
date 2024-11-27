@@ -43,6 +43,7 @@ class ScriptItem(pytest.Function):
         super().__init__(callobj=self._runscript, **kwargs)
         self.path = path
         self.add_marker("script")
+        self.add_marker("live")
         if path.parts[-3] == "scripts":
             self.add_marker(path.parts[-2])
 

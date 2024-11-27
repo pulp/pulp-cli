@@ -11,8 +11,35 @@ env:
   CONTAINER_RUNTIME: "docker"
 
 jobs:
+  unittest:
+    runs-on: "ubuntu-20.04"
+    steps:
+      - uses: "actions/checkout@v4"
+      - uses: "actions/cache@v4"
+        with:
+          path: "~/.cache/pip"
+          key: "${{ runner.os }}-pip-${{ hashFiles('**/*requirements.txt', '**/*constraints.lock', '**/setup.py', '**/pyproject.toml') }}"
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: "Download wheels"
+        uses: "actions/download-artifact@v4"
+        with:
+          name: "pulp_cli_packages"
+      - name: "Set up Python"
+        uses: "actions/setup-python@v5"
+        with:
+          python-version: "3.12"
+      - name: "Install Python Test Dependencies"
+        run: |
+          pip install dist/pulp_cli-*.whl pulp-glue/dist/pulp_glue-*.whl -r test_requirements.txt
+      - name: "Run tests"
+        run: |
+          make unittest
   test:
     runs-on: "ubuntu-20.04"
+    needs:
+      - "unittest"
     strategy:
       fail-fast: false
       matrix:
@@ -82,5 +109,5 @@ jobs:
           PULP_OAUTH2: "${{ matrix.pulp_oauth2 }}"
           PULP_API_ROOT: "${{ matrix.pulp_api_root }}"
         run: |
-          .ci/run_container.sh make test
+          .ci/run_container.sh make livetest
 ...
