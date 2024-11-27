@@ -40,9 +40,9 @@ note that we have styling and formatting conventions for both the code and our P
     We recommend running these before committing:
     ```bash
     pip install -r lint_requirements.txt  # setup, needed only once
-    make black  # reformatting with isort & black
+    make format  # reformatting with isort & black
     make lint  # checking with shellcheck, isort, black, flake8 and mypy
-    make black lint  # both in one command
+    make format lint  # both in one command
     ```
 
 Also please follow [The seven rules of a great Git commit message](https://chris.beams.io/posts/git-commit/).
