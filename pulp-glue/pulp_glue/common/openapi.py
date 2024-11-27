@@ -5,11 +5,13 @@ import json
 import os
 import typing as t
 from collections import defaultdict
+from dataclasses import dataclass
 from io import BufferedReader
 from urllib.parse import urljoin
 
 import requests
 import urllib3
+from multidict import CIMultiDict, MutableMultiMapping
 
 from pulp_glue.common import __version__
 from pulp_glue.common.exceptions import (
@@ -30,6 +32,13 @@ _ = translation.gettext
 UploadType = t.Union[bytes, t.IO[bytes]]
 
 SAFE_METHODS = ["GET", "HEAD", "OPTIONS"]
+
+
+@dataclass
+class _Response:
+    status_code: int
+    headers: t.Union[MutableMultiMapping[str], t.MutableMapping[str, str]]
+    body: bytes
 
 
 class AuthProviderBase:
@@ -150,7 +159,7 @@ class OpenAPI:
         self,
         base_url: str,
         doc_path: str,
-        headers: t.Optional[t.Dict[str, str]] = None,
+        headers: t.Optional[CIMultiDict[str]] = None,
         auth_provider: t.Optional[AuthProviderBase] = None,
         cert: t.Optional[str] = None,
         key: t.Optional[str] = None,
@@ -165,7 +174,7 @@ class OpenAPI:
         self._base_url: str = base_url
         self._doc_path: str = doc_path
         self._safe_calls_only: bool = safe_calls_only
-        self._headers = headers or {}
+        self._headers = CIMultiDict(headers or {})
         self._verify = verify
         self._auth_provider = auth_provider
         self._cert = cert
@@ -463,7 +472,7 @@ class OpenAPI:
         headers: t.Dict[str, str],
         body: t.Optional[t.Dict[str, t.Any]] = None,
         validate_body: bool = True,
-    ) -> requests.Response:
+    ) -> _Response:
         method_spec = path_spec[method]
         content_type, data, files = self._render_request_body(method_spec, body, validate_body)
         security: t.List[t.Dict[str, t.List[str]]] = method_spec.get(
@@ -535,10 +544,11 @@ class OpenAPI:
                 raise PulpHTTPError(str(e.response.text), e.response.status_code)
             else:
                 raise PulpException(str(e))
-        # The next line still breaks the encapsulation of requests.
-        return response
+        return _Response(
+            status_code=response.status_code, headers=response.headers, body=response.content
+        )
 
-    def parse_response(self, method_spec: t.Dict[str, t.Any], response: requests.Response) -> t.Any:
+    def _parse_response(self, method_spec: t.Dict[str, t.Any], response: _Response) -> t.Any:
         if response.status_code == 204:
             return {}
 
@@ -555,8 +565,10 @@ class OpenAPI:
                         expected=(", ").join(method_spec["responses"].keys()),
                     )
                 )
-        if "application/json" in response_spec["content"]:
-            return response.json()
+        content_type = response.headers.get("content-type")
+        if content_type is not None and content_type.startswith("application/json"):
+            assert content_type in response_spec["content"]
+            return json.loads(response.body)
         return None
 
     def call(
@@ -611,7 +623,7 @@ class OpenAPI:
 
         self._debug_callback(1, f"{operation_id} : {method} {url}")
 
-        response: requests.Response = self._send_request(
+        response = self._send_request(
             path_spec,
             method,
             url,
@@ -621,4 +633,4 @@ class OpenAPI:
             validate_body=validate_body,
         )
 
-        return self.parse_response(method_spec, response)
+        return self._parse_response(method_spec, response)
