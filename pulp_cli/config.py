@@ -70,10 +70,10 @@ CONFIG_OPTIONS = [
     click.option("--password", default=None, help=_("Password on pulp server")),
     click.option("--client-id", default=None, help=_("OAuth2 client ID")),
     click.option("--client-secret", default=None, help=_("OAuth2 client secret")),
-    click.option("--cert", default="", help=_("Path to client certificate")),
+    click.option("--cert", default=None, help=_("Path to client certificate")),
     click.option(
         "--key",
-        default="",
+        default=None,
         help=_("Path to client private key. Not required if client cert contains this."),
     ),
     click.option("--verify-ssl/--no-verify-ssl", default=True, help=_("Verify SSL connection")),
@@ -167,7 +167,7 @@ def validate_config(config: t.Dict[str, t.Any], strict: bool = False) -> None:
         missing_settings = (
             set(SETTINGS)
             - set(config.keys())
-            - {"plugins", "username", "password", "client_id", "client_secret"}
+            - {"plugins", "username", "password", "client_id", "client_secret", "cert", "key"}
         )
         if missing_settings:
             errors.append(_("Missing settings: '{}'.").format("','".join(missing_settings)))
