@@ -310,7 +310,7 @@ class OpenAPI:
             param_spec = {k: v for k, v in param_spec.items() if v.get("required", False)}
         return param_spec
 
-    def extract_params(
+    def _extract_params(
         self,
         param_in: str,
         path_spec: t.Dict[str, t.Any],
@@ -603,15 +603,15 @@ class OpenAPI:
         else:
             parameters = parameters.copy()
 
-        if any(self.extract_params("cookie", path_spec, method_spec, parameters)):
+        if any(self._extract_params("cookie", path_spec, method_spec, parameters)):
             raise NotImplementedError(_("Cookie parameters are not implemented."))
 
-        headers = self.extract_params("header", path_spec, method_spec, parameters)
+        headers = self._extract_params("header", path_spec, method_spec, parameters)
 
-        for name, value in self.extract_params("path", path_spec, method_spec, parameters).items():
+        for name, value in self._extract_params("path", path_spec, method_spec, parameters).items():
             path = path.replace("{" + name + "}", value)
 
-        query_params = self.extract_params("query", path_spec, method_spec, parameters)
+        query_params = self._extract_params("query", path_spec, method_spec, parameters)
 
         if any(parameters):
             raise OpenAPIError(
