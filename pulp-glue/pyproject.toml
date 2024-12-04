@@ -33,6 +33,15 @@ documentation = "https://pulpproject.org/pulp-glue/docs/dev/"
 repository = "https://github.com/pulp/pulp-cli"
 changelog = "https://pulpproject.org/pulp-cli/changes/"
 
+[project.entry-points."pulp_glue.plugins"]
+ansible = "pulp_glue.ansible"
+certguard = "pulp_glue.certguard"
+container = "pulp_glue.container"
+core = "pulp_glue.core"
+file = "pulp_glue.file"
+python = "pulp_glue.python"
+rpm = "pulp_glue.rpm"
+
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["pulp_glue.*"]
