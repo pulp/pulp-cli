@@ -475,8 +475,8 @@ class OpenAPI:
     ) -> _Response:
         method_spec = path_spec[method]
         content_type, data, files = self._render_request_body(method_spec, body, validate_body)
-        security: t.List[t.Dict[str, t.List[str]]] = method_spec.get(
-            "security", self.api_spec.get("security", {})
+        security: t.Optional[t.List[t.Dict[str, t.List[str]]]] = method_spec.get(
+            "security", self.api_spec.get("security")
         )
         if security and self._auth_provider:
             if "Authorization" in self._session.headers:
