@@ -11,6 +11,9 @@ from pulp_glue.common.openapi import BasicAuthProvider
 def pulp_ctx(
     request: pytest.FixtureRequest, pulp_cli_settings: t.Dict[str, t.Dict[str, t.Any]]
 ) -> PulpContext:
+    if not any((mark.name == "live" for mark in request.node.iter_markers())):
+        pytest.fail("This fixture can only be used in live (integration) tests.")
+
     if os.environ.get("PULP_OAUTH2", "").lower() == "true":
         pytest.skip("Pulp-glue in isolation does not support OAuth2 atm.")
     verbose = request.config.getoption("verbose")
@@ -23,6 +26,9 @@ def pulp_ctx(
 def fake_pulp_ctx(
     request: pytest.FixtureRequest, pulp_cli_settings: t.Dict[str, t.Dict[str, t.Any]]
 ) -> PulpContext:
+    if not any((mark.name == "live" for mark in request.node.iter_markers())):
+        pytest.fail("This fixture can only be used in live (integration) tests.")
+
     if os.environ.get("PULP_OAUTH2", "").lower() == "true":
         pytest.skip("Pulp-glue in isolation does not support OAuth2 atm.")
     verbose = request.config.getoption("verbose")
