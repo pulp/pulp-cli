@@ -312,8 +312,10 @@ def test_invalid_schema_raises(schema: t.Any, value: t.Any, exc_type: t.Type[Exc
     [
         pytest.param(None, "null", id="null"),
         pytest.param(1, "1", id="integer"),
-        pytest.param(datetime.date(1970, 1, 1), '"1970-01-01"'),
-        pytest.param(datetime.datetime(1970, 1, 1, 12), '"1970-01-01T12:00:00.000000Z"'),
+        pytest.param(datetime.date(1970, 1, 1), '"1970-01-01"', id="date"),
+        pytest.param(
+            datetime.datetime(1970, 1, 1, 12), '"1970-01-01T12:00:00.000000Z"', id="datetime"
+        ),
     ],
 )
 def test_json_encoder(obj: t.Any, output: str) -> None:
