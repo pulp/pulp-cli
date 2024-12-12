@@ -51,7 +51,7 @@ jobs:
           - image_tag: "latest"
             python: "3.11"
             upper_bounds: true
-          - image_tag: "3.61"
+          - image_tag: "3.63"
             pulp_https: "true"
             pulp_oauth2: "true"
             python: "3.10"
@@ -64,8 +64,6 @@ jobs:
             lower_bounds: true
             python: "3.13"
           - image_tag: "3.22"
-            python: "3.9"
-          - image_tag: "3.21"
             lower_bounds: true
             pulp_api_root: "/relocated/djnd/"
             python: "3.9"
