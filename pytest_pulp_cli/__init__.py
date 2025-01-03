@@ -212,6 +212,8 @@ if "PULP_LOGGING" in os.environ:
 
 else:
 
+    # MyPy complains about an incompatible redefinition.
+    # I don't think this quite applies to the fixtures do dependency injection.
     @pytest.fixture
-    def pulp_container_log() -> t.Iterator[None]:
+    def pulp_container_log() -> t.Iterator[None]:  # type: ignore[misc]
         yield
