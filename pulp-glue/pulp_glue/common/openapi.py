@@ -7,7 +7,7 @@ import typing as t
 from collections import defaultdict
 from dataclasses import dataclass
 from io import BufferedReader
-from urllib.parse import urljoin
+from urllib.parse import urlencode, urljoin
 
 import requests
 import urllib3
@@ -621,7 +621,14 @@ class OpenAPI:
             )
         url = urljoin(self._base_url, path)
 
-        self._debug_callback(1, f"{operation_id} : {method} {url}")
+        if query_params:
+            qs = urlencode(query_params)
+            self._debug_callback(1, f"{operation_id} : {method} {url}?{qs}")
+        else:
+            self._debug_callback(1, f"{operation_id} : {method} {url}")
+        self._debug_callback(
+            2, "\n".join([f"  {key}=={value}" for key, value in query_params.items()])
+        )
 
         response = self._send_request(
             path_spec,
