@@ -1,1 +1,0 @@
-Replaced python-toml dependency with a delicate combination of tomllib, tomli and tomli-w.

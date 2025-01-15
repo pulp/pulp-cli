@@ -1,1 +1,0 @@
-Fixed OAuth2 not using the provided CA bundle.
