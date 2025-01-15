@@ -1,1 +1,0 @@
-Fixed the error message for `pulp config edit` to properly hint at `pulp config create`.
