@@ -10,6 +10,60 @@
 
 [//]: # (towncrier release notes start)
 
+## 0.30.0 (2025-01-15) {: #0.30.0 }
+
+
+
+#### Features {: #0.30.0-feature }
+
+- Added `--file-url` option to file, python and rpm content create commands.
+  [#file_url](https://github.com/pulp/pulp-cli/issues/file_url)
+
+
+#### Bugfixes {: #0.30.0-bugfix }
+
+- Fixed OAuth2 not using the provided CA bundle.
+  [#1096](https://github.com/pulp/pulp-cli/issues/1096)
+- Fixed the error message for `pulp config edit` to properly hint at `pulp config create`.
+
+
+#### Improved Documentation {: #0.30.0-doc }
+
+- Fixed formatting and removed a confusing part of advanced features.
+
+
+#### Deprecations and Removals {: #0.30.0-removal }
+
+- Drop support for the now unsupported Python version 3.8.
+
+
+#### Misc {: #0.30.0-misc }
+
+- Replaced python-toml dependency with a delicate combination of tomllib, tomli and tomli-w.
+  [#1084](https://github.com/pulp/pulp-cli/issues/1084)
+- Declare compatibility with Python 3.13.
+
+
+### Pulp GLUE {: #0.30.0-pulp-glue }
+
+
+#### Bugfixes {: #0.30.0-pulp-glue-bugfix }
+
+- Fixes `from_config` call that messed up the headers attribute.
+
+
+#### Deprecations and Removals {: #0.30.0-pulp-glue-removal }
+
+- Drop support for the now unsupported Python version 3.8.
+
+
+#### Misc {: #0.30.0-pulp-glue-misc }
+
+- Declare compatibility with Python 3.13.
+
+
+---
+
 ## 0.29.2 (2024-09-23) {: #0.29.2 }
 
 
