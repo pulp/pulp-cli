@@ -59,6 +59,13 @@ fi
 expect_succ pulp file distribution list --base-path "cli_test_file_distro"
 test "$(echo "$OUTPUT" | jq -r length)" -eq 1
 base_url="$(echo "$OUTPUT" | jq -r .[0].base_url)"
+
+# if base_url starts with "/" (relative path) we need to prepend it with the server address
+if [[ $base_url == /* ]]
+then
+  base_url="http://localhost:8080${base_url}"
+fi
+
 expect_succ pulp file distribution list --base-path-contains "CLI"
 test "$(echo "$OUTPUT" | jq -r length)" -gt 0
 
