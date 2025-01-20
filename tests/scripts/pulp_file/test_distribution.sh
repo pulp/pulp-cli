@@ -63,7 +63,7 @@ base_url="$(echo "$OUTPUT" | jq -r .[0].base_url)"
 # if base_url starts with "/" (relative path) we need to prepend it with the server address
 if [[ $base_url == /* ]]
 then
-  base_url="http://localhost:8080${base_url}"
+  base_url="https://pulp:443${base_url}"
 fi
 
 expect_succ pulp file distribution list --base-path-contains "CLI"
