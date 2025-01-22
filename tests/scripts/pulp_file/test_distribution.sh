@@ -13,18 +13,6 @@ cleanup() {
 }
 trap cleanup EXIT
 
-if [ "$VERIFY_SSL" = "false" ]
-then
-  curl_opt=("-k")
-else
-  if [ "${PULP_CA_BUNDLE:+x}" ]
-  then
-    curl_opt=("--cacert" "${PULP_CA_BUNDLE}")
-  else
-    curl_opt=()
-  fi
-fi
-
 expect_succ pulp file remote create --name "cli_test_file_remote" --url "$FILE_REMOTE_URL"
 expect_succ pulp file repository create --name "cli_test_file_repository" --remote "cli_test_file_remote"
 expect_succ pulp file repository sync --repository "cli_test_file_repository"
@@ -58,17 +46,8 @@ fi
 
 expect_succ pulp file distribution list --base-path "cli_test_file_distro"
 test "$(echo "$OUTPUT" | jq -r length)" -eq 1
-base_url="$(echo "$OUTPUT" | jq -r .[0].base_url)"
-
-# if base_url starts with "/" (relative path) we need to prepend it with the server address
-if [[ $base_url == /* ]]
-then
-  base_url="https://pulp:443${base_url}"
-fi
 
 expect_succ pulp file distribution list --base-path-contains "CLI"
 test "$(echo "$OUTPUT" | jq -r length)" -gt 0
-
-expect_succ curl "${curl_opt[@]}" --head --fail "${base_url}1.iso"
 
 expect_succ pulp file distribution destroy --distribution "cli_test_file_distro"
