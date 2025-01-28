@@ -2,7 +2,7 @@
 black==24.10.0
 flake8==7.1.1
 flake8-pyproject==1.2.3
-isort==5.13.2
+isort==6.0.0
 mypy==1.14.1
 shellcheck-py==0.10.0.1
 
