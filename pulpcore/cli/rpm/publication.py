@@ -74,6 +74,13 @@ create_options = [
         ),
         needs_plugins=[PluginRequirement("rpm", specifier=">=3.25.0")],
     ),
+    pulp_option(
+        "--checkpoint",
+        is_flag=True,
+        default=None,
+        help=_("Create a checkpoint publication"),
+        needs_plugins=[PluginRequirement("rpm", specifier=">=3.29.0")],
+    ),
 ]
 publication.add_command(list_command(decorators=publication_filter_options + [repository_option]))
 publication.add_command(show_command(decorators=lookup_options))
