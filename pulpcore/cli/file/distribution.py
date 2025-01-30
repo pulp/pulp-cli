@@ -1,6 +1,10 @@
 import click
+from pulp_glue.common.context import PluginRequirement
 from pulp_glue.common.i18n import get_translation
-from pulp_glue.file.context import PulpFileDistributionContext, PulpFileRepositoryContext
+from pulp_glue.file.context import (
+    PulpFileDistributionContext,
+    PulpFileRepositoryContext,
+)
 
 from pulp_cli.generic import (
     PulpCLIContext,
@@ -17,6 +21,7 @@ from pulp_cli.generic import (
     pass_pulp_context,
     pulp_group,
     pulp_labels_option,
+    pulp_option,
     resource_option,
     role_command,
     show_command,
@@ -71,6 +76,13 @@ update_options = [
     repository_option,
     content_guard_option,
     pulp_labels_option,
+    pulp_option(
+        "--checkpoint/--not-checkpoint",
+        is_flag=True,
+        default=None,
+        help=_("Create a checkpoint distribution."),
+        needs_plugins=[PluginRequirement("core", specifier=">=3.74.0")],
+    ),
 ]
 create_options = common_distribution_create_options + update_options
 
