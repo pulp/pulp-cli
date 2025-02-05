@@ -1601,6 +1601,17 @@ def repository_content_command(**kwargs: t.Any) -> click.Group:
     """A factory that creates a repository content command group."""
 
     content_contexts = kwargs.pop("contexts", {})
+    repository_contexts = kwargs.pop("repository_contexts", PulpRepositoryContext.TYPE_REGISTRY)
+    base_default_plugin = kwargs.pop("base_default_plugin", None)
+    base_default_type = kwargs.pop("base_default_type", None)
+
+    base_repository_option = resource_option(
+        "--base-repository",
+        context_table=repository_contexts,
+        href_pattern=PulpRepositoryContext.HREF_PATTERN,
+        default_plugin=base_default_plugin,
+        default_type=base_default_type,
+    )
 
     def version_callback(
         ctx: click.Context, param: click.Parameter, value: t.Optional[int]
@@ -1637,43 +1648,67 @@ def repository_content_command(**kwargs: t.Any) -> click.Group:
 
     @pulp_command("add")
     @repository_lookup_option
-    @click.option("--base-version", type=int, callback=version_callback)
+    @base_repository_option
+    @click.option("--base-version", type=int)
+    @pass_repository_context
     @pass_content_context
     def content_add(
         content_ctx: PulpContentContext,
+        repo_ctx: PulpRepositoryContext,
         /,
-        base_version: PulpRepositoryVersionContext,
+        base_repository: PulpRepositoryContext,
+        base_version: int,
     ) -> None:
-        repo_ctx = base_version.repository_ctx
-        repo_ctx.modify(add_content=[content_ctx.pulp_href], base_version=base_version.pulp_href)
+        if base_repository is None:
+            base_repository = repo_ctx
+        base_version_ctx = base_repository.get_version_context(
+            -1 if base_version is None else base_version
+        )
+        repo_ctx.modify(add_content=[content_ctx.pulp_href], base_version=base_version_ctx)
 
     @pulp_command("remove")
     @click.option("--all", is_flag=True, help=_("Remove all content from repository version"))
     @repository_lookup_option
-    @click.option("--base-version", type=int, callback=version_callback)
+    @base_repository_option
+    @click.option("--base-version", type=int)
+    @pass_repository_context
     @pass_content_context
     def content_remove(
         content_ctx: PulpContentContext,
+        repo_ctx: PulpRepositoryContext,
         /,
-        base_version: PulpRepositoryVersionContext,
+        base_repository: PulpRepositoryContext,
+        base_version: int,
         all: bool,
     ) -> None:
-        repo_ctx = base_version.repository_ctx
+        if base_repository is None:
+            base_repository = repo_ctx
+        base_version_ctx = base_repository.get_version_context(
+            -1 if base_version is None else base_version
+        )
         remove_content = ["*" if all else content_ctx.pulp_href]
-        repo_ctx.modify(remove_content=remove_content, base_version=base_version.pulp_href)
+        repo_ctx.modify(remove_content=remove_content, base_version=base_version_ctx)
 
     @pulp_command("modify")
     @repository_lookup_option
-    @click.option("--base-version", type=int, callback=version_callback)
+    @base_repository_option
+    @click.option("--base-version", type=int)
+    @pass_repository_context
     def content_modify(
-        base_version: PulpRepositoryVersionContext,
+        repo_ctx: PulpRepositoryContext,
+        base_repository: PulpRepositoryContext,
+        base_version: int,
         add_content: t.Optional[t.List[PulpContentContext]],
         remove_content: t.Optional[t.List[PulpContentContext]],
     ) -> None:
-        repo_ctx = base_version.repository_ctx
+        if base_repository is None:
+            base_repository = repo_ctx
+        base_version_ctx = base_repository.get_version_context(
+            -1 if base_version is None else base_version
+        )
         ac = [unit.pulp_href for unit in add_content] if add_content else None
         rc = [unit.pulp_href for unit in remove_content] if remove_content else None
-        repo_ctx.modify(add_content=ac, remove_content=rc, base_version=base_version.pulp_href)
+        repo_ctx.modify(add_content=ac, remove_content=rc, base_version=base_version_ctx)
 
     command_decorators: t.Dict[click.Command, t.Optional[t.List[t.Callable[[FC], FC]]]] = {
         content_list: kwargs.pop("list_decorators", []),

@@ -136,6 +136,8 @@ repository.add_command(
         add_decorators=show_options,
         remove_decorators=show_options,
         allowed_with_contexts=container_context,
+        base_default_plugin="container",
+        base_default_type="container",
     )
 )
 

@@ -139,6 +139,8 @@ repository.add_command(
         add_decorators=[package_option],
         remove_decorators=[package_option],
         modify_decorators=modify_options,
+        base_default_plugin="python",
+        base_default_type="python",
     )
 )
 
