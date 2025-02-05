@@ -1483,7 +1483,7 @@ class PulpRepositoryContext(PulpEntityContext):
         self,
         add_content: t.Optional[t.List[str]] = None,
         remove_content: t.Optional[t.List[str]] = None,
-        base_version: t.Optional[str] = None,
+        base_version: t.Optional[t.Union[str, PulpRepositoryVersionContext]] = None,
     ) -> t.Any:
         """
         Add to or remove content from this repository.
@@ -1505,7 +1505,7 @@ class PulpRepositoryContext(PulpEntityContext):
         if base_version is not None:
             body["base_version"] = base_version
         if self.pulp_ctx.fake_mode:
-            return {"state": "conpleted"}  # Fake a task
+            return {"state": "completed"}  # Fake a task
         return self.call("modify", parameters={self.HREF: self.pulp_href}, body=body)
 
 

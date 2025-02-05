@@ -165,6 +165,8 @@ repository.add_command(label_command(decorators=nested_lookup_options))
 repository.add_command(
     repository_content_command(
         contexts={"file": PulpFileContentContext},
+        base_default_plugin="file",
+        base_default_type="file",
         add_decorators=file_options,
         remove_decorators=file_options,
         modify_decorators=modify_options,
