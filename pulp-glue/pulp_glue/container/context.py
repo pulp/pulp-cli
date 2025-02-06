@@ -144,7 +144,7 @@ class PulpContainerRepositoryContext(PulpContainerBaseRepositoryContext):
         self,
         add_content: t.Optional[t.List[str]] = None,
         remove_content: t.Optional[t.List[str]] = None,
-        base_version: t.Optional[str] = None,
+        base_version: t.Optional[t.Union[str, PulpRepositoryVersionContext]] = None,
     ) -> t.Any:
         if remove_content:
             self.call(

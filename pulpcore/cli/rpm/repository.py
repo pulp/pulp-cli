@@ -226,6 +226,8 @@ repository.add_command(
         add_decorators=package_options,
         remove_decorators=package_options,
         modify_decorators=modify_options,
+        base_default_plugin="rpm",
+        base_default_type="rpm",
     )
 )
 repository.add_command(role_command(decorators=lookup_options))

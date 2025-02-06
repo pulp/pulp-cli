@@ -185,6 +185,8 @@ repository.add_command(
         add_decorators=content_options,
         remove_decorators=content_options,
         modify_decorators=modify_options,
+        base_default_plugin="ansible",
+        base_default_type="ansible",
     )
 )
 

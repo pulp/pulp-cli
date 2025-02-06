@@ -7,6 +7,7 @@ pulp debug has-plugin --name "file" || exit 23
 
 cleanup() {
   pulp file repository destroy --name "cli_test_file_repository" || true
+  pulp file repository destroy --name "cli_test_file_repository_2" || true
   pulp orphan cleanup || true
 }
 trap cleanup EXIT
@@ -66,3 +67,7 @@ test "$(echo "$OUTPUT" | jq -r length)" -gt "0"
 expect_succ pulp repository version list
 expect_succ pulp repository version list --content "[]"
 expect_succ pulp repository version list --content "$(jq -R '[.]' <<<"$content_href")"
+
+# Creating a new repository version from a different repository
+expect_succ pulp file repository create --name "cli_test_file_repository_2"
+expect_succ pulp file repository content modify --repository "cli_test_file_repository_2" --base-repository "cli_test_file_repository"
