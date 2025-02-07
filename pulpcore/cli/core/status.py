@@ -13,7 +13,7 @@ _ = translation.gettext
 @click.option("--retries", type=int, default=0, help=_("Number of retries before failing."))
 @click.option("--retry-delay", type=int, default=1, help=_("Seconds to wait between retries."))
 @pass_pulp_context
-def status(pulp_ctx: PulpCLIContext, retries: int, retry_delay: int) -> None:
+def status(pulp_ctx: PulpCLIContext, /, retries: int, retry_delay: int) -> None:
     """
     Retrieve pulp status. And refresh outdated local api caches if server versions changed.
     """

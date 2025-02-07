@@ -43,7 +43,7 @@ def _content_callback(ctx: click.Context, param: click.Parameter, value: t.Any) 
 )
 @pass_pulp_context
 @click.pass_context
-def content(ctx: click.Context, pulp_ctx: PulpCLIContext, content_type: str) -> None:
+def content(ctx: click.Context, pulp_ctx: PulpCLIContext, /, content_type: str) -> None:
     if content_type == "manifest":
         ctx.obj = PulpContainerManifestContext(pulp_ctx)
     elif content_type == "tag":

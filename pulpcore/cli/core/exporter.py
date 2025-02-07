@@ -44,7 +44,7 @@ def exporter() -> None:
 @exporter.group()
 @pass_pulp_context
 @click.pass_context
-def pulp(ctx: click.Context, pulp_ctx: PulpCLIContext) -> None:
+def pulp(ctx: click.Context, pulp_ctx: PulpCLIContext, /) -> None:
     ctx.obj = PulpExporterContext(pulp_ctx)
 
 
@@ -66,6 +66,7 @@ pulp.add_command(destroy_command(decorators=lookup_options))
 def create(
     pulp_ctx: PulpCLIContext,
     exporter_ctx: PulpExporterContext,
+    /,
     name: str,
     path: str,
     repository: t.Iterable[EntityFieldDefinition],
@@ -93,6 +94,7 @@ def create(
 def update(
     pulp_ctx: PulpCLIContext,
     exporter_ctx: PulpExporterContext,
+    /,
     path: str,
     repository: t.Iterable[EntityFieldDefinition],
     repository_href: t.Iterable[str],

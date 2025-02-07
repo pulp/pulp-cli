@@ -95,7 +95,7 @@ def _signing_service_callback(ctx: click.Context, param: click.Parameter, value:
 )
 @pass_pulp_context
 @click.pass_context
-def repository(ctx: click.Context, pulp_ctx: PulpCLIContext, repo_type: str) -> None:
+def repository(ctx: click.Context, pulp_ctx: PulpCLIContext, /, repo_type: str) -> None:
     if repo_type == "ansible":
         ctx.obj = PulpAnsibleRepositoryContext(pulp_ctx)
     else:
@@ -197,6 +197,7 @@ repository.add_command(
 @pass_repository_context
 def sync(
     repository_ctx: PulpRepositoryContext,
+    /,
     remote: EntityFieldDefinition,
 ) -> None:
     """
@@ -230,6 +231,7 @@ def sync(
 @pass_repository_context
 def sign(
     repository_ctx: PulpRepositoryContext,
+    /,
     signing_service: PulpSigningServiceContext,
     content_units: t.Optional[t.List[str]],
 ) -> None:

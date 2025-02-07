@@ -19,7 +19,7 @@ _ = translation.gettext
 @pulp_group()
 @pass_pulp_context
 @click.pass_context
-def upload(ctx: click.Context, pulp_ctx: PulpCLIContext) -> None:
+def upload(ctx: click.Context, pulp_ctx: PulpCLIContext, /) -> None:
     ctx.obj = PulpUploadContext(pulp_ctx)
 
 

@@ -98,7 +98,7 @@ def _content_list_callback(
 )
 @pass_pulp_context
 @click.pass_context
-def repository(ctx: click.Context, pulp_ctx: PulpCLIContext, repo_type: str) -> None:
+def repository(ctx: click.Context, pulp_ctx: PulpCLIContext, /, repo_type: str) -> None:
     if repo_type == "file":
         ctx.obj = PulpFileRepositoryContext(pulp_ctx)
     else:
@@ -185,6 +185,7 @@ repository.add_command(role_command(decorators=lookup_options))
 @pass_repository_context
 def sync(
     repository_ctx: PulpRepositoryContext,
+    /,
     remote: EntityFieldDefinition,
     mirror: t.Optional[bool],
 ) -> None:

@@ -23,7 +23,7 @@ _ = translation.gettext
 @pulp_group()
 @pass_pulp_context
 @click.pass_context
-def access_policy(ctx: click.Context, pulp_ctx: PulpCLIContext) -> None:
+def access_policy(ctx: click.Context, pulp_ctx: PulpCLIContext, /) -> None:
     ctx.obj = PulpAccessPolicyContext(pulp_ctx)
 
 
@@ -47,7 +47,7 @@ access_policy.add_command(update_command(decorators=lookup_options + update_opti
 @click.option("--viewset-name", callback=lookup_callback("viewset_name"), expose_value=False)
 @pass_entity_context
 @pass_pulp_context
-def reset(pulp_ctx: PulpCLIContext, access_policy_ctx: PulpEntityContext) -> None:
+def reset(pulp_ctx: PulpCLIContext, access_policy_ctx: PulpEntityContext, /) -> None:
     assert isinstance(access_policy_ctx, PulpAccessPolicyContext)
 
     result = access_policy_ctx.reset()

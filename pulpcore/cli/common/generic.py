@@ -1310,6 +1310,7 @@ def list_command(**kwargs: t.Any) -> click.Command:
     def callback(
         pulp_ctx: PulpCLIContext,
         entity_ctx: PulpEntityContext,
+        /,
         limit: int,
         offset: int,
         **kwargs: t.Any,
@@ -1342,7 +1343,7 @@ def show_command(**kwargs: t.Any) -> click.Command:
     @pulp_command(**kwargs)
     @pass_entity_context
     @pass_pulp_context
-    def callback(pulp_ctx: PulpCLIContext, entity_ctx: PulpEntityContext) -> None:
+    def callback(pulp_ctx: PulpCLIContext, entity_ctx: PulpEntityContext, /) -> None:
         """
         Show details of a {entity}.
         """
@@ -1368,7 +1369,9 @@ def create_command(**kwargs: t.Any) -> click.Command:
     @pulp_command(**kwargs)  # type: ignore [arg-type]
     @pass_entity_context
     @pass_pulp_context
-    def callback(pulp_ctx: PulpCLIContext, entity_ctx: PulpEntityContext, **kwargs: t.Any) -> None:
+    def callback(
+        pulp_ctx: PulpCLIContext, entity_ctx: PulpEntityContext, /, **kwargs: t.Any
+    ) -> None:
         """
         Create a {entity}.
         """
@@ -1398,7 +1401,9 @@ def update_command(**kwargs: t.Any) -> click.Command:
     @pulp_command(**kwargs)  # type: ignore [arg-type]
     @pass_entity_context
     @pass_pulp_context
-    def callback(pulp_ctx: PulpCLIContext, entity_ctx: PulpEntityContext, **kwargs: t.Any) -> None:
+    def callback(
+        pulp_ctx: PulpCLIContext, entity_ctx: PulpEntityContext, /, **kwargs: t.Any
+    ) -> None:
         """
         Update a {entity}.
         """
@@ -1419,7 +1424,7 @@ def destroy_command(**kwargs: t.Any) -> click.Command:
 
     @pulp_command(**kwargs)
     @pass_entity_context
-    def callback(entity_ctx: PulpEntityContext) -> None:
+    def callback(entity_ctx: PulpEntityContext, /) -> None:
         """
         Destroy a {entity}.
         """
@@ -1447,10 +1452,7 @@ def version_command(**kwargs: t.Any) -> click.Command:
     @pulp_group(**kwargs)
     @pass_repository_context
     @click.pass_context
-    def callback(
-        ctx: click.Context,
-        repository_ctx: PulpRepositoryContext,
-    ) -> None:
+    def callback(ctx: click.Context, repository_ctx: PulpRepositoryContext, /) -> None:
         ctx.obj = repository_ctx.get_version_context()
 
     callback.add_command(list_command(decorators=decorators + [content_in_option]))
@@ -1467,6 +1469,7 @@ def version_command(**kwargs: t.Any) -> click.Command:
         def repair(
             pulp_ctx: PulpCLIContext,
             repository_version_ctx: PulpRepositoryVersionContext,
+            /,
         ) -> None:
             result = repository_version_ctx.repair()
             pulp_ctx.output_result(result)
@@ -1488,7 +1491,7 @@ def label_command(**kwargs: t.Any) -> click.Command:
 
     @pulp_group(**kwargs)
     @pass_pulp_context
-    def label_group(pulp_ctx: PulpCLIContext) -> None:
+    def label_group(pulp_ctx: PulpCLIContext, /) -> None:
         for item in need_plugins:
             pulp_ctx.needs_plugin(item)
 
@@ -1496,21 +1499,21 @@ def label_command(**kwargs: t.Any) -> click.Command:
     @click.option("--key", required=True, help=_("Key of the label"))
     @click.option("--value", required=True, help=_("Value of the label"))
     @pass_entity_context
-    def label_set(entity_ctx: PulpEntityContext, key: str, value: str) -> None:
+    def label_set(entity_ctx: PulpEntityContext, /, key: str, value: str) -> None:
         """Add or update a label"""
         entity_ctx.set_label(key, value)
 
     @pulp_command(name="unset", help=_("Remove a label with a given key"))
     @click.option("--key", required=True, help=_("Key of the label"))
     @pass_entity_context
-    def label_unset(entity_ctx: PulpEntityContext, key: str) -> None:
+    def label_unset(entity_ctx: PulpEntityContext, /, key: str) -> None:
         """Remove a label with a given key"""
         entity_ctx.unset_label(key)
 
     @pulp_command(name="show", help=_("Show the value for a particular label key"))
     @click.option("--key", required=True, help=_("Key of the label"))
     @pass_entity_context
-    def label_show(entity_ctx: PulpEntityContext, key: str) -> None:
+    def label_show(entity_ctx: PulpEntityContext, /, key: str) -> None:
         """Show the value for a particular label key"""
         click.echo(entity_ctx.show_label(key))
 
@@ -1541,14 +1544,14 @@ def role_command(**kwargs: t.Any) -> click.Command:
     @pulp_command(help=_("List my permissions on this object."))
     @pass_entity_context
     @pass_pulp_context
-    def my_permissions(pulp_ctx: PulpCLIContext, entity_ctx: PulpEntityContext) -> None:
+    def my_permissions(pulp_ctx: PulpCLIContext, entity_ctx: PulpEntityContext, /) -> None:
         result = entity_ctx.my_permissions()
         pulp_ctx.output_result(result)
 
     @pulp_command(name="list", help=_("List assigned object roles."))
     @pass_entity_context
     @pass_pulp_context
-    def role_list(pulp_ctx: PulpCLIContext, entity_ctx: PulpEntityContext) -> None:
+    def role_list(pulp_ctx: PulpCLIContext, entity_ctx: PulpEntityContext, /) -> None:
         result = entity_ctx.list_roles()
         pulp_ctx.output_result(result)
 
@@ -1561,6 +1564,7 @@ def role_command(**kwargs: t.Any) -> click.Command:
     def role_add(
         pulp_ctx: PulpCLIContext,
         entity_ctx: PulpEntityContext,
+        /,
         role: str,
         users: t.List[str],
         groups: t.List[str],
@@ -1577,6 +1581,7 @@ def role_command(**kwargs: t.Any) -> click.Command:
     def role_remove(
         pulp_ctx: PulpCLIContext,
         entity_ctx: PulpEntityContext,
+        /,
         role: str,
         users: t.List[str],
         groups: t.List[str],
@@ -1617,6 +1622,7 @@ def repository_content_command(**kwargs: t.Any) -> click.Group:
     def content_list(
         content_ctx: PulpContentContext,
         pulp_ctx: PulpCLIContext,
+        /,
         version: PulpRepositoryVersionContext,
         offset: int,
         limit: int,
@@ -1635,6 +1641,7 @@ def repository_content_command(**kwargs: t.Any) -> click.Group:
     @pass_content_context
     def content_add(
         content_ctx: PulpContentContext,
+        /,
         base_version: PulpRepositoryVersionContext,
     ) -> None:
         repo_ctx = base_version.repository_ctx
@@ -1647,6 +1654,7 @@ def repository_content_command(**kwargs: t.Any) -> click.Group:
     @pass_content_context
     def content_remove(
         content_ctx: PulpContentContext,
+        /,
         base_version: PulpRepositoryVersionContext,
         all: bool,
     ) -> None:

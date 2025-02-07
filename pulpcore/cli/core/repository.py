@@ -74,7 +74,7 @@ def _version_list_callback(
 @pulp_group()
 @pass_pulp_context
 @click.pass_context
-def repository(ctx: click.Context, pulp_ctx: PulpCLIContext) -> None:
+def repository(ctx: click.Context, pulp_ctx: PulpCLIContext, /) -> None:
     """
     Perform actions on all repositories.
 
@@ -125,6 +125,7 @@ repository.add_command(version_command(decorators=[], list_only=True))
 @pass_pulp_context
 def reclaim(
     pulp_ctx: PulpCLIContext,
+    /,
     repositories: t.Iterable[str],
     all_repositories: bool,
     keep_versions: t.Iterable[str],

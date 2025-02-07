@@ -21,7 +21,7 @@ _ = translation.gettext
 @pulp_group()
 @pass_pulp_context
 @click.pass_context
-def orphan(ctx: click.Context, pulp_ctx: PulpCLIContext) -> None:
+def orphan(ctx: click.Context, pulp_ctx: PulpCLIContext, /) -> None:
     """
     Handle orphaned content.
     """
@@ -49,7 +49,7 @@ def orphan(ctx: click.Context, pulp_ctx: PulpCLIContext) -> None:
 )
 @pass_view_set_context
 @pass_pulp_context
-def cleanup(pulp_ctx: PulpCLIContext, orphan_ctx: PulpViewSetContext, **kwargs: t.Any) -> None:
+def cleanup(pulp_ctx: PulpCLIContext, orphan_ctx: PulpViewSetContext, /, **kwargs: t.Any) -> None:
     """
     Cleanup orphaned content.
     """

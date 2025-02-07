@@ -22,7 +22,7 @@ def pulp2() -> None:
 @pulp2.group()
 @pass_pulp_context
 @click.pass_context
-def content(ctx: click.Context, pulp_ctx: PulpCLIContext) -> None:
+def content(ctx: click.Context, pulp_ctx: PulpCLIContext, /) -> None:
     ctx.obj = PulpMigrationPulp2ContentContext(pulp_ctx)
 
 
@@ -33,7 +33,7 @@ content.add_command(show_command(decorators=[href_option]))
 @pulp2.group()
 @pass_pulp_context
 @click.pass_context
-def repository(ctx: click.Context, pulp_ctx: PulpCLIContext) -> None:
+def repository(ctx: click.Context, pulp_ctx: PulpCLIContext, /) -> None:
     ctx.obj = PulpMigrationPulp2RepositoryContext(pulp_ctx)
     pass
 

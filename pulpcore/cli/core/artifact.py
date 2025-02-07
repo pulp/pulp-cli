@@ -24,7 +24,7 @@ _ = translation.gettext
 @pulp_group()
 @pass_pulp_context
 @click.pass_context
-def artifact(ctx: click.Context, pulp_ctx: PulpCLIContext) -> None:
+def artifact(ctx: click.Context, pulp_ctx: PulpCLIContext, /) -> None:
     ctx.obj = PulpArtifactContext(pulp_ctx)
 
 
@@ -68,6 +68,7 @@ artifact.add_command(show_command(decorators=lookup_options))
 def upload(
     pulp_ctx: PulpCLIContext,
     artifact_ctx: PulpEntityContext,
+    /,
     file: t.IO[bytes],
     chunk_size: int,
 ) -> None:

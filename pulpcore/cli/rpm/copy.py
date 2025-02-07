@@ -39,6 +39,7 @@ _ = gettext.gettext
 @pass_pulp_context
 def copy(
     pulp_ctx: PulpCLIContext,
+    /,
     config: t.List[t.Dict[str, t.Any]],
     dependency_solving: t.Optional[bool],
 ) -> None:

@@ -36,7 +36,7 @@ namespace_lookup_option = resource_lookup_option(
 )
 @pass_pulp_context
 @click.pass_context
-def namespace(ctx: click.Context, pulp_ctx: PulpCLIContext, namespace_type: str) -> None:
+def namespace(ctx: click.Context, pulp_ctx: PulpCLIContext, /, namespace_type: str) -> None:
     if namespace_type == "container":
         ctx.obj = PulpContainerNamespaceContext(pulp_ctx)
     else:

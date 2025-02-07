@@ -148,6 +148,7 @@ repository.add_command(
 @pass_repository_context
 def sync(
     repository_ctx: PulpRepositoryContext,
+    /,
     remote: EntityFieldDefinition,
 ) -> None:
     """
@@ -183,6 +184,7 @@ def sync(
 @pass_repository_context
 def add_tag(
     repository_ctx: PulpRepositoryContext,
+    /,
     digest: str,
     tag: str,
 ) -> None:
@@ -203,7 +205,7 @@ def add_tag(
 @repository_lookup_option
 @click.option("--tag", help=_("Name of tag to remove"), required=True, callback=_tag_callback)
 @pass_repository_context
-def remove_tag(repository_ctx: PulpRepositoryContext, tag: str) -> None:
+def remove_tag(repository_ctx: PulpRepositoryContext, /, tag: str) -> None:
     assert isinstance(repository_ctx, PulpContainerBaseRepositoryContext)
 
     repository_ctx.untag(tag)
@@ -224,6 +226,7 @@ def remove_tag(repository_ctx: PulpRepositoryContext, tag: str) -> None:
 @pass_repository_context
 def copy_tag(
     repository_ctx: PulpRepositoryContext,
+    /,
     source: PulpRepositoryContext,
     version: t.Optional[int],
     tags: t.List[str],
@@ -274,6 +277,7 @@ def copy_tag(
 @pass_repository_context
 def copy_manifest(
     repository_ctx: PulpRepositoryContext,
+    /,
     source: PulpRepositoryContext,
     version: t.Optional[int],
     digests: t.List[str],
@@ -306,6 +310,7 @@ def copy_manifest(
 @pass_repository_context
 def remove_image(
     repository_ctx: PulpRepositoryContext,
+    /,
     digest: str,
 ) -> None:
     assert isinstance(repository_ctx, PulpContainerPushRepositoryContext)

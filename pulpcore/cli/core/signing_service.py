@@ -19,7 +19,7 @@ _ = translation.gettext
 @pulp_group()
 @pass_pulp_context
 @click.pass_context
-def signing_service(ctx: click.Context, pulp_ctx: PulpCLIContext) -> None:
+def signing_service(ctx: click.Context, pulp_ctx: PulpCLIContext, /) -> None:
     ctx.obj = PulpSigningServiceContext(pulp_ctx)
 
 

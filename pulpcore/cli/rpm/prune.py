@@ -56,6 +56,7 @@ multi_repository_option = resource_option(
 @pass_pulp_context
 def prune_packages(
     pulp_ctx: PulpCLIContext,
+    /,
     repositories: t.Iterable[PulpRpmRepositoryContext],
     all_repositories: t.Optional[bool],
     keep_days: t.Optional[int],

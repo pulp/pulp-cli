@@ -11,7 +11,7 @@ _ = translation.gettext
 @pulp_group()
 @pass_pulp_context
 @click.pass_context
-def content(ctx: click.Context, pulp_ctx: PulpCLIContext) -> None:
+def content(ctx: click.Context, pulp_ctx: PulpCLIContext, /) -> None:
     """
     Perform actions on all content units.
 

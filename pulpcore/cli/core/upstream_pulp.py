@@ -62,7 +62,7 @@ create_options = [
 @pulp_group()
 @pass_pulp_context
 @click.pass_context
-def upstream_pulp(ctx: click.Context, pulp_ctx: PulpCLIContext) -> None:
+def upstream_pulp(ctx: click.Context, pulp_ctx: PulpCLIContext, /) -> None:
     ctx.obj = PulpUpstreamPulpContext(pulp_ctx)
 
 
@@ -76,6 +76,6 @@ upstream_pulp.add_command(destroy_command(decorators=lookup_options))
 @upstream_pulp.command()
 @lookup_option
 @pass_entity_context
-def replicate(upstream_pulp_ctx: PulpEntityContext) -> None:
+def replicate(upstream_pulp_ctx: PulpEntityContext, /) -> None:
     assert isinstance(upstream_pulp_ctx, PulpUpstreamPulpContext)
     upstream_pulp_ctx.replicate()

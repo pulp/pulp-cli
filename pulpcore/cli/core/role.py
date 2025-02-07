@@ -67,7 +67,7 @@ create_options = [
 @pulp_group()
 @pass_pulp_context
 @click.pass_context
-def role(ctx: click.Context, pulp_ctx: PulpCLIContext) -> None:
+def role(ctx: click.Context, pulp_ctx: PulpCLIContext, /) -> None:
     ctx.obj = PulpRoleContext(pulp_ctx)
 
 
