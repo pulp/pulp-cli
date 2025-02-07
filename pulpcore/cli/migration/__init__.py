@@ -10,7 +10,7 @@ from pulpcore.cli.migration.pulp2 import pulp2
 
 @pulp_group()
 @pass_pulp_context
-def migration(pulp_ctx: PulpCLIContext) -> None:
+def migration(pulp_ctx: PulpCLIContext, /) -> None:
     pulp_ctx.needs_plugin(PluginRequirement("pulp_2to3_migration"))
 
 

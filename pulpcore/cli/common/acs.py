@@ -53,7 +53,7 @@ def acs_command(
     @acs_lookup_option
     @path_option
     @pass_acs_context
-    def add(acs_ctx: PulpACSContext, paths: t.Iterable[str]) -> None:
+    def add(acs_ctx: PulpACSContext, /, paths: t.Iterable[str]) -> None:
         """Add path(s) to an existing ACS."""
         paths = set(paths)
         existing_paths = set(acs_ctx.entity["paths"])
@@ -72,7 +72,7 @@ def acs_command(
     @acs_lookup_option
     @path_option
     @pass_acs_context
-    def remove(acs_ctx: PulpACSContext, paths: t.Iterable[str]) -> None:
+    def remove(acs_ctx: PulpACSContext, /, paths: t.Iterable[str]) -> None:
         """Remove path(s) from an existing ACS."""
         paths = set(paths)
         existing_paths = set(acs_ctx.entity["paths"])
@@ -111,7 +111,7 @@ def acs_command(
     @name_option
     @pass_acs_context
     @pass_pulp_context
-    def refresh(pulp_ctx: PulpCLIContext, acs_ctx: PulpACSContext) -> None:
+    def refresh(pulp_ctx: PulpCLIContext, acs_ctx: PulpACSContext, /) -> None:
         acs_ctx.refresh()
 
     return acs

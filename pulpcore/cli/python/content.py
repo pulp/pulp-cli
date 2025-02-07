@@ -60,7 +60,7 @@ repository_option = resource_option(
 )
 @pass_pulp_context
 @click.pass_context
-def content(ctx: click.Context, pulp_ctx: PulpCLIContext, content_type: str) -> None:
+def content(ctx: click.Context, pulp_ctx: PulpCLIContext, /, content_type: str) -> None:
     if content_type == "package":
         ctx.obj = PulpPythonContentContext(pulp_ctx)
     else:
@@ -102,6 +102,7 @@ content.add_command(create_command(decorators=create_options))
 def upload(
     pulp_ctx: PulpCLIContext,
     entity_ctx: PulpEntityContext,
+    /,
     relative_path: str,
     file: t.IO[bytes],
     chunk_size: int,

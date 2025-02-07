@@ -42,7 +42,7 @@ def _uln_url_callback(ctx: click.Context, param: click.Parameter, value: str) ->
 )
 @pass_pulp_context
 @click.pass_context
-def remote(ctx: click.Context, pulp_ctx: PulpCLIContext, remote_type: str) -> None:
+def remote(ctx: click.Context, pulp_ctx: PulpCLIContext, /, remote_type: str) -> None:
     if remote_type == "rpm":
         ctx.obj = PulpRpmRemoteContext(pulp_ctx)
     elif remote_type == "uln":

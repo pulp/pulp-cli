@@ -41,7 +41,7 @@ def importer() -> None:
 @importer.group()
 @pass_pulp_context
 @click.pass_context
-def pulp(ctx: click.Context, pulp_ctx: PulpCLIContext) -> None:
+def pulp(ctx: click.Context, pulp_ctx: PulpCLIContext, /) -> None:
     ctx.obj = PulpImporterContext(pulp_ctx)
 
 
@@ -61,6 +61,7 @@ pulp.add_command(destroy_command(decorators=lookup_options))
 def create(
     pulp_ctx: PulpCLIContext,
     importer_ctx: PulpImporterContext,
+    /,
     name: str,
     repo_map: t.List[RepositoryMap],
 ) -> None:
@@ -82,6 +83,7 @@ def create(
 def update(
     pulp_ctx: PulpCLIContext,
     importer_ctx: PulpImporterContext,
+    /,
     repo_map: t.List[RepositoryMap],
 ) -> None:
     payload = {}

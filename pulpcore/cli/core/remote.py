@@ -13,7 +13,7 @@ from pulpcore.cli.common.generic import (
 @pulp_group()
 @pass_pulp_context
 @click.pass_context
-def remote(ctx: click.Context, pulp_ctx: PulpCLIContext) -> None:
+def remote(ctx: click.Context, pulp_ctx: PulpCLIContext, /) -> None:
     """
     Perform actions on all remotes.
 

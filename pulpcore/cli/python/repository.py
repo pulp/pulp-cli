@@ -76,7 +76,7 @@ def _content_callback(
 )
 @pass_pulp_context
 @click.pass_context
-def repository(ctx: click.Context, pulp_ctx: PulpCLIContext, repo_type: str) -> None:
+def repository(ctx: click.Context, pulp_ctx: PulpCLIContext, /, repo_type: str) -> None:
     if repo_type == "python":
         ctx.obj = PulpPythonRepositoryContext(pulp_ctx)
     else:
@@ -151,6 +151,7 @@ repository.add_command(
 @pass_repository_context
 def sync(
     repository_ctx: PulpRepositoryContext,
+    /,
     remote: EntityFieldDefinition,
 ) -> None:
     """

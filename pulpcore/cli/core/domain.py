@@ -26,7 +26,7 @@ _ = translation.gettext
 @pulp_group(name="domain", context_settings={"default_map": {}})
 @pass_pulp_context
 @click.pass_context
-def domain(ctx: click.Context, pulp_ctx: PulpContext) -> None:
+def domain(ctx: click.Context, pulp_ctx: PulpContext, /) -> None:
     """
     Perform actions on domains.
     """

@@ -52,7 +52,7 @@ repository_option = resource_option(
 )
 @pass_pulp_context
 @click.pass_context
-def distribution(ctx: click.Context, pulp_ctx: PulpContext, distribution_type: str) -> None:
+def distribution(ctx: click.Context, pulp_ctx: PulpContext, /, distribution_type: str) -> None:
     if distribution_type == "ansible":
         ctx.obj = PulpAnsibleDistributionContext(pulp_ctx)
     else:
@@ -106,6 +106,7 @@ distribution.add_command(
 @pass_entity_context
 def update(
     distribution_ctx: PulpEntityContext,
+    /,
     base_path: t.Optional[str],
     repository: EntityFieldDefinition,
     content_guard: EntityFieldDefinition,

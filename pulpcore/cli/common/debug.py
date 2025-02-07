@@ -36,10 +36,7 @@ if IPYTHON_AVAILABLE:
     @debug.command()
     @pass_pulp_context
     @click.pass_context
-    def ipython(
-        ctx: click.Context,
-        pulp_ctx: PulpCLIContext,
-    ) -> None:
+    def ipython(ctx: click.Context, pulp_ctx: PulpCLIContext, /) -> None:
         """
         Drop into an interactive python shell.
         Prepopulated symbols:
@@ -68,6 +65,7 @@ if IPYTHON_AVAILABLE:
 def has_cli_plugin(
     ctx: click.Context,
     pulp_ctx: PulpCLIContext,
+    /,
     name: str,
     specifier: t.Optional[str],
 ) -> None:
@@ -99,6 +97,7 @@ def has_cli_plugin(
 def has_plugin(
     ctx: click.Context,
     pulp_ctx: PulpCLIContext,
+    /,
     name: str,
     specifier: t.Optional[str],
 ) -> None:
@@ -117,7 +116,7 @@ def openapi_group() -> None:
 
 @openapi_group.command()
 @pass_pulp_context
-def spec(pulp_ctx: PulpCLIContext) -> None:
+def spec(pulp_ctx: PulpCLIContext, /) -> None:
     """
     Print the openapi schema of the server.
     """
@@ -126,7 +125,7 @@ def spec(pulp_ctx: PulpCLIContext) -> None:
 
 @openapi_group.command()
 @pass_pulp_context
-def info(pulp_ctx: PulpCLIContext) -> None:
+def info(pulp_ctx: PulpCLIContext, /) -> None:
     """
     Print info block.
     """
@@ -135,7 +134,7 @@ def info(pulp_ctx: PulpCLIContext) -> None:
 
 @openapi_group.command()
 @pass_pulp_context
-def security_schemes(pulp_ctx: PulpCLIContext) -> None:
+def security_schemes(pulp_ctx: PulpCLIContext, /) -> None:
     """
     Print info block.
     """
@@ -145,7 +144,7 @@ def security_schemes(pulp_ctx: PulpCLIContext) -> None:
 @openapi_group.command()
 @click.option("--id", "operation_id", required=True, help=_("Operation ID in openapi schema"))
 @pass_pulp_context
-def operation(pulp_ctx: PulpCLIContext, operation_id: str) -> None:
+def operation(pulp_ctx: PulpCLIContext, /, operation_id: str) -> None:
     """
     Print the spec of the operation.
     """
@@ -167,7 +166,7 @@ def operation(pulp_ctx: PulpCLIContext, operation_id: str) -> None:
 
 @openapi_group.command()
 @pass_pulp_context
-def operation_ids(pulp_ctx: PulpCLIContext) -> None:
+def operation_ids(pulp_ctx: PulpCLIContext, /) -> None:
     """
     Print a list of available operation-ids.
     """
@@ -182,6 +181,7 @@ def operation_ids(pulp_ctx: PulpCLIContext) -> None:
 @pass_pulp_context
 def call(
     pulp_ctx: PulpCLIContext,
+    /,
     operation_id: str,
     parameters: t.Iterable[str],
     body: t.Any,
@@ -208,7 +208,7 @@ def call(
     "--name", "schema_name", required=True, help=_("Component schema name in openapi schema")
 )
 @pass_pulp_context
-def schema(pulp_ctx: PulpCLIContext, schema_name: str) -> None:
+def schema(pulp_ctx: PulpCLIContext, /, schema_name: str) -> None:
     """
     Print the spec of the schema component.
     """
@@ -223,7 +223,7 @@ def schema(pulp_ctx: PulpCLIContext, schema_name: str) -> None:
 
 @openapi_group.command()
 @pass_pulp_context
-def schema_names(pulp_ctx: PulpCLIContext) -> None:
+def schema_names(pulp_ctx: PulpCLIContext, /) -> None:
     """
     Print a list of available schema component names.
     """

@@ -149,6 +149,7 @@ def task_command(**kwargs: t.Any) -> click.Command:
         ctx: click.Context,
         pulp_ctx: PulpCLIContext,
         entity_ctx: PulpEntityContext,
+        /,
     ) -> None:
         ctx.obj = PulpTaskContext(pulp_ctx)
         ctx.obj.resource_context = entity_ctx

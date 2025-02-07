@@ -31,6 +31,7 @@ repository_option = resource_option(
 @pass_pulp_context
 def comps_upload(
     pulp_ctx: PulpCLIContext,
+    /,
     file: t.IO[bytes],
     repository: t.Optional[EntityFieldDefinition],
     replace: t.Optional[bool],

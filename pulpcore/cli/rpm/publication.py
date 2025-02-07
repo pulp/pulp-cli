@@ -43,7 +43,7 @@ repository_option = resource_option(
 )
 @pass_pulp_context
 @click.pass_context
-def publication(ctx: click.Context, pulp_ctx: PulpCLIContext, publication_type: str) -> None:
+def publication(ctx: click.Context, pulp_ctx: PulpCLIContext, /, publication_type: str) -> None:
     if publication_type == "rpm":
         ctx.obj = PulpRpmPublicationContext(pulp_ctx)
     else:

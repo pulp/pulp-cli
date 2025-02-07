@@ -19,7 +19,7 @@ _ = translation.gettext
 @pulp_group()
 @pass_pulp_context
 @click.pass_context
-def worker(ctx: click.Context, pulp_ctx: PulpCLIContext) -> None:
+def worker(ctx: click.Context, pulp_ctx: PulpCLIContext, /) -> None:
     ctx.obj = PulpWorkerContext(pulp_ctx)
 
 

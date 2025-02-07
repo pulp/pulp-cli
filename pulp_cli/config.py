@@ -218,6 +218,7 @@ def config() -> None:
 @click.pass_context
 def create(
     ctx: click.Context,
+    /,
     interactive: bool,
     editor: bool,
     overwrite: bool,

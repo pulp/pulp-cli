@@ -88,7 +88,7 @@ def export() -> None:
 @export.group()
 @pass_pulp_context
 @click.pass_context
-def pulp(ctx: click.Context, pulp_ctx: PulpCLIContext) -> None:
+def pulp(ctx: click.Context, pulp_ctx: PulpCLIContext, /) -> None:
     ctx.obj = PulpExportContext(pulp_ctx)
 
 
@@ -111,6 +111,7 @@ pulp.add_command(destroy_command(decorators=lookup_options))
 def list(
     pulp_ctx: PulpCLIContext,
     export_ctx: PulpExportContext,
+    /,
     exporter: str,
     limit: int,
     offset: int,
@@ -136,6 +137,7 @@ def list(
 def run(
     pulp_ctx: PulpCLIContext,
     export_ctx: PulpExportContext,
+    /,
     exporter: str,
     full: bool,
     chunk_size: str,

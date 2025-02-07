@@ -22,7 +22,7 @@ _ = translation.gettext
 @pulp_group()
 @pass_pulp_context
 @click.pass_context
-def task_group(ctx: click.Context, pulp_ctx: PulpCLIContext) -> None:
+def task_group(ctx: click.Context, pulp_ctx: PulpCLIContext, /) -> None:
     ctx.obj = PulpTaskGroupContext(pulp_ctx)
 
 
@@ -53,7 +53,7 @@ uuid_option = pulp_option(
 @click.option("-w", "--wait", is_flag=True, help=_("Wait for the group-task to finish"))
 @pass_entity_context
 @pass_pulp_context
-def show(pulp_ctx: PulpCLIContext, task_group_ctx: PulpEntityContext, wait: bool) -> None:
+def show(pulp_ctx: PulpCLIContext, task_group_ctx: PulpEntityContext, /, wait: bool) -> None:
     """Shows details of a group-task."""
     assert isinstance(task_group_ctx, PulpTaskGroupContext)
 

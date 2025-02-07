@@ -23,7 +23,7 @@ pass_migration_plan_context = click.make_pass_decorator(PulpMigrationPlanContext
 @pulp_group()
 @pass_pulp_context
 @click.pass_context
-def plan(ctx: click.Context, pulp_ctx: PulpCLIContext) -> None:
+def plan(ctx: click.Context, pulp_ctx: PulpCLIContext, /) -> None:
     ctx.obj = PulpMigrationPlanContext(pulp_ctx)
 
 
@@ -48,12 +48,12 @@ plan.add_command(create_command(decorators=create_options))
 @plan.command(help=_("Run migration plan"))
 @click.option("--href", required=True, help=_("HREF of the plan"))
 @pass_migration_plan_context
-def run(plan_ctx: PulpMigrationPlanContext, href: str) -> None:
+def run(plan_ctx: PulpMigrationPlanContext, /, href: str) -> None:
     plan_ctx.run(href)
 
 
 @plan.command(help=_("Reset Pulp 3 data for plugins specified in the migration plan"))
 @click.option("--href", required=True, help=_("HREF of the plan"))
 @pass_migration_plan_context
-def reset(plan_ctx: PulpMigrationPlanContext, href: str) -> None:
+def reset(plan_ctx: PulpMigrationPlanContext, /, href: str) -> None:
     plan_ctx.reset(href)

@@ -56,7 +56,7 @@ repository_option = resource_option(
 )
 @pass_pulp_context
 @click.pass_context
-def distribution(ctx: click.Context, pulp_ctx: PulpCLIContext, distribution_type: str) -> None:
+def distribution(ctx: click.Context, pulp_ctx: PulpCLIContext, /, distribution_type: str) -> None:
     if distribution_type == "python":
         ctx.obj = PulpPythonDistributionContext(pulp_ctx)
     else:

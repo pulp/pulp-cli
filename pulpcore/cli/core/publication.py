@@ -24,7 +24,7 @@ repository_option = resource_option(
 @pulp_group()
 @pass_pulp_context
 @click.pass_context
-def publication(ctx: click.Context, pulp_ctx: PulpCLIContext) -> None:
+def publication(ctx: click.Context, pulp_ctx: PulpCLIContext, /) -> None:
     """
     Perform actions on all publications.
 

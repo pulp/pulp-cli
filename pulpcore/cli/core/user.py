@@ -94,7 +94,7 @@ create_options = update_options + [
 @pulp_group()
 @pass_pulp_context
 @click.pass_context
-def user(ctx: click.Context, pulp_ctx: PulpCLIContext) -> None:
+def user(ctx: click.Context, pulp_ctx: PulpCLIContext, /) -> None:
     ctx.obj = PulpUserContext(pulp_ctx)
 
 
@@ -111,7 +111,7 @@ user.add_command(destroy_command(decorators=lookup_options, needs_plugins=[req_c
 @pass_entity_context
 @pass_pulp_context
 @click.pass_context
-def role(ctx: click.Context, pulp_ctx: PulpCLIContext, user_ctx: PulpEntityContext) -> None:
+def role(ctx: click.Context, pulp_ctx: PulpCLIContext, user_ctx: PulpEntityContext, /) -> None:
     assert isinstance(user_ctx, PulpUserContext)
 
     pulp_ctx.needs_plugin(req_core_3_17)

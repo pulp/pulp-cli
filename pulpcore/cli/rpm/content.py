@@ -366,6 +366,7 @@ content.add_command(
 def upload(
     pulp_ctx: PulpCLIContext,
     entity_ctx: PulpEntityContext,
+    /,
     file: t.IO[bytes],
     chunk_size: int,
     **kwargs: t.Any,

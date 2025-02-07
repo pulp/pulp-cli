@@ -48,7 +48,7 @@ uuid_option = pulp_option(
 @pulp_group()
 @pass_pulp_context
 @click.pass_context
-def task(ctx: click.Context, pulp_ctx: PulpCLIContext) -> None:
+def task(ctx: click.Context, pulp_ctx: PulpCLIContext, /) -> None:
     ctx.obj = PulpTaskContext(pulp_ctx)
 
 
@@ -113,7 +113,7 @@ task.add_command(
 @click.option("-w", "--wait", is_flag=True, help=_("Wait for the task to finish"))
 @pass_task_context
 @pass_pulp_context
-def show(pulp_ctx: PulpCLIContext, task_ctx: PulpTaskContext, wait: bool) -> None:
+def show(pulp_ctx: PulpCLIContext, task_ctx: PulpTaskContext, /, wait: bool) -> None:
     """Shows details of a task."""
     entity = task_ctx.entity
     if wait and entity["state"] in ["waiting", "running", "canceling"]:
@@ -137,6 +137,7 @@ def show(pulp_ctx: PulpCLIContext, task_ctx: PulpTaskContext, wait: bool) -> Non
 def cancel(
     pulp_ctx: PulpCLIContext,
     task_ctx: PulpTaskContext,
+    /,
     all_tasks: bool,
     waiting_tasks: bool,
     running_tasks: bool,
@@ -182,6 +183,7 @@ def cancel(
 @pass_task_context
 def purge(
     task_ctx: PulpTaskContext,
+    /,
     finished: t.Optional[datetime],
     state: t.Optional[t.Tuple[str]],
 ) -> None:
@@ -192,7 +194,7 @@ def purge(
 @task.command()
 @pass_task_context
 @pass_pulp_context
-def summary(pulp_ctx: PulpCLIContext, task_ctx: PulpTaskContext) -> None:
+def summary(pulp_ctx: PulpCLIContext, task_ctx: PulpTaskContext, /) -> None:
     """
     List a summary of tasks by status.
     """

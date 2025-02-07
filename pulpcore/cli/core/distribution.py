@@ -13,7 +13,7 @@ from pulpcore.cli.common.generic import (
 @pulp_group()
 @pass_pulp_context
 @click.pass_context
-def distribution(ctx: click.Context, pulp_ctx: PulpCLIContext) -> None:
+def distribution(ctx: click.Context, pulp_ctx: PulpCLIContext, /) -> None:
     """
     Perform actions on all distribution.
 

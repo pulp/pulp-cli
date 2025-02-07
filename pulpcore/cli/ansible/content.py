@@ -17,7 +17,7 @@ from pulpcore.cli.common.generic import (
     href_option,
     list_command,
     parse_size_callback,
-    pass_entity_context,
+    pass_content_context,
     pass_pulp_context,
     pulp_group,
     pulp_option,
@@ -68,7 +68,7 @@ repository_option = resource_option(
 )
 @pass_pulp_context
 @click.pass_context
-def content(ctx: click.Context, pulp_ctx: PulpCLIContext, content_type: str) -> None:
+def content(ctx: click.Context, pulp_ctx: PulpCLIContext, /, content_type: str) -> None:
     if content_type == "collection-version":
         ctx.obj = PulpAnsibleCollectionVersionContext(pulp_ctx)
     elif content_type == "role":
@@ -200,11 +200,12 @@ content.add_command(show_command(decorators=lookup_options))
     allowed_with_contexts=signature_context,
     required=True,
 )
-@pass_entity_context
+@pass_content_context
 @pass_pulp_context
 def upload(
     pulp_ctx: PulpCLIContext,
     content_ctx: PulpContentContext,
+    /,
     file: t.IO[bytes],
     **kwargs: t.Any,
 ) -> None:

@@ -35,7 +35,7 @@ _ = translation.gettext
 @pulp_group()
 @pass_pulp_context
 @click.pass_context
-def content_guard(ctx: click.Context, pulp_ctx: PulpCLIContext) -> None:
+def content_guard(ctx: click.Context, pulp_ctx: PulpCLIContext, /) -> None:
     ctx.obj = PulpContentGuardContext(pulp_ctx)
 
 
@@ -54,7 +54,7 @@ content_guard.add_command(list_command(decorators=filter_options))
 @content_guard.group()
 @pass_pulp_context
 @click.pass_context
-def composite(ctx: click.Context, pulp_ctx: PulpCLIContext) -> None:
+def composite(ctx: click.Context, pulp_ctx: PulpCLIContext, /) -> None:
     ctx.obj = PulpCompositeContentGuardContext(pulp_ctx)
 
 
@@ -81,7 +81,7 @@ composite.add_command(role_command(decorators=lookup_options))
 @content_guard.group()
 @pass_pulp_context
 @click.pass_context
-def header(ctx: click.Context, pulp_ctx: PulpCLIContext) -> None:
+def header(ctx: click.Context, pulp_ctx: PulpCLIContext, /) -> None:
     ctx.obj = PulpHeaderContentGuardContext(pulp_ctx)
 
 
@@ -109,7 +109,7 @@ header.add_command(role_command(decorators=lookup_options))
 @content_guard.group()
 @pass_pulp_context
 @click.pass_context
-def rbac(ctx: click.Context, pulp_ctx: PulpCLIContext) -> None:
+def rbac(ctx: click.Context, pulp_ctx: PulpCLIContext, /) -> None:
     ctx.obj = PulpRbacContentGuardContext(pulp_ctx)
 
 
@@ -141,6 +141,7 @@ rbac.add_command(role_command(decorators=lookup_options))
 def assign(
     pulp_ctx: PulpCLIContext,
     guard_ctx: PulpEntityContext,
+    /,
     users: t.Optional[t.List[str]],
     groups: t.Optional[t.List[str]],
 ) -> None:
@@ -170,6 +171,7 @@ def assign(
 def remove(
     pulp_ctx: PulpCLIContext,
     guard_ctx: PulpEntityContext,
+    /,
     users: t.Optional[t.List[str]],
     groups: t.Optional[t.List[str]],
 ) -> None:
@@ -182,7 +184,7 @@ def remove(
 @content_guard.group()
 @pass_pulp_context
 @click.pass_context
-def redirect(ctx: click.Context, pulp_ctx: PulpCLIContext) -> None:
+def redirect(ctx: click.Context, pulp_ctx: PulpCLIContext, /) -> None:
     ctx.obj = PulpContentRedirectContentGuardContext(pulp_ctx)
 
 
@@ -197,7 +199,7 @@ redirect.add_command(role_command(decorators=lookup_options))
 @content_guard.group()
 @pass_pulp_context
 @click.pass_context
-def x509(ctx: click.Context, pulp_ctx: PulpCLIContext) -> None:
+def x509(ctx: click.Context, pulp_ctx: PulpCLIContext, /) -> None:
     ctx.obj = PulpX509CertGuardContext(pulp_ctx)
 
 
@@ -231,7 +233,7 @@ x509.add_command(destroy_command(decorators=lookup_options))
 @content_guard.group()
 @pass_pulp_context
 @click.pass_context
-def rhsm(ctx: click.Context, pulp_ctx: PulpCLIContext) -> None:
+def rhsm(ctx: click.Context, pulp_ctx: PulpCLIContext, /) -> None:
     ctx.obj = PulpRHSMCertGuardContext(pulp_ctx)
 
 
