@@ -160,40 +160,49 @@ def test_validates(schema: t.Any, value: t.Any) -> None:
 
 
 @pytest.mark.parametrize(
-    "schema,value",
+    "schema,value,match",
     [
-        pytest.param({"type": "boolean"}, 1, id="boolean_fails_int"),
-        pytest.param({"type": "string"}, None, id="string_fails_null"),
-        pytest.param({"type": "string"}, 1, id="string_fails_int"),
-        pytest.param({"type": "string"}, True, id="string_fails_bool"),
-        pytest.param({"type": "string", "nullable": False}, None, id="not_nullable_fails_null"),
-        pytest.param({"type": "string", "format": "byte"}, "1234", id="string_bytes_fails_string"),
+        pytest.param({"type": "boolean"}, 1, None, id="boolean_fails_int"),
+        pytest.param({"type": "string"}, None, None, id="string_fails_null"),
+        pytest.param({"type": "string"}, 1, None, id="string_fails_int"),
+        pytest.param({"type": "string"}, True, None, id="string_fails_bool"),
+        pytest.param(
+            {"type": "string", "nullable": False}, None, None, id="not_nullable_fails_null"
+        ),
+        pytest.param(
+            {"type": "string", "format": "byte"}, "1234", None, id="string_bytes_fails_string"
+        ),
         pytest.param(
             {"type": "string", "format": "date"},
             "aritrary string",
+            None,
             id="string_date_fails_string",
         ),
         pytest.param(
             {"type": "string", "enum": ["a", "b", "c"]},
             "d",
+            None,
             id="string_enum",
         ),
         pytest.param(
-            {"type": "integer", "exclusiveMinimum": True, "minimum": 5}, 5, id="integer_exmin"
+            {"type": "integer", "exclusiveMinimum": True, "minimum": 5}, 5, None, id="integer_exmin"
         ),
         pytest.param(
-            {"type": "integer", "exclusiveMaximum": True, "maximum": 5}, 5, id="integer_exmax"
+            {"type": "integer", "exclusiveMaximum": True, "maximum": 5}, 5, None, id="integer_exmax"
         ),
-        pytest.param({"type": "integer", "minimum": 5}, 4, id="integer_min"),
-        pytest.param({"type": "integer", "maximum": 5}, 6, id="integer_max"),
-        pytest.param({"type": "integer", "multipleOf": 7}, 15, id="integer_multiple_of"),
+        pytest.param({"type": "integer", "minimum": 5}, 4, None, id="integer_min"),
+        pytest.param({"type": "integer", "maximum": 5}, 6, None, id="integer_max"),
+        pytest.param({"type": "integer", "multipleOf": 7}, 15, None, id="integer_multiple_of"),
         pytest.param(
-            {"$ref": "#/components/schemas/aString"}, 1, id="string_reference_fails_integer"
+            {"$ref": "#/components/schemas/aString"}, 1, None, id="string_reference_fails_integer"
         ),
-        pytest.param({"type": "number", "minimum": 6.5}, 6.0, id="fails_if_number_is_to_small"),
+        pytest.param(
+            {"type": "number", "minimum": 6.5}, 6.0, None, id="fails_if_number_is_to_small"
+        ),
         pytest.param(
             {"$ref": "#/components/schemas/aReference"},
             1,
+            None,
             id="double_string_reference_fails_integer",
         ),
         pytest.param(
@@ -201,6 +210,7 @@ def test_validates(schema: t.Any, value: t.Any) -> None:
                 "$ref": "#/components/schemas/intArray",
             },
             True,
+            None,
             id="array_fails_boolean",
         ),
         pytest.param(
@@ -208,6 +218,7 @@ def test_validates(schema: t.Any, value: t.Any) -> None:
                 "$ref": "#/components/schemas/intArray",
             },
             ["asdf"],
+            None,
             id="integer_array_fails_string_array",
         ),
         pytest.param(
@@ -215,6 +226,7 @@ def test_validates(schema: t.Any, value: t.Any) -> None:
                 "$ref": "#/components/schemas/strArray",
             },
             ["asdf", False, "ghjk"],
+            None,
             id="string_array_fails_boolean_in_array",
         ),
         pytest.param(
@@ -222,6 +234,7 @@ def test_validates(schema: t.Any, value: t.Any) -> None:
                 "$ref": "#/components/schemas/minMaxArray",
             },
             [1, 2],
+            None,
             id="min_max_array_fails_too_small",
         ),
         pytest.param(
@@ -229,6 +242,7 @@ def test_validates(schema: t.Any, value: t.Any) -> None:
                 "$ref": "#/components/schemas/minMaxArray",
             },
             [1, 2, 3, 4, 5, 6],
+            None,
             id="min_max_array_fails_too_large",
         ),
         pytest.param(
@@ -236,6 +250,7 @@ def test_validates(schema: t.Any, value: t.Any) -> None:
                 "$ref": "#/components/schemas/uniqueArray",
             },
             [1, 2, 1, 6],
+            None,
             id="unique_array_fails",
         ),
         pytest.param(
@@ -243,6 +258,7 @@ def test_validates(schema: t.Any, value: t.Any) -> None:
                 "$ref": "#/components/schemas/emptyObject",
             },
             [],
+            None,
             id="object_fails_list",
         ),
         pytest.param(
@@ -250,6 +266,7 @@ def test_validates(schema: t.Any, value: t.Any) -> None:
                 "$ref": "#/components/schemas/emptyObject",
             },
             {"a": 1},
+            None,
             id="object_fails_non_empty",
         ),
         pytest.param(
@@ -257,20 +274,23 @@ def test_validates(schema: t.Any, value: t.Any) -> None:
                 "$ref": "#/components/schemas/objectAInt",
             },
             {"a": "test"},
+            None,
             id="object_fails_a_is_wrong_type",
         ),
         pytest.param(
             {
                 "$ref": "#/components/schemas/objectRequiredA",
             },
-            {"z": True},
+            {"z": "string"},
+            r"'testvar' is missing properties \(a\).",
             id="object_fails_required_property_missing",
         ),
         pytest.param(
             {
                 "$ref": "#/components/schemas/objectRequiredA",
             },
-            {"a": 1, "z": 2.5},
+            {"a": 1, "y": 2.5, "z": True},
+            r"'testvar\[y\]' is expected to be a string.",
             id="object_fails_additional_property_not_valid",
         ),
         pytest.param(
@@ -278,6 +298,7 @@ def test_validates(schema: t.Any, value: t.Any) -> None:
                 "$ref": "#/components/schemas/allOfEnum",
             },
             "a",
+            r"'testvar' is expected to be one of \[b, d, f\].",
             id="fails_validate_only_first_all_of",
         ),
         pytest.param(
@@ -285,12 +306,13 @@ def test_validates(schema: t.Any, value: t.Any) -> None:
                 "$ref": "#/components/schemas/anyOfEnum",
             },
             "z",
+            None,
             id="fails_validate_none_matched",
         ),
     ],
 )
-def test_validation_failed(schema: t.Any, value: t.Any) -> None:
-    with pytest.raises(ValidationError, match=r"'testvar.*'"):
+def test_validation_failed(schema: t.Any, value: t.Any, match: t.Optional[str]) -> None:
+    with pytest.raises(ValidationError, match=match or r"'testvar.*'"):
         validate(schema, "testvar", value, COMPONENTS)
 
 
