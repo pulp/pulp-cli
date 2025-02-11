@@ -212,7 +212,7 @@ def _validate_object(
                 _("'{name}' does not allow additional properties.").format(name=name)
             )
         elif isinstance(additional_properties, dict):
-            for value in extra_values.values():
+            for pname, pvalue in extra_values.items():
                 validate(additional_properties, f"{name}[{pname}]", pvalue, components)
     if (required := schema.get("required")) is not None:
         if missing_keys := set(required) - set(value.keys()):
@@ -242,7 +242,7 @@ def _validate_string(
     if (enum := schema.get("enum")) is not None:
         if value not in enum:
             raise ValidationError(
-                _("'{name}' is expected to be on of [{enums}].").format(
+                _("'{name}' is expected to be one of [{enums}].").format(
                     name=name, enums=", ".join(enum)
                 )
             )
