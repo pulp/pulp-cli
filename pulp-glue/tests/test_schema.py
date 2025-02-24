@@ -153,6 +153,8 @@ SOME_BYTES = io.BytesIO(b"\000\001\002")
             {"a": datetime.date(2000, 1, 1), "b": datetime.date(2000, 1, 2)},
             id="any_of_matches_one",
         ),
+        pytest.param({"type": ["string", "null"]}, "test_string", id="type_array_matches_string"),
+        pytest.param({"type": ["string", "null"]}, None, id="type_array_matches_null"),
     ],
 )
 def test_validates(schema: t.Any, value: t.Any) -> None:
@@ -309,6 +311,9 @@ def test_validates(schema: t.Any, value: t.Any) -> None:
             None,
             id="fails_validate_none_matched",
         ),
+        pytest.param(
+            {"type": ["string", "null"]}, 1, "did not match any", id="type_array_matches_string"
+        ),
     ],
 )
 def test_validation_failed(schema: t.Any, value: t.Any, match: t.Optional[str]) -> None:
@@ -322,6 +327,7 @@ def test_validation_failed(schema: t.Any, value: t.Any, match: t.Optional[str]) 
         pytest.param({"type": "blubb"}, 1, NotImplementedError, id="unknown_type"),
         pytest.param({"$ref": "blubb"}, 1, SchemaError, id="invalid_reference"),
         pytest.param({"$ref": "#/components/schemas/notHere"}, 1, KeyError, id="missing_reference"),
+        pytest.param({"type": []}, 1, SchemaError, id="type_array_matches_string"),
     ],
 )
 def test_invalid_schema_raises(schema: t.Any, value: t.Any, exc_type: t.Type[Exception]) -> None:

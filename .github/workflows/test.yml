@@ -51,6 +51,7 @@ jobs:
           - image_tag: "latest"
             python: "3.11"
             upper_bounds: true
+            oas_version: "3.1.1"
           - image_tag: "3.63"
             pulp_https: "true"
             pulp_oauth2: "true"
@@ -106,6 +107,7 @@ jobs:
           PULP_HTTPS: "${{ matrix.pulp_https }}"
           PULP_OAUTH2: "${{ matrix.pulp_oauth2 }}"
           PULP_API_ROOT: "${{ matrix.pulp_api_root }}"
+          OAS_VERSION: "${{ matrix.oas_version }}"
         run: |
           .ci/run_container.sh make livetest
 ...
