@@ -99,16 +99,31 @@ def validate(schema: t.Any, name: str, value: t.Any, components: t.Dict[str, t.A
         return
 
     if value is None:
+        # This seems to be the openapi 3.0.3 way.
+        # in 3.1.* they use `"type": ["string", "null"]` instead.
         if schema.get("nullable", False):
             return
 
     if (schema_type := schema.get("type")) is not None:
-        if (typed_transform := _TYPED_VALIDATORS.get(schema_type)) is not None:
-            value = typed_transform(schema, name, value, components)
+        if isinstance(schema_type, list):
+            if len(schema_type) == 0:
+                raise SchemaError(_("{name} specified an empty type array").format(name=name))
+            errors = []
+            for stype in schema_type:
+                try:
+                    _validate_type(stype, schema, name, value, components)
+                    break
+                except ValidationError as e:
+                    errors.append(f"{stype}: {e}")
+            else:
+                raise ValidationError(
+                    _("{name} did not match any of the types: {errors}").format(
+                        name=name, errors="\n".join(errors)
+                    )
+                )
+
         else:
-            raise NotImplementedError(
-                _("Type `{schema_type}` is not implemented yet.").format(schema_type=schema_type)
-            )
+            _validate_type(schema_type, schema, name, value, components)
 
     # allOf etc allow for composition, but the spec isn't particularly clear about that.
     if (all_of := schema.get("allOf")) is not None:
@@ -131,6 +146,17 @@ def validate(schema: t.Any, name: str, value: t.Any, components: t.Dict[str, t.A
             raise ValidationError(
                 _("'{name}' does not match any of the provide schemata.").format(name=name)
             )
+
+
+def _validate_type(
+    schema_type: str, schema: t.Any, name: str, value: t.Any, components: t.Dict[str, t.Any]
+) -> None:
+    if (typed_validator := _TYPED_VALIDATORS.get(schema_type)) is not None:
+        typed_validator(schema, name, value, components)
+    else:
+        raise NotImplementedError(
+            _("Type `{schema_type}` is not implemented yet.").format(schema_type=schema_type)
+        )
 
 
 def _validate_ref(schema_ref: str, name: str, value: t.Any, components: t.Dict[str, t.Any]) -> None:
@@ -183,6 +209,11 @@ def _validate_integer(
                     name=name, multiple_of=multiple_of
                 )
             )
+
+
+def _validate_null(schema: t.Any, name: str, value: t.Any, components: t.Dict[str, t.Any]) -> None:
+    if value is not None:
+        raise ValidationError(_("'{name}' is expected to be a null").format(name=name))
 
 
 def _validate_number(
@@ -252,6 +283,7 @@ _TYPED_VALIDATORS = {
     "array": _validate_array,
     "boolean": _validate_boolean,
     "integer": _validate_integer,
+    "null": _validate_null,
     "number": _validate_number,
     "object": _validate_object,
     "string": _validate_string,
