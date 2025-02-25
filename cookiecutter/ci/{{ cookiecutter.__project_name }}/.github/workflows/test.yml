@@ -82,6 +82,7 @@ jobs:
           PULP_HTTPS: "${{ matrix.pulp_https }}"
           PULP_OAUTH2: "${{ matrix.pulp_oauth2 }}"
           PULP_API_ROOT: "${{ matrix.pulp_api_root }}"
+          OAS_VERSION: "${{ matrix.oas_version }}"
           {%- endraw %}
         run: |
           .ci/run_container.sh make {% if cookiecutter.unittests %}live{% endif %}test

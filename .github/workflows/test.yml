@@ -49,9 +49,9 @@ jobs:
             pulp_https: "true"
             python: "3.11"
           - image_tag: "latest"
+            oas_version: "3.1.1"
             python: "3.11"
             upper_bounds: true
-            oas_version: "3.1.1"
           - image_tag: "3.63"
             pulp_https: "true"
             pulp_oauth2: "true"
