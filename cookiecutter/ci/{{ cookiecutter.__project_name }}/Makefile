@@ -37,6 +37,9 @@ lint:
 {%- endif %}
 	black --diff --check .
 	flake8
+{%- if cookiecutter.glue and cookiecutter.app_label %}
+	.ci/scripts/check_cli_dependencies.py
+{%- endif %}
 	.ci/scripts/check_click_for_mypy.py
 {%- if cookiecutter.glue %}
 	MYPYPATH=pulp-glue{{ cookiecutter.__app_label_suffix }} mypy
