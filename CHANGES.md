@@ -10,6 +10,43 @@
 
 [//]: # (towncrier release notes start)
 
+## 0.31.0 (2025-02-25) {: #0.31.0 }
+
+
+
+#### Bugfixes {: #0.31.0-bugfix }
+
+- Added "--base-repository" option to modify commands to allow creating a repository version from a different repository.
+  [#618](https://github.com/pulp/pulp-cli/issues/618)
+
+
+#### Misc {: #0.31.0-misc }
+
+- Changed the upper version bound of `packaging` to the last available version according to CalVer.
+  [#1125](https://github.com/pulp/pulp-cli/issues/1125)
+
+
+### Pulp GLUE {: #0.31.0-pulp-glue }
+
+
+#### Features {: #0.31.0-pulp-glue-feature }
+
+- Improved validation to consume openapi 3.1 schemata also.
+
+
+#### Bugfixes {: #0.31.0-pulp-glue-bugfix }
+
+- Fixed validation failure with `additionalProperties`.
+
+
+#### Misc {: #0.31.0-pulp-glue-misc }
+
+- Changed the upper version bound of `packaging` to the last available version according to CalVer.
+  [#1125](https://github.com/pulp/pulp-cli/issues/1125)
+
+
+---
+
 ## 0.30.2 (2025-01-20) {: #0.30.2 }
 
 
