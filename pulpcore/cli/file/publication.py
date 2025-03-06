@@ -56,6 +56,12 @@ create_options = [
         "--manifest",
         help=_("Filename to use for manifest file containing metadata for all the files."),
     ),
+    click.option(
+        "--checkpoint",
+        is_flag=True,
+        default=False,
+        help=_("Create a checkpoint publication"),
+    ),
 ]
 publication.add_command(list_command(decorators=publication_filter_options + [repository_option]))
 publication.add_command(show_command(decorators=lookup_options))
