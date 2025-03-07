@@ -1,0 +1,2 @@
+Fix a bug when header values contain more than alphanumeric characters.
+Also combine the headers from setting and the commandline.

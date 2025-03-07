@@ -47,6 +47,20 @@ SETTINGS = [
     "verbose",
     "plugins",
 ]
+HEADER_REGEX = r"^[-a-zA-Z0-9_]+:.+$"
+
+
+def headers_callback(
+    ctx: click.Context, param: click.Parameter, value: t.Iterable[str]
+) -> t.Iterable[str]:
+    if not all((re.match(HEADER_REGEX, item) for item in value)):
+        raise click.BadParameter("format is <header-name>:<value>")
+
+    default_map = ctx.default_map or {}
+    headers: t.List[str] = default_map.get("headers", [])
+    headers.extend(value)
+    return headers
+
 
 CONFIG_OPTIONS = [
     click.option("--base-url", default="https://localhost", help=_("API base url")),
@@ -65,6 +79,7 @@ CONFIG_OPTIONS = [
             "Name and value are colon separated. "
             "Can be specified multiple times."
         ),
+        callback=headers_callback,
     ),
     click.option("--username", default=None, help=_("Username on pulp server")),
     click.option("--password", default=None, help=_("Password on pulp server")),
@@ -149,8 +164,7 @@ def validate_config(config: t.Dict[str, t.Any], strict: bool = False) -> None:
     if "headers" in config:
         if not isinstance(config["headers"], list) or not all(
             (
-                isinstance(header, str)
-                and re.match(r"^[-a-zA-Z0-9_]+\s*:\s*[-a-zA-Z0-9_]+$", header)
+                isinstance(header, str) and re.match(HEADER_REGEX, header)
                 for header in config["headers"]
             )
         ):
