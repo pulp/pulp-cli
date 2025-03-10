@@ -1,5 +1,6 @@
 #!/bin/bash
 
+set -eu
 # shellcheck source=tests/scripts/config.source
 . "$(dirname "$(realpath "$0")")"/config.source
 

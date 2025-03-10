@@ -1,6 +1,6 @@
 #!/bin/bash
-# src1 src2 dest1 dest2 pkg advisory
 
+set -eu
 # shellcheck source=tests/scripts/config.source
 . "$(dirname "$(dirname "$(realpath "$0")")")"/config.source
 
@@ -99,5 +99,3 @@ cat << EOF >  ./cli_copy_test.json
 ]
 EOF
 expect_succ pulp rpm copy --config @./cli_copy_test.json
-
-
