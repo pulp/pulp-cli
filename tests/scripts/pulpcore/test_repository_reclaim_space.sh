@@ -1,5 +1,6 @@
 #!/bin/bash
 
+set -eu
 # shellcheck source=tests/scripts/config.source
 . "$(dirname "$(dirname "$(realpath "$0")")")"/config.source
 
@@ -32,4 +33,4 @@ test "$(echo "$OUTPUT" | jq -r '.[] | select(.relative_path | endswith("1.iso"))
 # Reclaim disk space and verify that the artifact is no longer available
 expect_succ pulp repository reclaim --repository "file:file:cli_test_reclaim_repo"
 expect_succ pulp file repository content list --repository "cli_test_reclaim_repo" --version 1
-test "$(echo "$OUTPUT" | jq -r '.[] | select(.relative_path | endswith("1.iso")) | .artifact')" = "null" 
+test "$(echo "$OUTPUT" | jq -r '.[] | select(.relative_path | endswith("1.iso")) | .artifact')" = "null"

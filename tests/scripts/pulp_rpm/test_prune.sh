@@ -1,5 +1,6 @@
 #!/bin/bash
 
+set -eu
 # shellcheck source=tests/scripts/config.source
 . "$(dirname "$(dirname "$(realpath "$0")")")"/config.source
 
@@ -32,6 +33,3 @@ expect_succ pulp rpm prune-packages --repository "rpm:rpm:cli_test_rpm_prune" --
 expect_succ pulp rpm prune-packages --repository "rpm:rpm:cli_test_rpm_prune" --repository "${repo_href}" --repository "${repo_href_2}" --dry-run
 expect_succ pulp rpm prune-packages --all-repositories --dry-run
 expect_succ pulp rpm prune-packages --repository "rpm:rpm:cli_test_rpm_prune" --keep-days 0
-
-
-
