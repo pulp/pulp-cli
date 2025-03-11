@@ -10,6 +10,25 @@
 
 [//]: # (towncrier release notes start)
 
+## 0.31.1 (2025-03-10) {: #0.31.1 }
+
+
+
+#### Bugfixes {: #0.31.1-bugfix }
+
+- Fix a bug when header values weren't allowed to contain other than alphanumeric characters.
+  Also combine the headers from setting and the commandline.
+  [#1139](https://github.com/pulp/pulp-cli/issues/1139)
+
+
+### Pulp GLUE {: #0.31.1-pulp-glue }
+
+
+No significant changes.
+
+
+---
+
 ## 0.31.0 (2025-02-25) {: #0.31.0 }
 
 
