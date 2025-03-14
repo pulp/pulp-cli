@@ -71,6 +71,12 @@ update_options = [
     repository_option,
     content_guard_option,
     pulp_labels_option,
+    click.option(
+        "--checkpoint/--not-checkpoint",
+        is_flag=True,
+        default=None,
+        help=_("Create a checkpoint distribution."),
+    ),
 ]
 create_options = common_distribution_create_options + update_options
 
