@@ -4,8 +4,8 @@ import click
 from pulp_glue.common.i18n import get_translation
 from pulp_glue.file.context import PulpFileACSContext, PulpFileRemoteContext
 
+from pulp_cli.generic import pulp_group
 from pulpcore.cli.common.acs import acs_command
-from pulpcore.cli.common.generic import pulp_group
 from pulpcore.cli.file.content import content
 from pulpcore.cli.file.distribution import distribution
 from pulpcore.cli.file.publication import publication

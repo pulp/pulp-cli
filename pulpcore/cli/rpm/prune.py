@@ -5,7 +5,7 @@ import click
 from pulp_glue.common.exceptions import PulpException
 from pulp_glue.rpm.context import PulpRpmPruneContext, PulpRpmRepositoryContext
 
-from pulpcore.cli.common.generic import (
+from pulp_cli.generic import (
     PulpCLIContext,
     pass_pulp_context,
     pulp_command,

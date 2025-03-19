@@ -11,7 +11,7 @@ from pulp_glue.common.context import (
 )
 from pulp_glue.common.i18n import get_translation
 
-from pulpcore.cli.common.generic import (
+from pulp_cli.generic import (
     content_guard_option,
     create_command,
     destroy_command,

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-04 09:12+0200\n"
+"POT-Creation-Date: 2025-03-19 11:46+0100\n"
 "PO-Revision-Date: 2021-12-06 11:24+0100\n"
 "Last-Translator: Matthias Dellweg <mdellweg@redhat.com>\n"
 "Language-Team: \n"
@@ -21,26 +21,112 @@ msgstr ""
 msgid "Repository to associate the comps-units to, takes <name> or href."
 msgstr ""
 
-#: pulpcore/cli/rpm/content.py:78
+#: pulpcore/cli/rpm/content.py:82
 msgid ""
 "Repository to add the content to in the form "
 "'[[<plugin>:]<resource_type>:]<name>' or by href."
 msgstr ""
 
-#: pulpcore/cli/rpm/content.py:233
-msgid "Digest of the artifact to use"
+#: pulpcore/cli/rpm/content.py:279
+#, fuzzy
+msgid "Digest of the artifact to use [deprecated]"
 msgstr "Fingerabdruck des zu verwendenden Artefakts"
 
-#: pulpcore/cli/rpm/content.py:261
+#: pulpcore/cli/rpm/content.py:285
+msgid "Remote url to download and create rpm content from"
+msgstr ""
+
+#: pulpcore/cli/rpm/content.py:314
+msgid "An advisory JSON file."
+msgstr ""
+
+#: pulpcore/cli/rpm/content.py:320
+msgid "An RPM binary. One of --file or --directory is required."
+msgstr ""
+
+#: pulpcore/cli/rpm/content.py:326
 msgid "Relative path within a distribution of the entity"
 msgstr ""
 
-#: pulpcore/cli/rpm/content.py:268
-msgid "An RPM binary"
+#: pulpcore/cli/rpm/content.py:333
+msgid ""
+"A directory containing RPM binaries named .rpm. A --repository is required "
+"for this directive. One of --file or --directory is required."
 msgstr ""
 
-#: pulpcore/cli/rpm/content.py:275
-msgid "An advisory JSON file."
+#: pulpcore/cli/rpm/content.py:346
+msgid ""
+"If --publish, once all files are uploaded into the destination repository, "
+"trigger a publish on the resulting repository-version."
+msgstr ""
+
+#: pulpcore/cli/rpm/content.py:358
+msgid ""
+"In conjunction with --directory, create and upload into a temporary "
+"repository,  then copy results into the specified destination as an atomic "
+"operation."
+msgstr ""
+
+#: pulpcore/cli/rpm/content.py:380
+msgid "You must specify one (and only one) of --file or --directory."
+msgstr ""
+
+#: pulpcore/cli/rpm/content.py:387
+msgid "You must specify a --repository to use --directory uploads."
+msgstr ""
+
+#: pulpcore/cli/rpm/content.py:397
+msgid "relative_path may not be specified on --directory uploads."
+msgstr ""
+
+#: pulpcore/cli/rpm/content.py:424
+msgid "Created new version {} in {}"
+msgstr ""
+
+#: pulpcore/cli/rpm/content.py:434
+msgid "Publishing repository {}."
+msgstr ""
+
+#: pulpcore/cli/rpm/content.py:473
+msgid "Creating new version of repository {}"
+msgstr ""
+
+#: pulpcore/cli/rpm/content.py:489
+msgid "Directory {} has no .rpm files in it."
+msgstr ""
+
+#: pulpcore/cli/rpm/content.py:492
+msgid "About to upload {} files for {}."
+msgstr ""
+
+#: pulpcore/cli/rpm/content.py:507
+msgid "Uploaded {}..."
+msgstr ""
+
+#: pulpcore/cli/rpm/content.py:510
+msgid "Failed to upload file {} : {}"
+msgstr ""
+
+#: pulpcore/cli/rpm/content.py:513
+msgid "No successful uploads using directory {}!"
+msgstr ""
+
+#: pulpcore/cli/rpm/copy.py:22
+msgid ""
+"\n"
+"        A JSON document describing sources, destinations, and content to be "
+"copied. It has the\n"
+"        format `[{\"source_repo_version\": repo-version-href, \"dest_repo\": "
+"repo-href,\n"
+"        \"content\": [content-href,...]},...]`\n"
+"\n"
+"         The argument prefixed with an '@' is interpreted as the path to a "
+"JSON file.\n"
+"        "
+msgstr ""
+
+#: pulpcore/cli/rpm/copy.py:37
+msgid "Copy dependencies of the explicitly-defined content being copied."
 msgstr ""
 
 #: pulpcore/cli/rpm/distribution.py:36
@@ -60,10 +146,52 @@ msgid ""
 "Option specifying whether ``*.repo`` files will be generated and served."
 msgstr ""
 
-#: pulpcore/cli/rpm/publication.py:53
+#: pulpcore/cli/rpm/prune.py:26
+msgid ""
+"RPM Repository to prune, in the form 'rpm:rpm:<name>' or by href. Can be "
+"called multiple times."
+msgstr ""
+
+#: pulpcore/cli/rpm/prune.py:40
+msgid "Prune *all* repositories accessible to the invoking user."
+msgstr ""
+
+#: pulpcore/cli/rpm/prune.py:46
+msgid ""
+"Prune packages that were added to the specified repositories more than N "
+"days ago."
+msgstr ""
+
+#: pulpcore/cli/rpm/prune.py:54
+msgid ""
+"Evaluate the prune-status of the specified repositories but DO NOT make any "
+"changes."
+msgstr ""
+
+#: pulpcore/cli/rpm/prune.py:79
+msgid "at least one --repository, or --all-repositories, must be specified"
+msgstr ""
+
+#: pulpcore/cli/rpm/prune.py:83
+msgid "cannot specify --all-repositories and --repository at the same time"
+msgstr ""
+
+#: pulpcore/cli/rpm/publication.py:57
 msgid "a repository version number, leave blank for latest"
 msgstr ""
 "Versionsnummer des Repositories, leer lassen um die letzte zu verwenden"
+
+#: pulpcore/cli/rpm/publication.py:64 pulpcore/cli/rpm/repository.py:207
+msgid ""
+"A JSON dictionary describing config.repo file (or @file containing a JSON "
+"dictionary)"
+msgstr ""
+
+#: pulpcore/cli/rpm/publication.py:73 pulpcore/cli/rpm/repository.py:165
+msgid ""
+"Option specifying the checksum type to use for package and metadata "
+"integrity checks."
+msgstr ""
 
 #: pulpcore/cli/rpm/remote.py:60
 msgid "a PEM encoded CA certificate or @file containing same"
@@ -111,17 +239,17 @@ msgstr ""
 msgid "ULN Server base URL."
 msgstr ""
 
-#: pulpcore/cli/rpm/repository.py:60
+#: pulpcore/cli/rpm/repository.py:61
 msgid ""
 "Remote used for synching in the form '[[<plugin>:]<resource_type>:]<name>' "
 "or by href."
 msgstr ""
 
-#: pulpcore/cli/rpm/repository.py:106
+#: pulpcore/cli/rpm/repository.py:115
 msgid "Href of the rpm package to use"
 msgstr ""
 
-#: pulpcore/cli/rpm/repository.py:119
+#: pulpcore/cli/rpm/repository.py:128
 msgid ""
 "JSON string with a list of objects to add to the repository.\n"
 "    Each object must contain the following keys: \"pulp_href\".\n"
@@ -129,7 +257,7 @@ msgid ""
 "list of objects."
 msgstr ""
 
-#: pulpcore/cli/rpm/repository.py:128
+#: pulpcore/cli/rpm/repository.py:137
 msgid ""
 "JSON string with a list of objects to remove from the repository.\n"
 "    Each object must contain the following keys: \"pulp_href\".\n"
@@ -137,7 +265,40 @@ msgid ""
 "list of objects."
 msgstr ""
 
-#: pulpcore/cli/rpm/repository.py:247
+#: pulpcore/cli/rpm/repository.py:151
+msgid ""
+"DEPRECATED: Option specifying the checksum type to use for repository "
+"metadata."
+msgstr ""
+
+#: pulpcore/cli/rpm/repository.py:157
+msgid ""
+"DEPRECATED: Option specifying the checksum type to use for packages in "
+"repository metadata."
+msgstr ""
+
+#: pulpcore/cli/rpm/repository.py:174
+msgid ""
+"DEPRECATED: Option specifying whether a client should perform a GPG "
+"signature check\n"
+"            on packages."
+msgstr ""
+
+#: pulpcore/cli/rpm/repository.py:183
+msgid ""
+"DEPRECATED: Option specifying whether a client should perform a GPG "
+"signature check\n"
+"            on the repodata."
+msgstr ""
+
+#: pulpcore/cli/rpm/repository.py:191
+msgid ""
+"DEPRECATED: An option specifying whether Pulp should generate SQLite "
+"metadata.\n"
+"            Unavailable for pulp_rpm>=3.25.0"
+msgstr ""
+
+#: pulpcore/cli/rpm/repository.py:307
 #, python-brace-format
 msgid ""
 "Repository '{name}' does not have a default remote. Please specify with '--"

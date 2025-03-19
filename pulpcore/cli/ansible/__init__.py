@@ -3,11 +3,11 @@ import typing as t
 import click
 from pulp_glue.common.i18n import get_translation
 
+from pulp_cli.generic import pulp_group
 from pulpcore.cli.ansible.content import content
 from pulpcore.cli.ansible.distribution import distribution
 from pulpcore.cli.ansible.remote import remote
 from pulpcore.cli.ansible.repository import repository
-from pulpcore.cli.common.generic import pulp_group
 
 translation = get_translation(__package__)
 _ = translation.gettext

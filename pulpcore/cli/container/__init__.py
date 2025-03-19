@@ -3,7 +3,7 @@ import typing as t
 import click
 from pulp_glue.common.i18n import get_translation
 
-from pulpcore.cli.common.generic import pulp_group
+from pulp_cli.generic import pulp_group
 from pulpcore.cli.container.content import content
 from pulpcore.cli.container.distribution import distribution
 from pulpcore.cli.container.namespace import namespace

@@ -6,7 +6,7 @@ from pulp_glue.common.i18n import get_translation
 from pulp_glue.core.context import PulpArtifactContext
 from pulp_glue.python.context import PulpPythonContentContext, PulpPythonRepositoryContext
 
-from pulpcore.cli.common.generic import (
+from pulp_cli.generic import (
     PulpCLIContext,
     chunk_size_option,
     create_command,

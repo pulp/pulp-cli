@@ -7,7 +7,7 @@ import click
 from pulp_glue.common.i18n import get_translation
 
 from pulp_cli.config import CONFIG_LOCATIONS, config, config_options, validate_config
-from pulpcore.cli.common.generic import PulpCLIContext, pulp_group
+from pulp_cli.generic import PulpCLIContext, pulp_group
 
 if sys.version_info >= (3, 10):
     from importlib.metadata import entry_points
