@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-04 09:12+0200\n"
+"POT-Creation-Date: 2025-03-19 11:46+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,14 +17,18 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: pulpcore/cli/file/content.py:62
+#: pulpcore/cli/file/content.py:63
 msgid ""
 "Repository to add the content to in the form "
 "'[[<plugin>:]<resource_type>:]<name>' or by href."
 msgstr ""
 
 #: pulpcore/cli/file/content.py:96
-msgid "Digest of the artifact to use"
+msgid "Digest of the artifact to use [deprecated]"
+msgstr ""
+
+#: pulpcore/cli/file/content.py:101
+msgid "Remote url to download and create file content from"
 msgstr ""
 
 #: pulpcore/cli/file/distribution.py:37
@@ -54,12 +58,12 @@ msgid ""
 "by href."
 msgstr ""
 
-#: pulpcore/cli/file/repository.py:83
+#: pulpcore/cli/file/repository.py:85
 #, python-brace-format
 msgid "Validation of '{parameter}' failed: {error}"
 msgstr ""
 
-#: pulpcore/cli/file/repository.py:139 pulpcore/cli/file/repository.py:293
+#: pulpcore/cli/file/repository.py:141
 msgid ""
 "JSON string with a list of objects to add to the repository.\n"
 "    Each object must contain the following keys: \"sha256\", "
@@ -68,7 +72,7 @@ msgid ""
 "list of objects."
 msgstr ""
 
-#: pulpcore/cli/file/repository.py:148 pulpcore/cli/file/repository.py:304
+#: pulpcore/cli/file/repository.py:150
 msgid ""
 "JSON string with a list of objects to remove from the repository.\n"
 "    Each object must contain the following keys: \"sha256\", "
@@ -77,7 +81,7 @@ msgid ""
 "list of objects."
 msgstr ""
 
-#: pulpcore/cli/file/repository.py:204
+#: pulpcore/cli/file/repository.py:209
 #, python-brace-format
 msgid ""
 "Repository '{name}' does not have a default remote. Please specify with '--"

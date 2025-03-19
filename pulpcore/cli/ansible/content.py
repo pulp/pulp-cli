@@ -11,7 +11,7 @@ from pulp_glue.common.context import PulpContentContext, PulpRepositoryContext
 from pulp_glue.common.i18n import get_translation
 from pulp_glue.core.context import PulpArtifactContext
 
-from pulpcore.cli.common.generic import (
+from pulp_cli.generic import (
     GroupOption,
     PulpCLIContext,
     href_option,

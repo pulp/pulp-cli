@@ -1,7 +1,7 @@
 import click
 from pulp_glue.common.context import PluginRequirement, PulpDistributionContext
 
-from pulpcore.cli.common.generic import (
+from pulp_cli.generic import (
     PulpCLIContext,
     distribution_filter_options,
     list_command,

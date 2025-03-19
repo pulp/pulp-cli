@@ -2,7 +2,7 @@ import click
 from pulp_glue.common.i18n import get_translation
 from pulp_glue.file.context import PulpFileDistributionContext, PulpFileRepositoryContext
 
-from pulpcore.cli.common.generic import (
+from pulp_cli.generic import (
     PulpCLIContext,
     common_distribution_create_options,
     content_guard_option,

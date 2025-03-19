@@ -3,7 +3,7 @@ from pulp_glue.common.context import PluginRequirement
 from pulp_glue.common.i18n import get_translation
 from pulp_glue.rpm.context import PulpRpmPublicationContext, PulpRpmRepositoryContext
 
-from pulpcore.cli.common.generic import (
+from pulp_cli.generic import (
     PulpCLIContext,
     create_command,
     destroy_command,

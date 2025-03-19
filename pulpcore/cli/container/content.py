@@ -9,7 +9,7 @@ from pulp_glue.container.context import (
     PulpContainerTagContext,
 )
 
-from pulpcore.cli.common.generic import (
+from pulp_cli.generic import (
     GroupOption,
     PulpCLIContext,
     href_option,

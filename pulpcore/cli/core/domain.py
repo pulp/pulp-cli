@@ -3,7 +3,7 @@ from pulp_glue.common.context import PulpContext
 from pulp_glue.common.i18n import get_translation
 from pulp_glue.core.context import PulpDomainContext
 
-from pulpcore.cli.common.generic import (
+from pulp_cli.generic import (
     create_command,
     destroy_command,
     href_option,

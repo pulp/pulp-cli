@@ -15,7 +15,7 @@ from pulp_glue.file.context import (
     PulpFileRepositoryContext,
 )
 
-from pulpcore.cli.common.generic import (
+from pulp_cli.generic import (
     GroupOption,
     PulpCLIContext,
     create_command,

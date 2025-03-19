@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-04 09:25+0200\n"
+"POT-Creation-Date: 2025-03-19 11:46+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,212 +17,212 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: pulp-glue/pulp_glue/core/context.py:22
+#: pulp-glue/pulp_glue/core/context.py:24
 msgid "access policy"
 msgstr ""
 
-#: pulp-glue/pulp_glue/core/context.py:23
+#: pulp-glue/pulp_glue/core/context.py:25
 msgid "access policies"
 msgstr ""
 
-#: pulp-glue/pulp_glue/core/context.py:40
+#: pulp-glue/pulp_glue/core/context.py:42
 msgid "artifact"
 msgstr ""
 
-#: pulp-glue/pulp_glue/core/context.py:41
+#: pulp-glue/pulp_glue/core/context.py:43
 msgid "artifacts"
 msgstr ""
 
-#: pulp-glue/pulp_glue/core/context.py:57
+#: pulp-glue/pulp_glue/core/context.py:59
 msgid "File digest does not match."
 msgstr ""
 
-#: pulp-glue/pulp_glue/core/context.py:62
+#: pulp-glue/pulp_glue/core/context.py:64
 msgid "Artifact already exists."
 msgstr ""
 
-#: pulp-glue/pulp_glue/core/context.py:66
+#: pulp-glue/pulp_glue/core/context.py:68
 #, python-brace-format
 msgid "Uploading file {filename}"
 msgstr ""
 
-#: pulp-glue/pulp_glue/core/context.py:77
+#: pulp-glue/pulp_glue/core/context.py:83
 msgid "Creating artifact."
 msgstr ""
 
-#: pulp-glue/pulp_glue/core/context.py:88
+#: pulp-glue/pulp_glue/core/context.py:94
 msgid "Pulp domain"
 msgstr ""
 
-#: pulp-glue/pulp_glue/core/context.py:89
+#: pulp-glue/pulp_glue/core/context.py:95
 msgid "Pulp domains"
 msgstr ""
 
-#: pulp-glue/pulp_glue/core/context.py:96
+#: pulp-glue/pulp_glue/core/context.py:102
 msgid "Pulp exporter"
 msgstr ""
 
-#: pulp-glue/pulp_glue/core/context.py:97
+#: pulp-glue/pulp_glue/core/context.py:103
 msgid "Pulp exporters"
 msgstr ""
 
-#: pulp-glue/pulp_glue/core/context.py:103
+#: pulp-glue/pulp_glue/core/context.py:109
 msgid "Pulp export"
 msgstr ""
 
-#: pulp-glue/pulp_glue/core/context.py:104
+#: pulp-glue/pulp_glue/core/context.py:110
 msgid "Pulp exports"
 msgstr ""
 
-#: pulp-glue/pulp_glue/core/context.py:115
+#: pulp-glue/pulp_glue/core/context.py:121
 msgid "user group"
 msgstr ""
 
-#: pulp-glue/pulp_glue/core/context.py:116
+#: pulp-glue/pulp_glue/core/context.py:122
 msgid "user groups"
 msgstr ""
 
-#: pulp-glue/pulp_glue/core/context.py:130
+#: pulp-glue/pulp_glue/core/context.py:148
 msgid "group permission"
 msgstr ""
 
-#: pulp-glue/pulp_glue/core/context.py:131
-#: pulp-glue/pulp_glue/core/context.py:132
+#: pulp-glue/pulp_glue/core/context.py:149
+#: pulp-glue/pulp_glue/core/context.py:150
 msgid "group permissions"
 msgstr ""
 
-#: pulp-glue/pulp_glue/core/context.py:172
-#: pulp-glue/pulp_glue/core/context.py:556
+#: pulp-glue/pulp_glue/core/context.py:189
+#: pulp-glue/pulp_glue/core/context.py:599
 #, python-brace-format
 msgid "Could not find {entity} with {kwargs}."
 msgstr ""
 
-#: pulp-glue/pulp_glue/core/context.py:184
+#: pulp-glue/pulp_glue/core/context.py:201
 msgid "group model permission"
 msgstr ""
 
-#: pulp-glue/pulp_glue/core/context.py:185
+#: pulp-glue/pulp_glue/core/context.py:202
 msgid "group model permissions"
 msgstr ""
 
-#: pulp-glue/pulp_glue/core/context.py:198
+#: pulp-glue/pulp_glue/core/context.py:215
 msgid "group object permission"
 msgstr ""
 
-#: pulp-glue/pulp_glue/core/context.py:199
+#: pulp-glue/pulp_glue/core/context.py:216
 msgid "group object permissions"
 msgstr ""
 
-#: pulp-glue/pulp_glue/core/context.py:212
+#: pulp-glue/pulp_glue/core/context.py:229
 msgid "group role"
 msgstr ""
 
-#: pulp-glue/pulp_glue/core/context.py:213
-#: pulp-glue/pulp_glue/core/context.py:217
+#: pulp-glue/pulp_glue/core/context.py:230
+#: pulp-glue/pulp_glue/core/context.py:234
 msgid "group roles"
 msgstr ""
 
-#: pulp-glue/pulp_glue/core/context.py:230
+#: pulp-glue/pulp_glue/core/context.py:247
 msgid "group user"
 msgstr ""
 
-#: pulp-glue/pulp_glue/core/context.py:231
+#: pulp-glue/pulp_glue/core/context.py:248
 msgid "group users"
 msgstr ""
 
-#: pulp-glue/pulp_glue/core/context.py:263
+#: pulp-glue/pulp_glue/core/context.py:270
 msgid "Pulp importer"
 msgstr ""
 
-#: pulp-glue/pulp_glue/core/context.py:264
+#: pulp-glue/pulp_glue/core/context.py:271
 msgid "Pulp importers"
 msgstr ""
 
-#: pulp-glue/pulp_glue/core/context.py:333
+#: pulp-glue/pulp_glue/core/context.py:376
 msgid "role"
 msgstr ""
 
-#: pulp-glue/pulp_glue/core/context.py:334
+#: pulp-glue/pulp_glue/core/context.py:377
 msgid "roles"
 msgstr ""
 
-#: pulp-glue/pulp_glue/core/context.py:342
+#: pulp-glue/pulp_glue/core/context.py:385
 msgid "signing service"
 msgstr ""
 
-#: pulp-glue/pulp_glue/core/context.py:343
+#: pulp-glue/pulp_glue/core/context.py:386
 msgid "signing services"
 msgstr ""
 
-#: pulp-glue/pulp_glue/core/context.py:350
+#: pulp-glue/pulp_glue/core/context.py:393
 msgid "task"
 msgstr ""
 
-#: pulp-glue/pulp_glue/core/context.py:351
+#: pulp-glue/pulp_glue/core/context.py:394
 msgid "tasks"
 msgstr ""
 
-#: pulp-glue/pulp_glue/core/context.py:387
+#: pulp-glue/pulp_glue/core/context.py:430
 msgid "specify multiple reserved resources"
 msgstr ""
 
-#: pulp-glue/pulp_glue/core/context.py:402
+#: pulp-glue/pulp_glue/core/context.py:445
 #, python-brace-format
 msgid "Waiting to cancel task {href}"
 msgstr ""
 
-#: pulp-glue/pulp_glue/core/context.py:404
+#: pulp-glue/pulp_glue/core/context.py:447
 msgid "Done."
 msgstr ""
 
-#: pulp-glue/pulp_glue/core/context.py:445
+#: pulp-glue/pulp_glue/core/context.py:488
 msgid "task group"
 msgstr ""
 
-#: pulp-glue/pulp_glue/core/context.py:446
+#: pulp-glue/pulp_glue/core/context.py:489
 msgid "task groups"
 msgstr ""
 
-#: pulp-glue/pulp_glue/core/context.py:452
+#: pulp-glue/pulp_glue/core/context.py:495
 msgid "upload"
 msgstr ""
 
-#: pulp-glue/pulp_glue/core/context.py:453
+#: pulp-glue/pulp_glue/core/context.py:496
 msgid "uploads"
 msgstr ""
 
-#: pulp-glue/pulp_glue/core/context.py:499
+#: pulp-glue/pulp_glue/core/context.py:542
 msgid "Upload complete."
 msgstr ""
 
-#: pulp-glue/pulp_glue/core/context.py:504
+#: pulp-glue/pulp_glue/core/context.py:547
 msgid "user"
 msgstr ""
 
-#: pulp-glue/pulp_glue/core/context.py:505
+#: pulp-glue/pulp_glue/core/context.py:548
 msgid "users"
 msgstr ""
 
-#: pulp-glue/pulp_glue/core/context.py:512
+#: pulp-glue/pulp_glue/core/context.py:555
 msgid "user role"
 msgstr ""
 
-#: pulp-glue/pulp_glue/core/context.py:513
+#: pulp-glue/pulp_glue/core/context.py:556
 msgid "user roles"
 msgstr ""
 
-#: pulp-glue/pulp_glue/core/context.py:529
+#: pulp-glue/pulp_glue/core/context.py:572
 msgid "worker"
 msgstr ""
 
-#: pulp-glue/pulp_glue/core/context.py:530
+#: pulp-glue/pulp_glue/core/context.py:573
 msgid "workers"
 msgstr ""
 
-#: pulp-glue/pulp_glue/core/context.py:537
+#: pulp-glue/pulp_glue/core/context.py:580
 msgid "upstream pulp"
 msgstr ""
 
-#: pulp-glue/pulp_glue/core/context.py:538
+#: pulp-glue/pulp_glue/core/context.py:581
 msgid "upstream pulps"
 msgstr ""

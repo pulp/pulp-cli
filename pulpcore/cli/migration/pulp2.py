@@ -1,6 +1,6 @@
 import click
 
-from pulpcore.cli.common.generic import (
+from pulp_cli.generic import (
     PulpCLIContext,
     href_option,
     list_command,
