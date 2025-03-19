@@ -6,7 +6,7 @@ from pulp_glue.common.context import DATETIME_FORMATS, PluginRequirement, PulpEn
 from pulp_glue.common.i18n import get_translation
 from pulp_glue.core.context import PulpTaskContext, PulpWorkerContext
 
-from pulpcore.cli.common.generic import (
+from pulp_cli.generic import (
     PulpCLIContext,
     list_command,
     pass_entity_context,

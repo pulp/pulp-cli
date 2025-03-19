@@ -38,7 +38,7 @@ A plugin must register itself with the main app by specifying its main module as
 The plugin should then attach subcommands to the `pulpcore.cli.common.main` command by providing a `mount` method in the main module.
 
 ```python
-from pulpcore.cli.common.generic import pulp_command
+from pulp_cli.generic import pulp_command
 
 @pulp_command()
 def my_command():
@@ -52,7 +52,7 @@ def mount(main: click.Group, **kwargs: Any) -> None:
 ## Contexts
 
 In `click`, every subcommand is accompanied by a `click.Context`, and objects can be attached to them.
-In this CLI we attach a [`PulpCLIContext`][pulpcore.cli.common.generic.PulpCLIContext] to the main command, which inherits from `pulp-glue`'s [`PulpContext`][pulp_glue.common.context.PulpContext].
+In this CLI we attach a [`PulpCLIContext`][pulp_cli.generic.PulpCLIContext] to the main command, which inherits from `pulp-glue`'s [`PulpContext`][pulp_glue.common.context.PulpContext].
 This context handles the communication to the pulp server through its `api` property.
 
 Further we encourage the handling of communication with certain endpoints by subclassing the [`PulpEntityContext`][pulp_glue.common.context.PulpEntityContext] or some of the resource-specific children, such as [PulpRepositoryContext][pulp_glue.common.context.PulpRepositoryContext].
@@ -80,20 +80,20 @@ def my_sub_command(entity_ctx):
 
 For certain often repeated patterns like listing all entities of a particular kind,
 we provide generic commands that use the underlying context objects.
-The following example shows the use of the [`show_command`][pulpcore.cli.common.generic.show_command] generic.
+The following example shows the use of the [`show_command`][pulp_cli.generic.show_command] generic.
 
 ```python
-from pulpcore.cli.common.generic import name_option, show_command,
+from pulp_cli.generic import name_option, show_command,
 
 lookup_params = [name_option]
 my_command.add_command(show_command(decorators=lookup_params))
 ```
 
-To add options to these subcommands, pass a list of [`PulpOption`][pulpcore.cli.common.generic.PulpOption] objects to the `decorators` argument.
-Preferably these are created using the [`pulp_option`][pulpcore.cli.common.generic.pulp_option] factory.
+To add options to these subcommands, pass a list of [`PulpOption`][pulp_cli.generic.PulpOption] objects to the `decorators` argument.
+Preferably these are created using the [`pulp_option`][pulp_cli.generic.pulp_option] factory.
 
 ```python
-from pulpcore.cli.common.generic import list_command,
+from pulp_cli.generic import list_command,
 
 filter_params = [
     pulp_option("--name"),

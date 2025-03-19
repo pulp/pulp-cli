@@ -11,7 +11,7 @@ from pulp_glue.core.context import (
     PulpRbacContentGuardContext,
 )
 
-from pulpcore.cli.common.generic import (
+from pulp_cli.generic import (
     PulpCLIContext,
     create_command,
     destroy_command,

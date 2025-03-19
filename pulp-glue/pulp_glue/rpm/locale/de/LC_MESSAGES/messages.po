@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-04 09:26+0200\n"
+"POT-Creation-Date: 2025-03-19 11:46+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,59 +17,88 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: pulp-glue/pulp_glue/rpm/context.py:27
+#: pulp-glue/pulp_glue/rpm/context.py:56
 msgid "rpm ACS"
 msgstr ""
 
-#: pulp-glue/pulp_glue/rpm/context.py:28
+#: pulp-glue/pulp_glue/rpm/context.py:57
 msgid "rpm ACSes"
 msgstr ""
 
-#: pulp-glue/pulp_glue/rpm/context.py:42
+#: pulp-glue/pulp_glue/rpm/context.py:71
 #, python-brace-format
 msgid "Uploading file {filename}"
 msgstr ""
 
-#: pulp-glue/pulp_glue/rpm/context.py:53
+#: pulp-glue/pulp_glue/rpm/context.py:82
 msgid "rpm distribution"
 msgstr ""
 
-#: pulp-glue/pulp_glue/rpm/context.py:54
+#: pulp-glue/pulp_glue/rpm/context.py:83
 msgid "rpm distributions"
 msgstr ""
 
-#: pulp-glue/pulp_glue/rpm/context.py:90
+#: pulp-glue/pulp_glue/rpm/context.py:101
+msgid "configuring the generation of the config.repo file"
+msgstr ""
+
+#: pulp-glue/pulp_glue/rpm/context.py:125
 msgid "--relative-path must be provided"
 msgstr ""
 
-#: pulp-glue/pulp_glue/rpm/context.py:187
+#: pulp-glue/pulp_glue/rpm/context.py:136
+msgid "substring filters"
+msgstr ""
+
+#: pulp-glue/pulp_glue/rpm/context.py:234
 msgid "rpm publication"
 msgstr ""
 
-#: pulp-glue/pulp_glue/rpm/context.py:188
+#: pulp-glue/pulp_glue/rpm/context.py:235
 msgid "rpm publications"
 msgstr ""
 
-#: pulp-glue/pulp_glue/rpm/context.py:206
+#: pulp-glue/pulp_glue/rpm/context.py:252
+#: pulp-glue/pulp_glue/rpm/context.py:348
+msgid "customization of the config.repo file"
+msgstr ""
+
+#: pulp-glue/pulp_glue/rpm/context.py:261
+#: pulp-glue/pulp_glue/rpm/context.py:357
+msgid "sqlite_metadata generation"
+msgstr ""
+
+#: pulp-glue/pulp_glue/rpm/context.py:272
+#: pulp-glue/pulp_glue/rpm/context.py:278
+#: pulp-glue/pulp_glue/rpm/context.py:368
+#: pulp-glue/pulp_glue/rpm/context.py:374
+msgid "weak checksums"
+msgstr ""
+
+#: pulp-glue/pulp_glue/rpm/context.py:287
 msgid "rpm remote"
 msgstr ""
 
-#: pulp-glue/pulp_glue/rpm/context.py:207
+#: pulp-glue/pulp_glue/rpm/context.py:288
 msgid "rpm remotes"
 msgstr ""
 
-#: pulp-glue/pulp_glue/rpm/context.py:228
+#: pulp-glue/pulp_glue/rpm/context.py:309
 msgid "uln remote"
 msgstr ""
 
-#: pulp-glue/pulp_glue/rpm/context.py:229
+#: pulp-glue/pulp_glue/rpm/context.py:310
 msgid "uln remotes"
 msgstr ""
 
-#: pulp-glue/pulp_glue/rpm/context.py:248
+#: pulp-glue/pulp_glue/rpm/context.py:329
 msgid "rpm repository"
 msgstr ""
 
-#: pulp-glue/pulp_glue/rpm/context.py:249
+#: pulp-glue/pulp_glue/rpm/context.py:330
 msgid "rpm repositories"
+msgstr ""
+
+#: pulp-glue/pulp_glue/rpm/context.py:383
+msgid "checksum_type"
 msgstr ""

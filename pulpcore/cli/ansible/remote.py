@@ -8,7 +8,7 @@ from pulp_glue.ansible.context import (
 )
 from pulp_glue.common.i18n import get_translation
 
-from pulpcore.cli.common.generic import (
+from pulp_cli.generic import (
     PulpCLIContext,
     common_remote_create_options,
     common_remote_update_options,

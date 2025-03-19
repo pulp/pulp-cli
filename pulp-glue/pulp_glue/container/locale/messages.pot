@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-04 09:25+0200\n"
+"POT-Creation-Date: 2025-03-19 11:46+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -73,10 +73,10 @@ msgstr ""
 msgid "container repositories"
 msgstr ""
 
-#: pulp-glue/pulp_glue/container/context.py:186
+#: pulp-glue/pulp_glue/container/context.py:185
 msgid "push container repository"
 msgstr ""
 
-#: pulp-glue/pulp_glue/container/context.py:187
+#: pulp-glue/pulp_glue/container/context.py:186
 msgid "push container repositories"
 msgstr ""

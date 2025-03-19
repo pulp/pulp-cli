@@ -14,7 +14,7 @@ from pulp_glue.core.context import (
     PulpUserContext,
 )
 
-from pulpcore.cli.common.generic import (
+from pulp_cli.generic import (
     PulpCLIContext,
     create_command,
     destroy_command,

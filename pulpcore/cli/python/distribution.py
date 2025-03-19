@@ -7,7 +7,7 @@ from pulp_glue.python.context import (
     PulpPythonRepositoryContext,
 )
 
-from pulpcore.cli.common.generic import (
+from pulp_cli.generic import (
     PulpCLIContext,
     common_distribution_create_options,
     content_guard_option,

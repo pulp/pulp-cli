@@ -4,8 +4,8 @@ import click
 from pulp_glue.common.i18n import get_translation
 from pulp_glue.rpm.context import PulpRpmACSContext, PulpRpmRemoteContext, PulpUlnRemoteContext
 
+from pulp_cli.generic import pulp_group
 from pulpcore.cli.common.acs import acs_command
-from pulpcore.cli.common.generic import pulp_group
 from pulpcore.cli.rpm.comps import comps_upload
 from pulpcore.cli.rpm.content import content
 from pulpcore.cli.rpm.copy import copy

@@ -22,7 +22,7 @@ from pulp_glue.rpm.context import (
     PulpRpmRepositoryContext,
 )
 
-from pulpcore.cli.common.generic import (
+from pulp_cli.generic import (
     PulpCLIContext,
     chunk_size_option,
     create_command,

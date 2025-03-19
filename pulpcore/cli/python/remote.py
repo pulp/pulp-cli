@@ -6,7 +6,7 @@ from pulp_glue.common.context import PluginRequirement
 from pulp_glue.common.i18n import get_translation
 from pulp_glue.python.context import PulpPythonRemoteContext
 
-from pulpcore.cli.common.generic import (
+from pulp_cli.generic import (
     PulpCLIContext,
     common_remote_create_options,
     common_remote_update_options,

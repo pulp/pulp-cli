@@ -14,7 +14,7 @@ from pulp_glue.container.context import (
     PulpContainerRepositoryContext,
 )
 
-from pulpcore.cli.common.generic import (
+from pulp_cli.generic import (
     PulpCLIContext,
     content_guard_option,
     create_command,

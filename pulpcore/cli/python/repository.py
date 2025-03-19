@@ -14,7 +14,7 @@ from pulp_glue.python.context import (
     PulpPythonRepositoryContext,
 )
 
-from pulpcore.cli.common.generic import (
+from pulp_cli.generic import (
     PulpCLIContext,
     create_command,
     create_content_json_callback,

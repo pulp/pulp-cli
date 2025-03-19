@@ -8,81 +8,68 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-04 09:15+0200\n"
+"POT-Creation-Date: 2025-03-19 11:46+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: pulpcore/cli/ansible/content.py:48
-#, python-brace-format
-msgid "Option {name} is deprecated."
-msgstr ""
-
-#: pulpcore/cli/ansible/content.py:90
+#: pulpcore/cli/ansible/content.py:56
 msgid ""
 "Repository to upload into in the form '[[<plugin>:]<resource_type>:]<name>' "
 "or by href."
 msgstr ""
 
-#: pulpcore/cli/ansible/content.py:117 pulpcore/cli/ansible/content.py:173
-#: pulpcore/cli/ansible/content.py:234 pulpcore/cli/ansible/repository.py:126
+#: pulpcore/cli/ansible/content.py:83 pulpcore/cli/ansible/content.py:122
+#: pulpcore/cli/ansible/content.py:183 pulpcore/cli/ansible/repository.py:126
 #, python-brace-format
 msgid "Name of {entity}"
 msgstr ""
 
-#: pulpcore/cli/ansible/content.py:119 pulpcore/cli/ansible/content.py:182
-#: pulpcore/cli/ansible/content.py:238 pulpcore/cli/ansible/repository.py:134
+#: pulpcore/cli/ansible/content.py:85 pulpcore/cli/ansible/content.py:131
+#: pulpcore/cli/ansible/content.py:187 pulpcore/cli/ansible/repository.py:134
 #, python-brace-format
 msgid "Namespace of {entity}"
 msgstr ""
 
-#: pulpcore/cli/ansible/content.py:121 pulpcore/cli/ansible/content.py:190
-#: pulpcore/cli/ansible/content.py:244 pulpcore/cli/ansible/repository.py:141
+#: pulpcore/cli/ansible/content.py:87 pulpcore/cli/ansible/content.py:139
+#: pulpcore/cli/ansible/content.py:193 pulpcore/cli/ansible/repository.py:141
 #, python-brace-format
 msgid "Version of {entity}"
 msgstr ""
 
-#: pulpcore/cli/ansible/content.py:127
+#: pulpcore/cli/ansible/content.py:93
 msgid "Only show highest version of collection version"
 msgstr ""
 
-#: pulpcore/cli/ansible/content.py:132
+#: pulpcore/cli/ansible/content.py:98
 msgid "Comma separated list of tags that must all match"
 msgstr ""
 
-#: pulpcore/cli/ansible/content.py:137 pulpcore/cli/ansible/content.py:198
+#: pulpcore/cli/ansible/content.py:103 pulpcore/cli/ansible/content.py:147
 #, python-brace-format
 msgid "Public key fingerprint of the {entity}"
 msgstr ""
 
-#: pulpcore/cli/ansible/content.py:143 pulpcore/cli/ansible/content.py:208
+#: pulpcore/cli/ansible/content.py:109 pulpcore/cli/ansible/content.py:157
 #, python-brace-format
 msgid "Collection of {entity}"
 msgstr ""
 
-#: pulpcore/cli/ansible/content.py:148
+#: pulpcore/cli/ansible/content.py:114
 #, python-brace-format
 msgid "Signing service used to create {entity}"
 msgstr ""
 
-#: pulpcore/cli/ansible/content.py:159
-msgid "String list of fields to include in the result [DEPRECATED]"
-msgstr ""
-
-#: pulpcore/cli/ansible/content.py:165
-msgid "String list of fields to exclude from result [DEPRECATED]"
-msgstr ""
-
-#: pulpcore/cli/ansible/content.py:228
+#: pulpcore/cli/ansible/content.py:177
 #, python-brace-format
 msgid "Chunk size to break up {entity} into. Defaults to 1MB"
 msgstr ""
 
-#: pulpcore/cli/ansible/content.py:250
+#: pulpcore/cli/ansible/content.py:199
 #, python-brace-format
 msgid "Collection for this {entity}"
 msgstr ""
@@ -103,7 +90,7 @@ msgstr ""
 msgid "version of new repository to be served, leave blank for always latest"
 msgstr ""
 
-#: pulpcore/cli/ansible/distribution.py:159
+#: pulpcore/cli/ansible/distribution.py:160
 #, python-brace-format
 msgid ""
 "Distribution {name} doesn't have a repository set, please specify the "
@@ -157,7 +144,7 @@ msgid ""
 "list of objects."
 msgstr ""
 
-#: pulpcore/cli/ansible/repository.py:216
+#: pulpcore/cli/ansible/repository.py:219
 #, python-brace-format
 msgid ""
 "Repository '{name}' does not have a default remote. Please specify with '--"

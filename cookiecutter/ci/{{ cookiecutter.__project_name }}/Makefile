@@ -74,7 +74,7 @@ docs:
 	pulp-docs build
 
 servedocs:
-	pulp-docs serve -w CHANGES.md -w pulp-glue/pulp_glue -w pulpcore/cli/common/generic.py
+	pulp-docs serve -w CHANGES.md -w pulp-glue/pulp_glue -w pulp_cli/generic.py
 {%- endif %}
 {%- if cookiecutter.translations %}
 {%- if cookiecutter.glue %}

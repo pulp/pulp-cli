@@ -5,7 +5,7 @@ from pulp_glue.common.context import EntityFieldDefinition, PulpRepositoryContex
 from pulp_glue.common.i18n import get_translation
 from pulp_glue.core.context import PulpExporterContext
 
-from pulpcore.cli.common.generic import (
+from pulp_cli.generic import (
     PulpCLIContext,
     destroy_command,
     href_option,

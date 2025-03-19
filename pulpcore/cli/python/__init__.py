@@ -3,7 +3,7 @@ import typing as t
 import click
 from pulp_glue.common.context import PluginRequirement
 
-from pulpcore.cli.common.generic import PulpCLIContext, pass_pulp_context, pulp_group
+from pulp_cli.generic import PulpCLIContext, pass_pulp_context, pulp_group
 from pulpcore.cli.python.content import content
 from pulpcore.cli.python.distribution import distribution
 from pulpcore.cli.python.publication import publication
