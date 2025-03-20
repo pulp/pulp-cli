@@ -4,7 +4,7 @@ import typing as t
 import click
 from pulp_glue.rpm.context import PulpRpmCopyContext
 
-from pulpcore.cli.common.generic import (
+from pulp_cli.generic import (
     PulpCLIContext,
     load_json_callback,
     pass_pulp_context,

@@ -5,7 +5,7 @@ from pulp_glue.common.context import PluginRequirement, PulpViewSetContext
 from pulp_glue.common.i18n import get_translation
 from pulp_glue.core.context import PulpOrphanContext
 
-from pulpcore.cli.common.generic import (
+from pulp_cli.generic import (
     PulpCLIContext,
     load_json_callback,
     pass_pulp_context,

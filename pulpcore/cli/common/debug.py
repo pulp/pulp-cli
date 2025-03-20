@@ -6,7 +6,7 @@ from packaging.specifiers import SpecifierSet
 from pulp_glue.common.context import PluginRequirement
 from pulp_glue.common.i18n import get_translation
 
-from pulpcore.cli.common.generic import (
+from pulp_cli.generic import (
     PulpCLIContext,
     load_json_callback,
     pass_pulp_context,

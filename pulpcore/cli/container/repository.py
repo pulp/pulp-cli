@@ -14,7 +14,7 @@ from pulp_glue.container.context import (
     PulpContainerTagContext,
 )
 
-from pulpcore.cli.common.generic import (
+from pulp_cli.generic import (
     create_command,
     destroy_command,
     href_option,

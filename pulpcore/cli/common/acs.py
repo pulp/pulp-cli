@@ -4,7 +4,7 @@ import click
 from pulp_glue.common.context import PulpACSContext, PulpRemoteContext
 from pulp_glue.common.i18n import get_translation
 
-from pulpcore.cli.common.generic import (
+from pulp_cli.generic import (
     PulpCLIContext,
     acs_lookup_option,
     create_command,

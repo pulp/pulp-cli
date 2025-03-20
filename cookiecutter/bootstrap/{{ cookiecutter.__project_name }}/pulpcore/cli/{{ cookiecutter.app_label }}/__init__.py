@@ -1,8 +1,8 @@
 import typing as t
 
 import click
+from pulp_cli.generic import pulp_group
 from pulp_glue.common.i18n import get_translation
-from pulpcore.cli.common.generic import pulp_group
 
 # TODO Implement these
 # from pulpcore.cli.{{ cookiecutter.app_label }}.content import content

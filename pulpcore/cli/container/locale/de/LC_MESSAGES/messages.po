@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-04 09:12+0200\n"
+"POT-Creation-Date: 2025-03-19 11:46+0100\n"
 "PO-Revision-Date: 2021-12-06 11:20+0100\n"
 "Last-Translator: Matthias Dellweg <mdellweg@redhat.com>\n"
 "Language-Team: \n"
@@ -33,7 +33,7 @@ msgid "a repository version number, leave blank for latest"
 msgstr ""
 "Versionsnummer des Repositories, leer lassen um die letzte zu verwenden"
 
-#: pulpcore/cli/container/distribution.py:154
+#: pulpcore/cli/container/distribution.py:155
 #, python-brace-format
 msgid ""
 "Distribution {distribution} doesn't have a repository set, please specify "
@@ -64,11 +64,11 @@ msgid ""
 "by href."
 msgstr ""
 
-#: pulpcore/cli/container/repository.py:159
+#: pulpcore/cli/container/repository.py:162
 msgid "Repository type does not support sync."
 msgstr "Dieser Repository Typ unterstützt Sync nicht."
 
-#: pulpcore/cli/container/repository.py:169
+#: pulpcore/cli/container/repository.py:172
 #, python-brace-format
 msgid ""
 "Repository '{name}' does not have a default remote. Please specify with '--"
@@ -77,33 +77,33 @@ msgstr ""
 "Repository '{name}' hat keine voreingestellte Gegenstelle. Bitte mit '--"
 "remote' angeben."
 
-#: pulpcore/cli/container/repository.py:181
+#: pulpcore/cli/container/repository.py:184
 msgid "Name to tag an image with"
 msgstr ""
 
-#: pulpcore/cli/container/repository.py:182
-#: pulpcore/cli/container/repository.py:305
+#: pulpcore/cli/container/repository.py:185
+#: pulpcore/cli/container/repository.py:311
 msgid "SHA256 digest of the Manifest file"
 msgstr ""
 
-#: pulpcore/cli/container/repository.py:204
+#: pulpcore/cli/container/repository.py:208
 msgid "Name of tag to remove"
 msgstr ""
 
-#: pulpcore/cli/container/repository.py:221
+#: pulpcore/cli/container/repository.py:225
 msgid "Multiple option of tag names to copy, leave blank to copy all"
 msgstr ""
 
-#: pulpcore/cli/container/repository.py:238
-#: pulpcore/cli/container/repository.py:289
+#: pulpcore/cli/container/repository.py:243
+#: pulpcore/cli/container/repository.py:295
 msgid "Please specify a version that between 0 and the latest version {}"
 msgstr ""
 
-#: pulpcore/cli/container/repository.py:256
+#: pulpcore/cli/container/repository.py:261
 msgid "Multiple option of manifest digests to copy, leave blank to copy all"
 msgstr ""
 
-#: pulpcore/cli/container/repository.py:262
+#: pulpcore/cli/container/repository.py:267
 msgid "Multiple option of media-types to copy, leave blank to copy all types"
 msgstr ""
 

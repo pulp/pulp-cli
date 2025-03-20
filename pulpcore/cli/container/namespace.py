@@ -2,7 +2,7 @@ import click
 from pulp_glue.common.i18n import get_translation
 from pulp_glue.container.context import PulpContainerNamespaceContext
 
-from pulpcore.cli.common.generic import (
+from pulp_cli.generic import (
     PulpCLIContext,
     create_command,
     destroy_command,

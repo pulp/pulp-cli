@@ -8,7 +8,7 @@ import click
 import tomli_w
 from pulp_glue.common.i18n import get_translation
 
-from pulpcore.cli.common.generic import REGISTERED_OUTPUT_FORMATTERS, pulp_group
+from pulp_cli.generic import REGISTERED_OUTPUT_FORMATTERS, pulp_group
 
 if sys.version_info >= (3, 11):
     import tomllib

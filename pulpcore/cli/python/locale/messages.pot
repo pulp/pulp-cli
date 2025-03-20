@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-04 09:12+0200\n"
+"POT-Creation-Date: 2025-03-19 11:46+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,21 +17,25 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: pulpcore/cli/python/content.py:46
+#: pulpcore/cli/python/content.py:47
 msgid ""
 "Repository to add the content to in the form "
 "'[[<plugin>:]<resource_type>:]<name>' or by href."
 msgstr ""
 
-#: pulpcore/cli/python/content.py:70 pulpcore/cli/python/content.py:91
+#: pulpcore/cli/python/content.py:71 pulpcore/cli/python/content.py:96
 msgid "Exact name of file"
 msgstr ""
 
 #: pulpcore/cli/python/content.py:75
-msgid "Digest of the artifact to use"
+msgid "Digest of the artifact to use [deprecated]"
 msgstr ""
 
-#: pulpcore/cli/python/content.py:92
+#: pulpcore/cli/python/content.py:80
+msgid "Remote url to download and create python content from"
+msgstr ""
+
+#: pulpcore/cli/python/content.py:97
 msgid "Path to file"
 msgstr ""
 
@@ -51,19 +55,19 @@ msgstr ""
 msgid "a repository version number, leave blank for latest"
 msgstr ""
 
-#: pulpcore/cli/python/remote.py:52
+#: pulpcore/cli/python/remote.py:54
 msgid "Failed to decode JSON: {}"
 msgstr ""
 
-#: pulpcore/cli/python/remote.py:83
+#: pulpcore/cli/python/remote.py:85
 msgid "Package allowlist"
 msgstr ""
 
-#: pulpcore/cli/python/remote.py:84
+#: pulpcore/cli/python/remote.py:86
 msgid "Package blocklist"
 msgstr ""
 
-#: pulpcore/cli/python/remote.py:137
+#: pulpcore/cli/python/remote.py:139
 #, python-brace-format
 msgid "Failed to load content from {requirements_file}"
 msgstr ""
@@ -94,7 +98,7 @@ msgid ""
 "list of objects."
 msgstr ""
 
-#: pulpcore/cli/python/repository.py:169
+#: pulpcore/cli/python/repository.py:172
 #, python-brace-format
 msgid ""
 "Repository '{name}' does not have a default remote. Please specify with '--"

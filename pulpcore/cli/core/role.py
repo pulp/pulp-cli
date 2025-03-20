@@ -4,7 +4,7 @@ import typing as t
 import click
 from pulp_glue.core.context import PulpRoleContext
 
-from pulpcore.cli.common.generic import (
+from pulp_cli.generic import (
     PulpCLIContext,
     create_command,
     destroy_command,

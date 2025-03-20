@@ -2,7 +2,7 @@ import click
 from pulp_glue.common.i18n import get_translation
 from pulp_glue.core.context import PulpWorkerContext
 
-from pulpcore.cli.common.generic import (
+from pulp_cli.generic import (
     PulpCLIContext,
     href_option,
     list_command,
