@@ -207,7 +207,7 @@ exclude = "cookiecutter"
 # This section is managed by the cookiecutter templates.
 profile = "black"
 line_length = 100
-skip = ["pulp-glue", "cookiecutter"]
+extend_skip = ["pulp-glue", "cookiecutter"]
 
 [tool.flake8]
 # This section is managed by the cookiecutter templates.

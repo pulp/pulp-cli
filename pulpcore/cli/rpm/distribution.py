@@ -1,4 +1,5 @@
 import click
+from pulp_glue.common.context import PluginRequirement
 from pulp_glue.common.i18n import get_translation
 from pulp_glue.rpm.context import PulpRpmDistributionContext, PulpRpmRepositoryContext
 
@@ -76,6 +77,12 @@ update_options = [
     repository_option,
     content_guard_option,
     pulp_labels_option,
+    pulp_option(
+        "--checkpoint/--not-checkpoint",
+        is_flag=True,
+        default=None,
+        needs_plugins=[PluginRequirement("rpm", specifier=">=3.29.0")],
+    ),
 ]
 create_options = common_distribution_create_options + update_options
 
