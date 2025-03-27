@@ -135,5 +135,5 @@ else:
             ({"b": 1, "a": 0}, 0, "", "---\na: 0\nb: 1\n...\n"),
         ],
     )
-    def test_to_jaml(value, level, embed_in, out):
+    def test_to_jaml(value: t.Any, level: int, embed_in: str, out: str) -> None:
         assert to_jaml(value, level, embed_in) == out

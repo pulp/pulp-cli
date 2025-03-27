@@ -54,6 +54,7 @@ jobs:
             upper_bounds: true
           - image_tag: "3.73"
             pulp_domain_enabled: "true"
+            pulp_enabled_plugins: "['pulp-certguard', 'pulp_container', 'pulp_file', 'pulp_python', 'pulp_rpm']"
             python: "3.10"
           - image_tag: "3.63"
             pulp_https: "true"
@@ -111,6 +112,7 @@ jobs:
           PULP_OAUTH2: "${{ matrix.pulp_oauth2 }}"
           PULP_API_ROOT: "${{ matrix.pulp_api_root }}"
           PULP_DOMAIN_ENABLED: "${{ matrix.pulp_domain_enabled }}"
+          PULP_ENABLED_PLUGINS: "${{ matrix.pulp_enabled_plugins }}"
           OAS_VERSION: "${{ matrix.oas_version }}"
         run: |
           .ci/run_container.sh make livetest
