@@ -76,6 +76,8 @@ export PULP_CONTENT_ORIGIN
   ${PULP_HTTPS:+--env PULP_HTTPS} \
   ${PULP_OAUTH2:+--env PULP_OAUTH2} \
   ${PULP_API_ROOT:+--env PULP_API_ROOT} \
+  ${PULP_DOMAIN_ENABLED:+--env PULP_DOMAIN_ENABLED} \
+  ${PULP_ENABLED_PLUGINS:+--env PULP_ENABLED_PLUGINS} \
   --env PULP_CONTENT_ORIGIN \
   --detach \
   --name "pulp-ephemeral" \

@@ -82,6 +82,8 @@ jobs:
           PULP_HTTPS: "${{ matrix.pulp_https }}"
           PULP_OAUTH2: "${{ matrix.pulp_oauth2 }}"
           PULP_API_ROOT: "${{ matrix.pulp_api_root }}"
+          PULP_DOMAIN_ENABLED: "${{ matrix.pulp_domain_enabled }}"
+          PULP_ENABLED_PLUGINS: "${{ matrix.pulp_enabled_plugins }}"
           OAS_VERSION: "${{ matrix.oas_version }}"
           {%- endraw %}
         run: |

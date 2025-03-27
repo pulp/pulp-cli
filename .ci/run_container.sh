@@ -69,13 +69,6 @@ else
 fi
 export PULP_CONTENT_ORIGIN
 
-if [ "${PULP_DOMAIN_ENABLED:-}" = "true" ]
-then
-  # shellcheck disable=SC2089
-  export PULP_ENABLED_PLUGINS="['pulp-certguard', 'pulp_container', 'pulp_file', 'pulp_python', 'pulp_rpm']"
-fi
-
-# shellcheck disable=SC2090
 "${CONTAINER_RUNTIME}" \
   run ${RM:+--rm} \
   --env S6_KEEP_ENV=1 \
