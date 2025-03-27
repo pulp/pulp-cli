@@ -1,6 +1,10 @@
 import click
+from pulp_glue.common.context import PluginRequirement
 from pulp_glue.common.i18n import get_translation
-from pulp_glue.file.context import PulpFilePublicationContext, PulpFileRepositoryContext
+from pulp_glue.file.context import (
+    PulpFilePublicationContext,
+    PulpFileRepositoryContext,
+)
 
 from pulpcore.cli.common.generic import (
     PulpCLIContext,
@@ -11,6 +15,7 @@ from pulpcore.cli.common.generic import (
     pass_pulp_context,
     publication_filter_options,
     pulp_group,
+    pulp_option,
     resource_option,
     role_command,
     show_command,
@@ -55,6 +60,13 @@ create_options = [
     click.option(
         "--manifest",
         help=_("Filename to use for manifest file containing metadata for all the files."),
+    ),
+    pulp_option(
+        "--checkpoint",
+        is_flag=True,
+        default=None,
+        help=_("Create a checkpoint publication"),
+        needs_plugins=[PluginRequirement("core", specifier=">=3.74.0")],
     ),
 ]
 publication.add_command(list_command(decorators=publication_filter_options + [repository_option]))
