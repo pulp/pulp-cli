@@ -29,6 +29,8 @@ from pulp_cli.generic import (
     exclude_field_option,
     field_option,
     href_option,
+    label_command,
+    label_select_option,
     list_command,
     pass_entity_context,
     pass_pulp_context,
@@ -240,6 +242,7 @@ list_options = [
         "--version-in", "version__in", multiple=True, allowed_with_contexts=(PulpRpmPackageContext,)
     ),
     pulp_option("--version-ne", "version__ne", allowed_with_contexts=(PulpRpmPackageContext,)),
+    label_select_option,
 ]
 lookup_options = [
     href_option,
@@ -263,6 +266,12 @@ lookup_options = [
 
 content.add_command(list_command(decorators=list_options))
 content.add_command(show_command(decorators=lookup_options))
+content.add_command(
+    label_command(
+        decorators=lookup_options,
+        need_plugins=[PluginRequirement("core", specifier=">=3.73.2")],
+    )
+)
 # create assumes "there exists an Artifact..."
 # create is defined for package, modulemd and modulemd_defaults.  The implications for modulemd
 # and modulemd_defaults are generally not what the user expects. Therefore, leaving those two
