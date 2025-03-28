@@ -36,7 +36,7 @@ from pulp_cli.generic import (
     update_command,
     version_command,
 )
-from pulpcore.cli.container.content import show_options
+from pulpcore.cli.container.content import lookup_options as content_lookup_options
 from pulpcore.cli.core.generic import task_command
 
 translation = get_translation(__package__)
@@ -133,8 +133,8 @@ repository.add_command(label_command(decorators=nested_lookup_options))
 repository.add_command(
     repository_content_command(
         contexts=contexts,
-        add_decorators=show_options,
-        remove_decorators=show_options,
+        add_decorators=content_lookup_options,
+        remove_decorators=content_lookup_options,
         allowed_with_contexts=container_context,
         base_default_plugin="container",
         base_default_type="container",
