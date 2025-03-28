@@ -11,6 +11,8 @@ from pulp_cli.generic import (
     chunk_size_option,
     create_command,
     href_option,
+    label_command,
+    label_select_option,
     list_command,
     pass_entity_context,
     pass_pulp_context,
@@ -81,15 +83,23 @@ create_options = [
         needs_plugins=[PluginRequirement("core", specifier=">=3.56.1")],
     ),
 ]
+lookup_options = [href_option]
 content.add_command(
     list_command(
         decorators=[
             click.option("--filename", type=str),
+            label_select_option,
         ]
     )
 )
-content.add_command(show_command(decorators=[href_option]))
+content.add_command(show_command(decorators=lookup_options))
 content.add_command(create_command(decorators=create_options))
+content.add_command(
+    label_command(
+        decorators=lookup_options,
+        need_plugins=[PluginRequirement("core", specifier=">=3.73.2")],
+    )
+)
 
 
 @content.command()

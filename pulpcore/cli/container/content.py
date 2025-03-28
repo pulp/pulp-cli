@@ -2,7 +2,7 @@ import gettext
 import typing as t
 
 import click
-from pulp_glue.common.context import PulpEntityContext
+from pulp_glue.common.context import PluginRequirement, PulpEntityContext
 from pulp_glue.container.context import (
     PulpContainerBlobContext,
     PulpContainerManifestContext,
@@ -13,6 +13,8 @@ from pulp_cli.generic import (
     GroupOption,
     PulpCLIContext,
     href_option,
+    label_command,
+    label_select_option,
     list_command,
     pass_pulp_context,
     pulp_group,
@@ -60,9 +62,10 @@ list_options = [
     pulp_option(
         "--name-in", "name__in", multiple=True, allowed_with_contexts=(PulpContainerTagContext,)
     ),
+    label_select_option,
 ]
 
-show_options = [
+lookup_options = [
     pulp_option(
         "--digest",
         expose_value=False,
@@ -95,4 +98,10 @@ show_options = [
 ]
 
 content.add_command(list_command(decorators=list_options))
-content.add_command(show_command(decorators=show_options))
+content.add_command(show_command(decorators=lookup_options))
+content.add_command(
+    label_command(
+        decorators=lookup_options,
+        need_plugins=[PluginRequirement("core", specifier=">=3.73.2")],
+    )
+)

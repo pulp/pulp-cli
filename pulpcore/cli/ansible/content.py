@@ -7,7 +7,7 @@ from pulp_glue.ansible.context import (
     PulpAnsibleRepositoryContext,
     PulpAnsibleRoleContext,
 )
-from pulp_glue.common.context import PulpContentContext, PulpRepositoryContext
+from pulp_glue.common.context import PluginRequirement, PulpContentContext, PulpRepositoryContext
 from pulp_glue.common.i18n import get_translation
 from pulp_glue.core.context import PulpArtifactContext
 
@@ -15,6 +15,8 @@ from pulp_cli.generic import (
     GroupOption,
     PulpCLIContext,
     href_option,
+    label_command,
+    label_select_option,
     list_command,
     parse_size_callback,
     pass_content_context,
@@ -114,6 +116,7 @@ list_options = [
         help=_("Signing service used to create {entity}"),
         allowed_with_contexts=signature_context,
     ),
+    label_select_option,
 ]
 
 lookup_options = [
@@ -165,6 +168,12 @@ lookup_options = [
 
 content.add_command(list_command(decorators=list_options))
 content.add_command(show_command(decorators=lookup_options))
+content.add_command(
+    label_command(
+        decorators=lookup_options,
+        need_plugins=[PluginRequirement("core", specifier=">=3.73.2")],
+    )
+)
 
 
 # This is a mypy bug getting confused with positional args
