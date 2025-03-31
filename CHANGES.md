@@ -10,6 +10,32 @@
 
 [//]: # (towncrier release notes start)
 
+## 0.30.3 (2025-03-31) {: #0.30.3 }
+
+
+
+#### Misc {: #0.30.3-misc }
+
+- Changed the upper version bound of `packaging` to the last available version according to CalVer.
+  [#1125](https://github.com/pulp/pulp-cli/issues/1125)
+
+
+### Pulp GLUE {: #0.30.3-pulp-glue }
+
+
+#### Bugfixes {: #0.30.3-pulp-glue-bugfix }
+
+- Fixed validation failure with `additionalProperties`.
+
+
+#### Misc {: #0.30.3-pulp-glue-misc }
+
+- Changed the upper version bound of `packaging` to the last available version according to CalVer.
+  [#1125](https://github.com/pulp/pulp-cli/issues/1125)
+
+
+---
+
 ## 0.30.2 (2025-01-20) {: #0.30.2 }
 
 
