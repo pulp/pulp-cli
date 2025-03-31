@@ -10,6 +10,25 @@
 
 [//]: # (towncrier release notes start)
 
+## 0.25.8 (2025-03-31) {: #0.25.8 }
+
+
+
+#### Misc {: #0.25.8-misc }
+
+- [#1125](https://github.com/pulp/pulp-cli/issues/1125)
+
+
+### Pulp GLUE {: #0.25.8-pulp-glue }
+
+
+#### Misc {: #0.25.8-pulp-glue-misc }
+
+- [#1125](https://github.com/pulp/pulp-cli/issues/1125)
+
+
+---
+
 ## 0.25.7 (2024-06-20) {: #0.25.7 }
 
 
