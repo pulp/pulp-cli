@@ -10,6 +10,31 @@
 
 [//]: # (towncrier release notes start)
 
+## 0.26.1 (2025-03-31) {: #0.26.1 }
+
+
+
+#### Bugfixes {: #0.26.1-bugfix }
+
+- Fixed the interactive config generation in the face of options allowing multiple values.
+  [#1008](https://github.com/pulp/pulp-cli/issues/1008)
+
+
+#### Misc {: #0.26.1-misc }
+
+- [#1125](https://github.com/pulp/pulp-cli/issues/1125)
+
+
+### Pulp GLUE {: #0.26.1-pulp-glue }
+
+
+#### Misc {: #0.26.1-pulp-glue-misc }
+
+- [#1125](https://github.com/pulp/pulp-cli/issues/1125)
+
+
+---
+
 ## 0.26.0 (2024-07-01) {: #0.26.0 }
 
 
