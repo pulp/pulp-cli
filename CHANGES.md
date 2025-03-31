@@ -10,6 +10,45 @@
 
 [//]: # (towncrier release notes start)
 
+## 0.32.0 (2025-03-31) {: #0.32.0 }
+
+
+
+#### Features {: #0.32.0-feature }
+
+- Added support for checkpoint distributions and publications.
+  [#1129](https://github.com/pulp/pulp-cli/issues/1129)
+- Add support for content label commands, requires pulpcore 3.73.2 or later.
+  [#1137](https://github.com/pulp/pulp-cli/issues/1137)
+
+
+#### Bugfixes {: #0.32.0-bugfix }
+
+- Fix a bug when header values weren't allowed to contain other than alphanumeric characters.
+  Also combine the headers from setting and the commandline.
+  [#1139](https://github.com/pulp/pulp-cli/issues/1139)
+
+
+#### Improved Documentation {: #0.32.0-doc }
+
+- Removed "supported workflows" from user reference material.
+  [#1148](https://github.com/pulp/pulp-cli/issues/1148)
+
+
+#### Deprecations and Removals {: #0.32.0-removal }
+
+- The module `generic` moved from `pulpcore.cli.common.generic` to `pulp_cli.generic`.
+  The old import path is still available for compatibility reasons.
+
+
+### Pulp GLUE {: #0.32.0-pulp-glue }
+
+
+No significant changes.
+
+
+---
+
 ## 0.31.1 (2025-03-10) {: #0.31.1 }
 
 
