@@ -1,2 +1,0 @@
-The module `generic` moved from `pulpcore.cli.common.generic` to `pulp_cli.generic`.
-The old import path is still available for compatibility reasons.
