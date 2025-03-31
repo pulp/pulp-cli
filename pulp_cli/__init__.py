@@ -9,7 +9,7 @@ if sys.version_info >= (3, 10):
 else:
     from importlib_metadata import entry_points
 
-__version__ = "0.23.3.dev"
+__version__ = "0.23.3"
 _main: Optional[click.Group] = None
 
 
