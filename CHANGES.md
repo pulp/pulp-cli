@@ -10,6 +10,45 @@
 
 [//]: # (towncrier release notes start)
 
+## 0.32.0 (2025-03-31) {: #0.32.0 }
+
+
+
+#### Features {: #0.32.0-feature }
+
+- Added support for checkpoint distributions and publications.
+  [#1129](https://github.com/pulp/pulp-cli/issues/1129)
+- Add support for content label commands, requires pulpcore 3.73.2 or later.
+  [#1137](https://github.com/pulp/pulp-cli/issues/1137)
+
+
+#### Bugfixes {: #0.32.0-bugfix }
+
+- Fix a bug when header values weren't allowed to contain other than alphanumeric characters.
+  Also combine the headers from setting and the commandline.
+  [#1139](https://github.com/pulp/pulp-cli/issues/1139)
+
+
+#### Improved Documentation {: #0.32.0-doc }
+
+- Removed "supported workflows" from user reference material.
+  [#1148](https://github.com/pulp/pulp-cli/issues/1148)
+
+
+#### Deprecations and Removals {: #0.32.0-removal }
+
+- The module `generic` moved from `pulpcore.cli.common.generic` to `pulp_cli.generic`.
+  The old import path is still available for compatibility reasons.
+
+
+### Pulp GLUE {: #0.32.0-pulp-glue }
+
+
+No significant changes.
+
+
+---
+
 ## 0.31.1 (2025-03-10) {: #0.31.1 }
 
 
@@ -59,6 +98,32 @@ No significant changes.
 
 
 #### Misc {: #0.31.0-pulp-glue-misc }
+
+- Changed the upper version bound of `packaging` to the last available version according to CalVer.
+  [#1125](https://github.com/pulp/pulp-cli/issues/1125)
+
+
+---
+
+## 0.30.3 (2025-03-31) {: #0.30.3 }
+
+
+
+#### Misc {: #0.30.3-misc }
+
+- Changed the upper version bound of `packaging` to the last available version according to CalVer.
+  [#1125](https://github.com/pulp/pulp-cli/issues/1125)
+
+
+### Pulp GLUE {: #0.30.3-pulp-glue }
+
+
+#### Bugfixes {: #0.30.3-pulp-glue-bugfix }
+
+- Fixed validation failure with `additionalProperties`.
+
+
+#### Misc {: #0.30.3-pulp-glue-misc }
 
 - Changed the upper version bound of `packaging` to the last available version according to CalVer.
   [#1125](https://github.com/pulp/pulp-cli/issues/1125)
@@ -150,6 +215,25 @@ No significant changes.
 
 ---
 
+## 0.29.3 (2025-03-31) {: #0.29.3 }
+
+
+
+#### Misc {: #0.29.3-misc }
+
+- [#1125](https://github.com/pulp/pulp-cli/issues/1125)
+
+
+### Pulp GLUE {: #0.29.3-pulp-glue }
+
+
+#### Misc {: #0.29.3-pulp-glue-misc }
+
+- [#1125](https://github.com/pulp/pulp-cli/issues/1125)
+
+
+---
+
 ## 0.29.2 (2024-09-23) {: #0.29.2 }
 
 
@@ -224,6 +308,25 @@ No significant changes.
   In particular, proposals requiring multiple mechanisms are ignored for now instead of considering each constituent individually,
   "HTTP Bearer" and other IANA schemes are no longer interpreted as "HTTP Basic" and the empty proposal rightfully reflects no needed authentication.
 - Use BasicAuth for token retrieval to comply with RFC6749.
+
+
+---
+
+## 0.28.5 (2025-03-31) {: #0.28.5 }
+
+
+
+#### Misc {: #0.28.5-misc }
+
+- [#1125](https://github.com/pulp/pulp-cli/issues/1125)
+
+
+### Pulp GLUE {: #0.28.5-pulp-glue }
+
+
+#### Misc {: #0.28.5-pulp-glue-misc }
+
+- [#1125](https://github.com/pulp/pulp-cli/issues/1125)
 
 
 ---
@@ -347,6 +450,25 @@ No significant changes.
 
 ---
 
+## 0.27.4 (2025-03-31) {: #0.27.4 }
+
+
+
+#### Misc {: #0.27.4-misc }
+
+- [#1125](https://github.com/pulp/pulp-cli/issues/1125)
+
+
+### Pulp GLUE {: #0.27.4-pulp-glue }
+
+
+#### Misc {: #0.27.4-pulp-glue-misc }
+
+- [#1125](https://github.com/pulp/pulp-cli/issues/1125)
+
+
+---
+
 ## 0.27.3 (2024-09-12) {: #0.27.3 }
 
 
@@ -439,6 +561,31 @@ No significant changes.
 
 ---
 
+## 0.26.1 (2025-03-31) {: #0.26.1 }
+
+
+
+#### Bugfixes {: #0.26.1-bugfix }
+
+- Fixed the interactive config generation in the face of options allowing multiple values.
+  [#1008](https://github.com/pulp/pulp-cli/issues/1008)
+
+
+#### Misc {: #0.26.1-misc }
+
+- [#1125](https://github.com/pulp/pulp-cli/issues/1125)
+
+
+### Pulp GLUE {: #0.26.1-pulp-glue }
+
+
+#### Misc {: #0.26.1-pulp-glue-misc }
+
+- [#1125](https://github.com/pulp/pulp-cli/issues/1125)
+
+
+---
+
 ## 0.26.0 (2024-07-01) {: #0.26.0 }
 
 
@@ -495,6 +642,25 @@ No significant changes.
 
 - Added a `PulpViewSetContext` to represent a view set not attached to a specific type of entity.
   Accordingly, `PulpEntityContext` should only be used when that API is defined by a `NamedModelViewset`.
+
+
+---
+
+## 0.25.8 (2025-03-31) {: #0.25.8 }
+
+
+
+#### Misc {: #0.25.8-misc }
+
+- [#1125](https://github.com/pulp/pulp-cli/issues/1125)
+
+
+### Pulp GLUE {: #0.25.8-pulp-glue }
+
+
+#### Misc {: #0.25.8-pulp-glue-misc }
+
+- [#1125](https://github.com/pulp/pulp-cli/issues/1125)
 
 
 ---
@@ -676,6 +842,25 @@ No significant changes.
   The methods rely on the `entity` or `href` properties to be preloaded.
   e.g. `entity_ctx.update(href, body=body)` should be changed to `entity_ctx.href = href; entity_ctx.update(body=body)`.
 - Removed unused `format` parameter from `PulpContext`.
+
+
+---
+
+## 0.24.4 (2025-03-31) {: #0.24.4 }
+
+
+
+#### Misc {: #0.24.4-misc }
+
+- [#1125](https://github.com/pulp/pulp-cli/issues/1125)
+
+
+### Pulp GLUE {: #0.24.4-pulp-glue }
+
+
+#### Misc {: #0.24.4-pulp-glue-misc }
+
+- [#1125](https://github.com/pulp/pulp-cli/issues/1125)
 
 
 ---
