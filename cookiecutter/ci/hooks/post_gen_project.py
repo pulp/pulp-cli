@@ -30,7 +30,7 @@ REMOVE_PATHS = [
     "pulp-glue{{ cookiecutter.__app_label_suffix }}",
     "CHANGES/pulp-glue{{ cookiecutter.__app_label_suffix }}",
     {%- endif %}
-    {% if not cookiecutter.app_label -%}
+    {% if not cookiecutter.app_label or not cookiecutter.glue -%}
     ".ci/scripts/check_cli_dependencies.py",
     {%- endif %}
 ]
