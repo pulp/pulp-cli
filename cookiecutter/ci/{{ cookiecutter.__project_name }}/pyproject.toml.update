@@ -166,7 +166,7 @@ exclude = "cookiecutter"
 # This section is managed by the cookiecutter templates.
 profile = "black"
 line_length = 100
-skip = ["pulp-glue{{ cookiecutter.__app_label_suffix }}"{% if cookiecutter.app_label == "" %}, "cookiecutter"{% endif %}]
+extend_skip = ["pulp-glue{{ cookiecutter.__app_label_suffix }}"{% if cookiecutter.app_label == "" %}, "cookiecutter"{% endif %}]
 
 [tool.flake8]
 # This section is managed by the cookiecutter templates.
