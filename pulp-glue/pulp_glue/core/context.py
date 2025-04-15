@@ -447,6 +447,15 @@ class PulpTaskContext(PulpEntityContext):
             self.pulp_ctx.echo(_("Done."), err=True)
         return task
 
+    def profile_artifact_urls(self) -> t.Dict[str, str]:
+        self.pulp_ctx.needs_plugin(PluginRequirement("core", specifier=">=3.57.0"))
+        result = self.call(
+            "profile_artifacts",
+            parameters={self.HREF: self.pulp_href},
+        )["urls"]
+        assert isinstance(result, dict)
+        return result
+
     @property
     def scope(self) -> t.Dict[str, t.Any]:
         if self.resource_context:
