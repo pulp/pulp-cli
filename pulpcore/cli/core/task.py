@@ -1,8 +1,11 @@
+import re
 import typing as t
 from contextlib import suppress
 from datetime import datetime
+from pathlib import Path
 
 import click
+import requests
 from pulp_glue.common.context import DATETIME_FORMATS, PluginRequirement, PulpEntityContext
 from pulp_glue.common.exceptions import PulpException
 from pulp_glue.common.i18n import get_translation
@@ -165,6 +168,37 @@ def cancel(
             )
 
         task_ctx.cancel(task_ctx.pulp_href)
+
+
+@task.command()
+@href_option
+@uuid_option
+@click.option("--download/--no-download")
+@pass_task_context
+@pass_pulp_context
+def profile_artifact_urls(
+    pulp_ctx: PulpCLIContext,
+    task_ctx: PulpTaskContext,
+    /,
+    download: bool,
+) -> None:
+    """Prints download links for profile urls of the task."""
+    urls = task_ctx.profile_artifact_urls()
+    pulp_ctx.output_result(urls)
+    if download:
+        task_name: str = task_ctx.entity["name"]
+        uuid_match = re.match(r".*/api/v3/tasks/(?P<uuid>.*)/", task_ctx.entity["pulp_href"])
+        assert uuid_match is not None
+        uuid = uuid_match.group("uuid")
+        profile_artifact_dir = Path(".") / f"task_profile-{task_name}-{uuid}"
+        profile_artifact_dir.mkdir(exist_ok=True)
+        with requests.session() as session:
+            for name, url in urls.items():
+                profile_artifact_path = profile_artifact_dir / name
+                click.echo(_("Downloading {path}").format(path=profile_artifact_path))
+                response = session.get(url)
+                response.raise_for_status()
+                profile_artifact_path.write_bytes(response.content)
 
 
 @task.command()
