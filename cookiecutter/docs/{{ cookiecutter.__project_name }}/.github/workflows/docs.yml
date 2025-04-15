@@ -6,7 +6,7 @@ on:
 jobs:
   test:
     if: "endsWith(github.base_ref, 'main')"
-    runs-on: "ubuntu-20.04"
+    runs-on: "ubuntu-24.04"
     steps:
       - uses: "actions/checkout@v4"
       - uses: "actions/cache@v4"
@@ -28,7 +28,7 @@ jobs:
           make docs
   no-test:
     if: "!endsWith(github.base_ref, 'main')"
-    runs-on: "ubuntu-20.04"
+    runs-on: "ubuntu-24.04"
     steps:
       - run: |
           echo "Skip docs testing on non-main branches."
