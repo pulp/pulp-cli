@@ -1,11 +1,9 @@
 #!/bin/env python3
-import typing as t
-
 import tomllib
+import typing as t
 from pathlib import Path
 
 from packaging.requirements import Requirement
-
 
 GLUE_DIR = "pulp-glue{{ cookiecutter.__app_label_suffix }}"
 
