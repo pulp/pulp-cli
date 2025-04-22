@@ -6,7 +6,7 @@ on:
 jobs:
   test:
     if: "endsWith(github.base_ref, 'main')"
-    runs-on: "ubuntu-20.04"
+    runs-on: "ubuntu-24.04"
     steps:
       - uses: "actions/checkout@v4"
       - uses: "actions/cache@v4"
@@ -19,7 +19,7 @@ jobs:
       - name: "Set up Python"
         uses: "actions/setup-python@v5"
         with:
-          python-version: "3.11"
+          python-version: "3.13"
       - name: "Install Test Dependencies"
         run: |
           pip install -r doc_requirements.txt
@@ -28,7 +28,7 @@ jobs:
           make docs
   no-test:
     if: "!endsWith(github.base_ref, 'main')"
-    runs-on: "ubuntu-20.04"
+    runs-on: "ubuntu-latest"
     steps:
       - run: |
           echo "Skip docs testing on non-main branches."
