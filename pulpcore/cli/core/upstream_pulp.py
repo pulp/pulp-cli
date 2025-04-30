@@ -1,5 +1,5 @@
 import click
-from pulp_glue.common.context import PulpEntityContext
+from pulp_glue.common.context import PluginRequirement, PulpEntityContext
 from pulp_glue.common.i18n import get_translation
 from pulp_glue.core.context import PulpUpstreamPulpContext
 
@@ -12,6 +12,7 @@ from pulp_cli.generic import (
     pass_entity_context,
     pass_pulp_context,
     pulp_group,
+    pulp_option,
     resource_lookup_option,
     show_command,
     update_command,
@@ -52,7 +53,16 @@ update_options = [
         help=_("a PEM encode private key or @file containing same"),
         callback=load_string_callback,
     ),
-    click.option("--pulp-label-select"),
+    pulp_option(
+        "--pulp-label-select",
+        needs_plugins=[PluginRequirement("core", specifier="<3.62.0")],
+    ),
+    pulp_option("--q-select", needs_plugins=[PluginRequirement("core", specifier=">=3.62.0")]),
+    pulp_option(
+        "--policy",
+        type=click.Choice(["all", "labeled", "nodelete"], case_sensitive=False),
+        needs_plugins=[PluginRequirement("core", specifier=">=3.73.0")],
+    ),
 ]
 create_options = [
     click.option("--name", required=True, help=_("Name of the upstream pulp")),
