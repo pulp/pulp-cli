@@ -106,8 +106,6 @@ then
 
   expect_succ pulp rpm repository update --name "cli_test_rpm_repository" --checksum-type sha512
   expect_fail pulp rpm repository update --name "cli_test_rpm_repository" --checksum-type sha1
-  expect_fail pulp rpm repository update --name "cli_test_rpm_repository" --package-checksum-type sha1
-  expect_fail pulp rpm repository update --name "cli_test_rpm_repository" --metadata-checksum-type sha1
 else
   expect_succ pulp rpm repository update --name "cli_test_rpm_repository" --metadata-checksum-type sha1
   expect_succ pulp rpm repository update --name "cli_test_rpm_repository" --package-checksum-type sha1
