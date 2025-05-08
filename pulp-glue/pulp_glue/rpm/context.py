@@ -266,6 +266,15 @@ class PulpRpmPublicationContext(PulpPublicationContext):
             package_checksum_type = body.get("metadata_checksum_type")
             disallowed_checksums = {"md5", "sha1", "sha224"}
 
+            self.pulp_ctx.needs_plugin(
+                PluginRequirement(
+                    "rpm",
+                    specifier=">=3.30.0",
+                    inverted=True,
+                    feature=_("package_checksum_type/metadata_checksum_type"),
+                )
+            )
+
             if metadata_checksum_type and metadata_checksum_type in disallowed_checksums:
                 self.pulp_ctx.needs_plugin(
                     PluginRequirement(
@@ -278,6 +287,16 @@ class PulpRpmPublicationContext(PulpPublicationContext):
                         "rpm", specifier=">=3.25.0", inverted=True, feature=_("weak checksums")
                     )
                 )
+        if "repo_gpgcheck" in body or "gpgcheck" in body:
+            self.pulp_ctx.needs_plugin(
+                PluginRequirement(
+                    "rpm",
+                    specifier=">=3.30.0",
+                    inverted=True,
+                    feature=_("gpgcheck/repo_gpgcheck"),
+                )
+            )
+
         return body
 
 
@@ -362,6 +381,15 @@ class PulpRpmRepositoryContext(PulpRepositoryContext):
             package_checksum_type = body.get("metadata_checksum_type")
             disallowed_checksums = {"md5", "sha1", "sha224"}
 
+            self.pulp_ctx.needs_plugin(
+                PluginRequirement(
+                    "rpm",
+                    specifier=">=3.30.0",
+                    inverted=True,
+                    feature=_("package_checksum_type/metadata_checksum_type"),
+                )
+            )
+
             if metadata_checksum_type and metadata_checksum_type in disallowed_checksums:
                 self.pulp_ctx.needs_plugin(
                     PluginRequirement(
@@ -383,6 +411,17 @@ class PulpRpmRepositoryContext(PulpRepositoryContext):
                     feature=_("checksum_type"),
                 )
             )
+
+        if "repo_gpgcheck" in body or "gpgcheck" in body:
+            self.pulp_ctx.needs_plugin(
+                PluginRequirement(
+                    "rpm",
+                    specifier=">=3.30.0",
+                    inverted=True,
+                    feature=_("gpgcheck/repo_gpgcheck"),
+                )
+            )
+
         return body
 
     def sync(self, body: t.Optional[EntityDefinition] = None) -> t.Any:
