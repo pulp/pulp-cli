@@ -51,7 +51,6 @@ common = "pulpcore.cli.common"
 container = "pulpcore.cli.container"
 core = "pulpcore.cli.core"
 file = "pulpcore.cli.file"
-migration = "pulpcore.cli.migration"
 python = "pulpcore.cli.python"
 rpm = "pulpcore.cli.rpm"
 
@@ -224,7 +223,6 @@ markers = [
   "script: tests provided as shell scripts",
   "help_page: tests that render help pages",
   "pulpcore: pulpcore tests",
-  "pulp_2to3_migration: pulp-2to3-migration tests",
   "pulp_file: pulp_file tests",
   "pulp_ansible: pulp_ansible tests",
   "pulp_container: pulp_container tests",
