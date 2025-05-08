@@ -1,0 +1,1 @@
+Removed support for the old options `--package-checksum-type`, `--metadata-checksum-type`, `--gpgcheck`, and `--repo-gpgcheck` for newer version of pulp_rpm. These options have been deprecated for some time.

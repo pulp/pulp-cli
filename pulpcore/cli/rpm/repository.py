@@ -145,18 +145,23 @@ update_options = [
     click.option("--retain-package-versions", type=int),
     remote_option,
     metadata_signing_service_option,
-    click.option(
+    pulp_option(
         "--metadata-checksum-type",
         type=click.Choice(LEGACY_CHECKSUM_CHOICES, case_sensitive=False),
-        help=_("DEPRECATED: Option specifying the checksum type to use for repository metadata."),
+        help=_(
+            "DEPRECATED: Option specifying the checksum type to use for repository metadata. "
+            "Unavailable for pulp_rpm>=3.30.0"
+        ),
+        needs_plugins=[PluginRequirement("rpm", specifier="<3.30.0")],
     ),
-    click.option(
+    pulp_option(
         "--package-checksum-type",
         type=click.Choice(LEGACY_CHECKSUM_CHOICES, case_sensitive=False),
         help=_(
             "DEPRECATED: Option specifying the checksum type to use for packages in "
-            "repository metadata."
+            "repository metadata. Unavailable for pulp_rpm>=3.30.0"
         ),
+        needs_plugins=[PluginRequirement("rpm", specifier="<3.30.0")],
     ),
     pulp_option(
         "--checksum-type",
@@ -166,31 +171,34 @@ update_options = [
         ),
         needs_plugins=[PluginRequirement("rpm", specifier=">=3.25.0")],
     ),
-    click.option(
+    pulp_option(
         "--gpgcheck",
         type=click.Choice(("0", "1")),
         callback=choice_to_int_callback,
         help=_(
             """DEPRECATED: Option specifying whether a client should perform a GPG signature check
-            on packages."""
+            on packages. Unavailable for pulp_rpm>=3.30.0"""
         ),
+        needs_plugins=[PluginRequirement("rpm", specifier="<3.30.0")],
     ),
-    click.option(
+    pulp_option(
         "--repo-gpgcheck",
         type=click.Choice(("0", "1")),
         callback=choice_to_int_callback,
         help=_(
             """DEPRECATED: Option specifying whether a client should perform a GPG signature check
-            on the repodata."""
+            on the repodata. Unavailable for pulp_rpm>=3.30.0"""
         ),
+        needs_plugins=[PluginRequirement("rpm", specifier="<3.30.0")],
     ),
-    click.option(
+    pulp_option(
         "--sqlite-metadata/--no-sqlite-metadata",
         default=None,
         help=_(
             """DEPRECATED: An option specifying whether Pulp should generate SQLite metadata.
             Unavailable for pulp_rpm>=3.25.0"""
         ),
+        needs_plugins=[PluginRequirement("rpm", specifier="<3.25.0")],
     ),
     pulp_option(
         "--autopublish/--no-autopublish",

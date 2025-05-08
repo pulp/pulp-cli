@@ -1,0 +1,1 @@
+Removed support for gpgcheck, repo_gpgcheck, package_checksum_type and metadata_checksum_type for the RPM plugin for version >=3.30.0
