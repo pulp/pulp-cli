@@ -19,7 +19,7 @@ translation = get_translation(__package__)
 _ = translation.gettext
 
 
-@pulp_group()
+@pulp_group(name="task-group")
 @pass_pulp_context
 @click.pass_context
 def task_group(ctx: click.Context, pulp_ctx: PulpCLIContext, /) -> None:

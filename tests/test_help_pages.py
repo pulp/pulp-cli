@@ -48,7 +48,10 @@ def test_access_help(no_api: None, subtests: SubTests) -> None:
             result = runner.invoke(main, args + ["--help"], catch_exceptions=False)
 
             if result.exit_code == 2:
-                assert "not available in this context" in result.stdout
+                assert (
+                    "not available in this context" in result.stdout
+                    or "not available in this context" in result.stderr
+                )
             else:
                 assert result.exit_code == 0
                 assert result.stdout.startswith("Usage:") or result.stdout.startswith(
