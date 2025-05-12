@@ -12,7 +12,7 @@ env:
 
 jobs:
   test:
-    runs-on: "ubuntu-20.04"
+    runs-on: "ubuntu-24.04"
     strategy:
       fail-fast: false
       matrix:
@@ -60,6 +60,10 @@ jobs:
           if [ "${{matrix.lower_bounds}}" ]
           then
             pip install dist/pulp_cli-*.whl pulp-glue/dist/pulp_glue-*.whl -r test_requirements.txt -c lower_bounds_constraints.lock
+          elif [ "${{matrix.upper_bounds}}" ]
+          then
+            .ci/scripts/calc_constraints.py pyproject.toml pulp-glue/pyproject.toml  --upper > upper_bounds_constraints.lock
+            pip install dist/pulp_cli-*.whl pulp-glue/dist/pulp_glue-*.whl -r test_requirements.txt -c upper_bounds_constraints.lock
           else
             pip install dist/pulp_cli-*.whl pulp-glue/dist/pulp_glue-*.whl -r test_requirements.txt
           fi
@@ -70,7 +74,11 @@ jobs:
           FROM_TAG: "${{ matrix.from_tag }}"
           CONTAINER_FILE: "${{ matrix.container_file }}"
           PULP_HTTPS: "${{ matrix.pulp_https }}"
+          PULP_OAUTH2: "${{ matrix.pulp_oauth2 }}"
           PULP_API_ROOT: "${{ matrix.pulp_api_root }}"
+          PULP_DOMAIN_ENABLED: "${{ matrix.pulp_domain_enabled }}"
+          PULP_ENABLED_PLUGINS: "${{ matrix.pulp_enabled_plugins }}"
+          OAS_VERSION: "${{ matrix.oas_version }}"
         run: |
           .ci/run_container.sh make test
 ...

@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools<73"]
+requires = ["setuptools<81"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -24,8 +24,8 @@ classifiers=[
 ]
 dependencies = [
   "pulp-glue==0.29.4.dev",
-  "click>=8.0.0,<9",
-  "packaging>=20.0,<=24.2",  # CalVer
+  "click>=8.0.0,<8.2",  # Proven to not do semver.
+  "packaging>=20.0,<=25",  # CalVer
   "PyYAML>=5.3,<6.1",
   "schema>=0.7.5,<0.8",
   "toml>=0.10.2,<0.11",
@@ -76,6 +76,7 @@ docs = true
 translations = true
 main_package = "common"
 binary_dependencies = ""
+unittests = false
 
 [tool.bumpversion]
 # This section is managed by the cookiecutter templates.
@@ -193,7 +194,7 @@ showcontent = true
 # This section is managed by the cookiecutter templates.
 directory = "misc"
 name = "Misc"
-showcontent = false
+showcontent = true
 
 
 [tool.black]
@@ -205,7 +206,7 @@ exclude = "cookiecutter"
 # This section is managed by the cookiecutter templates.
 profile = "black"
 line_length = 100
-skip = ["pulp-glue", "cookiecutter"]
+extend_skip = ["pulp-glue", "cookiecutter"]
 
 [tool.flake8]
 # This section is managed by the cookiecutter templates.

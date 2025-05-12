@@ -13,7 +13,9 @@ build:
 	cd pulp-glue; pyproject-build -n
 	pyproject-build -n
 
-black:
+black: format
+
+format:
 	isort .
 	cd pulp-glue; isort .
 	black .
@@ -36,11 +38,20 @@ tests/cli.toml:
 test: | tests/cli.toml
 	python3 -m pytest -v tests pulp-glue/tests
 
+livetest: | tests/cli.toml
+	python3 -m pytest -v tests pulp-glue/tests -m live
+
+unittest:
+	python3 -m pytest -v tests pulp-glue/tests -m "not live"
+
+unittest_glue:
+	python3 -m pytest -v pulp-glue/tests -m "not live"
+
 docs:
 	pulp-docs build
 
 servedocs:
-	pulp-docs serve -w CHANGES.md -w pulp-glue/pulp_glue -w pulpcore/cli/common/generic.py
+	pulp-docs serve -w CHANGES.md -w pulp-glue/pulp_glue -w pulp_cli/generic.py
 
 pulp-glue/pulp_glue/%/locale/messages.pot: pulp-glue/pulp_glue/%/*.py
 	xgettext -d $* -o $@ pulp-glue/pulp_glue/$*/*.py
