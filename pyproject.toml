@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools<79"]
+requires = ["setuptools<81"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -24,8 +24,8 @@ classifiers=[
 ]
 dependencies = [
   "pulp-glue==0.32.2.dev",
-  "click>=8.0.0,<9",
-  "packaging>=20.0,<=24.2",  # CalVer
+  "click>=8.0.0,<8.2",  # Proven to not do semver.
+  "packaging>=20.0,<=25",  # CalVer
   "PyYAML>=5.3,<6.1",
   "schema>=0.7.5,<0.8",
   "tomli>=2.0.0,<2.1;python_version<'3.11'",
