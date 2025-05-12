@@ -4,7 +4,7 @@ import click
 
 from pulpcore.cli.common.debug import debug
 
-__version__ = "0.32.3"
+__version__ = "0.32.4.dev"
 
 
 def mount(main: click.Group, **kwargs: t.Any) -> None:
