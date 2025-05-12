@@ -33,9 +33,7 @@ multi_repository_option = resource_option(
 @multi_repository_option
 @click.option(
     "--all-repositories",
-    type=bool,
     is_flag=True,
-    show_default=True,
     default=False,
     help=_("Prune *all* repositories accessible to the invoking user."),
 )
@@ -47,9 +45,7 @@ multi_repository_option = resource_option(
 )
 @click.option(
     "--dry-run",
-    type=bool,
     is_flag=True,
-    show_default=True,
     default=False,
     help=_("Evaluate the prune-status of the specified repositories but DO NOT make any changes."),
 )
@@ -73,7 +69,6 @@ def prune_packages(
 
     You may not specify --all-repositories *and* one or more specific repositories.
     """
-    prune_ctx = PulpRpmPruneContext(pulp_ctx)
     if not (all_repositories or repositories):
         raise PulpException(
             _("at least one --repository, or --all-repositories, must be specified")
@@ -87,5 +82,6 @@ def prune_packages(
         ["*"] if all_repositories else list(repositories)
     )
 
+    prune_ctx = PulpRpmPruneContext(pulp_ctx)
     result = prune_ctx.prune_packages(repos_list, keep_days, dry_run)
     pulp_ctx.output_result(result)
