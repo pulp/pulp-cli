@@ -3,4 +3,4 @@
 jobs:
   test:
     strategy:
-      matrix:{{ cookiecutter.test_matrix | to_nice_yaml(level=4, embed_in="dict") }}
+      matrix:{{ cookiecutter.test_matrix | jaml(level=4, embed_in="dict") }}

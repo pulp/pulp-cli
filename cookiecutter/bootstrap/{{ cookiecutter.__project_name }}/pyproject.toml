@@ -37,10 +37,10 @@ changelog = "{{ cookiecutter.repository }}/blob/main/CHANGES.md"
 {{ cookiecutter.app_label }} = "pulpcore.cli.{{ cookiecutter.app_label }}"
 
 [tool.pulp_cli_template]
-app_label = {{ cookiecutter.app_label | to_toml_value }}
-glue = {{ cookiecutter.glue | to_toml_value }}
-docs = {{ cookiecutter.docs | to_toml_value }}
-translations = {{ cookiecutter.translations | to_toml_value }}
+app_label = {{ cookiecutter.app_label | toml_value }}
+glue = {{ cookiecutter.glue | toml_value }}
+docs = {{ cookiecutter.docs | toml_value }}
+translations = {{ cookiecutter.translations | toml_value }}
 
 [tool.pytest.ini_options]
 markers = [
