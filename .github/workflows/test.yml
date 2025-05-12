@@ -12,7 +12,7 @@ env:
 
 jobs:
   unittest:
-    runs-on: "ubuntu-20.04"
+    runs-on: "ubuntu-latest"
     steps:
       - uses: "actions/checkout@v4"
       - uses: "actions/cache@v4"
@@ -37,7 +37,7 @@ jobs:
         run: |
           make unittest
   test:
-    runs-on: "ubuntu-20.04"
+    runs-on: "ubuntu-24.04"
     needs:
       - "unittest"
     strategy:
