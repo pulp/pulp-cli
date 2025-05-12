@@ -1,6 +1,5 @@
-# Lint requirements
-black==24.10.0
-flake8==7.1.1
+black==25.1.0
+flake8==7.2.0
 flake8-pyproject==1.2.3
 isort==5.13.2
 mypy==1.14.1
