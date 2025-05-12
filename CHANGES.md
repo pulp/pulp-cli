@@ -10,6 +10,23 @@
 
 [//]: # (towncrier release notes start)
 
+## 0.30.4 (2025-05-12) {: #0.30.4 }
+
+
+
+#### Bugfixes {: #0.30.4-bugfix }
+
+- Adjust click dependency constraints to breaking changes in y-releases.
+
+
+### Pulp GLUE {: #0.30.4-pulp-glue }
+
+
+No significant changes.
+
+
+---
+
 ## 0.30.3 (2025-03-31) {: #0.30.3 }
 
 
