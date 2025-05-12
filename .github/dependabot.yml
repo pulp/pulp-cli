@@ -1,23 +1,25 @@
+---
 version: 2
 updates:
-- package-ecosystem: pip
+- package-ecosystem: "pip"
   directory: "/"
   schedule:
-    interval: daily
+    interval: "daily"
   commit-message:
     prefix: "[PIP] "
   open-pull-requests-limit: 10
-- package-ecosystem: pip
+- package-ecosystem: "pip"
   directory: "/pulp-glue"
   schedule:
-    interval: daily
+    interval: "daily"
   commit-message:
     prefix: "[PIP] "
   open-pull-requests-limit: 10
-- package-ecosystem: github-actions
+- package-ecosystem: "github-actions"
   directory: "/"
   schedule:
-    interval: weekly
+    interval: "weekly"
   commit-message:
     prefix: "[GHA] "
   open-pull-requests-limit: 10
+...
