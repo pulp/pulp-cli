@@ -10,6 +10,38 @@
 
 [//]: # (towncrier release notes start)
 
+## 0.32.3 (2025-05-12) {: #0.32.3 }
+
+
+
+No significant changes.
+
+
+### Pulp GLUE {: #0.32.3-pulp-glue }
+
+
+No significant changes.
+
+
+---
+
+## 0.32.2 (2025-05-12) {: #0.32.2 }
+
+
+
+#### Bugfixes {: #0.32.2-bugfix }
+
+- Adjust click dependency constraints to breaking changes in y-releases.
+
+
+### Pulp GLUE {: #0.32.2-pulp-glue }
+
+
+No significant changes.
+
+
+---
+
 ## 0.32.1 (2025-04-07) {: #0.32.1 }
 
 
@@ -57,6 +89,23 @@ No significant changes.
 
 
 ### Pulp GLUE {: #0.32.0-pulp-glue }
+
+
+No significant changes.
+
+
+---
+
+## 0.31.2 (2025-05-12) {: #0.31.2 }
+
+
+
+#### Bugfixes {: #0.31.2-bugfix }
+
+- Adjust click dependency constraints to breaking changes in y-releases.
+
+
+### Pulp GLUE {: #0.31.2-pulp-glue }
 
 
 No significant changes.
@@ -116,6 +165,23 @@ No significant changes.
 
 - Changed the upper version bound of `packaging` to the last available version according to CalVer.
   [#1125](https://github.com/pulp/pulp-cli/issues/1125)
+
+
+---
+
+## 0.30.4 (2025-05-12) {: #0.30.4 }
+
+
+
+#### Bugfixes {: #0.30.4-bugfix }
+
+- Adjust click dependency constraints to breaking changes in y-releases.
+
+
+### Pulp GLUE {: #0.30.4-pulp-glue }
+
+
+No significant changes.
 
 
 ---
@@ -226,6 +292,23 @@ No significant changes.
 #### Misc {: #0.30.0-pulp-glue-misc }
 
 - Declare compatibility with Python 3.13.
+
+
+---
+
+## 0.29.4 (2025-05-12) {: #0.29.4 }
+
+
+
+#### Bugfixes {: #0.29.4-bugfix }
+
+- Adjust click dependency constraints to breaking changes in y-releases.
+
+
+### Pulp GLUE {: #0.29.4-pulp-glue }
+
+
+No significant changes.
 
 
 ---
