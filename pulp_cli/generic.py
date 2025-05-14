@@ -56,6 +56,8 @@ _ = translation.gettext
 _AnyCallable = t.Callable[..., t.Any]
 FC = t.TypeVar("FC", bound=t.Union[_AnyCallable, click.Command])
 
+HEADER_REGEX = r"^[-a-zA-Z0-9_]+:.+$"
+
 
 class IncompatibleContext(click.UsageError):
     """Exception to signal that an option or subcommand was used with an incompatible context."""
@@ -698,6 +700,29 @@ def null_callback(
     return value
 
 
+def remote_header_callback(
+    ctx: click.Context, param: click.Parameter, value: t.Iterable[str]
+) -> t.Optional[t.List[t.Dict[str, str]]]:
+    click.echo(value, err=True)
+    if not value:
+        return None
+    header_regex = re.compile(HEADER_REGEX)
+    failed_headers = ", ".join(
+        (item for item in value if not (item == "" or header_regex.match(item)))
+    )
+    if failed_headers:
+        raise click.BadParameter(f"format must be <header-name>:<value> \n{failed_headers}")
+
+    result: t.List[t.Dict[str, str]] = []
+    for header in value:
+        if header == "":
+            result = []
+        else:
+            k, v = header.split(":", maxsplit=1)
+            result.append({k: v})
+    return result
+
+
 ##############################################################################
 # Decorator common options
 
@@ -1181,10 +1206,7 @@ publication_filter_options = [
     pulp_option("--repository-version", help=_("Search {entities} by repository version HREF")),
 ]
 
-
-common_remote_create_options = [
-    click.option("--name", required=True),
-    click.option("--url", required=True),
+_common_remote_options = [
     click.option(
         "--ca-cert",
         help=_("a PEM encoded CA certificate or @file containing same"),
@@ -1200,10 +1222,7 @@ common_remote_create_options = [
         help=_("a PEM encode private key or @file containing same"),
         callback=load_string_callback,
     ),
-    click.option("--connect-timeout", type=float),
-    click.option(
-        "--download-concurrency", type=int, help=_("total number of simultaneous connections")
-    ),
+    click.option("--username"),
     click.option(
         "--password",
         help=_(
@@ -1217,38 +1236,6 @@ common_remote_create_options = [
         help=_(
             "The password to authenticate to the proxy (can contain leading and trailing spaces)."
         ),
-    ),
-    click.option("--rate-limit", type=int, help=_("limit download rate in requests per second")),
-    click.option("--sock-connect-timeout", type=float),
-    click.option("--sock-read-timeout", type=float),
-    click.option("--tls-validation", type=bool),
-    click.option("--total-timeout", type=float),
-    click.option("--username"),
-    click.option(
-        "--max-retries",
-        type=int,
-        help=_("maximum number of retry attemts after a download failure"),
-    ),
-    pulp_labels_option,
-]
-
-
-common_remote_update_options = [
-    click.option("--url"),
-    click.option(
-        "--ca-cert",
-        help=_("a PEM encoded CA certificate or @file containing same"),
-        callback=load_string_callback,
-    ),
-    click.option(
-        "--client-cert",
-        help=_("a PEM encoded client certificate or @file containing same"),
-        callback=load_string_callback,
-    ),
-    click.option(
-        "--client-key",
-        help=_("a PEM encode private key or @file containing same"),
-        callback=load_string_callback,
     ),
     click.option("--connect-timeout", type=float_or_empty),
     click.option(
@@ -1257,33 +1244,31 @@ common_remote_update_options = [
         help=_("total number of simultaneous connections"),
     ),
     click.option(
-        "--password",
-        help=_(
-            "The password to authenticate to the remote (can contain leading and trailing spaces)."
-        ),
-    ),
-    click.option("--proxy-url"),
-    click.option("--proxy-username"),
-    click.option(
-        "--proxy-password",
-        help=_(
-            "The password to authenticate to the proxy (can contain leading and trailing spaces)."
-        ),
-    ),
-    click.option(
         "--rate-limit", type=int_or_empty, help=_("limit download rate in requests per second")
     ),
     click.option("--sock-connect-timeout", type=float_or_empty),
     click.option("--sock-read-timeout", type=float_or_empty),
     click.option("--tls-validation", type=bool),
     click.option("--total-timeout", type=float_or_empty),
-    click.option("--username"),
     click.option(
         "--max-retries",
         type=int_or_empty,
         help=_("maximum number of retry attemts after a download failure"),
     ),
+    click.option("--header", "headers", multiple=True, callback=remote_header_callback),
     pulp_labels_option,
+]
+
+common_remote_create_options = [
+    click.option("--name", required=True),
+    click.option("--url", required=True),
+    *_common_remote_options,
+]
+
+
+common_remote_update_options = [
+    click.option("--url"),
+    *_common_remote_options,
 ]
 
 ##############################################################################
