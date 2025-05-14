@@ -13,18 +13,21 @@ trap cleanup EXIT
 
 expect_succ pulp file remote list
 
-expect_succ pulp file remote create --name "cli_test_file_remote" --url "$FILE_REMOTE_URL" --proxy-url "http://proxy.org" --proxy-username "user" --proxy-password "pass" --max-retries 5 --total-timeout 32
+expect_succ pulp file remote create --name "cli_test_file_remote" --url "$FILE_REMOTE_URL" --proxy-url "http://proxy.org" --proxy-username "user" --proxy-password "pass" --max-retries 5 --total-timeout 32 --header "a:1" --header "b:2" --header "a:1"
 expect_succ pulp file remote show --remote "cli_test_file_remote"
 HREF="$(echo "$OUTPUT" | jq -r '.pulp_href')"
 test "$(echo "$OUTPUT" | jq -r '.proxy_url')" = "http://proxy.org"
 test "$(echo "$OUTPUT" | jq -r '.max_retries')" = "5"
 TIMEOUT="$(echo "$OUTPUT" | jq -r '.total_timeout')"
 test 1 -eq "$(echo "${TIMEOUT}==32" | bc)"  # total_timeout is a float that can return as either 32 or 32.0
-expect_succ pulp file remote update --remote "$HREF" --proxy-url "" --proxy-username "" --proxy-password "" --max-retries "" --total-timeout ""
+echo "$OUTPUT" | jq -c '.headers'
+test "$(echo "$OUTPUT" | jq -c '.headers')" = '[{"a":"1"},{"b":"2"},{"a":"1"}]'
+expect_succ pulp file remote update --remote "$HREF" --proxy-url "" --proxy-username "" --proxy-password "" --max-retries "" --total-timeout "" --header ""
 expect_succ pulp file remote list --name-contains "li_test_file_remot"
 test "$(echo "$OUTPUT" | jq -r '.[0].proxy_url')" = "null"
 test "$(echo "$OUTPUT" | jq -r '.[0].max_retries')" = "null"
 test "$(echo "$OUTPUT" | jq -r '.[0].total_timeout')" = "null"
+test "$(echo "$OUTPUT" | jq -c '.[0].headers')" = '[]'
 expect_succ pulp file remote destroy --name "cli_test_file_remote"
 
 # test cert/key fields for remotes - both @file and string args

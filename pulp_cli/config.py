@@ -8,7 +8,7 @@ import click
 import tomli_w
 from pulp_glue.common.i18n import get_translation
 
-from pulp_cli.generic import REGISTERED_OUTPUT_FORMATTERS, pulp_group
+from pulp_cli.generic import HEADER_REGEX, REGISTERED_OUTPUT_FORMATTERS, pulp_group
 
 if sys.version_info >= (3, 11):
     import tomllib
@@ -47,15 +47,16 @@ SETTINGS = [
     "verbose",
     "plugins",
 ]
-HEADER_REGEX = r"^[-a-zA-Z0-9_]+:.+$"
 
 
 def headers_callback(
     ctx: click.Context, param: click.Parameter, value: t.Iterable[str]
 ) -> t.Iterable[str]:
-    failed_headers = ", ".join((item for item in value if not re.match(HEADER_REGEX, item)))
-    if failed_headers:
-        raise click.BadParameter(f"format must be <header-name>:<value> \n{failed_headers}")
+    if value:
+        header_regex = re.compile(HEADER_REGEX)
+        failed_headers = ", ".join((item for item in value if not header_regex.match(item)))
+        if failed_headers:
+            raise click.BadParameter(f"format must be <header-name>:<value> \n{failed_headers}")
 
     default_map = ctx.default_map or {}
     headers: t.List[str] = default_map.get("headers", [])
