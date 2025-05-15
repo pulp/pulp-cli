@@ -1,9 +1,12 @@
 #!/bin/env python3
 
-import click
-from packaging.version import parse
+from importlib import metadata
 
-if parse(click.__version__) < parse("8.1.1") or parse(click.__version__) >= parse("8.2"):
-    print("🚧 Linting with mypy is currently only supported with click~=8.1.1. 🚧")
-    print("🔧 Please run `pip install click~=8.1.1` first. 🔨")
-    exit(1)
+from packaging.version import Version
+
+if __name__ == "__main__":
+    click_version = Version(metadata.version("click"))
+    if click_version < Version("8.1.1"):
+        print("🚧 Linting with mypy is currently only supported with click>=8.1.1. 🚧")
+        print("🔧 Please run `pip install click>=8.1.1` first. 🔨")
+        exit(1)
