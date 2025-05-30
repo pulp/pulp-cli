@@ -1023,9 +1023,7 @@ class PulpEntityContext(PulpViewSetContext):
                 except (KeyError, StopIteration):
                     raise PulpException(_("No suitable resource got created."))
             else:
-                # Properties with different types on setters and getters are not accepted by mypy.
-                # https://github.com/python/mypy/issues/3004
-                self.entity = None  # type: ignore[assignment]
+                self.entity = None
         else:
             self._entity = result
             self._entity_lookup = {}
@@ -1087,17 +1085,13 @@ class PulpEntityContext(PulpViewSetContext):
             The record of the delete task.
         """
         if self.pulp_ctx.fake_mode:
-            # Properties with different types on setters and getters are not accepted by mypy.
-            # https://github.com/python/mypy/issues/3004
-            self.entity = None  # type: ignore[assignment]
+            self.entity = None
             return None
 
         result = self.call(
             "delete", parameters={self.HREF: self.pulp_href}, non_blocking=non_blocking
         )
-        # Properties with different types on setters and getters are not accepted by mypy.
-        # https://github.com/python/mypy/issues/3004
-        self.entity = None  # type: ignore[assignment]
+        self.entity = None
         return result
 
     def set_label(self, key: str, value: str, non_blocking: bool = False) -> t.Any:
