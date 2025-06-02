@@ -22,7 +22,10 @@ jobs:
   docs:
     needs:
       - "lint"
-    uses: "./.github/workflows/docs.yml"
+    # Keep the workflow tag the same as pulpdocs_ref.
+    uses: "pulp/pulp-docs/.github/workflows/docs-ci.yml@rewrite-as-mkdocs-plugin"
+    with:
+      pulpdocs_ref: "rewrite-as-mkdocs-plugin"
   codeql:
     needs:
       - "lint"
