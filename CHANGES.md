@@ -10,6 +10,48 @@
 
 [//]: # (towncrier release notes start)
 
+## 0.33.0 (2025-06-02) {: #0.33.0 }
+
+
+
+#### Features {: #0.33.0-feature }
+
+- Added `profile-artifact-urls` subcommand to `task` command.
+  [#1172](https://github.com/pulp/pulp-cli/issues/1172)
+- Add "--header" option to remote create and update commands.
+  [#1185](https://github.com/pulp/pulp-cli/issues/1185)
+- Add support for click 8.2.
+- Added support for the replicate policy options added in pulpcore 3.73.0.
+- Added support for the replicate q-select option added in pulpcore 3.62.0.
+
+
+#### Bugfixes {: #0.33.0-bugfix }
+
+- Adjust click dependency constraints to breaking changes in y-releases.
+
+
+#### Deprecations and Removals {: #0.33.0-removal }
+
+- Removed legacy support and tests for the 2to3 migration plugin.
+- Removed support for the old options `--package-checksum-type`, `--metadata-checksum-type`, `--gpgcheck`, and `--repo-gpgcheck` for newer version of pulp_rpm. These options have been deprecated for some time.
+
+
+### Pulp GLUE {: #0.33.0-pulp-glue }
+
+
+#### Features {: #0.33.0-pulp-glue-feature }
+
+- Added `profile_artifact_urls` to `PulpTaskContext`.
+  [#1172](https://github.com/pulp/pulp-cli/issues/1172)
+
+
+#### Deprecations and Removals {: #0.33.0-pulp-glue-removal }
+
+- Removed support for gpgcheck, repo_gpgcheck, package_checksum_type and metadata_checksum_type for the RPM plugin for version >=3.30.0
+
+
+---
+
 ## 0.32.3 (2025-05-12) {: #0.32.3 }
 
 
