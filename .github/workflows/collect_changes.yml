@@ -25,10 +25,18 @@ jobs:
           python3 .ci/scripts/collect_changes.py
       - name: "Create Pull Request"
         uses: "peter-evans/create-pull-request@v7"
+        id: "create_pr"
         with:
           token: "${{ secrets.RELEASE_TOKEN }}"
           title: "Update Changelog"
           body: ""
           branch: "update_changes"
           delete-branch: true
+      - name: "Mark PR automerge"
+        run: |
+          gh pr merge --rebase --auto "${{ steps.create_pr.outputs.pull-request-number }}"
+        if: "steps.create_pr.outputs.pull-request-number"
+        env:
+          GH_TOKEN: "${{ secrets.RELEASE_TOKEN }}"
+        continue-on-error: true
 ...
