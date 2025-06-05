@@ -8,7 +8,7 @@ Currently `pulp-cli` supports pulpcore and 6 of Pulp's plugins: `pulp_ansible`, 
 See section below for information on how to extend the CLI to support other Pulp plugins.
 
 You can find workflow examples for the Pulp 3 CLI throughout the [plugin documentation](site:help/).
-For example, [synchronizing a File repository](site:/pulp_file/docs/user/guides/01-sync/).
+For example, [synchronizing a File repository](site:/pulp_file/docs/user/guides/sync/).
 
 Use the links on the left to navigate.
 
