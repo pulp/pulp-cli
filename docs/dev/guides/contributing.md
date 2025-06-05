@@ -51,7 +51,7 @@ And finally, for each new feature, we require corresponding tests.
 ## Testing
 
 Tests are shell scripts in `tests/scripts` with names like `test_*.sh`.
-They should should focus on the cli operation and are not a replacement for pulp integration tests;
+They should focus on the cli operation and are not a replacement for pulp integration tests;
 i.e. make sure the cli translates to the right api calls, but do not care about pulp internals.
 
 ## Running Tests
