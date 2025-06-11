@@ -1,2 +1,2 @@
 # Pulp Glue
-## The version agnostic Pulp 3 client library in python
+## The version agnostic Pulp 3 client library in Python
