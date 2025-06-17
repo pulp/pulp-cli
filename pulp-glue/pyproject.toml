@@ -24,7 +24,7 @@ classifiers = [
 ]
 dependencies = [
   "importlib_resources>=5.4.0,<6.2;python_version<'3.9'",
-  "multidict>=6.0.5,<6.5",
+  "multidict>=6.0.5,<6.6",
   "packaging>=20.0,<=25.0",  # CalVer
   "requests>=2.24.0,<2.33",
 ]
