@@ -52,10 +52,12 @@ def mount(main: click.Group, **kwargs: Any) -> None:
 ## Contexts
 
 In `click`, every subcommand is accompanied by a `click.Context`, and objects can be attached to them.
-In this CLI we attach a [`PulpCLIContext`][pulp_cli.generic.PulpCLIContext] to the main command, which inherits from `pulp-glue`'s [`PulpContext`][pulp_glue.common.context.PulpContext].
+In this CLI we attach a [`PulpCLIContext`][pulp_cli.generic.PulpCLIContext] to the main command,
+which inherits from `pulp-glue`'s [`PulpContext`][pulp_glue.common.context.PulpContext].
 This context handles the communication to the pulp server through its `api` property.
 
-Further we encourage the handling of communication with certain endpoints by subclassing the [`PulpEntityContext`][pulp_glue.common.context.PulpEntityContext] or some of the resource-specific children, such as [PulpRepositoryContext][pulp_glue.common.context.PulpRepositoryContext].
+Further we encourage the handling of communication with certain endpoints by subclassing the [`PulpEntityContext`][pulp_glue.common.context.PulpEntityContext]
+or some of the resource-specific children, such as [`PulpRepositoryContext`][pulp_glue.common.context.PulpRepositoryContext].
 Some examples of this can be found under `pulp_glue/{plugin-name}/context.py`.
 
 By attaching them to the contexts of certain command groups, they are accessible to commands via the `pass_entity_context` decorator.
@@ -65,15 +67,15 @@ Those entity contexts should provide a common interface to the layer of `click` 
 @pulp_group()
 @pass_pulp_context
 @click.pass_context
-def my_command(ctx, pulp_ctx):
-    ctx.obj = MyEntityContext(pulp_ctx)
+def my_resource(ctx, pulp_ctx: PulpContext) -> None:
+    ctx.obj = PulpMyResourceContext(pulp_ctx)
 
 
-@my_command.command()
+@my_resource.command()
 @pass_entity_context
-def my_sub_command(entity_ctx):
-    entity_ctx.entity = {"name": "myentity")
-    entity_ctx.destroy()
+def frobnicate(entity_ctx: PulpMyResourceContext) -> None:
+    entity_ctx.entity = {"name": "myentity"}
+    entity_ctx.frobnicate()
 ```
 
 ## Generics
@@ -81,17 +83,34 @@ def my_sub_command(entity_ctx):
 For certain often repeated patterns like listing all entities of a particular kind,
 we provide generic commands that use the underlying context objects.
 The following example shows the use of the [`show_command`][pulp_cli.generic.show_command] generic.
+It uses a generated lookup option that will populate the closest matching `entity_ctx` in the command hierarchy.
 
 ```python
-from pulp_cli.generic import name_option, show_command,
+from pulp_cli.generic import resource_lookup_option, show_command,
 
-lookup_params = [name_option]
-my_command.add_command(show_command(decorators=lookup_params))
+
+my_resource_lookup_option = resource_lookup_option(
+    "--my-resource",
+    context_class=PulpMyResourceContext,
+)
+lookup_params = [my_resource_lookup_option]
+my_resource.add_command(show_command(decorators=lookup_params))
+
+# The example from above could use the lookup option too.
+
+@my_resource.command()
+@my_resource_lookup_option
+@pass_entity_context
+def frobnicate(entity_ctx: PulpMyResourceContext) -> None:
+    # At this point, the lookup option has already selected an entity.
+    entity_ctx.frobnicate()
 ```
 
 To add options to these subcommands, pass a list of [`PulpOption`][pulp_cli.generic.PulpOption] objects to the `decorators` argument.
 Preferably these are created using the [`pulp_option`][pulp_cli.generic.pulp_option] factory.
+More specific factories for resource handling are [`resource_option`][pulp_cli.generic.resource_option] and [`resource_lookup_option`][pulp_cli.generic.resource_lookup_option].
 
+Another example is the `list-command` that allows filtering (based on the server's capabilities) by adding named options:
 ```python
 from pulp_cli.generic import list_command,
 
@@ -99,7 +118,7 @@ filter_params = [
     pulp_option("--name"),
     pulp_option("--name-contains", "name__contains"),
 ]
-my_command.add_command(list_command(decorators=filter_params))
+my_resource.add_command(list_command(decorators=filter_params))
 ```
 
 ## Version dependent code paths
@@ -116,22 +135,23 @@ It will raise an error, once the first access to the server is attempted.
 
 ```python
 # In pulp_glue_my_plugin
-class MyEntityContext(PulpEntityContext):
-    def show(self, href):
-        if self.pulp_ctx.has_plugin(PluginRequirement("my_content", specifier=">=1.2.3", inverted=True)):
+class PulpMyResourceContext(PulpEntityContext):
+    NEEDS_PLUGINS = [PluginRequirement("my_plugin", specifier=">=1.0.0")]
+
+    def show(self) -> t.Dict[str, t.Any]:
+        if self.pulp_ctx.has_plugin(PluginRequirement("my_plugin", specifier=">=1.2.3", inverted=True)):
             # Versioned workaroud
             # see bug-tracker/12345678
-            return lookup_my_content_legacy(href)
-        return super().show(href)
+            return lookup_my_content_legacy(self.pulp_href)
+        return super().show()
 
 
 # In pulp_cli_my_plugin
 @main.command()
 @pass_pulp_context
-@click.pass_context
-def my_command(ctx, pulp_ctx):
-    pulp_ctx.needs_plugin(PluginRequirement("my_content", specifier=">=1.0.0"))
-    ctx.obj = MyEntityContext(pulp_ctx)
+def my_command(pulp_ctx:PulpContext) -> None:
+    pulp_ctx.needs_plugin(PluginRequirement("my_plugin", specifier=">=1.1.0"))
+    # From here on we can assume `my_plugin>=1.1.0`.
 ```
 
 To declare version restrictions on *options*, the [`preprocess_entity`][pulp_glue.common.context.PulpEntityContext.preprocess_entity] method can be used to check if a given option is present in the request body and conditionally apply the requirements to the context.
