@@ -756,7 +756,10 @@ domain_pattern = r"(?P<pulp_domain>[-a-zA-Z0-9_]+)"
 
 
 def resource_lookup_option(*args: t.Any, **kwargs: t.Any) -> t.Callable[[FC], FC]:
-    lookup_key: str = kwargs.pop("lookup_key", "name")
+    """
+    A factory to create a lookup option that will pass the lookup to the closest matching Context.
+    """
+    lookup_key: t.Optional[str] = kwargs.pop("lookup_key", "name")
     context_class: t.Type[PulpEntityContext] = kwargs.pop("context_class")
 
     def _option_callback(
@@ -788,9 +791,15 @@ def resource_lookup_option(*args: t.Any, **kwargs: t.Any) -> t.Callable[[FC], FC
                         value=value, option_name=param.name
                     )
                 )
-        else:
+        elif lookup_key is not None:
             # The named identity of a resource was passed
             entity_ctx.entity = {lookup_key: value}
+        else:
+            raise click.ClickException(
+                _("'{value}' is not recognised by {option_name}.").format(
+                    value=value, option_name=param.name
+                )
+            )
 
         return entity_ctx
 
@@ -801,14 +810,25 @@ def resource_lookup_option(*args: t.Any, **kwargs: t.Any) -> t.Callable[[FC], FC
     kwargs["expose_value"] = False
 
     if "help" not in kwargs:
-        kwargs["help"] = _(
-            "A resource to look for identified by <{lookup_key}> or by <href>."
-        ).format(lookup_key=lookup_key)
+        kwargs["help"] = (
+            _("A resource to look for identified by <href>.")
+            if lookup_key is None
+            else _("A resource to look for identified by <{lookup_key}> or by <href>.").format(
+                lookup_key=lookup_key
+            )
+        )
 
     return click.option(*args, **kwargs)
 
 
 def resource_option(*args: t.Any, **kwargs: t.Any) -> t.Callable[[FC], FC]:
+    """
+    Factory for an option that passes a preloaded PulpEntityContext to the command.
+
+    The resulting option will accept the entity being described in multiple ways, including its
+    href.
+    """
+
     default_plugin: t.Optional[str] = kwargs.pop("default_plugin", None)
     default_type: t.Optional[str] = kwargs.pop("default_type", None)
     lookup_key: str = kwargs.pop("lookup_key", "name")
@@ -924,11 +944,12 @@ def resource_option(*args: t.Any, **kwargs: t.Any) -> t.Callable[[FC], FC]:
 
     if "help" not in kwargs:
         kwargs["help"] = _(
-            "Referenced resource, in the form {plugin_form}{type_form}<name> or by href. "
+            "Referenced resource, in the form {plugin_form}{type_form}<{lookup_key}> or by href. "
             "{plugin_default}{type_default}{multiple_note}"
         ).format(
             plugin_form=_("[<plugin>:]") if default_plugin else _("<plugin>:"),
             type_form=_("[<resource_type>:]") if default_type else _("<resource_type>:"),
+            lookup_key=lookup_key,
             plugin_default=(
                 _("'<plugin>' defaults to {plugin}. ").format(plugin=default_plugin)
                 if default_plugin
@@ -946,6 +967,9 @@ def resource_option(*args: t.Any, **kwargs: t.Any) -> t.Callable[[FC], FC]:
 
 
 def type_option(*args: t.Any, **kwargs: t.Any) -> t.Callable[[FC], FC]:
+    """
+    A factory for `--type` options to allow selecting the class of the `PulpEntityContext` to use.
+    """
     choices: t.Dict[str, t.Type[PulpEntityContext]] = kwargs.pop("choices")
     assert choices and isinstance(choices, dict)
     type_names = list(choices.keys())

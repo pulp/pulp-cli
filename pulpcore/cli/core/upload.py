@@ -9,6 +9,7 @@ from pulp_cli.generic import (
     list_command,
     pass_pulp_context,
     pulp_group,
+    resource_lookup_option,
     show_command,
 )
 
@@ -23,7 +24,12 @@ def upload(ctx: click.Context, pulp_ctx: PulpCLIContext, /) -> None:
     ctx.obj = PulpUploadContext(pulp_ctx)
 
 
-lookup_options = [href_option]
+upload_lookup_option = resource_lookup_option(
+    "--upload",
+    lookup_key=None,
+    context_class=PulpUploadContext,
+)
+lookup_options = [href_option, upload_lookup_option]
 
 upload.add_command(list_command())
 upload.add_command(show_command(decorators=lookup_options))
