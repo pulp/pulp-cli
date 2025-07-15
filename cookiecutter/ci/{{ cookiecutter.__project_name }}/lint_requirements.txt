@@ -1,17 +1,1 @@
-# Lint requirements
-black==25.1.0
-flake8==7.3.0
-flake8-pyproject==1.2.3
-isort==6.0.1
-mypy==1.17.0
-shellcheck-py==0.10.0.1
-
-# Type annotation stubs
-types-pygments
-types-PyYAML
-types-requests
-types-setuptools
-types-toml
-
-# Install the actual bits for mypy
--r test_requirements.txt
+../../../lint_requirements.txt

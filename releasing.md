@@ -1,6 +1,6 @@
 # Releasing (for internal use)
 
-## New method (experimental)
+## Using Workflows
 
 ### Create a new Y-Release Branch
 
