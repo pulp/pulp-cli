@@ -90,6 +90,13 @@ def to_snake(name: str) -> str:
     return name.replace("-", "_")
 
 
+def to_hour(name: str) -> int:
+    """
+    Turn a string into a pseudorandom integer between 0 and 24.
+    """
+    return sum((i * ord(c) for i, c in enumerate(name))) % 24
+
+
 class PulpFilterExtension(Extension):
     def __init__(self, environment: Environment):
         super().__init__(environment)
@@ -100,6 +107,7 @@ class PulpFilterExtension(Extension):
         environment.filters["jaml"] = to_jaml
         environment.filters["toml_value"] = to_toml_value
         environment.filters["shquote"] = shlex.quote
+        environment.filters["hour"] = to_hour
 
 
 try:
