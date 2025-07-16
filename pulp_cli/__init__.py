@@ -1,3 +1,4 @@
+import logging
 import os
 import sys
 import typing as t
@@ -208,9 +209,8 @@ def main(
     timeout: int,
     cid: str,
 ) -> None:
-    def _debug_callback(level: int, x: str) -> None:
-        if verbose >= level:
-            click.secho(x, err=True, bold=True)
+    if verbose:
+        logging.basicConfig(level=logging.DEBUG + 4 - verbose, format="%(message)s")
 
     api_kwargs = dict(
         base_url=base_url,
@@ -220,7 +220,6 @@ def main(
         verify_ssl=verify_ssl,
         refresh_cache=refresh_api,
         dry_run=dry_run,
-        debug_callback=_debug_callback,
         user_agent=f"Pulp-CLI/{__version__}",
         cid=cid,
     )
