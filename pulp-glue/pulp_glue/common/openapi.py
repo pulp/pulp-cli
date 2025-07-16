@@ -2,6 +2,7 @@
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 import json
+import logging
 import os
 import typing as t
 import warnings
@@ -29,6 +30,7 @@ from pulp_glue.common.schema import encode_json, encode_param, validate
 
 translation = get_translation(__package__)
 _ = translation.gettext
+_logger = logging.getLogger("pulp_glue.openapi")
 
 UploadType = t.Union[bytes, t.IO[bytes]]
 
@@ -176,13 +178,22 @@ class OpenAPI:
         safe_calls_only: t.Optional[bool] = None,
     ):
         if validate_certs is not None:
-            warnings.warn("validate_certs is deprecated; use verify_ssl instead.")
+            warnings.warn(
+                "validate_certs is deprecated; use verify_ssl instead.", DeprecationWarning
+            )
             verify_ssl = validate_certs
         if safe_calls_only is not None:
-            warnings.warn("safe_calls_only is deprecated; use dry_run instead.")
+            warnings.warn("safe_calls_only is deprecated; use dry_run instead.", DeprecationWarning)
             dry_run = safe_calls_only
+        if debug_callback is not None:
+            warnings.warn(
+                "debug_callback is deprecated; use logging with level DEBUG instead.",
+                DeprecationWarning,
+            )
 
-        self._debug_callback: t.Callable[[int, str], t.Any] = debug_callback or (lambda i, x: None)
+        self._debug_callback: t.Callable[[int, str], t.Any] = debug_callback or (
+            lambda lvl, msg: _logger.log(logging.DEBUG + 4 - lvl, msg)
+        )
         self._base_url: str = base_url
         self._doc_path: str = doc_path
         self._dry_run: bool = dry_run
@@ -635,9 +646,10 @@ class OpenAPI:
 
         if query_params:
             qs = urlencode(query_params)
-            self._debug_callback(1, f"{operation_id} : {method} {url}?{qs}")
+            log_msg = f"{operation_id} : {method} {url}?{qs}"
         else:
-            self._debug_callback(1, f"{operation_id} : {method} {url}")
+            log_msg = f"{operation_id} : {method} {url}"
+        self._debug_callback(1, log_msg)
         self._debug_callback(
             2, "\n".join([f"  {key}=={value}" for key, value in query_params.items()])
         )
