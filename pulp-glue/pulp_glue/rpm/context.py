@@ -307,17 +307,7 @@ class PulpRpmRemoteContext(PulpRemoteContext):
     ENTITIES = _("rpm remotes")
     HREF = "rpm_rpm_remote_href"
     ID_PREFIX = "remotes_rpm_rpm"
-    NULLABLES = {
-        "ca_cert",
-        "client_cert",
-        "client_key",
-        "username",
-        "password",
-        "proxy_url",
-        "proxy_username",
-        "proxy_password",
-        "sles_auth_token",
-    }
+    NULLABLES = PulpRemoteContext.NULLABLES | {"sles_auth_token"}
     NEEDS_PLUGINS = [PluginRequirement("rpm", specifier=">=3.9.0")]
     CAPABILITIES = {"roles": [PluginRequirement("rpm", specifier=">=3.19.0")]}
 
