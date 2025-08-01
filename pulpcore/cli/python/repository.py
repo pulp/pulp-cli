@@ -1,6 +1,7 @@
 import typing as t
 
 import click
+import schema as s
 from pulp_glue.common.context import (
     EntityFieldDefinition,
     PluginRequirement,
@@ -15,14 +16,17 @@ from pulp_glue.python.context import (
 )
 
 from pulp_cli.generic import (
+    GroupOption,
     PulpCLIContext,
     create_command,
     create_content_json_callback,
     destroy_command,
     href_option,
+    json_callback,
     label_command,
     label_select_option,
     list_command,
+    load_file_wrapper,
     name_option,
     pass_pulp_context,
     pass_repository_context,
@@ -56,14 +60,33 @@ remote_option = resource_option(
 )
 
 
-def _content_callback(
-    ctx: click.Context, param: click.Parameter, value: t.Optional[str]
-) -> t.Optional[str]:
+def _content_callback(ctx: click.Context, param: click.Parameter, value: t.Any) -> t.Any:
     if value:
         pulp_ctx = ctx.find_object(PulpCLIContext)
         assert pulp_ctx is not None
-        ctx.obj = PulpPythonContentContext(pulp_ctx, entity={"filename": value})
+        ctx.obj = PulpPythonContentContext(pulp_ctx, entity=value)
     return value
+
+
+CONTENT_LIST_SCHEMA = s.Schema([{"sha256": str, "filename": s.And(str, len)}])
+
+
+@load_file_wrapper
+def _content_list_callback(
+    ctx: click.Context, param: click.Parameter, value: t.Optional[str]
+) -> t.Any:
+    if value is None:
+        return None
+
+    result = json_callback(ctx, param, value)
+    try:
+        return CONTENT_LIST_SCHEMA.validate(result)
+    except s.SchemaError as e:
+        raise click.ClickException(
+            _("Validation of '{parameter}' failed: {error}").format(
+                parameter=param.name, error=str(e)
+            )
+        )
 
 
 @pulp_group()
@@ -97,20 +120,27 @@ update_options = [
     pulp_labels_option,
 ]
 create_options = update_options + [click.option("--name", required=True)]
-package_option = click.option(
-    "--filename",
-    callback=_content_callback,
-    expose_value=False,
-    help=_("Filename of the python package"),
+package_options = [
+    click.option("--sha256", cls=GroupOption, expose_value=False, group=["filename"]),
+    click.option(
+        "--filename",
+        callback=_content_callback,
+        expose_value=False,
+        cls=GroupOption,
+        group=["sha256"],
+        help=_("Filename of the python package."),
+    ),
+]
+content_json_callback = create_content_json_callback(
+    PulpPythonContentContext, schema=CONTENT_LIST_SCHEMA
 )
-content_json_callback = create_content_json_callback(PulpPythonContentContext)
 modify_options = [
     click.option(
         "--add-content",
         callback=content_json_callback,
         help=_(
             """JSON string with a list of objects to add to the repository.
-    Each object should have the key: "filename"
+    Each object must contain the following keys: "sha256", "filename".
     The argument prefixed with the '@' can be the path to a JSON file with a list of objects."""
         ),
     ),
@@ -119,7 +149,7 @@ modify_options = [
         callback=content_json_callback,
         help=_(
             """JSON string with a list of objects to remove from the repository.
-    Each object should have the key: "filename"
+    Each object must contain the following keys: "sha256", "filename".
     The argument prefixed with the '@' can be the path to a JSON file with a list of objects."""
         ),
     ),
@@ -136,8 +166,8 @@ repository.add_command(label_command(decorators=nested_lookup_options))
 repository.add_command(
     repository_content_command(
         contexts={"package": PulpPythonContentContext},
-        add_decorators=[package_option],
-        remove_decorators=[package_option],
+        add_decorators=package_options,
+        remove_decorators=package_options,
         modify_decorators=modify_options,
         base_default_plugin="python",
         base_default_type="python",

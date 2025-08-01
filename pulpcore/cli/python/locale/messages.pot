@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-19 11:46+0100\n"
+"POT-Creation-Date: 2025-08-01 16:28+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,25 +17,25 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: pulpcore/cli/python/content.py:47
+#: pulpcore/cli/python/content.py:49
 msgid ""
 "Repository to add the content to in the form "
 "'[[<plugin>:]<resource_type>:]<name>' or by href."
 msgstr ""
 
-#: pulpcore/cli/python/content.py:71 pulpcore/cli/python/content.py:96
+#: pulpcore/cli/python/content.py:73 pulpcore/cli/python/content.py:106
 msgid "Exact name of file"
 msgstr ""
 
-#: pulpcore/cli/python/content.py:75
+#: pulpcore/cli/python/content.py:77
 msgid "Digest of the artifact to use [deprecated]"
 msgstr ""
 
-#: pulpcore/cli/python/content.py:80
+#: pulpcore/cli/python/content.py:82
 msgid "Remote url to download and create python content from"
 msgstr ""
 
-#: pulpcore/cli/python/content.py:97
+#: pulpcore/cli/python/content.py:107
 msgid "Path to file"
 msgstr ""
 
@@ -72,33 +72,38 @@ msgstr ""
 msgid "Failed to load content from {requirements_file}"
 msgstr ""
 
-#: pulpcore/cli/python/repository.py:54
+#: pulpcore/cli/python/repository.py:58
 msgid ""
 "Remote used for synching in the form '[[<plugin>:]<resource_type>:]<name>' "
 "or by href."
 msgstr ""
 
-#: pulpcore/cli/python/repository.py:104
-msgid "Filename of the python package"
+#: pulpcore/cli/python/repository.py:86
+#, python-brace-format
+msgid "Validation of '{parameter}' failed: {error}"
 msgstr ""
 
-#: pulpcore/cli/python/repository.py:112
+#: pulpcore/cli/python/repository.py:131
+msgid "Filename of the python package."
+msgstr ""
+
+#: pulpcore/cli/python/repository.py:142
 msgid ""
 "JSON string with a list of objects to add to the repository.\n"
-"    Each object should have the key: \"filename\"\n"
+"    Each object must contain the following keys: \"sha256\", \"filename\".\n"
 "    The argument prefixed with the '@' can be the path to a JSON file with a "
 "list of objects."
 msgstr ""
 
-#: pulpcore/cli/python/repository.py:121
+#: pulpcore/cli/python/repository.py:151
 msgid ""
 "JSON string with a list of objects to remove from the repository.\n"
-"    Each object should have the key: \"filename\"\n"
+"    Each object must contain the following keys: \"sha256\", \"filename\".\n"
 "    The argument prefixed with the '@' can be the path to a JSON file with a "
 "list of objects."
 msgstr ""
 
-#: pulpcore/cli/python/repository.py:172
+#: pulpcore/cli/python/repository.py:202
 #, python-brace-format
 msgid ""
 "Repository '{name}' does not have a default remote. Please specify with '--"

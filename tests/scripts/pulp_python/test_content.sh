@@ -33,7 +33,7 @@ fi
 
 expect_succ pulp python repository create --name "cli_test_python_repository"
 HREF="$(echo "$OUTPUT" | jq -r '.pulp_href')"
-expect_succ pulp python repository content add --repository "cli_test_python_repository" --filename "shelf-reader-0.1.tar.gz"
-expect_succ pulp python repository content add --repository "$HREF" --filename "shelf-reader-0.1.tar.gz" --base-version 0
-expect_succ pulp python repository content remove --repository "cli_test_python_repository" --filename "shelf-reader-0.1.tar.gz"
-expect_succ pulp python repository content remove --repository "$HREF" --filename "shelf-reader-0.1.tar.gz" --base-version 1
+expect_succ pulp python repository content add --repository "cli_test_python_repository" --sha256 "$sha256" --filename "shelf-reader-0.1.tar.gz"
+expect_succ pulp python repository content add --repository "$HREF" --sha256 "$sha256" --filename "shelf-reader-0.1.tar.gz" --base-version 0
+expect_succ pulp python repository content remove --repository "cli_test_python_repository" --sha256 "$sha256" --filename "shelf-reader-0.1.tar.gz"
+expect_succ pulp python repository content remove --repository "$HREF" --sha256 "$sha256" --filename "shelf-reader-0.1.tar.gz" --base-version 1
