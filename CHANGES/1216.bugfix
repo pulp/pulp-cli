@@ -1,0 +1,1 @@
+Fixed a bug where Python repository content addition/removal failed due to duplicate filenames.
