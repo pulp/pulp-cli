@@ -10,6 +10,36 @@
 
 [//]: # (towncrier release notes start)
 
+## 0.35.0 (2025-08-05) {: #0.35.0 }
+
+
+
+#### Bugfixes {: #0.35.0-bugfix }
+
+- Fixed a bug where Python repository content addition/removal failed due to duplicate filenames.
+  [#1216](https://github.com/pulp/pulp-cli/issues/1216)
+
+
+### Pulp GLUE {: #0.35.0-pulp-glue }
+
+
+#### Features {: #0.35.0-pulp-glue-feature }
+
+- Replaced `debug_callback` with python logging facilities.
+
+
+#### Bugfixes {: #0.35.0-pulp-glue-bugfix }
+
+- Added remote to the nullable fields of repositories.
+
+
+#### Deprecations and Removals {: #0.35.0-pulp-glue-removal }
+
+- Rename the `PulpContext` `api_kwargs` parameters `validate_certs` to `verify_ssl` and `safe_calls_only` to `dry_run`.
+
+
+---
+
 ## 0.34.0 (2025-07-09) {: #0.34.0 }
 
 
