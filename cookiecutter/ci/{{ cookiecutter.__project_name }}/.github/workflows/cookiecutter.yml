@@ -13,11 +13,11 @@ jobs:
   update-ci:
     runs-on: "ubuntu-latest"
     steps:
-      - uses: "actions/checkout@v4"
+      - uses: "actions/checkout@v5"
         with:
           repository: "pulp/pulp-cli"
           path: "pulp-cli"
-      - uses: "actions/checkout@v4"
+      - uses: "actions/checkout@v5"
         with:
           {%- raw %}
           token: "${{ secrets.RELEASE_TOKEN }}"

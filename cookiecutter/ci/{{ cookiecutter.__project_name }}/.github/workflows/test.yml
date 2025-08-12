@@ -15,10 +15,10 @@ jobs:
   unittest:
     runs-on: "ubuntu-latest"
     steps:
-      - uses: "actions/checkout@v4"
+      - uses: "actions/checkout@v5"
       {%- include "cache_action" %}
       - name: "Download wheels"
-        uses: "actions/download-artifact@v4"
+        uses: "actions/download-artifact@v5"
         with:
           name: "pulp_cli_packages"
       - name: "Set up Python"
@@ -42,10 +42,10 @@ jobs:
       fail-fast: false
       matrix:{{ cookiecutter.test_matrix | jaml(level=4, embed_in="dict") }}
     steps:
-      - uses: "actions/checkout@v4"
+      - uses: "actions/checkout@v5"
       {%- include "cache_action" %}
       - name: "Download wheels"
-        uses: "actions/download-artifact@v4"
+        uses: "actions/download-artifact@v5"
         with:
           name: "pulp_cli_packages"
       - name: "Set up Python"
