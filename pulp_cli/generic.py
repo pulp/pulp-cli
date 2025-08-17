@@ -58,6 +58,10 @@ FC = t.TypeVar("FC", bound=t.Union[_AnyCallable, click.Command])
 
 HEADER_REGEX = r"^[-a-zA-Z0-9_]+:.+$"
 
+prn_regex = re.compile(
+    r"^prn:(?P<app>[a-z][a-z0-9-_]*)\.(?P<model>[a-z][a-z0-9_]*):(?P<pk>[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$",  # noqa: E501
+)
+
 
 class IncompatibleContext(click.UsageError):
     """Exception to signal that an option or subcommand was used with an incompatible context."""
@@ -560,7 +564,26 @@ def href_callback(
         if value is not None:
             entity_ctx = ctx.find_object(context_class)
             assert entity_ctx is not None
-            entity_ctx.pulp_href = value
+            if value.startswith("prn:"):
+                entity_ctx.pulp_ctx.needs_plugin(
+                    PluginRequirement(
+                        "core",
+                        specifier=">=3.63.0",
+                        feature=_("PRNs"),
+                    )
+                )
+                match = re.match(prn_regex, value)
+                if match:
+                    # Search-by-single-PRN
+                    entity_ctx.entity = {"prn__in": [value]}
+                else:
+                    raise click.ClickException(
+                        _("'{value}' is not a valid PRN.").format(
+                            value=value, option_name=param.name
+                        )
+                    )
+            else:
+                entity_ctx.pulp_href = value
         return value
 
     return _href_callback
@@ -794,6 +817,22 @@ def resource_lookup_option(*args: t.Any, **kwargs: t.Any) -> t.Callable[[FC], FC
                         value=value, option_name=param.name
                     )
                 )
+        elif value.startswith("prn:"):
+            entity_ctx.pulp_ctx.needs_plugin(
+                PluginRequirement(
+                    "core",
+                    feature=_("PRNs"),
+                    specifier=">=3.63.0",
+                )
+            )
+            match = re.match(prn_regex, value)
+            if match:
+                # Search-by-single-PRN
+                entity_ctx.entity = {"prn__in": [value]}
+            else:
+                raise click.ClickException(
+                    _("'{value}' is not a valid PRN.").format(value=value, option_name=param.name)
+                )
         elif lookup_key is not None:
             # The named identity of a resource was passed
             entity_ctx.entity = {lookup_key: value}
@@ -878,6 +917,24 @@ def resource_option(*args: t.Any, **kwargs: t.Any) -> t.Callable[[FC], FC]:
             plugin = match_groups.get("plugin", "")
             resource_type = match_groups.get("resource_type", "")
             pulp_href = value
+        elif value.startswith("prn:"):
+            pulp_ctx.needs_plugin(
+                PluginRequirement(
+                    "core",
+                    feature=_("PRNs"),
+                    specifier=">=3.63.0",
+                )
+            )
+            match = re.match(prn_regex, value)
+            if match:
+                # Search-by-single-PRN
+                plugin = ""
+                resource_type = ""
+                entity = {"prn__in": [value]}
+            else:
+                raise click.ClickException(
+                    _("'{value}' is not a valid PRN.").format(value=value, option_name=param.name)
+                )
         else:
             # A natural key identifier was passed
             split_value = value.split(":", maxsplit=2)
@@ -1041,9 +1098,10 @@ exclude_field_option = pulp_option(
     help=_("A field that is to be excluded from a result. Can be specified multiple times."),
 )
 
+
 href_option = pulp_option(
     "--href",
-    help=_("HREF of the {entity}"),
+    help=_("HREF of the {entity} (accepts PRNs if core>=3.63)."),
     callback=href_callback(),
     expose_value=False,
 )
