@@ -11,6 +11,15 @@
     pulp status
     ```
 
+=== "uv"
+
+    ```bash
+    uv tool install pulp-cli[pygments]
+    pulp config create -e
+    # insert your server configuration here
+    pulp status
+    ```
+
 === "pipx"
 
     ```bash
@@ -25,7 +34,28 @@
 The pulp-cli package can be installed from a variety of sources.
 After installing, see the next section on how to [configure](configuration.md) pulp-cli.
 
+## Using uv
+
+To install with `uv` run:
+```bash
+uv tool install pulp-cli
+```
+You can add optional dependencies in the usual way.
+
+```bash
+uv tool install pulp-cli[pygments,shell]
+```
+
+[Additional plugins](site:pulp-cli/#cli-plugins) need to be specified at install time like this:
+```bash
+uv tool install --with pulp-cli-deb pulp-cli
+```
+
 ## Using pipx
+
+!!!warning
+
+    When using additional plugins, this approach does not enforce known good version combinations of pulp-cli and the plugin. 
 
 To install with `pipx` run:
 ```bash
