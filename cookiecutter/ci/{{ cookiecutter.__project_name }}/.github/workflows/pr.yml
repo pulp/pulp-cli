@@ -24,9 +24,9 @@ jobs:
     needs:
       - "lint"
     # Keep the workflow tag the same as pulpdocs_ref.
-    uses: "pulp/pulp-docs/.github/workflows/docs-ci.yml@rewrite-as-mkdocs-plugin"
+    uses: "pulp/pulp-docs/.github/workflows/docs-ci.yml@main"
     with:
-      pulpdocs_ref: "rewrite-as-mkdocs-plugin"
+      pulpdocs_ref: "main"
   {%- endif %}
   codeql:
     needs:
