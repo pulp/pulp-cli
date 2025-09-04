@@ -10,6 +10,27 @@
 
 [//]: # (towncrier release notes start)
 
+## 0.36.0 (2025-09-04) {: #0.36.0 }
+
+
+
+#### Features {: #0.36.0-feature }
+
+- Taught resource-option and href-lookup to accept PRNs if post-core-3.63.
+
+  NOTE: this does *not* affect `pulp show --href` - there isn't enough information to
+  use PRNs in that context, until pulpcore allows "naked" PRN GETs.
+  [#1141](https://github.com/pulp/pulp-cli/issues/1141)
+
+
+### Pulp GLUE {: #0.36.0-pulp-glue }
+
+
+No significant changes.
+
+
+---
+
 ## 0.35.0 (2025-08-05) {: #0.35.0 }
 
 
