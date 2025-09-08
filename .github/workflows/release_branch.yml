@@ -41,7 +41,7 @@ jobs:
           GH_TOKEN: "${{ secrets.RELEASE_TOKEN }}"
         continue-on-error: true
       - name: "Add Backport Label for new Branch"
-        uses: "actions/github-script@v7"
+        uses: "actions/github-script@v8"
         with:
           script: |
             const { NEW_BRANCH } = process.env;
