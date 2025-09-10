@@ -57,6 +57,10 @@ test: | tests/cli.toml
 livetest: | tests/cli.toml
 	python3 -m pytest -v tests {%- if cookiecutter.glue %} pulp-glue{{ cookiecutter.__app_label_suffix }}/tests {%- endif %} -m live
 
+.PHONY: paralleltest
+paralleltest: | tests/cli.toml
+	python3 -m pytest -v tests {%- if cookiecutter.glue %} pulp-glue{{ cookiecutter.__app_label_suffix }}/tests {%- endif %} -m live -n 8
+
 .PHONY: unittest
 unittest:
 	python3 -m pytest -v tests {%- if cookiecutter.glue %} pulp-glue{{ cookiecutter.__app_label_suffix }}/tests {%- endif %}

@@ -7,22 +7,21 @@ set -eu
 pulp debug has-plugin --name "python" || exit 23
 
 cleanup() {
-  pulp python repository destroy --name "cli_test_python_repository" || true
-  pulp python remote destroy --name "cli_test_python_remote" || true
+  pulp python repository destroy --name "cli_test_python_distribution_repository" || true
+  pulp python remote destroy --name "cli_test_python_distribution_remote" || true
   pulp python distribution destroy --name "cli_test_python_distro" || true
-  pulp orphan cleanup || true
 }
 trap cleanup EXIT
 
-expect_succ pulp python remote create --name "cli_test_python_remote" --url "$PYTHON_REMOTE_URL" --includes '["shelf-reader"]'
-expect_succ pulp python repository create --name "cli_test_python_repository" --remote "cli_test_python_remote"
-expect_succ pulp python repository sync --repository "cli_test_python_repository"
-expect_succ pulp python publication create --repository "cli_test_python_repository"
+expect_succ pulp python remote create --name "cli_test_python_distribution_remote" --url "$PYTHON_REMOTE_URL" --includes '["shelf-reader"]'
+expect_succ pulp python repository create --name "cli_test_python_distribution_repository" --remote "cli_test_python_distribution_remote"
+expect_succ pulp python repository sync --repository "cli_test_python_distribution_repository"
+expect_succ pulp python publication create --repository "cli_test_python_distribution_repository"
 PUBLICATION_HREF=$(echo "$OUTPUT" | jq -r .pulp_href)
 
 expect_succ pulp python distribution create \
   --name "cli_test_python_distro" \
-  --base-path "wrong_path" \
+  --base-path "python_wrong_path" \
   --publication "$PUBLICATION_HREF"
 HREF="$(echo "$OUTPUT" | jq -r '.pulp_href')"
 expect_succ pulp python distribution update \
@@ -35,11 +34,11 @@ expect_succ pulp python distribution update \
 
 expect_succ pulp python distribution update \
 --name "cli_test_python_distro" \
---repository "cli_test_python_repository" \
+--repository "cli_test_python_distribution_repository" \
 --block-uploads
 
 expect_succ pulp python distribution update \
 --name "cli_test_python_distro" \
---remote "cli_test_python_remote"
+--remote "cli_test_python_distribution_remote"
 
 expect_succ pulp python distribution destroy --distribution "cli_test_python_distro"

@@ -4,10 +4,6 @@ set -eu
 # shellcheck source=tests/scripts/config.source
 . "$(dirname "$(dirname "$(realpath "$0")")")"/config.source
 
-cleanup() {
-  pulp orphan cleanup
-}
-trap cleanup EXIT
 
 dd if=/dev/urandom of=test.txt bs=2MiB count=1
 dd if=/dev/urandom of=test2.txt bs=10KiB count=1

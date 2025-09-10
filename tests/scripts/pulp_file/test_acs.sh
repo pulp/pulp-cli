@@ -11,9 +11,9 @@ acs="cli_test_acs"
 
 cleanup() {
   pulp file acs destroy --name $acs || true
-  pulp file repository destroy --name "cli-repo-manifest-only" || true
+  pulp file repository destroy --name "cli-file-repo-manifest-only" || true
   pulp file remote destroy --name $acs_remote || true
-  pulp file remote destroy --name "cli-remote-manifest-only" || true
+  pulp file remote destroy --name "cli-file-remote-manifest-only" || true
 }
 trap cleanup EXIT
 
@@ -49,10 +49,10 @@ expect_succ pulp task-group show --uuid "$group_task_uuid"
 test "$(echo "$OUTPUT" | jq ".tasks | length")" -eq 2
 
 # create a remote with manifest only and sync it
-expect_succ pulp file remote create --name "cli-remote-manifest-only" --url "$PULP_FIXTURES_URL/file-manifest/PULP_MANIFEST"
+expect_succ pulp file remote create --name "cli-file-remote-manifest-only" --url "$PULP_FIXTURES_URL/file-manifest/PULP_MANIFEST"
 remote_href="$(echo "$OUTPUT" | jq -r '.pulp_href')"
-expect_succ pulp file repository create --name "cli-repo-manifest-only" --remote "$remote_href"
-expect_succ pulp file repository sync --repository "cli-repo-manifest-only"
+expect_succ pulp file repository create --name "cli-file-repo-manifest-only" --remote "$remote_href"
+expect_succ pulp file repository sync --repository "cli-file-repo-manifest-only"
 
 # test refresh with bad paths
 expect_succ pulp file acs path add --name $acs --path "bad-path/PULP_MANIFEST"

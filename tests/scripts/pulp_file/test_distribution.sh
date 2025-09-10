@@ -7,24 +7,24 @@ set -eu
 pulp debug has-plugin --name "file" || exit 23
 
 cleanup() {
-  pulp file repository destroy --name "cli_test_file_repository" || true
-  pulp file remote destroy --name "cli_test_file_remote" || true
+  pulp file repository destroy --name "cli_test_file_distribution_repository" || true
+  pulp file remote destroy --name "cli_test_file_distribution_remote" || true
   pulp file distribution destroy --name "cli_test_file_distro" || true
   pulp content-guard rbac destroy --name "cli_test_file_content_guard" || true
 }
 trap cleanup EXIT
 
-expect_succ pulp file remote create --name "cli_test_file_remote" --url "$FILE_REMOTE_URL"
-expect_succ pulp file repository create --name "cli_test_file_repository" --remote "cli_test_file_remote"
-expect_succ pulp file repository sync --repository "cli_test_file_repository"
-expect_succ pulp file publication create --repository "cli_test_file_repository"
+expect_succ pulp file remote create --name "cli_test_file_distribution_remote" --url "$FILE_REMOTE_URL"
+expect_succ pulp file repository create --name "cli_test_file_distribution_repository" --remote "cli_test_file_distribution_remote"
+expect_succ pulp file repository sync --repository "cli_test_file_distribution_repository"
+expect_succ pulp file publication create --repository "cli_test_file_distribution_repository"
 PUBLICATION_HREF=$(echo "$OUTPUT" | jq -r .pulp_href)
 expect_succ pulp content-guard rbac create --name "cli_test_file_content_guard"
 CONTENT_GUARD_HREF=$(echo "$OUTPUT" | jq -r .pulp_href)
 
 expect_succ pulp file distribution create \
   --name "cli_test_file_distro" \
-  --base-path "wrong_path" \
+  --base-path "file_wrong_path" \
   --publication "$PUBLICATION_HREF" \
   --content-guard "core:rbac:cli_test_file_content_guard"
 expect_succ pulp file distribution update \
@@ -42,7 +42,7 @@ if pulp debug has-plugin --name "file" --specifier ">=1.7.0"
 then
   expect_succ pulp file distribution update \
     --distribution "cli_test_file_distro" \
-    --repository "cli_test_file_repository"
+    --repository "cli_test_file_distribution_repository"
 fi
 
 expect_succ pulp file distribution list --base-path "cli_test_file_distro"
