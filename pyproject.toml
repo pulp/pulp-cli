@@ -75,6 +75,7 @@ translations = true
 main_package = "common"
 binary_dependencies = ""
 unittests = true
+paralleltests = true
 
 [tool.bumpversion]
 # This section is managed by the cookiecutter templates.

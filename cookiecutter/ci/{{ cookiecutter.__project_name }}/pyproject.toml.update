@@ -23,6 +23,7 @@ translations = {{ cookiecutter.translations | toml_value }}
 main_package = {{ cookiecutter.main_package | toml_value }}
 binary_dependencies = {{ cookiecutter.binary_dependencies | toml_value }}
 unittests = {{ cookiecutter.unittests | toml_value }}
+paralleltests = {{ cookiecutter.paralleltests | toml_value }}
 
 [tool.bumpversion]
 # This section is managed by the cookiecutter templates.

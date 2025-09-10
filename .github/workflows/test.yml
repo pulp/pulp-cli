@@ -115,5 +115,5 @@ jobs:
           PULP_ENABLED_PLUGINS: "${{ matrix.pulp_enabled_plugins }}"
           OAS_VERSION: "${{ matrix.oas_version }}"
         run: |
-          .ci/run_container.sh make livetest
+          .ci/run_container.sh make paralleltest
 ...

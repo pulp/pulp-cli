@@ -7,16 +7,15 @@ set -eu
 pulp debug has-plugin --name "container" || exit 23
 
 cleanup() {
-  pulp container repository destroy --name "cli_test_container_repository" || true
-  pulp container remote destroy --name "cli_test_container_remote" || true
-  pulp orphan cleanup || true
+  pulp container repository destroy --name "cli_test_container_content_repository" || true
+  pulp container remote destroy --name "cli_test_container_content_remote" || true
 }
 trap cleanup EXIT
 
 # Prepare
-pulp container remote create --name "cli_test_container_remote" --url "$CONTAINER_REMOTE_URL" --upstream-name "$CONTAINER_IMAGE"
-pulp container repository create --name "cli_test_container_repository"
-pulp container repository sync --name "cli_test_container_repository" --remote "cli_test_container_remote"
+pulp container remote create --name "cli_test_container_content_remote" --url "$CONTAINER_REMOTE_URL" --upstream-name "$CONTAINER_IMAGE"
+pulp container repository create --name "cli_test_container_content_repository"
+pulp container repository sync --name "cli_test_container_content_repository" --remote "cli_test_container_content_remote"
 
 # Check each content list
 expect_succ pulp container content -t blob list
@@ -48,15 +47,15 @@ expect_succ pulp container content -t tag show --name "$tag_name" --digest "$tag
 test "$(echo "$OUTPUT" | jq -r .pulp_href)" = "$tag_href"
 
 # Test repository content commands
-expect_succ pulp container repository content list --repository "cli_test_container_repository" --all-types
-expect_succ pulp container repository content --type "tag" list --repository "cli_test_container_repository"
-expect_succ pulp container repository content --type "manifest" list --repository "cli_test_container_repository"
-expect_succ pulp container repository content --type "blob" list --repository "cli_test_container_repository"
+expect_succ pulp container repository content list --repository "cli_test_container_content_repository" --all-types
+expect_succ pulp container repository content --type "tag" list --repository "cli_test_container_content_repository"
+expect_succ pulp container repository content --type "manifest" list --repository "cli_test_container_content_repository"
+expect_succ pulp container repository content --type "blob" list --repository "cli_test_container_content_repository"
 
-expect_succ pulp container repository content --type "blob" remove --repository "cli_test_container_repository" --digest "$blob_digest"
-expect_succ pulp container repository content --type "manifest" remove --repository "cli_test_container_repository" --digest "$manifest_digest"
-expect_succ pulp container repository content --type "tag" remove --repository "cli_test_container_repository" --name "$tag_name" --digest "$tag_digest"
+expect_succ pulp container repository content --type "blob" remove --repository "cli_test_container_content_repository" --digest "$blob_digest"
+expect_succ pulp container repository content --type "manifest" remove --repository "cli_test_container_content_repository" --digest "$manifest_digest"
+expect_succ pulp container repository content --type "tag" remove --repository "cli_test_container_content_repository" --name "$tag_name" --digest "$tag_digest"
 
-expect_succ pulp container repository content add --repository "cli_test_container_repository" --href "$blob_href"
-expect_succ pulp container repository content add --repository "cli_test_container_repository" --href "$manifest_href"
-expect_succ pulp container repository content add --repository "cli_test_container_repository" --href "$tag_href"
+expect_succ pulp container repository content add --repository "cli_test_container_content_repository" --href "$blob_href"
+expect_succ pulp container repository content add --repository "cli_test_container_content_repository" --href "$manifest_href"
+expect_succ pulp container repository content add --repository "cli_test_container_content_repository" --href "$tag_href"

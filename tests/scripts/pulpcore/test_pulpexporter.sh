@@ -8,7 +8,7 @@ pulp debug has-plugin --name "file" || exit 23
 
 eval "$(pulp status | jq -r '.domain_enabled // false | not')" || exit 23
 
-RMOTE="cli_test_file_remote"
+RMOTE="cli_test_core_export_remote"
 REPO1="cli_test_pulpexporter_repository_1"
 REPO2="cli_test_pulpexporter_repository_2"
 NAME1="cli_test_exporter_1"

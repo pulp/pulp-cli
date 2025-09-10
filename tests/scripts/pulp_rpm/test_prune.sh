@@ -31,5 +31,6 @@ expect_succ pulp rpm prune-packages --repository "${repo_href}" --keep-days 0 --
 expect_succ pulp rpm prune-packages --repository "${repo_href}" --repository "${repo_href_2}" --dry-run
 expect_succ pulp rpm prune-packages --repository "rpm:rpm:cli_test_rpm_prune" --repository "rpm:rpm:cli_test_rpm_prune_2" --dry-run
 expect_succ pulp rpm prune-packages --repository "rpm:rpm:cli_test_rpm_prune" --repository "${repo_href}" --repository "${repo_href_2}" --dry-run
-expect_succ pulp rpm prune-packages --all-repositories --dry-run
+# This task can fail in parallel tests, so run in background. We only care that the task is created
+expect_succ pulp -b rpm prune-packages --all-repositories --dry-run
 expect_succ pulp rpm prune-packages --repository "rpm:rpm:cli_test_rpm_prune" --keep-days 0
