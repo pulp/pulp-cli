@@ -469,7 +469,10 @@ class PulpContext:
             )
             if not non_blocking:
                 result = self.wait_for_task(result)
-        if isinstance(result, dict) and ["task_group"] == list(result.keys()):
+                if self.has_plugin(PluginRequirement("core", specifier=">=3.86")):
+                    if result["result"] is not None:
+                        result = result["result"]
+        elif isinstance(result, dict) and ["task_group"] == list(result.keys()):
             task_group_href = result["task_group"]
             result = self.api.call(
                 "task_groups_read", parameters={"task_group_href": task_group_href}
