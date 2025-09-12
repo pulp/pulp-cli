@@ -7,21 +7,21 @@ set -eu
 pulp debug has-plugin --name "ansible" || exit 23
 
 cleanup() {
-  pulp ansible repository destroy --name "cli_test_ansible_repository" || true
+  pulp ansible repository destroy --name "cli_test_ansible_distribution_repository" || true
   pulp ansible distribution destroy --name "cli_test_ansible_distro" || true
   pulp ansible distribution destroy --name "cli_test_ansible_ver_distro" || true
 }
 trap cleanup EXIT
 
-expect_succ pulp ansible repository create --name "cli_test_ansible_repository"
+expect_succ pulp ansible repository create --name "cli_test_ansible_distribution_repository"
 
 expect_succ pulp ansible distribution create --name "cli_test_ansible_distro" \
   --base-path "cli_test_ansible_distro" \
-  --repository "cli_test_ansible_repository"
+  --repository "cli_test_ansible_distribution_repository"
 
 expect_succ pulp ansible distribution create --name "cli_test_ansible_ver_distro" \
   --base-path "cli_test_ansible_ver_distro" \
-  --repository "cli_test_ansible_repository" \
+  --repository "cli_test_ansible_distribution_repository" \
   --version "0"
 
 expect_succ pulp ansible distribution list

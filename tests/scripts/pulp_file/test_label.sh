@@ -7,11 +7,11 @@ set -eu
 pulp debug has-plugin --name "file" --specifier ">=1.6.0" || exit 23
 
 cleanup() {
-  pulp file repository destroy --name "cli_test_file_repo" || true
+  pulp file repository destroy --name "cli_test_file_label_repo" || true
 }
 trap cleanup EXIT
 
-name="cli_test_file_repo"
+name="cli_test_file_label_repo"
 expect_succ pulp file repository create --name "$name" --labels '{"atani": "hurin"}'
 expect_succ pulp file repository label set --repository "$name" --key "ainur" --value "ulmo"
 

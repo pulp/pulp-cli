@@ -153,6 +153,10 @@ def cancel(
         states.append("running")
     if states:
         tasks = task_ctx.list(limit=1 << 64, offset=0, parameters={"state__in": states})
+        if pulp_ctx.api._dry_run:
+            raise click.ClickException(
+                _("Trying to cancel {} tasks in safe-mode, aborting").format(len(tasks))
+            )
         for task in tasks:
             task_ctx.cancel(task["pulp_href"], background=True)
         for task in tasks:

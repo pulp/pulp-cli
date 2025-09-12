@@ -7,14 +7,12 @@ set -eu
 pulp debug has-plugin --name "file" || exit 23
 
 cleanup() {
-  pulp file repository destroy --name "cli_test_file_repository" || true
-  pulp file remote destroy --name "cli_test_file_remote" || true
-  pulp file remote destroy --name "cli_test_file_large_remote" || true
-  pulp orphan cleanup --protection-time 0 || true
+  pulp file repository destroy --name "cli_test_core_task_repository" || true
+  pulp file remote destroy --name "cli_test_core_task_remote" || true
+  pulp file remote destroy --name "cli_test_core_task_large_remote" || true
 }
 trap cleanup EXIT
 
-pulp orphan cleanup --protection-time 0 || true
 
 expected_repo_task_count=1
 sync_task="pulp_file.app.tasks.synchronizing.synchronize"
@@ -24,16 +22,16 @@ expect_succ pulp worker list --limit 1
 worker="$(echo "$OUTPUT" | jq -r '.[0].pulp_href')"
 worker_name="$(echo "$OUTPUT" | jq -r '.[0].name')"
 
-expect_succ pulp file remote create --name "cli_test_file_remote" --url "$FILE_REMOTE_URL"
+expect_succ pulp file remote create --name "cli_test_core_task_remote" --url "$FILE_REMOTE_URL"
 remote_href="$(echo "$OUTPUT" | jq -r '.pulp_href')"
-expect_succ pulp file remote create --name "cli_test_file_large_remote" --url "$FILE_LARGE_REMOTE_URL"
-expect_succ pulp file repository create --name "cli_test_file_repository" --remote "cli_test_file_remote"
+expect_succ pulp file remote create --name "cli_test_core_task_large_remote" --url "$FILE_LARGE_REMOTE_URL"
+expect_succ pulp file repository create --name "cli_test_core_task_repository" --remote "cli_test_core_task_remote"
 repository_href="$(echo "$OUTPUT" | jq -r '.pulp_href')"
 
 # Test canceling a task introduced in 3.12, but not reliable in 3.18
 if pulp debug has-plugin --name "core" --specifier ">=3.21.0"
 then
-  expect_succ pulp --background file repository sync --name "cli_test_file_repository" --remote "cli_test_file_large_remote"
+  expect_succ pulp --background file repository sync --name "cli_test_core_task_repository" --remote "cli_test_core_task_large_remote"
   task="$(echo "$ERROUTPUT" | grep -E -o "${PULP_API_ROOT}([-_a-zA-Z0-9]+/)?api/v3/tasks/[-[:xdigit:]]*/")"
   if expect_succ pulp task cancel --href "$task"
   then
@@ -50,10 +48,10 @@ then
   expected_repo_task_count=$((expected_repo_task_count + 1))
 fi
 
-expect_succ pulp --dry-run task cancel --all
+expect_fail pulp --dry-run task cancel --all
 
 # Test waiting for a task
-expect_succ pulp --background file repository sync --name "cli_test_file_repository"
+expect_succ pulp --background file repository sync --name "cli_test_core_task_repository"
 task=$(echo "$ERROUTPUT" | grep -E -o "${PULP_API_ROOT}([-_a-zA-Z0-9]+/)?api/v3/tasks/[-[:xdigit:]]*/")
 task_uuid="${task%/}"
 task_uuid="${task_uuid##*/}"
