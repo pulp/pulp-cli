@@ -26,12 +26,15 @@ REMOVE_PATHS = [
     "pyproject.toml.update",
     ".bumpversion.cfg",
     ".flake8",
-    {% if not cookiecutter.glue -%}
+    {%- if not cookiecutter.glue %}
     "pulp-glue{{ cookiecutter.__app_label_suffix }}",
     "CHANGES/pulp-glue{{ cookiecutter.__app_label_suffix }}",
     {%- endif %}
-    {% if not cookiecutter.app_label or not cookiecutter.glue -%}
+    {%- if not cookiecutter.app_label or not cookiecutter.glue %}
     ".ci/scripts/check_cli_dependencies.py",
+    {%- endif %}
+    {%- if cookiecutter.app_label %}
+    ".github/dependabot.yml",
     {%- endif %}
 ]
 

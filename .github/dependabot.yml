@@ -15,11 +15,4 @@ updates:
   commit-message:
     prefix: "[PIP] "
   open-pull-requests-limit: 10
-- package-ecosystem: "github-actions"
-  directory: "/"
-  schedule:
-    interval: "weekly"
-  commit-message:
-    prefix: "[GHA] "
-  open-pull-requests-limit: 10
 ...
