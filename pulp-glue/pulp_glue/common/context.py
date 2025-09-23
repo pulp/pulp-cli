@@ -1631,45 +1631,31 @@ class PulpContentContext(PulpEntityContext):
         """
         self.needs_capability("upload")
         size = os.path.getsize(file.name)
+        body: t.Dict[str, t.Any] = {**kwargs}
 
-        # If no repository is provided, always use synchronous upload endpoint
-        if repository is None:
-            body: t.Dict[str, t.Any] = {**kwargs}
-            if not self.pulp_ctx.fake_mode:
-                if chunk_size > size:
-                    # Small file: direct upload
-                    body["file"] = file
+        if not self.pulp_ctx.fake_mode:
+            if chunk_size > size:
+                # Small file: direct upload
+                body["file"] = file
+            else:
+                # Large file: chunked upload
+                if self.pulp_ctx.has_plugin(PluginRequirement("core", specifier=">=3.20.0")):
+                    from pulp_glue.core.context import PulpUploadContext
+
+                    upload_href = PulpUploadContext(self.pulp_ctx).upload_file(file, chunk_size)
+                    body["upload"] = upload_href
                 else:
-                    # Large file: chunked upload, but still use sync endpoint
-                    if self.pulp_ctx.has_plugin(PluginRequirement("core", specifier=">=3.20.0")):
-                        from pulp_glue.core.context import PulpUploadContext
+                    from pulp_glue.core.context import PulpArtifactContext
 
-                        upload_href = PulpUploadContext(self.pulp_ctx).upload_file(file, chunk_size)
-                        body["upload"] = upload_href
-                    else:
-                        from pulp_glue.core.context import PulpArtifactContext
+                    artifact_href = PulpArtifactContext(self.pulp_ctx).upload(file, chunk_size)
+                    body["artifact"] = artifact_href
 
-                        artifact_href = PulpArtifactContext(self.pulp_ctx).upload(file, chunk_size)
-                        body["artifact"] = artifact_href
-            # Use the synchronous upload endpoint for both small and large files
+        # If no repository is provided, use synchronous upload endpoint
+        if repository is None:
             return self.call("upload", body=body)
 
         # Repository is specified: use create endpoint (async path)
-        body: t.Dict[str, t.Any] = {**kwargs}
-        if not self.pulp_ctx.fake_mode:  # Skip the uploading part in fake_mode
-            if chunk_size > size:
-                body["file"] = file
-            elif self.pulp_ctx.has_plugin(PluginRequirement("core", specifier=">=3.20.0")):
-                from pulp_glue.core.context import PulpUploadContext
-
-                upload_href = PulpUploadContext(self.pulp_ctx).upload_file(file, chunk_size)
-                body["upload"] = upload_href
-            else:
-                from pulp_glue.core.context import PulpArtifactContext
-
-                artifact_href = PulpArtifactContext(self.pulp_ctx).upload(file, chunk_size)
-                body["artifact"] = artifact_href
-            body["repository"] = repository
+        body["repository"] = repository
         return self.create(body=body)
 
 
