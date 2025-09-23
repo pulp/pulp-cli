@@ -1631,7 +1631,7 @@ class PulpContentContext(PulpEntityContext):
         """
         self.needs_capability("upload")
         size = os.path.getsize(file.name)
-        
+
         # If no repository is provided, always use synchronous upload endpoint
         if repository is None:
             body: t.Dict[str, t.Any] = {**kwargs}
@@ -1653,7 +1653,7 @@ class PulpContentContext(PulpEntityContext):
                         body["artifact"] = artifact_href
             # Use the synchronous upload endpoint for both small and large files
             return self.call("upload", body=body)
-        
+
         # Repository is specified: use create endpoint (async path)
         body: t.Dict[str, t.Any] = {**kwargs}
         if not self.pulp_ctx.fake_mode:  # Skip the uploading part in fake_mode

@@ -393,7 +393,9 @@ def upload(
         final_dest_repo_ctx = kwargs["repository"]
         if directory and kwargs["use_temp_repository"] and not final_dest_repo_ctx:
             raise click.ClickException(
-                _("You must specify a --repository to use --use-temp-repository with --directory uploads.")
+                _(
+                    "You must specify a --repository to use --use-temp-repository with --directory uploads."
+                )
             )
 
         # Sanity: ignore publish|use_temp unless directory has been specified
@@ -427,7 +429,9 @@ def upload(
                     # Remove the tmp-upload repo
                     dest_repo_ctx.delete()
 
-        final_version_number = _latest_version_number(final_dest_repo_ctx) if final_dest_repo_ctx else None
+        final_version_number = (
+            _latest_version_number(final_dest_repo_ctx) if final_dest_repo_ctx else None
+        )
         if final_version_number:
             click.echo(
                 _(
@@ -497,7 +501,7 @@ def _upload_rpms(
     rpm_names = glob.glob(rpms_path)
     if not rpm_names:
         raise click.ClickException(_("Directory {} has no .rpm files in it.").format(directory))
-    
+
     # Build message based on whether we have a repository or not
     if dest_repo_ctx:
         click.echo(
@@ -539,7 +543,9 @@ def _upload_rpms(
 
 
 def _determine_upload_repository(
-    final_dest_repo_ctx: t.Optional[PulpRpmRepositoryContext], pulp_ctx: PulpCLIContext, use_tmp: bool
+    final_dest_repo_ctx: t.Optional[PulpRpmRepositoryContext],
+    pulp_ctx: PulpCLIContext,
+    use_tmp: bool,
 ) -> t.Optional[PulpRpmRepositoryContext]:
     if use_tmp and final_dest_repo_ctx:
         dest_repo_ctx = PulpRpmRepositoryContext(pulp_ctx)
