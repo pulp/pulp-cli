@@ -394,7 +394,8 @@ def upload(
         if directory and kwargs["use_temp_repository"] and not final_dest_repo_ctx:
             raise click.ClickException(
                 _(
-                    "You must specify a --repository to use --use-temp-repository with --directory uploads."
+                    "You must specify a --repository to use --use-temp-repository "
+                    "with --directory uploads."
                 )
             )
 
