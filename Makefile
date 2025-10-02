@@ -41,6 +41,9 @@ test: | tests/cli.toml
 livetest: | tests/cli.toml
 	python3 -m pytest -v tests pulp-glue/tests -m live
 
+paralleltest: | tests/cli.toml
+	python3 -m pytest -v tests pulp-glue/tests -m live -n 8
+
 unittest:
 	python3 -m pytest -v tests pulp-glue/tests cookiecutter/pulp_filter_extension.py -m "not live"
 

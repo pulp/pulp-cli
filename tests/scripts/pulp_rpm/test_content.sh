@@ -14,9 +14,9 @@ RPM_FILENAME="lemon-0-1.noarch.rpm"
 RPM2_FILENAME="icecubes-2-3.noarch.rpm"
 RPM_NAME="lemon"
 RPM2_NAME="icecubes"
-REPO1_NAME="cli_test_rpm_content"
-REPO2_NAME="cli_test_modular_content"
-UPLOAD_REPO_NAME="cli_test_rpm_content_upload"
+REPO1_NAME="cli_test_rpm_content_repo1"
+REPO2_NAME="cli_test_rpm_modular_content_repo2"
+UPLOAD_REPO_NAME="cli_test_rpm_content_upload_repo"
 PACKAGE_HREF=
 ADVISORY_HREF=
 cleanup() {
@@ -26,8 +26,6 @@ cleanup() {
   pulp rpm repository destroy --name "${UPLOAD_REPO_NAME}" || true
   pulp rpm remote destroy --name "${REPO1_NAME}" || true
   pulp rpm remote destroy --name "${REPO2_NAME}" || true
-  # clean up everything else "asap"
-  pulp orphan cleanup --protection-time 0 || true
 }
 trap cleanup EXIT
 cleanup
@@ -41,8 +39,8 @@ expect_succ pulp rpm content show --href "${PACKAGE_HREF}"
 # Test rpm-package directory-upload
 mkdir "$(dirname "$(realpath "$0")")"/test_rpm_upload
 pushd "$(dirname "$(realpath "$0")")"/test_rpm_upload
-wget --no-check-certificate "${RPM_REMOTE_URL}/bear-4.1-1.noarch.rpm"
-wget --no-check-certificate "${RPM_REMOTE_URL}/camel-0.1-1.noarch.rpm"
+wget --no-check-certificate "${RPM_WEAK_DEPS_URL}/Cobbler-1-0.noarch.rpm"
+wget --no-check-certificate "${RPM_WEAK_DEPS_URL}/PanAmerican-1-0.noarch.rpm"
 popd
 expect_succ pulp rpm repository create --name "${UPLOAD_REPO_NAME}" --no-autopublish
 expect_succ pulp rpm content upload --repository "rpm:rpm:${UPLOAD_REPO_NAME}" \
