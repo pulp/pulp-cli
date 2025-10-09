@@ -49,6 +49,20 @@ except ImportError:
 else:
     SECRET_STORAGE = True
 
+try:
+    # Sentinel is introduced in click 8.3.
+    # We need to use it to identify unset values.
+    _UNSET = click._utils.Sentinel.UNSET  # type: ignore[attr-defined]
+
+    def _unset(value: t.Any) -> bool:
+        return value is _UNSET or value is None or value == () or value == []
+
+except AttributeError:
+
+    def _unset(value: t.Any) -> bool:
+        return value is None or value == () or value == []
+
+
 translation = get_translation(__package__)
 _ = translation.gettext
 
@@ -474,7 +488,7 @@ class PulpOption(click.Option):
         super().__init__(*args, **kwargs)
 
     def process_value(self, ctx: click.Context, value: t.Any) -> t.Any:
-        if self.needs_plugins and value is not None and value != ():
+        if self.needs_plugins and not _unset(value):
             pulp_ctx = ctx.find_object(PulpCLIContext)
             assert pulp_ctx is not None
             for plugin_requirement in self.needs_plugins:
