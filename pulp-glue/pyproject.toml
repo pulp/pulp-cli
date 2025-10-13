@@ -1,14 +1,8 @@
 [build-system]
-requires = ["setuptools<81"]
 build-backend = "setuptools.build_meta"
+requires = ["setuptools<81"]
 
 [project]
-name = "pulp-glue"
-version = "0.37.0.dev"
-description = "Version agnostic glue library to talk to pulpcore's REST API."
-readme = "README.md"
-requires-python = ">=3.9,<3.14"
-license = {text = "GPLv2+"}
 authors = [
   {name = "Pulp Team", email = "pulp-list@redhat.com"},
 ]
@@ -25,20 +19,26 @@ classifiers = [
 dependencies = [
   "importlib_resources>=5.4.0,<6.2;python_version<'3.9'",
   "multidict>=6.0.5,<6.8",
-  "packaging>=20.0,<=25.0",  # CalVer
+  "packaging>=20.0,<=25.0", # CalVer
   "requests>=2.24.0,<2.33",
   "tomli>=2.0.0,<2.1;python_version<'3.11'",
 ]
+description = "Version agnostic glue library to talk to pulpcore's REST API."
+license = {text = "GPLv2+"}
+name = "pulp-glue"
+readme = "README.md"
+requires-python = ">=3.9,<3.15"
+version = "0.37.0.dev"
 
 [project.urls]
+changelog = "https://pulpproject.org/pulp-cli/changes/"
 documentation = "https://pulpproject.org/pulp-glue/docs/dev/"
 repository = "https://github.com/pulp/pulp-cli"
-changelog = "https://pulpproject.org/pulp-cli/changes/"
 
 [tool.setuptools.packages.find]
-where = ["."]
 include = ["pulp_glue.*"]
 namespaces = true
+where = ["."]
 
 [tool.setuptools.package-data]
 "*" = ["py.typed", "locale/*/LC_MESSAGES/*.mo"]
@@ -47,18 +47,18 @@ namespaces = true
 line-length = 100
 
 [tool.isort]
-profile = "black"
 line_length = 100
+profile = "black"
 
 [tool.mypy]
-strict = true
-show_error_codes = true
+explicit_package_bases = true
 files = "pulp_glue/**/*.py, tests/**/*.py"
 namespace_packages = true
-explicit_package_bases = true
+show_error_codes = true
+strict = true
 
 [[tool.mypy.overrides]]
+ignore_missing_imports = true
 module = [
   "schema.*",
 ]
-ignore_missing_imports = true

@@ -1,18 +1,12 @@
 [build-system]
-requires = ["setuptools<81"]
 build-backend = "setuptools.build_meta"
+requires = ["setuptools<81"]
 
 [project]
-name = "pulp-cli"
-version = "0.37.0.dev"
-description = "Command line interface to talk to pulpcore's REST API."
-readme = "README.md"
-requires-python = ">=3.9,<3.14"
-license = {text = "GPLv2+"}
 authors = [
   {name = "Pulp Team", email = "pulp-list@redhat.com"},
 ]
-classifiers=[
+classifiers = [
   "Development Status :: 4 - Beta",
   "Environment :: Console",
   "Intended Audience :: System Administrators",
@@ -24,23 +18,29 @@ classifiers=[
 ]
 dependencies = [
   "pulp-glue==0.37.0.dev",
-  "click>=8.0.0,<8.3",  # Proven to not do semver.
+  "click>=8.0.0,<8.3", # Proven to not do semver.
   "PyYAML>=5.3,<6.1",
   "schema>=0.7.5,<0.8",
   "tomli>=2.0.0,<2.1;python_version<'3.11'",
   "tomli-w>=1.0.0,<2",
   "importlib_metadata>=4.8.0,<7.1;python_version<'3.10'",
 ]
+description = "Command line interface to talk to pulpcore's REST API."
+license = {text = "GPLv2+"}
+name = "pulp-cli"
+readme = "README.md"
+requires-python = ">=3.9,<3.15"
+version = "0.37.0.dev"
 
 [project.optional-dependencies]
+password-manager = ["SecretStorage>=3.3.3,<3.4"]
 pygments = ["pygments>=2.17.2,<2.20"]
 shell = ["click-shell>=2.1,<3.0"]
-password-manager = ["SecretStorage>=3.3.3,<3.4"]
 
 [project.urls]
+changelog = "https://pulpproject.org/pulp-cli/changes/"
 documentation = "https://pulpproject.org/pulp-cli/"
 repository = "https://github.com/pulp/pulp-cli"
-changelog = "https://pulpproject.org/pulp-cli/changes/"
 
 [project.scripts]
 pulp = "pulp_cli:main"
@@ -56,37 +56,36 @@ rpm = "pulpcore.cli.rpm"
 
 [tool.setuptools.packages.find]
 # This section is managed by the cookiecutter templates.
-where = ["."]
 include = ["pulpcore.cli.*", "pulp_cli", "pytest_pulp_cli"]
 namespaces = true
+where = ["."]
 
 [tool.setuptools.package-data]
 # This section is managed by the cookiecutter templates.
 "*" = ["py.typed", "locale/*/LC_MESSAGES/*.mo"]
 
-
 [tool.pulp_cli_template]
 # This section is co-managed by the cookiecutter templates.
 # Changes to existing keys should be preserved.
 app_label = ""
-repository = "https://github.com/pulp/pulp-cli"
-glue = true
-docs = true
-translations = true
-main_package = "common"
 binary_dependencies = ""
+docs = true
+glue = true
+main_package = "common"
+repository = "https://github.com/pulp/pulp-cli"
+translations = true
 unittests = true
 
 [tool.bumpversion]
 # This section is managed by the cookiecutter templates.
-current_version = "0.37.0.dev"
 commit = false
-tag = false
+current_version = "0.37.0.dev"
 parse = "(?P<major>\\d+)\\.(?P<minor>\\d+)\\.(?P<patch>\\d+)(\\.(?P<release>[a-z]+))?"
 serialize = [
   "{major}.{minor}.{patch}.{release}",
   "{major}.{minor}.{patch}",
 ]
+tag = false
 
 [tool.bumpversion.parts.release]
 # This section is managed by the cookiecutter templates.
@@ -99,59 +98,58 @@ values = [
 [[tool.bumpversion.files]]
 # This section is managed by the cookiecutter templates.
 filename = "./pulp_cli/__init__.py"
-search = "__version__ = \"{current_version}\""
 replace = "__version__ = \"{new_version}\""
+search = "__version__ = \"{current_version}\""
 
 [[tool.bumpversion.files]]
 # This section is managed by the cookiecutter templates.
 filename = "./pulp-glue/pulp_glue/common/__init__.py"
-search = "__version__ = \"{current_version}\""
 replace = "__version__ = \"{new_version}\""
+search = "__version__ = \"{current_version}\""
 
 [[tool.bumpversion.files]]
 # This section is managed by the cookiecutter templates.
 filename = "./pulpcore/cli/common/__init__.py"
-search = "__version__ = \"{current_version}\""
 replace = "__version__ = \"{new_version}\""
+search = "__version__ = \"{current_version}\""
 
 [[tool.bumpversion.files]]
 # This section is managed by the cookiecutter templates.
 filename = "./pulp-glue/pyproject.toml"
-search = "version = \"{current_version}\""
 replace = "version = \"{new_version}\""
+search = "version = \"{current_version}\""
 
 [[tool.bumpversion.files]]
 # This section is managed by the cookiecutter templates.
 filename = "./pyproject.toml"
-search = "version = \"{current_version}\""
 replace = "version = \"{new_version}\""
+search = "version = \"{current_version}\""
 
 [[tool.bumpversion.files]]
 # This section is managed by the cookiecutter templates.
 filename = "./pyproject.toml"
-search = "\"pulp-glue=={current_version}\""
 replace = "\"pulp-glue=={new_version}\""
-
+search = "\"pulp-glue=={current_version}\""
 
 [tool.towncrier]
 # This section is managed by the cookiecutter templates.
-filename = "CHANGES.md"
 directory = "CHANGES/"
-title_format = "## {version} ({project_date}) {{: #{version} }}"
-template = "CHANGES/.TEMPLATE.md"
+filename = "CHANGES.md"
 issue_format = "[#{issue}](https://github.com/pulp/pulp-cli/issues/{issue})"
 start_string = "[//]: # (towncrier release notes start)\n"
+template = "CHANGES/.TEMPLATE.md"
+title_format = "## {version} ({project_date}) {{: #{version} }}"
 underlines = ["", "", ""]
 
 [[tool.towncrier.section]]
 # This section is managed by the cookiecutter templates.
-path = ""
 name = ""
+path = ""
 
 [[tool.towncrier.section]]
 # This section is managed by the cookiecutter templates.
-path = "pulp-glue"
 name = "Pulp GLUE"
+path = "pulp-glue"
 
 [[tool.towncrier.type]]
 # This section is managed by the cookiecutter templates.
@@ -195,17 +193,16 @@ directory = "misc"
 name = "Misc"
 showcontent = true
 
-
 [tool.black]
 # This section is managed by the cookiecutter templates.
-line-length = 100
 exclude = "cookiecutter"
+line-length = 100
 
 [tool.isort]
 # This section is managed by the cookiecutter templates.
-profile = "black"
-line_length = 100
 extend_skip = ["pulp-glue", "cookiecutter"]
+line_length = 100
+profile = "black"
 
 [tool.flake8]
 # This section is managed by the cookiecutter templates.
@@ -232,19 +229,19 @@ markers = [
 
 [tool.mypy]
 # This section is managed by the cookiecutter templates.
-strict = true
-warn_unused_ignores = false
-show_error_codes = true
+explicit_package_bases = true
 files = "pulpcore/**/*.py, tests/*.py, pulp_cli/**/*.py, pytest_pulp_cli/**/*.py"
 namespace_packages = true
-explicit_package_bases = true
+show_error_codes = true
+strict = true
+warn_unused_ignores = false
 
 [[tool.mypy.overrides]]
 # This section is managed by the cookiecutter templates.
+ignore_missing_imports = true
 module = [
   "click_shell.*",
   "gnupg.*",
   "IPython.*",
   "schema.*",
 ]
-ignore_missing_imports = true
