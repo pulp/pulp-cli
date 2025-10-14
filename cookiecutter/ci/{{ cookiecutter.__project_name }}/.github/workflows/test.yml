@@ -24,7 +24,7 @@ jobs:
       - name: "Set up Python"
         uses: "actions/setup-python@v5"
         with:
-          python-version: "3.12"
+          python-version: "3.14"
       - name: "Install Python Test Dependencies"
         run: |
           pip install dist/pulp_cli{{ cookiecutter.__app_label_suffix | replace("-", "_") }}-*.whl {%- if cookiecutter.glue %} pulp-glue{{ cookiecutter.__app_label_suffix }}/dist/pulp_glue{{ cookiecutter.__app_label_suffix | replace("-", "_") }}-*.whl {%- endif %} -r test_requirements.txt
