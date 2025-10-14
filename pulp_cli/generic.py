@@ -652,7 +652,8 @@ def load_labels_callback(
 
 
 def create_content_json_callback(
-    context_class: t.Optional[t.Type[PulpContentContext]] = None, schema: s.Schema = None
+    context_class: t.Optional[t.Type[PulpContentContext]] = None,
+    schema: t.Optional[s.Schema] = None,
 ) -> t.Any:
     @load_file_wrapper
     def _callback(
