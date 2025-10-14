@@ -29,7 +29,7 @@ jobs:
       - name: "Set up Python"
         uses: "actions/setup-python@v6"
         with:
-          python-version: "3.12"
+          python-version: "3.14"
       - name: "Install Python Test Dependencies"
         run: |
           pip install dist/pulp_cli-*.whl pulp-glue/dist/pulp_glue-*.whl -r test_requirements.txt
@@ -59,7 +59,7 @@ jobs:
           - image_tag: "3.63"
             pulp_https: "true"
             pulp_oauth2: "true"
-            python: "3.10"
+            python: "3.14"
           - image_tag: "3.49"
             pulp_https: "true"
             python: "3.10"

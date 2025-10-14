@@ -24,7 +24,7 @@ jobs:
           fetch-depth: 0
       - uses: "actions/setup-python@v6"
         with:
-          python-version: "3.12"
+          python-version: "3.x"
       - name: "Determine PR labels"
         run: |
           pip install GitPython==3.1.42
