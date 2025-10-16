@@ -1650,7 +1650,7 @@ class PulpContentContext(PulpEntityContext):
                     artifact_href = PulpArtifactContext(self.pulp_ctx).upload(file, chunk_size)
                     body["artifact"] = artifact_href
 
-        # If no repository is provided, use synchronous upload endpoint
+        # Use synchronous upload endpoint if no repository is provided
         if repository is None:
             return self.call("upload", body=body)
 
