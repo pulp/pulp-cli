@@ -10,6 +10,21 @@
 
 [//]: # (towncrier release notes start)
 
+## 0.36.1 (2025-10-15) {: #0.36.1 }
+
+
+
+No significant changes.
+
+
+### Pulp GLUE {: #0.36.1-pulp-glue }
+
+
+No significant changes.
+
+
+---
+
 ## 0.36.0 (2025-09-04) {: #0.36.0 }
 
 
@@ -24,6 +39,21 @@
 
 
 ### Pulp GLUE {: #0.36.0-pulp-glue }
+
+
+No significant changes.
+
+
+---
+
+## 0.35.1 (2025-10-15) {: #0.35.1 }
+
+
+
+No significant changes.
+
+
+### Pulp GLUE {: #0.35.1-pulp-glue }
 
 
 No significant changes.
@@ -61,6 +91,21 @@ No significant changes.
 
 ---
 
+## 0.34.1 (2025-10-15) {: #0.34.1 }
+
+
+
+No significant changes.
+
+
+### Pulp GLUE {: #0.34.1-pulp-glue }
+
+
+No significant changes.
+
+
+---
+
 ## 0.34.0 (2025-07-09) {: #0.34.0 }
 
 
@@ -69,6 +114,21 @@ No significant changes.
 
 
 ### Pulp GLUE {: #0.34.0-pulp-glue }
+
+
+No significant changes.
+
+
+---
+
+## 0.33.1 (2025-10-15) {: #0.33.1 }
+
+
+
+No significant changes.
+
+
+### Pulp GLUE {: #0.33.1-pulp-glue }
 
 
 No significant changes.
