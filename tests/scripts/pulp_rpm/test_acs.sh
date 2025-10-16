@@ -10,14 +10,13 @@ pulp debug has-plugin --name "rpm" --specifier ">=3.18.0" || exit 23
 pulp debug has-plugin --name "rpm" --specifier "==3.20.0" && pulp debug has-plugin --name "core" --specifier "==3.23.21" && exit 23
 
 acs_remote="cli_test_rpm_acs_remote"
-acs="cli_test_acs"
+acs="cli_test_rpm_acs"
 
 cleanup() {
-  pulp rpm repository destroy --name "cli-repo-metadata-only" || true
+  pulp rpm repository destroy --name "cli-rpm-acs-repo-metadata-only" || true
   pulp rpm acs destroy --name $acs || true
   pulp rpm remote destroy --name $acs_remote || true
-  pulp rpm remote destroy --name "cli-remote-metadata-only" || true
-  pulp orphan cleanup --protection-time 0 || true
+  pulp rpm remote destroy --name "cli-rpm-acs-remote-metadata-only" || true
 }
 trap cleanup EXIT
 
@@ -25,7 +24,7 @@ cleanup
 
 expect_succ pulp rpm remote create --name $acs_remote --url "$PULP_FIXTURES_URL" --policy "on_demand"
 
-expect_succ pulp rpm acs create --name $acs --remote $acs_remote --path "rpm-unsigned/" --path "rpm-richnweak-deps/"
+expect_succ pulp rpm acs create --name $acs --remote $acs_remote --path "rpm-unsigned/" --path "rpm-signed/"
 HREF="$(echo "$OUTPUT" | jq -r '.pulp_href')"
 expect_succ pulp rpm acs list
 test "$(echo "$OUTPUT" | jq -r length)" -ge 1
@@ -47,10 +46,10 @@ expect_succ pulp task-group show --href "$task_group"
 test "$(echo "$OUTPUT" | jq ".tasks | length")" -eq 2
 
 # create a remote with metadata only and sync it
-expect_succ pulp rpm remote create --name "cli-remote-metadata-only" --url "$PULP_FIXTURES_URL/rpm-unsigned-meta-only/"
+expect_succ pulp rpm remote create --name "cli-rpm-acs-remote-metadata-only" --url "$PULP_FIXTURES_URL/rpm-unsigned-meta-only/"
 remote_href="$(echo "$OUTPUT" | jq -r '.pulp_href')"
-expect_succ pulp rpm repository create --name "cli-repo-metadata-only" --remote "$remote_href"
-expect_succ pulp rpm repository sync --repository "cli-repo-metadata-only"
+expect_succ pulp rpm repository create --name "cli-rpm-acs-repo-metadata-only" --remote "$remote_href"
+expect_succ pulp rpm repository sync --repository "cli-rpm-acs-repo-metadata-only"
 
 # test refresh with bad paths
 expect_succ pulp rpm acs path add --acs $acs --path "bad-path/"

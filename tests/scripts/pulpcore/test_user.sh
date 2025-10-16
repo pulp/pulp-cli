@@ -5,11 +5,11 @@ set -eu
 . "$(dirname "$(dirname "$(realpath "$0")")")"/config.source
 
 cleanup() {
-  pulp user destroy --username "clitest" || true
+  pulp user destroy --username "core-user-clitest" || true
 }
 trap cleanup EXIT
 
 expect_succ pulp user list
 expect_succ pulp user show --username admin
-expect_succ pulp user create --username "clitest" --password "Yeech6ba"
-expect_succ pulp user update --username "clitest" --first-name "cli" --last-name "test"
+expect_succ pulp user create --username "core-user-clitest" --password "Yeech6ba"
+expect_succ pulp user update --username "core-user-clitest" --first-name "cli" --last-name "test"

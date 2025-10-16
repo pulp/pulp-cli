@@ -87,5 +87,5 @@ jobs:
           OAS_VERSION: "${{ matrix.oas_version }}"
           {%- endraw %}
         run: |
-          .ci/run_container.sh make {% if cookiecutter.unittests %}live{% endif %}test
+          .ci/run_container.sh make {% if cookiecutter.unittests %}parallel{% endif %}test
 ...

@@ -7,9 +7,8 @@ set -eu
 pulp debug has-plugin --name "file" || exit 23
 
 cleanup() {
-  pulp file repository destroy --name "cli_test_file_repository" || true
-  pulp file repository destroy --name "cli_test_file_repository_2" || true
-  pulp orphan cleanup || true
+  pulp file repository destroy --name "cli_test_file_content_repository" || true
+  pulp file repository destroy --name "cli_test_file_content_repository_2" || true
 }
 trap cleanup EXIT
 
@@ -44,22 +43,22 @@ then
   expect_succ pulp file content create --file-url "$FILE_REMOTE_URL" --relative-path PULP_MANIFEST
 fi
 
-expect_succ pulp file repository create --name "cli_test_file_repository"
+expect_succ pulp file repository create --name "cli_test_file_content_repository"
 # New content commands
-expect_succ pulp file repository content add --repository "cli_test_file_repository" --sha256 "$sha256" --relative-path upload_test/test.txt
-expect_succ pulp file repository content add --repository "cli_test_file_repository" --sha256 "$sha256" --relative-path upload_test/test.txt --base-version 0
-expect_succ pulp file repository content list --repository "cli_test_file_repository" --version 1
+expect_succ pulp file repository content add --repository "cli_test_file_content_repository" --sha256 "$sha256" --relative-path upload_test/test.txt
+expect_succ pulp file repository content add --repository "cli_test_file_content_repository" --sha256 "$sha256" --relative-path upload_test/test.txt --base-version 0
+expect_succ pulp file repository content list --repository "cli_test_file_content_repository" --version 1
 test "$(echo "$OUTPUT" | jq -r length)" -eq "1"
-expect_succ pulp file repository content list --repository "cli_test_file_repository" --all-types
+expect_succ pulp file repository content list --repository "cli_test_file_content_repository" --all-types
 
-expect_succ pulp file repository content remove --repository "cli_test_file_repository" --sha256 "$sha256" --relative-path upload_test/test.txt
-expect_succ pulp file repository content list --repository "cli_test_file_repository"
+expect_succ pulp file repository content remove --repository "cli_test_file_content_repository" --sha256 "$sha256" --relative-path upload_test/test.txt
+expect_succ pulp file repository content list --repository "cli_test_file_content_repository"
 test "$(echo "$OUTPUT" | jq -r length)" -eq "0"
 
 # Create and add to repository in one command
-expect_succ pulp file content create --sha256 "$sha256" --relative-path upload_test/test2.txt --repository "cli_test_file_repository"
-expect_succ pulp file content upload --file test.txt --relative-path upload_test/test3.txt --repository "cli_test_file_repository"
-expect_succ pulp file repository content list --repository "cli_test_file_repository"
+expect_succ pulp file content create --sha256 "$sha256" --relative-path upload_test/test2.txt --repository "cli_test_file_content_repository"
+expect_succ pulp file content upload --file test.txt --relative-path upload_test/test3.txt --repository "cli_test_file_content_repository"
+expect_succ pulp file repository content list --repository "cli_test_file_content_repository"
 test "$(echo "$OUTPUT" | jq -r '[.[]|.relative_path]|sort|join(" ")')" = "upload_test/test2.txt upload_test/test3.txt"
 
 expect_succ pulp content list
@@ -70,5 +69,5 @@ expect_succ pulp repository version list --content "[]"
 expect_succ pulp repository version list --content "$(jq -R '[.]' <<<"$content_href")"
 
 # Creating a new repository version from a different repository
-expect_succ pulp file repository create --name "cli_test_file_repository_2"
-expect_succ pulp file repository content modify --repository "cli_test_file_repository_2" --base-repository "cli_test_file_repository"
+expect_succ pulp file repository create --name "cli_test_file_content_repository_2"
+expect_succ pulp file repository content modify --repository "cli_test_file_content_repository_2" --base-repository "cli_test_file_content_repository"

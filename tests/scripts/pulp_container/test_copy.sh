@@ -9,18 +9,17 @@ pulp debug has-plugin --name "container" || exit 23
 cleanup() {
   pulp container repository destroy --name "cli_test_source_container_repository" || true
   pulp container repository destroy --name "cli_test_dest_container_repository" || true
-  pulp container remote destroy --name "cli_test_container_remote" || true
-  pulp orphan cleanup || true
+  pulp container remote destroy --name "cli_test_container_copy_remote" || true
 }
 trap cleanup EXIT
 
 # Prepare
-expect_succ pulp container remote create --name "cli_test_container_remote" --url "$CONTAINER_REMOTE_URL" --upstream-name "$CONTAINER_IMAGE"
+expect_succ pulp container remote create --name "cli_test_container_copy_remote" --url "$CONTAINER_REMOTE_URL" --upstream-name "$CONTAINER_IMAGE"
 SOURCE_HREF="$(pulp container repository create --name "cli_test_source_container_repository" | jq -r '.pulp_href')"
 expect_succ pulp container repository create --name "cli_test_dest_container_repository"
 HREF="$(echo "$OUTPUT" | jq -r '.pulp_href')"
 
-expect_succ pulp container repository sync --repository "cli_test_source_container_repository" --remote "cli_test_container_remote"
+expect_succ pulp container repository sync --repository "cli_test_source_container_repository" --remote "cli_test_container_copy_remote"
 TAG="$(pulp container repository content -t "tag" list --repository "cli_test_source_container_repository" | jq -r '.[0].name')"
 DIGEST="$(pulp container repository content -t "manifest" list --repository "cli_test_source_container_repository" | jq -r '.[] | select(.listed_manifests == []) | .digest' | sed -n '1p')"
 

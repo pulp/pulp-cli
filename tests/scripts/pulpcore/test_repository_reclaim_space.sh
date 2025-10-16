@@ -15,7 +15,7 @@ cleanup() {
 trap cleanup EXIT
 
 # Setup needed prerequisites
-expect_succ pulp file remote create --name "cli_test_reclaim_remote" --url "$FILE_REMOTE_URL" --policy immediate
+expect_succ pulp file remote create --name "cli_test_reclaim_remote" --url "$FILE_REMOTE2_URL" --policy immediate
 expect_succ pulp file repository create --name "cli_test_reclaim_repo" --remote "cli_test_reclaim_remote" --autopublish
 expect_succ pulp file repository sync --name "cli_test_reclaim_repo"
 expect_succ pulp file distribution create --name "cli_test_reclaim_distro" --base-path "cli_test_reclaim_distro" --repository "cli_test_reclaim_repo"
