@@ -1,3 +1,4 @@
+import os
 import typing as t
 
 from pulp_glue.common.context import (
@@ -68,6 +69,51 @@ class PulpFileContentContext(PulpContentContext):
                 assert result["sha256"] == sha256
 
         return result
+
+    def upload(
+        self,
+        file: t.IO[bytes],
+        chunk_size: int,
+        repository: t.Optional[PulpRepositoryContext],
+        **kwargs: t.Any,
+    ) -> t.Any:
+        """
+        Create file content by uploading a file.
+
+        File content does not support synchronous upload endpoint,
+        so this always uses the create endpoint.
+
+        Parameters:
+            file: A file like object that supports `os.path.getsize`.
+            chunk_size: Size of the chunks to upload independently.
+            repository: Repository context to add the newly created content to.
+            kwargs: Extra args specific to the content type, passed to the create call.
+
+        Returns:
+            The result of the create task.
+        """
+        self.needs_capability("upload")
+        size = os.path.getsize(file.name)
+        body: t.Dict[str, t.Any] = {**kwargs}
+
+        if not self.pulp_ctx.fake_mode:
+            if chunk_size > size:
+                body["file"] = file
+            elif self.pulp_ctx.has_plugin(PluginRequirement("core", specifier=">=3.20.0")):
+                from pulp_glue.core.context import PulpUploadContext
+
+                upload_href = PulpUploadContext(self.pulp_ctx).upload_file(file, chunk_size)
+                body["upload"] = upload_href
+            else:
+                from pulp_glue.core.context import PulpArtifactContext
+
+                artifact_href = PulpArtifactContext(self.pulp_ctx).upload(file, chunk_size)
+                body["artifact"] = artifact_href
+            if repository:
+                body["repository"] = repository
+
+        # File content always uses create endpoint (no synchronous upload support)
+        return self.create(body=body)
 
 
 class PulpFileDistributionContext(PulpDistributionContext):
