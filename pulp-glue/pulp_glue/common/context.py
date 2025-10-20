@@ -1632,21 +1632,34 @@ class PulpContentContext(PulpEntityContext):
         self.needs_capability("upload")
         size = os.path.getsize(file.name)
         body: t.Dict[str, t.Any] = {**kwargs}
-        if not self.pulp_ctx.fake_mode:  # Skip the uploading part in fake_mode
+
+        if not self.pulp_ctx.fake_mode:
             if chunk_size > size:
+                # Small file: direct upload
                 body["file"] = file
-            elif self.pulp_ctx.has_plugin(PluginRequirement("core", specifier=">=3.20.0")):
-                from pulp_glue.core.context import PulpUploadContext
-
-                upload_href = PulpUploadContext(self.pulp_ctx).upload_file(file, chunk_size)
-                body["upload"] = upload_href
             else:
-                from pulp_glue.core.context import PulpArtifactContext
+                # Large file: chunked upload
+                if self.pulp_ctx.has_plugin(PluginRequirement("core", specifier=">=3.20.0")):
+                    from pulp_glue.core.context import PulpUploadContext
 
-                artifact_href = PulpArtifactContext(self.pulp_ctx).upload(file, chunk_size)
-                body["artifact"] = artifact_href
-            if repository:
-                body["repository"] = repository
+                    upload_href = PulpUploadContext(self.pulp_ctx).upload_file(file, chunk_size)
+                    body["upload"] = upload_href
+                else:
+                    from pulp_glue.core.context import PulpArtifactContext
+
+                    artifact_href = PulpArtifactContext(self.pulp_ctx).upload(file, chunk_size)
+                    body["artifact"] = artifact_href
+
+        # For rpm plugin >= 3.32.5, use synchronous upload endpoint when no repository is provided
+        # For older versions, always use the create endpoint (backward compatibility)
+        if repository is None and self.pulp_ctx.has_plugin(
+            PluginRequirement("rpm", specifier=">=3.32.5")
+        ):
+            return self.call("upload", body=body)
+
+        # Repository is specified or older rpm version: use create endpoint (async path)
+        if repository is not None:
+            body["repository"] = repository
         return self.create(body=body)
 
 
