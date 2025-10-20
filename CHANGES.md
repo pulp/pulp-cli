@@ -2333,7 +2333,7 @@ No significant changes.
 
 ## 0.1.0 (2021-01-15) {: #0.1.0 }
 
-Initial release of pulp-cli.
+Initial release of pulp-cli2.
 
 
 ---
