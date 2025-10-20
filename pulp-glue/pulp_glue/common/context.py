@@ -1650,12 +1650,13 @@ class PulpContentContext(PulpEntityContext):
                     artifact_href = PulpArtifactContext(self.pulp_ctx).upload(file, chunk_size)
                     body["artifact"] = artifact_href
 
+        # TODO: Temporarily disabled sync endpoint to debug schema validation issue
         # For rpm plugin >= 3.32.5, use synchronous upload endpoint when no repository is provided
         # For older versions, always use the create endpoint (backward compatibility)
-        if repository is None and self.pulp_ctx.has_plugin(
-            PluginRequirement("rpm", specifier=">=3.32.5")
-        ):
-            return self.call("upload", body=body)
+        # if repository is None and self.pulp_ctx.has_plugin(
+        #     PluginRequirement("rpm", specifier=">=3.32.5")
+        # ):
+        #     return self.call("upload", body=body)
 
         # Repository is specified or older rpm version: use create endpoint (async path)
         if repository is not None:
