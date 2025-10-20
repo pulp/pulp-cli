@@ -163,6 +163,12 @@ def _validate_ref(schema_ref: str, name: str, value: t.Any, components: t.Dict[s
     if not schema_ref.startswith("#/components/schemas/"):
         raise SchemaError(_("'{name}' contains an invalid reference.").format(name=name))
     schema_name = schema_ref[21:]
+    # DEBUG: Print the resolved schema
+    import sys
+    resolved_schema = components[schema_name]
+    print(f"DEBUG: Resolved schema '{schema_name}': {resolved_schema}", file=sys.stderr)
+    if "required" in resolved_schema:
+        print(f"DEBUG: Required fields: {resolved_schema['required']}", file=sys.stderr)
     validate(components[schema_name], name, value, components)
 
 
@@ -226,6 +232,10 @@ def _validate_number(
 def _validate_object(
     schema: t.Any, name: str, value: t.Any, components: t.Dict[str, t.Any]
 ) -> None:
+    import sys
+    print(f"DEBUG _validate_object: name='{name}', value keys={list(value.keys()) if isinstance(value, dict) else 'NOT_A_DICT'}", file=sys.stderr)
+    print(f"DEBUG _validate_object: schema.get('required')={schema.get('required')}", file=sys.stderr)
+    
     _assert_type(name, value, dict, "object")
     extra_values = {}
     properties = schema.get("properties", {})
@@ -247,6 +257,7 @@ def _validate_object(
                 validate(additional_properties, f"{name}[{pname}]", pvalue, components)
     if (required := schema.get("required")) is not None:
         if missing_keys := set(required) - set(value.keys()):
+            print(f"DEBUG _validate_object: THROWING ValidationError! required={required}, value.keys()={list(value.keys())}, missing={missing_keys}", file=sys.stderr)
             raise ValidationError(
                 _("'{name}' is missing properties ({missing}).").format(
                     name=name, missing=", ".join(missing_keys)

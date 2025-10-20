@@ -440,13 +440,20 @@ class OpenAPI:
             )
             if content_type:
                 if validate_body:
+                    import sys
+                    schema = request_body_spec["content"][content_type]["schema"]
+                    print(f"\nDEBUG openapi.py: Validating with content_type='{content_type}'", file=sys.stderr)
+                    print(f"DEBUG openapi.py: Schema={schema}", file=sys.stderr)
+                    print(f"DEBUG openapi.py: Body keys={list(body.keys()) if isinstance(body, dict) else 'NOT_A_DICT'}", file=sys.stderr)
                     try:
                         self.validate_schema(
-                            request_body_spec["content"][content_type]["schema"],
+                            schema,
                             "body",
                             body,
                         )
+                        print(f"DEBUG openapi.py: Validation PASSED for {content_type}", file=sys.stderr)
                     except ValidationError as e:
+                        print(f"DEBUG openapi.py: Validation FAILED for {content_type}: {e}", file=sys.stderr)
                         errors.append(f"{content_type}: {e}")
                         # Try the next content-type
                         continue
