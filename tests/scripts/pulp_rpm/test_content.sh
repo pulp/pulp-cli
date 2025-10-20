@@ -34,7 +34,7 @@ cleanup
 
 # Test rpm package upload
 wget --no-check-certificate "${RPM_WEAK_DEPS_URL}/${RPM_FILENAME}"
-expect_succ pulp rpm content upload --file "${RPM_FILENAME}" --relative-path "${RPM_FILENAME}"
+expect_succ pulp --refresh-api rpm content upload --file "${RPM_FILENAME}" --relative-path "${RPM_FILENAME}"
 PACKAGE_HREF=$(echo "${OUTPUT}" | jq -r .pulp_href)
 expect_succ pulp rpm content show --href "${PACKAGE_HREF}"
 

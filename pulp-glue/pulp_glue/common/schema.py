@@ -163,6 +163,12 @@ def _validate_ref(schema_ref: str, name: str, value: t.Any, components: t.Dict[s
     if not schema_ref.startswith("#/components/schemas/"):
         raise SchemaError(_("'{name}' contains an invalid reference.").format(name=name))
     schema_name = schema_ref[21:]
+    # DEBUG: Print the resolved schema
+    import sys
+    resolved_schema = components[schema_name]
+    print(f"DEBUG: Resolved schema '{schema_name}': {resolved_schema}", file=sys.stderr)
+    if "required" in resolved_schema:
+        print(f"DEBUG: Required fields: {resolved_schema['required']}", file=sys.stderr)
     validate(components[schema_name], name, value, components)
 
 

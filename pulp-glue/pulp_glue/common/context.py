@@ -1656,7 +1656,7 @@ class PulpContentContext(PulpEntityContext):
             PluginRequirement("rpm", specifier=">=3.32.5")
         ):
             # Temporarily disable schema validation to debug the issue
-            return self.call("upload", body=body, validate_body=False)
+            return self.call("upload", body=body, validate_body=True)
 
         # Repository is specified or older rpm version: use create endpoint (async path)
         if repository is not None:
