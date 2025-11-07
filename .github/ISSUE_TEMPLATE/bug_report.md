@@ -20,5 +20,5 @@ labels: bug, Triage-Needed
 ## Pulp and pulp-cli version info
 <!-- Verbatim output of `pulp --version` and `pulp status` -->
 
-## Additonal context
+## Additional context
 <!-- Add any other context about the problem here. -->
