@@ -8,7 +8,7 @@ import click
 import tomli_w
 from pulp_glue.common.i18n import get_translation
 
-from pulp_cli.generic import HEADER_REGEX, REGISTERED_OUTPUT_FORMATTERS, pulp_group
+from pulp_cli.generic import HEADER_REGEX, REGISTERED_OUTPUT_FORMATTERS, _unset, pulp_group
 
 if sys.version_info >= (3, 11):
     import tomllib
@@ -256,13 +256,13 @@ def create(
         option = next(p for p in ctx.command.params if p.name == name)
         if option.multiple:
             assert option.type == click.types.STRING
-            assert option.default is None
+            assert _unset(option.default)
             result = []
             value = click.prompt(f"{name} (end with an empty line)", default="", type=option.type)
             while value:
                 result.append(value)
                 value = click.prompt(f"{name} (continued)", default="", type=option.type)
-            return result
+            return None if _unset(result) else result
         else:
             return click.prompt(name, default=option.default, type=option.type)
 
