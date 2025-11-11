@@ -1,1 +1,0 @@
-Fixed interactive config generation to allow empty plugin list. All availale plugins will be used in that case.
