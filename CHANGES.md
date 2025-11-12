@@ -10,6 +10,24 @@
 
 [//]: # (towncrier release notes start)
 
+## 0.36.2 (2025-11-11) {: #0.36.2 }
+
+
+
+#### Bugfixes {: #0.36.2-bugfix }
+
+- Fixed interactive config generation to allow empty plugin list. All availale plugins will be used in that case.
+  [#1265](https://github.com/pulp/pulp-cli/issues/1265)
+
+
+### Pulp GLUE {: #0.36.2-pulp-glue }
+
+
+No significant changes.
+
+
+---
+
 ## 0.36.1 (2025-10-15) {: #0.36.1 }
 
 
