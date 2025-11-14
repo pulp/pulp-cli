@@ -1515,7 +1515,7 @@ def version_command(**kwargs: t.Any) -> click.Command:
     """
     A factory that creates a repository version command group.
 
-    This group contains `list`, `show`, `destroy` and `repair` subcommands.
+    This group contains `list`, `show`, `destroy`, `repair` and `scan` subcommands.
     If `list_only=True` is passed, only the `list` command will be instantiated.
     Repository lookup options can be provided in `decorators`.
     """
@@ -1547,6 +1547,19 @@ def version_command(**kwargs: t.Any) -> click.Command:
             /,
         ) -> None:
             result = repository_version_ctx.repair()
+            pulp_ctx.output_result(result)
+
+        @callback.command()
+        @repository_lookup_option
+        @version_option
+        @pass_repository_version_context
+        @pass_pulp_context
+        def scan(
+            pulp_ctx: PulpCLIContext,
+            repository_version_ctx: PulpRepositoryVersionContext,
+            /,
+        ) -> None:
+            result = repository_version_ctx.scan()
             pulp_ctx.output_result(result)
 
     return callback
