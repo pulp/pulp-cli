@@ -1,3 +1,5 @@
+import typing as t
+
 from pulp_glue.common.context import (
     EntityDefinition,
     PluginRequirement,
@@ -101,6 +103,9 @@ class PulpPythonRepositoryVersionContext(PulpRepositoryVersionContext):
     HREF = "python_python_repository_version_href"
     ID_PREFIX = "repositories_python_python_versions"
     NEEDS_PLUGINS = [PluginRequirement("python", specifier=">=3.1.0")]
+
+    def scan(self) -> t.Any:
+        return self.call("scan", parameters={self.HREF: self.pulp_href})
 
 
 class PulpPythonRepositoryContext(PulpRepositoryContext):
