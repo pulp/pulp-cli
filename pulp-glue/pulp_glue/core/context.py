@@ -618,3 +618,11 @@ class PulpUpstreamPulpContext(PulpEntityContext):
 
     def replicate(self) -> t.Any:
         return self.call("replicate", parameters={self.HREF: self.pulp_href})
+
+
+class PulpVulnerabilityReportContext(PulpEntityContext):
+    ENTITY = _("vulnerability report")
+    ENTITIES = _("vulnerability reports")
+    ID_PREFIX = "vuln_report"
+    HREF = "vulnerability_report_href"
+    NEEDS_PLUGINS = [PluginRequirement("core", specifier=">=3.85.3")]
