@@ -25,6 +25,7 @@ from pulpcore.cli.core.task_group import task_group
 from pulpcore.cli.core.upload import upload
 from pulpcore.cli.core.upstream_pulp import upstream_pulp
 from pulpcore.cli.core.user import user
+from pulpcore.cli.core.vulnerability_report import vulnerability_report
 from pulpcore.cli.core.worker import worker
 
 
@@ -52,6 +53,7 @@ def mount(main: click.Group, **kwargs: t.Any) -> None:
     main.add_command(upload)
     main.add_command(upstream_pulp)
     main.add_command(user)
+    main.add_command(vulnerability_report)
     main.add_command(worker)
 
     _orig_get_command = main.get_command
