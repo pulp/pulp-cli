@@ -1521,11 +1521,33 @@ def destroy_command(**kwargs: t.Any) -> click.Command:
     return callback
 
 
+def scan_command(**kwargs: t.Any) -> click.Command:
+    """A factory that creates a scan command."""
+
+    kwargs.setdefault("name", "scan")
+    kwargs.setdefault("help", _("Verify repository version package vulnerabilities."))
+    decorators = kwargs.pop("decorators", [])
+
+    @pulp_command(**kwargs)
+    @pass_entity_context
+    def callback(entity_ctx: PulpEntityContext, /) -> None:
+        """
+        Scan a {entity}.
+        """
+        entity_ctx.needs_capability("scan")
+        entity_ctx.scan()
+
+    for option in decorators:
+        # Decorate callback
+        callback = option(callback)
+    return callback
+
+
 def version_command(**kwargs: t.Any) -> click.Command:
     """
     A factory that creates a repository version command group.
 
-    This group contains `list`, `show`, `destroy` and `repair` subcommands.
+    This group contains `list`, `show`, `destroy`, `repair` and `scan` subcommands.
     If `list_only=True` is passed, only the `list` command will be instantiated.
     Repository lookup options can be provided in `decorators`.
     """
@@ -1545,6 +1567,7 @@ def version_command(**kwargs: t.Any) -> click.Command:
     if not list_only:
         callback.add_command(show_command(decorators=decorators + [version_option]))
         callback.add_command(destroy_command(decorators=decorators + [version_option]))
+        callback.add_command(scan_command(decorators=decorators + [version_option]))
 
         @callback.command()
         @repository_lookup_option
