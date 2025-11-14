@@ -1417,6 +1417,10 @@ class PulpRepositoryVersionContext(PulpEntityContext):
         """
         return self.call("repair", parameters={self.HREF: self.pulp_href}, body={})
 
+    def scan(self) -> t.Any:
+        self.needs_capability("scan")
+        return self.call("scan", parameters={self.HREF: self.pulp_href})
+
 
 class PulpRepositoryContext(PulpEntityContext):
     """Base class for repository contexts."""

@@ -101,6 +101,7 @@ class PulpPythonRepositoryVersionContext(PulpRepositoryVersionContext):
     HREF = "python_python_repository_version_href"
     ID_PREFIX = "repositories_python_python_versions"
     NEEDS_PLUGINS = [PluginRequirement("python", specifier=">=3.1.0")]
+    CAPABILITIES = {"scan": [PluginRequirement("python", specifier=">=3.21.0")]}
 
 
 class PulpPythonRepositoryContext(PulpRepositoryContext):
