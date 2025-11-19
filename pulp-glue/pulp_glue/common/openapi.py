@@ -12,6 +12,7 @@ from io import BufferedReader
 from urllib.parse import urlencode, urljoin
 
 import aiofiles
+import aiofiles.os
 import aiohttp
 import requests
 import urllib3
@@ -199,7 +200,7 @@ class OpenAPI:
         self._base_url: str = base_url
         self._doc_path: str = doc_path
         self._dry_run: bool = dry_run
-        self._headers = CIMultiDict(headers or {})
+        self._headers = CIMultiDict(headers)
         self._verify_ssl = verify_ssl
 
         self._auth_provider = auth_provider
@@ -268,6 +269,9 @@ class OpenAPI:
         return _ssl_context
 
     def load_api(self, refresh_cache: bool = False) -> None:
+        asyncio.run(self._load_api(refresh_cache=refresh_cache))
+
+    async def _load_api(self, refresh_cache: bool = False) -> None:
         # TODO: Find a way to invalidate caches on upstream change
         xdg_cache_home: str = os.environ.get("XDG_CACHE_HOME") or "~/.cache"
         apidoc_cache: str = os.path.join(
@@ -279,17 +283,17 @@ class OpenAPI:
         try:
             if refresh_cache:
                 raise OSError()
-            with open(apidoc_cache, "rb") as f:
-                data: bytes = f.read()
+            async with aiofiles.open(apidoc_cache, mode="rb") as f:
+                data: bytes = await f.read()
             self._parse_api(data)
         except Exception:
             # Try again with a freshly downloaded version
-            data = asyncio.run(self._download_api())
+            data = await self._download_api()
             self._parse_api(data)
             # Write to cache as it seems to be valid
-            os.makedirs(os.path.dirname(apidoc_cache), exist_ok=True)
-            with open(apidoc_cache, "bw") as f:
-                f.write(data)
+            await aiofiles.os.makedirs(os.path.dirname(apidoc_cache), exist_ok=True)
+            async with aiofiles.open(apidoc_cache, mode="bw") as f:
+                await f.write(data)
 
     def _parse_api(self, data: bytes) -> None:
         self.api_spec: dict[str, t.Any] = json.loads(data)
@@ -306,11 +310,10 @@ class OpenAPI:
 
     async def _download_api(self) -> bytes:
         try:
-            connector = aiohttp.TCPConnector(ssl=self.ssl_context)
-            async with aiohttp.ClientSession(
-                connector=connector, headers=self._headers, ssl=self.ssl_context
-            ) as session:
-                async with session.get(urljoin(self._base_url, self._doc_path)) as response:
+            async with aiohttp.ClientSession(headers=self._headers) as session:
+                async with session.get(
+                    urljoin(self._base_url, self._doc_path), ssl=self.ssl_context
+                ) as response:
                     response.raise_for_status()
                     data = await response.read()
                 if "Correlation-Id" in response.headers:
@@ -508,7 +511,20 @@ class OpenAPI:
 
         return content_type, data, files
 
-    def _send_request(
+    async def _http_middleware(
+        self, request: aiohttp.ClientRequest, handler: aiohttp.ClientHandlerType
+    ) -> aiohttp.ClientResponse:
+        for key, value in request.headers.items():
+            self._debug_callback(2, f"  {key}: {value}")
+        if request.body is not None:
+            self._debug_callback(3, f"{request.body!r}")
+        if self._dry_run and request.method.upper() not in SAFE_METHODS:
+            raise UnsafeCallError(_("Call aborted due to safe mode"))
+
+        response = await handler(request)
+        return response
+
+    async def _send_request(
         self,
         path_spec: dict[str, t.Any],
         method: str,
@@ -519,6 +535,7 @@ class OpenAPI:
         validate_body: bool = True,
     ) -> _Response:
         method_spec = path_spec[method]
+        _headers = CIMultiDict(headers)
         content_type, data, files = self._render_request_body(method_spec, body, validate_body)
         security: list[dict[str, list[str]]] | None = method_spec.get(
             "security", self.api_spec.get("security")
@@ -536,14 +553,14 @@ class OpenAPI:
         # For we encode the json on our side.
         # Somehow this does not work properly for multipart...
         if content_type is not None and content_type.startswith("application/json"):
-            headers["content-type"] = content_type
+            _headers["Content-Type"] = content_type
         request = self._session.prepare_request(
             requests.Request(
                 method,
                 url,
                 auth=auth,
                 params=params,
-                headers=headers,
+                headers=_headers,
                 data=data,
                 files=files,
             )
@@ -552,35 +569,40 @@ class OpenAPI:
             assert request.headers["content-type"].startswith(
                 content_type
             ), f"{request.headers['content-type']} != {content_type}"
-        for key, value in request.headers.items():
-            self._debug_callback(2, f"  {key}: {value}")
-        if request.body is not None:
-            self._debug_callback(3, f"{request.body!r}")
-        if self._dry_run and method.upper() not in SAFE_METHODS:
-            raise UnsafeCallError(_("Call aborted due to safe mode"))
         try:
-            response = self._session.send(request)
+            async with aiohttp.ClientSession(
+                headers=self._headers, middlewares=(self._http_middleware,)
+            ) as session:
+                async with session.request(
+                    method,
+                    url,
+                    params=params,
+                    headers=_headers,
+                    data=data,
+                    # files=files,
+                    ssl=self.ssl_context,
+                ) as response:
+                    response.raise_for_status()
+                    response_body = await response.read()
         except requests.TooManyRedirects as e:
             assert e.response is not None
             raise OpenAPIError(
-                _("Received redirect to '{url}'. Please check your CLI configuration.").format(
+                _("Received redirect to '{url}'. Please check your configuration.").format(
                     url=e.response.headers["location"]
                 )
             )
         except requests.RequestException as e:
             raise OpenAPIError(str(e))
-        self._debug_callback(
-            1, _("Response: {status_code}").format(status_code=response.status_code)
-        )
+        self._debug_callback(1, _("Response: {status_code}").format(status_code=response.status))
         for key, value in response.headers.items():
             self._debug_callback(2, f"  {key}: {value}")
         if response.text:
             self._debug_callback(3, f"{response.text}")
         if "Correlation-Id" in response.headers:
             self._set_correlation_id(response.headers["Correlation-Id"])
-        if response.status_code == 401:
+        if response.status == 401:
             raise PulpAuthenticationFailed(method_spec["operationId"])
-        if response.status_code == 403:
+        if response.status == 403:
             raise PulpNotAutorized(method_spec["operationId"])
         try:
             response.raise_for_status()
@@ -589,9 +611,7 @@ class OpenAPI:
                 raise PulpHTTPError(str(e.response.text), e.response.status_code)
             else:
                 raise PulpException(str(e))
-        return _Response(
-            status_code=response.status_code, headers=response.headers, body=response.content
-        )
+        return _Response(status_code=response.status, headers=response.headers, body=response_body)
 
     def _parse_response(self, method_spec: dict[str, t.Any], response: _Response) -> t.Any:
         if response.status_code == 204:
@@ -676,14 +696,16 @@ class OpenAPI:
             2, "\n".join([f"  {key}=={value}" for key, value in query_params.items()])
         )
 
-        response = self._send_request(
-            path_spec,
-            method,
-            url,
-            query_params,
-            headers,
-            body,
-            validate_body=validate_body,
+        response = asyncio.run(
+            self._send_request(
+                path_spec,
+                method,
+                url,
+                query_params,
+                headers,
+                body,
+                validate_body=validate_body,
+            )
         )
 
         return self._parse_response(method_spec, response)
