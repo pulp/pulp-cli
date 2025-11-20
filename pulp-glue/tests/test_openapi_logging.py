@@ -6,6 +6,8 @@ import pytest
 
 from pulp_glue.common.openapi import OpenAPI
 
+pytestmark = pytest.mark.glue
+
 TEST_SCHEMA = json.dumps(
     {
         "openapi": "3.0.3",

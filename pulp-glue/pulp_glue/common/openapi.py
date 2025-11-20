@@ -15,8 +15,7 @@ import aiofiles
 import aiofiles.os
 import aiohttp
 import requests
-import urllib3
-from multidict import CIMultiDict, MutableMultiMapping
+from multidict import CIMultiDict, CIMultiDictProxy, MutableMultiMapping
 
 from pulp_glue.common import __version__
 from pulp_glue.common.exceptions import (
@@ -41,9 +40,16 @@ SAFE_METHODS = ["GET", "HEAD", "OPTIONS"]
 
 
 @dataclass
+class _Request:
+    method: str
+    headers: MutableMultiMapping[str] | CIMultiDictProxy[str] | t.MutableMapping[str, str]
+    body: bytes | None
+
+
+@dataclass
 class _Response:
     status_code: int
-    headers: MutableMultiMapping[str] | t.MutableMapping[str, str]
+    headers: MutableMultiMapping[str] | CIMultiDictProxy[str] | t.MutableMapping[str, str]
     body: bytes
 
 
@@ -135,10 +141,38 @@ class BasicAuthProvider(AuthProviderBase):
     """
 
     def __init__(self, username: str, password: str):
+        self.username = username
+        self.password = password
         self.auth = requests.auth.HTTPBasicAuth(username, password)
 
     def basic_auth(self, scopes: list[str]) -> requests.auth.AuthBase | None:
         return self.auth
+
+
+class _Middleware:
+    def __init__(
+        self,
+        openapi: "OpenAPI",
+        security: t.Optional[t.List[t.Dict[str, t.List[str]]]],
+    ):
+        self._openapi = openapi
+        # self.method_spec  may be more interesting...
+        self._security = security
+
+    async def __call__(
+        self,
+        request: aiohttp.ClientRequest,
+        handler: aiohttp.ClientHandlerType,
+    ) -> aiohttp.ClientResponse:
+        if self._security:
+            # TODO
+            request.headers["Authorization"] = "basic YWRtaW46cGFzc3dvcmQ="
+
+        response = await handler(request)
+
+        if "Correlation-Id" in response.headers:
+            self._openapi._set_correlation_id(response.headers["Correlation-Id"])
+        return response
 
 
 class OpenAPI:
@@ -167,7 +201,7 @@ class OpenAPI:
         self,
         base_url: str,
         doc_path: str,
-        headers: CIMultiDict[str] | None = None,
+        headers: CIMultiDict[str] | CIMultiDictProxy[str] | None = None,
         auth_provider: AuthProviderBase | None = None,
         cert: str | None = None,
         key: str | None = None,
@@ -200,7 +234,7 @@ class OpenAPI:
         self._base_url: str = base_url
         self._doc_path: str = doc_path
         self._dry_run: bool = dry_run
-        self._headers = CIMultiDict(headers)
+        self._headers = CIMultiDict(headers or {})
         self._verify_ssl = verify_ssl
 
         self._auth_provider = auth_provider
@@ -216,35 +250,7 @@ class OpenAPI:
         if cid:
             self._headers["Correlation-Id"] = cid
 
-        self._setup_session()
-
         self.load_api(refresh_cache=refresh_cache)
-
-    def _setup_session(self) -> None:
-        # This is specific for the requests library.
-
-        if self._verify_ssl is False:
-            urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-
-        self._session: requests.Session = requests.session()
-        # Don't redirect, because carrying auth accross redirects is unsafe.
-        self._session.max_redirects = 0
-        self._session.headers.update(self._headers)
-        if self._auth_provider:
-            if self._cert or self._key:
-                raise OpenAPIError(_("Cannot use both 'auth' and 'cert'."))
-        else:
-            if self._cert and self._key:
-                self._session.cert = (self._cert, self._key)
-            elif self._cert:
-                self._session.cert = self._cert
-            elif self._key:
-                raise OpenAPIError(_("Cert is required if key is set."))
-        session_settings = self._session.merge_environment_settings(
-            self._base_url, {}, None, self._verify_ssl, None
-        )
-        self._session.verify = session_settings["verify"]
-        self._session.proxies = session_settings["proxies"]
 
     @property
     def base_url(self) -> str:
@@ -332,8 +338,6 @@ class OpenAPI:
                 )
         else:
             self._headers["Correlation-Id"] = correlation_id
-            # Do it for requests too...
-            self._session.headers["Correlation-Id"] = correlation_id
 
     def param_spec(
         self, operation_id: str, param_type: str, required: bool = False
@@ -511,19 +515,6 @@ class OpenAPI:
 
         return content_type, data, files
 
-    async def _http_middleware(
-        self, request: aiohttp.ClientRequest, handler: aiohttp.ClientHandlerType
-    ) -> aiohttp.ClientResponse:
-        for key, value in request.headers.items():
-            self._debug_callback(2, f"  {key}: {value}")
-        if request.body is not None:
-            self._debug_callback(3, f"{request.body!r}")
-        if self._dry_run and request.method.upper() not in SAFE_METHODS:
-            raise UnsafeCallError(_("Call aborted due to safe mode"))
-
-        response = await handler(request)
-        return response
-
     async def _send_request(
         self,
         path_spec: dict[str, t.Any],
@@ -535,44 +526,33 @@ class OpenAPI:
         validate_body: bool = True,
     ) -> _Response:
         method_spec = path_spec[method]
-        _headers = CIMultiDict(headers)
+        _headers = CIMultiDict(self._headers)
+        _headers.update(headers)
         content_type, data, files = self._render_request_body(method_spec, body, validate_body)
-        security: list[dict[str, list[str]]] | None = method_spec.get(
-            "security", self.api_spec.get("security")
-        )
-        if security and self._auth_provider:
-            if "Authorization" in self._session.headers:
-                # Bad idea, but you wanted it that way.
-                auth = None
-            else:
-                auth = self._auth_provider(security, self.api_spec["components"]["securitySchemes"])
+        security: list[dict[str, list[str]]] | None
+        if self._auth_provider and "Authorization" not in self._headers:
+            security = method_spec.get("security", self.api_spec.get("security"))
         else:
             # No auth required? Don't provide it.
             # No auth_provider available? Hope for the best (should do the trick for cert auth).
-            auth = None
+            # Authorization header present? You wanted it that way...
+            security = None
+
         # For we encode the json on our side.
         # Somehow this does not work properly for multipart...
         if content_type is not None and content_type.startswith("application/json"):
             _headers["Content-Type"] = content_type
-        request = self._session.prepare_request(
-            requests.Request(
-                method,
-                url,
-                auth=auth,
-                params=params,
-                headers=_headers,
-                data=data,
-                files=files,
-            )
-        )
-        if content_type:
-            assert request.headers["content-type"].startswith(
-                content_type
-            ), f"{request.headers['content-type']} != {content_type}"
+
+        for key, value in headers.items():
+            self._debug_callback(2, f"  {key}: {value}")
+        if data is not None:
+            self._debug_callback(3, f"{data!r}")
+
+        if self._dry_run and method.upper() not in SAFE_METHODS:
+            raise UnsafeCallError(_("Call aborted due to safe mode"))
+
         try:
-            async with aiohttp.ClientSession(
-                headers=self._headers, middlewares=(self._http_middleware,)
-            ) as session:
+            async with aiohttp.ClientSession() as session:
                 async with session.request(
                     method,
                     url,
@@ -581,36 +561,38 @@ class OpenAPI:
                     data=data,
                     # files=files,
                     ssl=self.ssl_context,
+                    max_redirects=0,
+                    middlewares=[_Middleware(self, security)],
                 ) as response:
-                    response.raise_for_status()
+                    # response.raise_for_status()
                     response_body = await response.read()
-        except requests.TooManyRedirects as e:
-            assert e.response is not None
+        except aiohttp.TooManyRedirects as e:
+            # We could handle that in the middleware...
+            assert e.history[-1] is not None
             raise OpenAPIError(
                 _("Received redirect to '{url}'. Please check your configuration.").format(
-                    url=e.response.headers["location"]
+                    url=e.history[-1].headers["location"]
                 )
             )
-        except requests.RequestException as e:
+        except aiohttp.ClientResponseError as e:
             raise OpenAPIError(str(e))
+
         self._debug_callback(1, _("Response: {status_code}").format(status_code=response.status))
         for key, value in response.headers.items():
             self._debug_callback(2, f"  {key}: {value}")
-        if response.text:
-            self._debug_callback(3, f"{response.text}")
-        if "Correlation-Id" in response.headers:
-            self._set_correlation_id(response.headers["Correlation-Id"])
+        if response_body:
+            self._debug_callback(3, f"{response_body!r}")
+
         if response.status == 401:
             raise PulpAuthenticationFailed(method_spec["operationId"])
         if response.status == 403:
             raise PulpNotAutorized(method_spec["operationId"])
         try:
             response.raise_for_status()
-        except requests.HTTPError as e:
-            if e.response is not None:
-                raise PulpHTTPError(str(e.response.text), e.response.status_code)
-            else:
-                raise PulpException(str(e))
+        except aiohttp.ClientResponseError as e:
+            raise PulpHTTPError(str(e), e.status)
+        except aiohttp.ClientError as e:
+            raise PulpException(str(e))
         return _Response(status_code=response.status, headers=response.headers, body=response_body)
 
     def _parse_response(self, method_spec: dict[str, t.Any], response: _Response) -> t.Any:

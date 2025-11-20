@@ -399,10 +399,10 @@ class PulpContext:
                 )
             except OpenAPIError as e:
                 raise PulpException(str(e))
+            self._patch_api_spec()
             # Rerun scheduled version checks
             for plugin_requirement in self._needed_plugins:
                 self.needs_plugin(plugin_requirement)
-            self._patch_api_spec()
         return self._api
 
     @property
