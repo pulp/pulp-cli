@@ -1,11 +1,6 @@
 import gettext
-import sys
 from functools import lru_cache
-
-if sys.version_info >= (3, 9):
-    from importlib.resources import files
-else:
-    from importlib_resources import files
+from importlib.resources import files
 
 
 # Need to call lru_cache() before using it as a decorator for python 3.7 compatibility

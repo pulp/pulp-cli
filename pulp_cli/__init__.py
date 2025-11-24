@@ -2,6 +2,7 @@ import logging
 import os
 import sys
 import typing as t
+from importlib.metadata import entry_points
 from types import ModuleType
 
 import click
@@ -9,11 +10,6 @@ from pulp_glue.common.i18n import get_translation
 
 from pulp_cli.config import CONFIG_LOCATIONS, config, config_options, validate_config
 from pulp_cli.generic import PulpCLIContext, pulp_group
-
-if sys.version_info >= (3, 10):
-    from importlib.metadata import entry_points
-else:
-    from importlib_metadata import entry_points
 
 if sys.version_info >= (3, 11):
     import tomllib

@@ -52,6 +52,9 @@ jobs:
             oas_version: "3.1.1"
             python: "3.11"
             upper_bounds: true
+          - image_tag: "3.85"
+            pulp_https: "true"
+            python: "3.14"
           - image_tag: "3.73"
             pulp_domain_enabled: "true"
             pulp_enabled_plugins: "['pulp-certguard', 'pulp_container', 'pulp_file', 'pulp_python', 'pulp_rpm']"
@@ -64,14 +67,11 @@ jobs:
             pulp_https: "true"
             python: "3.10"
           - image_tag: "3.39"
+            pulp_api_root: "/relocated/djnd/"
             python: "3.12"
           - image_tag: "3.28"
             lower_bounds: true
             python: "3.13"
-          - image_tag: "3.22"
-            lower_bounds: true
-            pulp_api_root: "/relocated/djnd/"
-            python: "3.9"
     steps:
       - uses: "actions/checkout@v5"
       - uses: "actions/cache@v4"
