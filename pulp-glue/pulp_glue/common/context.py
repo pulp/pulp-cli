@@ -1284,6 +1284,9 @@ class PulpEntityContext(PulpViewSetContext):
                 )
             )
 
+    def scan(self) -> t.Any:
+        return self.call("scan", parameters={self.HREF: self.pulp_href})
+
 
 class PulpRemoteContext(PulpEntityContext):
     """
