@@ -7,7 +7,7 @@ name = "pulp-glue"
 version = "0.37.0.dev"
 description = "Version agnostic glue library to talk to pulpcore's REST API."
 readme = "README.md"
-requires-python = ">=3.9,<3.15"
+requires-python = ">=3.10,<3.15"
 license = {text = "GPLv2+"}
 authors = [
   {name = "Pulp Team", email = "pulp-list@redhat.com"},
@@ -23,7 +23,6 @@ classifiers = [
   "Typing :: Typed",
 ]
 dependencies = [
-  "importlib_resources>=5.4.0,<6.2;python_version<'3.9'",
   "multidict>=6.0.5,<6.8",
   "packaging>=20.0,<=25.0",  # CalVer
   "requests>=2.24.0,<2.33",

@@ -6,8 +6,6 @@ requests==2.25.1;python_version>="3.12"
 schema==0.7.5
 tomli==2.0.0
 tomli-w==1.0.0
-importlib_metadata==4.8.0
-importlib_resources==5.4.0
 pygments==2.17.2
 click-shell==2.1
 SecretStorage==3.3.3

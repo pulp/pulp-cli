@@ -7,7 +7,7 @@ name = "pulp-cli"
 version = "0.37.0.dev"
 description = "Command line interface to talk to pulpcore's REST API."
 readme = "README.md"
-requires-python = ">=3.9,<3.15"
+requires-python = ">=3.10,<3.15"
 license = {text = "GPLv2+"}
 authors = [
   {name = "Pulp Team", email = "pulp-list@redhat.com"},
@@ -29,7 +29,6 @@ dependencies = [
   "schema>=0.7.5,<0.8",
   "tomli>=2.0.0,<2.1;python_version<'3.11'",
   "tomli-w>=1.0.0,<2",
-  "importlib_metadata>=4.8.0,<7.1;python_version<'3.10'",
 ]
 
 [project.optional-dependencies]
