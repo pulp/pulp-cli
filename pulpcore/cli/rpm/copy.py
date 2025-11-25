@@ -40,8 +40,8 @@ _ = gettext.gettext
 def copy(
     pulp_ctx: PulpCLIContext,
     /,
-    config: t.List[t.Dict[str, t.Any]],
-    dependency_solving: t.Optional[bool],
+    config: list[dict[str, t.Any]],
+    dependency_solving: bool | None,
 ) -> None:
     """ """
     copy_ctx = PulpRpmCopyContext(pulp_ctx)

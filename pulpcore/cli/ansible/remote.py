@@ -32,9 +32,7 @@ translation = get_translation(__package__)
 _ = translation.gettext
 
 
-def yaml_callback(
-    ctx: click.Context, param: click.Parameter, value: t.Any
-) -> t.Optional[t.Union[str, t.Any]]:
+def yaml_callback(ctx: click.Context, param: click.Parameter, value: t.Any) -> str | t.Any | None:
     if value:
         return f"{yaml.safe_load(value)}"
     return value

@@ -82,9 +82,7 @@ def _content_callback(ctx: click.Context, param: click.Parameter, value: t.Any) 
 CONTENT_LIST_SCHEMA = s.Schema([{"pulp_href": str}])
 
 
-def choice_to_int_callback(
-    ctx: click.Context, param: click.Parameter, value: t.Any
-) -> t.Optional[int]:
+def choice_to_int_callback(ctx: click.Context, param: click.Parameter, value: t.Any) -> int | None:
     if value:
         return int(value)
     return None
@@ -286,10 +284,10 @@ def sync(
     repository_ctx: PulpRepositoryContext,
     /,
     remote: EntityFieldDefinition,
-    mirror: t.Optional[bool],
-    optimize: t.Optional[bool],
-    skip_types: t.Optional[t.Iterable[str]],
-    sync_policy: t.Optional[str],
+    mirror: bool | None,
+    optimize: bool | None,
+    skip_types: t.Iterable[str] | None,
+    sync_policy: str | None,
 ) -> None:
     """
     Sync the repository from a remote source.
@@ -297,7 +295,7 @@ def sync(
     the repository
     """
     repo = repository_ctx.entity
-    body: t.Dict[str, t.Any] = {}
+    body: dict[str, t.Any] = {}
     if mirror is not None:
         body["mirror"] = mirror
     if optimize is not None:

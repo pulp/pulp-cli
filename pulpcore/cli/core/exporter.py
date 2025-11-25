@@ -99,7 +99,7 @@ def update(
     repository: t.Iterable[EntityFieldDefinition],
     repository_href: t.Iterable[str],
 ) -> None:
-    payload: t.Dict[str, t.Any] = {}
+    payload: dict[str, t.Any] = {}
 
     if path:
         payload["path"] = path

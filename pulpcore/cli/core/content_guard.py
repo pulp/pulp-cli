@@ -1,5 +1,3 @@
-import typing as t
-
 import click
 from pulp_glue.certguard.context import PulpRHSMCertGuardContext, PulpX509CertGuardContext
 from pulp_glue.common.context import PulpContentGuardContext, PulpEntityContext
@@ -142,8 +140,8 @@ def assign(
     pulp_ctx: PulpCLIContext,
     guard_ctx: PulpEntityContext,
     /,
-    users: t.Optional[t.List[str]],
-    groups: t.Optional[t.List[str]],
+    users: list[str] | None,
+    groups: list[str] | None,
 ) -> None:
     assert isinstance(guard_ctx, PulpRbacContentGuardContext)
 
@@ -172,8 +170,8 @@ def remove(
     pulp_ctx: PulpCLIContext,
     guard_ctx: PulpEntityContext,
     /,
-    users: t.Optional[t.List[str]],
-    groups: t.Optional[t.List[str]],
+    users: list[str] | None,
+    groups: list[str] | None,
 ) -> None:
     assert isinstance(guard_ctx, PulpRbacContentGuardContext)
 

@@ -62,8 +62,8 @@ def _sha256_callback(ctx: click.Context, param: click.Parameter, value: str) -> 
 
 
 def _sha256_artifact_callback(
-    ctx: click.Context, param: click.Parameter, value: t.Optional[str]
-) -> t.Optional[t.Union[str, PulpEntityContext]]:
+    ctx: click.Context, param: click.Parameter, value: str | None
+) -> str | PulpEntityContext | None:
     # Pass None and "" verbatim
     if value:
         pulp_ctx = ctx.find_object(PulpCLIContext)
@@ -458,7 +458,7 @@ def upload(
     pulp_ctx.output_result(result)
 
 
-def _latest_version_number(final_dest_repo_ctx: PulpRpmRepositoryContext) -> t.Optional[int]:
+def _latest_version_number(final_dest_repo_ctx: PulpRpmRepositoryContext) -> int | None:
     if final_dest_repo_ctx:
         repo_result = final_dest_repo_ctx.show()
         version_number = int(repo_result["latest_version_href"].split("/")[-2])
@@ -492,7 +492,7 @@ def _copy_to_final(
 
 def _upload_rpms(
     entity_ctx: PulpContentContext,
-    dest_repo_ctx: t.Optional[PulpRpmRepositoryContext],
+    dest_repo_ctx: PulpRpmRepositoryContext | None,
     directory: t.Any,
     chunk_size: int,
 ) -> t.Any:
@@ -542,13 +542,13 @@ def _upload_rpms(
 
 
 def _determine_upload_repository(
-    final_dest_repo_ctx: t.Optional[PulpRpmRepositoryContext],
+    final_dest_repo_ctx: PulpRpmRepositoryContext | None,
     pulp_ctx: PulpCLIContext,
     use_tmp: bool,
-) -> t.Optional[PulpRpmRepositoryContext]:
+) -> PulpRpmRepositoryContext | None:
     if use_tmp and final_dest_repo_ctx:
         dest_repo_ctx = PulpRpmRepositoryContext(pulp_ctx)
-        body: t.Dict[str, t.Any] = {
+        body: dict[str, t.Any] = {
             "name": f"uploadtmp_{final_dest_repo_ctx.entity['name']}_{uuid4()}",
             "retain_repo_versions": 1,
             "autopublish": False,

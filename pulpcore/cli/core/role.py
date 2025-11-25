@@ -29,7 +29,7 @@ def _no_permission_callback(ctx: click.Context, param: click.Parameter, value: b
 
 def _permission_callback(
     ctx: click.Context, param: click.Parameter, value: t.Iterable[str]
-) -> t.Optional[t.Iterable[str]]:
+) -> t.Iterable[str] | None:
     if ctx.meta.get(NO_PERMISSION_KEY, False):
         if value:
             raise click.ClickException(_("Cannot specify `--permission` and `--no-permission`."))

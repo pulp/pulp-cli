@@ -27,14 +27,14 @@ pass_export_context = click.make_pass_decorator(PulpExportContext)
 
 
 def _version_list_callback(
-    ctx: click.Context, param: click.Parameter, value: t.Iterable[t.Tuple[str, int]]
+    ctx: click.Context, param: click.Parameter, value: t.Iterable[tuple[str, int]]
 ) -> t.Iterable[PulpRepositoryVersionContext]:
     result = []
     pulp_ctx = ctx.find_object(PulpCLIContext)
     assert pulp_ctx is not None
     for item in value:
-        pulp_href: t.Optional[str] = None
-        entity: t.Optional[EntityDefinition] = None
+        pulp_href: str | None = None
+        entity: EntityDefinition | None = None
 
         if item[0].startswith("/"):
             pattern = rf"^{pulp_ctx.api_path}{PulpRepositoryContext.HREF_PATTERN}"
@@ -147,7 +147,7 @@ def run(
     exporter_ctx = PulpExporterContext(pulp_ctx)
     export_ctx.exporter = exporter_ctx.find(name=exporter)
 
-    body: t.Dict[str, t.Any] = dict(full=full)
+    body: dict[str, t.Any] = dict(full=full)
 
     if chunk_size:
         body["chunk_size"] = chunk_size

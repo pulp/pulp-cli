@@ -45,7 +45,7 @@ class PulpArtifactContext(PulpEntityContext):
     ID_PREFIX = "artifacts"
 
     def upload(
-        self, file: t.IO[bytes], chunk_size: int = 1000000, sha256: t.Optional[str] = None
+        self, file: t.IO[bytes], chunk_size: int = 1000000, sha256: str | None = None
     ) -> t.Any:
         size = os.path.getsize(file.name)
 
@@ -73,7 +73,7 @@ class PulpArtifactContext(PulpEntityContext):
             return self._entity["pulp_href"]
         if chunk_size > size:
             # if chunk_size is bigger than the file size, just upload it directly
-            artifact: t.Dict[str, t.Any] = self.create({"sha256": sha256_digest, "file": file})
+            artifact: dict[str, t.Any] = self.create({"sha256": sha256_digest, "file": file})
             self.pulp_href = artifact["pulp_href"]
             return artifact["pulp_href"]
 
@@ -113,7 +113,7 @@ class PulpExportContext(PulpEntityContext):
     exporter: EntityDefinition
 
     @property
-    def scope(self) -> t.Dict[str, t.Any]:
+    def scope(self) -> dict[str, t.Any]:
         return {PulpExporterContext.HREF: self.exporter["pulp_href"]}
 
 
@@ -158,8 +158,8 @@ class PulpGroupPermissionContext(PulpEntityContext):
         self,
         operation: str,
         non_blocking: bool = False,
-        parameters: t.Optional[t.Dict[str, t.Any]] = None,
-        body: t.Optional[t.Dict[str, t.Any]] = None,
+        parameters: dict[str, t.Any] | None = None,
+        body: dict[str, t.Any] | None = None,
         validate_body: bool = False,
     ) -> t.Any:
         # Workaroud because the openapi spec for GroupPermissions has always been broken.
@@ -193,7 +193,7 @@ class PulpGroupPermissionContext(PulpEntityContext):
         return search_result[0]
 
     @property
-    def scope(self) -> t.Dict[str, t.Any]:
+    def scope(self) -> dict[str, t.Any]:
         return {self.group_ctx.HREF: self.group_ctx.pulp_href}
 
 
@@ -239,7 +239,7 @@ class PulpGroupRoleContext(PulpEntityContext):
         self.group_ctx = group_ctx
 
     @property
-    def scope(self) -> t.Dict[str, t.Any]:
+    def scope(self) -> dict[str, t.Any]:
         return {self.group_ctx.HREF: self.group_ctx.pulp_href}
 
 
@@ -262,7 +262,7 @@ class PulpGroupUserContext(PulpEntityContext):
         self.group_ctx = group_ctx
 
     @property
-    def scope(self) -> t.Dict[str, t.Any]:
+    def scope(self) -> dict[str, t.Any]:
         return {self.group_ctx.HREF: self.group_ctx.pulp_href}
 
 
@@ -276,7 +276,7 @@ class PulpImporterContext(PulpEntityContext):
 class PulpOrphanContext(PulpViewSetContext):
     ID_PREFIX = "orphans_cleanup"
 
-    def cleanup(self, body: t.Optional[t.Dict[str, t.Any]] = None) -> t.Any:
+    def cleanup(self, body: dict[str, t.Any] | None = None) -> t.Any:
         if body is not None:
             body = preprocess_payload(body)
             if "orphan_protection_time" in body:
@@ -339,9 +339,9 @@ class PulpRbacContentGuardContext(PulpContentGuardContext):
 
     def assign(
         self,
-        href: t.Optional[str] = None,
-        users: t.Optional[t.List[str]] = None,
-        groups: t.Optional[t.List[str]] = None,
+        href: str | None = None,
+        users: list[str] | None = None,
+        groups: list[str] | None = None,
     ) -> t.Any:
         if self.pulp_ctx.has_plugin(PluginRequirement("core", specifier=">=3.17.0")):
             body: EntityDefinition = {"users": users, "groups": groups}
@@ -355,9 +355,9 @@ class PulpRbacContentGuardContext(PulpContentGuardContext):
 
     def remove(
         self,
-        href: t.Optional[str] = None,
-        users: t.Optional[t.List[str]] = None,
-        groups: t.Optional[t.List[str]] = None,
+        href: str | None = None,
+        users: list[str] | None = None,
+        groups: list[str] | None = None,
     ) -> t.Any:
         if self.pulp_ctx.has_plugin(PluginRequirement("core", specifier=">=3.17.0")):
             body: EntityDefinition = {"users": users, "groups": groups}
@@ -396,9 +396,9 @@ class PulpTaskContext(PulpEntityContext):
     ID_PREFIX = "tasks"
     CAPABILITIES = {"roles": [PluginRequirement("core", specifier=">=3.17.0")]}
 
-    resource_context: t.Optional[PulpEntityContext] = None
+    resource_context: PulpEntityContext | None = None
 
-    def _list(self, limit: int, offset: int, parameters: t.Dict[str, t.Any]) -> t.List[t.Any]:
+    def _list(self, limit: int, offset: int, parameters: dict[str, t.Any]) -> list[t.Any]:
         if (
             parameters.get("logging_cid") is not None
             or parameters.get("logging_cid__contains") is not None
@@ -434,7 +434,7 @@ class PulpTaskContext(PulpEntityContext):
 
         return super().list(limit=limit, offset=offset, parameters=parameters)
 
-    def cancel(self, task_href: t.Optional[str] = None, background: bool = False) -> t.Any:
+    def cancel(self, task_href: str | None = None, background: bool = False) -> t.Any:
         task_href = task_href or self.pulp_href
         task = self.call(
             "cancel",
@@ -447,7 +447,7 @@ class PulpTaskContext(PulpEntityContext):
             self.pulp_ctx.echo(_("Done."), err=True)
         return task
 
-    def profile_artifact_urls(self) -> t.Dict[str, str]:
+    def profile_artifact_urls(self) -> dict[str, str]:
         self.pulp_ctx.needs_plugin(PluginRequirement("core", specifier=">=3.57.0"))
         result = self.call(
             "profile_artifacts",
@@ -457,7 +457,7 @@ class PulpTaskContext(PulpEntityContext):
         return result
 
     @property
-    def scope(self) -> t.Dict[str, t.Any]:
+    def scope(self) -> dict[str, t.Any]:
         if self.resource_context:
             if self.pulp_ctx.has_plugin(PluginRequirement("core", specifier=">=3.22.0")):
                 return {"reserved_resources": self.resource_context.pulp_href}
@@ -468,11 +468,11 @@ class PulpTaskContext(PulpEntityContext):
 
     def purge(
         self,
-        finished_before: t.Optional[datetime.datetime],
-        states: t.Optional[t.List[str]],
+        finished_before: datetime.datetime | None,
+        states: list[str] | None,
     ) -> t.Any:
         self.pulp_ctx.needs_plugin(PluginRequirement("core", specifier=">=3.17.0"))
-        body: t.Dict[str, t.Any] = {}
+        body: dict[str, t.Any] = {}
         if finished_before:
             body["finished_before"] = finished_before
         if states:
@@ -482,7 +482,7 @@ class PulpTaskContext(PulpEntityContext):
             body=body,
         )
 
-    def summary(self) -> t.Dict[str, int]:
+    def summary(self) -> dict[str, int]:
         task_states = ["waiting", "skipped", "running", "completed", "failed", "canceled"]
         if self.pulp_ctx.has_plugin(PluginRequirement("core", specifier=">=3.14.0")):
             task_states.append("canceling")
@@ -578,7 +578,7 @@ class PulpUserRoleContext(PulpEntityContext):
         self.user_ctx = user_ctx
 
     @property
-    def scope(self) -> t.Dict[str, t.Any]:
+    def scope(self) -> dict[str, t.Any]:
         return {self.user_ctx.HREF: self.user_ctx.pulp_href}
 
 

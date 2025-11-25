@@ -16,15 +16,15 @@ TEST_SCHEMA = json.dumps(
 
 
 class MockRequest:
-    headers: t.Dict[str, str] = {}
-    body: t.Dict[str, t.Any] = {}
+    headers: dict[str, str] = {}
+    body: dict[str, t.Any] = {}
 
 
 class MockResponse:
     status_code = 200
-    headers: t.Dict[str, str] = {}
+    headers: dict[str, str] = {}
     text = "{}"
-    content: t.Dict[str, t.Any] = {}
+    content: dict[str, t.Any] = {}
 
     def raise_for_status(self) -> None:
         pass

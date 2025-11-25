@@ -162,7 +162,7 @@ def sync(
         raise click.ClickException(_("Repository type does not support sync."))
 
     repository = repository_ctx.entity
-    body: t.Dict[str, t.Any] = {}
+    body: dict[str, t.Any] = {}
 
     if remote:
         body["remote"] = remote
@@ -230,8 +230,8 @@ def copy_tag(
     repository_ctx: PulpRepositoryContext,
     /,
     source: PulpRepositoryContext,
-    version: t.Optional[int],
-    tags: t.List[str],
+    version: int | None,
+    tags: list[str],
 ) -> None:
     assert isinstance(repository_ctx, PulpContainerRepositoryContext)
 
@@ -281,9 +281,9 @@ def copy_manifest(
     repository_ctx: PulpRepositoryContext,
     /,
     source: PulpRepositoryContext,
-    version: t.Optional[int],
-    digests: t.List[str],
-    media_types: t.List[str],
+    version: int | None,
+    digests: list[str],
+    media_types: list[str],
 ) -> None:
     assert isinstance(repository_ctx, PulpContainerRepositoryContext)
 

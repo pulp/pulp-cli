@@ -1,5 +1,3 @@
-import typing as t
-
 from pulp_glue.common.i18n import get_translation
 
 translation = get_translation(__package__)
@@ -17,7 +15,7 @@ class PulpEntityNotFound(PulpException):
 class PulpHTTPError(PulpException):
     """Exception to indicate HTTP error responses."""
 
-    def __init__(self, msg: str, status_code: int, operation_id: t.Optional[str] = None) -> None:
+    def __init__(self, msg: str, status_code: int, operation_id: str | None = None) -> None:
         super().__init__(msg)
         self.status_code = status_code
         self.operation_id = operation_id

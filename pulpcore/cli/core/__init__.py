@@ -56,7 +56,7 @@ def mount(main: click.Group, **kwargs: t.Any) -> None:
 
     _orig_get_command = main.get_command
 
-    def patched_get_command(ctx: click.Context, cmd_name: str) -> t.Optional[click.Command]:
+    def patched_get_command(ctx: click.Context, cmd_name: str) -> click.Command | None:
         if cmd_name == "domains":
             click.echo("Please use 'domain' instead of 'domains'.", err=True)
             cmd_name = "domain"

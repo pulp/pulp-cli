@@ -1,5 +1,4 @@
 import re
-import typing as t
 from contextlib import suppress
 from datetime import datetime
 from pathlib import Path
@@ -30,9 +29,7 @@ _ = translation.gettext
 pass_task_context = click.make_pass_decorator(PulpTaskContext)
 
 
-def _uuid_callback(
-    ctx: click.Context, param: click.Parameter, value: t.Optional[str]
-) -> t.Optional[str]:
+def _uuid_callback(ctx: click.Context, param: click.Parameter, value: str | None) -> str | None:
     if value is not None:
         entity_ctx = ctx.find_object(PulpEntityContext)
         assert entity_ctx is not None
@@ -218,8 +215,8 @@ def profile_artifact_urls(
 def purge(
     task_ctx: PulpTaskContext,
     /,
-    finished: t.Optional[datetime],
-    state: t.Optional[t.Tuple[str]],
+    finished: datetime | None,
+    state: tuple[str] | None,
 ) -> None:
     state_list = list(state) if state else None
     task_ctx.purge(finished, state_list)

@@ -68,7 +68,7 @@ _ = translation.gettext
 
 
 _AnyCallable = t.Callable[..., t.Any]
-FC = t.TypeVar("FC", bound=t.Union[_AnyCallable, click.Command])
+FC = t.TypeVar("FC", bound=_AnyCallable | click.Command)
 
 HEADER_REGEX = r"^[-a-zA-Z0-9_]+:.+$"
 
@@ -86,7 +86,7 @@ class ClickNoWait(click.ClickException):
 
     exit_code = 0
 
-    def show(self, file: t.Optional[t.IO[str]] = None) -> None:
+    def show(self, file: t.IO[str] | None = None) -> None:
         # Format the message into file or STDERR.
         # Overwritten from base class to not print "Error: ".
         if file is None:
@@ -146,15 +146,15 @@ class PulpCLIContext(PulpContext):
     def __init__(
         self,
         api_root: str,
-        api_kwargs: t.Dict[str, t.Any],
+        api_kwargs: dict[str, t.Any],
         background_tasks: bool,
         timeout: int,
         format: str,
         domain: str = "default",
-        username: t.Optional[str] = None,
-        password: t.Optional[str] = None,
-        oauth2_client_id: t.Optional[str] = None,
-        oauth2_client_secret: t.Optional[str] = None,
+        username: str | None = None,
+        password: str | None = None,
+        oauth2_client_id: str | None = None,
+        oauth2_client_secret: str | None = None,
     ) -> None:
         self.username = username
         self.password = password
@@ -163,7 +163,7 @@ class PulpCLIContext(PulpContext):
         if not api_kwargs.get("cert"):
             api_kwargs["auth_provider"] = PulpCLIAuthProvider(pulp_ctx=self)
 
-        verify_ssl: t.Optional[bool] = api_kwargs.pop("verify_ssl", None)
+        verify_ssl: bool | None = api_kwargs.pop("verify_ssl", None)
         super().__init__(
             api_root=api_root,
             api_kwargs=api_kwargs,
@@ -199,9 +199,9 @@ if SECRET_STORAGE:
         def __init__(self, pulp_ctx: PulpCLIContext):
             self.pulp_ctx = pulp_ctx
             assert self.pulp_ctx.username is not None
-            self.password: t.Optional[str] = None
+            self.password: str | None = None
 
-            self.attr: t.Dict[str, str] = {
+            self.attr: dict[str, str] = {
                 "service": "pulp-cli",
                 "base_url": self.pulp_ctx.api.base_url,
                 "api_path": self.pulp_ctx.api_path,
@@ -251,9 +251,9 @@ if SECRET_STORAGE:
 class PulpCLIAuthProvider(AuthProviderBase):
     def __init__(self, pulp_ctx: PulpCLIContext):
         self.pulp_ctx = pulp_ctx
-        self._memoized: t.Dict[str, t.Optional[requests.auth.AuthBase]] = {}
+        self._memoized: dict[str, requests.auth.AuthBase | None] = {}
 
-    def basic_auth(self, scopes: t.List[str]) -> t.Optional[requests.auth.AuthBase]:
+    def basic_auth(self, scopes: list[str]) -> requests.auth.AuthBase | None:
         if "BASIC_AUTH" not in self._memoized:
             if self.pulp_ctx.username is None:
                 # No username -> No basic auth.
@@ -275,8 +275,8 @@ class PulpCLIAuthProvider(AuthProviderBase):
         return self._memoized["BASIC_AUTH"]
 
     def oauth2_client_credentials_auth(
-        self, flow: t.Any, scopes: t.List[str]
-    ) -> t.Optional[requests.auth.AuthBase]:
+        self, flow: t.Any, scopes: list[str]
+    ) -> requests.auth.AuthBase | None:
         token_url = flow["tokenUrl"]
         key = "OAUTH2_CLIENT_CREDENTIALS;" + token_url + ";" + ":".join(scopes)
         if key not in self._memoized:
@@ -328,7 +328,7 @@ pass_repository_version_context = click.make_pass_decorator(PulpRepositoryVersio
 # Custom types for parameters
 
 
-def int_or_empty(value: str) -> t.Union[str, int]:
+def int_or_empty(value: str) -> str | int:
     """
     Turns a string into an integer or keeps the empty string.
 
@@ -343,7 +343,7 @@ def int_or_empty(value: str) -> t.Union[str, int]:
 int_or_empty.__name__ = "int or empty"
 
 
-def float_or_empty(value: str) -> t.Union[str, float]:
+def float_or_empty(value: str) -> str | float:
     """
     Turns a string into a float or keeps the empty string.
 
@@ -366,8 +366,8 @@ class PulpCommand(click.Command):
     def __init__(
         self,
         *args: t.Any,
-        allowed_with_contexts: t.Optional[t.Tuple[t.Type[PulpEntityContext]]] = None,
-        needs_plugins: t.Optional[t.List[PluginRequirement]] = None,
+        allowed_with_contexts: tuple[t.Type[PulpEntityContext]] | None = None,
+        needs_plugins: list[PluginRequirement] | None = None,
         **kwargs: t.Any,
     ):
         self.allowed_with_contexts = allowed_with_contexts
@@ -399,9 +399,9 @@ class PulpCommand(click.Command):
                 self.help = self.help.format(entity=entity_ctx.ENTITY, entities=entity_ctx.ENTITIES)
         super().format_help_text(ctx, formatter)
 
-    def get_params(self, ctx: click.Context) -> t.List[click.Parameter]:
+    def get_params(self, ctx: click.Context) -> list[click.Parameter]:
         params = super().get_params(ctx)
-        new_params: t.List[click.Parameter] = []
+        new_params: list[click.Parameter] = []
         for param in params:
             if isinstance(param, PulpOption):
                 if param.allowed_with_contexts is not None:
@@ -415,7 +415,7 @@ class PulpGroup(PulpCommand, click.Group):
     command_class = PulpCommand
     group_class = type
 
-    def get_command(self, ctx: click.Context, cmd_name: str) -> t.Optional[click.Command]:
+    def get_command(self, ctx: click.Context, cmd_name: str) -> click.Command | None:
         # Overwriting this removes the command from the help message and from being callable
         cmd = super().get_command(ctx, cmd_name)
         if (
@@ -428,7 +428,7 @@ class PulpGroup(PulpCommand, click.Group):
             )
         return cmd
 
-    def list_commands(self, ctx: click.Context) -> t.List[str]:
+    def list_commands(self, ctx: click.Context) -> list[str]:
         commands_filtered_by_context = []
 
         for name, cmd in self.commands.items():
@@ -444,7 +444,7 @@ class PulpGroup(PulpCommand, click.Group):
 
 
 def pulp_command(
-    name: t.Optional[str] = None, **kwargs: t.Any
+    name: str | None = None, **kwargs: t.Any
 ) -> t.Callable[[_AnyCallable], PulpCommand]:
     """
     Pulp command factory.
@@ -456,9 +456,7 @@ def pulp_command(
     return click.command(name=name, cls=PulpCommand, **kwargs)
 
 
-def pulp_group(
-    name: t.Optional[str] = None, **kwargs: t.Any
-) -> t.Callable[[_AnyCallable], PulpGroup]:
+def pulp_group(name: str | None = None, **kwargs: t.Any) -> t.Callable[[_AnyCallable], PulpGroup]:
     """
     Pulp command group factory.
 
@@ -479,8 +477,8 @@ class PulpOption(click.Option):
     def __init__(
         self,
         *args: t.Any,
-        needs_plugins: t.Optional[t.List[PluginRequirement]] = None,
-        allowed_with_contexts: t.Optional[t.Tuple[t.Type[PulpEntityContext]]] = None,
+        needs_plugins: list[PluginRequirement] | None = None,
+        allowed_with_contexts: tuple[t.Type[PulpEntityContext]] | None = None,
         **kwargs: t.Any,
     ):
         self.needs_plugins = needs_plugins
@@ -503,7 +501,7 @@ class PulpOption(click.Option):
                 pulp_ctx.needs_plugin(plugin_requirement)
         return super().process_value(ctx, value)
 
-    def get_help_record(self, ctx: click.Context) -> t.Optional[t.Tuple[str, str]]:
+    def get_help_record(self, ctx: click.Context) -> tuple[str, str] | None:
         tmp = super().get_help_record(ctx)
         if tmp is None:
             return None
@@ -516,7 +514,7 @@ class PulpOption(click.Option):
 
 class GroupOption(PulpOption):
     def __init__(self, *args: t.Any, **kwargs: t.Any) -> None:
-        self.group: t.List[str] = kwargs.pop("group")
+        self.group: list[str] = kwargs.pop("group")
         assert self.group, "'group' parameter required"
         kwargs["help"] = (
             kwargs.get("help", "")
@@ -526,7 +524,7 @@ class GroupOption(PulpOption):
         super().__init__(*args, **kwargs)
 
     def handle_parse_result(
-        self, ctx: click.Context, opts: t.Mapping[str, t.Any], args: t.List[t.Any]
+        self, ctx: click.Context, opts: t.Mapping[str, t.Any], args: list[t.Any]
     ) -> t.Any:
         assert self.name is not None
         all_options = self.group + [self.name]
@@ -554,10 +552,8 @@ class GroupOption(PulpOption):
 @lru_cache(typed=True)
 def lookup_callback(
     attribute: str, context_class: t.Type[PulpEntityContext] = PulpEntityContext
-) -> t.Callable[[click.Context, click.Parameter, t.Optional[str]], t.Optional[str]]:
-    def _callback(
-        ctx: click.Context, param: click.Parameter, value: t.Optional[str]
-    ) -> t.Optional[str]:
+) -> t.Callable[[click.Context, click.Parameter, str | None], str | None]:
+    def _callback(ctx: click.Context, param: click.Parameter, value: str | None) -> str | None:
         if value is not None:
             if value == "":
                 value = "null"
@@ -571,10 +567,8 @@ def lookup_callback(
 
 def href_callback(
     context_class: t.Type[PulpEntityContext] = PulpEntityContext,
-) -> t.Callable[[click.Context, click.Parameter, t.Optional[str]], t.Optional[str]]:
-    def _href_callback(
-        ctx: click.Context, param: click.Parameter, value: t.Optional[str]
-    ) -> t.Optional[str]:
+) -> t.Callable[[click.Context, click.Parameter, str | None], str | None]:
+    def _href_callback(ctx: click.Context, param: click.Parameter, value: str | None) -> str | None:
         if value is not None:
             entity_ctx = ctx.find_object(context_class)
             assert entity_ctx is not None
@@ -603,9 +597,7 @@ def href_callback(
     return _href_callback
 
 
-def _version_callback(
-    ctx: click.Context, param: click.Parameter, value: t.Optional[int]
-) -> t.Optional[int]:
+def _version_callback(ctx: click.Context, param: click.Parameter, value: int | None) -> int | None:
     repository_version_ctx = ctx.find_object(PulpRepositoryVersionContext)
     assert repository_version_ctx is not None
     repository_version_ctx.entity = {"number": value}
@@ -622,7 +614,7 @@ def load_file_wrapper(handler: t.Callable[[click.Context, click.Parameter, str],
 
     @wraps(handler)
     def _load_file_or_string_wrapper(
-        ctx: click.Context, param: click.Parameter, value: t.Optional[str]
+        ctx: click.Context, param: click.Parameter, value: str | None
     ) -> t.Any:
         """Load the string from input, or from file if the value starts with @."""
         if not value:
@@ -653,7 +645,7 @@ It will read data from a file if their value starts with `"@"`, otherwise use it
 """
 
 
-def json_callback(ctx: click.Context, param: click.Parameter, value: t.Optional[str]) -> t.Any:
+def json_callback(ctx: click.Context, param: click.Parameter, value: str | None) -> t.Any:
     """A reusable callback that will parse its value from json."""
     if value is None:
         return None
@@ -675,8 +667,8 @@ Will optionally read from a file prefixed with `"@"`.
 
 
 def load_labels_callback(
-    ctx: click.Context, param: click.Parameter, value: t.Optional[str]
-) -> t.Optional[t.Dict[str, str]]:
+    ctx: click.Context, param: click.Parameter, value: str | None
+) -> dict[str, str] | None:
     if value is None:
         return value
 
@@ -689,13 +681,13 @@ def load_labels_callback(
 
 
 def create_content_json_callback(
-    context_class: t.Optional[t.Type[PulpContentContext]] = None,
-    schema: t.Optional[s.Schema] = None,
+    context_class: t.Type[PulpContentContext] | None = None,
+    schema: s.Schema | None = None,
 ) -> t.Any:
     @load_file_wrapper
     def _callback(
         ctx: click.Context, param: click.Parameter, value: str
-    ) -> t.Optional[t.List[PulpContentContext]]:
+    ) -> list[PulpContentContext] | None:
         ctx_class = context_class
         new_value = json_callback(ctx, param, value)
         if new_value is not None:
@@ -733,9 +725,7 @@ def parse_size_callback(ctx: click.Context, param: click.Parameter, value: str) 
     return int(float(number) * units[unit])
 
 
-def null_callback(
-    ctx: click.Context, param: click.Parameter, value: t.Optional[str]
-) -> t.Optional[str]:
+def null_callback(ctx: click.Context, param: click.Parameter, value: str | None) -> str | None:
     if value == "":
         return "null"
     return value
@@ -743,7 +733,7 @@ def null_callback(
 
 def remote_header_callback(
     ctx: click.Context, param: click.Parameter, value: t.Iterable[str]
-) -> t.Optional[t.List[t.Dict[str, str]]]:
+) -> list[dict[str, str]] | None:
     click.echo(value, err=True)
     if not value:
         return None
@@ -754,7 +744,7 @@ def remote_header_callback(
     if failed_headers:
         raise click.BadParameter(f"format must be <header-name>:<value> \n{failed_headers}")
 
-    result: t.List[t.Dict[str, str]] = []
+    result: list[dict[str, str]] = []
     for header in value:
         if header == "":
             result = []
@@ -800,11 +790,11 @@ def resource_lookup_option(*args: t.Any, **kwargs: t.Any) -> t.Callable[[FC], FC
     """
     A factory to create a lookup option that will pass the lookup to the closest matching Context.
     """
-    lookup_key: t.Optional[str] = kwargs.pop("lookup_key", "name")
+    lookup_key: str | None = kwargs.pop("lookup_key", "name")
     context_class: t.Type[PulpEntityContext] = kwargs.pop("context_class")
 
     def _option_callback(
-        ctx: click.Context, param: click.Parameter, value: t.Optional[str]
+        ctx: click.Context, param: click.Parameter, value: str | None
     ) -> EntityFieldDefinition:
         # Pass None and "" verbatim
         if not value:
@@ -886,25 +876,25 @@ def resource_option(*args: t.Any, **kwargs: t.Any) -> t.Callable[[FC], FC]:
     href.
     """
 
-    default_plugin: t.Optional[str] = kwargs.pop("default_plugin", None)
-    default_type: t.Optional[str] = kwargs.pop("default_type", None)
+    default_plugin: str | None = kwargs.pop("default_plugin", None)
+    default_type: str | None = kwargs.pop("default_type", None)
     lookup_key: str = kwargs.pop("lookup_key", "name")
-    context_table: t.Dict[str, t.Type[PulpEntityContext]] = kwargs.pop("context_table")
-    capabilities: t.Optional[t.List[str]] = kwargs.pop("capabilities", None)
-    href_pattern: t.Optional[str] = kwargs.pop("href_pattern", None)
-    parent_resource_lookup: t.Optional[t.Tuple[str, t.Type[PulpEntityContext]]] = kwargs.pop(
+    context_table: dict[str, t.Type[PulpEntityContext]] = kwargs.pop("context_table")
+    capabilities: list[str] | None = kwargs.pop("capabilities", None)
+    href_pattern: str | None = kwargs.pop("href_pattern", None)
+    parent_resource_lookup: tuple[str, t.Type[PulpEntityContext]] | None = kwargs.pop(
         "parent_resource_lookup", None
     )
 
     def _option_callback(
-        ctx: click.Context, param: click.Parameter, value: t.Optional[str]
+        ctx: click.Context, param: click.Parameter, value: str | None
     ) -> EntityFieldDefinition:
         # Pass None and "" verbatim
         if not value:
             return value
 
-        pulp_href: t.Optional[str] = None
-        entity: t.Optional[EntityDefinition] = None
+        pulp_href: str | None = None
+        entity: EntityDefinition | None = None
 
         pulp_ctx = ctx.find_object(PulpCLIContext)
         assert pulp_ctx is not None
@@ -1004,7 +994,7 @@ def resource_option(*args: t.Any, **kwargs: t.Any) -> t.Callable[[FC], FC]:
         return entity_ctx
 
     def _multi_option_callback(
-        ctx: click.Context, param: click.Parameter, value: t.Iterable[t.Optional[str]]
+        ctx: click.Context, param: click.Parameter, value: t.Iterable[str | None]
     ) -> t.Iterable[EntityFieldDefinition]:
         if value:
             return [_option_callback(ctx, param, item) for item in value]
@@ -1045,7 +1035,7 @@ def type_option(*args: t.Any, **kwargs: t.Any) -> t.Callable[[FC], FC]:
     """
     A factory for `--type` options to allow selecting the class of the `PulpEntityContext` to use.
     """
-    choices: t.Dict[str, t.Type[PulpEntityContext]] = kwargs.pop("choices")
+    choices: dict[str, t.Type[PulpEntityContext]] = kwargs.pop("choices")
     assert choices and isinstance(choices, dict)
     type_names = list(choices.keys())
     case_sensitive = kwargs.pop("case_sensitive", False)
@@ -1056,7 +1046,7 @@ def type_option(*args: t.Any, **kwargs: t.Any) -> t.Callable[[FC], FC]:
         "expose_value": False,
     }
 
-    def _type_callback(ctx: click.Context, param: click.Parameter, value: t.Optional[str]) -> str:
+    def _type_callback(ctx: click.Context, param: click.Parameter, value: str | None) -> str:
         pulp_ctx = ctx.find_object(PulpCLIContext)
         assert pulp_ctx
         if value is not None:
@@ -1651,8 +1641,8 @@ def role_command(**kwargs: t.Any) -> click.Command:
         entity_ctx: PulpEntityContext,
         /,
         role: str,
-        users: t.List[str],
-        groups: t.List[str],
+        users: list[str],
+        groups: list[str],
     ) -> None:
         result = entity_ctx.add_role(role, users, groups)
         pulp_ctx.output_result(result)
@@ -1668,8 +1658,8 @@ def role_command(**kwargs: t.Any) -> click.Command:
         entity_ctx: PulpEntityContext,
         /,
         role: str,
-        users: t.List[str],
-        groups: t.List[str],
+        users: list[str],
+        groups: list[str],
     ) -> None:
         result = entity_ctx.remove_role(role, users, groups)
         pulp_ctx.output_result(result)
@@ -1699,7 +1689,7 @@ def repository_content_command(**kwargs: t.Any) -> click.Group:
     )
 
     def version_callback(
-        ctx: click.Context, param: click.Parameter, value: t.Optional[int]
+        ctx: click.Context, param: click.Parameter, value: int | None
     ) -> PulpRepositoryVersionContext:
         repo_ctx = ctx.find_object(PulpRepositoryContext)
         assert repo_ctx is not None
@@ -1783,8 +1773,8 @@ def repository_content_command(**kwargs: t.Any) -> click.Group:
         repo_ctx: PulpRepositoryContext,
         base_repository: PulpRepositoryContext,
         base_version: int,
-        add_content: t.Optional[t.List[PulpContentContext]],
-        remove_content: t.Optional[t.List[PulpContentContext]],
+        add_content: list[PulpContentContext] | None,
+        remove_content: list[PulpContentContext] | None,
     ) -> None:
         if base_repository is None:
             base_repository = repo_ctx
@@ -1795,7 +1785,7 @@ def repository_content_command(**kwargs: t.Any) -> click.Group:
         rc = [unit.pulp_href for unit in remove_content] if remove_content else None
         repo_ctx.modify(add_content=ac, remove_content=rc, base_version=base_version_ctx)
 
-    command_decorators: t.Dict[click.Command, t.Optional[t.List[t.Callable[[FC], FC]]]] = {
+    command_decorators: dict[click.Command, list[t.Callable[[FC], FC]] | None] = {
         content_list: kwargs.pop("list_decorators", []),
         content_add: kwargs.pop("add_decorators", None),
         content_remove: kwargs.pop("remove_decorators", None),

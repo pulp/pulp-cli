@@ -32,13 +32,13 @@ loaded_plugins: t.MutableMapping[str, ModuleType] = {}
 
 
 def load_plugins(
-    enabled_plugins: t.Optional[t.List[str]] = None,
+    enabled_plugins: list[str] | None = None,
 ) -> t.MutableMapping[str, ModuleType]:
     ##############################################################################
     # Load plugins
     # https://packaging.python.org/guides/creating-and-discovering-plugins/#using-package-metadata
 
-    discovered_plugins: t.Dict[str, ModuleType] = {
+    discovered_plugins: dict[str, ModuleType] = {
         entry_point.name: entry_point.load()
         for entry_point in entry_points(group="pulp_cli.plugins")
         if (enabled_plugins is None or entry_point.name in enabled_plugins)
@@ -65,13 +65,13 @@ PROFILE_KEY = f"{__name__}.profile"
 # _load_config (also to be called exactly once).
 
 
-def _config_callback(ctx: click.Context, param: t.Any, value: t.Optional[str]) -> None:
+def _config_callback(ctx: click.Context, param: t.Any, value: str | None) -> None:
     ctx.meta[CONFIG_KEY] = value
     if PROFILE_KEY in ctx.meta:
         _load_config(ctx)
 
 
-def _config_profile_callback(ctx: click.Context, param: t.Any, value: t.Optional[str]) -> None:
+def _config_profile_callback(ctx: click.Context, param: t.Any, value: str | None) -> None:
     ctx.meta[PROFILE_KEY] = value
     if CONFIG_KEY in ctx.meta:
         _load_config(ctx)
@@ -81,7 +81,7 @@ def _load_config(ctx: click.Context) -> None:
     # Raise a runtime error if called a second time.
     assert ctx.default_map is None
 
-    enabled_plugins: t.Optional[t.List[str]] = None
+    enabled_plugins: list[str] | None = None
     try:
         config_path = ctx.meta[CONFIG_KEY]
         profile_key = ctx.meta[PROFILE_KEY]
@@ -189,13 +189,13 @@ def main(
     base_url: str,
     api_root: str,
     domain: str,
-    headers: t.List[str],
-    username: t.Optional[str],
-    password: t.Optional[str],
-    client_id: t.Optional[str],
-    client_secret: t.Optional[str],
-    cert: t.Optional[str],
-    key: t.Optional[str],
+    headers: list[str],
+    username: str | None,
+    password: str | None,
+    client_id: str | None,
+    client_secret: str | None,
+    cert: str | None,
+    key: str | None,
     verify_ssl: bool,
     format: str,
     verbose: int,

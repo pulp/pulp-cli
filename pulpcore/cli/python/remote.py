@@ -36,9 +36,7 @@ remote_lookup_option = resource_lookup_option(
 )
 
 
-def _package_list_callback(
-    ctx: click.Context, param: click.Parameter, value: t.Optional[str]
-) -> t.Any:
+def _package_list_callback(ctx: click.Context, param: click.Parameter, value: str | None) -> t.Any:
     """Parses the requirements file or JSON list for packages."""
     if not value:
         return value
@@ -113,7 +111,7 @@ remote.add_command(label_command(decorators=nested_lookup_options))
 
 
 # TODO Add support for 'from_bandersnatch' remote create endpoint
-def parse_requirements_string(requirements_string: str) -> t.List[str]:
+def parse_requirements_string(requirements_string: str) -> list[str]:
     """Parses the requirements string to find the packages listed."""
     requirements_string = requirements_string.strip()
     if not requirements_string or requirements_string.startswith("#"):
@@ -127,7 +125,7 @@ def parse_requirements_string(requirements_string: str) -> t.List[str]:
         return [requirements_string]
 
 
-def parse_requirements_file(requirements_file: str) -> t.List[str]:
+def parse_requirements_file(requirements_file: str) -> list[str]:
     """Parses the requirements.txt file."""
     requirements = list()
     try:

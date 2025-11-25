@@ -15,16 +15,16 @@ class OAuth2ClientCredentialsAuth(requests.auth.AuthBase):
         client_id: str,
         client_secret: str,
         token_url: str,
-        scopes: t.Optional[t.List[str]] = None,
-        verify_ssl: t.Optional[t.Union[str, bool]] = None,
+        scopes: list[str] | None = None,
+        verify_ssl: str | bool | None = None,
     ):
         self._token_server_auth = requests.auth.HTTPBasicAuth(client_id, client_secret)
         self._token_url = token_url
         self._scopes = scopes
         self._verify_ssl = verify_ssl
 
-        self._access_token: t.Optional[str] = None
-        self._expire_at: t.Optional[datetime] = None
+        self._access_token: str | None = None
+        self._expire_at: datetime | None = None
 
     def __call__(self, request: requests.PreparedRequest) -> requests.PreparedRequest:
         if self._expire_at is None or self._expire_at < datetime.now():

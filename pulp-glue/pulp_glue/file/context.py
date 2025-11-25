@@ -49,12 +49,12 @@ class PulpFileContentContext(PulpContentContext):
     def create(
         self,
         body: EntityDefinition,
-        parameters: t.Optional[t.Mapping[str, t.Any]] = None,
+        parameters: t.Mapping[str, t.Any] | None = None,
         non_blocking: bool = False,
     ) -> t.Any:
         if "sha256" in body:
             body = body.copy()
-            sha256: t.Optional[str] = body.pop("sha256")
+            sha256: str | None = body.pop("sha256")
         else:
             sha256 = None
         result = super().create(body=body, parameters=parameters, non_blocking=non_blocking)

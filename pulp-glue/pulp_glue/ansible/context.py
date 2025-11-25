@@ -27,7 +27,7 @@ class PulpAnsibleCollectionVersionContext(PulpContentContext):
     CAPABILITIES = {"upload": [PluginRequirement("ansible", specifier=">=0.16.0")]}
 
     def upload(self, file: t.IO[bytes], **kwargs: t.Any) -> t.Any:  # type:ignore
-        repository: t.Optional[PulpRepositoryContext] = kwargs.pop("repository", None)
+        repository: PulpRepositoryContext | None = kwargs.pop("repository", None)
         if self.capable("upload"):
             chunk_size: int = kwargs.pop("chunk_size", 1000000)
             return super().upload(file, chunk_size, repository, **kwargs)
@@ -61,7 +61,7 @@ class PulpAnsibleCollectionVersionSignatureContext(PulpContentContext):
     def create(
         self,
         body: EntityDefinition,
-        parameters: t.Optional[t.Mapping[str, t.Any]] = None,
+        parameters: t.Mapping[str, t.Any] | None = None,
         non_blocking: bool = False,
     ) -> t.Any:
         self.pulp_ctx.needs_plugin(

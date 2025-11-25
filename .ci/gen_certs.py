@@ -1,14 +1,11 @@
 import argparse
 import os
 import sys
-import typing as t
 
 import trustme
 
 
-def main(argv: t.Optional[t.List[str]] = None) -> None:
-    if argv is None:
-        argv = sys.argv[1:]
+def main() -> None:
 
     parser = argparse.ArgumentParser(prog="gen_certs")
     parser.add_argument(
@@ -18,7 +15,7 @@ def main(argv: t.Optional[t.List[str]] = None) -> None:
         help="Directory where certificates and keys are written to. Defaults to cwd.",
     )
 
-    args = parser.parse_args(argv)
+    args = parser.parse_args(sys.argv[1:])
     cert_dir = args.dir
 
     if not os.path.isdir(cert_dir):

@@ -1,5 +1,3 @@
-import typing as t
-
 import click
 from pulp_glue.ansible.context import PulpAnsibleDistributionContext, PulpAnsibleRepositoryContext
 from pulp_glue.common.context import (
@@ -107,11 +105,11 @@ distribution.add_command(
 def update(
     distribution_ctx: PulpEntityContext,
     /,
-    base_path: t.Optional[str],
+    base_path: str | None,
     repository: EntityFieldDefinition,
     content_guard: EntityFieldDefinition,
-    version: t.Optional[int],
-    pulp_labels: t.Optional[t.Dict[str, str]],
+    version: int | None,
+    pulp_labels: dict[str, str] | None,
 ) -> None:
     """
     To remove repository or repository_version fields set --repository to ""

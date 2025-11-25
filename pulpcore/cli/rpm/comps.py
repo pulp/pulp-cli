@@ -33,8 +33,8 @@ def comps_upload(
     pulp_ctx: PulpCLIContext,
     /,
     file: t.IO[bytes],
-    repository: t.Optional[EntityFieldDefinition],
-    replace: t.Optional[bool],
+    repository: EntityFieldDefinition | None,
+    replace: bool | None,
 ) -> None:
     """Create comps.xml content-units by uploading a comps.xml-formatted file"""
     entity_ctx = PulpRpmCompsXmlContext(pulp_ctx)
