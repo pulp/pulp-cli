@@ -398,7 +398,7 @@ class PulpTaskContext(PulpEntityContext):
 
     resource_context: t.Optional[PulpEntityContext] = None
 
-    def list(self, limit: int, offset: int, parameters: t.Dict[str, t.Any]) -> t.List[t.Any]:
+    def _list(self, limit: int, offset: int, parameters: t.Dict[str, t.Any]) -> t.List[t.Any]:
         if (
             parameters.get("logging_cid") is not None
             or parameters.get("logging_cid__contains") is not None
@@ -491,6 +491,11 @@ class PulpTaskContext(PulpEntityContext):
             payload = {"limit": 1, "state": state}
             result[state] = self.call("list", parameters=payload)["count"]
         return result
+
+    # "list" should be a reserverd word in Python...
+    # In this scope, we want to use the global "list" for typing hints.
+    list = _list
+    del _list
 
 
 class PulpTaskGroupContext(PulpEntityContext):
