@@ -21,7 +21,6 @@ from pulp_glue.common import __version__
 from pulp_glue.common.exceptions import (
     OpenAPIError,
     PulpAuthenticationFailed,
-    PulpException,
     PulpHTTPError,
     PulpNotAutorized,
     UnsafeCallError,
@@ -41,9 +40,14 @@ SAFE_METHODS = ["GET", "HEAD", "OPTIONS"]
 
 @dataclass
 class _Request:
+    operation_id: str
     method: str
+    url: str
     headers: MutableMultiMapping[str] | CIMultiDictProxy[str] | t.MutableMapping[str, str]
-    body: bytes | None
+    params: dict[str, str]
+    data: dict[str, t.Any] | str | None
+    files: list[tuple[str, tuple[str, UploadType, str]]] | None
+    security: list[dict[str, list[str]]] | None
 
 
 @dataclass
@@ -270,7 +274,8 @@ class OpenAPI:
                 _ssl_context = ssl.create_default_context(cafile=self._verify_ssl)
             else:
                 _ssl_context = ssl.create_default_context()
-            if self._cert is not None:
+            if self._cert:
+                print("CERT: ", self._cert)
                 _ssl_context.load_cert_chain(self._cert, self._key)
         return _ssl_context
 
@@ -515,7 +520,7 @@ class OpenAPI:
 
         return content_type, data, files
 
-    async def _send_request(
+    def _render_request(
         self,
         path_spec: dict[str, t.Any],
         method: str,
@@ -524,11 +529,11 @@ class OpenAPI:
         headers: dict[str, str],
         body: dict[str, t.Any] | None = None,
         validate_body: bool = True,
-    ) -> _Response:
+    ) -> _Request:
         method_spec = path_spec[method]
         _headers = CIMultiDict(self._headers)
         _headers.update(headers)
-        content_type, data, files = self._render_request_body(method_spec, body, validate_body)
+
         security: list[dict[str, list[str]]] | None
         if self._auth_provider and "Authorization" not in self._headers:
             security = method_spec.get("security", self.api_spec.get("security"))
@@ -538,34 +543,60 @@ class OpenAPI:
             # Authorization header present? You wanted it that way...
             security = None
 
+        content_type, data, files = self._render_request_body(method_spec, body, validate_body)
         # For we encode the json on our side.
         # Somehow this does not work properly for multipart...
         if content_type is not None and content_type.startswith("application/json"):
             _headers["Content-Type"] = content_type
 
-        for key, value in headers.items():
+        return _Request(
+            operation_id=method_spec["operationId"],
+            method=method,
+            url=url,
+            headers=_headers,
+            params=params,
+            data=data,
+            files=files,
+            security=security,
+        )
+
+    def _log_request(self, request: _Request) -> None:
+        if request.params:
+            qs = urlencode(request.params)
+            log_msg = f"{request.operation_id} : {request.method} {request.url}?{qs}"
+        else:
+            log_msg = f"{request.operation_id} : {request.method} {request.url}"
+        self._debug_callback(1, log_msg)
+        self._debug_callback(
+            2, "\n".join([f"  {key}=={value}" for key, value in request.params.items()])
+        )
+        for key, value in request.headers.items():
             self._debug_callback(2, f"  {key}: {value}")
-        if data is not None:
-            self._debug_callback(3, f"{data!r}")
+        if request.data is not None:
+            self._debug_callback(3, f"{request.data!r}")
 
-        if self._dry_run and method.upper() not in SAFE_METHODS:
-            raise UnsafeCallError(_("Call aborted due to safe mode"))
-
+    async def _send_request(
+        self,
+        request: _Request,
+    ) -> _Response:
         try:
             async with aiohttp.ClientSession() as session:
                 async with session.request(
-                    method,
-                    url,
-                    params=params,
-                    headers=_headers,
-                    data=data,
-                    # files=files,
+                    request.method,
+                    request.url,
+                    params=request.params,
+                    headers=request.headers,
+                    data=request.data,
+                    # files=request.files,
                     ssl=self.ssl_context,
                     max_redirects=0,
-                    middlewares=[_Middleware(self, security)],
-                ) as response:
+                    middlewares=[_Middleware(self, request.security)],
+                ) as r:
                     # response.raise_for_status()
-                    response_body = await response.read()
+                    response_body = await r.read()
+                    response = _Response(
+                        status_code=r.status, headers=r.headers, body=response_body
+                    )
         except aiohttp.TooManyRedirects as e:
             # We could handle that in the middleware...
             assert e.history[-1] is not None
@@ -577,25 +608,25 @@ class OpenAPI:
         except aiohttp.ClientResponseError as e:
             raise OpenAPIError(str(e))
 
-        self._debug_callback(1, _("Response: {status_code}").format(status_code=response.status))
+        return response
+
+    def _log_response(self, response: _Response) -> None:
+        self._debug_callback(
+            1, _("Response: {status_code}").format(status_code=response.status_code)
+        )
         for key, value in response.headers.items():
             self._debug_callback(2, f"  {key}: {value}")
-        if response_body:
-            self._debug_callback(3, f"{response_body!r}")
-
-        if response.status == 401:
-            raise PulpAuthenticationFailed(method_spec["operationId"])
-        if response.status == 403:
-            raise PulpNotAutorized(method_spec["operationId"])
-        try:
-            response.raise_for_status()
-        except aiohttp.ClientResponseError as e:
-            raise PulpHTTPError(str(e), e.status)
-        except aiohttp.ClientError as e:
-            raise PulpException(str(e))
-        return _Response(status_code=response.status, headers=response.headers, body=response_body)
+        if response.body:
+            self._debug_callback(3, f"{response.body!r}")
 
     def _parse_response(self, method_spec: dict[str, t.Any], response: _Response) -> t.Any:
+        if response.status_code == 401:
+            raise PulpAuthenticationFailed(method_spec["operationId"])
+        elif response.status_code == 403:
+            raise PulpNotAutorized(method_spec["operationId"])
+        elif response.status_code >= 300:
+            raise PulpHTTPError(response.body.decode(), response.status_code)
+
         if response.status_code == 204:
             return {}
 
@@ -668,26 +699,21 @@ class OpenAPI:
             )
         url = urljoin(self._base_url, path)
 
-        if query_params:
-            qs = urlencode(query_params)
-            log_msg = f"{operation_id} : {method} {url}?{qs}"
-        else:
-            log_msg = f"{operation_id} : {method} {url}"
-        self._debug_callback(1, log_msg)
-        self._debug_callback(
-            2, "\n".join([f"  {key}=={value}" for key, value in query_params.items()])
+        request = self._render_request(
+            path_spec,
+            method,
+            url,
+            query_params,
+            headers,
+            body,
+            validate_body=validate_body,
         )
+        self._log_request(request)
 
-        response = asyncio.run(
-            self._send_request(
-                path_spec,
-                method,
-                url,
-                query_params,
-                headers,
-                body,
-                validate_body=validate_body,
-            )
-        )
+        if self._dry_run and request.method.upper() not in SAFE_METHODS:
+            raise UnsafeCallError(_("Call aborted due to safe mode"))
 
+        response = asyncio.run(self._send_request(request))
+
+        self._log_response(response)
         return self._parse_response(method_spec, response)
