@@ -890,7 +890,7 @@ class PulpEntityContext(PulpViewSetContext):
             if response["next"] is None:
                 break
 
-    def list(self, limit: int, offset: int, parameters: t.Dict[str, t.Any]) -> t.List[t.Any]:
+    def _list(self, limit: int, offset: int, parameters: t.Dict[str, t.Any]) -> t.List[t.Any]:
         """
         List entities by the type of this context.
 
@@ -1283,6 +1283,11 @@ class PulpEntityContext(PulpViewSetContext):
                     capability=capability, entity=self.ENTITY
                 )
             )
+
+    # "list" should be a reserverd word in Python...
+    # In this scope, we want to use the global "list" for typing hints.
+    list = _list
+    del _list
 
 
 class PulpRemoteContext(PulpEntityContext):
