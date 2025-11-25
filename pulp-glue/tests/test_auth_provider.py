@@ -9,7 +9,7 @@ from pulp_glue.common.openapi import AuthProviderBase
 pytestmark = pytest.mark.glue
 
 
-SECURITY_SCHEMES: t.Dict[str, dict[str, t.Any]] = {
+SECURITY_SCHEMES: dict[str, dict[str, t.Any]] = {
     "A": {"type": "http", "scheme": "bearer"},
     "B": {"type": "http", "scheme": "basic"},
     "C": {

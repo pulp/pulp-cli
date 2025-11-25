@@ -32,8 +32,8 @@ path_option = click.option(
 
 
 def acs_command(
-    acs_contexts: t.Dict[str, t.Type[PulpACSContext]],
-    remote_context_table: t.Dict[str, t.Type[PulpRemoteContext]],
+    acs_contexts: dict[str, t.Type[PulpACSContext]],
+    remote_context_table: dict[str, t.Type[PulpRemoteContext]],
 ) -> click.Command:
     default_remote_plugin, default_remote_type = list(remote_context_table.keys())[0].split(":")
 

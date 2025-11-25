@@ -32,7 +32,7 @@ translation = get_translation(__package__)
 _ = translation.gettext
 _logger = logging.getLogger("pulp_glue.openapi")
 
-UploadType = t.Union[bytes, t.IO[bytes]]
+UploadType = bytes | t.IO[bytes]
 
 SAFE_METHODS = ["GET", "HEAD", "OPTIONS"]
 
@@ -40,7 +40,7 @@ SAFE_METHODS = ["GET", "HEAD", "OPTIONS"]
 @dataclass
 class _Response:
     status_code: int
-    headers: t.Union[MutableMultiMapping[str], t.MutableMapping[str, str]]
+    headers: MutableMultiMapping[str] | t.MutableMapping[str, str]
     body: bytes
 
 
@@ -53,13 +53,13 @@ class AuthProviderBase:
     Returned auth objects need to be compatible with `requests.auth.AuthBase`.
     """
 
-    def basic_auth(self, scopes: t.List[str]) -> t.Optional[requests.auth.AuthBase]:
+    def basic_auth(self, scopes: list[str]) -> requests.auth.AuthBase | None:
         """Implement this to provide means of http basic auth."""
         return None
 
     def http_auth(
-        self, security_scheme: t.Dict[str, t.Any], scopes: t.List[str]
-    ) -> t.Optional[requests.auth.AuthBase]:
+        self, security_scheme: dict[str, t.Any], scopes: list[str]
+    ) -> requests.auth.AuthBase | None:
         """Select a suitable http auth scheme or return None."""
         # https://www.iana.org/assignments/http-authschemes/http-authschemes.xhtml
         if security_scheme["scheme"] == "basic":
@@ -69,14 +69,14 @@ class AuthProviderBase:
         return None
 
     def oauth2_client_credentials_auth(
-        self, flow: t.Any, scopes: t.List[str]
-    ) -> t.Optional[requests.auth.AuthBase]:
+        self, flow: t.Any, scopes: list[str]
+    ) -> requests.auth.AuthBase | None:
         """Implement this to provide other authentication methods."""
         return None
 
     def oauth2_auth(
-        self, security_scheme: t.Dict[str, t.Any], scopes: t.List[str]
-    ) -> t.Optional[requests.auth.AuthBase]:
+        self, security_scheme: dict[str, t.Any], scopes: list[str]
+    ) -> requests.auth.AuthBase | None:
         """Select a suitable oauth2 flow or return None."""
         # Check flows by preference.
         if "clientCredentials" in security_scheme["flows"]:
@@ -93,13 +93,13 @@ class AuthProviderBase:
 
     def __call__(
         self,
-        security: t.List[t.Dict[str, t.List[str]]],
-        security_schemes: t.Dict[str, t.Dict[str, t.Any]],
-    ) -> t.Optional[requests.auth.AuthBase]:
+        security: list[dict[str, list[str]]],
+        security_schemes: dict[str, dict[str, t.Any]],
+    ) -> requests.auth.AuthBase | None:
 
         # Reorder the proposals by their type to prioritize properly.
         # Select only single mechanism proposals on the way.
-        proposed_schemes: t.Dict[str, t.Dict[str, t.List[str]]] = defaultdict(dict)
+        proposed_schemes: dict[str, dict[str, list[str]]] = defaultdict(dict)
         for proposal in security:
             if len(proposal) == 0:
                 # Empty proposal: No authentication needed. Shortcut return.
@@ -134,7 +134,7 @@ class BasicAuthProvider(AuthProviderBase):
     def __init__(self, username: str, password: str):
         self.auth = requests.auth.HTTPBasicAuth(username, password)
 
-    def basic_auth(self, scopes: t.List[str]) -> t.Optional[requests.auth.AuthBase]:
+    def basic_auth(self, scopes: list[str]) -> requests.auth.AuthBase | None:
         return self.auth
 
 
@@ -164,18 +164,18 @@ class OpenAPI:
         self,
         base_url: str,
         doc_path: str,
-        headers: t.Optional[CIMultiDict[str]] = None,
-        auth_provider: t.Optional[AuthProviderBase] = None,
-        cert: t.Optional[str] = None,
-        key: t.Optional[str] = None,
-        verify_ssl: t.Optional[t.Union[bool, str]] = True,
+        headers: CIMultiDict[str] | None = None,
+        auth_provider: AuthProviderBase | None = None,
+        cert: str | None = None,
+        key: str | None = None,
+        verify_ssl: bool | str | None = True,
         refresh_cache: bool = False,
         dry_run: bool = False,
-        debug_callback: t.Optional[t.Callable[[int, str], t.Any]] = None,
-        user_agent: t.Optional[str] = None,
-        cid: t.Optional[str] = None,
-        validate_certs: t.Optional[bool] = None,
-        safe_calls_only: t.Optional[bool] = None,
+        debug_callback: t.Callable[[int, str], t.Any] | None = None,
+        user_agent: str | None = None,
+        cid: str | None = None,
+        validate_certs: bool | None = None,
+        safe_calls_only: bool | None = None,
     ):
         if validate_certs is not None:
             warnings.warn(
@@ -247,7 +247,7 @@ class OpenAPI:
         return self._base_url
 
     @property
-    def cid(self) -> t.Optional[str]:
+    def cid(self) -> str | None:
         return self._headers.get("Correlation-Id")
 
     def load_api(self, refresh_cache: bool = False) -> None:
@@ -261,7 +261,7 @@ class OpenAPI:
         )
         try:
             if refresh_cache:
-                raise IOError()
+                raise OSError()
             with open(apidoc_cache, "rb") as f:
                 data: bytes = f.read()
             self._parse_api(data)
@@ -275,12 +275,12 @@ class OpenAPI:
                 f.write(data)
 
     def _parse_api(self, data: bytes) -> None:
-        self.api_spec: t.Dict[str, t.Any] = json.loads(data)
+        self.api_spec: dict[str, t.Any] = json.loads(data)
         if self.api_spec.get("openapi", "").startswith("3."):
             self.openapi_version: int = 3
         else:
             raise OpenAPIError(_("Unknown schema version"))
-        self.operations: t.Dict[str, t.Any] = {
+        self.operations: dict[str, t.Any] = {
             method_entry["operationId"]: (method, path)
             for path, path_entry in self.api_spec["paths"].items()
             for method, method_entry in path_entry.items()
@@ -312,7 +312,7 @@ class OpenAPI:
 
     def param_spec(
         self, operation_id: str, param_type: str, required: bool = False
-    ) -> t.Dict[str, t.Any]:
+    ) -> dict[str, t.Any]:
         method, path = self.operations[operation_id]
         path_spec = self.api_spec["paths"][path]
         method_spec = path_spec[method]
@@ -336,10 +336,10 @@ class OpenAPI:
     def _extract_params(
         self,
         param_in: str,
-        path_spec: t.Dict[str, t.Any],
-        method_spec: t.Dict[str, t.Any],
-        params: t.Dict[str, t.Any],
-    ) -> t.Dict[str, t.Any]:
+        path_spec: dict[str, t.Any],
+        method_spec: dict[str, t.Any],
+        params: dict[str, t.Any],
+    ) -> dict[str, t.Any]:
         param_specs = {
             entry["name"]: entry
             for entry in path_spec.get("parameters", [])
@@ -352,7 +352,7 @@ class OpenAPI:
                 if entry["in"] == param_in
             }
         )
-        result: t.Dict[str, t.Any] = {}
+        result: dict[str, t.Any] = {}
         for name in list(params.keys()):
             if name in param_specs:
                 param = params.pop(name)
@@ -393,15 +393,15 @@ class OpenAPI:
 
     def _render_request_body(
         self,
-        method_spec: t.Dict[str, t.Any],
-        body: t.Optional[t.Dict[str, t.Any]] = None,
+        method_spec: dict[str, t.Any],
+        body: dict[str, t.Any] | None = None,
         validate_body: bool = True,
-    ) -> t.Tuple[
-        t.Optional[str],
-        t.Optional[t.Union[t.Dict[str, t.Any], str]],
-        t.Optional[t.List[t.Tuple[str, t.Tuple[str, UploadType, str]]]],
+    ) -> tuple[
+        str | None,
+        dict[str, t.Any] | str | None,
+        list[tuple[str, tuple[str, UploadType, str]]] | None,
     ]:
-        content_types: t.List[str] = []
+        content_types: list[str] = []
         try:
             request_body_spec = method_spec["requestBody"]
         except KeyError:
@@ -416,9 +416,9 @@ class OpenAPI:
             content_types = list(request_body_spec["content"].keys())
         assert body is not None
 
-        content_type: t.Optional[str] = None
-        data: t.Optional[t.Union[t.Dict[str, t.Any], str]] = None
-        files: t.Optional[t.List[t.Tuple[str, t.Tuple[str, UploadType, str]]]] = None
+        content_type: str | None = None
+        data: dict[str, t.Any] | str | None = None
+        files: list[tuple[str, tuple[str, UploadType, str]]] | None = None
 
         candidate_content_types = [
             "multipart/form-data",
@@ -428,7 +428,7 @@ class OpenAPI:
                 "application/json",
                 "application/x-www-form-urlencoded",
             ] + candidate_content_types
-        errors: t.List[str] = []
+        errors: list[str] = []
         for candidate in candidate_content_types:
             content_type = next(
                 (
@@ -456,7 +456,7 @@ class OpenAPI:
                 elif content_type.startswith("application/x-www-form-urlencoded"):
                     data = body
                 elif content_type.startswith("multipart/form-data"):
-                    uploads: t.Dict[str, t.Tuple[str, UploadType, str]] = {}
+                    uploads: dict[str, tuple[str, UploadType, str]] = {}
                     data = {}
                     # Extract and prepare the files to upload
                     if body:
@@ -488,17 +488,17 @@ class OpenAPI:
 
     def _send_request(
         self,
-        path_spec: t.Dict[str, t.Any],
+        path_spec: dict[str, t.Any],
         method: str,
         url: str,
-        params: t.Dict[str, t.Any],
-        headers: t.Dict[str, str],
-        body: t.Optional[t.Dict[str, t.Any]] = None,
+        params: dict[str, t.Any],
+        headers: dict[str, str],
+        body: dict[str, t.Any] | None = None,
         validate_body: bool = True,
     ) -> _Response:
         method_spec = path_spec[method]
         content_type, data, files = self._render_request_body(method_spec, body, validate_body)
-        security: t.Optional[t.List[t.Dict[str, t.List[str]]]] = method_spec.get(
+        security: list[dict[str, list[str]]] | None = method_spec.get(
             "security", self.api_spec.get("security")
         )
         if security and self._auth_provider:
@@ -571,7 +571,7 @@ class OpenAPI:
             status_code=response.status_code, headers=response.headers, body=response.content
         )
 
-    def _parse_response(self, method_spec: t.Dict[str, t.Any], response: _Response) -> t.Any:
+    def _parse_response(self, method_spec: dict[str, t.Any], response: _Response) -> t.Any:
         if response.status_code == 204:
             return {}
 
@@ -597,8 +597,8 @@ class OpenAPI:
     def call(
         self,
         operation_id: str,
-        parameters: t.Optional[t.Dict[str, t.Any]] = None,
-        body: t.Optional[t.Dict[str, t.Any]] = None,
+        parameters: dict[str, t.Any] | None = None,
+        body: dict[str, t.Any] | None = None,
         validate_body: bool = True,
     ) -> t.Any:
         """

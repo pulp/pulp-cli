@@ -28,9 +28,7 @@ class HrefOrUuidCallback:
     def __init__(self, base_href: str) -> None:
         self.base_href = base_href
 
-    def __call__(
-        self, ctx: click.Context, param: click.Parameter, value: t.Optional[str]
-    ) -> t.Optional[str]:
+    def __call__(self, ctx: click.Context, param: click.Parameter, value: str | None) -> str | None:
         if value is not None:
             pulp_ctx = ctx.find_object(PulpCLIContext)
             assert pulp_ctx is not None

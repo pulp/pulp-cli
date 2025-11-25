@@ -71,9 +71,7 @@ CONTENT_LIST_SCHEMA = s.Schema([{"sha256": str, "relative_path": s.And(str, len)
 
 
 @load_file_wrapper
-def _content_list_callback(
-    ctx: click.Context, param: click.Parameter, value: t.Optional[str]
-) -> t.Any:
+def _content_list_callback(ctx: click.Context, param: click.Parameter, value: str | None) -> t.Any:
     if value is None:
         return None
 
@@ -189,14 +187,14 @@ def sync(
     repository_ctx: PulpRepositoryContext,
     /,
     remote: EntityFieldDefinition,
-    mirror: t.Optional[bool],
+    mirror: bool | None,
 ) -> None:
     """
     Sync the repository from a remote source.
     If remote is not specified sync will try to use the default remote associated with
     the repository
     """
-    body: t.Dict[str, t.Any] = {}
+    body: dict[str, t.Any] = {}
     repository = repository_ctx.entity
     if mirror is not None:
         body["mirror"] = mirror

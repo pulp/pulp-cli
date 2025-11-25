@@ -1,5 +1,3 @@
-import typing as t
-
 import click
 from pulp_glue.common.context import PluginRequirement, PulpEntityContext
 from pulp_glue.common.i18n import get_translation
@@ -63,7 +61,7 @@ def _object_required_callback(ctx: click.Context, param: click.Parameter, value:
 
 def _object_required_grouprole_lookup_callback(
     ctx: click.Context, param: click.Parameter, value: str
-) -> t.Optional[str]:
+) -> str | None:
     value = _object_required_callback(ctx, param, value)
     grouprole_lookup_callback = lookup_callback("content_object", PulpGroupRoleContext)
     return grouprole_lookup_callback(ctx, param, value)
@@ -149,7 +147,7 @@ permission.add_command(
 @click.option("--permission", required=True)
 @click.option("--object", "obj", callback=_object_callback)
 @pass_entity_context
-def add_permission(entity_ctx: PulpEntityContext, /, permission: str, obj: t.Optional[str]) -> None:
+def add_permission(entity_ctx: PulpEntityContext, /, permission: str, obj: str | None) -> None:
     assert isinstance(entity_ctx, PulpGroupPermissionContext)
 
     body = {"permission": permission}

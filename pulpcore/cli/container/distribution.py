@@ -103,12 +103,12 @@ distribution.add_command(label_command(decorators=nested_lookup_options))
 def update(
     distribution_ctx: PulpEntityContext,
     /,
-    base_path: t.Optional[str],
-    repository: t.Optional[t.Union[str, PulpEntityContext]],
+    base_path: str | None,
+    repository: str | PulpEntityContext | None,
     content_guard: EntityFieldDefinition,
-    version: t.Optional[int],
-    private: t.Optional[bool],
-    pulp_labels: t.Optional[t.Dict[str, str]],
+    version: int | None,
+    private: bool | None,
+    pulp_labels: dict[str, str] | None,
 ) -> None:
     assert isinstance(distribution_ctx, PulpContainerDistributionContext)
 

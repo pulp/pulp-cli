@@ -54,9 +54,9 @@ def prune_packages(
     pulp_ctx: PulpCLIContext,
     /,
     repositories: t.Iterable[PulpRpmRepositoryContext],
-    all_repositories: t.Optional[bool],
-    keep_days: t.Optional[int],
-    dry_run: t.Optional[bool],
+    all_repositories: bool | None,
+    keep_days: int | None,
+    dry_run: bool | None,
 ) -> None:
     """
     Prune older Packages from the current-version of a repository/repositories.
@@ -78,7 +78,7 @@ def prune_packages(
             _("cannot specify --all-repositories and --repository at the same time")
         )
 
-    repos_list: t.List[t.Union[str, PulpRpmRepositoryContext]] = (
+    repos_list: list[str | PulpRpmRepositoryContext] = (
         ["*"] if all_repositories else list(repositories)
     )
 

@@ -21,7 +21,7 @@ if t.TYPE_CHECKING:
 
 def pytest_collect_file(
     file_path: pathlib.Path, parent: pytest.Collector
-) -> t.Optional[pytest.Collector]:
+) -> pytest.Collector | None:
     if file_path.suffix == ".sh" and file_path.name.startswith("test_"):
         return ScriptFile.from_parent(parent, path=file_path)
     return None
@@ -31,7 +31,7 @@ class ScriptFile(pytest.File):
     # To make pytest.Function happy
     obj = None
 
-    def collect(self) -> t.Iterable[t.Union[pytest.Item, pytest.Collector]]:
+    def collect(self) -> t.Iterable[pytest.Item | pytest.Collector]:
         # Extract the name between "test_" and ".sh".
         name = self.path.name[5:][:-3]
         yield ScriptItem.from_parent(self, name=name, path=self.path)
@@ -48,7 +48,7 @@ class ScriptItem(pytest.Function):
             self.add_marker(path.parts[-2])
 
     def _runscript(
-        self, pulp_cli_env: t.Dict[str, t.Any], tmp_path: pathlib.Path, pulp_container_log: None
+        self, pulp_cli_env: dict[str, t.Any], tmp_path: pathlib.Path, pulp_container_log: None
     ) -> None:
         run = subprocess.run([self.path], cwd=tmp_path)
         if run.returncode == 23:
@@ -56,17 +56,15 @@ class ScriptItem(pytest.Function):
         if run.returncode != 0:
             raise ScriptError(f"Script returned with exit code {run.returncode}.")
 
-    def reportinfo(self) -> t.Tuple[pathlib.Path, int, str]:
+    def reportinfo(self) -> tuple[pathlib.Path, int, str]:
         return self.path, 0, f"test script: {self.name}"
 
     def repr_failure(
         self,
         excinfo: "ExceptionInfo[BaseException]",
         # older versions of python do not have typing.Literal ...
-        style: t.Optional[
-            't.Literal["long", "short", "line", "no", "native", "value", "auto"]'
-        ] = None,
-    ) -> t.Union[str, "TerminalRepr"]:
+        style: 't.Literal["long", "short", "line", "no", "native", "value", "auto"] | None' = None,
+    ) -> "str | TerminalRepr":
         if isinstance(excinfo.value, ScriptError):
             return str(excinfo.value)
         # Weird, that the subclass Function does not like the parameter "style".
@@ -78,7 +76,7 @@ class ScriptError(Exception):
 
 
 @pytest.fixture
-def pulp_cli_vars() -> t.Dict[str, str]:
+def pulp_cli_vars() -> dict[str, str]:
     """
     This fixture will return a dictionary that is used by `pulp_cli_env` to setup the environment.
     To inject more environment variables, it can overwritten.
@@ -90,7 +88,7 @@ def pulp_cli_vars() -> t.Dict[str, str]:
 
 
 @pytest.fixture(scope="session")
-def pulp_cli_settings() -> t.Dict[str, t.Dict[str, t.Any]]:
+def pulp_cli_settings() -> dict[str, dict[str, t.Any]]:
     """
     This fixture will setup the config file once per session only.
     It is most likely not useful to be included standalone.
@@ -129,7 +127,7 @@ def pulp_cli_settings() -> t.Dict[str, t.Dict[str, t.Any]]:
 
 @pytest.fixture(scope="session")
 def pulp_cli_settings_path(
-    tmp_path_factory: pytest.TempPathFactory, pulp_cli_settings: t.Dict[str, t.Dict[str, t.Any]]
+    tmp_path_factory: pytest.TempPathFactory, pulp_cli_settings: dict[str, dict[str, t.Any]]
 ) -> pathlib.Path:
     settings_path = tmp_path_factory.mktemp("config", numbered=False)
     (settings_path / "pulp").mkdir(parents=True)
@@ -161,9 +159,9 @@ def pulp_cli_gnupghome(tmp_path_factory: pytest.TempPathFactory) -> pathlib.Path
 
 @pytest.fixture
 def pulp_cli_env(
-    pulp_cli_settings: t.Dict[str, t.Dict[str, t.Any]],
+    pulp_cli_settings: dict[str, dict[str, t.Any]],
     pulp_cli_settings_path: pathlib.Path,
-    pulp_cli_vars: t.Dict[str, str],
+    pulp_cli_vars: dict[str, str],
     pulp_cli_gnupghome: pathlib.Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

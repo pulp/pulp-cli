@@ -49,7 +49,7 @@ def encode_param(value: t.Any) -> t.Any:
 def _assert_type(
     name: str,
     value: t.Any,
-    types: t.Union[t.Type[object], t.Tuple[t.Type[object], ...]],
+    types: t.Type[object] | tuple[t.Type[object], ...],
     type_name: str,
 ) -> None:
     if not isinstance(value, types):
@@ -91,7 +91,7 @@ def _assert_min_max(schema: t.Any, name: str, value: t.Any) -> None:
                 )
 
 
-def validate(schema: t.Any, name: str, value: t.Any, components: t.Dict[str, t.Any]) -> None:
+def validate(schema: t.Any, name: str, value: t.Any, components: dict[str, t.Any]) -> None:
     if (schema_ref := schema.get("$ref")) is not None:
         # From json-schema:
         # "All other properties in a "$ref" object MUST be ignored."
@@ -149,7 +149,7 @@ def validate(schema: t.Any, name: str, value: t.Any, components: t.Dict[str, t.A
 
 
 def _validate_type(
-    schema_type: str, schema: t.Any, name: str, value: t.Any, components: t.Dict[str, t.Any]
+    schema_type: str, schema: t.Any, name: str, value: t.Any, components: dict[str, t.Any]
 ) -> None:
     if (typed_validator := _TYPED_VALIDATORS.get(schema_type)) is not None:
         typed_validator(schema, name, value, components)
@@ -159,14 +159,14 @@ def _validate_type(
         )
 
 
-def _validate_ref(schema_ref: str, name: str, value: t.Any, components: t.Dict[str, t.Any]) -> None:
+def _validate_ref(schema_ref: str, name: str, value: t.Any, components: dict[str, t.Any]) -> None:
     if not schema_ref.startswith("#/components/schemas/"):
         raise SchemaError(_("'{name}' contains an invalid reference.").format(name=name))
     schema_name = schema_ref[21:]
     validate(components[schema_name], name, value, components)
 
 
-def _validate_array(schema: t.Any, name: str, value: t.Any, components: t.Dict[str, t.Any]) -> None:
+def _validate_array(schema: t.Any, name: str, value: t.Any, components: dict[str, t.Any]) -> None:
     _assert_type(name, value, list, "array")
     if (min_items := schema.get("minItems")) is not None:
         if len(value) < min_items:
@@ -190,15 +190,11 @@ def _validate_array(schema: t.Any, name: str, value: t.Any, components: t.Dict[s
         validate(schema["items"], f"{name}[{i}]", item, components)
 
 
-def _validate_boolean(
-    schema: t.Any, name: str, value: t.Any, components: t.Dict[str, t.Any]
-) -> None:
+def _validate_boolean(schema: t.Any, name: str, value: t.Any, components: dict[str, t.Any]) -> None:
     _assert_type(name, value, bool, "boolean")
 
 
-def _validate_integer(
-    schema: t.Any, name: str, value: t.Any, components: t.Dict[str, t.Any]
-) -> None:
+def _validate_integer(schema: t.Any, name: str, value: t.Any, components: dict[str, t.Any]) -> None:
     _assert_type(name, value, int, "integer")
     _assert_min_max(schema, name, value)
 
@@ -211,21 +207,17 @@ def _validate_integer(
             )
 
 
-def _validate_null(schema: t.Any, name: str, value: t.Any, components: t.Dict[str, t.Any]) -> None:
+def _validate_null(schema: t.Any, name: str, value: t.Any, components: dict[str, t.Any]) -> None:
     if value is not None:
         raise ValidationError(_("'{name}' is expected to be a null").format(name=name))
 
 
-def _validate_number(
-    schema: t.Any, name: str, value: t.Any, components: t.Dict[str, t.Any]
-) -> None:
+def _validate_number(schema: t.Any, name: str, value: t.Any, components: dict[str, t.Any]) -> None:
     _assert_type(name, value, (float, int), "number")
     _assert_min_max(schema, name, value)
 
 
-def _validate_object(
-    schema: t.Any, name: str, value: t.Any, components: t.Dict[str, t.Any]
-) -> None:
+def _validate_object(schema: t.Any, name: str, value: t.Any, components: dict[str, t.Any]) -> None:
     _assert_type(name, value, dict, "object")
     extra_values = {}
     properties = schema.get("properties", {})
@@ -234,9 +226,7 @@ def _validate_object(
             validate(pschema, f"{name}[{pname}]", pvalue, components)
         else:
             extra_values[pname] = pvalue
-    additional_properties: t.Union[bool, t.Dict[str, t.Any]] = schema.get(
-        "additionalProperties", {}
-    )
+    additional_properties: bool | dict[str, t.Any] = schema.get("additionalProperties", {})
     if len(extra_values) > 0:
         if additional_properties is False:
             raise ValidationError(
@@ -254,9 +244,7 @@ def _validate_object(
             )
 
 
-def _validate_string(
-    schema: t.Any, name: str, value: t.Any, components: t.Dict[str, t.Any]
-) -> None:
+def _validate_string(schema: t.Any, name: str, value: t.Any, components: dict[str, t.Any]) -> None:
     schema_format = schema.get("format")
     if schema_format == "byte":
         _assert_type(name, value, bytes, "bytes")

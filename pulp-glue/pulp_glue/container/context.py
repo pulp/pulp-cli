@@ -142,9 +142,9 @@ class PulpContainerRepositoryContext(PulpContainerBaseRepositoryContext):
 
     def modify(
         self,
-        add_content: t.Optional[t.List[str]] = None,
-        remove_content: t.Optional[t.List[str]] = None,
-        base_version: t.Optional[t.Union[str, PulpRepositoryVersionContext]] = None,
+        add_content: list[str] | None = None,
+        remove_content: list[str] | None = None,
+        base_version: str | PulpRepositoryVersionContext | None = None,
     ) -> t.Any:
         if remove_content:
             self.call(
@@ -159,15 +159,15 @@ class PulpContainerRepositoryContext(PulpContainerBaseRepositoryContext):
                 body={"content_units": add_content},
             )
 
-    def copy_tag(self, source_href: str, tags: t.Optional[t.List[str]]) -> t.Any:
+    def copy_tag(self, source_href: str, tags: list[str] | None) -> t.Any:
         body = {"source_repository_version": source_href, "names": tags}
         return self.call("copy_tags", parameters={self.HREF: self.pulp_href}, body=body)
 
     def copy_manifest(
         self,
         source_href: str,
-        digests: t.Optional[t.List[str]],
-        media_types: t.Optional[t.List[str]],
+        digests: list[str] | None,
+        media_types: list[str] | None,
     ) -> t.Any:
         body = {
             "source_repository_version": source_href,

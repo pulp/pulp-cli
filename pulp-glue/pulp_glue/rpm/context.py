@@ -67,9 +67,7 @@ class PulpRpmCompsXmlContext(PulpEntityContext):
     UPLOAD_COMPS_ID: t.ClassVar[str] = "rpm_comps_upload"
     NEEDS_PLUGINS = [PluginRequirement("rpm", specifier=">=3.17.0")]
 
-    def upload_comps(
-        self, file: t.IO[bytes], repo_href: t.Optional[str], replace: t.Optional[bool]
-    ) -> t.Any:
+    def upload_comps(self, file: t.IO[bytes], repo_href: str | None, replace: bool | None) -> t.Any:
         self.pulp_ctx.echo(_("Uploading file {filename}").format(filename=file.name), err=True)
         file.seek(0)
         return self.call(
@@ -129,10 +127,10 @@ class PulpRpmPackageContext(PulpContentContext):
 
     def list_iterator(
         self,
-        parameters: t.Optional[t.Dict[str, t.Any]] = None,
+        parameters: dict[str, t.Any] | None = None,
         offset: int = 0,
         batch_size: int = BATCH_SIZE,
-        stats: t.Optional[t.Dict[str, t.Any]] = None,
+        stats: dict[str, t.Any] | None = None,
     ) -> t.Iterator[t.Any]:
         contains_startswith = [
             "name__contains",
@@ -159,7 +157,7 @@ class PulpRpmPackageContext(PulpContentContext):
         self,
         file: t.IO[bytes],
         chunk_size: int,
-        repository: t.Optional[PulpRepositoryContext],
+        repository: PulpRepositoryContext | None,
         **kwargs: t.Any,
     ) -> t.Any:
         """
@@ -178,7 +176,7 @@ class PulpRpmPackageContext(PulpContentContext):
         """
         self.needs_capability("upload")
         size = os.path.getsize(file.name)
-        body: t.Dict[str, t.Any] = {**kwargs}
+        body: dict[str, t.Any] = {**kwargs}
 
         if not self.pulp_ctx.fake_mode:
             if chunk_size > size:
@@ -486,7 +484,7 @@ class PulpRpmRepositoryContext(PulpRepositoryContext):
 
         return body
 
-    def sync(self, body: t.Optional[EntityDefinition] = None) -> t.Any:
+    def sync(self, body: EntityDefinition | None = None) -> t.Any:
         if body:
             if body.get("optimize") is not None:
                 self.pulp_ctx.needs_plugin(PluginRequirement("rpm", specifier=">=3.3.0"))
@@ -506,11 +504,11 @@ class PulpRpmPruneContext(PulpViewSetContext):
 
     def prune_packages(
         self,
-        repo_hrefs: t.List[t.Union[str, PulpRpmRepositoryContext]],
-        keep_days: t.Optional[int],
-        dry_run: t.Optional[bool],
+        repo_hrefs: list[str | PulpRpmRepositoryContext],
+        keep_days: int | None,
+        dry_run: bool | None,
     ) -> t.Any:
-        body: t.Dict[str, t.Any] = {
+        body: dict[str, t.Any] = {
             "repo_hrefs": repo_hrefs,
             "keep_days": keep_days,
             "dry_run": dry_run,
@@ -524,10 +522,10 @@ class PulpRpmCopyContext(PulpViewSetContext):
 
     def copy(
         self,
-        config: t.List[t.Dict[str, t.Any]],
-        dependency_solving: t.Optional[bool] = False,
+        config: list[dict[str, t.Any]],
+        dependency_solving: bool | None = False,
     ) -> t.Any:
-        body: t.Dict[str, t.Any] = {
+        body: dict[str, t.Any] = {
             "config": config,
             "dependency_solving": dependency_solving,
         }

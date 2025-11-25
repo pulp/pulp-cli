@@ -72,9 +72,7 @@ CONTENT_LIST_SCHEMA = s.Schema([{"sha256": str, "filename": s.And(str, len)}])
 
 
 @load_file_wrapper
-def _content_list_callback(
-    ctx: click.Context, param: click.Parameter, value: t.Optional[str]
-) -> t.Any:
+def _content_list_callback(ctx: click.Context, param: click.Parameter, value: str | None) -> t.Any:
     if value is None:
         return None
 
@@ -192,7 +190,7 @@ def sync(
     the repository
     """
     repository = repository_ctx.entity
-    body: t.Dict[str, t.Any] = {}
+    body: dict[str, t.Any] = {}
 
     if remote:
         body["remote"] = remote

@@ -45,7 +45,7 @@ if IPYTHON_AVAILABLE:
           - ctx: click.Context
           - pulp_ctx: PulpContext
         """
-        user_ns: t.Dict[str, t.Any] = {
+        user_ns: dict[str, t.Any] = {
             # modules
             "click": click,
             # Classes
@@ -67,13 +67,13 @@ def has_cli_plugin(
     pulp_ctx: PulpCLIContext,
     /,
     name: str,
-    specifier: t.Optional[str],
+    specifier: str | None,
 ) -> None:
     """
     Check whether a specific cli plugin is installed.
     """
     available = False
-    plugin: t.Optional[ModuleType] = ctx.meta["pulp_cli.plugins"].get(name)
+    plugin: ModuleType | None = ctx.meta["pulp_cli.plugins"].get(name)
     if plugin:
         if specifier:
             version = getattr(plugin, "__version__", None)
@@ -99,7 +99,7 @@ def has_plugin(
     pulp_ctx: PulpCLIContext,
     /,
     name: str,
-    specifier: t.Optional[str],
+    specifier: str | None,
 ) -> None:
     """
     Check whether a specific plugin is installed on the server.
@@ -193,7 +193,7 @@ def call(
     WARNING: Danger ahead!
     """
     try:
-        params: t.Dict[str, str] = dict(parameter.partition("=")[::2] for parameter in parameters)
+        params: dict[str, str] = dict(parameter.partition("=")[::2] for parameter in parameters)
     except ValueError:
         raise click.ClickException("Parameters must be in the form <key>=<value>.")
     if uploads:

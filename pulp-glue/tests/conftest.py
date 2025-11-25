@@ -18,7 +18,7 @@ FAKE_OPENAPI_SPEC = json.dumps(
 
 @pytest.fixture
 def pulp_ctx(
-    request: pytest.FixtureRequest, pulp_cli_settings: t.Dict[str, t.Dict[str, t.Any]]
+    request: pytest.FixtureRequest, pulp_cli_settings: dict[str, dict[str, t.Any]]
 ) -> PulpContext:
     if not any((mark.name == "live" for mark in request.node.iter_markers())):
         pytest.fail("This fixture can only be used in live (integration) tests.")
@@ -46,14 +46,14 @@ def mock_pulp_ctx(
     )
 
     verbose = request.config.getoption("verbose")
-    settings: t.Dict[str, t.Any] = {"base_url": "nowhere"}
+    settings: dict[str, t.Any] = {"base_url": "nowhere"}
     settings["debug_callback"] = lambda i, s: i <= verbose and print(s)
     return PulpContext.from_config(settings)
 
 
 @pytest.fixture
 def fake_pulp_ctx(
-    request: pytest.FixtureRequest, pulp_cli_settings: t.Dict[str, t.Dict[str, t.Any]]
+    request: pytest.FixtureRequest, pulp_cli_settings: dict[str, dict[str, t.Any]]
 ) -> PulpContext:
     if not any((mark.name == "live" for mark in request.node.iter_markers())):
         pytest.fail("This fixture can only be used in live (integration) tests.")

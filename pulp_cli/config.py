@@ -21,7 +21,7 @@ _ = translation.gettext
 
 _T = t.TypeVar("_T")
 _AnyCallable = t.Callable[..., t.Any]
-FC = t.TypeVar("FC", bound=t.Union[_AnyCallable, click.Command])
+FC = t.TypeVar("FC", bound=_AnyCallable | click.Command)
 
 CONFIG_LOCATIONS = [
     "/etc/pulp/cli.toml",
@@ -59,7 +59,7 @@ def headers_callback(
             raise click.BadParameter(f"format must be <header-name>:<value> \n{failed_headers}")
 
     default_map = ctx.default_map or {}
-    headers: t.List[str] = default_map.get("headers", [])
+    headers: list[str] = default_map.get("headers", [])
     headers.extend(value)
     return headers
 
@@ -122,7 +122,7 @@ CONFIG_OPTIONS = [
 ]
 
 
-def not_none(value: t.Optional[_T], exc: t.Optional[Exception] = None) -> _T:
+def not_none(value: _T | None, exc: Exception | None = None) -> _T:
     if value is None:
         raise exc or RuntimeError(_("Value cannot be None."))
     return value
@@ -134,9 +134,9 @@ def config_options(command: FC) -> FC:
     return command
 
 
-def validate_config(config: t.Dict[str, t.Any], strict: bool = False) -> None:
+def validate_config(config: dict[str, t.Any], strict: bool = False) -> None:
     """Validate, that the config provides the proper data types"""
-    errors: t.List[str] = []
+    errors: list[str] = []
     if "base_url" in config:
         try:
             parsed_url = urlparse(config["base_url"])
@@ -194,9 +194,9 @@ def validate_config(config: t.Dict[str, t.Any], strict: bool = False) -> None:
 
 
 def validate_settings(
-    settings: t.MutableMapping[str, t.Dict[str, t.Any]], strict: bool = False
+    settings: t.MutableMapping[str, dict[str, t.Any]], strict: bool = False
 ) -> None:
-    errors: t.List[str] = []
+    errors: list[str] = []
     if "cli" not in settings:
         errors.append(_("Could not locate default profile 'cli' setting"))
 

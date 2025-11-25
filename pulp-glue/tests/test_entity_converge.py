@@ -11,7 +11,7 @@ pytestmark = pytest.mark.glue
 
 
 @pytest.fixture
-def file_remote(pulp_ctx: PulpContext) -> t.Iterator[t.Dict[str, t.Any]]:
+def file_remote(pulp_ctx: PulpContext) -> t.Iterator[dict[str, t.Any]]:
     name = "".join(random.choices(string.ascii_letters, k=8))
     file_remote_ctx = PulpFileRemoteContext(pulp_ctx)
     yield file_remote_ctx.create(body={"name": name, "url": "https://localhost/"})
@@ -19,7 +19,7 @@ def file_remote(pulp_ctx: PulpContext) -> t.Iterator[t.Dict[str, t.Any]]:
 
 
 @pytest.fixture
-def file_repository(pulp_ctx: PulpContext) -> t.Iterator[t.Dict[str, t.Any]]:
+def file_repository(pulp_ctx: PulpContext) -> t.Iterator[dict[str, t.Any]]:
     name = "".join(random.choices(string.ascii_letters, k=8))
     file_repository_ctx = PulpFileRepositoryContext(pulp_ctx)
     yield file_repository_ctx.create(body={"name": name})
@@ -57,7 +57,7 @@ def test_converge_crud(pulp_ctx: PulpContext) -> None:
 
 @pytest.mark.live
 def test_converge_linked_object(
-    pulp_ctx: PulpContext, file_repository: t.Dict[str, t.Any], file_remote: t.Dict[str, t.Any]
+    pulp_ctx: PulpContext, file_repository: dict[str, t.Any], file_remote: dict[str, t.Any]
 ) -> None:
     name = file_repository["name"]
     entity_ctx = PulpFileRepositoryContext(pulp_ctx, entity={"name": name})
@@ -78,7 +78,7 @@ def test_converge_linked_object(
 
 
 @pytest.mark.live
-def test_converge_href(pulp_ctx: PulpContext, file_repository: t.Dict[str, t.Any]) -> None:
+def test_converge_href(pulp_ctx: PulpContext, file_repository: dict[str, t.Any]) -> None:
     entity_ctx = PulpFileRepositoryContext(pulp_ctx, pulp_href=file_repository["pulp_href"])
     assert entity_ctx.converge({})[0] is False
 

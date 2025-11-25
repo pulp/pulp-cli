@@ -208,7 +208,7 @@ def sync(
     the repository
     """
     repository = repository_ctx.entity
-    body: t.Dict[str, t.Any] = {}
+    body: dict[str, t.Any] = {}
 
     if remote:
         body["remote"] = remote
@@ -235,7 +235,7 @@ def sign(
     repository_ctx: PulpRepositoryContext,
     /,
     signing_service: PulpSigningServiceContext,
-    content_units: t.Optional[t.List[str]],
+    content_units: list[str] | None,
 ) -> None:
     """Sign the collections in the repository using the signing service specified."""
     if content_units is None:

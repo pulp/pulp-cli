@@ -1,5 +1,3 @@
-import typing as t
-
 import click
 from pulp_glue.common.context import PluginRequirement, PulpEntityContext
 from pulp_glue.common.i18n import get_translation
@@ -39,7 +37,7 @@ def _object_required_callback(ctx: click.Context, param: click.Parameter, value:
 
 def _object_required_userrole_lookup_callback(
     ctx: click.Context, param: click.Parameter, value: str
-) -> t.Optional[str]:
+) -> str | None:
     value = _object_required_callback(ctx, param, value)
     userrole_lookup_callback = lookup_callback("content_object", PulpUserRoleContext)
     return userrole_lookup_callback(ctx, param, value)

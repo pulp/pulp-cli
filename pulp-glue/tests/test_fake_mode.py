@@ -12,7 +12,7 @@ pytestmark = pytest.mark.glue
 
 
 @pytest.fixture
-def file_repository(pulp_ctx: PulpContext) -> t.Iterator[t.Dict[str, t.Any]]:
+def file_repository(pulp_ctx: PulpContext) -> t.Iterator[dict[str, t.Any]]:
     name = "".join(random.choices(string.ascii_letters, k=8))
     repository_ctx = PulpFileRepositoryContext(pulp_ctx)
     yield repository_ctx.create(body={"name": name})
@@ -41,7 +41,7 @@ def test_fake_repository_create(fake_pulp_ctx: PulpContext) -> None:
 
 @pytest.mark.live
 def test_fake_repository_update(
-    fake_pulp_ctx: PulpContext, file_repository: t.Dict[str, t.Any]
+    fake_pulp_ctx: PulpContext, file_repository: dict[str, t.Any]
 ) -> None:
     repository_ctx = PulpFileRepositoryContext(
         fake_pulp_ctx, pulp_href=file_repository["pulp_href"]
@@ -58,7 +58,7 @@ def test_fake_repository_update(
 
 @pytest.mark.live
 def test_fake_repository_delete(
-    fake_pulp_ctx: PulpContext, file_repository: t.Dict[str, t.Any]
+    fake_pulp_ctx: PulpContext, file_repository: dict[str, t.Any]
 ) -> None:
     repository_ctx = PulpFileRepositoryContext(
         fake_pulp_ctx, pulp_href=file_repository["pulp_href"]

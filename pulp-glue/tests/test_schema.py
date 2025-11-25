@@ -316,7 +316,7 @@ def test_validates(schema: t.Any, value: t.Any) -> None:
         ),
     ],
 )
-def test_validation_failed(schema: t.Any, value: t.Any, match: t.Optional[str]) -> None:
+def test_validation_failed(schema: t.Any, value: t.Any, match: str | None) -> None:
     with pytest.raises(ValidationError, match=match or r"'testvar.*'"):
         validate(schema, "testvar", value, COMPONENTS)
 
