@@ -76,7 +76,6 @@ class TestOpenAPILogs:
         mock_openapi.call("get_test_id")
         assert caplog.record_tuples == [
             ("pulp_glue.openapi", logging.DEBUG + 3, "get_test_id : get test/"),
-            ("pulp_glue.openapi", logging.DEBUG + 2, ""),
             ("pulp_glue.openapi", logging.DEBUG + 2, "  User-Agent: test agent"),
             ("pulp_glue.openapi", logging.DEBUG + 2, "  Accept: application/json"),
             ("pulp_glue.openapi", logging.DEBUG + 3, "Response: 200"),
@@ -92,7 +91,6 @@ class TestOpenAPILogs:
         mock_openapi.call("post_test_id", body={"text": "Trace"})
         assert caplog.record_tuples == [
             ("pulp_glue.openapi", logging.DEBUG + 3, "post_test_id : post test/"),
-            ("pulp_glue.openapi", logging.DEBUG + 2, ""),
             ("pulp_glue.openapi", logging.DEBUG + 2, "  User-Agent: test agent"),
             ("pulp_glue.openapi", logging.DEBUG + 2, "  Accept: application/json"),
             ("pulp_glue.openapi", logging.DEBUG + 2, "  Content-Type: application/json"),

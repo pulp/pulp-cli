@@ -23,7 +23,8 @@ classifiers = [
   "Typing :: Typed",
 ]
 dependencies = [
-  "aiohttp>=3.10.10,<3.11",
+  "aiofiles>=25.1.0,<25.2",
+  "aiohttp>=3.12.0,<3.14",
   "multidict>=6.0.5,<6.8",
   "packaging>=20.0,<=25.0",  # CalVer
   "requests>=2.24.0,<2.33",

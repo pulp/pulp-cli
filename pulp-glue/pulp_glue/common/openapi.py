@@ -5,6 +5,7 @@ import os
 import ssl
 import typing as t
 import warnings
+from base64 import b64encode
 from collections import defaultdict
 from dataclasses import dataclass
 from functools import cached_property
@@ -44,10 +45,10 @@ class _Request:
     method: str
     url: str
     headers: MutableMultiMapping[str] | CIMultiDictProxy[str] | t.MutableMapping[str, str]
-    params: dict[str, str]
-    data: dict[str, t.Any] | str | None
-    files: list[tuple[str, tuple[str, UploadType, str]]] | None
-    security: list[dict[str, list[str]]] | None
+    params: dict[str, str] | None = None
+    data: dict[str, t.Any] | str | None = None
+    files: dict[str, tuple[str, UploadType, str]] | None = None
+    security: list[dict[str, list[str]]] | None = None
 
 
 @dataclass
@@ -169,9 +170,23 @@ class _Middleware:
         handler: aiohttp.ClientHandlerType,
     ) -> aiohttp.ClientResponse:
         if self._security:
-            # TODO
-            request.headers["Authorization"] = "basic YWRtaW46cGFzc3dvcmQ="
-
+            assert self._openapi._auth_provider is not None
+            auth = self._openapi._auth_provider(
+                self._security, self._openapi.api_spec["components"]["securitySchemes"]
+            )
+            if isinstance(auth, requests.auth.HTTPBasicAuth):
+                username = (
+                    auth.username.encode("latin1")
+                    if isinstance(auth.username, str)
+                    else auth.username
+                )
+                password = (
+                    auth.password.encode("latin1")
+                    if isinstance(auth.password, str)
+                    else auth.password
+                )
+                secret = b64encode(username + b":" + password)
+                request.headers["Authorization"] = "Basic " + secret.decode()
         response = await handler(request)
 
         if "Correlation-Id" in response.headers:
@@ -275,7 +290,6 @@ class OpenAPI:
             else:
                 _ssl_context = ssl.create_default_context()
             if self._cert:
-                print("CERT: ", self._cert)
                 _ssl_context.load_cert_chain(self._cert, self._key)
         return _ssl_context
 
@@ -283,7 +297,7 @@ class OpenAPI:
         asyncio.run(self._load_api(refresh_cache=refresh_cache))
 
     async def _load_api(self, refresh_cache: bool = False) -> None:
-        # TODO: Find a way to invalidate caches on upstream change
+        # TODO: Find a way to invalidate caches on upstream change.
         xdg_cache_home: str = os.environ.get("XDG_CACHE_HOME") or "~/.cache"
         apidoc_cache: str = os.path.join(
             os.path.expanduser(xdg_cache_home),
@@ -293,15 +307,16 @@ class OpenAPI:
         )
         try:
             if refresh_cache:
+                # Fake that we did not find the cache.
                 raise OSError()
             async with aiofiles.open(apidoc_cache, mode="rb") as f:
                 data: bytes = await f.read()
             self._parse_api(data)
         except Exception:
-            # Try again with a freshly downloaded version
+            # Try again with a freshly downloaded version.
             data = await self._download_api()
             self._parse_api(data)
-            # Write to cache as it seems to be valid
+            # Write to cache as it seems to be valid.
             await aiofiles.os.makedirs(os.path.dirname(apidoc_cache), exist_ok=True)
             async with aiofiles.open(apidoc_cache, mode="bw") as f:
                 await f.write(data)
@@ -320,18 +335,17 @@ class OpenAPI:
         }
 
     async def _download_api(self) -> bytes:
-        try:
-            async with aiohttp.ClientSession(headers=self._headers) as session:
-                async with session.get(
-                    urljoin(self._base_url, self._doc_path), ssl=self.ssl_context
-                ) as response:
-                    response.raise_for_status()
-                    data = await response.read()
-                if "Correlation-Id" in response.headers:
-                    self._set_correlation_id(response.headers["Correlation-Id"])
-        except aiohttp.ClientError as e:
-            raise OpenAPIError(str(e))
-        return data
+        response = await self._send_request(
+            _Request(
+                operation_id="",
+                method="get",
+                url=urljoin(self._base_url, self._doc_path),
+                headers=self._headers,
+            )
+        )
+        if response.status_code != 200:
+            raise OpenAPIError(_("Failed to find api docs."))
+        return response.body
 
     def _set_correlation_id(self, correlation_id: str) -> None:
         if "Correlation-Id" in self._headers:
@@ -433,7 +447,7 @@ class OpenAPI:
     ) -> tuple[
         str | None,
         dict[str, t.Any] | str | None,
-        list[tuple[str, tuple[str, UploadType, str]]] | None,
+        dict[str, tuple[str, UploadType, str]] | None,
     ]:
         content_types: list[str] = []
         try:
@@ -452,7 +466,7 @@ class OpenAPI:
 
         content_type: str | None = None
         data: dict[str, t.Any] | str | None = None
-        files: list[tuple[str, tuple[str, UploadType, str]]] | None = None
+        files: dict[str, tuple[str, UploadType, str]] | None = None
 
         candidate_content_types = [
             "multipart/form-data",
@@ -490,21 +504,19 @@ class OpenAPI:
                 elif content_type.startswith("application/x-www-form-urlencoded"):
                     data = body
                 elif content_type.startswith("multipart/form-data"):
-                    uploads: dict[str, tuple[str, UploadType, str]] = {}
                     data = {}
+                    files = {}
                     # Extract and prepare the files to upload
                     if body:
                         for key, value in body.items():
                             if isinstance(value, (bytes, BufferedReader)):
-                                uploads[key] = (
+                                files[key] = (
                                     getattr(value, "name", key),
                                     value,
                                     "application/octet-stream",
                                 )
                             else:
                                 data[key] = value
-                    if uploads:
-                        files = [(key, upload_data) for key, upload_data in uploads.items()]
                 break
         else:
             # No known content-type left
@@ -563,22 +575,35 @@ class OpenAPI:
     def _log_request(self, request: _Request) -> None:
         if request.params:
             qs = urlencode(request.params)
-            log_msg = f"{request.operation_id} : {request.method} {request.url}?{qs}"
+            self._debug_callback(1, f"{request.operation_id} : {request.method} {request.url}?{qs}")
+            self._debug_callback(
+                2, "\n".join([f"  {key}=={value}" for key, value in request.params.items()])
+            )
         else:
-            log_msg = f"{request.operation_id} : {request.method} {request.url}"
-        self._debug_callback(1, log_msg)
-        self._debug_callback(
-            2, "\n".join([f"  {key}=={value}" for key, value in request.params.items()])
-        )
+            self._debug_callback(1, f"{request.operation_id} : {request.method} {request.url}")
         for key, value in request.headers.items():
             self._debug_callback(2, f"  {key}: {value}")
         if request.data is not None:
             self._debug_callback(3, f"{request.data!r}")
+        if request.files is not None:
+            for key, (name, _dummy, content_type) in request.files.items():
+                self._debug_callback(3, f"{key} <- {name} [{content_type}]")
 
     async def _send_request(
         self,
         request: _Request,
     ) -> _Response:
+        # This function uses aiohttp to translate the _Request into a _Response.
+        data: aiohttp.FormData | dict[str, t.Any] | str | None
+        if request.files:
+            assert isinstance(request.data, dict)
+            data = aiohttp.FormData(default_to_multipart=True)
+            for key, value in request.data.items():
+                data.add_field(key, encode_param(value))
+            for key, (name, value, content_type) in request.files.items():
+                data.add_field(key, value, filename=name, content_type=content_type)
+        else:
+            data = request.data
         try:
             async with aiohttp.ClientSession() as session:
                 async with session.request(
@@ -586,13 +611,11 @@ class OpenAPI:
                     request.url,
                     params=request.params,
                     headers=request.headers,
-                    data=request.data,
-                    # files=request.files,
+                    data=data,
                     ssl=self.ssl_context,
                     max_redirects=0,
                     middlewares=[_Middleware(self, request.security)],
                 ) as r:
-                    # response.raise_for_status()
                     response_body = await r.read()
                     response = _Response(
                         status_code=r.status, headers=r.headers, body=response_body
@@ -601,8 +624,12 @@ class OpenAPI:
             # We could handle that in the middleware...
             assert e.history[-1] is not None
             raise OpenAPIError(
-                _("Received redirect to '{url}'. Please check your configuration.").format(
-                    url=e.history[-1].headers["location"]
+                _(
+                    "Received redirect to '{new_url} from {old_url}'."
+                    " Please check your configuration."
+                ).format(
+                    new_url=e.history[-1].headers["location"],
+                    old_url=request.url,
                 )
             )
         except aiohttp.ClientResponseError as e:
@@ -669,8 +696,8 @@ class OpenAPI:
             The JSON decoded server response if any.
 
         Raises:
-            OpenAPIValidationError: on failed input validation (no request was sent to the server).
-            requests.HTTPError: on failures related to the HTTP call made.
+            ValidationError: on failed input validation (no request was sent to the server).
+            OpenAPIError: on failures related to the HTTP call made.
         """
         method, path = self.operations[operation_id]
         path_spec = self.api_spec["paths"][path]
