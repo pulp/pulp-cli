@@ -1,25 +1,27 @@
-# copyright (c) 2020, Matthias Dellweg
-# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
-
+import asyncio
 import json
 import logging
 import os
+import ssl
 import typing as t
 import warnings
+from base64 import b64encode
 from collections import defaultdict
 from dataclasses import dataclass
+from functools import cached_property
 from io import BufferedReader
 from urllib.parse import urlencode, urljoin
 
+import aiofiles
+import aiofiles.os
+import aiohttp
 import requests
-import urllib3
-from multidict import CIMultiDict, MutableMultiMapping
+from multidict import CIMultiDict, CIMultiDictProxy, MutableMultiMapping
 
 from pulp_glue.common import __version__
 from pulp_glue.common.exceptions import (
     OpenAPIError,
     PulpAuthenticationFailed,
-    PulpException,
     PulpHTTPError,
     PulpNotAutorized,
     UnsafeCallError,
@@ -38,9 +40,21 @@ SAFE_METHODS = ["GET", "HEAD", "OPTIONS"]
 
 
 @dataclass
+class _Request:
+    operation_id: str
+    method: str
+    url: str
+    headers: MutableMultiMapping[str] | CIMultiDictProxy[str] | t.MutableMapping[str, str]
+    params: dict[str, str] | None = None
+    data: dict[str, t.Any] | str | None = None
+    files: dict[str, tuple[str, UploadType, str]] | None = None
+    security: list[dict[str, list[str]]] | None = None
+
+
+@dataclass
 class _Response:
     status_code: int
-    headers: MutableMultiMapping[str] | t.MutableMapping[str, str]
+    headers: MutableMultiMapping[str] | CIMultiDictProxy[str] | t.MutableMapping[str, str]
     body: bytes
 
 
@@ -132,10 +146,52 @@ class BasicAuthProvider(AuthProviderBase):
     """
 
     def __init__(self, username: str, password: str):
+        self.username = username
+        self.password = password
         self.auth = requests.auth.HTTPBasicAuth(username, password)
 
     def basic_auth(self, scopes: list[str]) -> requests.auth.AuthBase | None:
         return self.auth
+
+
+class _Middleware:
+    def __init__(
+        self,
+        openapi: "OpenAPI",
+        security: t.Optional[t.List[t.Dict[str, t.List[str]]]],
+    ):
+        self._openapi = openapi
+        # self.method_spec  may be more interesting...
+        self._security = security
+
+    async def __call__(
+        self,
+        request: aiohttp.ClientRequest,
+        handler: aiohttp.ClientHandlerType,
+    ) -> aiohttp.ClientResponse:
+        if self._security:
+            assert self._openapi._auth_provider is not None
+            auth = self._openapi._auth_provider(
+                self._security, self._openapi.api_spec["components"]["securitySchemes"]
+            )
+            if isinstance(auth, requests.auth.HTTPBasicAuth):
+                username = (
+                    auth.username.encode("latin1")
+                    if isinstance(auth.username, str)
+                    else auth.username
+                )
+                password = (
+                    auth.password.encode("latin1")
+                    if isinstance(auth.password, str)
+                    else auth.password
+                )
+                secret = b64encode(username + b":" + password)
+                request.headers["Authorization"] = "Basic " + secret.decode()
+        response = await handler(request)
+
+        if "Correlation-Id" in response.headers:
+            self._openapi._set_correlation_id(response.headers["Correlation-Id"])
+        return response
 
 
 class OpenAPI:
@@ -164,7 +220,7 @@ class OpenAPI:
         self,
         base_url: str,
         doc_path: str,
-        headers: CIMultiDict[str] | None = None,
+        headers: CIMultiDict[str] | CIMultiDictProxy[str] | None = None,
         auth_provider: AuthProviderBase | None = None,
         cert: str | None = None,
         key: str | None = None,
@@ -199,6 +255,7 @@ class OpenAPI:
         self._dry_run: bool = dry_run
         self._headers = CIMultiDict(headers or {})
         self._verify_ssl = verify_ssl
+
         self._auth_provider = auth_provider
         self._cert = cert
         self._key = key
@@ -212,35 +269,7 @@ class OpenAPI:
         if cid:
             self._headers["Correlation-Id"] = cid
 
-        self._setup_session()
-
         self.load_api(refresh_cache=refresh_cache)
-
-    def _setup_session(self) -> None:
-        # This is specific requests library.
-
-        if self._verify_ssl is False:
-            urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-
-        self._session: requests.Session = requests.session()
-        # Don't redirect, because carrying auth accross redirects is unsafe.
-        self._session.max_redirects = 0
-        self._session.headers.update(self._headers)
-        if self._auth_provider:
-            if self._cert or self._key:
-                raise OpenAPIError(_("Cannot use both 'auth' and 'cert'."))
-        else:
-            if self._cert and self._key:
-                self._session.cert = (self._cert, self._key)
-            elif self._cert:
-                self._session.cert = self._cert
-            elif self._key:
-                raise OpenAPIError(_("Cert is required if key is set."))
-        session_settings = self._session.merge_environment_settings(
-            self._base_url, {}, None, self._verify_ssl, None
-        )
-        self._session.verify = session_settings["verify"]
-        self._session.proxies = session_settings["proxies"]
 
     @property
     def base_url(self) -> str:
@@ -250,8 +279,25 @@ class OpenAPI:
     def cid(self) -> str | None:
         return self._headers.get("Correlation-Id")
 
+    @cached_property
+    def ssl_context(self) -> t.Union[ssl.SSLContext, bool]:
+        _ssl_context: t.Union[ssl.SSLContext, bool]
+        if self._verify_ssl is False:
+            _ssl_context = False
+        else:
+            if isinstance(self._verify_ssl, str):
+                _ssl_context = ssl.create_default_context(cafile=self._verify_ssl)
+            else:
+                _ssl_context = ssl.create_default_context()
+            if self._cert:
+                _ssl_context.load_cert_chain(self._cert, self._key)
+        return _ssl_context
+
     def load_api(self, refresh_cache: bool = False) -> None:
-        # TODO: Find a way to invalidate caches on upstream change
+        asyncio.run(self._load_api(refresh_cache=refresh_cache))
+
+    async def _load_api(self, refresh_cache: bool = False) -> None:
+        # TODO: Find a way to invalidate caches on upstream change.
         xdg_cache_home: str = os.environ.get("XDG_CACHE_HOME") or "~/.cache"
         apidoc_cache: str = os.path.join(
             os.path.expanduser(xdg_cache_home),
@@ -261,18 +307,19 @@ class OpenAPI:
         )
         try:
             if refresh_cache:
+                # Fake that we did not find the cache.
                 raise OSError()
-            with open(apidoc_cache, "rb") as f:
-                data: bytes = f.read()
+            async with aiofiles.open(apidoc_cache, mode="rb") as f:
+                data: bytes = await f.read()
             self._parse_api(data)
         except Exception:
-            # Try again with a freshly downloaded version
-            data = self._download_api()
+            # Try again with a freshly downloaded version.
+            data = await self._download_api()
             self._parse_api(data)
-            # Write to cache as it seems to be valid
-            os.makedirs(os.path.dirname(apidoc_cache), exist_ok=True)
-            with open(apidoc_cache, "bw") as f:
-                f.write(data)
+            # Write to cache as it seems to be valid.
+            await aiofiles.os.makedirs(os.path.dirname(apidoc_cache), exist_ok=True)
+            async with aiofiles.open(apidoc_cache, mode="bw") as f:
+                await f.write(data)
 
     def _parse_api(self, data: bytes) -> None:
         self.api_spec: dict[str, t.Any] = json.loads(data)
@@ -287,15 +334,18 @@ class OpenAPI:
             if method in {"get", "put", "post", "delete", "options", "head", "patch", "trace"}
         }
 
-    def _download_api(self) -> bytes:
-        try:
-            response: requests.Response = self._session.get(urljoin(self._base_url, self._doc_path))
-        except requests.RequestException as e:
-            raise OpenAPIError(str(e))
-        response.raise_for_status()
-        if "Correlation-Id" in response.headers:
-            self._set_correlation_id(response.headers["Correlation-Id"])
-        return response.content
+    async def _download_api(self) -> bytes:
+        response = await self._send_request(
+            _Request(
+                operation_id="",
+                method="get",
+                url=urljoin(self._base_url, self._doc_path),
+                headers=self._headers,
+            )
+        )
+        if response.status_code != 200:
+            raise OpenAPIError(_("Failed to find api docs."))
+        return response.body
 
     def _set_correlation_id(self, correlation_id: str) -> None:
         if "Correlation-Id" in self._headers:
@@ -307,8 +357,6 @@ class OpenAPI:
                 )
         else:
             self._headers["Correlation-Id"] = correlation_id
-            # Do it for requests too...
-            self._session.headers["Correlation-Id"] = correlation_id
 
     def param_spec(
         self, operation_id: str, param_type: str, required: bool = False
@@ -399,7 +447,7 @@ class OpenAPI:
     ) -> tuple[
         str | None,
         dict[str, t.Any] | str | None,
-        list[tuple[str, tuple[str, UploadType, str]]] | None,
+        dict[str, tuple[str, UploadType, str]] | None,
     ]:
         content_types: list[str] = []
         try:
@@ -418,7 +466,7 @@ class OpenAPI:
 
         content_type: str | None = None
         data: dict[str, t.Any] | str | None = None
-        files: list[tuple[str, tuple[str, UploadType, str]]] | None = None
+        files: dict[str, tuple[str, UploadType, str]] | None = None
 
         candidate_content_types = [
             "multipart/form-data",
@@ -456,21 +504,19 @@ class OpenAPI:
                 elif content_type.startswith("application/x-www-form-urlencoded"):
                     data = body
                 elif content_type.startswith("multipart/form-data"):
-                    uploads: dict[str, tuple[str, UploadType, str]] = {}
                     data = {}
+                    files = {}
                     # Extract and prepare the files to upload
                     if body:
                         for key, value in body.items():
                             if isinstance(value, (bytes, BufferedReader)):
-                                uploads[key] = (
+                                files[key] = (
                                     getattr(value, "name", key),
                                     value,
                                     "application/octet-stream",
                                 )
                             else:
                                 data[key] = value
-                    if uploads:
-                        files = [(key, upload_data) for key, upload_data in uploads.items()]
                 break
         else:
             # No known content-type left
@@ -486,7 +532,7 @@ class OpenAPI:
 
         return content_type, data, files
 
-    def _send_request(
+    def _render_request(
         self,
         path_spec: dict[str, t.Any],
         method: str,
@@ -495,83 +541,119 @@ class OpenAPI:
         headers: dict[str, str],
         body: dict[str, t.Any] | None = None,
         validate_body: bool = True,
-    ) -> _Response:
+    ) -> _Request:
         method_spec = path_spec[method]
-        content_type, data, files = self._render_request_body(method_spec, body, validate_body)
-        security: list[dict[str, list[str]]] | None = method_spec.get(
-            "security", self.api_spec.get("security")
-        )
-        if security and self._auth_provider:
-            if "Authorization" in self._session.headers:
-                # Bad idea, but you wanted it that way.
-                auth = None
-            else:
-                auth = self._auth_provider(security, self.api_spec["components"]["securitySchemes"])
+        _headers = CIMultiDict(self._headers)
+        _headers.update(headers)
+
+        security: list[dict[str, list[str]]] | None
+        if self._auth_provider and "Authorization" not in self._headers:
+            security = method_spec.get("security", self.api_spec.get("security"))
         else:
             # No auth required? Don't provide it.
             # No auth_provider available? Hope for the best (should do the trick for cert auth).
-            auth = None
+            # Authorization header present? You wanted it that way...
+            security = None
+
+        content_type, data, files = self._render_request_body(method_spec, body, validate_body)
         # For we encode the json on our side.
         # Somehow this does not work properly for multipart...
         if content_type is not None and content_type.startswith("application/json"):
-            headers["content-type"] = content_type
-        request = self._session.prepare_request(
-            requests.Request(
-                method,
-                url,
-                auth=auth,
-                params=params,
-                headers=headers,
-                data=data,
-                files=files,
-            )
+            _headers["Content-Type"] = content_type
+
+        return _Request(
+            operation_id=method_spec["operationId"],
+            method=method,
+            url=url,
+            headers=_headers,
+            params=params,
+            data=data,
+            files=files,
+            security=security,
         )
-        if content_type:
-            assert request.headers["content-type"].startswith(
-                content_type
-            ), f"{request.headers['content-type']} != {content_type}"
+
+    def _log_request(self, request: _Request) -> None:
+        if request.params:
+            qs = urlencode(request.params)
+            self._debug_callback(1, f"{request.operation_id} : {request.method} {request.url}?{qs}")
+            self._debug_callback(
+                2, "\n".join([f"  {key}=={value}" for key, value in request.params.items()])
+            )
+        else:
+            self._debug_callback(1, f"{request.operation_id} : {request.method} {request.url}")
         for key, value in request.headers.items():
             self._debug_callback(2, f"  {key}: {value}")
-        if request.body is not None:
-            self._debug_callback(3, f"{request.body!r}")
-        if self._dry_run and method.upper() not in SAFE_METHODS:
-            raise UnsafeCallError(_("Call aborted due to safe mode"))
+        if request.data is not None:
+            self._debug_callback(3, f"{request.data!r}")
+        if request.files is not None:
+            for key, (name, _dummy, content_type) in request.files.items():
+                self._debug_callback(3, f"{key} <- {name} [{content_type}]")
+
+    async def _send_request(
+        self,
+        request: _Request,
+    ) -> _Response:
+        # This function uses aiohttp to translate the _Request into a _Response.
+        data: aiohttp.FormData | dict[str, t.Any] | str | None
+        if request.files:
+            assert isinstance(request.data, dict)
+            data = aiohttp.FormData(default_to_multipart=True)
+            for key, value in request.data.items():
+                data.add_field(key, encode_param(value))
+            for key, (name, value, content_type) in request.files.items():
+                data.add_field(key, value, filename=name, content_type=content_type)
+        else:
+            data = request.data
         try:
-            response = self._session.send(request)
-        except requests.TooManyRedirects as e:
-            assert e.response is not None
+            async with aiohttp.ClientSession() as session:
+                async with session.request(
+                    request.method,
+                    request.url,
+                    params=request.params,
+                    headers=request.headers,
+                    data=data,
+                    ssl=self.ssl_context,
+                    max_redirects=0,
+                    middlewares=[_Middleware(self, request.security)],
+                ) as r:
+                    response_body = await r.read()
+                    response = _Response(
+                        status_code=r.status, headers=r.headers, body=response_body
+                    )
+        except aiohttp.TooManyRedirects as e:
+            # We could handle that in the middleware...
+            assert e.history[-1] is not None
             raise OpenAPIError(
-                _("Received redirect to '{url}'. Please check your CLI configuration.").format(
-                    url=e.response.headers["location"]
+                _(
+                    "Received redirect to '{new_url} from {old_url}'."
+                    " Please check your configuration."
+                ).format(
+                    new_url=e.history[-1].headers["location"],
+                    old_url=request.url,
                 )
             )
-        except requests.RequestException as e:
+        except aiohttp.ClientResponseError as e:
             raise OpenAPIError(str(e))
+
+        return response
+
+    def _log_response(self, response: _Response) -> None:
         self._debug_callback(
             1, _("Response: {status_code}").format(status_code=response.status_code)
         )
         for key, value in response.headers.items():
             self._debug_callback(2, f"  {key}: {value}")
-        if response.text:
-            self._debug_callback(3, f"{response.text}")
-        if "Correlation-Id" in response.headers:
-            self._set_correlation_id(response.headers["Correlation-Id"])
-        if response.status_code == 401:
-            raise PulpAuthenticationFailed(method_spec["operationId"])
-        if response.status_code == 403:
-            raise PulpNotAutorized(method_spec["operationId"])
-        try:
-            response.raise_for_status()
-        except requests.HTTPError as e:
-            if e.response is not None:
-                raise PulpHTTPError(str(e.response.text), e.response.status_code)
-            else:
-                raise PulpException(str(e))
-        return _Response(
-            status_code=response.status_code, headers=response.headers, body=response.content
-        )
+        if response.body:
+            self._debug_callback(3, f"{response.body!r}")
 
     def _parse_response(self, method_spec: dict[str, t.Any], response: _Response) -> t.Any:
+        if response.status_code == 401:
+            raise PulpAuthenticationFailed(method_spec["operationId"])
+        elif response.status_code == 403:
+            raise PulpNotAutorized(method_spec["operationId"])
+        elif response.status_code >= 300:
+            raise PulpHTTPError(response.body.decode(), response.status_code)
+
         if response.status_code == 204:
             return {}
 
@@ -614,8 +696,8 @@ class OpenAPI:
             The JSON decoded server response if any.
 
         Raises:
-            OpenAPIValidationError: on failed input validation (no request was sent to the server).
-            requests.HTTPError: on failures related to the HTTP call made.
+            ValidationError: on failed input validation (no request was sent to the server).
+            OpenAPIError: on failures related to the HTTP call made.
         """
         method, path = self.operations[operation_id]
         path_spec = self.api_spec["paths"][path]
@@ -644,17 +726,7 @@ class OpenAPI:
             )
         url = urljoin(self._base_url, path)
 
-        if query_params:
-            qs = urlencode(query_params)
-            log_msg = f"{operation_id} : {method} {url}?{qs}"
-        else:
-            log_msg = f"{operation_id} : {method} {url}"
-        self._debug_callback(1, log_msg)
-        self._debug_callback(
-            2, "\n".join([f"  {key}=={value}" for key, value in query_params.items()])
-        )
-
-        response = self._send_request(
+        request = self._render_request(
             path_spec,
             method,
             url,
@@ -663,5 +735,12 @@ class OpenAPI:
             body,
             validate_body=validate_body,
         )
+        self._log_request(request)
 
+        if self._dry_run and request.method.upper() not in SAFE_METHODS:
+            raise UnsafeCallError(_("Call aborted due to safe mode"))
+
+        response = asyncio.run(self._send_request(request))
+
+        self._log_response(response)
         return self._parse_response(method_spec, response)
