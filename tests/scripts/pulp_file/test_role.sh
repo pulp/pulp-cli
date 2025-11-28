@@ -6,6 +6,8 @@ set -eu
 
 pulp debug has-plugin --name "file" --specifier ">=1.11.0" || exit 23
 
+[ "$(pulp debug openapi security-schemes | jq '.[]|select(.type=="http")|select(.scheme=="basic")|[.]|length')" = "1" ] || exit 23
+
 USERPASS="Yeech6ba"
 
 cleanup() {
