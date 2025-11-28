@@ -4,6 +4,8 @@ set -eu
 # shellcheck source=tests/scripts/config.source
 . "$(dirname "$(dirname "$(realpath "$0")")")"/config.source
 
+[ "$(pulp debug openapi security-schemes | jq '.[]|select(.type=="http")|select(.scheme=="basic")|[.]|length')" = "1" ] || exit 23
+
 USERPASS="Yeech6ba"
 
 cleanup() {

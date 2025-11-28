@@ -4,7 +4,10 @@ ALLOWED_EXPORT_PATHS = ["/tmp"]
 ANALYTICS = False
 ALLOWED_CONTENT_CHECKSUMS = ["sha1", "sha256", "sha512"]
 
-if os.environ.get("PULP_HTTPS", "false").lower() == "true":
+pulp_https = os.environ.get("PULP_HTTPS", "false").lower() == "true"
+pulp_oauth2 = os.environ.get("PULP_OAUTH2", "false").lower() == "true"
+
+if pulp_https and not pulp_oauth2:
     AUTHENTICATION_BACKENDS = "@merge django.contrib.auth.backends.RemoteUserBackend"
     MIDDLEWARE = "@merge django.contrib.auth.middleware.RemoteUserMiddleware"
     REST_FRAMEWORK__DEFAULT_AUTHENTICATION_CLASSES = (
@@ -12,14 +15,14 @@ if os.environ.get("PULP_HTTPS", "false").lower() == "true":
     )
     REMOTE_USER_ENVIRON_NAME = "HTTP_REMOTEUSER"
 
-if os.environ.get("PULP_OAUTH2", "false").lower() == "true":
-    assert os.environ.get("PULP_HTTPS", "false").lower() == "true"
+if pulp_oauth2:
+    assert pulp_https
 
     def PulpCliFakeOauth2Authentication(*args, **kwargs):
         # We need to lazy load this.
         # Otherwise views may be instanciated, before this configuration is merged.
 
-        from django.contrib.auth import authenticate
+        from django.contrib.auth import get_user_model
         from drf_spectacular.extensions import OpenApiAuthenticationExtension
         from rest_framework.authentication import BaseAuthentication
 
@@ -27,7 +30,7 @@ if os.environ.get("PULP_OAUTH2", "false").lower() == "true":
             def authenticate(self, request):
                 auth_header = request.META.get("HTTP_AUTHORIZATION")
                 if auth_header == "Bearer DEADBEEF":
-                    return authenticate(request, remote_user="admin"), None
+                    return get_user_model().objects.get(username="admin"), None
                 else:
                     return None
 
@@ -54,5 +57,5 @@ if os.environ.get("PULP_OAUTH2", "false").lower() == "true":
     PULP_CLI_FAKE_OAUTH2_AUTHENTICATION = PulpCliFakeOauth2Authentication
 
     REST_FRAMEWORK__DEFAULT_AUTHENTICATION_CLASSES = (
-        "@merge pulpcore.app.settings.PULP_CLI_FAKE_OAUTH2_AUTHENTICATION"
+        "pulpcore.app.settings.PULP_CLI_FAKE_OAUTH2_AUTHENTICATION",
     )
