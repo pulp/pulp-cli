@@ -3,7 +3,11 @@ import typing as t
 
 import pytest
 
-from pulp_glue.common.authentication import AuthProviderBase, BasicAuthProvider, GlueAuthProvider
+from pulp_glue.common.authentication import (
+    AuthProviderBase,
+    BasicAuthProvider,
+    GlueAuthProvider,
+)
 
 pytestmark = pytest.mark.glue
 

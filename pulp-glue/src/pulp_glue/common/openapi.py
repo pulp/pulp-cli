@@ -27,6 +27,7 @@ from pulp_glue.common.exceptions import (
     ValidationError,
 )
 from pulp_glue.common.i18n import get_translation
+from pulp_glue.common.pydantic_oas import OpenAPISpec
 from pulp_glue.common.schema import encode_json, encode_param, validate
 
 translation = get_translation(__package__)
@@ -217,6 +218,7 @@ class OpenAPI:
 
     def _parse_api(self, data: bytes) -> None:
         raw_spec = self._patch_api_hook(json.loads(data))
+        OpenAPISpec.model_validate(raw_spec)
         self.api_spec: dict[str, t.Any] = raw_spec
         if self.api_spec.get("openapi", "").startswith("3."):
             self.openapi_version: int = 3
