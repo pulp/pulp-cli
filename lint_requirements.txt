@@ -7,6 +7,7 @@ mypy==1.19.0
 shellcheck-py==0.11.0.1
 
 # Type annotation stubs
+types-aiofiles
 types-pygments
 types-PyYAML
 types-requests

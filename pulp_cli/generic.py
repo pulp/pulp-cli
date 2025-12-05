@@ -1,3 +1,4 @@
+import asyncio
 import datetime
 import json
 import re
@@ -10,7 +11,7 @@ import click
 import requests
 import schema as s
 import yaml
-from pulp_glue.common.authentication import OAuth2ClientCredentialsAuth
+from pulp_glue.common.authentication import AuthProviderBase
 from pulp_glue.common.context import (
     DATETIME_FORMATS,
     DEFAULT_LIMIT,
@@ -30,7 +31,6 @@ from pulp_glue.common.context import (
 )
 from pulp_glue.common.exceptions import PulpException, PulpNoWait
 from pulp_glue.common.i18n import get_translation
-from pulp_glue.common.openapi import AuthProviderBase
 
 try:
     from pygments import highlight
@@ -153,6 +153,8 @@ class PulpCLIContext(PulpContext):
         domain: str = "default",
         username: str | None = None,
         password: str | None = None,
+        cert: str | None = None,
+        key: str | None = None,
         oauth2_client_id: str | None = None,
         oauth2_client_secret: str | None = None,
     ) -> None:
@@ -160,8 +162,9 @@ class PulpCLIContext(PulpContext):
         self.password = password
         self.oauth2_client_id = oauth2_client_id
         self.oauth2_client_secret = oauth2_client_secret
-        if not api_kwargs.get("cert"):
-            api_kwargs["auth_provider"] = PulpCLIAuthProvider(pulp_ctx=self)
+        self.cert = cert
+        self.key = key
+        api_kwargs["auth_provider"] = PulpCLIAuthProvider(pulp_ctx=self)
 
         verify_ssl: bool | None = api_kwargs.pop("verify_ssl", None)
         super().__init__(
@@ -249,59 +252,56 @@ if SECRET_STORAGE:
 
 
 class PulpCLIAuthProvider(AuthProviderBase):
+    """
+    The auth provider using cli promts to ask for missing passwords.
+    """
+
     def __init__(self, pulp_ctx: PulpCLIContext):
+        super().__init__()
         self.pulp_ctx = pulp_ctx
-        self._memoized: dict[str, requests.auth.AuthBase | None] = {}
+        self._http_basic: tuple[bytes, bytes] | None = None
+        self._oauth2_client_credentials: tuple[bytes, bytes] | None = None
 
-    def basic_auth(self, scopes: list[str]) -> requests.auth.AuthBase | None:
-        if "BASIC_AUTH" not in self._memoized:
-            if self.pulp_ctx.username is None:
-                # No username -> No basic auth.
-                self._memoized["BASIC_AUTH"] = None
-            elif self.pulp_ctx.password is None:
-                # TODO give the user a chance to opt out.
-                if SECRET_STORAGE:
-                    # We could just try to fetch the password here,
-                    # but we want to get a grip on the response_hook.
-                    self._memoized["BASIC_AUTH"] = SecretStorageBasicAuth(self.pulp_ctx)
-                else:
-                    self._memoized["BASIC_AUTH"] = requests.auth.HTTPBasicAuth(
-                        self.pulp_ctx.username, click.prompt("Password", hide_input=True)
-                    )
-            else:
-                self._memoized["BASIC_AUTH"] = requests.auth.HTTPBasicAuth(
-                    self.pulp_ctx.username, self.pulp_ctx.password
-                )
-        return self._memoized["BASIC_AUTH"]
+    def can_complete_http_basic(self) -> bool:
+        return self.pulp_ctx.username is not None
 
-    def oauth2_client_credentials_auth(
-        self, flow: t.Any, scopes: list[str]
-    ) -> requests.auth.AuthBase | None:
-        token_url = flow["tokenUrl"]
-        key = "OAUTH2_CLIENT_CREDENTIALS;" + token_url + ";" + ":".join(scopes)
-        if key not in self._memoized:
-            if self.pulp_ctx.oauth2_client_id is None:
-                # No client_id -> No oauth2 client credentials.
-                self._memoized[key] = None
-            elif self.pulp_ctx.oauth2_client_secret is None:
-                self._memoized[key] = OAuth2ClientCredentialsAuth(
-                    client_id=self.pulp_ctx.oauth2_client_id,
-                    client_secret=click.prompt("Client Secret"),
-                    token_url=flow["tokenUrl"],
-                    # Try to request all possible scopes.
-                    scopes=flow["scopes"],
-                    verify_ssl=self.pulp_ctx.verify_ssl,
-                )
-            else:
-                self._memoized[key] = OAuth2ClientCredentialsAuth(
-                    client_id=self.pulp_ctx.oauth2_client_id,
-                    client_secret=self.pulp_ctx.oauth2_client_secret,
-                    token_url=flow["tokenUrl"],
-                    # Try to request all possible scopes.
-                    scopes=flow["scopes"],
-                    verify_ssl=self.pulp_ctx.verify_ssl,
-                )
-        return self._memoized[key]
+    def can_complete_oauth2_client_credentials(self, scopes: list[str]) -> bool:
+        return self.pulp_ctx.oauth2_client_id is not None
+
+    def can_complete_mutualTLS(self) -> bool:
+        return self.pulp_ctx.cert is not None
+
+    def _fetch_password(self) -> str:
+        # TODO secretstorage...
+        return self.pulp_ctx.password or click.prompt("Password", hide_input=True)
+
+    async def http_basic_credentials(self) -> tuple[bytes, bytes]:
+        if self._http_basic is None:
+            assert self.pulp_ctx.username is not None
+
+            password = await asyncio.get_running_loop().run_in_executor(None, self._fetch_password)
+            self._http_basic = self.pulp_ctx.username.encode("latin1"), password.encode("latin1")
+        return self._http_basic
+
+    def tls_credentials(self) -> tuple[str, str | None]:
+        assert self.pulp_ctx.cert is not None
+
+        return self.pulp_ctx.cert, self.pulp_ctx.key
+
+    def _fetch_client_secret(self) -> str:
+        return self.pulp_ctx.oauth2_client_secret or click.prompt("Client Secret", hide_input=True)
+
+    async def oauth2_client_credentials(self) -> tuple[bytes, bytes]:
+        if self._oauth2_client_credentials is None:
+            assert self.pulp_ctx.oauth2_client_id is not None
+
+            client_secret = await asyncio.get_running_loop().run_in_executor(
+                None, self._fetch_client_secret
+            )
+            self._oauth2_client_credentials = self.pulp_ctx.oauth2_client_id.encode(
+                "latin1"
+            ), client_secret.encode("latin1")
+        return self._oauth2_client_credentials
 
 
 ##############################################################################
