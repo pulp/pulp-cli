@@ -1,5 +1,3 @@
-# flake8: noqa
-
 import os
 import shutil
 import sys
@@ -16,6 +14,10 @@ with open("pyproject.toml.update", "r") as fp:
 # TODO How deep is your merge?
 # Is merging on the tool level appropriate?
 pyproject_toml["tool"].update(pyproject_toml_update["tool"])
+
+# Remove legacy tools.
+for tool in ["flake8", "black", "isort"]:
+    pyproject_toml["tool"].pop(tool, None)
 
 with open("pyproject.toml", "w") as fp:
     tomlkit.dump(pyproject_toml, fp)

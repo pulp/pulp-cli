@@ -168,14 +168,14 @@ profile = "black"
 line_length = 100
 extend_skip = ["pulp-glue{{ cookiecutter.__app_label_suffix }}"{% if cookiecutter.app_label == "" %}, "cookiecutter"{% endif %}]
 
-[tool.flake8]
+[tool.ruff]
 # This section is managed by the cookiecutter templates.
-exclude = ["./docs/*"{% if cookiecutter.app_label == "" %}, "./cookiecutter/*"{% endif %}]
-ignore = ["W503", "Q000", "Q003", "D100", "D104", "D106", "D200", "D202", "D205", "D400", "D401", "D402"]
-# E203: whitespace before ':'; https://github.com/psf/black/issues/279
-# E401: multiple imports on one line
-extend-ignore = ["E203", "E401"]
-max-line-length = 100
+line-length = 100
+extend-exclude = ["cookiecutter"]
+
+[tool.ruff.lint]
+# This section is managed by the cookiecutter templates.
+extend-select = ["I"]
 
 [tool.mypy]
 # This section is managed by the cookiecutter templates.

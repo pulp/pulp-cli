@@ -14,7 +14,6 @@ from urllib.parse import urlencode, urljoin
 import requests
 import urllib3
 from multidict import CIMultiDict, MutableMultiMapping
-
 from pulp_glue.common import __version__
 from pulp_glue.common.exceptions import (
     OpenAPIError,
@@ -96,7 +95,6 @@ class AuthProviderBase:
         security: list[dict[str, list[str]]],
         security_schemes: dict[str, dict[str, t.Any]],
     ) -> requests.auth.AuthBase | None:
-
         # Reorder the proposals by their type to prioritize properly.
         # Select only single mechanism proposals on the way.
         proposed_schemes: dict[str, dict[str, list[str]]] = defaultdict(dict)
@@ -527,9 +525,9 @@ class OpenAPI:
             )
         )
         if content_type:
-            assert request.headers["content-type"].startswith(
-                content_type
-            ), f"{request.headers['content-type']} != {content_type}"
+            assert request.headers["content-type"].startswith(content_type), (
+                f"{request.headers['content-type']} != {content_type}"
+            )
         for key, value in request.headers.items():
             self._debug_callback(2, f"  {key}: {value}")
         if request.body is not None:

@@ -138,7 +138,7 @@ def update(
             if version is not None:
                 if dist_body["repository"]:
                     distribution_ctx.update(body={"repository": ""}, non_blocking=True)
-                body["repository_version"] = f'{repo["versions_href"]}{version}/'
+                body["repository_version"] = f"{repo['versions_href']}{version}/"
             else:
                 if dist_body["repository_version"]:
                     distribution_ctx.update(body={"repository_version": ""}, non_blocking=True)
@@ -147,7 +147,7 @@ def update(
         # keep current repository, change version
         if dist_body["repository"]:
             distribution_ctx.update(body={"repository": ""}, non_blocking=True)
-            body["repository_version"] = f'{dist_body["repository"]}versions/{version}/'
+            body["repository_version"] = f"{dist_body['repository']}versions/{version}/"
         elif dist_body["repository_version"]:
             # 'dummy' vars are to get us around a mypy/1.2 complaint about '_'
             repository_href, dummy, dummy = dist_body["repository_version"].partition("versions")

@@ -6,7 +6,6 @@ import trustme
 
 
 def main() -> None:
-
     parser = argparse.ArgumentParser(prog="gen_certs")
     parser.add_argument(
         "-d",

@@ -19,9 +19,7 @@ If you are using the Pulp CLI and have written end-to-end steps for Pulp workflo
 If you are interested in contributing code,
 note that we have styling and formatting conventions for both the code and our PRs:
 
-- Code formatting is done with `isort` and `black`.
-
-- Static analysis is performed with `flake8`.
+- Code formatting and static analysis is done with `ruff`.
 
 - `pulp-cli` utilizes strict python type annotations, checked with `mypy`.
 
@@ -40,8 +38,8 @@ note that we have styling and formatting conventions for both the code and our P
     We recommend running these before committing:
     ```bash
     pip install -r lint_requirements.txt  # setup, needed only once
-    make format  # reformatting with isort & black
-    make lint  # checking with shellcheck, isort, black, flake8 and mypy
+    make format  # reformatting with ruff
+    make lint  # checking with shellcheck, ruff and mypy
     make format lint  # both in one command
     ```
 

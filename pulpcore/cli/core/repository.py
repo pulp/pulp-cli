@@ -57,8 +57,7 @@ def _version_list_callback(
         if context_class is None:
             raise click.ClickException(
                 _(
-                    "The type '{plugin}:{resource_type}' "
-                    "is not valid for the {option_name} option."
+                    "The type '{plugin}:{resource_type}' is not valid for the {option_name} option."
                 ).format(plugin=plugin, resource_type=resource_type, option_name=param.name)
             )
         repository_ctx: PulpRepositoryContext = context_class(

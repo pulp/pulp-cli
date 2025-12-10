@@ -8,7 +8,6 @@ import warnings
 from contextlib import ExitStack
 
 from packaging.specifiers import SpecifierSet
-
 from pulp_glue.common.exceptions import (
     NotImplementedFake,
     OpenAPIError,
