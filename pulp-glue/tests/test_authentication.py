@@ -1,14 +1,12 @@
 import typing as t
 
 import pytest
-
 from pulp_glue.common.authentication import OAuth2ClientCredentialsAuth
 
 pytestmark = pytest.mark.glue
 
 
 def test_sending_no_scope_when_empty(monkeypatch: pytest.MonkeyPatch) -> None:
-
     class OAuth2MockResponse:
         def raise_for_status(self) -> None:
             return None

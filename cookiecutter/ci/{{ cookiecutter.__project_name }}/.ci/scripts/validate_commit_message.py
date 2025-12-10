@@ -2,9 +2,9 @@ import os
 import re
 import subprocess
 import sys
-import tomllib
 from pathlib import Path
 
+import tomllib
 from github import Github
 
 with open("pyproject.toml", "rb") as fp:

@@ -195,25 +195,15 @@ name = "Misc"
 showcontent = true
 
 
-[tool.black]
+[tool.ruff]
 # This section is managed by the cookiecutter templates.
 line-length = 100
-exclude = "cookiecutter"
+extend-exclude = ["cookiecutter"]
 
-[tool.isort]
+[tool.ruff.lint]
 # This section is managed by the cookiecutter templates.
-profile = "black"
-line_length = 100
-extend_skip = ["pulp-glue", "cookiecutter"]
+extend-select = ["I"]
 
-[tool.flake8]
-# This section is managed by the cookiecutter templates.
-exclude = ["./docs/*", "./cookiecutter/*"]
-ignore = ["W503", "Q000", "Q003", "D100", "D104", "D106", "D200", "D202", "D205", "D400", "D401", "D402"]
-# E203: whitespace before ':'; https://github.com/psf/black/issues/279
-# E401: multiple imports on one line
-extend-ignore = ["E203", "E401"]
-max-line-length = 100
 
 [tool.pytest.ini_options]
 markers = [
@@ -247,3 +237,4 @@ module = [
   "schema.*",
 ]
 ignore_missing_imports = true
+

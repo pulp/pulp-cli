@@ -2,7 +2,6 @@ import datetime
 import json
 
 import pytest
-
 from pulp_glue.common.openapi import OpenAPI, _Response
 
 pytestmark = pytest.mark.glue

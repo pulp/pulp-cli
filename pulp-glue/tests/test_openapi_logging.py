@@ -3,7 +3,6 @@ import logging
 import typing as t
 
 import pytest
-
 from pulp_glue.common.openapi import OpenAPI
 
 TEST_SCHEMA = json.dumps(

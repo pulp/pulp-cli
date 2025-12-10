@@ -969,8 +969,7 @@ def resource_option(*args: t.Any, **kwargs: t.Any) -> t.Callable[[FC], FC]:
         if context_class is None:
             raise click.ClickException(
                 _(
-                    "The type '{plugin}:{resource_type}' "
-                    "is not valid for the {option_name} option."
+                    "The type '{plugin}:{resource_type}' is not valid for the {option_name} option."
                 ).format(plugin=plugin, resource_type=resource_type, option_name=param.name)
             )
         entity_ctx: PulpEntityContext = context_class(pulp_ctx, pulp_href=pulp_href, entity=entity)
@@ -1259,9 +1258,7 @@ retained_versions_option = pulp_option(
 pulp_labels_option = pulp_option(
     "--labels",
     "pulp_labels",
-    help=_(
-        "JSON dictionary of labels to set on {entity} (or " "@file containing a JSON dictionary)"
-    ),
+    help=_("JSON dictionary of labels to set on {entity} (or @file containing a JSON dictionary)"),
     callback=load_labels_callback,
 )
 

@@ -3,10 +3,10 @@
 # This script requires click, cookiecutter, tomlkit and pyyaml
 
 import os
-import tomllib
 from pathlib import Path
 
 import click
+import tomllib
 import yaml
 
 from cookiecutter.main import cookiecutter
