@@ -401,7 +401,12 @@ def upload(
 
         # Sanity: ignore publish|use_temp unless destination-repository has been specified
         use_tmp = final_dest_repo_ctx and kwargs["use_temp_repository"]
-        do_publish = final_dest_repo_ctx and kwargs["publish"]
+        # Publish if autopublish is not enabled on the repository
+        do_publish = (
+            final_dest_repo_ctx
+            and kwargs["publish"]
+            and not final_dest_repo_ctx.entity["autopublish"]
+        )
 
         # Sanity: ignore relative_path if directory specified
         if directory and kwargs["relative_path"]:
