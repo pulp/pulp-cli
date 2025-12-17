@@ -40,6 +40,16 @@ class PulpPythonContentContext(PulpContentContext):
     CAPABILITIES = {"upload": []}
 
 
+class PulpPythonProvenanceContext(PulpContentContext):
+    PLUGIN = "python"
+    RESOURCE_TYPE = "provenance"
+    ENTITY = _("python provenance")
+    ENTITIES = _("python provenances")
+    HREF = "python_package_provenance_href"
+    ID_PREFIX = "content_python_provenance"
+    NEEDS_PLUGINS = [PluginRequirement("python", specifier=">=3.22.0")]
+
+
 class PulpPythonDistributionContext(PulpDistributionContext):
     PLUGIN = "python"
     RESOURCE_TYPE = "python"
