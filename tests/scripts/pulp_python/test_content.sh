@@ -33,7 +33,17 @@ fi
 
 expect_succ pulp python repository create --name "cli_test_python_repository"
 HREF="$(echo "$OUTPUT" | jq -r '.pulp_href')"
-expect_succ pulp python repository content add --repository "cli_test_python_repository" --sha256 "$sha256" --filename "shelf-reader-0.1.tar.gz"
-expect_succ pulp python repository content add --repository "$HREF" --sha256 "$sha256" --filename "shelf-reader-0.1.tar.gz" --base-version 0
-expect_succ pulp python repository content remove --repository "cli_test_python_repository" --sha256 "$sha256" --filename "shelf-reader-0.1.tar.gz"
-expect_succ pulp python repository content remove --repository "$HREF" --sha256 "$sha256" --filename "shelf-reader-0.1.tar.gz" --base-version 1
+expect_succ pulp python repository content add --repository "cli_test_python_repository" --sha256 "$sha256"
+expect_succ pulp python repository content add --repository "$HREF" --sha256 "$sha256" --base-version 0
+expect_succ pulp python repository content remove --repository "cli_test_python_repository" --sha256 "$sha256"
+expect_succ pulp python repository content remove --repository "$HREF" --sha256 "$sha256" --base-version 1
+
+if pulp debug has-plugin --name "python" --specifier ">=3.22.0"
+then
+  attestation_file="$(dirname "$(realpath "$0")")"/shelf-reader-0.1.tar.gz.publish.attestation
+  expect_succ pulp python content create --file "shelf-reader-0.1.tar.gz" --relative-path "shelf-reader-0.1.tar.gz" --attestation "@$attestation_file"
+  expect_succ pulp python content --type provenance list --package "$content_href"
+  provenance_href="$(echo "$OUTPUT" | tr '\r\n' ' ' | jq -r .[0].pulp_href)"
+  expect_succ pulp python content --type provenance show --href "$provenance_href"
+  expect_succ pulp python repository content --type provenance add --repository "cli_test_python_repository" --href "$provenance_href"
+fi

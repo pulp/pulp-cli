@@ -11,22 +11,21 @@ from pulp_glue.common.context import (
 from pulp_glue.common.i18n import get_translation
 from pulp_glue.python.context import (
     PulpPythonContentContext,
+    PulpPythonProvenanceContext,
     PulpPythonRemoteContext,
     PulpPythonRepositoryContext,
 )
 
 from pulp_cli.generic import (
-    GroupOption,
     PulpCLIContext,
     create_command,
     create_content_json_callback,
     destroy_command,
     href_option,
-    json_callback,
     label_command,
     label_select_option,
     list_command,
-    load_file_wrapper,
+    lookup_callback,
     name_option,
     pass_pulp_context,
     pass_repository_context,
@@ -60,31 +59,7 @@ remote_option = resource_option(
 )
 
 
-def _content_callback(ctx: click.Context, param: click.Parameter, value: t.Any) -> t.Any:
-    if value:
-        pulp_ctx = ctx.find_object(PulpCLIContext)
-        assert pulp_ctx is not None
-        ctx.obj = PulpPythonContentContext(pulp_ctx, entity=value)
-    return value
-
-
-CONTENT_LIST_SCHEMA = s.Schema([{"sha256": str, "filename": s.And(str, len)}])
-
-
-@load_file_wrapper
-def _content_list_callback(ctx: click.Context, param: click.Parameter, value: str | None) -> t.Any:
-    if value is None:
-        return None
-
-    result = json_callback(ctx, param, value)
-    try:
-        return CONTENT_LIST_SCHEMA.validate(result)
-    except s.SchemaError as e:
-        raise click.ClickException(
-            _("Validation of '{parameter}' failed: {error}").format(
-                parameter=param.name, error=str(e)
-            )
-        )
+CONTENT_LIST_SCHEMA = s.Schema([{"sha256": str, s.Optional("filename"): str}])
 
 
 @pulp_group()
@@ -119,36 +94,37 @@ update_options = [
 ]
 create_options = update_options + [click.option("--name", required=True)]
 package_options = [
-    click.option("--sha256", cls=GroupOption, expose_value=False, group=["filename"]),
+    pulp_option(
+        "--sha256",
+        callback=lookup_callback("sha256"),
+        expose_value=False,
+        help=_("SHA256 digest of the {entity}."),
+    ),
     click.option(
         "--filename",
-        callback=_content_callback,
         expose_value=False,
-        cls=GroupOption,
-        group=["sha256"],
-        help=_("Filename of the python package."),
+        help=_("Filename of the python package. [deprecated]"),
     ),
+    href_option,
 ]
-content_json_callback = create_content_json_callback(
-    PulpPythonContentContext, schema=CONTENT_LIST_SCHEMA
-)
+content_json_callback = create_content_json_callback(None, schema=CONTENT_LIST_SCHEMA)
 modify_options = [
-    click.option(
+    pulp_option(
         "--add-content",
         callback=content_json_callback,
         help=_(
-            """JSON string with a list of objects to add to the repository.
-    Each object must contain the following keys: "sha256", "filename".
-    The argument prefixed with the '@' can be the path to a JSON file with a list of objects."""
+            """JSON string with a list of {entities} to add to the repository.
+    Each {entity} must contain the following keys: "sha256".
+    The argument prefixed with the '@' can be the path to a JSON file with a list of {entities}."""
         ),
     ),
-    click.option(
+    pulp_option(
         "--remove-content",
         callback=content_json_callback,
         help=_(
-            """JSON string with a list of objects to remove from the repository.
-    Each object must contain the following keys: "sha256", "filename".
-    The argument prefixed with the '@' can be the path to a JSON file with a list of objects."""
+            """JSON string with a list of {entities} to remove from the repository.
+    Each {entity} must contain the following keys: "sha256".
+    The argument prefixed with the '@' can be the path to a JSON file with a list of {entities}."""
         ),
     ),
 ]
@@ -163,7 +139,10 @@ repository.add_command(version_command(decorators=nested_lookup_options))
 repository.add_command(label_command(decorators=nested_lookup_options))
 repository.add_command(
     repository_content_command(
-        contexts={"package": PulpPythonContentContext},
+        contexts={
+            "package": PulpPythonContentContext,
+            "provenance": PulpPythonProvenanceContext,
+        },
         add_decorators=package_options,
         remove_decorators=package_options,
         modify_decorators=modify_options,
