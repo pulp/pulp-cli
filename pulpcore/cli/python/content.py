@@ -4,7 +4,11 @@ import click
 from pulp_glue.common.context import PluginRequirement, PulpEntityContext
 from pulp_glue.common.i18n import get_translation
 from pulp_glue.core.context import PulpArtifactContext
-from pulp_glue.python.context import PulpPythonContentContext, PulpPythonRepositoryContext
+from pulp_glue.python.context import (
+    PulpPythonContentContext,
+    PulpPythonProvenanceContext,
+    PulpPythonRepositoryContext,
+)
 
 from pulp_cli.generic import (
     PulpCLIContext,
@@ -14,6 +18,7 @@ from pulp_cli.generic import (
     label_command,
     label_select_option,
     list_command,
+    load_json_callback,
     pass_entity_context,
     pass_pulp_context,
     pulp_group,
@@ -37,6 +42,24 @@ def _sha256_artifact_callback(
     return value
 
 
+def _attestation_callback(
+    ctx: click.Context, param: click.Parameter, value: t.Iterable[str] | None
+) -> list[t.Any] | None:
+    """Callback to process multiple attestation values and combine them into a list."""
+    if not value:
+        return None
+    result = []
+    for attestation_value in value:
+        # Use load_json_callback to process each value (supports JSON strings and file paths)
+        processed = load_json_callback(ctx, param, attestation_value)
+        # If it's already a list, extend; otherwise append
+        if isinstance(processed, list):
+            result.extend(processed)
+        else:
+            result.append(processed)
+    return result
+
+
 repository_option = resource_option(
     "--repository",
     default_plugin="python",
@@ -51,13 +74,30 @@ repository_option = resource_option(
     ),
 )
 
+package_option = resource_option(
+    "--package",
+    default_plugin="python",
+    default_type="package",
+    lookup_key="sha256",
+    context_table={
+        "python:package": PulpPythonContentContext,
+    },
+    href_pattern=PulpPythonContentContext.HREF_PATTERN,
+    help=_(
+        "Package to associate the provenance with in the form"
+        "'[[<plugin>:]<resource_type>:]<sha256>' or by href/prn."
+    ),
+    allowed_with_contexts=(PulpPythonProvenanceContext,),
+    required=True,
+)
+
 
 @pulp_group()
 @click.option(
     "-t",
     "--type",
     "content_type",
-    type=click.Choice(["package"], case_sensitive=False),
+    type=click.Choice(["package", "provenance"], case_sensitive=False),
     default="package",
 )
 @pass_pulp_context
@@ -65,12 +105,19 @@ repository_option = resource_option(
 def content(ctx: click.Context, pulp_ctx: PulpCLIContext, /, content_type: str) -> None:
     if content_type == "package":
         ctx.obj = PulpPythonContentContext(pulp_ctx)
+    elif content_type == "provenance":
+        ctx.obj = PulpPythonProvenanceContext(pulp_ctx)
     else:
         raise NotImplementedError()
 
 
 create_options = [
-    click.option("--relative-path", required=True, help=_("Exact name of file")),
+    pulp_option(
+        "--relative-path",
+        required=True,
+        help=_("Exact name of file"),
+        allowed_with_contexts=(PulpPythonContentContext,),
+    ),
     click.option(
         "--sha256",
         "artifact",
@@ -79,21 +126,49 @@ create_options = [
     ),
     pulp_option(
         "--file-url",
-        help=_("Remote url to download and create python content from"),
+        help=_("Remote url to download and create {entity} from"),
         needs_plugins=[PluginRequirement("core", specifier=">=3.56.1")],
+    ),
+    pulp_option(
+        "--attestation",
+        "attestations",
+        multiple=True,
+        callback=_attestation_callback,
+        needs_plugins=[PluginRequirement("python", specifier=">=3.22.0")],
+        help=_(
+            "A JSON object containing an attestation for the package. Can be a JSON string or a "
+            "file path prefixed with '@'. Can be specified multiple times."
+        ),
+        allowed_with_contexts=(PulpPythonContentContext,),
+    ),
+]
+provenance_create_options = [
+    pulp_option(
+        "--file",
+        type=click.File("rb"),
+        help=_("Provenance JSON file"),
+        allowed_with_contexts=(PulpPythonProvenanceContext,),
+    ),
+    package_option,
+    pulp_option(
+        "--verify/--no-verify",
+        default=True,
+        needs_plugins=[PluginRequirement("python", specifier=">=3.22.0")],
+        help=_("Verify the provenance"),
+        allowed_with_contexts=(PulpPythonProvenanceContext,),
     ),
 ]
 lookup_options = [href_option]
 content.add_command(
     list_command(
         decorators=[
-            click.option("--filename", type=str),
+            pulp_option("--filename", type=str, allowed_with_contexts=(PulpPythonContentContext,)),
             label_select_option,
         ]
     )
 )
 content.add_command(show_command(decorators=lookup_options))
-content.add_command(create_command(decorators=create_options))
+content.add_command(create_command(decorators=create_options + provenance_create_options))
 content.add_command(
     label_command(
         decorators=lookup_options,
@@ -102,10 +177,21 @@ content.add_command(
 )
 
 
-@content.command()
+@content.command(allowed_with_contexts=(PulpPythonContentContext,))
 @click.option("--relative-path", required=True, help=_("Exact name of file"))
 @click.option("--file", type=click.File("rb"), required=True, help=_("Path to file"))
 @chunk_size_option
+@pulp_option(
+    "--attestation",
+    "attestations",
+    multiple=True,
+    callback=_attestation_callback,
+    needs_plugins=[PluginRequirement("python", specifier=">=3.22.0")],
+    help=_(
+        "A JSON object containing an attestation for the package. Can be a JSON string or a file"
+        " path prefixed with '@'. Can be specified multiple times."
+    ),
+)
 @repository_option
 @pass_entity_context
 @pass_pulp_context
@@ -116,12 +202,17 @@ def upload(
     relative_path: str,
     file: t.IO[bytes],
     chunk_size: int,
+    attestations: list[t.Any] | None,
     repository: PulpPythonRepositoryContext | None,
 ) -> None:
     """Create a Python package content unit through uploading a file"""
     assert isinstance(entity_ctx, PulpPythonContentContext)
 
     result = entity_ctx.upload(
-        relative_path=relative_path, file=file, chunk_size=chunk_size, repository=repository
+        relative_path=relative_path,
+        file=file,
+        chunk_size=chunk_size,
+        repository=repository,
+        attestations=attestations,
     )
     pulp_ctx.output_result(result)
