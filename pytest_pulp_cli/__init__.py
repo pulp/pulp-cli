@@ -3,10 +3,10 @@ import pathlib
 import subprocess
 import sys
 import typing as t
+import urllib.request
 
 import gnupg
 import pytest
-import requests
 import tomli_w
 
 if sys.version_info >= (3, 11):
@@ -149,8 +149,9 @@ def pulp_cli_gnupghome(tmp_path_factory: pytest.TempPathFactory) -> pathlib.Path
         private_key_data = key_file.read_text()
     else:
         private_key_url = "https://github.com/pulp/pulp-fixtures/raw/master/common/GPG-PRIVATE-KEY-fixture-signing"  # noqa: E501
-        private_key_data = requests.get(private_key_url).text
-        key_file.write_text(private_key_data)
+        with urllib.request.urlopen(private_key_url) as response:
+            private_key_data = response.read()
+        key_file.write_bytes(private_key_data)
 
     import_result = gpg.import_keys(private_key_data)
     gpg.trust_keys(import_result.fingerprints[0], "TRUST_ULTIMATE")
