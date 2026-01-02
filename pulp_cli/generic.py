@@ -1744,14 +1744,16 @@ def repository_content_command(**kwargs: t.Any) -> click.Group:
         content_ctx: PulpContentContext,
         repo_ctx: PulpRepositoryContext,
         /,
-        base_repository: PulpRepositoryContext,
-        base_version: int,
+        base_repository: PulpRepositoryContext | None,
+        base_version: int | None,
     ) -> None:
-        if base_repository is None:
-            base_repository = repo_ctx
-        base_version_ctx = base_repository.get_version_context(
-            -1 if base_version is None else base_version
-        )
+        base_version_ctx: PulpRepositoryVersionContext | None = None
+        if base_version is not None:
+            if base_repository is None:
+                base_repository = repo_ctx
+            base_version_ctx = base_repository.get_version_context(base_version)
+        elif base_repository is not None:
+            base_version_ctx = base_repository.get_version_context(-1)
         repo_ctx.modify(add_content=[content_ctx.pulp_href], base_version=base_version_ctx)
 
     @pulp_command("remove")
@@ -1765,15 +1767,17 @@ def repository_content_command(**kwargs: t.Any) -> click.Group:
         content_ctx: PulpContentContext,
         repo_ctx: PulpRepositoryContext,
         /,
-        base_repository: PulpRepositoryContext,
-        base_version: int,
+        base_repository: PulpRepositoryContext | None,
+        base_version: int | None,
         all: bool,
     ) -> None:
-        if base_repository is None:
-            base_repository = repo_ctx
-        base_version_ctx = base_repository.get_version_context(
-            -1 if base_version is None else base_version
-        )
+        base_version_ctx: PulpRepositoryVersionContext | None = None
+        if base_version is not None:
+            if base_repository is None:
+                base_repository = repo_ctx
+            base_version_ctx = base_repository.get_version_context(base_version)
+        elif base_repository is not None:
+            base_version_ctx = base_repository.get_version_context(-1)
         remove_content = ["*" if all else content_ctx.pulp_href]
         repo_ctx.modify(remove_content=remove_content, base_version=base_version_ctx)
 
@@ -1784,16 +1788,18 @@ def repository_content_command(**kwargs: t.Any) -> click.Group:
     @pass_repository_context
     def content_modify(
         repo_ctx: PulpRepositoryContext,
-        base_repository: PulpRepositoryContext,
-        base_version: int,
+        base_repository: PulpRepositoryContext | None,
+        base_version: int | None,
         add_content: list[PulpContentContext] | None,
         remove_content: list[PulpContentContext] | None,
     ) -> None:
-        if base_repository is None:
-            base_repository = repo_ctx
-        base_version_ctx = base_repository.get_version_context(
-            -1 if base_version is None else base_version
-        )
+        base_version_ctx: PulpRepositoryVersionContext | None = None
+        if base_version is not None:
+            if base_repository is None:
+                base_repository = repo_ctx
+            base_version_ctx = base_repository.get_version_context(base_version)
+        elif base_repository is not None:
+            base_version_ctx = base_repository.get_version_context(-1)
         ac = [unit.pulp_href for unit in add_content] if add_content else None
         rc = [unit.pulp_href for unit in remove_content] if remove_content else None
         repo_ctx.modify(add_content=ac, remove_content=rc, base_version=base_version_ctx)
