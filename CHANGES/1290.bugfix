@@ -1,0 +1,1 @@
+Stop passing latest repository version on modify commands if no version number was provided.
