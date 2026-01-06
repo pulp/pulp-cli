@@ -1,8 +1,15 @@
 #!/bin/env python3
-import tomllib
+# /// script
+# requires-python = ">=3.11"
+# dependencies = [
+#     "packaging>=25.0,<25.1",
+# ]
+# ///
+
 import typing as t
 from pathlib import Path
 
+import tomllib
 from packaging.requirements import Requirement
 
 GLUE_DIR = "pulp-glue{{ cookiecutter.__app_label_suffix }}"

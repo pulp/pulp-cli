@@ -1,3 +1,10 @@
+# /// script
+# requires-python = ">=3.11"
+# dependencies = [
+#     "gitpython>=3.1.46,<3.2.0",
+# ]
+# ///
+
 import os
 import re
 import subprocess

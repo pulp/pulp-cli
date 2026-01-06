@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
-
-# Requirements:
-# packaging
-# tomlkit
+# /// script
+# requires-python = ">=3.11"
+# dependencies = [
+#     "packaging>=25.0,<25.1",
+#     "tomlkit>=0.13.3,<0.13.4",
+# ]
+# ///
 
 import json
 import logging

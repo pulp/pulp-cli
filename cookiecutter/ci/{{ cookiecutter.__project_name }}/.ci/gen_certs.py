@@ -1,3 +1,10 @@
+# /// script
+# requires-python = ">=3.10"
+# dependencies = [
+#     "trustme>=1.2.1,<1.3.0",
+# ]
+# ///
+
 import argparse
 import os
 import sys

@@ -1,4 +1,10 @@
 #!/bin/env python3
+# /// script
+# requires-python = ">=3.11"
+# dependencies = [
+#     "packaging>=25.0,<25.1",
+# ]
+# ///
 
 from importlib import metadata
 
