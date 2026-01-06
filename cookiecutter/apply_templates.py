@@ -1,12 +1,20 @@
 #!/bin/env python3
+# /// script
+# requires-python = ">=3.11"
+# dependencies = [
+#     "click>=8.3.1,<8.4",
+#     "cookiecutter>=2.6.0,<2.7",
+#     "pyyaml>=6.0.3,<6.1",
+#     "tomlkit>=0.13.3,<0.14",
+# ]
+# ///
 
-# This script requires click, cookiecutter, tomlkit and pyyaml
 
 import os
 from pathlib import Path
+import tomllib
 
 import click
-import tomllib
 import yaml
 
 from cookiecutter.main import cookiecutter
