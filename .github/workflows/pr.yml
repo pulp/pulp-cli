@@ -9,15 +9,15 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
-    uses: "./.github/workflows/build.yml"
   lint:
-    needs:
-      - "build"
     uses: "./.github/workflows/lint.yml"
-  test:
+  build:
     needs:
       - "lint"
+    uses: "./.github/workflows/build.yml"
+  test:
+    needs:
+      - "build"
     uses: "./.github/workflows/test.yml"
   docs:
     needs:
@@ -33,16 +33,19 @@ jobs:
   check-commits:
     runs-on: "ubuntu-latest"
     steps:
-      - uses: "actions/checkout@v5"
+      - name: "Checkout"
+        uses: "actions/checkout@v5"
         with:
           fetch-depth: 0
       - name: "Set up Python"
         uses: "actions/setup-python@v6"
         with:
-          python-version: "3.x"
-      - name: "Install python dependencies"
-        run: |
-          pip install toml pygithub
+          python-version: "3.14"
+          allow-prereleases: true
+      - name: "Install uv"
+        uses: "astral-sh/setup-uv@v7"
+        with:
+          enable-cache: true
       - name: "Check commit message"
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
@@ -50,7 +53,7 @@ jobs:
         run: |
           for SHA in $(curl -H "Authorization: token $GITHUB_TOKEN" "$GITHUB_CONTEXT" | jq -r '.[].sha')
           do
-            python .ci/scripts/validate_commit_message.py "$SHA"
+            uv run -q .ci/scripts/validate_commit_message.py "$SHA"
             VALUE=$?
             if [ "$VALUE" -gt 0 ]; then
               exit "$VALUE"

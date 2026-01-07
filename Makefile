@@ -12,13 +12,17 @@ info:
 
 .PHONY: build
 build:
-	cd pulp-glue; pyproject-build -n
-	pyproject-build -n
+	uv build --all
 
 .PHONY: format
 format:
 	ruff format
 	ruff check --fix
+
+.PHONY: uv-format
+uv-format:
+	uv lock
+	uv run --isolated --group lint $(MAKE) format
 
 .PHONY: lint
 lint:
@@ -29,6 +33,11 @@ lint:
 	mypy
 	cd pulp-glue; mypy
 	@echo "🙊 Code 🙈 LGTM 🙉 !"
+
+.PHONY: uv-lint
+uv-lint:
+	uv lock --check
+	uv run --isolated --group lint $(MAKE) lint
 
 tests/cli.toml:
 	cp $@.example $@
