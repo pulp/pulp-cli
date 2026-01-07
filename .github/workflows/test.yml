@@ -14,14 +14,8 @@ jobs:
   unittest:
     runs-on: "ubuntu-latest"
     steps:
-      - uses: "actions/checkout@v5"
-      - uses: "actions/cache@v4"
-        with:
-          path: "~/.cache/pip"
-          key: "${{ runner.os }}-pip-${{ hashFiles('**/*requirements.txt', '**/*constraints.lock', '**/setup.py', '**/pyproject.toml') }}"
-          restore-keys: |
-            ${{ runner.os }}-pip-
-
+      - name: "Checkout"
+        uses: "actions/checkout@v5"
       - name: "Download wheels"
         uses: "actions/download-artifact@v5"
         with:
@@ -30,12 +24,14 @@ jobs:
         uses: "actions/setup-python@v6"
         with:
           python-version: "3.14"
-      - name: "Install Python Test Dependencies"
-        run: |
-          pip install dist/pulp_cli-*.whl pulp-glue/dist/pulp_glue-*.whl -r test_requirements.txt
+          allow-prereleases: true
+      - name: "Install uv"
+        uses: "astral-sh/setup-uv@v7"
+        with:
+          enable-cache: true
       - name: "Run tests"
         run: |
-          make unittest
+          uv run --isolated --with dist/pulp_glue*.whl --with dist/pulp_cli*.whl --only-group test make unittest
   test:
     runs-on: "ubuntu-24.04"
     needs:
@@ -73,14 +69,8 @@ jobs:
             lower_bounds: true
             python: "3.13"
     steps:
-      - uses: "actions/checkout@v5"
-      - uses: "actions/cache@v4"
-        with:
-          path: "~/.cache/pip"
-          key: "${{ runner.os }}-pip-${{ hashFiles('**/*requirements.txt', '**/*constraints.lock', '**/setup.py', '**/pyproject.toml') }}"
-          restore-keys: |
-            ${{ runner.os }}-pip-
-
+      - name: "Checkout"
+        uses: "actions/checkout@v5"
       - name: "Download wheels"
         uses: "actions/download-artifact@v5"
         with:
@@ -90,18 +80,10 @@ jobs:
         with:
           python-version: "${{ matrix.python }}"
           allow-prereleases: true
-      - name: "Install Python Test Dependencies"
-        run: |
-          if [ "${{matrix.lower_bounds}}" ]
-          then
-            pip install dist/pulp_cli-*.whl pulp-glue/dist/pulp_glue-*.whl -r test_requirements.txt -c lower_bounds_constraints.lock
-          elif [ "${{matrix.upper_bounds}}" ]
-          then
-            .ci/scripts/calc_constraints.py pyproject.toml pulp-glue/pyproject.toml  --upper > upper_bounds_constraints.lock
-            pip install dist/pulp_cli-*.whl pulp-glue/dist/pulp_glue-*.whl -r test_requirements.txt -c upper_bounds_constraints.lock
-          else
-            pip install dist/pulp_cli-*.whl pulp-glue/dist/pulp_glue-*.whl -r test_requirements.txt
-          fi
+      - name: "Install uv"
+        uses: "astral-sh/setup-uv@v7"
+        with:
+          enable-cache: true
       - name: "Run tests"
         env:
           CONTAINER_RUNTIME: "${{ matrix.container_runtime }}"
@@ -115,5 +97,15 @@ jobs:
           PULP_ENABLED_PLUGINS: "${{ matrix.pulp_enabled_plugins }}"
           OAS_VERSION: "${{ matrix.oas_version }}"
         run: |
-          .ci/run_container.sh make paralleltest
+          if [ "${{matrix.lower_bounds}}" ]
+          then
+            RESOLUTION=("--resolution" "lowest-direct")
+          elif [ "${{matrix.upper_bounds}}" ]
+          then
+            RESOLUTION=("--resolution" "highest")
+          else
+            RESOLUTION=()
+          fi
+
+          uv run "${RESOLUTION[@]}" --isolated --with dist/pulp_glue*.whl --with dist/pulp_cli*.whl --only-group test .ci/run_container.sh make paralleltest
 ...
