@@ -1,1 +1,0 @@
-Fix CLI explicitly creating a publication after package upload when repo has autopublish enabled

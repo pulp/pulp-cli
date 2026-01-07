@@ -10,6 +10,46 @@
 
 [//]: # (towncrier release notes start)
 
+## 0.37.0 (2026-01-07) {: #0.37.0 }
+
+
+
+#### Features {: #0.37.0-feature }
+
+- Added support to vulnerability report for pulp_python plugin.
+  [#1272](https://github.com/pulp/pulp-cli/issues/1272)
+
+
+#### Bugfixes {: #0.37.0-bugfix }
+
+- Fixed interactive config generation to allow empty plugin list. All availale plugins will be used in that case.
+  [#1265](https://github.com/pulp/pulp-cli/issues/1265)
+- Fix CLI explicitly creating a publication after package upload when repo has autopublish enabled
+  [#1284](https://github.com/pulp/pulp-cli/issues/1284)
+- Stop passing latest repository version on modify commands if no version number was provided.
+  [#1290](https://github.com/pulp/pulp-cli/issues/1290)
+
+
+#### Deprecations and Removals {: #0.37.0-removal }
+
+- Dropped support for python 3.9.
+
+
+### Pulp GLUE {: #0.37.0-pulp-glue }
+
+
+#### Features {: #0.37.0-pulp-glue-feature }
+
+- Added a preference to return the result of a task in case on is given over guessing what happened.
+
+
+#### Deprecations and Removals {: #0.37.0-pulp-glue-removal }
+
+- Dropped support for python 3.9.
+
+
+---
+
 ## 0.36.3 (2025-12-12) {: #0.36.3 }
 
 
