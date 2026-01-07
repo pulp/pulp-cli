@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools<83"]
+requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -25,7 +25,8 @@ dependencies = [
   "multidict>=6.0.5,<6.8",
   "packaging>=22.0,<=26.1",  # CalVer
   "pydantic>=2.9.2,<2.14",
-  "requests>=2.24.0,<2.34",
+  "requests>=2.24.0,<2.34;python_version<'3.12'",
+  "requests>=2.25.1,<2.34;python_version>='3.12'",
   "tomli>=2.0.0,<2.1;python_version<'3.11'",
 ]
 
@@ -33,6 +34,11 @@ dependencies = [
 documentation = "https://pulpproject.org/pulp-glue/docs/dev/"
 repository = "https://github.com/pulp/pulp-cli"
 changelog = "https://pulpproject.org/pulp-cli/changes/"
+
+[tool.uv.build-backend]
+package-name = ["pulp_glue"]
+namespace = true
+source-exclude = ["*.pot", "*.po", "**/*\\~"]
 
 [tool.setuptools.packages.find]
 # This section is managed by the cookiecutter templates.
@@ -69,5 +75,5 @@ line-length = 100
 
 [tool.ruff.lint]
 # This section is managed by the cookiecutter templates.
-extend-select = ["I"]
+extend-select = ["I", "INT"]
 
