@@ -35,29 +35,37 @@ repository = "https://github.com/pulp/pulp-cli"
 changelog = "https://pulpproject.org/pulp-cli/changes/"
 
 [tool.setuptools.packages.find]
+# This section is managed by the cookiecutter templates.
 where = ["."]
 include = ["pulp_glue.*"]
 namespaces = true
 
 [tool.setuptools.package-data]
+# This section is managed by the cookiecutter templates.
 "*" = ["py.typed", "locale/*/LC_MESSAGES/*.mo"]
 
-[tool.black]
-line-length = 100
-
-[tool.isort]
-profile = "black"
-line_length = 100
 
 [tool.mypy]
+# This section is managed by the cookiecutter templates.
 strict = true
+warn_unused_ignores = false
 show_error_codes = true
 files = "pulp_glue/**/*.py, tests/**/*.py"
 namespace_packages = true
 explicit_package_bases = true
 
 [[tool.mypy.overrides]]
+# This section is managed by the cookiecutter templates.
 module = [
   "schema.*",
 ]
 ignore_missing_imports = true
+
+[tool.ruff]
+# This section is managed by the cookiecutter templates.
+line-length = 100
+
+[tool.ruff.lint]
+# This section is managed by the cookiecutter templates.
+extend-select = ["I"]
+

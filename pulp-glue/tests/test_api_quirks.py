@@ -1,6 +1,7 @@
 from copy import deepcopy
 
 import pytest
+
 from pulp_glue.common.context import _REGISTERED_API_QUIRKS, PulpContext
 
 pytestmark = pytest.mark.glue

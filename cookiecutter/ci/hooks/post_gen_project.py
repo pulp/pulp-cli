@@ -4,23 +4,27 @@ import sys
 
 import tomlkit
 
-# Merge pyproject.toml.update into pyproject.toml
-with open("pyproject.toml", "r") as fp:
-    pyproject_toml = tomlkit.load(fp)
+for base_path in [
+    ".",
+    "pulp-glue{{ cookiecutter.__app_label_suffix }}",
+]:
+    # Merge pyproject.toml.update into pyproject.toml
+    with open(os.path.join(base_path, "pyproject.toml"), "r") as fp:
+        pyproject_toml = tomlkit.load(fp)
 
-with open("pyproject.toml.update", "r") as fp:
-    pyproject_toml_update = tomlkit.load(fp)
+    with open(os.path.join(base_path, "pyproject.toml.update"), "r") as fp:
+        pyproject_toml_update = tomlkit.load(fp)
 
-# TODO How deep is your merge?
-# Is merging on the tool level appropriate?
-pyproject_toml["tool"].update(pyproject_toml_update["tool"])
+    # TODO How deep is your merge?
+    # Is merging on the tool level appropriate?
+    pyproject_toml["tool"].update(pyproject_toml_update["tool"])
 
-# Remove legacy tools.
-for tool in ["flake8", "black", "isort"]:
-    pyproject_toml["tool"].pop(tool, None)
+    # Remove legacy tools.
+    for tool in ["flake8", "black", "isort"]:
+        pyproject_toml["tool"].pop(tool, None)
 
-with open("pyproject.toml", "w") as fp:
-    tomlkit.dump(pyproject_toml, fp)
+    with open(os.path.join(base_path, "pyproject.toml"), "w") as fp:
+        tomlkit.dump(pyproject_toml, fp)
 
 # Remove unwanted files
 
@@ -31,6 +35,8 @@ REMOVE_PATHS = [
     {%- if not cookiecutter.glue %}
     "pulp-glue{{ cookiecutter.__app_label_suffix }}",
     "CHANGES/pulp-glue{{ cookiecutter.__app_label_suffix }}",
+    {%- else %}
+    "pulp-glue{{ cookiecutter.__app_label_suffix }}/pyproject.toml.update",
     {%- endif %}
     {%- if not cookiecutter.app_label or not cookiecutter.glue %}
     ".ci/scripts/check_cli_dependencies.py",

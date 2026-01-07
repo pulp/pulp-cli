@@ -1,9 +1,10 @@
 import typing as t
 
 import pytest
+from requests.auth import AuthBase
+
 from pulp_glue.common.exceptions import OpenAPIError
 from pulp_glue.common.openapi import AuthProviderBase
-from requests.auth import AuthBase
 
 pytestmark = pytest.mark.glue
 

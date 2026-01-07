@@ -1,6 +1,7 @@
 import typing as t
 
 import pytest
+
 from pulp_glue.common.authentication import OAuth2ClientCredentialsAuth
 
 pytestmark = pytest.mark.glue

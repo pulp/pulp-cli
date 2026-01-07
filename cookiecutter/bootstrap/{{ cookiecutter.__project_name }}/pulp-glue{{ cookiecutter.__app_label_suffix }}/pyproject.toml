@@ -38,13 +38,6 @@ namespaces = true
 [tool.setuptools.package-data]
 "*" = ["py.typed", "locale/*/LC_MESSAGES/*.mo"]
 
-[tool.black]
-line-length = 100
-
-[tool.isort]
-profile = "black"
-line_length = 100
-
 [tool.mypy]
 strict = true
 show_error_codes = true

@@ -3,6 +3,7 @@ import io
 import typing as t
 
 import pytest
+
 from pulp_glue.common.schema import (
     SchemaError,
     ValidationError,
