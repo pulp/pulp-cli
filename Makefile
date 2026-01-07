@@ -12,16 +12,28 @@ info:
 
 .PHONY: build
 build:
-	cd pulp-glue; pyproject-build -n
-	pyproject-build -n
+	uv build --all
+
+.PHONY: _format
+_format:
+	ruff format
+	ruff check --select I --fix
 
 .PHONY: format
 format:
-	ruff format
+	uv run --isolated --group lint $(MAKE) _format
+
+.PHONY: _autofix
+_autofix:
 	ruff check --fix
 
-.PHONY: lint
-lint:
+.PHONY: autofix
+autofix:
+	uv lock
+	uv run --isolated --group lint $(MAKE) _autofix
+
+.PHONY: _lint
+_lint:
 	find tests .ci -name '*.sh' -print0 | xargs -0 shellcheck -x
 	ruff format --check --diff
 	ruff check
@@ -30,29 +42,54 @@ lint:
 	cd pulp-glue; mypy
 	@echo "🙊 Code 🙈 LGTM 🙉 !"
 
+.PHONY: lint
+lint:
+	uv lock --check
+	uv run --isolated --group lint $(MAKE) _lint
+
 tests/cli.toml:
 	cp $@.example $@
 	@echo "In order to configure the tests to talk to your test server, you might need to edit $@ ."
 
+.PHONY: _test
+_test: | tests/cli.toml
+	pytest -v tests pulp-glue/tests cookiecutter/pulp_filter_extension.py
+
 .PHONY: test
-test: | tests/cli.toml
-	python3 -m pytest -v tests pulp-glue/tests cookiecutter/pulp_filter_extension.py
+test:
+	uv run $(MAKE) _test
+
+.PHONY: _livetest
+_livetest: | tests/cli.toml
+	pytest -v tests pulp-glue/tests -m live
 
 .PHONY: livetest
-livetest: | tests/cli.toml
-	python3 -m pytest -v tests pulp-glue/tests -m live
+livetest:
+	uv run $(MAKE) _livetest
+
+.PHONY: _paralleltest
+_paralleltest: | tests/cli.toml
+	pytest -v tests pulp-glue/tests -m live -n 8
 
 .PHONY: paralleltest
-paralleltest: | tests/cli.toml
-	python3 -m pytest -v tests pulp-glue/tests -m live -n 8
+paralleltest:
+	uv run $(MAKE) _paralleltest
+
+.PHONY: _unittest
+_unittest:
+	pytest -v tests pulp-glue/tests cookiecutter/pulp_filter_extension.py -m "not live"
 
 .PHONY: unittest
 unittest:
-	python3 -m pytest -v tests pulp-glue/tests cookiecutter/pulp_filter_extension.py -m "not live"
+	uv run $(MAKE) _unittest
+
+.PHONY: _unittest_glue
+_unittest_glue:
+	pytest -v pulp-glue/tests -m "not live"
 
 .PHONY: unittest_glue
 unittest_glue:
-	python3 -m pytest -v pulp-glue/tests -m "not live"
+	uv run $(MAKE) _unittest_glue
 
 .PHONY: docs
 docs:
