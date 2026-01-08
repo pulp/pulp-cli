@@ -204,6 +204,11 @@ extend-exclude = ["cookiecutter"]
 # This section is managed by the cookiecutter templates.
 extend-select = ["I"]
 
+[tool.ruff.lint.isort]
+# This section is managed by the cookiecutter templates.
+sections = { second-party = ["pulp_glue"] }
+section-order = ["future", "standard-library", "third-party", "second-party", "first-party", "local-folder"]
+
 
 [tool.pytest.ini_options]
 markers = [

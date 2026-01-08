@@ -1,6 +1,7 @@
 import typing as t
 
 import click
+
 from pulp_glue.common.context import (
     EntityDefinition,
     EntityFieldDefinition,
