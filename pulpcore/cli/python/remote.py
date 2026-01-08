@@ -98,6 +98,12 @@ python_remote_options = [
         callback=load_json_callback,
         needs_plugins=[PluginRequirement("python", specifier=">=3.2.0")],
     ),
+    pulp_option(
+        "--provenance/--no-provenance",
+        default=None,
+        help=_("Sync available package provenances"),
+        needs_plugins=[PluginRequirement("python", specifier=">=3.22.0")],
+    ),
 ]
 
 remote.add_command(list_command(decorators=remote_filter_options))
