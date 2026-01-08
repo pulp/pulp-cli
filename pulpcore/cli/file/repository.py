@@ -2,6 +2,7 @@ import typing as t
 
 import click
 import schema as s
+
 from pulp_glue.common.context import (
     EntityFieldDefinition,
     PluginRequirement,

@@ -3,6 +3,7 @@ from types import ModuleType
 
 import click
 from packaging.specifiers import SpecifierSet
+
 from pulp_glue.common.context import PluginRequirement
 from pulp_glue.common.i18n import get_translation
 

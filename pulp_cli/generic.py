@@ -10,6 +10,7 @@ import click
 import requests
 import schema as s
 import yaml
+
 from pulp_glue.common.authentication import OAuth2ClientCredentialsAuth
 from pulp_glue.common.context import (
     DATETIME_FORMATS,
