@@ -81,15 +81,19 @@ test = [
 ]
 
 [tool.uv.sources]
-pulp_glue = { workspace = true }
+# This section is managed by the cookiecutter templates.
+pulp-glue = { workspace = true }
 
 [tool.uv.workspace]
+# This section is managed by the cookiecutter templates.
 members = ["pulp-glue"]
 
 [tool.uv.build-backend]
+# This section is managed by the cookiecutter templates.
 module-name = ["pulp_cli", "pulpcore.cli", "pytest_pulp_cli"]
 namespace = true
 source-exclude = ["*.pot", "*.po", "**/*\\~"]
+
 
 [tool.setuptools.packages.find]
 # This section is managed by the cookiecutter templates.
