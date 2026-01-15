@@ -16,7 +16,6 @@ jobs:
     runs-on: "ubuntu-latest"
     steps:
       - uses: "actions/checkout@v5"
-      {%- include "cache_action" %}
       - name: "Download wheels"
         uses: "actions/download-artifact@v5"
         with:
@@ -25,12 +24,13 @@ jobs:
         uses: "actions/setup-python@v6"
         with:
           python-version: "3.14"
-      - name: "Install Python Test Dependencies"
-        run: |
-          pip install dist/pulp_cli{{ cookiecutter.__app_label_suffix | replace("-", "_") }}-*.whl {%- if cookiecutter.glue %} pulp-glue{{ cookiecutter.__app_label_suffix }}/dist/pulp_glue{{ cookiecutter.__app_label_suffix | replace("-", "_") }}-*.whl {%- endif %} -r test_requirements.txt
+      - name: "Install uv"
+        uses: "astral-sh/setup-uv@v7"
+        with:
+          enable-cache: true
       - name: "Run tests"
         run: |
-          make unittest
+          uv run --isolated --with dist/pulp_glue*.whl --with dist/pulp_cli*.whl --only-group test make unittest
   {%- endif %}
   test:
     runs-on: "ubuntu-24.04"
@@ -43,7 +43,6 @@ jobs:
       matrix:{{ cookiecutter.test_matrix | jaml(level=4, embed_in="dict") }}
     steps:
       - uses: "actions/checkout@v5"
-      {%- include "cache_action" %}
       - name: "Download wheels"
         uses: "actions/download-artifact@v5"
         with:
@@ -60,18 +59,10 @@ jobs:
         run: |
           sudo apt-get install {{ cookiecutter.binary_dependencies }}
       {%- endif %}
-      - name: "Install Python Test Dependencies"
-        run: |
-          if [ "{{ "${{matrix.lower_bounds}}" }}" ]
-          then
-            pip install dist/pulp_cli{{ cookiecutter.__app_label_suffix | replace("-", "_") }}-*.whl {%- if cookiecutter.glue %} pulp-glue{{ cookiecutter.__app_label_suffix }}/dist/pulp_glue{{ cookiecutter.__app_label_suffix | replace("-", "_") }}-*.whl {%- endif %} -r test_requirements.txt -c lower_bounds_constraints.lock
-          elif [ "{{ "${{matrix.upper_bounds}}" }}" ]
-          then
-            .ci/scripts/calc_constraints.py pyproject.toml {%- if cookiecutter.glue %} pulp-glue{{ cookiecutter.__app_label_suffix }}/pyproject.toml {%- endif %}  --upper > upper_bounds_constraints.lock
-            pip install dist/pulp_cli{{ cookiecutter.__app_label_suffix | replace("-", "_") }}-*.whl {%- if cookiecutter.glue %} pulp-glue{{ cookiecutter.__app_label_suffix }}/dist/pulp_glue{{ cookiecutter.__app_label_suffix | replace("-", "_") }}-*.whl {%- endif %} -r test_requirements.txt -c upper_bounds_constraints.lock
-          else
-            pip install dist/pulp_cli{{ cookiecutter.__app_label_suffix | replace("-", "_") }}-*.whl {%- if cookiecutter.glue %} pulp-glue{{ cookiecutter.__app_label_suffix }}/dist/pulp_glue{{ cookiecutter.__app_label_suffix | replace("-", "_") }}-*.whl {%- endif %} -r test_requirements.txt
-          fi
+      - name: "Install uv"
+        uses: "astral-sh/setup-uv@v7"
+        with:
+          enable-cache: true
       - name: "Run tests"
         env:
           {%- raw %}
@@ -87,5 +78,17 @@ jobs:
           OAS_VERSION: "${{ matrix.oas_version }}"
           {%- endraw %}
         run: |
-          .ci/run_container.sh make {% if cookiecutter.unittests %}live{% endif %}test
+          {%- raw %}
+          if [ "${{matrix.lower_bounds}}" ]
+          then
+            RESOLUTION=("--resolution" "lowest-direct")
+          elif [ "${{matrix.upper_bounds}}" ]
+          then
+            RESOLUTION=("--resolution" "highest")
+          else
+            RESOLUTION=()
+          fi
+
+          uv run "${RESOLUTION[@]}" --isolated --with dist/pulp_glue*.whl --with dist/pulp_cli*.whl --only-group test .ci/run_container.sh make livetest
+          {%- endraw %}
 ...
