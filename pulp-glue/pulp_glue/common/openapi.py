@@ -1,6 +1,3 @@
-# copyright (c) 2020, Matthias Dellweg
-# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
-
 import json
 import logging
 import os
@@ -13,13 +10,12 @@ from urllib.parse import urlencode, urljoin
 
 import requests
 import urllib3
-from multidict import CIMultiDict, MutableMultiMapping
+from multidict import CIMultiDict, CIMultiDictProxy, MutableMultiMapping
 
 from pulp_glue.common import __version__
 from pulp_glue.common.exceptions import (
     OpenAPIError,
     PulpAuthenticationFailed,
-    PulpException,
     PulpHTTPError,
     PulpNotAutorized,
     UnsafeCallError,
@@ -38,9 +34,21 @@ SAFE_METHODS = ["GET", "HEAD", "OPTIONS"]
 
 
 @dataclass
+class _Request:
+    operation_id: str
+    method: str
+    url: str
+    headers: MutableMultiMapping[str] | CIMultiDictProxy[str] | t.MutableMapping[str, str]
+    params: dict[str, str] | None = None
+    data: dict[str, t.Any] | str | None = None
+    files: dict[str, tuple[str, UploadType, str]] | None = None
+    security: list[dict[str, list[str]]] | None = None
+
+
+@dataclass
 class _Response:
     status_code: int
-    headers: MutableMultiMapping[str] | t.MutableMapping[str, str]
+    headers: MutableMultiMapping[str] | CIMultiDictProxy[str] | t.MutableMapping[str, str]
     body: bytes
 
 
@@ -149,7 +157,7 @@ class OpenAPI:
         auth_provider: Object that returns requests auth objects according to the api spec.
         cert: Client certificate used for auth.
         key: Matching key for `cert` if not already included.
-        verify_ssl: Whether to check server TLS certificates agains a CA (requests semantic).
+        verify_ssl: Whether to check server TLS certificates agains a CA.
         refresh_cache: Whether to fetch the api doc regardless.
         dry_run: Flag to disallow issuing POST, PUT, PATCH or DELETE calls.
         debug_callback: Callback that will be called with strings useful for logging or debugging.
@@ -163,7 +171,7 @@ class OpenAPI:
         self,
         base_url: str,
         doc_path: str,
-        headers: CIMultiDict[str] | None = None,
+        headers: CIMultiDict[str] | CIMultiDictProxy[str] | None = None,
         auth_provider: AuthProviderBase | None = None,
         cert: str | None = None,
         key: str | None = None,
@@ -178,11 +186,15 @@ class OpenAPI:
     ):
         if validate_certs is not None:
             warnings.warn(
-                "validate_certs is deprecated; use verify_ssl instead.", DeprecationWarning
+                "validate_certs is deprecated; use verify_ssl instead.",
+                DeprecationWarning,
             )
             verify_ssl = validate_certs
         if safe_calls_only is not None:
-            warnings.warn("safe_calls_only is deprecated; use dry_run instead.", DeprecationWarning)
+            warnings.warn(
+                "safe_calls_only is deprecated; use dry_run instead.",
+                DeprecationWarning,
+            )
             dry_run = safe_calls_only
         if debug_callback is not None:
             warnings.warn(
@@ -281,7 +293,7 @@ class OpenAPI:
             raise OpenAPIError(_("Unknown schema version"))
         self.operations: dict[str, t.Any] = {
             method_entry["operationId"]: (method, path)
-            for path, path_entry in self.api_spec["paths"].items()
+            for path, path_entry in self.api_spec.get("paths", {}).items()
             for method, method_entry in path_entry.items()
             if method in {"get", "put", "post", "delete", "options", "head", "patch", "trace"}
         }
@@ -398,7 +410,7 @@ class OpenAPI:
     ) -> tuple[
         str | None,
         dict[str, t.Any] | str | None,
-        list[tuple[str, tuple[str, UploadType, str]]] | None,
+        dict[str, tuple[str, UploadType, str]] | None,
     ]:
         content_types: list[str] = []
         try:
@@ -417,7 +429,7 @@ class OpenAPI:
 
         content_type: str | None = None
         data: dict[str, t.Any] | str | None = None
-        files: list[tuple[str, tuple[str, UploadType, str]]] | None = None
+        files: dict[str, tuple[str, UploadType, str]] | None = None
 
         candidate_content_types = [
             "multipart/form-data",
@@ -455,21 +467,20 @@ class OpenAPI:
                 elif content_type.startswith("application/x-www-form-urlencoded"):
                     data = body
                 elif content_type.startswith("multipart/form-data"):
-                    uploads: dict[str, tuple[str, UploadType, str]] = {}
                     data = {}
+                    files = {}
                     # Extract and prepare the files to upload
                     if body:
                         for key, value in body.items():
                             if isinstance(value, (bytes, BufferedReader)):
-                                uploads[key] = (
-                                    getattr(value, "name", key),
+                                # If available, use the filename.
+                                files[key] = (
+                                    getattr(value, "name", key).split("/")[-1],
                                     value,
                                     "application/octet-stream",
                                 )
                             else:
                                 data[key] = value
-                    if uploads:
-                        files = [(key, upload_data) for key, upload_data in uploads.items()]
                 break
         else:
             # No known content-type left
@@ -485,7 +496,7 @@ class OpenAPI:
 
         return content_type, data, files
 
-    def _send_request(
+    def _render_request(
         self,
         path_spec: dict[str, t.Any],
         method: str,
@@ -494,83 +505,118 @@ class OpenAPI:
         headers: dict[str, str],
         body: dict[str, t.Any] | None = None,
         validate_body: bool = True,
-    ) -> _Response:
+    ) -> _Request:
         method_spec = path_spec[method]
+        _headers = CIMultiDict(self._headers)
+        _headers.update(headers)
+
+        security: list[dict[str, list[str]]] | None
+        if self._auth_provider and "Authorization" not in self._headers:
+            security = method_spec.get("security", self.api_spec.get("security"))
+        else:
+            # No auth required? Don't provide it.
+            # No auth_provider available? Hope for the best (should do the trick for cert auth).
+            # Authorization header present? You wanted it that way...
+            security = None
+
         content_type, data, files = self._render_request_body(method_spec, body, validate_body)
-        security: list[dict[str, list[str]]] | None = method_spec.get(
-            "security", self.api_spec.get("security")
+        # For we encode the json on our side.
+        # Somehow this does not work properly for multipart...
+        if content_type is not None and content_type.startswith("application/json"):
+            _headers["Content-Type"] = content_type
+
+        return _Request(
+            operation_id=method_spec["operationId"],
+            method=method,
+            url=url,
+            headers=_headers,
+            params=params,
+            data=data,
+            files=files,
+            security=security,
         )
-        if security and self._auth_provider:
+
+    def _log_request(self, request: _Request) -> None:
+        if request.params:
+            qs = urlencode(request.params)
+            self._debug_callback(1, f"{request.operation_id} : {request.method} {request.url}?{qs}")
+            self._debug_callback(
+                2,
+                "\n".join([f"  {key}=={value}" for key, value in request.params.items()]),
+            )
+        else:
+            self._debug_callback(1, f"{request.operation_id} : {request.method} {request.url}")
+        for key, value in request.headers.items():
+            self._debug_callback(2, f"  {key}: {value}")
+        if request.data is not None:
+            self._debug_callback(3, f"{request.data!r}")
+        if request.files is not None:
+            for key, (name, _dummy, content_type) in request.files.items():
+                self._debug_callback(3, f"{key} <- {name} [{content_type}]")
+
+    def _send_request(
+        self,
+        request: _Request,
+    ) -> _Response:
+        # This function uses requests to translate the _Request into a _Response.
+        if request.security and self._auth_provider:
             if "Authorization" in self._session.headers:
                 # Bad idea, but you wanted it that way.
                 auth = None
             else:
-                auth = self._auth_provider(security, self.api_spec["components"]["securitySchemes"])
+                auth = self._auth_provider(
+                    request.security, self.api_spec["components"]["securitySchemes"]
+                )
         else:
             # No auth required? Don't provide it.
             # No auth_provider available? Hope for the best (should do the trick for cert auth).
             auth = None
-        # For we encode the json on our side.
-        # Somehow this does not work properly for multipart...
-        if content_type is not None and content_type.startswith("application/json"):
-            headers["content-type"] = content_type
-        request = self._session.prepare_request(
-            requests.Request(
-                method,
-                url,
-                auth=auth,
-                params=params,
-                headers=headers,
-                data=data,
-                files=files,
-            )
-        )
-        if content_type:
-            assert request.headers["content-type"].startswith(content_type), (
-                f"{request.headers['content-type']} != {content_type}"
-            )
-        for key, value in request.headers.items():
-            self._debug_callback(2, f"  {key}: {value}")
-        if request.body is not None:
-            self._debug_callback(3, f"{request.body!r}")
-        if self._dry_run and method.upper() not in SAFE_METHODS:
-            raise UnsafeCallError(_("Call aborted due to safe mode"))
         try:
-            response = self._session.send(request)
+            r = self._session.request(
+                request.method,
+                request.url,
+                params=request.params,
+                headers=request.headers,
+                data=request.data,
+                files=request.files,
+                auth=auth,
+            )
+            response = _Response(status_code=r.status_code, headers=r.headers, body=r.content)
         except requests.TooManyRedirects as e:
             assert e.response is not None
             raise OpenAPIError(
-                _("Received redirect to '{url}'. Please check your CLI configuration.").format(
-                    url=e.response.headers["location"]
+                _(
+                    "Received redirect to '{new_url} from {old_url}'."
+                    " Please check your configuration."
+                ).format(
+                    new_url=e.response.headers["location"],
+                    old_url=request.url,
                 )
             )
         except requests.RequestException as e:
             raise OpenAPIError(str(e))
+
+        return response
+
+    def _log_response(self, response: _Response) -> None:
         self._debug_callback(
             1, _("Response: {status_code}").format(status_code=response.status_code)
         )
         for key, value in response.headers.items():
             self._debug_callback(2, f"  {key}: {value}")
-        if response.text:
-            self._debug_callback(3, f"{response.text}")
+        if response.body:
+            self._debug_callback(3, f"{response.body!r}")
+
+    def _parse_response(self, method_spec: dict[str, t.Any], response: _Response) -> t.Any:
         if "Correlation-Id" in response.headers:
             self._set_correlation_id(response.headers["Correlation-Id"])
         if response.status_code == 401:
             raise PulpAuthenticationFailed(method_spec["operationId"])
-        if response.status_code == 403:
+        elif response.status_code == 403:
             raise PulpNotAutorized(method_spec["operationId"])
-        try:
-            response.raise_for_status()
-        except requests.HTTPError as e:
-            if e.response is not None:
-                raise PulpHTTPError(str(e.response.text), e.response.status_code)
-            else:
-                raise PulpException(str(e))
-        return _Response(
-            status_code=response.status_code, headers=response.headers, body=response.content
-        )
+        elif response.status_code >= 300:
+            raise PulpHTTPError(response.body.decode(), response.status_code)
 
-    def _parse_response(self, method_spec: dict[str, t.Any], response: _Response) -> t.Any:
         if response.status_code == 204:
             return {}
 
@@ -613,8 +659,8 @@ class OpenAPI:
             The JSON decoded server response if any.
 
         Raises:
-            OpenAPIValidationError: on failed input validation (no request was sent to the server).
-            requests.HTTPError: on failures related to the HTTP call made.
+            ValidationError: on failed input validation (no request was sent to the server).
+            OpenAPIError: on failures related to the HTTP call made.
         """
         method, path = self.operations[operation_id]
         path_spec = self.api_spec["paths"][path]
@@ -643,17 +689,7 @@ class OpenAPI:
             )
         url = urljoin(self._base_url, path)
 
-        if query_params:
-            qs = urlencode(query_params)
-            log_msg = f"{operation_id} : {method} {url}?{qs}"
-        else:
-            log_msg = f"{operation_id} : {method} {url}"
-        self._debug_callback(1, log_msg)
-        self._debug_callback(
-            2, "\n".join([f"  {key}=={value}" for key, value in query_params.items()])
-        )
-
-        response = self._send_request(
+        request = self._render_request(
             path_spec,
             method,
             url,
@@ -662,5 +698,12 @@ class OpenAPI:
             body,
             validate_body=validate_body,
         )
+        self._log_request(request)
 
+        if self._dry_run and request.method.upper() not in SAFE_METHODS:
+            raise UnsafeCallError(_("Call aborted due to safe mode"))
+
+        response = self._send_request(request)
+
+        self._log_response(response)
         return self._parse_response(method_spec, response)
