@@ -24,7 +24,7 @@ classifiers = [
 ]
 dependencies = [
   "multidict>=6.0.5,<6.8",
-  "packaging>=20.0,<=25.0",  # CalVer
+  "packaging>=20.0,<=26.0",  # CalVer
   "requests>=2.24.0,<2.33",
   "tomli>=2.0.0,<2.1;python_version<'3.11'",
 ]
