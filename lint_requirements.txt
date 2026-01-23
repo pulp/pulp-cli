@@ -1,5 +1,5 @@
 # Lint requirements
-ruff==0.14.11
+ruff==0.14.14
 mypy==1.19.1
 shellcheck-py==0.11.0.1
 
