@@ -1,5 +1,5 @@
 click==8.0.0
-packaging==20.0
+packaging==22.0
 PyYAML==5.3
 requests==2.24.0;python_version<"3.12"
 requests==2.25.1;python_version>="3.12"

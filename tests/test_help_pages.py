@@ -4,7 +4,6 @@ from functools import reduce
 import click
 import pytest
 from click.testing import CliRunner
-from pytest_subtests.plugin import SubTests
 
 from pulp_cli import load_plugins, main
 
@@ -40,7 +39,7 @@ def no_api(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 @pytest.mark.help_page
-def test_access_help(no_api: None, subtests: SubTests) -> None:
+def test_access_help(no_api: None, subtests: pytest.Subtests) -> None:
     """Test, that all help screens are accessible without touching the api property."""
     runner = CliRunner()
     for args in traverse_commands(main, []):
