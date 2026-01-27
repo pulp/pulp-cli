@@ -4,9 +4,12 @@ from datetime import datetime
 from pathlib import Path
 
 import click
-import requests
 
-from pulp_glue.common.context import DATETIME_FORMATS, PluginRequirement, PulpEntityContext
+from pulp_glue.common.context import (
+    DATETIME_FORMATS,
+    PluginRequirement,
+    PulpEntityContext,
+)
 from pulp_glue.common.exceptions import PulpException
 from pulp_glue.common.i18n import get_translation
 from pulp_glue.core.context import PulpTaskContext
@@ -194,7 +197,7 @@ def profile_artifact_urls(
         uuid = uuid_match.group("uuid")
         profile_artifact_dir = Path(".") / f"task_profile-{task_name}-{uuid}"
         profile_artifact_dir.mkdir(exist_ok=True)
-        with requests.session() as session:
+        with pulp_ctx.api._session as session:
             for name, url in urls.items():
                 profile_artifact_path = profile_artifact_dir / name
                 click.echo(_("Downloading {path}").format(path=profile_artifact_path))
