@@ -7,29 +7,29 @@ set -eu
 pulp debug has-plugin --name "file" || exit 23
 
 cleanup() {
-  pulp file repository destroy --name aaaaaaaaaa || true
-  pulp file repository destroy --name bbbbbbbbbb || true
-  pulp file repository destroy --name cccccccccc || true
+  pulp file repository destroy --name query_params_aaaaaaaaaa || true
+  pulp file repository destroy --name query_params_bbbbbbbbbb || true
+  pulp file repository destroy --name query_params_cccccccccc || true
 }
 trap cleanup EXIT
 
-expect_succ pulp file repository create --name aaaaaaaaaa
-expect_succ pulp file repository create --name bbbbbbbbbb
-expect_succ pulp file repository create --name cccccccccc
+expect_succ pulp file repository create --name query_params_aaaaaaaaaa
+expect_succ pulp file repository create --name query_params_bbbbbbbbbb
+expect_succ pulp file repository create --name query_params_cccccccccc
 
-expect_succ pulp file repository list --ordering -name
+expect_succ pulp file repository list --ordering -name --name-startswith query_params
 if ! (echo "$OUTPUT" | jq -r .[].name | sort -r -C -); then
   echo -e "Ordered results are not in a reverse alphabetical order.\n$(echo "$OUTPUT" | jq -r .[].name)"
   exit 1
 fi
 
-expect_succ pulp file repository list --ordering name
+expect_succ pulp file repository list --ordering name --name-startswith query_params
 if ! (echo "$OUTPUT" | jq -r .[].name | sort -C -); then
   echo -e "Ordered results are not in an alphabetical order.\n$(echo "$OUTPUT" | jq -r .[].name)"
   exit 1
 fi
 
-expect_succ pulp file repository list --field name --field remote
+expect_succ pulp file repository list --field name --field remote --name-startswith query_params
 SELECTED_FIELDS=$(echo "$OUTPUT" | jq -r ".[] | keys[]" | sort -u | tr "\n" " " | xargs)
 EXPECTED_FIELDS="name remote"
 if [[ "$SELECTED_FIELDS" != "$EXPECTED_FIELDS" ]]; then
@@ -37,7 +37,7 @@ if [[ "$SELECTED_FIELDS" != "$EXPECTED_FIELDS" ]]; then
   exit 1
 fi
 
-expect_succ pulp file repository list --exclude-field name --exclude-field remote
+expect_succ pulp file repository list --exclude-field name --exclude-field remote --name-startswith query_params
 EXCLUDED_FIELDS=$(echo "$OUTPUT" | jq -r ".[] | keys[]" | tr "\n" " " )
 
 if [[ "$EXCLUDED_FIELDS" == *"name"* ]]; then

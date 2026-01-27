@@ -153,7 +153,11 @@ modify_options = [
     ),
 ]
 
-repository.add_command(list_command(decorators=[label_select_option]))
+repository.add_command(
+    list_command(
+        decorators=[label_select_option, click.option("--name-startswith", "name__startswith")]
+    )
+)
 repository.add_command(show_command(decorators=lookup_options))
 repository.add_command(create_command(decorators=create_options))
 repository.add_command(update_command(decorators=lookup_options + update_options))
