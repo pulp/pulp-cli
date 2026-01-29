@@ -142,6 +142,7 @@ create_options = [
         ),
         allowed_with_contexts=(PulpPythonContentContext,),
     ),
+    repository_option,
 ]
 provenance_create_options = [
     package_option,
@@ -202,7 +203,7 @@ def upload(
     attestations: list[t.Any] | None,
     repository: PulpPythonRepositoryContext | None,
 ) -> None:
-    """Create a Python package content unit through uploading a file"""
+    """Create a Python package content unit through uploading a file [deprecated]"""
     assert isinstance(entity_ctx, PulpPythonContentContext)
 
     result = entity_ctx.upload(
