@@ -1,0 +1,1 @@
+Deprecated `pulp python content upload` command. Use `pulp python content create` instead.

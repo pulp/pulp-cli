@@ -20,6 +20,7 @@ sha256=$(sha256sum "shelf-reader-0.1.tar.gz" | cut -d' ' -f1)
 
 expect_succ pulp python repository create --name "cli_test_python_upload_repository"
 expect_succ pulp python content upload --file "shelf-reader-0.1.tar.gz" --relative-path "shelf-reader-0.1.tar.gz" --repository "cli_test_python_upload_repository"
+expect_succ pulp python content create --file "shelf-reader-0.1.tar.gz" --relative-path "shelf-reader-0.1.tar.gz" --repository "cli_test_python_upload_repository"
 expect_succ pulp artifact list --sha256 "$sha256"
 expect_succ pulp python content list --filename "shelf-reader-0.1.tar.gz"
 content_href="$(echo "$OUTPUT" | tr '\r\n' ' ' | jq -r .[0].pulp_href)"
