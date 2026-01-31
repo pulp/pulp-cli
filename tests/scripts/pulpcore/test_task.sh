@@ -51,7 +51,7 @@ fi
 expect_fail pulp --dry-run task cancel --all
 
 # Test waiting for a task
-expect_succ pulp --background file repository sync --name "cli_test_core_task_repository"
+expect_succ pulp --header X-Task-Diagnostics:memory --background file repository sync --name "cli_test_core_task_repository"
 task=$(echo "$ERROUTPUT" | grep -E -o "${PULP_API_ROOT}([-_a-zA-Z0-9]+/)?api/v3/tasks/[-[:xdigit:]]*/")
 task_uuid="${task%/}"
 task_uuid="${task_uuid##*/}"
@@ -65,6 +65,16 @@ expect_succ pulp task list --parent-task "$task_uuid" --worker "$worker_name"
 expect_succ pulp task list --started-before "21/01/12" --started-after "22/01/06T00:00:00"
 expect_succ pulp task list --finished-before "2021-12-01" --finished-after "2022-06-01 00:00:00"
 expect_succ pulp task list --created-resource "$created_resource"
+
+if pulp debug has-plugin --name "core" --specifier ">=3.57.0"
+then
+  # Downloading profile artifacts.
+  expect_succ pulp task profile-artifact-urls --uuid "${task_uuid}"
+  expect_succ test "$(echo "$OUTPUT" | jq -r 'keys[]')" = "memory_profile"
+
+  expect_succ pulp task profile-artifact-urls --uuid "${task_uuid}" --download
+  expect_succ test -f "task_profile-pulp_file.app.tasks.synchronizing.synchronize-${task_uuid}/memory_profile"
+fi
 
 if pulp debug has-plugin --name "core" --specifier ">=3.22.0"
 then
