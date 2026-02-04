@@ -35,6 +35,7 @@ _logger = logging.getLogger("pulp_glue.openapi")
 
 UploadType = bytes | t.IO[bytes]
 
+METHODS = {"get", "put", "post", "delete", "options", "head", "patch", "trace"}
 SAFE_METHODS = ["GET", "HEAD", "OPTIONS"]
 
 
@@ -95,6 +96,7 @@ class OpenAPI:
         cid: str | None = None,
         validate_certs: bool | None = None,
         safe_calls_only: bool | None = None,
+        patch_api_hook: t.Callable[[t.Any], t.Any] | None = None,
     ):
         if validate_certs is not None:
             warnings.warn(
@@ -140,6 +142,7 @@ class OpenAPI:
         self._oauth2_token: str | None = None
         self._oauth2_expires: datetime = datetime.now()
 
+        self._patch_api_hook: t.Callable[[t.Any], t.Any] = patch_api_hook or (lambda data: data)
         self.load_api(refresh_cache=refresh_cache)
 
     def _setup_session(self) -> None:
@@ -213,7 +216,8 @@ class OpenAPI:
                 f.write(data)
 
     def _parse_api(self, data: bytes) -> None:
-        self.api_spec: dict[str, t.Any] = json.loads(data)
+        raw_spec = self._patch_api_hook(json.loads(data))
+        self.api_spec: dict[str, t.Any] = raw_spec
         if self.api_spec.get("openapi", "").startswith("3."):
             self.openapi_version: int = 3
         else:
@@ -222,7 +226,7 @@ class OpenAPI:
             method_entry["operationId"]: (method, path)
             for path, path_entry in self.api_spec.get("paths", {}).items()
             for method, method_entry in path_entry.items()
-            if method in {"get", "put", "post", "delete", "options", "head", "patch", "trace"}
+            if method in METHODS
         }
 
     def _download_api(self) -> bytes:

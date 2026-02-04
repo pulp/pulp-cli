@@ -10,7 +10,7 @@ from pulp_glue.common.openapi import OpenAPI
 FAKE_OPENAPI_SPEC = json.dumps(
     {
         "openapi": "3.0.3",
-        "info": {"x-pulp-app-versions": {"core": "3.75.0"}},
+        "info": {"title": "test", "version": "0.0.0", "x-pulp-app-versions": {"core": "3.75.0"}},
         "paths": {},
     }
 )

@@ -1,3 +1,5 @@
+import typing as t
+
 from pulp_glue.common.context import (
     EntityDefinition,
     PluginRequirement,
@@ -7,19 +9,18 @@ from pulp_glue.common.context import (
     PulpRemoteContext,
     PulpRepositoryContext,
     PulpRepositoryVersionContext,
-    api_quirk,
+    api_spec_quirk,
 )
 from pulp_glue.common.i18n import get_translation
-from pulp_glue.common.openapi import OpenAPI
 
 translation = get_translation(__package__)
 _ = translation.gettext
 
 
-@api_quirk(PluginRequirement("python", specifier="<3.9.0"))
-def patch_python_remote_includes_excludes(api: OpenAPI) -> None:
-    python_remote_serializer = api.api_spec["components"]["schemas"]["python.PythonRemote"]
-    patched_python_remote_serializer = api.api_spec["components"]["schemas"][
+@api_spec_quirk(PluginRequirement("python", specifier="<3.9.0"))
+def patch_python_remote_includes_excludes(api_spec: t.Any) -> t.Any:
+    python_remote_serializer = api_spec["components"]["schemas"]["python.PythonRemote"]
+    patched_python_remote_serializer = api_spec["components"]["schemas"][
         "Patchedpython.PythonRemote"
     ]
     for prop in ("includes", "excludes"):
@@ -27,6 +28,7 @@ def patch_python_remote_includes_excludes(api: OpenAPI) -> None:
         python_remote_serializer["properties"][prop]["items"] = {"type": "string"}
         patched_python_remote_serializer["properties"][prop]["type"] = "array"
         patched_python_remote_serializer["properties"][prop]["items"] = {"type": "string"}
+    return api_spec
 
 
 class PulpPythonContentContext(PulpContentContext):
