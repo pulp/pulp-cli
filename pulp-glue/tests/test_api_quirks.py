@@ -2,7 +2,7 @@ from copy import deepcopy
 
 import pytest
 
-from pulp_glue.common.context import _REGISTERED_API_QUIRKS, PulpContext
+from pulp_glue.common.context import _REGISTERED_API_SPEC_QUIRKS, PulpContext, _patch_api_hook
 
 pytestmark = pytest.mark.glue
 
@@ -21,10 +21,11 @@ def test_api_quirks_idempotent(pulp_ctx: PulpContext) -> None:
         "patch_upstream_pulp_replicate_request_body",
         "patch_python_remote_includes_excludes",
         "patch_ordering_filters",
-    } <= {quirk[1].__name__ for quirk in _REGISTERED_API_QUIRKS}
+        "patch_rpm_copy_scheme",
+    } <= {quirk[1].__name__ for quirk in _REGISTERED_API_SPEC_QUIRKS}
 
     patched_once_api = deepcopy(pulp_ctx.api.api_spec)
     # Patch a second time
     assert pulp_ctx._api is not None
-    pulp_ctx._patch_api_spec()
+    _patch_api_hook(pulp_ctx.api.api_spec)
     assert pulp_ctx.api.api_spec == patched_once_api

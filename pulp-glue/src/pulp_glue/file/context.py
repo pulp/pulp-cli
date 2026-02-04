@@ -10,19 +10,19 @@ from pulp_glue.common.context import (
     PulpRemoteContext,
     PulpRepositoryContext,
     PulpRepositoryVersionContext,
-    api_quirk,
+    api_spec_quirk,
 )
 from pulp_glue.common.i18n import get_translation
-from pulp_glue.common.openapi import OpenAPI
 
 translation = get_translation(__package__)
 _ = translation.gettext
 
 
-@api_quirk(PluginRequirement("file", specifier=">=1.10.0,<1.11.0"))
-def patch_file_acs_refresh_request_body(api: OpenAPI) -> None:
-    operation = api.api_spec["paths"]["{file_file_alternate_content_source_href}refresh/"]["post"]
+@api_spec_quirk(PluginRequirement("file", specifier=">=1.10.0,<1.11.0"))
+def patch_file_acs_refresh_request_body(api_spec: t.Any) -> t.Any:
+    operation = api_spec["paths"]["{file_file_alternate_content_source_href}refresh/"]["post"]
     operation.pop("requestBody", None)
+    return api_spec
 
 
 class PulpFileACSContext(PulpACSContext):
