@@ -13,26 +13,21 @@ from pulp_glue.common.context import (
     PulpRepositoryContext,
     PulpRepositoryVersionContext,
     PulpViewSetContext,
-    api_quirk,
+    api_spec_quirk,
 )
 from pulp_glue.common.exceptions import PulpException
 from pulp_glue.common.i18n import get_translation
-from pulp_glue.common.openapi import OpenAPI
 
 translation = get_translation(__package__)
 _ = translation.gettext
 
 
-@api_quirk(PluginRequirement("rpm", specifier=">=3.3.0"))
-def patch_rpm_copy_scheme(api: OpenAPI) -> None:
+@api_spec_quirk(PluginRequirement("rpm", specifier=">=3.3.0"))
+def patch_rpm_copy_scheme(api_spec: t.Any) -> t.Any:
     path, operation = next(
-        (
-            (k, v["post"])
-            for k, v in api.api_spec["paths"].items()
-            if k.endswith("/api/v3/rpm/copy/")
-        )
+        ((k, v["post"]) for k, v in api_spec["paths"].items() if k.endswith("/api/v3/rpm/copy/"))
     )
-    api.api_spec["components"]["schemas"]["RpmCopy"] = {
+    api_spec["components"]["schemas"]["RpmCopy"] = {
         "type": "object",
         "description": "A serializer for Content Copy API.",
         "properties": {
@@ -48,7 +43,7 @@ def patch_rpm_copy_scheme(api: OpenAPI) -> None:
     for item in operation["requestBody"]["content"].values():
         item["schema"]["$ref"] = "#/components/schemas/RpmCopy"
 
-    api.operations["rpm_copy_content"] = ("post", path)
+    return api_spec
 
 
 class PulpRpmACSContext(PulpACSContext):

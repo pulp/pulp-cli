@@ -21,12 +21,24 @@ from pulp_glue.common.exceptions import (
     UnsafeCallError,
 )
 from pulp_glue.common.i18n import get_translation
-from pulp_glue.common.openapi import OpenAPI
+from pulp_glue.common.openapi import METHODS, OpenAPI
 
 if sys.version_info >= (3, 11):
     import tomllib
 else:
     import tomli as tomllib
+
+if sys.version_info >= (3, 13):
+    from warnings import deprecated
+else:
+    T = t.TypeVar("T")
+
+    def deprecated(s: str) -> t.Callable[[T], T]:
+        def _inner(f: T) -> T:
+            return f
+
+        return _inner
+
 
 translation = get_translation(__package__)
 _ = translation.gettext
@@ -119,8 +131,10 @@ def preprocess_payload(payload: EntityDefinition) -> EntityDefinition:
 
 
 _REGISTERED_API_QUIRKS: list[tuple[PluginRequirement, t.Callable[[OpenAPI], None]]] = []
+_REGISTERED_API_SPEC_QUIRKS: list[tuple[PluginRequirement, t.Callable[[t.Any], t.Any]]] = []
 
 
+@deprecated("This decorator is deprecated. Please use api_spec_quirk instead.")
 def api_quirk(
     req: PluginRequirement,
 ) -> t.Callable[[t.Callable[[OpenAPI], None]], None]:
@@ -144,10 +158,50 @@ def api_quirk(
     return _decorator
 
 
-@api_quirk(PluginRequirement("core", specifier="<3.20.0"))
-def patch_ordering_filters(api: OpenAPI) -> None:
-    for method, path in api.operations.values():
-        operation = api.api_spec["paths"][path][method]
+def api_spec_quirk(
+    req: PluginRequirement,
+) -> t.Callable[[t.Callable[[t.Any], t.Any]], None]:
+    """
+    A function decorator to allow manipulating API specs based on the availability of plugins.
+
+    Parameters:
+        req: The plugin specifier to determine when the quirk should be applied.
+
+    Examples:
+        ```
+        @api_quirk(PluginRequirement("catdog", specifier="<1.5.2"))
+        def patch_barking_filter_type(api_spec: t.Any) -> None:
+            # Fixup api_spec here.
+            # This can be destructive on api_spec.
+            return api_spec
+        ```
+    """
+
+    def _decorator(patch: t.Callable[[t.Any], t.Any]) -> None:
+        _REGISTERED_API_SPEC_QUIRKS.append((req, patch))
+
+    return _decorator
+
+
+def walk_operations(api_spec: t.Any) -> t.Iterator[tuple[str, str, str, t.Any]]:
+    for path in api_spec.get("paths", {}).values():
+        for method in METHODS:
+            if (operation := path.get(method)) is not None:
+                operation_id = operation["operationId"]
+                yield path, method, operation_id, operation
+
+
+def _patch_api_hook(spec: t.Any) -> t.Any:
+    for req, quirk in _REGISTERED_API_SPEC_QUIRKS:
+        if ver := spec["info"].get("x-pulp-app-versions", {}).get(req.name):
+            if ver in req:
+                spec = quirk(spec)
+    return spec
+
+
+@api_spec_quirk(PluginRequirement("core", specifier="<3.20.0"))
+def patch_ordering_filters(api_spec: t.Any) -> t.Any:
+    for path, method, operation_id, operation in walk_operations(api_spec):
         if method == "get" and "parameters" in operation:
             for parameter in operation["parameters"]:
                 if (
@@ -159,12 +213,12 @@ def patch_ordering_filters(api: OpenAPI) -> None:
                     parameter["schema"] = {"type": "array", "items": {"type": "string"}}
                     parameter["explode"] = False
                     parameter["style"] = "form"
+    return api_spec
 
 
-@api_quirk(PluginRequirement("core", specifier="<3.22.0"))
-def patch_field_select_filters(api: OpenAPI) -> None:
-    for method, path in api.operations.values():
-        operation = api.api_spec["paths"][path][method]
+@api_spec_quirk(PluginRequirement("core", specifier="<3.22.0"))
+def patch_field_select_filters(api_spec: t.Any) -> t.Any:
+    for path, method, operation_id, operation in walk_operations(api_spec):
         if method == "get" and "parameters" in operation:
             for parameter in operation["parameters"]:
                 if (
@@ -174,12 +228,13 @@ def patch_field_select_filters(api: OpenAPI) -> None:
                     and parameter["schema"]["type"] == "string"
                 ):
                     parameter["schema"] = {"type": "array", "items": {"type": "string"}}
+    return api_spec
 
 
-@api_quirk(PluginRequirement("core", specifier="<99.99.0"))
-def patch_content_in_query_filters(api: OpenAPI) -> None:
+@api_spec_quirk(PluginRequirement("core", specifier="<99.99.0"))
+def patch_content_in_query_filters(api_spec: t.Any) -> t.Any:
     # https://github.com/pulp/pulpcore/issues/3634
-    for operation_id, (method, path) in api.operations.items():
+    for path, method, operation_id, operation in walk_operations(api_spec):
         if (
             operation_id == "repository_versions_list"
             or (
@@ -187,7 +242,6 @@ def patch_content_in_query_filters(api: OpenAPI) -> None:
             )
             or (operation_id.startswith("publications_") and operation_id.endswith("_list"))
         ):
-            operation = api.api_spec["paths"][path][method]
             for parameter in operation["parameters"]:
                 if (
                     parameter["name"] == "content__in"
@@ -196,26 +250,29 @@ def patch_content_in_query_filters(api: OpenAPI) -> None:
                     and parameter["schema"]["type"] == "string"
                 ):
                     parameter["schema"] = {"type": "array", "items": {"type": "string"}}
+    return api_spec
 
 
-@api_quirk(PluginRequirement("core", specifier=">=3.23,<3.30.0"))
-def patch_upstream_pulp_replicate_request_body(api: OpenAPI) -> None:
-    operation = api.api_spec["paths"]["{upstream_pulp_href}replicate/"]["post"]
+@api_spec_quirk(PluginRequirement("core", specifier=">=3.23,<3.30.0"))
+def patch_upstream_pulp_replicate_request_body(api_spec: t.Any) -> t.Any:
+    operation = api_spec["paths"]["{upstream_pulp_href}replicate/"]["post"]
     operation.pop("requestBody", None)
+    return api_spec
 
 
-@api_quirk(PluginRequirement("core", specifier="<3.85"))
-def patch_security_scheme_mutual_tls(api: OpenAPI) -> None:
+@api_spec_quirk(PluginRequirement("core", specifier="<3.85"))
+def patch_security_scheme_mutual_tls(api_spec: t.Any) -> t.Any:
     # Trick to allow tls cert auth on older Pulp.
-    if (components := api.api_spec.get("components")) is not None:
+    if (components := api_spec.get("components")) is not None:
         if (security_schemes := components.get("securitySchemes")) is not None:
             # Only if it is going to be idempotent...
             if "gluePatchTLS" not in security_schemes:
                 security_schemes["gluePatchTLS"] = {"type": "mutualTLS"}
-                for method, path in api.operations.values():
-                    operation = api.api_spec["paths"][path][method]
-                    if "security" in operation:
-                        operation["security"].append({"gluePatchTLS": []})
+                for path, method, operation_id, operation in walk_operations(api_spec):
+                    security = operation.get("security")
+                    if security is not None:
+                        security.append({"gluePatchTLS": []})
+    return api_spec
 
 
 class PulpContext:
@@ -420,6 +477,7 @@ class PulpContext:
                 self._api = OpenAPI(
                     doc_path=f"{self._api_root}api/v3/docs/api.json",
                     verify_ssl=self.verify_ssl,
+                    patch_api_hook=_patch_api_hook,
                     **self._api_kwargs,
                 )
             except OpenAPIError as e:
