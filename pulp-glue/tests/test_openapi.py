@@ -90,6 +90,10 @@ TEST_SCHEMA = json.dumps(
             },
             "securitySchemes": SECURITY_SCHEMES,
         },
+        "info": {
+            "title": "test",
+            "version": "0.0.0",
+        },
     }
 ).encode()
 
