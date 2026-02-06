@@ -18,7 +18,6 @@ REPO1_NAME="cli_test_rpm_content_repo1"
 REPO2_NAME="cli_test_rpm_modular_content_repo2"
 UPLOAD_REPO_NAME="cli_test_rpm_content_upload_repo"
 PACKAGE_HREF=
-ADVISORY_HREF=
 cleanup() {
   rm -rf "$(dirname "$(realpath "$0")")"/test_rpm_upload
   pulp rpm repository destroy --name "${REPO1_NAME}" || true
@@ -154,6 +153,3 @@ expect_succ test "$(echo "${OUTPUT}" | jq -r 'length')" -eq 2
 
 # test upload for advisory, package-upload is tested at the start
 expect_succ pulp rpm content -t advisory upload --file "${TEST_ADVISORY}"
-ADVISORY_HREF=$(echo "${OUTPUT}" | jq -r .pulp_href)
-# make sure the package/advisory we've been playing with are cleaned up immediately
-expect_succ pulp orphan cleanup --content-hrefs "[\"${PACKAGE_HREF}\",\"${ADVISORY_HREF}\"]" --protection-time 0 || true
