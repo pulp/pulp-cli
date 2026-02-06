@@ -1,3 +1,4 @@
+{%- import 'macros' as macros with context -%}
 ---
 name: "CodeQL"
 
@@ -17,8 +18,7 @@ jobs:
       security-events: "write"
 
     steps:
-      - name: "Checkout repository"
-        uses: "actions/checkout@v5"
+      {{ macros.checkout() | indent(6) }}
       - name: "Initialize CodeQL"
         uses: "github/codeql-action/init@v3"
         with:

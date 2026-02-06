@@ -1,6 +1,6 @@
 [build-system]
-requires = ["setuptools<81"]
-build-backend = "setuptools.build_meta"
+requires = ["uv_build>=0.9.21,<0.10.0"]
+build-backend = "uv_build"
 
 [project]
 name = "pulp-glue"
@@ -25,7 +25,8 @@ classifiers = [
 dependencies = [
   "multidict>=6.0.5,<6.8",
   "packaging>=22.0,<=26.0",  # CalVer
-  "requests>=2.24.0,<2.33",
+  "requests>=2.24.0,<2.33;python_version<'3.12'",
+  "requests>=2.25.1,<2.33;python_version>='3.12'",
   "tomli>=2.0.0,<2.1;python_version<'3.11'",
 ]
 
@@ -34,9 +35,14 @@ documentation = "https://pulpproject.org/pulp-glue/docs/dev/"
 repository = "https://github.com/pulp/pulp-cli"
 changelog = "https://pulpproject.org/pulp-cli/changes/"
 
+[tool.uv.build-backend]
+package-name = ["pulp_glue"]
+namespace = true
+source-exclude = ["*.pot", "*.po", "**/*\\~"]
+
 [tool.setuptools.packages.find]
 # This section is managed by the cookiecutter templates.
-where = ["."]
+where = ["src"]
 include = ["pulp_glue.*"]
 namespaces = true
 
@@ -47,10 +53,11 @@ namespaces = true
 
 [tool.mypy]
 # This section is managed by the cookiecutter templates.
+mypy_path = ["src"]
 strict = true
 warn_unused_ignores = false
 show_error_codes = true
-files = "pulp_glue/**/*.py, tests/**/*.py"
+files = "src/**/*.py, tests/**/*.py"
 namespace_packages = true
 explicit_package_bases = true
 

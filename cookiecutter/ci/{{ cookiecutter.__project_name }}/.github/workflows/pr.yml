@@ -1,23 +1,22 @@
+{%- import 'macros' as macros with context -%}
 ---
 name: "pulp-cli CI"
 
 on:
   pull_request:
 
-concurrency:
-  group: "{{ "main-${{ github.ref_name }}-${{ github.workflow }}" }}"
-  cancel-in-progress: true
+{{ macros.concurrency() }}
 
 jobs:
-  build:
-    uses: "./.github/workflows/build.yml"
   lint:
-    needs:
-      - "build"
     uses: "./.github/workflows/lint.yml"
-  test:
+  build:
     needs:
       - "lint"
+    uses: "./.github/workflows/build.yml"
+  test:
+    needs:
+      - "build"
     uses: "./.github/workflows/test.yml"
   {%- if cookiecutter.docs %}
   docs:
@@ -35,24 +34,19 @@ jobs:
   check-commits:
     runs-on: "ubuntu-latest"
     steps:
-      - uses: "actions/checkout@v5"
-        with:
-          fetch-depth: 0
-      - name: "Set up Python"
-        uses: "actions/setup-python@v6"
-        with:
-          python-version: "3.x"
-      - name: "Install python dependencies"
-        run: |
-          pip install toml pygithub
+      {{ macros.checkout(deep=true) | indent(6) }}
+      {{ macros.setup_python() | indent(6) }}
+      {{ macros.install_uv() | indent(6) }}
       - name: "Check commit message"
         env:
-          GITHUB_TOKEN: "{{ "${{ secrets.GITHUB_TOKEN }}" }}"
-          GITHUB_CONTEXT: "{{ "${{ github.event.pull_request.commits_url }}" }}"
+          {%- raw %}
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          GITHUB_CONTEXT: "${{ github.event.pull_request.commits_url }}"
+          {%- endraw %}
         run: |
           for SHA in $(curl -H "Authorization: token $GITHUB_TOKEN" "$GITHUB_CONTEXT" | jq -r '.[].sha')
           do
-            python .ci/scripts/validate_commit_message.py "$SHA"
+            uv run -q .ci/scripts/validate_commit_message.py "$SHA"
             VALUE=$?
             if [ "$VALUE" -gt 0 ]; then
               exit "$VALUE"
@@ -74,7 +68,9 @@ jobs:
     steps:
       - name: "Collect needed jobs results"
         run: |
-          echo {{ "'${{toJson(needs)}}'" }} | jq -r 'to_entries[]|select(.value.result!="success")|.key + ": " + .value.result'
-          echo {{ "'${{toJson(needs)}}'" }} | jq -e 'to_entries|map(select(.value.result!="success"))|length == 0'
+          {%- raw %}
+          echo '${{toJson(needs)}}' | jq -r 'to_entries[]|select(.value.result!="success")|.key + ": " + .value.result'
+          echo '${{toJson(needs)}}' | jq -e 'to_entries|map(select(.value.result!="success"))|length == 0'
           echo "CI says: Looks good!"
+          {%- endraw %}
 ...

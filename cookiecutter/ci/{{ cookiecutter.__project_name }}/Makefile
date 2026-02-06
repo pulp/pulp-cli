@@ -2,9 +2,9 @@
 LANGUAGES=de
 {%- endif %}
 {%- if cookiecutter.glue %}
-GLUE_PLUGINS=$(notdir $(wildcard pulp-glue{{ cookiecutter.__app_label_suffix }}/pulp_glue/*))
+GLUE_PLUGINS=$(notdir $(wildcard pulp-glue{{ cookiecutter.__app_label_suffix }}/src/pulp_glue/*))
 {%- endif %}
-CLI_PLUGINS=$(notdir $(wildcard pulpcore/cli/*))
+CLI_PLUGINS=$(notdir $(wildcard src/pulpcore/cli/*))
 
 .PHONY: info
 info:
@@ -17,15 +17,17 @@ info:
 
 .PHONY: build
 build:
-{%- if cookiecutter.glue %}
-	cd pulp-glue{{ cookiecutter.__app_label_suffix }}; pyproject-build -n
-{%- endif %}
-	pyproject-build -n
+	uv build --all
 
 .PHONY: format
 format:
 	ruff format
 	ruff check --fix
+
+.PHONY: uv-format
+uv-format:
+	uv lock
+	uv run --isolated --group lint $(MAKE) format
 
 .PHONY: lint
 lint:
@@ -36,13 +38,16 @@ lint:
 	.ci/scripts/check_cli_dependencies.py
 {%- endif %}
 	.ci/scripts/check_click_for_mypy.py
-{%- if cookiecutter.glue %}
-	MYPYPATH=pulp-glue{{ cookiecutter.__app_label_suffix }} mypy
-	cd pulp-glue{{ cookiecutter.__app_label_suffix }}; mypy
-{%- else %}
 	mypy
+{%- if cookiecutter.glue %}
+	cd pulp-glue{{ cookiecutter.__app_label_suffix }}; mypy
 {%- endif %}
 	@echo "🙊 Code 🙈 LGTM 🙉 !"
+
+.PHONY: uv-lint
+uv-lint:
+	uv lock --check
+	uv run --isolated --group lint $(MAKE) lint
 
 tests/cli.toml:
 	cp $@.example $@

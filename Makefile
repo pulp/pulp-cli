@@ -1,7 +1,7 @@
 
 LANGUAGES=de
-GLUE_PLUGINS=$(notdir $(wildcard pulp-glue/pulp_glue/*))
-CLI_PLUGINS=$(notdir $(wildcard pulpcore/cli/*))
+GLUE_PLUGINS=$(notdir $(wildcard pulp-glue/src/pulp_glue/*))
+CLI_PLUGINS=$(notdir $(wildcard src/pulpcore/cli/*))
 
 .PHONY: info
 info:
@@ -12,13 +12,17 @@ info:
 
 .PHONY: build
 build:
-	cd pulp-glue; pyproject-build -n
-	pyproject-build -n
+	uv build --all
 
 .PHONY: format
 format:
 	ruff format
 	ruff check --fix
+
+.PHONY: uv-format
+uv-format:
+	uv lock
+	uv run --isolated --group lint $(MAKE) format
 
 .PHONY: lint
 lint:
@@ -26,9 +30,14 @@ lint:
 	ruff format --check --diff
 	ruff check --diff
 	.ci/scripts/check_click_for_mypy.py
-	MYPYPATH=pulp-glue mypy
+	mypy
 	cd pulp-glue; mypy
 	@echo "🙊 Code 🙈 LGTM 🙉 !"
+
+.PHONY: uv-lint
+uv-lint:
+	uv lock --check
+	uv run --isolated --group lint $(MAKE) lint
 
 tests/cli.toml:
 	cp $@.example $@
