@@ -3,6 +3,7 @@ import os
 ALLOWED_EXPORT_PATHS = ["/tmp"]
 ANALYTICS = False
 ALLOWED_CONTENT_CHECKSUMS = ["sha1", "sha256", "sha512"]
+TASK_DIAGNOSTICS = ["memory"]
 
 if os.environ.get("PULP_HTTPS", "false").lower() == "true":
     AUTHENTICATION_BACKENDS = "@merge django.contrib.auth.backends.RemoteUserBackend"

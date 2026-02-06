@@ -1,7 +1,7 @@
 # /// script
 # requires-python = ">=3.11"
 # dependencies = [
-#     "gitpython>=3.1.46,<3.2.0",
+#     "pygithub>=2.8.1,<3.0.0",
 # ]
 # ///
 
