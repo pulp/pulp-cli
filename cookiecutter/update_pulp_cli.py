@@ -9,12 +9,12 @@
 
 import json
 import logging
+import urllib.request
+
 from packaging.version import Version
 from packaging.requirements import Requirement
 from packaging.specifiers import Specifier, SpecifierSet
 from packaging.utils import canonicalize_name
-import urllib.request
-
 import tomlkit
 
 
