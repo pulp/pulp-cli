@@ -144,7 +144,7 @@ def pulp_cli_gnupghome(tmp_path_factory: pytest.TempPathFactory) -> pathlib.Path
     gnupghome = tmp_path_factory.mktemp("gnupghome")
     gpg = gnupg.GPG(gnupghome=str(gnupghome))
 
-    key_file = pathlib.Path(__file__).parent / "GPG-PRIVATE-KEY-fixture-signing"
+    key_file = pathlib.Path(".ci") / "GPG-PRIVATE-KEY-fixture-signing"
     if key_file.exists():
         private_key_data = key_file.read_text()
     else:
