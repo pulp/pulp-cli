@@ -35,7 +35,7 @@ changelog = "https://pulpproject.org/pulp-cli/changes/"
 
 [tool.setuptools.packages.find]
 # This section is managed by the cookiecutter templates.
-where = ["."]
+where = ["src"]
 include = ["pulp_glue.*"]
 namespaces = true
 
@@ -49,7 +49,8 @@ namespaces = true
 strict = true
 warn_unused_ignores = false
 show_error_codes = true
-files = "pulp_glue/**/*.py, tests/**/*.py"
+files = "src/**/*.py, tests/**/*.py"
+mypy_path = ["src"]
 namespace_packages = true
 explicit_package_bases = true
 
