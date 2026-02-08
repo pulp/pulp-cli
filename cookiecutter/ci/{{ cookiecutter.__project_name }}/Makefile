@@ -1,10 +1,11 @@
+{%- set src_infix = "src/" if cookiecutter.src_layout else "" %}
 {%- if cookiecutter.translations %}
 LANGUAGES=de
 {%- endif %}
 {%- if cookiecutter.glue %}
-GLUE_PLUGINS=$(notdir $(wildcard pulp-glue{{ cookiecutter.__app_label_suffix }}/pulp_glue/*))
+GLUE_PLUGINS=$(notdir $(wildcard pulp-glue{{ cookiecutter.__app_label_suffix }}/{{ src_infix }}pulp_glue/*))
 {%- endif %}
-CLI_PLUGINS=$(notdir $(wildcard pulpcore/cli/*))
+CLI_PLUGINS=$(notdir $(wildcard {{ src_infix }}pulpcore/cli/*))
 
 .PHONY: info
 info:
@@ -37,7 +38,7 @@ lint:
 {%- endif %}
 	.ci/scripts/check_click_for_mypy.py
 {%- if cookiecutter.glue %}
-	MYPYPATH=pulp-glue{{ cookiecutter.__app_label_suffix }} mypy
+	mypy
 	cd pulp-glue{{ cookiecutter.__app_label_suffix }}; mypy
 {%- else %}
 	mypy
