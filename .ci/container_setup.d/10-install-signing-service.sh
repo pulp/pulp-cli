@@ -6,9 +6,9 @@ pulp --config "${PULP_CLI_CONFIG}" debug has-plugin --name "deb" && HAS_DEB=true
 pulp --config "${PULP_CLI_CONFIG}" debug has-plugin --name "ansible" && HAS_ANSIBLE=true || HAS_ANSIBLE=""
 if [ "$HAS_DEB" ] || [ "$HAS_ANSIBLE" ]
 then
-  if [ ! -f pytest_pulp_cli/GPG-PRIVATE-KEY-fixture-signing ]
+  if [ ! -f .ci/GPG-PRIVATE-KEY-fixture-signing ]
   then
-    curl -L https://github.com/pulp/pulp-fixtures/raw/master/common/GPG-PRIVATE-KEY-fixture-signing > pytest_pulp_cli/GPG-PRIVATE-KEY-fixture-signing
+    curl -L https://github.com/pulp/pulp-fixtures/raw/master/common/GPG-PRIVATE-KEY-fixture-signing > .ci/GPG-PRIVATE-KEY-fixture-signing
   fi
   echo "Setup the signing services"
   if "${CONTAINER_RUNTIME}" exec "pulp-ephemeral" id pulp
@@ -20,7 +20,7 @@ then
   "${CONTAINER_RUNTIME}" exec "pulp-ephemeral" mkdir -p /var/lib/pulp/scripts/
   # Setup key on the Pulp container
   echo "0C1A894EBB86AFAE218424CADDEF3019C2D4A8CF:6:" | "${CONTAINER_RUNTIME}" exec -i "pulp-ephemeral" su "${PULP_USER}" -c "gpg --import-ownertrust"
-  "${CONTAINER_RUNTIME}" exec -i "pulp-ephemeral" su "${PULP_USER}" -c "gpg --import" < pytest_pulp_cli/GPG-PRIVATE-KEY-fixture-signing
+  "${CONTAINER_RUNTIME}" exec -i "pulp-ephemeral" su "${PULP_USER}" -c "gpg --import" < .ci/GPG-PRIVATE-KEY-fixture-signing
   if [ "$HAS_DEB" ]
   then
     echo "Setup deb release signing service"

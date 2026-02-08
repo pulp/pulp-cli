@@ -1,0 +1,83 @@
+# Library for test helper functions
+
+: "${PULP_API_ROOT:="/pulp/"}"
+
+# open fd 3 as a copy of stderr
+exec 3<&2
+
+# Expects the command to succeed
+# Supresses all output, which is redirected to $OUTPUT and $ERROUTPUT
+# Reports verbosely on failure
+expect_succ () {
+  if {
+    "$@"
+  } 1>log.out 2>log.err
+  then
+    echo "SUCCESS [$@]" >&3
+    OUTPUT="$(cat log.out)"
+    ERROUTPUT="$(cat log.err)"
+  else
+    echo "FAILURE [$@]" >&3
+    echo "=== STDOUT ===" >&3
+    cat log.out >&3
+    echo "=== STDERR ===" >&3
+    cat log.err >&3
+    echo "==============" >&3
+    false
+  fi
+}
+
+# Expects the command to fail
+# Supresses all output, which is redirected to $OUTPUT and $ERROUTPUT
+# Reports verbosely on failure
+expect_fail () {
+  if {
+    "$@"
+  } 1>log.out 2>log.err
+  then
+    echo "FAILURE [! $@]" >&3
+    echo "=== STDOUT ===" >&3
+    cat log.out >&3
+    echo "=== STDERR ===" >&3
+    cat log.err >&3
+    false
+  else
+    echo "SUCCESS [! $@]" >&3
+    OUTPUT="$(cat log.out)"
+    ERROUTPUT="$(cat log.err)"
+  fi
+}
+
+# Expects the command to report access denied
+# Supresses all output, which is redirected to $OUTPUT and $ERROUTPUT
+# Reports verbosely on failure
+expect_deny () {
+  if {
+    "$@"
+  } 1>log.out 2>log.err
+  # TODO check for access denied message
+  then
+    echo "FAILURE [! $@]" >&3
+    echo "=== STDOUT ===" >&3
+    cat log.out >&3
+    echo "=== STDERR ===" >&3
+    cat log.err >&3
+    false
+  else
+    if grep -q "Operation .* not authorized." log.err
+    then
+      echo "SUCCESS [! $@]" >&3
+      OUTPUT="$(cat log.out)"
+      ERROUTPUT="$(cat log.err)"
+    else
+      echo "FAILURE [! $@]" >&3
+      echo "=== STDOUT ===" >&3
+      cat log.out >&3
+      echo "=== STDERR ===" >&3
+      cat log.err >&3
+      false
+    fi
+  fi
+}
+
+set -eu

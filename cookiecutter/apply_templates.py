@@ -11,8 +11,8 @@
 
 
 import os
-from pathlib import Path
 import tomllib
+from pathlib import Path
 
 import click
 import yaml
@@ -38,8 +38,7 @@ def main(bootstrap: bool, force: bool) -> None:
         os.chdir(proj_dir)
 
     try:
-        with open("pyproject.toml", "rb") as fp:
-            pyproject_toml = tomllib.load(fp)
+        pyproject_toml = tomllib.loads(Path("pyproject.toml").read_text())
         config = pyproject_toml["tool"]["pulp_cli_template"]
     except (FileNotFoundError, KeyError):
         raise click.ClickException("This does not look like a pulp cli repository.")

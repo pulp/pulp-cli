@@ -4,7 +4,7 @@
 
 [tool.setuptools.packages.find]
 # This section is managed by the cookiecutter templates.
-where = ["."]
+where = ["{% if cookiecutter.src_layout %}src{% else %}.{% endif %}"]
 include = ["pulp_glue.*"]
 namespaces = true
 
@@ -25,7 +25,8 @@ extend-select = ["I"]
 strict = true
 warn_unused_ignores = false
 show_error_codes = true
-files = "pulp_glue/**/*.py, tests/**/*.py"
+files = "{% if cookiecutter.src_layout %}src{% else %}pulp_glue{% endif %}/**/*.py, tests/**/*.py"
+mypy_path = ["{% if cookiecutter.src_layout %}src{% else %}.{% endif %}"]
 namespace_packages = true
 explicit_package_bases = true
 

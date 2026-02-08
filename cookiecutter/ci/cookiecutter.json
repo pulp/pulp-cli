@@ -1,5 +1,6 @@
 {
   "app_label": "noname",
+  "src_layout": false,
   "glue": true,
   "docs": false,
   "translations": false,
