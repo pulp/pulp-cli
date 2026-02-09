@@ -178,12 +178,18 @@ class PulpRpmPackageContext(PulpContentContext):
         size = os.path.getsize(file.name)
         body: dict[str, t.Any] = {**kwargs}
 
+        use_upload_endpoint = repository is None and self.pulp_ctx.has_plugin(
+            PluginRequirement("rpm", specifier=">=3.32.5")
+        )
+
         if not self.pulp_ctx.fake_mode:
-            if chunk_size > size:
-                # Small file: direct upload
+            # The "upload" endpoint always requires direct file upload (no chunking)
+            # The "create" endpoint supports chunked upload for large files
+            if use_upload_endpoint or chunk_size > size:
+                # Direct file upload: required for upload endpoint, or small files
                 body["file"] = file
             else:
-                # Large file: chunked upload
+                # Large file with create endpoint: chunked upload
                 if self.pulp_ctx.has_plugin(PluginRequirement("core", specifier=">=3.20.0")):
                     from pulp_glue.core.context import PulpUploadContext
 
@@ -195,11 +201,8 @@ class PulpRpmPackageContext(PulpContentContext):
                     artifact_href = PulpArtifactContext(self.pulp_ctx).upload(file, chunk_size)
                     body["artifact"] = artifact_href
 
-        # For rpm plugin >= 3.32.5, use synchronous upload endpoint when no repository is provided
-        # For older versions, always use the create endpoint (backward compatibility)
-        if repository is None and self.pulp_ctx.has_plugin(
-            PluginRequirement("rpm", specifier=">=3.32.5")
-        ):
+        # Call the appropriate endpoint
+        if use_upload_endpoint:
             return self.call("upload", body=body)
 
         # Repository is specified or older rpm version: use create endpoint (async path)

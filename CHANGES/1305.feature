@@ -1,0 +1,1 @@
+Disabling the chunk uploads to the synchronous rpm endpoint to improve performance. 
