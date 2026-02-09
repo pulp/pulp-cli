@@ -1,0 +1,1 @@
+Change the default chunking value to "infinite". If users wants to, they can still specify a value based on their needs.

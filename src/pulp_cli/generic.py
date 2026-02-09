@@ -717,7 +717,9 @@ def create_content_json_callback(
 units = {"B": 1, "KB": 10**3, "MB": 10**6, "GB": 10**9, "TB": 10**12}
 
 
-def parse_size_callback(ctx: click.Context, param: click.Parameter, value: str) -> int:
+def parse_size_callback(ctx: click.Context, param: click.Parameter, value: str | None) -> int:
+    if value is None:
+        return sys.maxsize
     size = value.strip().upper()
     match = re.match(r"^([0-9]+)\s*([KMGT]?B)?$", size)
     if not match:
@@ -1216,8 +1218,8 @@ content_in_option = pulp_option(
 
 chunk_size_option = pulp_option(
     "--chunk-size",
-    help=_("Chunk size to break up {entity} into. Defaults to 1MB"),
-    default="1MB",
+    help=_("Chunk size to break up {entity} into. Defaults to not chunking at all."),
+    default=None,
     callback=parse_size_callback,
 )
 

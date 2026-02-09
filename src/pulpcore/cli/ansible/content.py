@@ -184,8 +184,8 @@ content.add_command(
 @repository_option
 @pulp_option(
     "--chunk-size",
-    help=_("Chunk size to break up {entity} into. Defaults to 1MB"),
-    default="1MB",
+    help=_("Chunk size to break up {entity} into. Defaults to not chunking at all."),
+    default=None,
     callback=parse_size_callback,
     allowed_with_contexts=content_context,
 )

@@ -32,7 +32,7 @@ def traverse_commands(command: click.Command, args: t.List[str]) -> t.Iterator[t
 def pytest_generate_tests(metafunc: pytest.Metafunc) -> None:
     m = next(metafunc.definition.iter_markers("help_page"), None)
     if m is not None and "base_cmd" in m.kwargs:
-        rel_main:click.Group = main
+        rel_main: click.Group = main
         base_cmd = m.kwargs["base_cmd"]
         for step in base_cmd:
             sub = rel_main.commands[step]
