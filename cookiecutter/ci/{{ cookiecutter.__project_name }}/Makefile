@@ -18,15 +18,17 @@ info:
 
 .PHONY: build
 build:
-{%- if cookiecutter.glue %}
-	cd pulp-glue{{ cookiecutter.__app_label_suffix }}; pyproject-build -n
-{%- endif %}
-	pyproject-build -n
+	uv build --all
 
 .PHONY: format
 format:
 	ruff format
 	ruff check --fix
+
+.PHONY: uv-format
+uv-format:
+	uv lock
+	uv run --isolated --group lint $(MAKE) format
 
 .PHONY: lint
 lint:
@@ -37,13 +39,16 @@ lint:
 	.ci/scripts/check_cli_dependencies.py
 {%- endif %}
 	.ci/scripts/check_click_for_mypy.py
+	mypy
 {%- if cookiecutter.glue %}
-	mypy
 	cd pulp-glue{{ cookiecutter.__app_label_suffix }}; mypy
-{%- else %}
-	mypy
 {%- endif %}
 	@echo "🙊 Code 🙈 LGTM 🙉 !"
+
+.PHONY: uv-lint
+uv-lint:
+	uv lock --check
+	uv run --isolated --group lint $(MAKE) lint
 
 tests/cli.toml:
 	cp $@.example $@

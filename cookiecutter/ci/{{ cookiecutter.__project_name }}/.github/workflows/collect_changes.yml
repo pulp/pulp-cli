@@ -1,3 +1,4 @@
+{%- import 'macros' as macros with context -%}
 ---
 name: "Collect changes"
 on:
@@ -12,9 +13,7 @@ jobs:
         with:
           ref: "main"
           fetch-depth: 0
-      - uses: "actions/setup-python@v6"
-        with:
-          python-version: "3.x"
+      {{ macros.setup_python() | indent(6) }}
       - name: "Setup git"
         run: |
           git config user.name pulpbot
@@ -23,6 +22,7 @@ jobs:
         run: |
           pip install GitPython packaging
           python3 .ci/scripts/collect_changes.py
+      {%- raw %}
       - name: "Create Pull Request"
         uses: "peter-evans/create-pull-request@v7"
         id: "create_pr"
@@ -39,4 +39,5 @@ jobs:
         env:
           GH_TOKEN: "${{ secrets.RELEASE_TOKEN }}"
         continue-on-error: true
+      {%- endraw %}
 ...
