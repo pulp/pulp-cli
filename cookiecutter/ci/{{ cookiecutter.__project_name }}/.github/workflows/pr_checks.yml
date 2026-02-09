@@ -1,3 +1,4 @@
+{%- import 'macros' as macros with context -%}
 ---
 name: "Pulp CLI PR static checks"
 on:
@@ -9,7 +10,9 @@ on:
 # Static analysis should be fine however.
 
 concurrency:
+  {%- raw %}
   group: "${{ github.event.pull_request.number }}-${{ github.workflow }}"
+  {%- endraw %}
   cancel-in-progress: true
 
 jobs:
@@ -19,19 +22,17 @@ jobs:
     permissions:
       pull-requests: "write"
     steps:
-      - uses: "actions/checkout@v5"
-        with:
-          fetch-depth: 0
-      - uses: "actions/setup-python@v6"
-        with:
-          python-version: "3.x"
+      {{ macros.checkout(deep=true) | indent(6) }}
+      {{ macros.setup_python() | indent(6) }}
+      {{ macros.install_uv() | indent(6) }}
       - name: "Determine PR labels"
         run: |
-          pip install GitPython==3.1.42
+          {%- raw %}
           git fetch origin ${{ github.event.pull_request.head.sha }}
-          python .ci/scripts/pr_labels.py "origin/${{ github.base_ref }}" "${{ github.event.pull_request.head.sha }}" >> "$GITHUB_ENV"
-      - uses: "actions/github-script@v8"
-        name: "Apply PR Labels"
+          uv run -q .ci/scripts/pr_labels.py "origin/${{ github.base_ref }}" "${{ github.event.pull_request.head.sha }}" >> "$GITHUB_ENV"
+          {%- endraw %}
+      - name: "Apply PR Labels"
+        uses: "actions/github-script@v8"
         with:
           script: |
             const { ADD_LABELS, REMOVE_LABELS } = process.env;

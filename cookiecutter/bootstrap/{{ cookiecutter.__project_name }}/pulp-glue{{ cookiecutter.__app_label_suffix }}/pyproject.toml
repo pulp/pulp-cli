@@ -28,24 +28,3 @@ dependencies = [
 [project.urls]
 repository = "https://github.com/pulp/{{ cookiecutter.__project_name }}"
 changelog = "https://github.com/pulp/{{ cookiecutter.__project_name }}/blob/main/CHANGES.md"
-
-[tool.setuptools.packages.find]
-where = ["."]
-include = ["pulp_glue.*"]
-namespaces = true
-
-[tool.setuptools.package-data]
-"*" = ["py.typed", "locale/*/LC_MESSAGES/*.mo"]
-
-[tool.mypy]
-strict = true
-show_error_codes = true
-files = "pulp_glue/**/*.py"
-namespace_packages = true
-explicit_package_bases = true
-
-[[tool.mypy.overrides]]
-module = [
-  "schema.*",
-]
-ignore_missing_imports = true

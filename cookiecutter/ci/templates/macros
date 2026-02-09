@@ -1,0 +1,38 @@
+{%- macro concurrency() -%}
+concurrency:
+  {%- raw %}
+  group: "main-${{ github.ref_name }}-${{ github.workflow }}"
+  {%- endraw %}
+  cancel-in-progress: true
+{%- endmacro -%}
+
+{%- macro checkout(deep=false) -%}
+- name: "Checkout"
+  uses: "actions/checkout@v5"
+  {%- if deep %}
+  with:
+    fetch-depth: 0
+  {%- endif %}
+{%- endmacro -%}
+
+{%- macro download_wheels() -%}
+- name: "Download wheels"
+  uses: "actions/download-artifact@v5"
+  with:
+    name: "pulp_cli_packages"
+{%- endmacro -%}
+
+{%- macro setup_python(version="3.14") -%}
+- name: "Set up Python"
+  uses: "actions/setup-python@v6"
+  with:
+    python-version: "{{ version }}"
+    allow-prereleases: true
+{%- endmacro -%}
+
+{%- macro install_uv() -%}
+- name: "Install uv"
+  uses: "astral-sh/setup-uv@v7"
+  with:
+    enable-cache: true
+{%- endmacro -%}

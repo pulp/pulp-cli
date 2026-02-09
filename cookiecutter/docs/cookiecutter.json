@@ -6,5 +6,6 @@
   "__project_slug": "{{ cookiecutter.__project_name | lower | replace(' ', '_') }}",
   "_copy_without_render": [
     ".github/workflows/docs.yml"
-  ]
+  ],
+  "_extensions": [".pulp_filter_extension.PulpFilterExtension"]
 }
