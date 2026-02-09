@@ -1,3 +1,4 @@
+{%- import 'macros' as macros with context -%}
 ---
 name: "Lint"
 
@@ -14,20 +15,10 @@ jobs:
           - "3.11"
           - "3.14"
     steps:
-      - uses: "actions/checkout@v5"
-      {%- include "cache_action" %}
-      - name: "Download wheels"
-        uses: "actions/download-artifact@v5"
-        with:
-          name: "pulp_cli_packages"
-      - name: "Set up Python"
-        uses: "actions/setup-python@v6"
-        with:
-          python-version: "{{ "${{ matrix.python }}" }}"
-      - name: "Install python dependencies"
-        run: |
-          pip install dist/pulp_cli{{ cookiecutter.__app_label_suffix | replace ("-", "_") }}-*.whl {%- if cookiecutter.glue %} pulp-glue{{ cookiecutter.__app_label_suffix }}/dist/pulp_glue{{ cookiecutter.__app_label_suffix | replace ("-", "_") }}-*.whl {%- endif %} -r lint_requirements.txt
+      {{ macros.checkout() | indent(6) }}
+      {{ macros.setup_python(version="${{ matrix.python }}") | indent(6) }}
+      {{ macros.install_uv() | indent(6) }}
       - name: "Lint code"
         run: |
-          make lint
+          make uv-lint
 ...
