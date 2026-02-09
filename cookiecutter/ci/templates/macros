@@ -36,3 +36,10 @@ concurrency:
   with:
     enable-cache: true
 {%- endmacro -%}
+
+{%- macro setup_git() -%}
+- name: "Setup git"
+  run: |
+    git config user.name pulpbot
+    git config user.email pulp-infra@redhat.com
+{%- endmacro -%}
