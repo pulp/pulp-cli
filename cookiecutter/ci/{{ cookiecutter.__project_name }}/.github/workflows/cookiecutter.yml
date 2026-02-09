@@ -24,12 +24,9 @@ jobs:
           token: "${{ secrets.RELEASE_TOKEN }}"
           {%- endraw %}
           path: "pulp-cli{{ cookiecutter.__app_label_suffix }}"
-      - name: "Setup git"
-        run: |
-          git config user.name pulpbot
-          git config user.email pulp-infra@redhat.com
       {{ macros.setup_python() | indent(6) }}
       {{ macros.install_uv() | indent(6) }}
+      {{ macros.setup_git() | indent(6) }}
       - name: "Apply cookiecutter templates"
         run: |
           uv run ../pulp-cli/cookiecutter/apply_templates.py
@@ -73,12 +70,9 @@ jobs:
           token: "${{ secrets.RELEASE_TOKEN }}"
           {%- endraw %}
           path: "pulp-cli{{ cookiecutter.__app_label_suffix }}"
-      - name: "Setup git"
-        run: |
-          git config user.name pulpbot
-          git config user.email pulp-infra@redhat.com
       {{ macros.setup_python() | indent(6) }}
       {{ macros.install_uv() | indent(6) }}
+      {{ macros.setup_git() | indent(6) }}
       - name: "Apply cookiecutter templates"
         run: |
           uv run ../pulp-cli/cookiecutter/update_pulp_cli.py

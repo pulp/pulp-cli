@@ -18,7 +18,7 @@ line-length = 100
 
 [tool.ruff.lint]
 # This section is managed by the cookiecutter templates.
-extend-select = ["I"]
+extend-select = ["I", "INT"]
 
 [tool.mypy]
 # This section is managed by the cookiecutter templates.

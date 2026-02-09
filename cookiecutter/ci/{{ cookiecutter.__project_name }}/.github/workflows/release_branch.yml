@@ -1,3 +1,4 @@
+{%- import 'macros' as macros with context -%}
 ---
 name: "Create Release Branch"
 on:
@@ -9,36 +10,36 @@ jobs:
     steps:
       - uses: "actions/checkout@v6"
         with:
+          {%- raw %}
           token: "${{ secrets.RELEASE_TOKEN }}"
-      - name: "Set up Python"
-        uses: "actions/setup-python@v6"
-        with:
-          python-version: "3.x"
-      - name: "Setup git"
-        run: |
-          git config user.name pulpbot
-          git config user.email pulp-infra@redhat.com
-      - name: "Install python dependencies"
-        run: |
-          pip install bump-my-version~=0.20.0
+          {%- endraw %}
+      {{ macros.setup_python() | indent(6) }}
+      {{ macros.install_uv() | indent(6) }}
+      {{ macros.setup_git() | indent(6) }}
       - name: "Create Release Branch"
         run: |
-          .ci/scripts/create_release_branch.sh
+          uv run --with bump-my-version~=0.20.0 .ci/scripts/create_release_branch.sh
       - name: "Create Pull Request"
         uses: "peter-evans/create-pull-request@v8"
         id: "create_pr"
         with:
+          {%- raw %}
           token: "${{ secrets.RELEASE_TOKEN }}"
           title: "Bump dev-version"
           body: ""
           branch: "bump_version"
           delete-branch: true
+          {%- endraw %}
       - name: "Mark PR automerge"
         run: |
+          {%- raw %}
           gh pr merge --rebase --auto "${{ steps.create_pr.outputs.pull-request-number }}"
+          {%- endraw %}
         if: "steps.create_pr.outputs.pull-request-number"
         env:
+          {%- raw %}
           GH_TOKEN: "${{ secrets.RELEASE_TOKEN }}"
+          {%- endraw %}
         continue-on-error: true
       - name: "Add Backport Label for new Branch"
         uses: "actions/github-script@v8"
