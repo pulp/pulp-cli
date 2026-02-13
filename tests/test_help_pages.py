@@ -29,6 +29,12 @@ def traverse_commands(command: click.Command, args: t.List[str]) -> t.Iterator[t
                         yield from traverse_commands(sub, args + ["--type", context_type, name])
 
 
+def pytest_generate_tests(metafunc: pytest.Metafunc) -> None:
+    m = next(metafunc.definition.iter_markers("help_page"), None)
+    if m is not None and "base_cmd" in m.kwargs:
+        metafunc.parametrize("args", traverse_commands(main, m.kwargs["base_cmd"]), ids=" ".join)
+
+
 @pytest.fixture
 def no_api(monkeypatch: pytest.MonkeyPatch) -> None:
     @property  # type: ignore
@@ -38,30 +44,28 @@ def no_api(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr("pulp_glue.common.context.PulpContext.api", getter)
 
 
-@pytest.mark.help_page
-def test_access_help(no_api: None, subtests: pytest.Subtests) -> None:
-    """Test, that all help screens are accessible without touching the api property."""
+@pytest.mark.help_page(base_cmd=[])
+def test_accessing_the_help_page_does_not_invoke_api(
+    no_api: None,
+    args: list[str],
+) -> None:
     runner = CliRunner()
-    for args in traverse_commands(main, []):
-        with subtests.test(msg=" ".join(args)):
-            result = runner.invoke(main, args + ["--help"], catch_exceptions=False)
+    result = runner.invoke(main, args + ["--help"], catch_exceptions=False)
 
-            if result.exit_code == 2:
-                assert (
-                    "not available in this context" in result.stdout
-                    or "not available in this context" in result.stderr
-                )
-            else:
-                assert result.exit_code == 0
-                assert result.stdout.startswith("Usage:") or result.stdout.startswith(
-                    "DeprecationWarning:"
-                )
+    if result.exit_code == 2:
+        assert (
+            "not available in this context" in result.stdout
+            or "not available in this context" in result.stderr
+        )
+    else:
+        assert result.exit_code == 0
+        assert result.stdout.startswith("Usage:") or result.stdout.startswith("DeprecationWarning:")
 
 
 @pytest.mark.parametrize(
     "command,options",
     [
-        (
+        pytest.param(
             [
                 "file",
                 "repository",
