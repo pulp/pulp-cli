@@ -8,11 +8,27 @@
 # ///
 
 
-import typing as t
 import sys
+import typing as t
 from pathlib import Path
 
 import tomlkit
+
+
+def move_to_src(base_dir: Path, names: list[str]) -> None:
+    src_dir = base_dir / "src"
+    src_dir.mkdir(exist_ok=True)
+    for name in names:
+        origin = base_dir / name
+        destination = src_dir / name
+        try:
+            origin.rename(destination)
+        except OSError:
+            print(
+                f"Moving '{origin}' to '{destination}' failed. "
+                "To start fresh you can run 'git reset --hard; git clean -d -f'."
+            )
+            sys.exit(1)
 
 
 def main() -> None:
@@ -34,10 +50,7 @@ def main() -> None:
             glue_dir = Path("pulp-glue-" + config["app_label"])
         assert glue_dir.is_dir()
         print("Moving glue parts.")
-        glue_src_dir = glue_dir / "src"
-        glue_src_dir.mkdir(exist_ok=True)
-        glue_namespace_dir = glue_dir / "pulp_glue"
-        glue_namespace_dir.rename(glue_src_dir / "pulp_glue")
+        move_to_src(glue_dir, ["pulp_glue"])
 
     print("Moving cli parts to src.")
     cli_src_dir = Path("src")

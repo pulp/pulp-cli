@@ -14,26 +14,18 @@ jobs:
           - "3.11"
           - "3.14"
     steps:
-      - uses: "actions/checkout@v5"
-      - uses: "actions/cache@v4"
-        with:
-          path: "~/.cache/pip"
-          key: "${{ runner.os }}-pip-${{ hashFiles('**/*requirements.txt', '**/*constraints.lock', '**/setup.py', '**/pyproject.toml') }}"
-          restore-keys: |
-            ${{ runner.os }}-pip-
-
-      - name: "Download wheels"
-        uses: "actions/download-artifact@v5"
-        with:
-          name: "pulp_cli_packages"
+      - name: "Checkout"
+        uses: "actions/checkout@v5"
       - name: "Set up Python"
         uses: "actions/setup-python@v6"
         with:
           python-version: "${{ matrix.python }}"
-      - name: "Install python dependencies"
-        run: |
-          pip install dist/pulp_cli-*.whl pulp-glue/dist/pulp_glue-*.whl -r lint_requirements.txt
+          allow-prereleases: true
+      - name: "Install uv"
+        uses: "astral-sh/setup-uv@v7"
+        with:
+          enable-cache: true
       - name: "Lint code"
         run: |
-          make lint
+          make uv-lint
 ...
