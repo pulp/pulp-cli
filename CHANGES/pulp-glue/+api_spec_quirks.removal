@@ -1,0 +1,2 @@
+The `api_quirk` decorator has been deprecated in favor of the `api_spec_quirk` decorator.
+Quirks are now supposed to work on the raw spec before it is parsed by the `openapi` layer.
