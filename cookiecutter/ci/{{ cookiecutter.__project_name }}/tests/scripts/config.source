@@ -80,4 +80,28 @@ expect_deny () {
   fi
 }
 
+# Expects the provided test to pass
+# Supresses all output, which is redirected to ASSERTION_OUTPUT and
+# ASSERTION_ERROUTPUT so as not to overwrite the latest OUTPUT and ERROUTPUT.
+# That way we can test several assertions in a row.
+# Reports verbosely on failure.
+assert () {
+  if {
+    [[ "$@" ]]
+  } 1>log.out 2>log.err
+  then
+    echo "SUCCESS [$@]" >&3
+    ASSERTION_OUTPUT="$(cat log.out)"
+    ASSERTION_ERROUTPUT="$(cat log.err)"
+  else
+    echo "FAILURE [$@]" >&3
+    echo "=== STDOUT ===" >&3
+    cat log.out >&3
+    echo "=== STDERR ===" >&3
+    cat log.err >&3
+    echo "==============" >&3
+    false
+  fi
+}
+
 set -eu
