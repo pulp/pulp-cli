@@ -13,6 +13,7 @@ def pulp_cli_vars(pulp_cli_vars: dict[str, str]) -> dict[str, str]:
     result.update(
         {
             "FILE_REMOTE_URL": urljoin(PULP_FIXTURES_URL, "/file/PULP_MANIFEST"),
+            "GIT_REMOTE_URL": "https://github.com/pulp/pulp-fixtures.git",
             "FILE_REMOTE2_URL": urljoin(PULP_FIXTURES_URL, "/file2/PULP_MANIFEST"),
             "FILE_LARGE_REMOTE_URL": urljoin(PULP_FIXTURES_URL, "/file-perf/PULP_MANIFEST"),
             "CONTAINER_REMOTE_URL": "https://quay.io",
