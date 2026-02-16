@@ -1,8 +1,9 @@
 import asyncio
-import typing as t
 
 import pytest
+from pydantic.type_adapter import TypeAdapter
 
+from pulp_glue.common import oas
 from pulp_glue.common.authentication import (
     AuthProviderBase,
     BasicAuthProvider,
@@ -12,50 +13,52 @@ from pulp_glue.common.authentication import (
 pytestmark = pytest.mark.glue
 
 
-SECURITY_SCHEMES: dict[str, dict[str, t.Any]] = {
-    "A": {"type": "http", "scheme": "bearer"},
-    "B": {"type": "http", "scheme": "basic"},
-    "C": {
-        "type": "oauth2",
-        "flows": {
-            "implicit": {
-                "authorizationUrl": "https://example.com/api/oauth/dialog",
-                "scopes": {
-                    "write:pets": "modify pets in your account",
-                    "read:pets": "read your pets",
+SECURITY_SCHEMES = TypeAdapter(dict[str, oas.SecurityScheme | oas.Reference]).validate_python(
+    {
+        "A": {"type": "http", "scheme": "bearer"},
+        "B": {"type": "http", "scheme": "basic"},
+        "C": {
+            "type": "oauth2",
+            "flows": {
+                "implicit": {
+                    "authorizationUrl": "https://example.com/api/oauth/dialog",
+                    "scopes": {
+                        "write:pets": "modify pets in your account",
+                        "read:pets": "read your pets",
+                    },
                 },
-            },
-            "authorizationCode": {
-                "authorizationUrl": "https://example.com/api/oauth/dialog",
-                "tokenUrl": "https://example.com/api/oauth/token",
-                "scopes": {
-                    "write:pets": "modify pets in your account",
-                    "read:pets": "read your pets",
-                },
-            },
-        },
-    },
-    "D": {
-        "type": "oauth2",
-        "flows": {
-            "implicit": {
-                "authorizationUrl": "https://example.com/api/oauth/dialog",
-                "scopes": {
-                    "write:pets": "modify pets in your account",
-                    "read:pets": "read your pets",
-                },
-            },
-            "clientCredentials": {
-                "tokenUrl": "https://example.com/api/oauth/token",
-                "scopes": {
-                    "write:pets": "modify pets in your account",
-                    "read:pets": "read your pets",
+                "authorizationCode": {
+                    "authorizationUrl": "https://example.com/api/oauth/dialog",
+                    "tokenUrl": "https://example.com/api/oauth/token",
+                    "scopes": {
+                        "write:pets": "modify pets in your account",
+                        "read:pets": "read your pets",
+                    },
                 },
             },
         },
-    },
-    "E": {"type": "mutualTLS"},
-}
+        "D": {
+            "type": "oauth2",
+            "flows": {
+                "implicit": {
+                    "authorizationUrl": "https://example.com/api/oauth/dialog",
+                    "scopes": {
+                        "write:pets": "modify pets in your account",
+                        "read:pets": "read your pets",
+                    },
+                },
+                "clientCredentials": {
+                    "tokenUrl": "https://example.com/api/oauth/token",
+                    "scopes": {
+                        "write:pets": "modify pets in your account",
+                        "read:pets": "read your pets",
+                    },
+                },
+            },
+        },
+        "E": {"type": "mutualTLS"},
+    }
+)
 
 
 class TestBasicAuthProvider:
