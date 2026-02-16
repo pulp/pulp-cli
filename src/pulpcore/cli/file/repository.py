@@ -12,6 +12,7 @@ from pulp_glue.common.context import (
 from pulp_glue.common.i18n import get_translation
 from pulp_glue.file.context import (
     PulpFileContentContext,
+    PulpFileGitRemoteContext,
     PulpFileRemoteContext,
     PulpFileRepositoryContext,
 )
@@ -54,7 +55,10 @@ remote_option = resource_option(
     "--remote",
     default_plugin="file",
     default_type="file",
-    context_table={"file:file": PulpFileRemoteContext},
+    context_table={
+        "file:file": PulpFileRemoteContext,
+        "file:git": PulpFileGitRemoteContext,
+    },
     href_pattern=PulpRemoteContext.HREF_PATTERN,
     help=_("Remote used for syncing in the form '[[<plugin>:]<resource_type>:]<name>' or by href."),
 )
