@@ -59,5 +59,9 @@ class ValidationError(OpenAPIError):
     """Exception raised for failed client side validation of parameters or request bodies."""
 
 
+class SchemaError(OpenAPIError):
+    """Exception raised for unsurmountable inconsistencies of the openapi schema."""
+
+
 class UnsafeCallError(OpenAPIError):
     """Exception raised for POST, PUT, PATCH or DELETE calls with `safe_calls_only=True`."""

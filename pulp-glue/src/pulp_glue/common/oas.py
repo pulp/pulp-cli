@@ -1,4 +1,5 @@
 import typing as t
+from functools import cached_property
 
 import pydantic
 import pydantic.alias_generators
@@ -15,7 +16,7 @@ class OASBase(pydantic.BaseModel, alias_generator=to_alias, extra="forbid"):
 
 class ExtensibleOASBase(OASBase, extra="allow"):
     @pydantic.model_validator(mode="after")
-    def _check_extensions(self) -> t.Self:
+    def _check_extensions(self) -> "t.Self":
         if self.__pydantic_extra__ is not None:
             invalid_keys = [
                 key for key in self.__pydantic_extra__.keys() if not key.startswith("x-")
@@ -30,8 +31,31 @@ class ExtensibleOASBase(OASBase, extra="allow"):
         return self
 
 
+OperationName = t.Literal[
+    "get",
+    "put",
+    "post",
+    "patch",
+    "delete",
+    "options",
+    "head",
+    "trace",
+]
+
+METHODS: list[OperationName] = [
+    "get",
+    "put",
+    "post",
+    "patch",
+    "delete",
+    "options",
+    "head",
+    "trace",
+]
+
+
 class Reference(OASBase):
-    _ref: t.Annotated[str, pydantic.Field(alias="$ref")]
+    ref: t.Annotated[str, pydantic.Field(alias="$ref")]
     summary: str | None = None
     description: str | None = None
 
@@ -164,11 +188,48 @@ class XML(ExtensibleOASBase):
     wrapped: bool = False
 
 
-class Schema(OASBase, extra="allow"):
+class SchemaBase(OASBase, extra="allow"):
     discriminator: Discriminator | None = None
     xml: XML | None = None
     external_docs: ExternalDocumentation | None = None
     example: t.Any = None
+    examples: dict[str, Example | Reference] | None = None
+    nullable: bool = False
+
+
+class AllOfSchema(SchemaBase):
+    all_of: list["Schema"]
+
+
+class AnyOfSchema(SchemaBase):
+    any_of: list["Schema"]
+
+
+class OneOfSchema(SchemaBase):
+    one_of: list["Schema"]
+
+
+class TypeSchema(SchemaBase):
+    type_: str | list[str]
+
+    min_items: int | None = None
+    max_items: int | None = None
+    unique_items: bool = False
+    items: "Schema | None" = None
+
+    minimum: int | float | None = None
+    exclusive_minimum: bool = False
+    maximum: int | float | None = None
+    exclusive_maximum: bool = False
+    multiple_of: int | None = None
+    format_: str | None = None
+    enum: list[str] | None = None
+    properties: dict[str, "Schema"] | None = None
+    additional_properties: "Schema" = True
+    required: list[str] | None = None
+
+
+Schema = bool | Reference | TypeSchema | AllOfSchema | AnyOfSchema | OneOfSchema | SchemaBase
 
 
 class Link(ExtensibleOASBase):
@@ -192,18 +253,38 @@ class Encoding(ExtensibleOASBase):
     # TODO These only apply to RFC6570
     style: (
         t.Literal[
-            "simple", "form", "matrix", "label", "spaceDelimited", "pipeDelimited", "deepObject"
+            "simple",
+            "form",
+            "matrix",
+            "label",
+            "spaceDelimited",
+            "pipeDelimited",
+            "deepObject",
         ]
         | None
     ) = None
-    explode: t.Annotated[bool, pydantic.Field(default_factory=lambda data: data["style"] == "form")]
+    explode: t.Annotated[
+        bool,
+        pydantic.Field(
+            # default_factory=lambda data: data["style"] == "form"
+        ),
+    ]
     allow_reserved: bool = False
+
+    @pydantic.model_validator(mode="before")
+    @classmethod
+    def explode_default(cls, data: t.Any) -> t.Any:
+        # This is a workaround for pydantic < 2.10 .
+        # default_factory didn't have the extra data argument.
+        data["explode"] = data.get("style") == "form"
+        return data
 
 
 class MediaType(ExtensibleOASBase):
     schema_: Schema
     example: t.Any = None
     examples: dict[str, Example | Reference] | None = None
+    # TODO encoding seems to be reserved to request body.
     encoding: dict[str, Encoding] = {}
 
 
@@ -237,7 +318,7 @@ class ParameterBase(ExtensibleOASBase):
     allow_empty_value: bool = False
 
     @pydantic.model_validator(mode="after")
-    def _path_required(self) -> t.Self:
+    def _path_required(self) -> "t.Self":
         if self.in_ == "path":
             assert self.required
         return self
@@ -251,16 +332,41 @@ class SchemaParameter(ParameterBase):
     schema_: Schema
     style: t.Annotated[
         t.Literal[
-            "simple", "form", "matrix", "label", "spaceDelimited", "pipeDelimited", "deepObject"
+            "simple",
+            "form",
+            "matrix",
+            "label",
+            "spaceDelimited",
+            "pipeDelimited",
+            "deepObject",
         ],
         pydantic.Field(
-            default_factory=lambda data: "simple" if data["in_"] in ["header", "path"] else "form"
+            #    default_factory=lambda data: (
+            #        "simple" if data.get("in_") in ["header", "path"] else "form"
+            #    )
         ),
     ]
-    explode: t.Annotated[bool, pydantic.Field(default_factory=lambda data: data["style"] == "form")]
+    explode: t.Annotated[
+        bool,
+        pydantic.Field(
+            # default_factory=lambda data: data["style"] == "form"
+        ),
+    ]
     allowed_reserved: bool = False
     example: t.Any = None
     examples: dict[str, Example | Reference] | None = None
+
+    @pydantic.model_validator(mode="before")
+    @classmethod
+    def explode_default(cls, data: t.Any) -> t.Any:
+        # This is a workaround for pydantic < 2.10 .
+        # default_factory didn't have the extra data argument.
+        if "schema" in data:
+            if data.get("style") is None:
+                data["style"] = "simple" if data.get("in") in ["header", "path"] else "form"
+            if data.get("explode") is None:
+                data["explode"] = data["style"] == "form"
+        return data
 
 
 Parameter = ContentParameter | SchemaParameter
@@ -275,7 +381,7 @@ class RequestBody(ExtensibleOASBase):
 class Response(ExtensibleOASBase):
     description: str
     headers: dict[str, Header | Reference] | None = None
-    content: dict[str, MediaType] | None = None
+    content: dict[str, MediaType] = {}
     links: dict[str, Link | Reference] | None = None
 
 
@@ -291,16 +397,17 @@ class Operation(ExtensibleOASBase):
     description: str | None = None
     external_docs: ExternalDocumentation | None = None
     operation_id: str
-    parameters: list[Parameter | Reference] | None = None
+    parameters: list[Parameter | Reference] = []
     request_body: RequestBody | Reference | None = None
-    responses: Responses | None = None
+    responses: Responses = {}
     callbacks: dict[str, Callback | Reference] | None = None
     deprecated: bool = False
     security: SecurityRequirements | None = None
     servers: list[Server] | None = None
 
 
-class PathItem(Reference, ExtensibleOASBase):
+class PathItem(ExtensibleOASBase):
+    # TODO $ref
     get: Operation | None = None
     put: Operation | None = None
     post: Operation | None = None
@@ -310,17 +417,17 @@ class PathItem(Reference, ExtensibleOASBase):
     head: Operation | None = None
     trace: Operation | None = None
     servers: list[Server] | None = None
-    parameters: list[Parameter | Reference] | None = None
+    parameters: list[Parameter | Reference] = []
 
 
 class Components(ExtensibleOASBase):
-    schemas: dict[str, Schema] | None = None
+    schemas: dict[str, Schema] = {}
     responses: dict[str, Response | Reference] | None = None
-    parameters: dict[str, Parameter | Reference] | None = None
+    parameters: dict[str, Parameter | Reference] = {}
     examples: dict[str, Example | Reference] | None = None
     request_bodies: dict[str, RequestBody | Reference] | None = None
     headers: dict[str, Header | Reference] | None = None
-    security_schemes: dict[str, SecurityScheme | Reference] | None = None
+    security_schemes: dict[str, SecurityScheme | Reference] = {}
     links: dict[str, Link | Reference] | None = None
     callbacks: dict[str, Callback | Reference] | None = None
     path_items: dict[str, PathItem] | None = None
@@ -333,9 +440,19 @@ class OpenAPISpec(ExtensibleOASBase):
     servers: list[Server] | None = None
     # In the specification there is a Paths Object,
     # probably because paths as keys can get extra validation.
-    paths: dict[str, PathItem] | None = None
+    paths: dict[str, PathItem] = {}
     webhooks: dict[str, PathItem] | None = None
-    components: Components | None = None
+    components: Components = Components()
     security: SecurityRequirements | None = None
     tags: list[Tag] | None = None
     external_docs: ExternalDocumentation | None = None
+
+    # @pydantic.computed_field  # type: ignore[prop-decorator]
+    @cached_property
+    def operations(self) -> dict[str, tuple[OperationName, str]]:
+        return {
+            operation.operation_id: (method, path)
+            for path, path_item in self.paths.items()
+            for method, operation in ((method, getattr(path_item, method)) for method in METHODS)
+            if operation is not None
+        }
