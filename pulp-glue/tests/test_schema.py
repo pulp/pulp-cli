@@ -4,9 +4,9 @@ import typing as t
 
 import pytest
 
+from pulp_glue.common.exceptions import ValidationError
 from pulp_glue.common.schema import (
     SchemaError,
-    ValidationError,
     encode_json,
     encode_param,
     validate,

@@ -16,6 +16,7 @@ import requests
 import urllib3
 from multidict import CIMultiDict, CIMultiDictProxy, MutableMultiMapping
 
+import pulp_glue.common.pydantic_oas as s
 from pulp_glue.common import __version__
 from pulp_glue.common.authentication import AuthProviderBase
 from pulp_glue.common.exceptions import (
@@ -27,7 +28,6 @@ from pulp_glue.common.exceptions import (
     ValidationError,
 )
 from pulp_glue.common.i18n import get_translation
-from pulp_glue.common.pydantic_oas import OpenAPISpec
 from pulp_glue.common.schema import encode_json, encode_param, validate
 
 translation = get_translation(__package__)
@@ -37,7 +37,7 @@ _logger = logging.getLogger("pulp_glue.openapi")
 UploadType = bytes | t.IO[bytes]
 
 METHODS = {"get", "put", "post", "delete", "options", "head", "patch", "trace"}
-SAFE_METHODS = ["GET", "HEAD", "OPTIONS"]
+SAFE_METHODS = ["get", "head", "options"]
 
 
 @dataclass
@@ -80,6 +80,9 @@ class OpenAPI:
         validate_certs: DEPRECATED use verify_ssl instead.
         safe_calls_only: DEPRECATED use dry_run instead.
     """
+
+    _api_spec: s.OpenAPISpec
+    operations: dict[str, tuple[s.OperationName, str]]
 
     def __init__(
         self,
@@ -218,13 +221,13 @@ class OpenAPI:
 
     def _parse_api(self, data: bytes) -> None:
         raw_spec = self._patch_api_hook(json.loads(data))
-        OpenAPISpec.model_validate(raw_spec)
+        self._api_spec = s.OpenAPISpec.model_validate(raw_spec)
         self.api_spec: dict[str, t.Any] = raw_spec
         if self.api_spec.get("openapi", "").startswith("3."):
             self.openapi_version: int = 3
         else:
             raise OpenAPIError(_("Unknown schema version"))
-        self.operations: dict[str, t.Any] = {
+        self.operations = {
             method_entry["operationId"]: (method, path)
             for path, path_entry in self.api_spec.get("paths", {}).items()
             for method, method_entry in path_entry.items()
@@ -277,67 +280,67 @@ class OpenAPI:
             param_spec = {k: v for k, v in param_spec.items() if v.get("required", False)}
         return param_spec
 
-    def _extract_params(
-        self,
-        param_in: str,
-        path_spec: dict[str, t.Any],
-        method_spec: dict[str, t.Any],
-        params: dict[str, t.Any],
-    ) -> dict[str, t.Any]:
-        param_specs = {
-            entry["name"]: entry
-            for entry in path_spec.get("parameters", [])
-            if entry["in"] == param_in
-        }
-        param_specs.update(
-            {
-                entry["name"]: entry
-                for entry in method_spec.get("parameters", [])
-                if entry["in"] == param_in
-            }
+    def validate_schema(self, schema: s.Schema, name: str, value: t.Any) -> None:
+        validate(
+            schema.model_dump(by_alias=True),
+            name,
+            value,
+            self.api_spec["components"]["schemas"],
         )
-        result: dict[str, t.Any] = {}
-        for name in list(params.keys()):
-            if name in param_specs:
-                param = params.pop(name)
-                param_spec = param_specs.pop(name)
-                param_schema = param_spec.get("schema")
-                if param_schema is not None:
-                    self.validate_schema(param_schema, name, param)
 
-                param = encode_param(param)
-                if isinstance(param, list):
-                    if not param:
-                        # Don't propagate an empty list here
-                        continue
-                    # Check if we need to implode the list
-                    style = (
-                        param_spec.get("style") or "form"
-                        if param_in in ("query", "cookie")
-                        else "simple"
+    def _render_parameters(
+        self,
+        path_spec: s.PathItem,
+        operation_spec: s.Operation,
+        parameters: dict[str, t.Any],
+    ) -> dict[t.Literal["query", "header", "path", "cookie"], dict[str, t.Any]]:
+        param_specs: dict[str, s.Parameter] = {}
+        result: dict[t.Literal["query", "header", "path", "cookie"], dict[str, t.Any]] = {
+            "query": {},
+            "header": {},
+            "path": {},
+            "cookie": {},
+        }
+        for param_spec in path_spec.parameters + operation_spec.parameters:
+            if isinstance(param_spec, s.Reference):
+                raise NotImplementedError("Parameter as Reference")
+            param_specs[param_spec.name] = param_spec
+        for name, value in parameters.items():
+            try:
+                param_spec = param_specs.pop(name)
+            except KeyError:
+                raise ValidationError(
+                    _("Parameter '{name}' not available for '{operation_id}'.").format(
+                        name=name, operation_id=operation_spec.operation_id
                     )
-                    explode: bool = param_spec.get("explode", style == "form")
-                    if not explode:
-                        # Not exploding means comma separated list
-                        param = ",".join(param)
-                result[name] = param
-        remaining_required = [
-            item["name"] for item in param_specs.values() if item.get("required", False)
-        ]
-        if any(remaining_required):
-            raise RuntimeError(
-                _("Required parameters [{required}] missing in {param_in}.").format(
-                    required=", ".join(remaining_required), param_in=param_in
+                )
+            if isinstance(param_spec, s.SchemaParameter):
+                self.validate_schema(param_spec.schema_, name, value)
+            else:
+                raise NotImplementedError("Content Type Parameters")
+            value = encode_param(value)
+            if isinstance(value, list):
+                if not value:
+                    # TODO this is a workaround. We should absolutely be able to pass empty lists.
+                    # Don't propagate an empty list here, but put the spec up again.
+                    param_specs[name] = param_spec
+                    continue
+                if not param_spec.explode:
+                    # Not exploding means comma separated list
+                    value = ",".join(value)
+            result[param_spec.in_][name] = value
+        required_parameters = [item.name for item in param_specs.values() if item.required]
+        if len(required_parameters) > 0:
+            raise ValidationError(
+                _("Required parameter(s) [{required}] missing.").format(
+                    required=", ".join(required_parameters)
                 )
             )
         return result
 
-    def validate_schema(self, schema: t.Any, name: str, value: t.Any) -> None:
-        validate(schema, name, value, self.api_spec["components"]["schemas"])
-
     def _render_request_body(
         self,
-        method_spec: dict[str, t.Any],
+        method_spec: s.Operation,
         body: dict[str, t.Any] | None = None,
         validate_body: bool = True,
     ) -> tuple[
@@ -346,18 +349,17 @@ class OpenAPI:
         dict[str, tuple[str, UploadType, str]] | None,
     ]:
         content_types: list[str] = []
-        try:
-            request_body_spec = method_spec["requestBody"]
-        except KeyError:
+        if method_spec.request_body is None:
             if body is not None:
                 raise OpenAPIError(_("This operation does not expect a request body."))
             return None, None, None
-        else:
-            body_required = request_body_spec.get("required", False)
-            if body is None and not body_required:
-                # shortcut
-                return None, None, None
-            content_types = list(request_body_spec["content"].keys())
+        if isinstance(method_spec.request_body, s.Reference):
+            raise NotImplementedError()
+        request_body_spec: s.RequestBody = method_spec.request_body
+        if body is None and not request_body_spec.required:
+            # shortcut
+            return None, None, None
+        content_types = list(request_body_spec.content.keys())
         assert body is not None
 
         content_type: str | None = None
@@ -386,7 +388,7 @@ class OpenAPI:
                 if validate_body:
                     try:
                         self.validate_schema(
-                            request_body_spec["content"][content_type]["schema"],
+                            request_body_spec.content[content_type].schema_,
                             "body",
                             body,
                         )
@@ -420,7 +422,7 @@ class OpenAPI:
             if errors:
                 raise ValidationError(
                     _("Validation failed for '{operation_id}':\n  ").format(
-                        operation_id=method_spec["operationId"]
+                        operation_id=method_spec.operation_id
                     )
                     + "\n  ".join(errors)
                 )
@@ -431,7 +433,7 @@ class OpenAPI:
 
     def _render_request(
         self,
-        path_spec: dict[str, t.Any],
+        path_spec: s.PathItem,
         method: str,
         url: str,
         params: dict[str, t.Any],
@@ -439,16 +441,16 @@ class OpenAPI:
         body: dict[str, t.Any] | None = None,
         validate_body: bool = True,
     ) -> _Request:
-        method_spec = path_spec[method]
+        method_spec: s.Operation = getattr(path_spec, method)
         _headers = CIMultiDict(self._headers)
         _headers.update(headers)
 
         security: list[dict[str, list[str]]] | None
         if self._auth_provider and "Authorization" not in self._headers:
-            security = method_spec.get("security", self.api_spec.get("security"))
+            security = method_spec.security or self._api_spec.security
         else:
             # No auth required? Don't provide it.
-            # No auth_provider available? Hope for the best (should do the trick for cert auth).
+            # No auth_provider available? Hope for the best (cert auth is now coverd by the provider).
             # Authorization header present? You wanted it that way...
             security = None
 
@@ -459,7 +461,7 @@ class OpenAPI:
             _headers["Content-Type"] = content_type
 
         return _Request(
-            operation_id=method_spec["operationId"],
+            operation_id=method_spec.operation_id,
             method=method,
             url=url,
             headers=_headers,
@@ -538,6 +540,7 @@ class OpenAPI:
                     raise NotImplementedError("OAuth2: Only client credential flow is available.")
                 # Allow retry if the token was taken from cache.
                 may_retry = not await self._fetch_oauth2_token(flow)
+                # TODO Should we add, amend or replace the existing auth header?
                 request.headers["Authorization"] = f"Bearer {self._oauth2_token}"
             elif scheme["type"] == "mutualTLS":
                 # At this point, we assume the cert has already been loaded into the sslcontext.
@@ -670,33 +673,28 @@ class OpenAPI:
         Raises:
             ValidationError: on failed input validation (no request was sent to the server).
             OpenAPIError: on failures related to the HTTP call made.
+
+            NotImplementedError: well, the name really says is all.
         """
         method, path = self.operations[operation_id]
-        path_spec = self.api_spec["paths"][path]
-        method_spec = path_spec[method]
+        path_spec = self._api_spec.paths[path]
+        operation_spec = getattr(path_spec, method)
 
         if parameters is None:
             parameters = {}
-        else:
-            parameters = parameters.copy()
+        rendered_parameters = self._render_parameters(path_spec, operation_spec, parameters)
 
-        if any(self._extract_params("cookie", path_spec, method_spec, parameters)):
-            raise NotImplementedError(_("Cookie parameters are not implemented."))
+        if len(rendered_parameters["cookie"]) > 0:
+            raise NotImplementedError("Cookie Parameters")
 
-        headers = self._extract_params("header", path_spec, method_spec, parameters)
+        headers = rendered_parameters["header"]
 
         rel_url = path
-        for name, value in self._extract_params("path", path_spec, method_spec, parameters).items():
+        for name, value in rendered_parameters["path"].items():
             rel_url = path.replace("{" + name + "}", value)
 
-        query_params = self._extract_params("query", path_spec, method_spec, parameters)
+        query_params = rendered_parameters["query"]
 
-        if any(parameters):
-            raise OpenAPIError(
-                _("Parameter [{names}] not available for {operation_id}.").format(
-                    names=", ".join(parameters.keys()), operation_id=operation_id
-                )
-            )
         url = urljoin(self._base_url, rel_url)
 
         request = self._render_request(
@@ -710,12 +708,14 @@ class OpenAPI:
         )
         self._log_request(request)
 
-        if self._dry_run and request.method.upper() not in SAFE_METHODS:
+        if self._dry_run and request.method.lower() not in SAFE_METHODS:
             raise UnsafeCallError(_("Call aborted due to safe mode"))
 
         may_retry = False
         if proposal := self._select_proposal(request):
-            assert len(proposal) == 1, "More complex security proposals are not implemented."
+            if len(proposal) != 1:
+                warnings.warn("The following exception statement may no longer be true.")
+                raise NotImplementedError("More complex security proposals are not implemented.")
             may_retry = asyncio.run(self._authenticate_request(request, proposal))
 
         response = self._send_request(request)
@@ -741,4 +741,4 @@ class OpenAPI:
                 )
 
         self._log_response(response)
-        return self._parse_response(method_spec, response)
+        return self._parse_response(operation_spec.model_dump(by_alias=True), response)

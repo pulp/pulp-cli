@@ -3,7 +3,12 @@ import typing as t
 import pydantic
 import pytest
 
-from pulp_glue.common.pydantic_oas import OpenAPISpec, Parameter, SchemaParameter
+from pulp_glue.common.pydantic_oas import (
+    OpenAPISpec,
+    Parameter,
+    SchemaParameter,
+    SecuritySchemeHttp,
+)
 
 pytestmark = pytest.mark.glue
 
@@ -58,7 +63,10 @@ TEST_SCHEMA = {
     "info": {
         "title": "Test API",
         "version": "3.141592653",
-        "license": {"name": "Creative Commons Zero v1.0 Universal", "identifier": "CC0-1.0"},
+        "license": {
+            "name": "Creative Commons Zero v1.0 Universal",
+            "identifier": "CC0-1.0",
+        },
         "x-this-is-something": True,
     },
     "paths": {
@@ -86,6 +94,7 @@ TEST_SCHEMA = {
                 "responses": {"200": {"description": "SUCCESS"}},
                 "security": [{"B": []}],
             },
+            "parameters": [{"$ref": "#/components/parameters/query1"}],
         }
     },
     "security": [{}],
@@ -96,6 +105,9 @@ TEST_SCHEMA = {
                 "properties": {"text": {"type": "string"}},
                 "required": ["text"],
             }
+        },
+        "parameters": {
+            "query1": {"name": "query1", "in": "query", "schema": {}},
         },
         "securitySchemes": SECURITY_SCHEMES,
     },
@@ -109,7 +121,7 @@ class TestPydanticOpenAPISpec:
         spec = OpenAPISpec.model_validate(TEST_SCHEMA)
         assert spec.components is not None
         assert spec.components.security_schemes is not None
-        assert spec.components.security_schemes["A"].type_ == "http"
+        assert isinstance(spec.components.security_schemes["A"], SecuritySchemeHttp)
         assert spec.paths is not None
         assert spec.paths["test/"].get is not None
         assert spec.paths["test/"].get.parameters is not None
@@ -129,7 +141,12 @@ class TestPydanticOpenAPISpec:
             )
         with pytest.raises(pydantic.ValidationError):
             ParameterAdapter.validate_python(
-                {"in": "path", "name": "cannotbeoptional", "required": False, "schema": {}}
+                {
+                    "in": "path",
+                    "name": "cannotbeoptional",
+                    "required": False,
+                    "schema": {},
+                }
             )
 
     @pytest.mark.parametrize(
@@ -162,7 +179,13 @@ class TestPydanticOpenAPISpec:
     )
     def test_parameter_explode_defautls_to(self, style: str, explode: bool) -> None:
         parameter = ParameterAdapter.validate_python(
-            {"in": "query", "name": "test", "required": True, "style": style, "schema": {}}
+            {
+                "in": "query",
+                "name": "test",
+                "required": True,
+                "style": style,
+                "schema": {},
+            }
         )
         assert isinstance(parameter, SchemaParameter)
         assert parameter.explode == explode

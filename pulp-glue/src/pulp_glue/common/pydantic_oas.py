@@ -15,7 +15,7 @@ class OASBase(pydantic.BaseModel, alias_generator=to_alias, extra="forbid"):
 
 class ExtensibleOASBase(OASBase, extra="allow"):
     @pydantic.model_validator(mode="after")
-    def _check_extensions(self) -> t.Self:
+    def _check_extensions(self) -> "t.Self":
         if self.__pydantic_extra__ is not None:
             invalid_keys = [
                 key for key in self.__pydantic_extra__.keys() if not key.startswith("x-")
@@ -30,8 +30,20 @@ class ExtensibleOASBase(OASBase, extra="allow"):
         return self
 
 
+OperationName = t.Literal[
+    "get",
+    "put",
+    "post",
+    "patch",
+    "delete",
+    "options",
+    "head",
+    "trace",
+]
+
+
 class Reference(OASBase):
-    _ref: t.Annotated[str, pydantic.Field(alias="$ref")]
+    ref: t.Annotated[str, pydantic.Field(alias="$ref")]
     summary: str | None = None
     description: str | None = None
 
@@ -192,7 +204,13 @@ class Encoding(ExtensibleOASBase):
     # TODO These only apply to RFC6570
     style: (
         t.Literal[
-            "simple", "form", "matrix", "label", "spaceDelimited", "pipeDelimited", "deepObject"
+            "simple",
+            "form",
+            "matrix",
+            "label",
+            "spaceDelimited",
+            "pipeDelimited",
+            "deepObject",
         ]
         | None
     ) = None
@@ -237,7 +255,7 @@ class ParameterBase(ExtensibleOASBase):
     allow_empty_value: bool = False
 
     @pydantic.model_validator(mode="after")
-    def _path_required(self) -> t.Self:
+    def _path_required(self) -> "t.Self":
         if self.in_ == "path":
             assert self.required
         return self
@@ -251,10 +269,18 @@ class SchemaParameter(ParameterBase):
     schema_: Schema
     style: t.Annotated[
         t.Literal[
-            "simple", "form", "matrix", "label", "spaceDelimited", "pipeDelimited", "deepObject"
+            "simple",
+            "form",
+            "matrix",
+            "label",
+            "spaceDelimited",
+            "pipeDelimited",
+            "deepObject",
         ],
         pydantic.Field(
-            default_factory=lambda data: "simple" if data["in_"] in ["header", "path"] else "form"
+            default_factory=lambda data: (
+                "simple" if data.get("in_") in ["header", "path"] else "form"
+            )
         ),
     ]
     explode: t.Annotated[bool, pydantic.Field(default_factory=lambda data: data["style"] == "form")]
@@ -291,7 +317,7 @@ class Operation(ExtensibleOASBase):
     description: str | None = None
     external_docs: ExternalDocumentation | None = None
     operation_id: str
-    parameters: list[Parameter | Reference] | None = None
+    parameters: list[Parameter | Reference] = []
     request_body: RequestBody | Reference | None = None
     responses: Responses | None = None
     callbacks: dict[str, Callback | Reference] | None = None
@@ -300,7 +326,8 @@ class Operation(ExtensibleOASBase):
     servers: list[Server] | None = None
 
 
-class PathItem(Reference, ExtensibleOASBase):
+class PathItem(ExtensibleOASBase):
+    # TODO $ref
     get: Operation | None = None
     put: Operation | None = None
     post: Operation | None = None
@@ -310,17 +337,17 @@ class PathItem(Reference, ExtensibleOASBase):
     head: Operation | None = None
     trace: Operation | None = None
     servers: list[Server] | None = None
-    parameters: list[Parameter | Reference] | None = None
+    parameters: list[Parameter | Reference] = []
 
 
 class Components(ExtensibleOASBase):
-    schemas: dict[str, Schema] | None = None
+    schemas: dict[str, Schema] | None = {}
     responses: dict[str, Response | Reference] | None = None
-    parameters: dict[str, Parameter | Reference] | None = None
+    parameters: dict[str, Parameter | Reference] = {}
     examples: dict[str, Example | Reference] | None = None
     request_bodies: dict[str, RequestBody | Reference] | None = None
     headers: dict[str, Header | Reference] | None = None
-    security_schemes: dict[str, SecurityScheme | Reference] | None = None
+    security_schemes: dict[str, SecurityScheme | Reference] = {}
     links: dict[str, Link | Reference] | None = None
     callbacks: dict[str, Callback | Reference] | None = None
     path_items: dict[str, PathItem] | None = None
@@ -333,7 +360,7 @@ class OpenAPISpec(ExtensibleOASBase):
     servers: list[Server] | None = None
     # In the specification there is a Paths Object,
     # probably because paths as keys can get extra validation.
-    paths: dict[str, PathItem] | None = None
+    paths: dict[str, PathItem] = {}
     webhooks: dict[str, PathItem] | None = None
     components: Components | None = None
     security: SecurityRequirements | None = None
