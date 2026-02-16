@@ -1,7 +1,7 @@
 import click
 
 from pulp_glue.common.i18n import get_translation
-from pulp_glue.file.context import PulpFileRemoteContext
+from pulp_glue.file.context import PulpFileGitRemoteContext, PulpFileRemoteContext
 
 from pulp_cli.generic import (
     common_remote_create_options,
@@ -13,6 +13,7 @@ from pulp_cli.generic import (
     list_command,
     name_option,
     pulp_group,
+    pulp_option,
     remote_filter_options,
     remote_lookup_option,
     role_command,
@@ -26,7 +27,7 @@ _ = translation.gettext
 
 
 @pulp_group()
-@type_option(choices={"file": PulpFileRemoteContext})
+@type_option(choices={"file": PulpFileRemoteContext, "git": PulpFileGitRemoteContext})
 def remote() -> None:
     pass
 
@@ -34,8 +35,15 @@ def remote() -> None:
 lookup_options = [href_option, name_option, remote_lookup_option]
 nested_lookup_options = [remote_lookup_option]
 file_remote_options = [
-    click.option(
-        "--policy", type=click.Choice(["immediate", "on_demand", "streamed"], case_sensitive=False)
+    pulp_option(
+        "--policy",
+        type=click.Choice(["immediate", "on_demand", "streamed"], case_sensitive=False),
+        allowed_with_contexts=(PulpFileRemoteContext,),
+    ),
+    pulp_option(
+        "--git-ref",
+        help=_("The git ref (branch, tag, or commit hash) to sync from. Defaults to HEAD."),
+        allowed_with_contexts=(PulpFileGitRemoteContext,),
     ),
 ]
 
