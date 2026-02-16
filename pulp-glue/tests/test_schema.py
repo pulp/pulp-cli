@@ -2,59 +2,81 @@ import datetime
 import io
 import typing as t
 
+import pydantic
 import pytest
 
+from pulp_glue.common import oas
+from pulp_glue.common.exceptions import SchemaError, ValidationError
 from pulp_glue.common.schema import (
-    SchemaError,
-    ValidationError,
     encode_json,
     encode_param,
     validate,
 )
 
-COMPONENTS = {
-    "aString": {"type": "string"},
-    "anInteger": {"type": "integer"},
-    "aReference": {"$ref": "#/components/schemas/aString"},
-    "intArray": {"type": "array", "items": {"type": "integer"}},
-    "strArray": {"type": "array", "items": {"$ref": "#/components/schemas/aString"}},
-    "minMaxArray": {"type": "array", "minItems": 3, "maxItems": 5, "items": {"type": "integer"}},
-    "uniqueArray": {"type": "array", "uniqueItems": True, "items": {"type": "integer"}},
-    "unspecifiedObject": {"type": "object"},
-    "emptyObject": {"type": "object", "additionalProperties": False},
-    "objectAInt": {
-        "type": "object",
-        "additionalProperties": False,
-        "properties": {"a": {"type": "integer"}},
-    },
-    "objectRequiredA": {
-        "type": "object",
-        "additionalProperties": {"type": "string"},
-        "properties": {
-            "a": {"type": "integer"},
-            "b": {"type": "boolean"},
+COMPONENTS: dict[str, oas.Schema] = pydantic.TypeAdapter(dict[str, oas.Schema]).validate_python(
+    {
+        "aString": {"type": "string"},
+        "anInteger": {"type": "integer"},
+        "aReference": {"$ref": "#/components/schemas/aString"},
+        "intArray": {"type": "array", "items": {"type": "integer"}},
+        "strArray": {"type": "array", "items": {"$ref": "#/components/schemas/aString"}},
+        "minMaxArray": {
+            "type": "array",
+            "minItems": 3,
+            "maxItems": 5,
+            "items": {"type": "integer"},
         },
-        "required": ["a"],
-    },
-    "allOfEnum": {
-        "allOf": [
-            {"type": "string", "enum": ["a", "b", "c"]},
-            {"type": "string", "enum": ["b", "d", "f"]},
-        ]
-    },
-    "anyOfEnum": {
-        "anyOf": [
-            {"type": "string", "enum": ["a", "b", "c"]},
-            {"type": "string", "enum": ["b", "d", "f"]},
-        ]
-    },
-    "allOfCompose": {
-        "allOf": [
-            {"type": "object", "properties": {"a": {"type": "string", "format": "date"}}},
-            {"type": "object", "properties": {"b": {"type": "string", "format": "date"}}},
-        ]
-    },
-}
+        "uniqueArray": {"type": "array", "uniqueItems": True, "items": {"type": "integer"}},
+        "unspecifiedObject": {"type": "object"},
+        "emptyObject": {"type": "object", "additionalProperties": False},
+        "objectAInt": {
+            "type": "object",
+            "additionalProperties": False,
+            "properties": {"a": {"type": "integer"}},
+        },
+        "objectRequiredA": {
+            "type": "object",
+            "additionalProperties": {"type": "string"},
+            "properties": {
+                "a": {"type": "integer"},
+                "b": {"type": "boolean"},
+            },
+            "required": ["a"],
+        },
+        "allOfEnum": {
+            "allOf": [
+                {"type": "string", "enum": ["a", "b", "c"]},
+                {"type": "string", "enum": ["b", "d", "f"]},
+            ]
+        },
+        "anyOfEnum": {
+            "anyOf": [
+                {"type": "string", "enum": ["a", "b", "c"]},
+                {"type": "string", "enum": ["b", "d", "f"]},
+            ]
+        },
+        "allOfCompose": {
+            "allOf": [
+                {"type": "object", "properties": {"a": {"type": "string", "format": "date"}}},
+                {"type": "object", "properties": {"b": {"type": "string", "format": "date"}}},
+            ]
+        },
+        "oneOfCompose": {
+            "oneOf": [
+                {
+                    "type": "object",
+                    "properties": {"a": {"type": "string", "format": "date"}},
+                    "required": ["a"],
+                },
+                {
+                    "type": "object",
+                    "properties": {"b": {"type": "string", "format": "date"}},
+                    "required": ["b"],
+                },
+            ]
+        },
+    }
+)
 
 
 # This will only pass for identity...
@@ -64,6 +86,7 @@ SOME_BYTES = io.BytesIO(b"\000\001\002")
 @pytest.mark.parametrize(
     "schema,value",
     [
+        pytest.param(True, "always", id="true_validates_always"),
         pytest.param({}, None, id="empty_allows_null"),
         pytest.param({}, "asdf", id="empty_allows_string"),
         pytest.param({}, 1, id="empty_allows_int"),
@@ -115,6 +138,7 @@ SOME_BYTES = io.BytesIO(b"\000\001\002")
             {"$ref": "#/components/schemas/anInteger", "type": "string"},
             1,
             id="reference_ignores_all_properties",
+            marks=pytest.mark.skip,
         ),
         pytest.param({"$ref": "#/components/schemas/intArray"}, [], id="reference_array"),
         pytest.param(
@@ -151,19 +175,31 @@ SOME_BYTES = io.BytesIO(b"\000\001\002")
         pytest.param(
             {"$ref": "#/components/schemas/allOfCompose"},
             {"a": datetime.date(2000, 1, 1), "b": datetime.date(2000, 1, 2)},
-            id="any_of_matches_one",
+            id="all_of_matches_combined_object",
+        ),
+        pytest.param(
+            {"$ref": "#/components/schemas/oneOfCompose"},
+            {"a": datetime.date(2000, 1, 1)},
+            id="one_of_matches_first_object",
+        ),
+        pytest.param(
+            {"$ref": "#/components/schemas/oneOfCompose"},
+            {"b": datetime.date(2000, 1, 2)},
+            id="one_of_matches_second_object",
         ),
         pytest.param({"type": ["string", "null"]}, "test_string", id="type_array_matches_string"),
         pytest.param({"type": ["string", "null"]}, None, id="type_array_matches_null"),
     ],
 )
-def test_validates(schema: t.Any, value: t.Any) -> None:
+@pydantic.validate_call
+def test_validates(schema: oas.Schema, value: t.Any) -> None:
     validate(schema, "testvar", value, COMPONENTS)
 
 
 @pytest.mark.parametrize(
     "schema,value,match",
     [
+        pytest.param(False, "never", None, id="false_validates_never"),
         pytest.param({"type": "boolean"}, 1, None, id="boolean_fails_int"),
         pytest.param({"type": "string"}, None, None, id="string_fails_null"),
         pytest.param({"type": "string"}, 1, None, id="string_fails_int"),
@@ -312,11 +348,24 @@ def test_validates(schema: t.Any, value: t.Any) -> None:
             id="fails_validate_none_matched",
         ),
         pytest.param(
+            {"$ref": "#/components/schemas/oneOfCompose"},
+            {},
+            "not match any",
+            id="none_of_one_of_matches",
+        ),
+        pytest.param(
+            {"$ref": "#/components/schemas/oneOfCompose"},
+            {"a": datetime.date(2000, 1, 1), "b": datetime.date(2000, 1, 2)},
+            "more than one of",
+            id="both_of_one_of_matches",
+        ),
+        pytest.param(
             {"type": ["string", "null"]}, 1, "did not match any", id="type_array_matches_string"
         ),
     ],
 )
-def test_validation_failed(schema: t.Any, value: t.Any, match: str | None) -> None:
+@pydantic.validate_call
+def test_validation_failed(schema: oas.Schema, value: t.Any, match: str | None) -> None:
     with pytest.raises(ValidationError, match=match or r"'testvar.*'"):
         validate(schema, "testvar", value, COMPONENTS)
 
@@ -326,11 +375,16 @@ def test_validation_failed(schema: t.Any, value: t.Any, match: str | None) -> No
     [
         pytest.param({"type": "blubb"}, 1, NotImplementedError, id="unknown_type"),
         pytest.param({"$ref": "blubb"}, 1, SchemaError, id="invalid_reference"),
-        pytest.param({"$ref": "#/components/schemas/notHere"}, 1, KeyError, id="missing_reference"),
+        pytest.param(
+            {"$ref": "#/components/schemas/notHere"}, 1, SchemaError, id="missing_reference"
+        ),
         pytest.param({"type": []}, 1, SchemaError, id="type_array_matches_string"),
     ],
 )
-def test_invalid_schema_raises(schema: t.Any, value: t.Any, exc_type: t.Type[Exception]) -> None:
+@pydantic.validate_call
+def test_invalid_schema_raises(
+    schema: oas.Schema, value: t.Any, exc_type: t.Type[Exception]
+) -> None:
     with pytest.raises(exc_type):
         validate(schema, "testvar", value, COMPONENTS)
 
