@@ -719,7 +719,7 @@ units = {"B": 1, "KB": 10**3, "MB": 10**6, "GB": 10**9, "TB": 10**12}
 
 def parse_size_callback(ctx: click.Context, param: click.Parameter, value: str | None) -> int:
     if value is None:
-        return sys.maxsize
+        return 8 * 10**9
     size = value.strip().upper()
     match = re.match(r"^([0-9]+)\s*([KMGT]?B)?$", size)
     if not match:
