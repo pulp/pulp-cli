@@ -42,6 +42,9 @@ class PulpArtifactContext(PulpEntityContext):
     ENTITY = _("artifact")
     ENTITIES = _("artifacts")
     HREF = "artifact_href"
+    PLUGIN = "core"
+    MODEL = "artifact"
+    HREF_TEMPLATE = "artifacts/{pulp_id}/"
     ID_PREFIX = "artifacts"
 
     def upload(
@@ -398,6 +401,9 @@ class PulpTaskContext(PulpEntityContext):
     HREF = "task_href"
     ID_PREFIX = "tasks"
     CAPABILITIES = {"roles": [PluginRequirement("core", specifier=">=3.17.0")]}
+    PLUGIN = "core"
+    MODEL = "task"
+    HREF_TEMPLATE = "tasks/{pulp_id}/"
 
     resource_context: PulpEntityContext | None = None
 
@@ -513,6 +519,9 @@ class PulpUploadContext(PulpEntityContext):
     ENTITIES = _("uploads")
     HREF = "upload_href"
     ID_PREFIX = "uploads"
+    PLUGIN = "core"
+    MODEL = "upload"
+    HREF_TEMPLATE = "uploads/{pulp_id}/"
 
     def upload_chunk(
         self,

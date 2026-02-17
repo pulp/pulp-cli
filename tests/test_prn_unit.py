@@ -1,10 +1,10 @@
 import pytest
 
-from pulp_cli.generic import prn_regex
+from pulp_glue.common.context import prn_regex
 
 
 @pytest.mark.parametrize(
-    "prn,app,model,pk",
+    "prn,plugin,model,pulp_id",
     [
         pytest.param(
             "prn:file.fileremote:0198b567-c482-7b28-8628-ea7f4be6d008",
@@ -29,13 +29,13 @@ from pulp_cli.generic import prn_regex
         ),
     ],
 )
-def test_prn_match_succeeds_for(prn: str, app: str, model: str, pk: str) -> None:
+def test_prn_match_succeeds_for(prn: str, plugin: str, model: str, pulp_id: str) -> None:
     match = prn_regex.match(prn)
     assert match
     assert 3 == len(match.groups())
-    assert match.group("app") == app
+    assert match.group("plugin") == plugin
     assert match.group("model") == model
-    assert match.group("pk") == pk
+    assert match.group("pulp_id") == pulp_id
 
 
 @pytest.mark.parametrize(

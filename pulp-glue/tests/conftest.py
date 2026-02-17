@@ -7,10 +7,14 @@ from pulp_glue.common.authentication import GlueAuthProvider
 from pulp_glue.common.context import PulpContext
 from pulp_glue.common.openapi import OpenAPI
 
-FAKE_OPENAPI_SPEC = json.dumps(
+MOCK_OPENAPI_SPEC = json.dumps(
     {
         "openapi": "3.0.3",
-        "info": {"title": "test", "version": "0.0.0", "x-pulp-app-versions": {"core": "3.75.0"}},
+        "info": {
+            "title": "test",
+            "version": "0.0.0",
+            "x-pulp-app-versions": {"core": "3.75.0", "file": "3.75.0"},
+        },
         "paths": {},
     }
 )
@@ -35,7 +39,7 @@ def mock_pulp_ctx(
     monkeypatch: pytest.MonkeyPatch,
 ) -> PulpContext:
     monkeypatch.setattr(
-        OpenAPI, "load_api", lambda self, refresh_cache: self._parse_api(FAKE_OPENAPI_SPEC)
+        OpenAPI, "load_api", lambda self, refresh_cache: self._parse_api(MOCK_OPENAPI_SPEC)
     )
     monkeypatch.setattr(
         OpenAPI,
