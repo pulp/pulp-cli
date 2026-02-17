@@ -28,6 +28,7 @@ from pulp_glue.common.context import (
     PulpRepositoryContext,
     PulpRepositoryVersionContext,
     PulpViewSetContext,
+    prn_regex,
 )
 from pulp_glue.common.exceptions import PulpException, PulpNoWait
 from pulp_glue.common.i18n import get_translation
@@ -82,10 +83,6 @@ _AnyCallable = t.Callable[..., t.Any]
 FC = t.TypeVar("FC", bound=_AnyCallable | click.Command)
 
 HEADER_REGEX = r"^[-a-zA-Z0-9_]+:.+$"
-
-prn_regex = re.compile(
-    r"^prn:(?P<app>[a-z][a-z0-9-_]*)\.(?P<model>[a-z][a-z0-9_]*):(?P<pk>[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$",  # noqa: E501
-)
 
 
 class IncompatibleContext(click.UsageError):
@@ -827,9 +824,6 @@ def pulp_option(*args: t.Any, **kwargs: t.Any) -> t.Callable[[FC], FC]:
     return click.option(*args, **kwargs)
 
 
-domain_pattern = r"(?P<pulp_domain>[-a-zA-Z0-9_]+)"
-
-
 def resource_lookup_option(*args: t.Any, **kwargs: t.Any) -> t.Callable[[FC], FC]:
     """
     A factory to create a lookup option that will pass the lookup to the closest matching Context.
@@ -853,10 +847,7 @@ def resource_lookup_option(*args: t.Any, **kwargs: t.Any) -> t.Callable[[FC], FC
         if value.startswith("/"):
             # The HREF of a resource was passed
             href_pattern = entity_ctx.HREF_PATTERN
-            if pulp_ctx.domain_enabled:
-                pattern = rf"^{pulp_ctx._api_root}{domain_pattern}/api/v3/{href_pattern}"
-            else:
-                pattern = rf"^{pulp_ctx.api_path}{href_pattern}"
+            pattern = rf"^{re.escape(pulp_ctx.api_path)}{href_pattern}"
             match = re.match(pattern, value)
             if match:
                 entity_ctx.pulp_href = value
@@ -951,10 +942,7 @@ def resource_option(*args: t.Any, **kwargs: t.Any) -> t.Callable[[FC], FC]:
                         option_name=param.name
                     )
                 )
-            if pulp_ctx.domain_enabled:
-                pattern = rf"^{pulp_ctx._api_root}{domain_pattern}/api/v3/{href_pattern}"
-            else:
-                pattern = rf"^{pulp_ctx.api_path}{href_pattern}"
+            pattern = rf"^{re.escape(pulp_ctx.api_path)}{href_pattern}"
             match = re.match(pattern, value)
             if match is None:
                 raise click.ClickException(

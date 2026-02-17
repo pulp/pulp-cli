@@ -61,6 +61,6 @@ To run tests:
 
 ```bash
 make test                           # all tests
-pytest -m pulp_file                 # tests for pulp_file
-pytest -m pulp_file -k test_remote  # run tests/scripts/pulp_file/test_remote.sh
+pytest tests -m pulp_file                 # tests for pulp_file
+pytest tests -m pulp_file -k test_remote  # run tests/scripts/pulp_file/test_remote.sh
 ```

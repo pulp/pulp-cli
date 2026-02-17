@@ -13,9 +13,14 @@ cleanup() {
 trap cleanup EXIT
 
 expect_succ pulp file repository create --name "cli_test_core_show_repo"
-repo_href="$(echo "$OUTPUT" | jq -r .pulp_href)"
-expect_succ pulp show --href "$repo_href"
+REPO_HREF="$(echo "$OUTPUT" | jq -r .pulp_href)"
+expect_succ pulp show --href "$REPO_HREF"
 
 expect_succ pulp file remote create --name "cli_test_core_show_remote" --url "$FILE_REMOTE_URL"
-remote_href="$(echo "$OUTPUT" | jq -r .pulp_href)"
-expect_succ pulp show --href "$remote_href"
+REMOTE_HREF="$(echo "$OUTPUT" | jq -r .pulp_href)"
+REMOTE_PRN="$(echo "$OUTPUT" | jq -r .prn)"
+expect_succ pulp show --href "$REMOTE_HREF"
+if pulp debug has-plugin --name core --specifier ">=3.63.0"
+then
+  expect_succ pulp show --prn "$REMOTE_PRN"
+fi
