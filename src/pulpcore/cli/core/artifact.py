@@ -71,7 +71,7 @@ def upload(
     artifact_ctx: PulpEntityContext,
     /,
     file: t.IO[bytes],
-    chunk_size: int,
+    chunk_size: int | None,
 ) -> None:
     assert isinstance(artifact_ctx, PulpArtifactContext)
 

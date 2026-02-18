@@ -15,11 +15,11 @@ from pulp_glue.core.context import PulpArtifactContext
 from pulp_cli.generic import (
     GroupOption,
     PulpCLIContext,
+    chunk_size_callback,
     href_option,
     label_command,
     label_select_option,
     list_command,
-    parse_size_callback,
     pass_content_context,
     pass_pulp_context,
     pulp_group,
@@ -186,7 +186,7 @@ content.add_command(
     "--chunk-size",
     help=_("Chunk size to break up {entity} into. Defaults to not chunking at all."),
     default=None,
-    callback=parse_size_callback,
+    callback=chunk_size_callback,
     allowed_with_contexts=content_context,
 )
 @pulp_option(

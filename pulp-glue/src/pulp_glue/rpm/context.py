@@ -1,4 +1,3 @@
-import os
 import typing as t
 
 from pulp_glue.common.context import (
@@ -156,7 +155,7 @@ class PulpRpmPackageContext(PulpContentContext):
     def upload(
         self,
         file: t.IO[bytes],
-        chunk_size: int,
+        chunk_size: int | None,
         repository: PulpRepositoryContext | None,
         **kwargs: t.Any,
     ) -> t.Any:
@@ -167,7 +166,7 @@ class PulpRpmPackageContext(PulpContentContext):
 
         Parameters:
             file: A file like object that supports `os.path.getsize`.
-            chunk_size: Size of the chunks to upload independently.
+            chunk_size: Size of the chunks to upload independently. `None` to disable chunking.
             repository: Repository context to add the newly created content to.
             kwargs: Extra args specific to the content type, passed to the create call.
 
@@ -175,34 +174,16 @@ class PulpRpmPackageContext(PulpContentContext):
             The result of the create task.
         """
         self.needs_capability("upload")
-        size = os.path.getsize(file.name)
         body: dict[str, t.Any] = {**kwargs}
 
-        if not self.pulp_ctx.fake_mode:
-            if chunk_size > size:
-                # Small file: direct upload
-                body["file"] = file
-            else:
-                # Large file: chunked upload
-                if self.pulp_ctx.has_plugin(PluginRequirement("core", specifier=">=3.20.0")):
-                    from pulp_glue.core.context import PulpUploadContext
+        self._prepare_upload(body, file, chunk_size)
 
-                    upload_href = PulpUploadContext(self.pulp_ctx).upload_file(file, chunk_size)
-                    body["upload"] = upload_href
-                else:
-                    from pulp_glue.core.context import PulpArtifactContext
-
-                    artifact_href = PulpArtifactContext(self.pulp_ctx).upload(file, chunk_size)
-                    body["artifact"] = artifact_href
-
-        # For rpm plugin >= 3.32.5, use synchronous upload endpoint when no repository is provided
-        # For older versions, always use the create endpoint (backward compatibility)
         if repository is None and self.pulp_ctx.has_plugin(
             PluginRequirement("rpm", specifier=">=3.32.5")
         ):
+            # "Synchronous upload"
             return self.call("upload", body=body)
 
-        # Repository is specified or older rpm version: use create endpoint (async path)
         if repository is not None:
             body["repository"] = repository
         return self.create(body=body)

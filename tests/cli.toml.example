@@ -3,3 +3,4 @@ base_url = "http://localhost:8080"
 username = "admin"
 password = "password"
 timeout = 120
+chunk_size = "1mb"

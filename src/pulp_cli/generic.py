@@ -33,6 +33,18 @@ from pulp_glue.common.exceptions import PulpException, PulpNoWait
 from pulp_glue.common.i18n import get_translation
 from pulp_glue.common.openapi import AuthProviderBase
 
+if sys.version_info >= (3, 13):
+    from warnings import deprecated
+else:
+    T = t.TypeVar("T")
+
+    def deprecated(s: str) -> t.Callable[[T], T]:
+        def _inner(f: T) -> T:
+            return f
+
+        return _inner
+
+
 try:
     from pygments import highlight
     from pygments.formatters import Terminal256Formatter
@@ -66,7 +78,6 @@ except AttributeError:
 
 translation = get_translation(__package__)
 _ = translation.gettext
-
 
 _AnyCallable = t.Callable[..., t.Any]
 FC = t.TypeVar("FC", bound=_AnyCallable | click.Command)
@@ -156,6 +167,7 @@ class PulpCLIContext(PulpContext):
         password: str | None = None,
         oauth2_client_id: str | None = None,
         oauth2_client_secret: str | None = None,
+        chunk_size: int | None = None,
     ) -> None:
         self.username = username
         self.password = password
@@ -172,6 +184,7 @@ class PulpCLIContext(PulpContext):
             background_tasks=background_tasks,
             timeout=timeout,
             domain=domain,
+            chunk_size=chunk_size,
         )
         self.format = format
 
@@ -717,15 +730,27 @@ def create_content_json_callback(
 units = {"B": 1, "KB": 10**3, "MB": 10**6, "GB": 10**9, "TB": 10**12}
 
 
-def parse_size_callback(ctx: click.Context, param: click.Parameter, value: str | None) -> int:
+def parse_size(value: str | None) -> int | None:
     if value is None:
-        return 8 * 10**9
+        return None
     size = value.strip().upper()
     match = re.match(r"^([0-9]+)\s*([KMGT]?B)?$", size)
     if not match:
         raise click.ClickException("Please pass in a valid size of form: [0-9] [K/M/G/T]B")
     number, unit = match.groups(default="B")
     return int(float(number) * units[unit])
+
+
+def chunk_size_callback(
+    ctx: click.Context, param: click.Parameter, value: str | None
+) -> int | None:
+    if value == "":
+        # Actually override the default.
+        return None
+    return parse_size(value)
+
+
+parse_size_callback = deprecated("Use 'chunk_size_callback' instead.")(chunk_size_callback)
 
 
 def null_callback(ctx: click.Context, param: click.Parameter, value: str | None) -> str | None:
@@ -1220,7 +1245,7 @@ chunk_size_option = pulp_option(
     "--chunk-size",
     help=_("Chunk size to break up {entity} into. Defaults to not chunking at all."),
     default=None,
-    callback=parse_size_callback,
+    callback=chunk_size_callback,
 )
 
 pulp_created_gte_option = pulp_option(

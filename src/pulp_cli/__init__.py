@@ -202,6 +202,7 @@ def main(
     verbose: int,
     background: bool,
     refresh_api: bool,
+    chunk_size: int | None,
     dry_run: bool,
     timeout: int,
     cid: str,
@@ -231,6 +232,7 @@ def main(
         password=password,
         oauth2_client_id=client_id,
         oauth2_client_secret=client_secret,
+        chunk_size=chunk_size,
     )
 
 

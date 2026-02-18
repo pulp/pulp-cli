@@ -29,7 +29,7 @@ class PulpAnsibleCollectionVersionContext(PulpContentContext):
     def upload(self, file: t.IO[bytes], **kwargs: t.Any) -> t.Any:  # type:ignore
         repository: PulpRepositoryContext | None = kwargs.pop("repository", None)
         if self.capable("upload"):
-            chunk_size: int = kwargs.pop("chunk_size", 1000000)
+            chunk_size: int | None = kwargs.pop("chunk_size", None)
             return super().upload(file, chunk_size, repository, **kwargs)
         else:
             result = self.call("upload", body={"file": file})
