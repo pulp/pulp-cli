@@ -6,6 +6,7 @@ import time
 import typing as t
 import warnings
 from contextlib import ExitStack
+from pathlib import Path
 
 from packaging.specifiers import SpecifierSet
 
@@ -248,6 +249,7 @@ class PulpContext:
         fake_mode: bool = False,
         verify_ssl: bool | str | None = None,
         verify: bool | str | None = None,  # Deprecated
+        chunk_size: int | None = None,
     ) -> None:
         self._api: OpenAPI | None = None
         self._api_root: str = api_root
@@ -273,6 +275,7 @@ class PulpContext:
         self.fake_mode: bool = fake_mode
         if self.fake_mode:
             self._api_kwargs["dry_run"] = True
+        self.chunk_size = chunk_size
 
     @classmethod
     def from_config_files(
@@ -1565,6 +1568,7 @@ class PulpContentContext(PulpEntityContext):
         repository_ctx: PulpRepositoryContext | None = None,
     ):
         super().__init__(pulp_ctx, pulp_href=pulp_href, entity=entity)
+        assert (repository_ctx is None) or (repository_ctx.pulp_ctx is pulp_ctx)
         self.repository_ctx = repository_ctx
 
     def list(self, limit: int, offset: int, parameters: dict[str, t.Any]) -> list[t.Any]:
@@ -1578,6 +1582,29 @@ class PulpContentContext(PulpEntityContext):
             kwargs["repository_version"] = self.repository_ctx.entity["latest_version_href"]
         return super().find(**kwargs)
 
+    def _prepare_upload(
+        self,
+        body: EntityDefinition,
+        file: t.IO[bytes],
+        chunk_size: int | None,
+    ) -> None:
+        _chunk_size: int | None = chunk_size or self.pulp_ctx.chunk_size
+        size = os.path.getsize(file.name)
+        if not self.pulp_ctx.fake_mode:  # Skip the uploading part in fake_mode
+            if _chunk_size is None or _chunk_size > size:
+                body["file"] = file
+            elif self.pulp_ctx.has_plugin(PluginRequirement("core", specifier=">=3.20.0")):
+                self.needs_capability("upload")
+                from pulp_glue.core.context import PulpUploadContext
+
+                upload_href = PulpUploadContext(self.pulp_ctx).upload_file(file, _chunk_size)
+                body["upload"] = upload_href
+            else:
+                from pulp_glue.core.context import PulpArtifactContext
+
+                artifact_href = PulpArtifactContext(self.pulp_ctx).upload(file, _chunk_size)
+                body["artifact"] = artifact_href
+
     def create(
         self,
         body: EntityDefinition,
@@ -1589,24 +1616,10 @@ class PulpContentContext(PulpEntityContext):
             file = body.pop("file", None)
             chunk_size: int | None = body.pop("chunk_size", None)
             if file:
-                if isinstance(file, str):
+                if isinstance(file, str | Path):
                     file = open(file, "rb")
                     cleanup.enter_context(file)
-                size = os.path.getsize(file.name)
-                if not self.pulp_ctx.fake_mode:  # Skip the uploading part in fake_mode
-                    if chunk_size is None or chunk_size > size:
-                        body["file"] = file
-                    elif self.pulp_ctx.has_plugin(PluginRequirement("core", specifier=">=3.20.0")):
-                        self.needs_capability("upload")
-                        from pulp_glue.core.context import PulpUploadContext
-
-                        upload_href = PulpUploadContext(self.pulp_ctx).upload_file(file, chunk_size)
-                        body["upload"] = upload_href
-                    else:
-                        from pulp_glue.core.context import PulpArtifactContext
-
-                        artifact_href = PulpArtifactContext(self.pulp_ctx).upload(file, chunk_size)
-                        body["artifact"] = artifact_href
+                self._prepare_upload(body, file, chunk_size)
             if self.repository_ctx is not None:
                 body["repository"] = self.repository_ctx
             return super().create(body=body, parameters=parameters, non_blocking=non_blocking)
@@ -1618,7 +1631,7 @@ class PulpContentContext(PulpEntityContext):
     def upload(
         self,
         file: t.IO[bytes],
-        chunk_size: int,
+        chunk_size: int | None,
         repository: PulpRepositoryContext | None,
         **kwargs: t.Any,
     ) -> t.Any:
@@ -1629,7 +1642,7 @@ class PulpContentContext(PulpEntityContext):
 
         Parameters:
             file: A file like object that supports `os.path.getsize`.
-            chunk_size: Size of the chunks to upload independently.
+            chunk_size: Size of the chunks to upload independently. `None` to disable chunking.
             repository: Repository context to add the newly created content to.
             kwargs: Extra args specific to the content type, passed to the create call.
 
@@ -1637,23 +1650,10 @@ class PulpContentContext(PulpEntityContext):
             The result of the create task.
         """
         self.needs_capability("upload")
-        size = os.path.getsize(file.name)
         body: dict[str, t.Any] = {**kwargs}
-        if not self.pulp_ctx.fake_mode:  # Skip the uploading part in fake_mode
-            if chunk_size > size:
-                body["file"] = file
-            elif self.pulp_ctx.has_plugin(PluginRequirement("core", specifier=">=3.20.0")):
-                from pulp_glue.core.context import PulpUploadContext
-
-                upload_href = PulpUploadContext(self.pulp_ctx).upload_file(file, chunk_size)
-                body["upload"] = upload_href
-            else:
-                from pulp_glue.core.context import PulpArtifactContext
-
-                artifact_href = PulpArtifactContext(self.pulp_ctx).upload(file, chunk_size)
-                body["artifact"] = artifact_href
-            if repository:
-                body["repository"] = repository
+        self._prepare_upload(body, file, chunk_size)
+        if repository is not None:
+            body["repository"] = repository
         return self.create(body=body)
 
 

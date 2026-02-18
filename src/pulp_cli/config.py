@@ -9,7 +9,14 @@ import tomli_w
 
 from pulp_glue.common.i18n import get_translation
 
-from pulp_cli.generic import HEADER_REGEX, REGISTERED_OUTPUT_FORMATTERS, _unset, pulp_group
+from pulp_cli.generic import (
+    HEADER_REGEX,
+    REGISTERED_OUTPUT_FORMATTERS,
+    _unset,
+    chunk_size_callback,
+    parse_size,
+    pulp_group,
+)
 
 if sys.version_info >= (3, 11):
     import tomllib
@@ -43,6 +50,7 @@ SETTINGS = [
     "key",
     "verify_ssl",
     "format",
+    "chunk_size",
     "dry_run",
     "timeout",
     "verbose",
@@ -102,6 +110,12 @@ CONFIG_OPTIONS = [
         help=_("Format of the response"),
     ),
     click.option(
+        "--chunk-size",
+        help=_("Chunk size to break up {entity} into. Defaults to not chunking at all."),
+        default=None,
+        callback=chunk_size_callback,
+    ),
+    click.option(
         "--dry-run/--force",
         default=False,
         help=_("Trace commands without performing any unsafe HTTP calls"),
@@ -158,6 +172,11 @@ def validate_config(config: dict[str, t.Any], strict: bool = False) -> None:
         errors.append(_("'format' is not one of {choices}").format(choices=FORMAT_CHOICES))
     if "verify_ssl" in config and not isinstance(config["verify_ssl"], bool):
         errors.append(_("'verify_ssl' is not a bool"))
+    if "chunk_size" in config:
+        try:
+            parse_size(config["chunk_size"])
+        except click.ClickException as e:
+            errors.append(e.message)
     if "dry_run" in config and not isinstance(config["dry_run"], bool):
         errors.append(_("'dry_run' is not a bool"))
     if "timeout" in config and not isinstance(config["timeout"], int):
@@ -186,7 +205,7 @@ def validate_config(config: dict[str, t.Any], strict: bool = False) -> None:
         missing_settings = (
             set(SETTINGS)
             - set(config.keys())
-            - {"plugins", "username", "password", "client_id", "client_secret"}
+            - {"plugins", "username", "password", "client_id", "client_secret", "chunk_size"}
         )
         if missing_settings:
             errors.append(_("Missing settings: '{}'.").format("','".join(missing_settings)))

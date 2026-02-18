@@ -1,1 +1,1 @@
-Change the default chunking value to "infinite". If users wants to, they can still specify a value based on their needs.
+Removed the default `chunk_size` value. If necessary, a suitable value should be provided with the call or configured for the profile.

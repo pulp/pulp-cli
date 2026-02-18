@@ -45,12 +45,15 @@ class PulpArtifactContext(PulpEntityContext):
     ID_PREFIX = "artifacts"
 
     def upload(
-        self, file: t.IO[bytes], chunk_size: int = 1000000, sha256: str | None = None
+        self,
+        file: t.IO[bytes],
+        chunk_size: int | None = None,
+        sha256: str | None = None,
     ) -> t.Any:
         size = os.path.getsize(file.name)
 
         sha256_hasher = hashlib.sha256()
-        for chunk in iter(lambda: file.read(chunk_size), b""):
+        for chunk in iter(lambda: file.read(10_000_000), b""):
             sha256_hasher.update(chunk)
         sha256_digest = sha256_hasher.hexdigest()
         file.seek(0)
@@ -71,8 +74,8 @@ class PulpArtifactContext(PulpEntityContext):
             self._entity = {"pulp_href": "<FAKE_ENTITY>", "sha256": sha256, "size": size}
             self._entity_lookup = {}
             return self._entity["pulp_href"]
-        if chunk_size > size:
-            # if chunk_size is bigger than the file size, just upload it directly
+        if chunk_size is None or chunk_size > size:
+            # upload it directly
             artifact: dict[str, t.Any] = self.create({"sha256": sha256_digest, "file": file})
             self.pulp_href = artifact["pulp_href"]
             return artifact["pulp_href"]
