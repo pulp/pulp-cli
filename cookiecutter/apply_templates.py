@@ -4,6 +4,7 @@
 # dependencies = [
 #     "click>=8.3.1,<8.4",
 #     "cookiecutter>=2.6.0,<2.7",
+#     "jamldump>=1.2.0,<1.3.0",
 #     "pyyaml>=6.0.3,<6.1",
 #     "tomlkit>=0.13.3,<0.14",
 # ]
@@ -11,12 +12,11 @@
 
 
 import os
-import tomllib
 from pathlib import Path
 
 import click
+import tomllib
 import yaml
-
 from cookiecutter.main import cookiecutter
 
 
@@ -42,6 +42,12 @@ def main(bootstrap: bool, force: bool) -> None:
         config = pyproject_toml["tool"]["pulp_cli_template"]
     except (FileNotFoundError, KeyError):
         raise click.ClickException("This does not look like a pulp cli repository.")
+
+    if config.get("src_layout") is not True:
+        raise click.ClickException(
+            "In oder to proceed, this repository needs to be migrated to the src_layout. "
+            "See the adjacent `migrate_src_layout.py` script."
+        )
 
     config.setdefault("main_package", config["app_label"])
     config["current_version"] = pyproject_toml["project"]["version"]

@@ -15,5 +15,5 @@
   "repository": "https://github.com/pulp/{{ cookiecutter.__project_name }}",
   "_copy_without_render": [
   ],
-  "_extensions": [".pulp_filter_extension.PulpFilterExtension"]
+  "_extensions": ["jamldump.jinja2.Jaml", ".pulp_filter_extension.PulpFilterExtension"]
 }

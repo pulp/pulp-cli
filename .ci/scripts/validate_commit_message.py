@@ -40,7 +40,7 @@ g = Github(os.environ.get("GITHUB_TOKEN"))
 repo = g.get_repo("pulp/pulp-cli")
 
 
-def check_status(issue):
+def check_status(issue: str) -> None:
     gi = repo.get_issue(int(issue))
     if gi.pull_request:
         sys.exit(f"Error: issue #{issue} is a pull request.")
@@ -48,7 +48,7 @@ def check_status(issue):
         sys.exit(f"Error: issue #{issue} is closed.")
 
 
-def check_changelog(issue):
+def check_changelog(issue: str) -> None:
     matches = list(Path("CHANGES").rglob(f"{issue}.*"))
 
     if len(matches) < 1:
