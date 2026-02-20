@@ -98,7 +98,7 @@ TEST_SCHEMA = json.dumps(
 ).encode()
 
 
-def mock_send_request(request: _Request) -> _Response:
+async def mock_send_request(request: _Request) -> _Response:
     if request.url.endswith("oauth/token"):
         assert request.method.lower() == "post"
         # $ echo -n "client1:secret1" | base64

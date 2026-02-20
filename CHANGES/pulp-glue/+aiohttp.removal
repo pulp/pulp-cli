@@ -1,0 +1,2 @@
+Replaced requests with aiohttp.
+Breaking change: Reworked the contract around the `AuthProvider` to allow authentication to be coded independently of the underlying library.

@@ -63,10 +63,7 @@ class TestBasicAuthProvider:
         assert provider.can_complete_http_basic()
 
     def test_provides_username_and_password(self, provider: AuthProviderBase) -> None:
-        assert asyncio.run(provider.http_basic_credentials()) == (
-            b"user1",
-            b"password1",
-        )
+        assert asyncio.run(provider.http_basic_credentials()) == (b"user1", b"password1")
 
     def test_cannot_complete_mutualTLS(self, provider: AuthProviderBase) -> None:
         assert not provider.can_complete_mutualTLS()
@@ -104,10 +101,7 @@ class TestGlueAuthProvider:
     def test_can_complete_oauth2_client_credentials_and_provide_them(self) -> None:
         provider = GlueAuthProvider(client_id="client1", client_secret="secret1")
         assert provider.can_complete_oauth2_client_credentials([]) is True
-        assert asyncio.run(provider.oauth2_client_credentials()) == (
-            b"client1",
-            b"secret1",
-        )
+        assert asyncio.run(provider.oauth2_client_credentials()) == (b"client1", b"secret1")
 
     def test_can_complete_mutualTLS_and_provide_cert(self) -> None:
         provider = GlueAuthProvider(cert="FAKECERTIFICATE")
