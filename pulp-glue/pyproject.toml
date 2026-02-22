@@ -24,6 +24,7 @@ classifiers = [
 dependencies = [
   "multidict>=6.0.5,<6.8",
   "packaging>=22.0,<=26.0",  # CalVer
+  "pydantic>=2.8.1,<2.13",
   "requests>=2.24.0,<2.33",
   "tomli>=2.0.0,<2.1;python_version<'3.11'",
 ]
@@ -53,6 +54,7 @@ files = "src/**/*.py, tests/**/*.py"
 mypy_path = ["src"]
 namespace_packages = true
 explicit_package_bases = true
+plugins = ["pydantic.mypy"]
 
 [[tool.mypy.overrides]]
 # This section is managed by the cookiecutter templates.

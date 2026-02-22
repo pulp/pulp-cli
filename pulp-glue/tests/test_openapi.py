@@ -2,11 +2,17 @@ import asyncio
 import datetime
 import json
 import logging
+import typing as t
 
 import pytest
 from multidict import CIMultiDict
 
-from pulp_glue.common.authentication import AuthProviderBase, BasicAuthProvider, GlueAuthProvider
+from pulp_glue.common.authentication import (
+    AuthProviderBase,
+    BasicAuthProvider,
+    GlueAuthProvider,
+)
+from pulp_glue.common.exceptions import ValidationError
 from pulp_glue.common.openapi import OpenAPI, _Request, _Response
 
 pytestmark = pytest.mark.glue
@@ -57,12 +63,12 @@ SECURITY_SCHEMES = {
 }
 TEST_SCHEMA = json.dumps(
     {
-        "openapi": "3.0.3",
+        "openapi": "3.1.1",
         "paths": {
             "test/": {
                 "get": {
                     "operationId": "get_test_id",
-                    "responses": {200: {}},
+                    "responses": {200: {"description": "get test"}},
                 },
                 "post": {
                     "operationId": "post_test_id",
@@ -74,13 +80,95 @@ TEST_SCHEMA = json.dumps(
                             }
                         },
                     },
-                    "responses": {200: {}},
+                    "responses": {200: {"description": "post test"}},
                     "security": [{"B": []}],
                 },
-            }
+            },
+            "render_params/": {
+                "head": {
+                    "operationId": "render_params_ref",
+                    "parameters": [{"$ref": "#/components/parameters/limit"}],
+                },
+                "get": {
+                    "operationId": "render_params_none",
+                },
+                "trace": {
+                    "operationId": "render_params_query",
+                    "parameters": [
+                        {"name": "query1", "in": "query", "schema": {"type": "string"}},
+                        {"name": "query2", "in": "query", "schema": {"type": "string"}},
+                        {
+                            "name": "date",
+                            "in": "query",
+                            "schema": {"type": "string", "format": "date"},
+                        },
+                    ],
+                },
+                "delete": {
+                    "operationId": "render_params_lists",
+                    "parameters": [
+                        {
+                            "name": "qlist",
+                            "in": "query",
+                            "explode": False,
+                            "schema": {"type": "array", "items": {"type": "string"}},
+                        },
+                        {
+                            "name": "hlist",
+                            "in": "header",
+                            "schema": {"type": "array", "items": {"type": "string"}},
+                        },
+                        {
+                            "name": "clist",
+                            "in": "cookie",
+                            "explode": False,
+                            "schema": {"type": "array", "items": {"type": "string"}},
+                        },
+                        {
+                            "name": "eqlist",
+                            "in": "query",
+                            "schema": {"type": "array", "items": {"type": "string"}},
+                        },
+                        {
+                            "name": "ehlist",
+                            "in": "header",
+                            "explode": True,
+                            "schema": {"type": "array", "items": {"type": "string"}},
+                        },
+                        {
+                            "name": "eclist",
+                            "in": "cookie",
+                            "schema": {"type": "array", "items": {"type": "string"}},
+                        },
+                    ],
+                },
+            },
+            "render_params/{pk}/": {
+                "head": {
+                    "operationId": "render_params_pk_query",
+                    "parameters": [
+                        {"name": "query1", "in": "query", "schema": {"type": "string"}},
+                        {"name": "query2", "in": "query", "schema": {"type": "string"}},
+                    ],
+                },
+                "get": {
+                    "operationId": "render_params_pk_",
+                },
+                "parameters": [
+                    {
+                        "name": "pk",
+                        "in": "path",
+                        "required": True,
+                        "schema": {"type": "integer"},
+                    },
+                ],
+            },
         },
         "security": [{}],
         "components": {
+            "parameters": {
+                "limit": {"name": "limit", "in": "query", "schema": {"type": "int"}},
+            },
             "schemas": {
                 "testBody": {
                     "type": "object",
@@ -117,9 +205,10 @@ def mock_send_request(request: _Request) -> _Response:
 
 @pytest.fixture
 def mock_openapi(monkeypatch: pytest.MonkeyPatch) -> OpenAPI:
-    monkeypatch.setattr(OpenAPI, "load_api", lambda self, refresh_cache: TEST_SCHEMA)
+    monkeypatch.setattr(
+        OpenAPI, "load_api", lambda self, refresh_cache: self._parse_api(TEST_SCHEMA)
+    )
     openapi = OpenAPI("base_url", "doc_path", user_agent="test agent")
-    openapi._parse_api(TEST_SCHEMA)
     monkeypatch.setattr(openapi, "_send_request", mock_send_request)
     return openapi
 
@@ -161,7 +250,7 @@ class TestRenderRequest:
         basic_auth_provider: AuthProviderBase,
     ) -> None:
         method, path = mock_openapi.operations["get_test_id"]
-        path_spec = mock_openapi.api_spec["paths"][path]
+        path_spec = mock_openapi._api_spec.paths[path]
         request = mock_openapi._render_request(path_spec, method, "test/", {}, {}, None)
         assert request.security == [{}]
 
@@ -171,7 +260,7 @@ class TestRenderRequest:
         basic_auth_provider: AuthProviderBase,
     ) -> None:
         method, path = mock_openapi.operations["post_test_id"]
-        path_spec = mock_openapi.api_spec["paths"][path]
+        path_spec = mock_openapi._api_spec.paths[path]
         request = mock_openapi._render_request(
             path_spec, method, "test/", {}, {}, {"text": "TRACE"}
         )
@@ -198,52 +287,112 @@ class TestParseResponse:
         assert result == {"a": 1, "b": "Hallo!"}
 
 
-class TestExtractParams:
-    def test_with_no_match(self, mock_openapi: OpenAPI) -> None:
-        parameters = {"a": 1, "b": "C"}
-        query_params = mock_openapi._extract_params("query", {}, {}, parameters)
-        assert query_params == {}
-        assert parameters == {"a": 1, "b": "C"}
+class TestRenderParameters:
+    @pytest.mark.parametrize(
+        "operation_id,parameters,match",
+        (
+            pytest.param(
+                "render_params_none",
+                {"superfluous": "1234"},
+                r"superfluous",
+                id="remaining_parameters",
+            ),
+            pytest.param(
+                "render_params_pk_query",
+                {"query1": "asdf"},
+                r"pk",
+                id="missing_required_parameter",
+            ),
+            pytest.param(
+                "render_params_query",
+                {"query1": "asdf", "query2": 35},
+                r"query2",
+                id="wrong_type",
+            ),
+        ),
+    )
+    def test_fails_validation_for(
+        self,
+        mock_openapi: OpenAPI,
+        operation_id: str,
+        parameters: dict[str, t.Any],
+        match: str,
+    ) -> None:
+        method, path = mock_openapi.operations[operation_id]
+        path_spec = mock_openapi._api_spec.paths[path]
+        method_spec = getattr(path_spec, method)
 
-    def test_raises_for_missing_required_parameter(self, mock_openapi: OpenAPI) -> None:
-        parameters = {"a": 1, "b": "C"}
-        with pytest.raises(RuntimeError, match=r"Required parameters \[c\] missing"):
-            mock_openapi._extract_params(
-                "query",
-                {"parameters": [{"name": "c", "in": "query", "required": True}]},
-                {},
-                parameters,
-            )
-        assert parameters == {"a": 1, "b": "C"}
+        with pytest.raises(ValidationError, match=match):
+            mock_openapi._render_parameters(path_spec, method_spec, parameters)
 
-    def test_removes_matches(self, mock_openapi: OpenAPI) -> None:
-        parameters = {"a": 1, "c": "C"}
-        query_params = mock_openapi._extract_params(
-            "query",
-            {"parameters": [{"name": "c", "in": "query", "required": True}]},
-            {},
-            parameters,
-        )
-        assert query_params == {"c": "C"}
-        assert parameters == {"a": 1}
+    def test_references_are_not_implemented(self, mock_openapi: OpenAPI) -> None:
+        parameters: dict[str, t.Any] = {}
+        method, path = mock_openapi.operations["render_params_ref"]
+        path_spec = mock_openapi._api_spec.paths[path]
+        method_spec = getattr(path_spec, method)
+
+        with pytest.raises(NotImplementedError):
+            mock_openapi._render_parameters(path_spec, method_spec, parameters)
+
+        assert parameters == {}
+
+    def test_no_parameters_none_specified(self, mock_openapi: OpenAPI) -> None:
+        parameters: dict[str, t.Any] = {}
+        method, path = mock_openapi.operations["render_params_none"]
+        path_spec = mock_openapi._api_spec.paths[path]
+        method_spec = getattr(path_spec, method)
+
+        res = mock_openapi._render_parameters(path_spec, method_spec, parameters)
+
+        assert res == {"query": {}, "header": {}, "path": {}, "cookie": {}}
+        assert parameters == {}
+
+    def test_provided_parameters_are_rendered(self, mock_openapi: OpenAPI) -> None:
+        parameters: dict[str, t.Any] = {"query1": "asdf", "pk": 42}
+        method, path = mock_openapi.operations["render_params_pk_query"]
+        path_spec = mock_openapi._api_spec.paths[path]
+        method_spec = getattr(path_spec, method)
+
+        res = mock_openapi._render_parameters(path_spec, method_spec, parameters)
+
+        assert res == {
+            "query": {"query1": "asdf"},
+            "header": {},
+            "path": {"pk": 42},
+            "cookie": {},
+        }
+        assert parameters == {"query1": "asdf", "pk": 42}
+
+    def test_lists_are_rendered_according_to_explode(self, mock_openapi: OpenAPI) -> None:
+        parameters: dict[str, t.Any] = {
+            "qlist": ["1", "2", "3"],
+            "eqlist": ["1", "2", "3"],
+            "hlist": ["1", "2", "3"],
+            "ehlist": ["1", "2", "3"],
+            "clist": ["1", "2", "3"],
+            "eclist": ["1", "2", "3"],
+        }
+        method, path = mock_openapi.operations["render_params_lists"]
+        path_spec = mock_openapi._api_spec.paths[path]
+        method_spec = getattr(path_spec, method)
+
+        res = mock_openapi._render_parameters(path_spec, method_spec, parameters)
+
+        assert res == {
+            "query": {"qlist": "1,2,3", "eqlist": ["1", "2", "3"]},
+            "header": {"hlist": "1,2,3", "ehlist": ["1", "2", "3"]},
+            "path": {},
+            "cookie": {"clist": "1,2,3", "eclist": ["1", "2", "3"]},
+        }
 
     def test_encodes_date(self, mock_openapi: OpenAPI) -> None:
-        parameters = {"a": datetime.date(2000, 1, 1)}
-        query_params = mock_openapi._extract_params(
-            "query",
-            {
-                "parameters": [
-                    {
-                        "name": "a",
-                        "in": "query",
-                        "schema": {"type": "string", "format": "date"},
-                    }
-                ]
-            },
-            {},
-            parameters,
-        )
-        assert query_params == {"a": "2000-01-01"}
+        parameters = {"date": datetime.date(2000, 1, 1)}
+        method, path = mock_openapi.operations["render_params_query"]
+        path_spec = mock_openapi._api_spec.paths[path]
+        method_spec = getattr(path_spec, method)
+
+        res = mock_openapi._render_parameters(path_spec, method_spec, parameters)
+        assert res["query"] == {"date": "2000-01-01"}
 
 
 class TestOpenAPILogs:

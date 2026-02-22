@@ -4,6 +4,7 @@ import json
 import typing as t
 from contextlib import suppress
 
+from pulp_glue.common.exceptions import ValidationError
 from pulp_glue.common.i18n import get_translation
 
 translation = get_translation(__package__)
@@ -14,10 +15,6 @@ ISO_DATETIME_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 
 
 class SchemaError(ValueError):
-    pass
-
-
-class ValidationError(ValueError):
     pass
 
 
