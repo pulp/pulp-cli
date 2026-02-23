@@ -68,6 +68,14 @@ def test_accessing_the_help_page_does_not_invoke_api(
         assert result.stdout.startswith("Usage:") or result.stdout.startswith("DeprecationWarning:")
 
 
+def test_help_shows_all_available_commands(no_api: None) -> None:
+    runner = CliRunner()
+    result = runner.invoke(main, ["--help"], catch_exceptions=False)
+    assert result.exit_code == 0
+    for command in main.commands.keys():
+        assert command in result.stdout
+
+
 @pytest.mark.parametrize(
     "command,options",
     [
