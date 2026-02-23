@@ -144,6 +144,27 @@ def _version_callback(ctx: click.Context, param: t.Any, value: bool) -> None:
         ctx.exit(0)
 
 
+def _help_callback(ctx: click.Context, param: click.Parameter, value: bool) -> None:
+    if value and not ctx.resilient_parsing:
+        # Ensure _load_config runs even if --config/--profile callbacks
+        # haven't fired yet (they are eager but may be sorted after
+        # --help when not explicitly provided on the command line).
+        ctx.meta.setdefault(CONFIG_KEY, None)
+        ctx.meta.setdefault(PROFILE_KEY, None)
+        if PLUGIN_KEY not in ctx.meta:
+            _load_config(ctx)
+        click.echo(ctx.get_help(), color=ctx.color)
+        ctx.exit()
+
+
+@click.option(
+    "--help",
+    is_flag=True,
+    expose_value=False,
+    is_eager=True,
+    callback=_help_callback,
+    help=_("Show this message and exit."),
+)
 @click.option(
     "--profile",
     "-p",
