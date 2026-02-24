@@ -726,17 +726,9 @@ class OpenAPI:
                 response = self._send_request(request)
 
             if response.status_code >= 200 and response.status_code < 300:
-                asyncio.run(
-                    self._auth_provider.auth_success_hook(
-                        proposal, self.api_spec["components"]["securitySchemes"]
-                    )
-                )
+                asyncio.run(self._auth_provider.auth_success_hook())
             elif response.status_code == 401:
-                asyncio.run(
-                    self._auth_provider.auth_failure_hook(
-                        proposal, self.api_spec["components"]["securitySchemes"]
-                    )
-                )
+                asyncio.run(self._auth_provider.auth_failure_hook())
 
         self._log_response(response)
         return self._parse_response(method_spec, response)

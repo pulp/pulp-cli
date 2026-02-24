@@ -281,9 +281,7 @@ class PulpCLIAuthProvider(AuthProviderBase):
                 collection = secretstorage.get_default_collection(connection)
                 collection.create_item("Pulp CLI", secret_attr, password, replace=True)
 
-    async def auth_success_hook(
-        self, proposal: dict[str, list[str]], security_schemes: dict[str, dict[str, t.Any]]
-    ) -> None:
+    async def auth_success_hook(self, **kwargs: t.Any) -> None:
         if SECRET_STORAGE and self._password_in_secretstorage is False:
             await asyncio.get_running_loop().run_in_executor(None, self._save_password_to_storage)
         self._password_in_secretstorage = None
@@ -305,9 +303,7 @@ class PulpCLIAuthProvider(AuthProviderBase):
                     item.delete()
         self.password = None
 
-    async def auth_failure_hook(
-        self, proposal: dict[str, list[str]], security_schemes: dict[str, dict[str, t.Any]]
-    ) -> None:
+    async def auth_failure_hook(self, **kwargs: t.Any) -> None:
         if SECRET_STORAGE and self._password_in_secretstorage is True:
             await asyncio.get_running_loop().run_in_executor(
                 None, self._remove_password_from_storage
