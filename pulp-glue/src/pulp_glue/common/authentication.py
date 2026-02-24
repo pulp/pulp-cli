@@ -42,14 +42,10 @@ class AuthProviderBase:
         # This covers the case where `[]` allows for no auth at all.
         return True
 
-    async def auth_success_hook(
-        self, proposal: dict[str, list[str]], security_schemes: dict[str, dict[str, t.Any]]
-    ) -> None:
+    async def auth_success_hook(self, **kwargs: t.Any) -> None:
         pass
 
-    async def auth_failure_hook(
-        self, proposal: dict[str, list[str]], security_schemes: dict[str, dict[str, t.Any]]
-    ) -> None:
+    async def auth_failure_hook(self, **kwargs: t.Any) -> None:
         pass
 
     async def http_basic_credentials(self) -> tuple[bytes, bytes]:
