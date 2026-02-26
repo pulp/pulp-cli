@@ -10,6 +10,49 @@
 
 [//]: # (towncrier release notes start)
 
+## 0.38.0 (2026-02-25) {: #0.38.0 }
+
+
+
+#### Features {: #0.38.0-feature }
+
+- Removed the default `chunk_size` value. If necessary, a suitable value should be provided with the call or configured for the profile.
+  [#1305](https://github.com/pulp/pulp-cli/issues/1305)
+- Added support for uploading attestations with Python Package content.
+  Added support for uploading Python Provenance content.
+  Added support for specifying syncing of Python Provenance content.
+- Change the python repository content add/remove/modify commands to only require the package's sha256.
+
+
+#### Bugfixes {: #0.38.0-bugfix }
+
+- Fixed `pulp --help` not showing all available commands.
+  [#1267](https://github.com/pulp/pulp-cli/issues/1267)
+
+
+#### Deprecations and Removals {: #0.38.0-removal }
+
+- Deprecated `pulp python content upload` command. Use `pulp python content create` instead.
+
+
+### Pulp GLUE {: #0.38.0-pulp-glue }
+
+
+#### Features {: #0.38.0-pulp-glue-feature }
+
+- Add support for OAUTH2 client credentials authentication.
+- Allow to specify `None` for the `chunk_size` of content upload commands to disable chunking.
+
+
+#### Deprecations and Removals {: #0.38.0-pulp-glue-removal }
+
+- Breaking change: Reworked the contract around the `AuthProvider` to allow authentication to be coded independently of the underlying library.
+- The `api_quirk` decorator has been deprecated in favor of the `api_spec_quirk` decorator.
+  Quirks are now supposed to work on the raw spec before it is parsed by the `openapi` layer.
+
+
+---
+
 ## 0.37.0 (2026-01-07) {: #0.37.0 }
 
 
