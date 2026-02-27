@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools<83"]
+requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -51,6 +51,48 @@ core = "pulpcore.cli.core"
 file = "pulpcore.cli.file"
 python = "pulpcore.cli.python"
 rpm = "pulpcore.cli.rpm"
+
+[dependency-groups]
+dev = [
+  {include-group = "lint"},
+  "pylsp-mypy>=0.7.0",
+  "pylsp-rope>=0.1.17,<0.1.18",
+]
+lint = [
+  {include-group = "test"},
+  "mypy==1.19.1",
+  "ruff==0.15.1",
+  "shellcheck-py==0.11.0.1",
+  "types-pygments",
+  "types-pyyaml",
+  "types-requests",
+  "types-setuptools",
+  "types-toml",
+]
+test = [
+  "jinja2>=3.1.4,<3.2",
+  "pygments",
+  "pytest>=7.0.0,<9.1",
+  "pytest-xdist>=3.8.0,<3.9",
+  "python-gnupg>=0.5.0,<0.6",
+  "secretstorage",
+  "trustme>=1.1.0,<1.3",
+]
+
+[tool.uv.sources]
+# This section is managed by the cookiecutter templates.
+pulp-glue = { workspace = true }
+
+[tool.uv.workspace]
+# This section is managed by the cookiecutter templates.
+members = ["pulp-glue"]
+
+[tool.uv.build-backend]
+# This section is managed by the cookiecutter templates.
+module-name = ["pulpcore.cli", "pulp_cli", "pytest_pulp_cli"]
+namespace = true
+source-exclude = ["*.pot", "*.po", "**/*\\~"]
+
 
 [tool.setuptools.packages.find]
 # This section is managed by the cookiecutter templates.
@@ -199,7 +241,7 @@ showcontent = true
 [tool.ruff]
 # This section is managed by the cookiecutter templates.
 line-length = 100
-extend-exclude = ["cookiecutter"]
+extend-exclude = ["cookiecutter/bootstrap", "cookiecutter/ci", "cookiecutter/docs"]
 
 [tool.ruff.lint]
 # This section is managed by the cookiecutter templates.
@@ -230,7 +272,7 @@ markers = [
 strict = true
 warn_unused_ignores = false
 show_error_codes = true
-files = "src/**/*.py, tests/*.py"
+files = "src/**/*.py, tests/**/*.py"
 mypy_path = ["src", "pulp-glue/src"]
 namespace_packages = true
 explicit_package_bases = true

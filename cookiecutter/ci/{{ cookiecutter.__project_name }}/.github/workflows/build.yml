@@ -1,3 +1,4 @@
+{%- import 'macros' as macros with context -%}
 ---
 name: "Build"
 
@@ -8,24 +9,19 @@ jobs:
   build:
     runs-on: "ubuntu-latest"
     steps:
-      - uses: "actions/checkout@v5"
-      {%- include "cache_action" %}
-      - name: "Set up Python"
-        uses: "actions/setup-python@v6"
-        with:
-          python-version: "3.14"
-      - name: "Install python dependencies"
-        run: |
-          pip install build setuptools wheel
+      {{ macros.checkout() | indent(6) }}
+      {{ macros.setup_python() | indent(6) }}
+      {{ macros.install_uv() | indent(6) }}
       - name: "Build wheels"
         run: |
           make build
+          touch .root
       - name: "Upload wheels"
         uses: "actions/upload-artifact@v4"
         with:
           name: "pulp_cli_packages"
           path: |
-            pulp-glue{{ cookiecutter.__app_label_suffix }}/dist/
+            .root
             dist/
           if-no-files-found: "error"
           retention-days: 5
