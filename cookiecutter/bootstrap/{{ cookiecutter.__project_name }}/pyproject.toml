@@ -7,7 +7,7 @@ name = "{{ cookiecutter.__project_name }}"
 version = "{{ cookiecutter.version }}"
 description = "Command line interface to talk to pulpcore's REST API. ({{ cookiecutter.app_label | capitalize }} plugin commands)"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 license = "GPL-2.0-or-later"
 authors = [
   {name = "Pulp Team", email = "pulp-list@redhat.com"},
@@ -39,6 +39,7 @@ changelog = "{{ cookiecutter.repository }}/blob/main/CHANGES.md"
 app_label = {{ cookiecutter.app_label | toml_value }}
 glue = {{ cookiecutter.glue | toml_value }}
 docs = {{ cookiecutter.docs | toml_value }}
+src_layout = true
 translations = {{ cookiecutter.translations | toml_value }}
 
 [tool.pytest.ini_options]

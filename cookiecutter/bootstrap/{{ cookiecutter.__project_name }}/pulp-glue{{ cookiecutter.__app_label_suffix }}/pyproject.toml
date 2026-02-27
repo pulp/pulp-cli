@@ -7,7 +7,7 @@ name = "pulp-glue{{ cookiecutter.__app_label_suffix }}"
 version = "{{ cookiecutter.version }}"
 description = "Version agnostic glue library to talk to pulpcore's REST API. ({{ cookiecutter.app_label | capitalize }} plugin)"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 license = "GPL-2.0-or-later"
 authors = [
   {name = "Pulp Team", email = "pulp-list@redhat.com"},
@@ -29,23 +29,4 @@ dependencies = [
 repository = "https://github.com/pulp/{{ cookiecutter.__project_name }}"
 changelog = "https://github.com/pulp/{{ cookiecutter.__project_name }}/blob/main/CHANGES.md"
 
-[tool.setuptools.packages.find]
-where = ["."]
-include = ["pulp_glue.*"]
-namespaces = true
-
-[tool.setuptools.package-data]
-"*" = ["py.typed", "locale/*/LC_MESSAGES/*.mo"]
-
 [tool.mypy]
-strict = true
-show_error_codes = true
-files = "pulp_glue/**/*.py"
-namespace_packages = true
-explicit_package_bases = true
-
-[[tool.mypy.overrides]]
-module = [
-  "schema.*",
-]
-ignore_missing_imports = true
