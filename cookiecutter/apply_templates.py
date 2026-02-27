@@ -19,6 +19,7 @@ import yaml
 
 from cookiecutter.main import cookiecutter
 
+import migrate_src_layout
 
 @click.option("--bootstrap/--no-bootstrap")
 @click.option("--force/--no-force")
@@ -36,6 +37,9 @@ def main(bootstrap: bool, force: bool) -> None:
         )
         print(f"New plugin repository created in {proj_dir}.")
         os.chdir(proj_dir)
+    else:
+        # Remove this again, once all known plugins were migrated.
+        migrate_src_layout.main()
 
     try:
         pyproject_toml = tomllib.loads(Path("pyproject.toml").read_text())
