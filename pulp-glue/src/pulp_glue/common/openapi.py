@@ -15,6 +15,7 @@ from urllib.parse import urlencode, urljoin
 import requests
 import urllib3
 from multidict import CIMultiDict, CIMultiDictProxy, MutableMultiMapping
+from requests.auth import AuthBase
 
 from pulp_glue.common import __version__
 from pulp_glue.common.authentication import AuthProviderBase
@@ -56,6 +57,11 @@ class _Response:
     status_code: int
     headers: MutableMultiMapping[str] | CIMultiDictProxy[str] | t.MutableMapping[str, str]
     body: bytes
+
+
+class _RequestsFakeAuth(AuthBase):
+    def __call__(self, request: requests.PreparedRequest) -> requests.PreparedRequest:
+        return request
 
 
 class OpenAPI:
@@ -160,6 +166,7 @@ class OpenAPI:
         )
         self._session.verify = session_settings["verify"]
         self._session.proxies = session_settings["proxies"]
+        self._session.auth = _RequestsFakeAuth()
 
         if self._auth_provider is not None and self._auth_provider.can_complete_mutualTLS():
             cert, key = self._auth_provider.tls_credentials()
