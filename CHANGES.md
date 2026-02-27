@@ -10,6 +10,23 @@
 
 [//]: # (towncrier release notes start)
 
+## 0.38.1 (2026-02-27) {: #0.38.1 }
+
+
+
+#### Bugfixes {: #0.38.1-bugfix }
+
+- Prevent picking up ~/.netrc logins.
+
+
+### Pulp GLUE {: #0.38.1-pulp-glue }
+
+
+No significant changes.
+
+
+---
+
 ## 0.38.0 (2026-02-25) {: #0.38.0 }
 
 
