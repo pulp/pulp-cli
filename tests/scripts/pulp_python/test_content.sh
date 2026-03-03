@@ -31,6 +31,39 @@ then
   expect_succ pulp python content create --file-url "$file_url" --relative-path "shelf-reader-0.1.tar.gz"
 fi
 
+# Test content list filter options
+expect_succ pulp python content list --name "shelf-reader"
+test "$(echo "$OUTPUT" | jq -r length)" -gt "0"
+test "$(echo "$OUTPUT" | jq -r '.[0].name')" = "shelf-reader"
+
+expect_succ pulp python content list --name-in "shelf-reader"
+test "$(echo "$OUTPUT" | jq -r length)" -gt "0"
+
+if pulp debug has-plugin --name "python" --specifier ">=3.25.0"
+then
+  expect_succ pulp python content list --name-contains "shelf"
+  test "$(echo "$OUTPUT" | jq -r length)" -gt "0"
+fi
+
+expect_succ pulp python content list --name "shelf-reader" --version "0.1"
+test "$(echo "$OUTPUT" | jq -r length)" -ge "1"
+
+expect_succ pulp python content list --name "shelf-reader" --version-gte "0.1"
+test "$(echo "$OUTPUT" | jq -r length)" -ge "1"
+
+expect_succ pulp python content list --name "shelf-reader" --packagetype "sdist"
+test "$(echo "$OUTPUT" | jq -r length)" -ge "1"
+
+expect_succ pulp python content list --filename-contains "shelf-reader"
+test "$(echo "$OUTPUT" | jq -r length)" -ge "1"
+
+FIRST_AUTHOR=$(echo "$OUTPUT" | jq -r '.[0].author')
+if [ -n "$FIRST_AUTHOR" ] && [ "$FIRST_AUTHOR" != "null" ]
+then
+  expect_succ pulp python content list --author "$FIRST_AUTHOR"
+  test "$(echo "$OUTPUT" | jq -r length)" -ge "1"
+fi
+
 expect_succ pulp python repository create --name "cli_test_python_content_repository"
 HREF="$(echo "$OUTPUT" | jq -r '.pulp_href')"
 expect_succ pulp python repository content add --repository "cli_test_python_content_repository" --sha256 "$sha256"

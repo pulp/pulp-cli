@@ -26,12 +26,10 @@ from pulp_glue.rpm.context import (
 from pulp_cli.generic import (
     PulpCLIContext,
     chunk_size_option,
+    content_filter_options,
     create_command,
-    exclude_field_option,
-    field_option,
     href_option,
     label_command,
-    label_select_option,
     list_command,
     pass_entity_context,
     pass_pulp_context,
@@ -111,10 +109,10 @@ def content() -> None:
 
 
 list_options = [
-    field_option,
-    exclude_field_option,
-    pulp_option("--repository-version"),
-    pulp_option("--arch", allowed_with_contexts=(PulpRpmPackageContext,)),
+    pulp_option(
+        "--arch",
+        allowed_with_contexts=(PulpRpmPackageContext, PulpRpmModulemdContext),
+    ),
     pulp_option(
         "--arch-contains",
         "arch__contains",
@@ -125,7 +123,7 @@ list_options = [
         "--arch-in",
         "arch__in",
         multiple=True,
-        allowed_with_contexts=(PulpRpmPackageContext,),
+        allowed_with_contexts=(PulpRpmPackageContext, PulpRpmModulemdContext),
         needs_plugins=[PluginRequirement("rpm", specifier=">=3.20.0")],
     ),
     pulp_option("--arch-ne", "arch__ne", allowed_with_contexts=(PulpRpmPackageContext,)),
@@ -135,11 +133,41 @@ list_options = [
         allowed_with_contexts=(PulpRpmPackageContext,),
         needs_plugins=[PluginRequirement("rpm", specifier=">=3.20.0")],
     ),
+    pulp_option(
+        "--checksum-type",
+        "checksum_type",
+        allowed_with_contexts=(PulpRpmPackageContext,),
+    ),
+    pulp_option(
+        "--checksum-type-in",
+        "checksum_type__in",
+        multiple=True,
+        allowed_with_contexts=(PulpRpmPackageContext,),
+    ),
+    pulp_option(
+        "--checksum-type-ne",
+        "checksum_type__ne",
+        allowed_with_contexts=(PulpRpmPackageContext,),
+    ),
+    pulp_option(
+        "--context",
+        allowed_with_contexts=(PulpRpmModulemdContext,),
+    ),
+    pulp_option(
+        "--context-in",
+        "context__in",
+        multiple=True,
+        allowed_with_contexts=(PulpRpmModulemdContext,),
+    ),
     pulp_option("--epoch", allowed_with_contexts=(PulpRpmPackageContext,)),
     pulp_option(
         "--epoch-in", "epoch__in", multiple=True, allowed_with_contexts=(PulpRpmPackageContext,)
     ),
     pulp_option("--epoch-ne", "epoch__ne", allowed_with_contexts=(PulpRpmPackageContext,)),
+    pulp_option(
+        "--filename",
+        allowed_with_contexts=(PulpRpmPackageContext,),
+    ),
     pulp_option("--id", allowed_with_contexts=(PulpRpmAdvisoryContext,)),
     pulp_option(
         "--id-in", "id__in", multiple=True, allowed_with_contexts=(PulpRpmAdvisoryContext,)
@@ -155,7 +183,7 @@ list_options = [
     pulp_option(
         "--name-contains",
         "name__contains",
-        allowed_with_contexts=(PulpRpmPackageContext, PulpRpmModulemdContext),
+        allowed_with_contexts=(PulpRpmPackageContext,),
         needs_plugins=[PluginRequirement("rpm", specifier=">=3.20.0")],
     ),
     pulp_option(
@@ -167,12 +195,12 @@ list_options = [
     pulp_option(
         "--name-ne",
         "name__ne",
-        allowed_with_contexts=(PulpRpmPackageContext, PulpRpmModulemdContext),
+        allowed_with_contexts=(PulpRpmPackageContext,),
     ),
     pulp_option(
         "--name-startswith",
         "name__startswith",
-        allowed_with_contexts=(PulpRpmPackageContext, PulpRpmModulemdContext),
+        allowed_with_contexts=(PulpRpmPackageContext,),
         needs_plugins=[PluginRequirement("rpm", specifier=">=3.20.0")],
     ),
     pulp_option("--package-href", allowed_with_contexts=(PulpRpmPackageContext,)),
@@ -238,12 +266,18 @@ list_options = [
         "--type-in", "type__in", multiple=True, allowed_with_contexts=(PulpRpmAdvisoryContext,)
     ),
     pulp_option("--type-ne", "type__ne", allowed_with_contexts=(PulpRpmAdvisoryContext,)),
-    pulp_option("--version", allowed_with_contexts=(PulpRpmPackageContext,)),
     pulp_option(
-        "--version-in", "version__in", multiple=True, allowed_with_contexts=(PulpRpmPackageContext,)
+        "--version",
+        allowed_with_contexts=(PulpRpmPackageContext, PulpRpmModulemdContext),
+    ),
+    pulp_option(
+        "--version-in",
+        "version__in",
+        multiple=True,
+        allowed_with_contexts=(PulpRpmPackageContext, PulpRpmModulemdContext),
     ),
     pulp_option("--version-ne", "version__ne", allowed_with_contexts=(PulpRpmPackageContext,)),
-    label_select_option,
+    *content_filter_options,
 ]
 lookup_options = [
     href_option,

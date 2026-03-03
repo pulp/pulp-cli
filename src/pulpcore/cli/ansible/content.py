@@ -16,9 +16,9 @@ from pulp_cli.generic import (
     GroupOption,
     PulpCLIContext,
     chunk_size_callback,
+    content_filter_options,
     href_option,
     label_command,
-    label_select_option,
     list_command,
     pass_content_context,
     pass_pulp_context,
@@ -107,6 +107,13 @@ list_options = [
         allowed_with_contexts=signature_context,
     ),
     pulp_option(
+        "--pubkey-fingerprint-in",
+        "pubkey_fingerprint__in",
+        multiple=True,
+        help=_("Public key fingerprint of the {entity}"),
+        allowed_with_contexts=signature_context,
+    ),
+    pulp_option(
         "--collection",
         "signed_collection",
         help=_("Collection of {entity}"),
@@ -117,7 +124,7 @@ list_options = [
         help=_("Signing service used to create {entity}"),
         allowed_with_contexts=signature_context,
     ),
-    label_select_option,
+    *content_filter_options,
 ]
 
 lookup_options = [

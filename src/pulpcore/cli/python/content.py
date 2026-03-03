@@ -15,10 +15,10 @@ from pulp_glue.python.context import (
 from pulp_cli.generic import (
     PulpCLIContext,
     chunk_size_option,
+    content_filter_options,
     create_command,
     href_option,
     label_command,
-    label_select_option,
     list_command,
     load_json_callback,
     pass_entity_context,
@@ -158,10 +158,53 @@ lookup_options = [href_option]
 content.add_command(
     list_command(
         decorators=[
+            pulp_option("--name", allowed_with_contexts=(PulpPythonContentContext,)),
+            pulp_option(
+                "--name-in",
+                "name__in",
+                multiple=True,
+                allowed_with_contexts=(PulpPythonContentContext,),
+            ),
+            pulp_option(
+                "--name-contains",
+                "name__contains",
+                allowed_with_contexts=(PulpPythonContentContext,),
+                needs_plugins=[PluginRequirement("python", specifier=">=3.25.0")],
+            ),
+            pulp_option("--author", allowed_with_contexts=(PulpPythonContentContext,)),
+            pulp_option(
+                "--author-contains",
+                "author__contains",
+                allowed_with_contexts=(PulpPythonContentContext,),
+                needs_plugins=[PluginRequirement("python", specifier=">=3.25.0")],
+            ),
+            pulp_option("--packagetype", allowed_with_contexts=(PulpPythonContentContext,)),
+            pulp_option(
+                "--packagetype-in",
+                "packagetype__in",
+                multiple=True,
+                allowed_with_contexts=(PulpPythonContentContext,),
+            ),
             pulp_option("--filename", allowed_with_contexts=(PulpPythonContentContext,)),
+            pulp_option(
+                "--filename-contains",
+                "filename__contains",
+                allowed_with_contexts=(PulpPythonContentContext,),
+            ),
+            pulp_option("--version", allowed_with_contexts=(PulpPythonContentContext,)),
+            pulp_option(
+                "--version-gte",
+                "version__gte",
+                allowed_with_contexts=(PulpPythonContentContext,),
+            ),
+            pulp_option(
+                "--version-lte",
+                "version__lte",
+                allowed_with_contexts=(PulpPythonContentContext,),
+            ),
             pulp_option("--sha256"),
-            label_select_option,
             package_option,
+            *content_filter_options,
         ]
     )
 )

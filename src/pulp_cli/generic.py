@@ -1337,6 +1337,19 @@ publication_filter_options = [
     pulp_option("--repository-version", help=_("Search {entities} by repository version HREF")),
 ]
 
+content_filter_options = [
+    label_select_option,
+    pulp_option("--repository-version", help=_("Search for {entities} in a repository version")),
+    pulp_option(
+        "--repository-version-added",
+        help=_("Search for {entities} added in a repository version"),
+    ),
+    pulp_option(
+        "--repository-version-removed",
+        help=_("Search for {entities} removed from a repository version"),
+    ),
+]
+
 _common_remote_options = [
     click.option(
         "--ca-cert",

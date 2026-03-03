@@ -10,10 +10,10 @@ from pulp_glue.file.context import PulpFileContentContext, PulpFileRepositoryCon
 from pulp_cli.generic import (
     PulpCLIContext,
     chunk_size_option,
+    content_filter_options,
     create_command,
     href_option,
     label_command,
-    label_select_option,
     list_command,
     pass_entity_context,
     pass_pulp_context,
@@ -112,7 +112,7 @@ content.add_command(
         decorators=[
             click.option("--relative-path"),
             click.option("--sha256"),
-            label_select_option,
+            *content_filter_options,
         ]
     )
 )
