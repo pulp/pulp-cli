@@ -153,3 +153,37 @@ expect_succ test "$(echo "${OUTPUT}" | jq -r 'length')" -eq 2
 
 # test upload for advisory, package-upload is tested at the start
 expect_succ pulp rpm content -t advisory upload --file "${TEST_ADVISORY}"
+
+# Test content list filter options
+expect_succ pulp rpm content -t package list --repository-version "${VERSION_HREF}" --limit 1
+FIRST_PKG_NAME=$(echo "${OUTPUT}" | jq -r '.[0].name')
+
+expect_succ pulp rpm content -t package list --name "${FIRST_PKG_NAME}"
+test "$(echo "${OUTPUT}" | jq -r length)" -ge "1"
+
+expect_succ pulp rpm content -t package list --repository-version "${VERSION_HREF}" --checksum-type "sha256" --limit 5
+test "$(echo "${OUTPUT}" | jq -r length)" -ge "1"
+
+# Test modulemd filters
+expect_succ pulp rpm content -t modulemd list --repository-version "${VERSION_HREF}"
+test "$(echo "${OUTPUT}" | jq -r length)" -gt "0"
+MOD_NAME=$(echo "${OUTPUT}" | jq -r '.[0].name')
+MOD_VERSION=$(echo "${OUTPUT}" | jq -r '.[0].version')
+MOD_CONTEXT=$(echo "${OUTPUT}" | jq -r '.[0].context')
+MOD_ARCH=$(echo "${OUTPUT}" | jq -r '.[0].arch')
+
+expect_succ pulp rpm content -t modulemd list --name "${MOD_NAME}" --version "${MOD_VERSION}"
+test "$(echo "${OUTPUT}" | jq -r length)" -ge "1"
+expect_succ pulp rpm content -t modulemd list --name "${MOD_NAME}" --context "${MOD_CONTEXT}"
+test "$(echo "${OUTPUT}" | jq -r length)" -ge "1"
+expect_succ pulp rpm content -t modulemd list --name "${MOD_NAME}" --arch "${MOD_ARCH}"
+test "$(echo "${OUTPUT}" | jq -r length)" -ge "1"
+
+# Test advisory filters
+expect_succ pulp rpm content -t advisory list --repository-version "${VERSION_HREF}" --limit 1
+if test "$(echo "${OUTPUT}" | jq -r length)" -gt "0"
+then
+  ADV_ID=$(echo "${OUTPUT}" | jq -r '.[0].id')
+  expect_succ pulp rpm content -t advisory list --id "${ADV_ID}"
+  test "$(echo "${OUTPUT}" | jq -r length)" -ge "1"
+fi

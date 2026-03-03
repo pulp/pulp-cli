@@ -13,9 +13,9 @@ from pulp_glue.container.context import (
 from pulp_cli.generic import (
     GroupOption,
     PulpCLIContext,
+    content_filter_options,
     href_option,
     label_command,
-    label_select_option,
     list_command,
     pass_pulp_context,
     pulp_group,
@@ -58,12 +58,41 @@ def content(ctx: click.Context, pulp_ctx: PulpCLIContext, /, content_type: str) 
 
 
 list_options = [
-    pulp_option("--media-type"),
+    pulp_option(
+        "--media-type",
+        allowed_with_contexts=(PulpContainerManifestContext, PulpContainerTagContext),
+    ),
     pulp_option("--name", "name", allowed_with_contexts=(PulpContainerTagContext,)),
     pulp_option(
         "--name-in", "name__in", multiple=True, allowed_with_contexts=(PulpContainerTagContext,)
     ),
-    label_select_option,
+    pulp_option(
+        "--digest",
+        allowed_with_contexts=(
+            PulpContainerManifestContext,
+            PulpContainerBlobContext,
+            PulpContainerTagContext,
+        ),
+    ),
+    pulp_option(
+        "--digest-in",
+        "digest__in",
+        multiple=True,
+        allowed_with_contexts=(PulpContainerManifestContext, PulpContainerBlobContext),
+    ),
+    pulp_option(
+        "--is-bootable",
+        is_flag=True,
+        default=None,
+        allowed_with_contexts=(PulpContainerManifestContext,),
+    ),
+    pulp_option(
+        "--is-flatpak",
+        is_flag=True,
+        default=None,
+        allowed_with_contexts=(PulpContainerManifestContext,),
+    ),
+    *content_filter_options,
 ]
 
 lookup_options = [

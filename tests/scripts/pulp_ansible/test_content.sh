@@ -82,3 +82,9 @@ expect_succ pulp ansible repository content remove --repository "cli_test_ansibl
 expect_succ pulp ansible repository content remove --repository "cli_test_ansible_content_repository" --href "$content2_href"
 expect_succ pulp ansible repository content list --repository "cli_test_ansible_content_repository"
 test "$(echo "$OUTPUT" | jq -r length)" -eq "0"
+
+# Test content list filter options
+expect_succ pulp ansible content list --name "posix"
+test "$(echo "$OUTPUT" | jq -r length)" -ge "1"
+expect_succ pulp ansible content list --namespace "ansible"
+test "$(echo "$OUTPUT" | jq -r length)" -ge "1"

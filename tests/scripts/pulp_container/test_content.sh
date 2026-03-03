@@ -59,3 +59,13 @@ expect_succ pulp container repository content --type "tag" remove --repository "
 expect_succ pulp container repository content add --repository "cli_test_container_content_repository" --href "$blob_href"
 expect_succ pulp container repository content add --repository "cli_test_container_content_repository" --href "$manifest_href"
 expect_succ pulp container repository content add --repository "cli_test_container_content_repository" --href "$tag_href"
+
+# Test content list filter options
+expect_succ pulp container content -t tag list --name "$tag_name"
+test "$(echo "$OUTPUT" | jq -r length)" -ge "1"
+
+expect_succ pulp container content -t manifest list --digest "$manifest_digest"
+test "$(echo "$OUTPUT" | jq -r length)" -ge "1"
+
+expect_succ pulp container content -t blob list --digest "$blob_digest"
+test "$(echo "$OUTPUT" | jq -r length)" -ge "1"

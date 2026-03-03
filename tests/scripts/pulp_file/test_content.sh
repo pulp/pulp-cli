@@ -71,3 +71,18 @@ expect_succ pulp repository version list --content "$(jq -R '[.]' <<<"$content_h
 # Creating a new repository version from a different repository
 expect_succ pulp file repository create --name "cli_test_file_content_repository_2"
 expect_succ pulp file repository content modify --repository "cli_test_file_content_repository_2" --base-repository "cli_test_file_content_repository"
+
+# Test content list filter options
+VERSION_HREF=$(pulp file repository version show --repository "cli_test_file_content_repository" | jq -r .pulp_href)
+
+expect_succ pulp file content list --repository-version "$VERSION_HREF"
+test "$(echo "$OUTPUT" | jq -r length)" -gt "0"
+
+expect_succ pulp file content list --repository-version-added "$VERSION_HREF"
+test "$(echo "$OUTPUT" | jq -r length)" -gt "0"
+
+expect_succ pulp file content list --repository-version-removed "$VERSION_HREF"
+
+FIRST_PATH=$(pulp file content list --repository-version "$VERSION_HREF" --limit 1 | jq -r '.[0].relative_path')
+expect_succ pulp file content list --relative-path "$FIRST_PATH"
+test "$(echo "$OUTPUT" | jq -r length)" -ge "1"
