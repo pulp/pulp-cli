@@ -66,7 +66,7 @@ expect_succ pulp task list --started-before "21/01/12" --started-after "22/01/06
 expect_succ pulp task list --finished-before "2021-12-01" --finished-after "2022-06-01 00:00:00"
 expect_succ pulp task list --created-resource "$created_resource"
 
-if pulp debug has-plugin --name "core" --specifier ">=3.57.0"
+if pulp debug has-plugin --name "core" --specifier ">=3.82.0"
 then
   # Downloading profile artifacts.
   expect_succ pulp task profile-artifact-urls --uuid "${task_uuid}"
