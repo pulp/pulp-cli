@@ -1,5 +1,7 @@
 import typing as t
 
+from pulp_glue.common import oas
+
 
 class AuthProviderBase:
     """
@@ -18,26 +20,32 @@ class AuthProviderBase:
     def can_complete_oauth2_client_credentials(self, scopes: list[str]) -> bool:
         return False
 
-    def can_complete_scheme(self, scheme: dict[str, t.Any], scopes: list[str]) -> bool:
-        if scheme["type"] == "http":
-            if scheme["scheme"] == "basic":
+    def can_complete_scheme(self, security_scheme: oas.SecurityScheme, scopes: list[str]) -> bool:
+        if isinstance(security_scheme, oas.SecuritySchemeHttp):
+            if security_scheme.scheme == "basic":
                 return self.can_complete_http_basic()
-        elif scheme["type"] == "mutualTLS":
+        elif isinstance(security_scheme, oas.SecuritySchemeMutualTLS):
             return self.can_complete_mutualTLS()
-        elif scheme["type"] == "oauth2":
-            for flow_name, flow in scheme["flows"].items():
-                if flow_name == "clientCredentials" and self.can_complete_oauth2_client_credentials(
-                    flow["scopes"]
-                ):
-                    return True
+        elif isinstance(security_scheme, oas.SecuritySchemeOAuth2):
+            client_credentials_flow = security_scheme.flows.client_credentials
+            if client_credentials_flow is not None and self.can_complete_oauth2_client_credentials(
+                list(client_credentials_flow.scopes.keys())
+            ):
+                return True
         return False
 
     def can_complete(
-        self, proposal: dict[str, list[str]], security_schemes: dict[str, dict[str, t.Any]]
+        self,
+        proposal: dict[str, list[str]],
+        security_schemes: dict[str, oas.SecurityScheme | oas.Reference],
     ) -> bool:
         for name, scopes in proposal.items():
-            scheme = security_schemes.get(name)
-            if scheme is None or not self.can_complete_scheme(scheme, scopes):
+            security_scheme = security_schemes.get(name)
+            if (
+                security_scheme is None
+                or isinstance(security_scheme, oas.Reference)
+                or not self.can_complete_scheme(security_scheme, scopes)
+            ):
                 return False
         # This covers the case where `[]` allows for no auth at all.
         return True
