@@ -72,6 +72,11 @@ class PulpPythonDistributionContext(PulpDistributionContext):
                 body["publication"] = None
             if "repository" not in body and "publication" in body:
                 body["repository"] = None
+
+        version = body.pop("version", None)
+        if version is not None:
+            repository_href = body.pop("repository")
+            body["repository_version"] = f"{repository_href}versions/{version}/"
         return body
 
 
