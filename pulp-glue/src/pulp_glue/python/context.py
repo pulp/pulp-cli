@@ -73,10 +73,23 @@ class PulpPythonDistributionContext(PulpDistributionContext):
             if "repository" not in body and "publication" in body:
                 body["repository"] = None
 
-        version = body.pop("version", None)
-        if version is not None:
-            repository_href = body.pop("repository")
-            body["repository_version"] = f"{repository_href}versions/{version}/"
+        if self.pulp_ctx.has_plugin(PluginRequirement("python", specifier=">=3.21.0")):
+            version = body.pop("version", None)
+            if version is not None:
+                if repository_href := body.pop("repository", None):
+                    body["repository_version"] = f"{repository_href}versions/{version}/"
+                    body["repository"] = None
+                else:
+                    current_entity = self.entity
+                    if repository_href := current_entity.get("repository"):
+                        body["repository_version"] = f"{repository_href}versions/{version}/"
+                        body["repository"] = None
+                    elif repository_version_href := current_entity.get("repository_version"):
+                        repository_href = repository_version_href.partition("versions")[0]
+                        body["repository_version"] = f"{repository_href}versions/{version}/"
+            elif "repository" in body:
+                body["repository_version"] = None
+
         return body
 
 
