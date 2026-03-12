@@ -25,7 +25,7 @@ def main() -> None:
 
     if config.get("src_layout") is True:
         print("Apparently this repository has been migrated already.")
-        sys.exit()
+        return
 
     if config["glue"] is True:
         if config["app_label"] == "":

@@ -8,7 +8,7 @@ jobs:
   collect-changes:
     runs-on: "ubuntu-latest"
     steps:
-      - uses: "actions/checkout@v5"
+      - uses: "actions/checkout@v6"
         with:
           ref: "main"
           fetch-depth: 0
@@ -24,7 +24,7 @@ jobs:
           pip install GitPython packaging
           python3 .ci/scripts/collect_changes.py
       - name: "Create Pull Request"
-        uses: "peter-evans/create-pull-request@v7"
+        uses: "peter-evans/create-pull-request@v8"
         id: "create_pr"
         with:
           token: "${{ secrets.RELEASE_TOKEN }}"

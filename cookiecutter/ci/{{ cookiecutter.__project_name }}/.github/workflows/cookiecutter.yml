@@ -13,11 +13,11 @@ jobs:
   update-ci:
     runs-on: "ubuntu-latest"
     steps:
-      - uses: "actions/checkout@v5"
+      - uses: "actions/checkout@v6"
         with:
           repository: "pulp/pulp-cli"
           path: "pulp-cli"
-      - uses: "actions/checkout@v5"
+      - uses: "actions/checkout@v6"
         with:
           {%- raw %}
           token: "${{ secrets.RELEASE_TOKEN }}"
@@ -43,7 +43,7 @@ jobs:
             git commit -m "Update cookiecutter"
           fi
       - name: "Create Pull Request"
-        uses: "peter-evans/create-pull-request@v7"
+        uses: "peter-evans/create-pull-request@v8"
         id: "create_pr"
         with:
           {%- raw %}
@@ -67,11 +67,11 @@ jobs:
   update-dependencies:
     runs-on: "ubuntu-latest"
     steps:
-      - uses: "actions/checkout@v5"
+      - uses: "actions/checkout@v6"
         with:
           repository: "pulp/pulp-cli"
           path: "pulp-cli"
-      - uses: "actions/checkout@v5"
+      - uses: "actions/checkout@v6"
         with:
           {%- raw %}
           token: "${{ secrets.RELEASE_TOKEN }}"
@@ -97,7 +97,7 @@ jobs:
             git commit -m "Update CLI and GLUE"
           fi
       - name: "Create Pull Request"
-        uses: "peter-evans/create-pull-request@v7"
+        uses: "peter-evans/create-pull-request@v8"
         id: "create_pr"
         with:
           {%- raw %}
