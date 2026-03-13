@@ -10,6 +10,7 @@ cleanup() {
   pulp python repository destroy --name "cli_test_python_distribution_repository" || true
   pulp python remote destroy --name "cli_test_python_distribution_remote" || true
   pulp python distribution destroy --name "cli_test_python_distro" || true
+  pulp python distribution destroy --name "cli_test_python_distro_repo_version" || true
 }
 trap cleanup EXIT
 
@@ -42,3 +43,41 @@ expect_succ pulp python distribution update \
 --remote "cli_test_python_distribution_remote"
 
 expect_succ pulp python distribution destroy --distribution "cli_test_python_distro"
+
+# Test repository_version functionality
+if pulp debug has-plugin --name "python" --specifier ">=3.21.0"; then
+  expect_succ pulp python distribution create \
+    --name "cli_test_python_distro_repo_version" \
+    --base-path "cli_test_python_distro_repo_version" \
+    --repository "cli_test_python_distribution_repository" \
+    --version 0
+  expect_succ pulp python distribution show --distribution "cli_test_python_distro_repo_version"
+  echo "$OUTPUT" | jq -e '.repository_version | contains("/versions/0/")'
+  echo "$OUTPUT" | jq -e '.repository == null'
+
+  expect_succ pulp python distribution update \
+    --distribution "cli_test_python_distro_repo_version" \
+    --repository "cli_test_python_distribution_repository" \
+    --version 1
+  expect_succ pulp python distribution show --distribution "cli_test_python_distro_repo_version"
+  echo "$OUTPUT" | jq -e '.repository_version | contains("/versions/1/")'
+  echo "$OUTPUT" | jq -e '.repository == null'
+
+  expect_succ pulp python distribution update \
+    --distribution "cli_test_python_distro_repo_version" \
+    --version 0
+  expect_succ pulp python distribution show --distribution "cli_test_python_distro_repo_version"
+  echo "$OUTPUT" | jq -e '.repository_version | contains("/versions/0/")'
+  echo "$OUTPUT" | jq -e '.repository == null'
+
+  expect_succ pulp python distribution update \
+    --distribution "cli_test_python_distro_repo_version" \
+    --repository "cli_test_python_distribution_repository"
+  expect_succ pulp python distribution show --distribution "cli_test_python_distro_repo_version"
+  echo "$OUTPUT" | jq -e '.repository_version == null'
+  echo "$OUTPUT" | jq -e '.repository != null'
+
+  expect_succ pulp python distribution destroy --distribution "cli_test_python_distro_repo_version"
+else
+  echo "Python plugin version >=3.21.0 not available, skipping repository_version tests"
+fi

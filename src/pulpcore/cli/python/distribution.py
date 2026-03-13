@@ -75,6 +75,15 @@ update_options = [
         ),
     ),
     repository_option,
+    pulp_option(
+        "--version",
+        type=int,
+        help=_(
+            "A repository version number, leave blank for latest."
+            " When set, repository will no longer be auto-distributed."
+        ),
+        needs_plugins=[PluginRequirement("python", specifier=">=3.21.0")],
+    ),
     content_guard_option,
     pulp_option(
         "--allow-uploads/--block-uploads",
