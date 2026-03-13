@@ -2,6 +2,47 @@
   This file is not templated for itself, but it is used to update sections in pyproject.toml.
 #}
 {%- set src_infix = "src/" if cookiecutter.src_layout else "" %}
+[dependency-groups]
+# This section is managed by the cookiecutter templates.
+dev = [
+  {include-group = "lint"},
+  "pylsp-mypy>=0.7.0",
+  "pylsp-rope>=0.1.17,<0.1.18",
+]
+lint = [
+  {include-group = "test"},
+  "mypy==1.19.1",
+  "ruff==0.14.10",
+  "shellcheck-py==0.11.0.1",
+  "types-pygments",
+  "types-pyyaml",
+  "types-requests",
+  "types-setuptools",
+  "types-toml",
+]
+test = [
+  "jinja2>=3.1.4,<3.2",
+  "pygments>=2.19.2",
+  "pytest>=9.0.0,<9.1",
+  "pytest-xdist>=3.8.0,<3.9",
+  "python-gnupg>=0.5.0,<0.6",
+  "secretstorage>=3.5.0",
+  "trustme>=1.1.0,<1.3",
+]
+
+[tool.uv.sources]
+# This section is managed by the cookiecutter templates.
+pulp-glue{{ cookiecutter.__app_label_suffix }} = { workspace = true }
+
+[tool.uv.workspace]
+# This section is managed by the cookiecutter templates.
+members = ["pulp-glue{{ cookiecutter.__app_label_suffix }}"]
+
+[tool.uv.build-backend]
+# This section is managed by the cookiecutter templates.
+module-name = ["pulpcore.cli"{% if cookiecutter.app_label == "" %}, "pulp_cli", "pytest_pulp_cli"{% endif %}]
+namespace = true
+source-exclude = ["*.pot", "*.po", "**/*\\~"]
 
 [tool.setuptools.packages.find]
 # This section is managed by the cookiecutter templates.
@@ -161,7 +202,9 @@ showcontent = true
 [tool.ruff]
 # This section is managed by the cookiecutter templates.
 line-length = 100
-extend-exclude = ["cookiecutter"]
+{%- if cookiecutter.app_label == "" %}
+extend-exclude = ["cookiecutter/bootstrap", "cookiecutter/ci", "cookiecutter/docs"]
+{%- endif %}
 
 [tool.ruff.lint]
 # This section is managed by the cookiecutter templates.
@@ -177,7 +220,7 @@ section-order = ["future", "standard-library", "third-party", "second-party", "f
 strict = true
 warn_unused_ignores = false
 show_error_codes = true
-files = "{% if cookiecutter.src_layout %}src{% else %}pulpcore{% endif %}/**/*.py, tests/*.py{% if cookiecutter.app_label == "" and not cookiecutter.src_layout %}, pulp_cli/**/*.py, pytest_pulp_cli/**/*.py{% endif %}"
+files = "{% if cookiecutter.src_layout %}src{% else %}pulpcore{% endif %}/**/*.py, tests/**/*.py{% if cookiecutter.app_label == "" and not cookiecutter.src_layout %}, pulp_cli/**/*.py, pytest_pulp_cli/**/*.py{% endif %}"
 mypy_path = ["{% if cookiecutter.src_layout %}src{% else %}.{% endif %}"{% if cookiecutter.glue %}, "pulp-glue{{ cookiecutter.__app_label_suffix }}{% if cookiecutter.src_layout %}/src{% endif %}"{% endif %}]
 namespace_packages = true
 explicit_package_bases = true
