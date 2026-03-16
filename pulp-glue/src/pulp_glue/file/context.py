@@ -121,6 +121,17 @@ class PulpFileRemoteContext(PulpRemoteContext):
     NEEDS_PLUGINS = [PluginRequirement("file", specifier=">=1.6.0")]
 
 
+class PulpFileGitRemoteContext(PulpRemoteContext):
+    PLUGIN = "file"
+    RESOURCE_TYPE = "git"
+    ENTITY = _("file git remote")
+    ENTITIES = _("file git remotes")
+    HREF = "file_git_remote_href"
+    ID_PREFIX = "remotes_file_git"
+    CAPABILITIES = {"roles": [PluginRequirement("file", specifier=">=3.104.0.dev")]}
+    NEEDS_PLUGINS = [PluginRequirement("file", specifier=">=3.104.0.dev")]
+
+
 class PulpFileRepositoryVersionContext(PulpRepositoryVersionContext):
     HREF = "file_file_repository_version_href"
     ID_PREFIX = "repositories_file_file_versions"
