@@ -39,8 +39,8 @@ repository_option = resource_option(
     default_type="python",
     context_table={"python:python": PulpPythonRepositoryContext},
     help=_(
-        "Repository to be used for auto-distributing."
-        " When set, this will unset the 'publication'."
+        "Repository to be distributed."
+        " When used, this will replace any attached 'publication'."
         " Specified as '[[<plugin>:]<type>:]<name>' or as href."
     ),
     href_pattern=PulpPythonRepositoryContext.HREF_PATTERN,
@@ -75,6 +75,15 @@ update_options = [
         ),
     ),
     repository_option,
+    pulp_option(
+        "--version",
+        type=int,
+        help=_(
+            "The repository version number to distribute."
+            " When unset, the latest version of the repository will be auto-distributed."
+        ),
+        needs_plugins=[PluginRequirement("python", specifier=">=3.21.0")],
+    ),
     content_guard_option,
     pulp_option(
         "--allow-uploads/--block-uploads",

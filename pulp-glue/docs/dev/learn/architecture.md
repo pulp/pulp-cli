@@ -24,7 +24,7 @@ Those include:
 
   - `PulpContext.api`: When accessed, the `api.json` file for the addressed server will be read or downloaded and processed.
     Scheduled version checks will be evaluated at that point.
-  - `PulpContext.needs_version`: This function can be used at any time to declare that an operation needs a plugin in a version range.
+  - `PulpContext.needs_plugin`: This function can be used at any time to declare that an operation needs a plugin in a version range.
     The actual check will be performed immediately when `api` already was accessed, or scheduled for later.
   - `PulpEntityContext.entity`: This property can be used to collect lookup attributes for entities by assigning dicts to it.
     On read access, the entity lookup will be performed through the `api` property.
@@ -50,7 +50,7 @@ Typically, plugin requirements are checked by passing into `PulpContext.has_plug
 Some Entities may provide support for different Pulp concepts based on their plugins version.
 e.g. `Pulp Import Export` for a specific repository type may be added in a certain Pulp Plugin version.
 You can add a `capability` to the `PulpEntityContext` subclass with an attached `PluginRequirement`.
-Whenever glue attempts to perform the corresonding action, the capabilities are first checked against the server's versions.
+Whenever glue attempts to perform the corresponding action, the capabilities are first checked against the server's versions.
 
 ### API quirks
 
@@ -60,5 +60,5 @@ See the `pulp_glue.common.api_quirk` decorator.
 
 ## Plugin System
 
-Pulp Glue comes with a plugin interface to be easily extendible.
+Pulp Glue comes with a plugin interface to be easily extendable.
 Multiple plugins can be provided by the same Python package and some plugins are shipped with the pulp-glue core package.

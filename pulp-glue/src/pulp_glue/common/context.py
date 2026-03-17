@@ -1184,7 +1184,7 @@ class PulpEntityContext(PulpViewSetContext):
         if parameters:
             _parameters.update(parameters)
         if body is not None:
-            body = self.preprocess_entity(body, partial=False)
+            body = self.preprocess_entity(body, partial=True)
         if self.pulp_ctx.fake_mode:
             assert self._entity is not None
             if body is not None:
