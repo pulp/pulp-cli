@@ -1,0 +1,1 @@
+Fixed `PulpEntityContext.update` method to correctly pass `partial=True` to `preprocess_entity`.
