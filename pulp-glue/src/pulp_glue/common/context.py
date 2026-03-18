@@ -1617,7 +1617,7 @@ class PulpRepositoryContext(PulpEntityContext):
             elif number == -1:
                 version_href = self.entity["latest_version_href"]
             else:
-                PulpException(_("Invalid version number ({number}).").format(number=number))
+                raise PulpException(_("Invalid version number ({number}).").format(number=number))
         else:
             version_href = None
         return self.VERSION_CONTEXT(

@@ -166,7 +166,7 @@ def cancel(
     else:
         entity = task_ctx.entity
         if entity["state"] not in ["waiting", "running"]:
-            click.ClickException(
+            raise click.ClickException(
                 _("Task {href} is in state {state} and cannot be canceled.").format(
                     href=task_ctx.pulp_href, state=entity["state"]
                 )

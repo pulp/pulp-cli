@@ -15,7 +15,6 @@ from pulp_glue.common.context import (
     PulpViewSetContext,
     api_spec_quirk,
 )
-from pulp_glue.common.exceptions import PulpException
 from pulp_glue.common.i18n import get_translation
 
 translation = get_translation(__package__)
@@ -115,8 +114,6 @@ class PulpRpmPackageContext(PulpContentContext):
         if partial is False:
             if body.get("relative_path") is None:
                 self.pulp_ctx.needs_plugin(PluginRequirement("rpm", specifier=">=3.18.0"))
-            else:
-                PulpException(_("--relative-path must be provided"))
         return body
 
     def list_iterator(
