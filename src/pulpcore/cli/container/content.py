@@ -3,7 +3,7 @@ import typing as t
 
 import click
 
-from pulp_glue.common.context import PluginRequirement, PulpEntityContext
+from pulp_glue.common.context import PluginRequirement, PulpContentContext
 from pulp_glue.container.context import (
     PulpContainerBlobContext,
     PulpContainerManifestContext,
@@ -11,12 +11,12 @@ from pulp_glue.container.context import (
 )
 
 from pulp_cli.generic import (
-    GroupOption,
     PulpCLIContext,
     content_filter_options,
     href_option,
     label_command,
     list_command,
+    option_group,
     pass_pulp_context,
     pulp_group,
     pulp_option,
@@ -26,14 +26,13 @@ from pulp_cli.generic import (
 _ = gettext.gettext
 
 
-def _content_callback(ctx: click.Context, param: click.Parameter, value: t.Any) -> None:
-    if value is not None:
-        entity_ctx = ctx.find_object(PulpEntityContext)
+def _content_callback(ctx: click.Context, value: t.Dict[str, t.Any]) -> None:
+    if value:
+        entity_ctx = ctx.find_object(PulpContentContext)
         assert entity_ctx is not None
-        if isinstance(entity_ctx, PulpContainerTagContext):
-            entity_ctx.entity = value
-        else:
-            entity_ctx.entity = {"digest": value}
+        if isinstance(entity_ctx, PulpContainerTagContext) and len(value) != 2:
+            raise click.UsageError(_("Both 'name' and 'digest' are needed to describe a tag."))
+        entity_ctx.entity = value
 
 
 @pulp_group()
@@ -64,7 +63,10 @@ list_options = [
     ),
     pulp_option("--name", "name", allowed_with_contexts=(PulpContainerTagContext,)),
     pulp_option(
-        "--name-in", "name__in", multiple=True, allowed_with_contexts=(PulpContainerTagContext,)
+        "--name-in",
+        "name__in",
+        multiple=True,
+        allowed_with_contexts=(PulpContainerTagContext,),
     ),
     pulp_option(
         "--digest",
@@ -98,33 +100,21 @@ list_options = [
 lookup_options = [
     pulp_option(
         "--digest",
-        expose_value=False,
         help=_("Digest associated with {entity}"),
-        callback=_content_callback,
-        allowed_with_contexts=(PulpContainerBlobContext, PulpContainerManifestContext),
     ),
-    click.option(
-        "--digest",
-        expose_value=False,
-        help=_("Digest associated with {entity}"),
-        callback=_content_callback,
-        allowed_with_contexts=(PulpContainerTagContext,),
-        group=[
-            "name",
-        ],
-        cls=GroupOption,
-    ),
-    click.option(
+    pulp_option(
         "--name",
-        expose_value=False,
         help=_("Name of {entity}"),
         allowed_with_contexts=(PulpContainerTagContext,),
-        group=[
-            "digest",
-        ],
-        cls=GroupOption,
     ),
     href_option,
+    option_group(
+        "content",
+        ["name", "digest"],
+        callback=_content_callback,
+        require_all=False,
+        expose_value=False,
+    ),
 ]
 
 content.add_command(list_command(decorators=list_options))

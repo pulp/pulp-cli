@@ -203,7 +203,6 @@ def x509(ctx: click.Context, pulp_ctx: PulpCLIContext, /) -> None:
 
 
 certguard_create_options = common_create_options + [
-    click.option("--description"),
     click.option(
         "--ca-certificate",
         help=_("a PEM encoded CA certificate or @file containing same"),
@@ -212,14 +211,17 @@ certguard_create_options = common_create_options + [
     ),
 ]
 
-certguard_update_options = lookup_options + [
-    click.option("--description"),
-    click.option(
-        "--ca-certificate",
-        help=_("a PEM encoded CA certificate or @file containing same"),
-        callback=load_string_callback,
-    ),
-]
+certguard_update_options = (
+    lookup_options
+    + common_update_options
+    + [
+        click.option(
+            "--ca-certificate",
+            help=_("a PEM encoded CA certificate or @file containing same"),
+            callback=load_string_callback,
+        ),
+    ]
+)
 
 
 x509.add_command(list_command(decorators=filter_options))

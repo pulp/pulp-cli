@@ -67,8 +67,6 @@ lookup_options = [href_option, name_option, remote_lookup_option]
 nested_lookup_options = [remote_lookup_option]
 remote_options = [
     click.option("--policy", help=_("policy to use when downloading")),
-]
-collection_options = [
     pulp_option(
         "--requirements-file",
         callback=yaml_callback,
@@ -96,9 +94,8 @@ collection_options = [
         allowed_with_contexts=collection_context,
     ),
 ]
-ansible_remote_options = remote_options + collection_options
-create_options = common_remote_create_options + remote_options + ansible_remote_options
-update_options = common_remote_update_options + remote_options + ansible_remote_options
+create_options = common_remote_create_options + remote_options
+update_options = common_remote_update_options + remote_options
 
 remote.add_command(list_command(decorators=remote_filter_options))
 remote.add_command(show_command(decorators=lookup_options))

@@ -20,7 +20,6 @@ from pulp_glue.common.i18n import get_translation
 from pulp_glue.core.context import PulpSigningServiceContext
 
 from pulp_cli.generic import (
-    GroupOption,
     PulpCLIContext,
     create_command,
     create_content_json_callback,
@@ -32,6 +31,7 @@ from pulp_cli.generic import (
     load_json_callback,
     load_string_callback,
     name_option,
+    option_group,
     pass_pulp_context,
     pass_repository_context,
     pulp_group,
@@ -72,7 +72,7 @@ CONTENT_LIST_SCHEMA = s.Schema(
 )
 
 
-def _content_callback(ctx: click.Context, param: click.Parameter, value: t.Any) -> t.Any:
+def _content_callback(ctx: click.Context, value: t.Any) -> t.Any:
     if value:
         ctx.obj.entity = value  # The context is set by the type parameter on the content commands
     return value
@@ -122,27 +122,23 @@ update_options = [
 ]
 create_options = update_options + [click.option("--name", required=True)]
 content_options = [
-    click.option(
+    pulp_option(
         "--name",
         help=_("Name of {entity}"),
-        group=["namespace", "version"],
-        expose_value=False,
-        cls=GroupOption,
-        callback=_content_callback,
     ),
-    click.option(
+    pulp_option(
         "--namespace",
         help=_("Namespace of {entity}"),
-        group=["name", "version"],
-        expose_value=False,
-        cls=GroupOption,
     ),
-    click.option(
+    pulp_option(
         "--version",
         help=_("Version of {entity}"),
-        group=["namespace", "name"],
+    ),
+    option_group(
+        "content",
+        ["namespace", "name", "version"],
         expose_value=False,
-        cls=GroupOption,
+        callback=_content_callback,
     ),
     href_option,
 ]

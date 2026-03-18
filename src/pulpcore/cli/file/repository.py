@@ -17,7 +17,6 @@ from pulp_glue.file.context import (
 )
 
 from pulp_cli.generic import (
-    GroupOption,
     PulpCLIContext,
     create_command,
     create_content_json_callback,
@@ -29,6 +28,7 @@ from pulp_cli.generic import (
     list_command,
     load_file_wrapper,
     name_option,
+    option_group,
     pass_pulp_context,
     pass_repository_context,
     pulp_group,
@@ -60,12 +60,11 @@ remote_option = resource_option(
 )
 
 
-def _content_callback(ctx: click.Context, param: click.Parameter, value: t.Any) -> t.Any:
+def _content_callback(ctx: click.Context, value: t.Dict[str, t.Any]) -> t.Any:
     if value:
-        pulp_ctx = ctx.find_object(PulpCLIContext)
-        assert pulp_ctx is not None
-        ctx.obj = PulpFileContentContext(pulp_ctx, entity=value)
-    return value
+        entity_ctx = ctx.find_object(PulpFileContentContext)
+        assert entity_ctx is not None
+        entity_ctx.entity = value
 
 
 CONTENT_LIST_SCHEMA = s.Schema([{"sha256": str, "relative_path": s.And(str, len)}])
@@ -119,14 +118,14 @@ update_options = [
     pulp_labels_option,
 ]
 create_options = update_options + [click.option("--name", required=True)]
-file_options = [
-    click.option("--sha256", cls=GroupOption, expose_value=False, group=["relative_path"]),
-    click.option(
-        "--relative-path",
-        cls=GroupOption,
-        expose_value=False,
-        group=["sha256"],
+file_content_options = [
+    click.option("--sha256"),
+    click.option("--relative-path"),
+    option_group(
+        "content",
+        ["sha256", "relative_path"],
         callback=_content_callback,
+        expose_value=False,
     ),
 ]
 content_json_callback = create_content_json_callback(
@@ -155,7 +154,10 @@ modify_options = [
 
 repository.add_command(
     list_command(
-        decorators=[label_select_option, click.option("--name-startswith", "name__startswith")]
+        decorators=[
+            label_select_option,
+            click.option("--name-startswith", "name__startswith"),
+        ]
     )
 )
 repository.add_command(show_command(decorators=lookup_options))
@@ -170,8 +172,8 @@ repository.add_command(
         contexts={"file": PulpFileContentContext},
         base_default_plugin="file",
         base_default_type="file",
-        add_decorators=file_options,
-        remove_decorators=file_options,
+        add_decorators=file_content_options,
+        remove_decorators=file_content_options,
         modify_decorators=modify_options,
     )
 )
