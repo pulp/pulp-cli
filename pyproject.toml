@@ -211,7 +211,8 @@ sections = { second-party = ["pulp_glue"] }
 section-order = ["future", "standard-library", "third-party", "second-party", "first-party", "local-folder"]
 
 
-[tool.pytest.ini_options]
+[tool.pytest]
+testpaths = ["tests", "pulp_glue/tests"]
 markers = [
   "live: integration tests that run against a live server",
   "glue: tests for pulp-glue in isolation",
@@ -231,7 +232,7 @@ strict = true
 warn_unused_ignores = false
 show_error_codes = true
 files = "src/**/*.py, tests/*.py"
-mypy_path = ["src", "pulp-glue/src"]
+mypy_path = ["src", "pulp-glue/src", "cookiecutter/pulp_filter_extension.py"]
 namespace_packages = true
 explicit_package_bases = true
 
