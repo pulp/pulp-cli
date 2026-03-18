@@ -354,15 +354,11 @@ content.add_command(
 @pulp_option(
     "--file",
     type=click.File("rb"),
-    required=True,
-    help=_("An advisory JSON file."),
-    allowed_with_contexts=(PulpRpmAdvisoryContext,),
-)
-@pulp_option(
-    "--file",
-    type=click.File("rb"),
-    help=_("An RPM binary. One of --file or --directory is required."),
-    allowed_with_contexts=(PulpRpmPackageContext,),
+    help=_("A file to upload. One of --file or --directory is required."),
+    allowed_with_contexts=(
+        PulpRpmAdvisoryContext,
+        PulpRpmPackageContext,
+    ),
     required=False,
 )
 @pulp_option(

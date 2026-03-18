@@ -399,6 +399,7 @@ class PulpCommand(click.Command):
     ):
         self.allowed_with_contexts = allowed_with_contexts
         self.needs_plugins = needs_plugins
+        self.option_processors: list[t.Callable[[click.Context], None]] = []
         super().__init__(*args, **kwargs)
 
     def invoke(self, ctx: click.Context) -> t.Any:
@@ -408,6 +409,8 @@ class PulpCommand(click.Command):
                 assert pulp_ctx is not None
                 for plugin_requirement in self.needs_plugins:
                     pulp_ctx.needs_plugin(plugin_requirement)
+            for processor in self.option_processors:
+                processor(ctx)
             return super().invoke(ctx)
         except PulpException as e:
             raise click.ClickException(str(e))
@@ -471,7 +474,9 @@ class PulpGroup(PulpCommand, click.Group):
 
 
 def pulp_command(
-    name: str | None = None, **kwargs: t.Any
+    name: str | None = None,
+    cls: t.Type[PulpCommand] = PulpCommand,
+    **kwargs: t.Any,
 ) -> t.Callable[[_AnyCallable], PulpCommand]:
     """
     Pulp command factory.
@@ -480,17 +485,21 @@ def pulp_command(
     `allowed_with_contexts`. It allows rendering the docstring with the values of `ENTITY` and
     `ENTITIES` from the closest entity context.
     """
-    return click.command(name=name, cls=PulpCommand, **kwargs)
+    return click.command(name=name, cls=cls, **kwargs)
 
 
-def pulp_group(name: str | None = None, **kwargs: t.Any) -> t.Callable[[_AnyCallable], PulpGroup]:
+def pulp_group(
+    name: str | None = None,
+    cls: t.Type[PulpGroup] = PulpGroup,
+    **kwargs: t.Any,
+) -> t.Callable[[_AnyCallable], PulpGroup]:
     """
     Pulp command group factory.
 
     Creates a click compatible group command that selects subcommands based on
     `allowed_with_contexts` and creates `PulpCommand` subcommands by default.
     """
-    return click.group(name=name, cls=PulpGroup, **kwargs)
+    return click.group(name=name, cls=cls, **kwargs)
 
 
 class PulpOption(click.Option):
@@ -631,7 +640,9 @@ def _version_callback(ctx: click.Context, param: click.Parameter, value: int | N
     return value
 
 
-def load_file_wrapper(handler: t.Callable[[click.Context, click.Parameter, str], t.Any]) -> t.Any:
+def load_file_wrapper(
+    handler: t.Callable[[click.Context, click.Parameter, str], t.Any],
+) -> t.Any:
     """
     A wrapper that is used for chaining or decorating callbacks that manipulate input data.
 
@@ -799,7 +810,11 @@ def remote_header_callback(
 # Decorator common options
 
 
-def pulp_option(*args: t.Any, **kwargs: t.Any) -> t.Callable[[FC], FC]:
+def pulp_option(
+    *args: t.Any,
+    cls: t.Type[PulpOption] = PulpOption,
+    **kwargs: t.Any,
+) -> t.Callable[[FC], FC]:
     """
     Factory of [`PulpOption`][pulp_cli.generic.PulpOption] objects.
 
@@ -820,8 +835,72 @@ def pulp_option(*args: t.Any, **kwargs: t.Any) -> t.Callable[[FC], FC]:
         )
         ```
     """
-    kwargs["cls"] = PulpOption
-    return click.option(*args, **kwargs)
+    return click.option(*args, cls=cls, **kwargs)
+
+
+def option_processor(
+    *, callback: t.Callable[[click.Context], None]
+) -> t.Callable[[PulpCommand], PulpCommand]:
+    """
+    Add a callback i.e. for option processing at a rather generic place before calling the command.
+    """
+
+    def _inner(cmd: PulpCommand) -> PulpCommand:
+        cmd.option_processors.append(callback)
+        return cmd
+
+    return _inner
+
+
+def option_group(
+    name: str,
+    options: t.List[str],
+    /,
+    callback: t.Callable[[click.Context, t.Dict[str, t.Any]], t.Any] | None = None,
+    require_all: bool = True,
+    expose_value: bool = True,
+) -> t.Callable[[PulpCommand], PulpCommand]:
+    def _group_callback(ctx: click.Context) -> None:
+        """
+        Group a list of options into a group represented as a dictionary.
+        This allows to add a `callback` function for further processing.
+        `expose_value` allows to hide the value from the command callback.
+        """
+        value = {k: v for k, v in ((k, ctx.params.pop(k, None)) for k in options) if v is not None}
+        if value:
+            if require_all and (missing_options := set(options) - set(value.keys())):
+                raise click.UsageError(
+                    _(
+                        "Illegal usage, please specify all options in the group: {option_list}\n"
+                        "missing: {missing_options}"
+                    ).format(
+                        option_list=", ".join(options),
+                        missing_options=", ".join(missing_options),
+                    )
+                )
+
+            if callback is not None:
+                value = callback(ctx, value)
+            if expose_value:
+                ctx.params[name] = value
+
+    def _inner(cmd: PulpCommand) -> PulpCommand:
+        for param in cmd.params:
+            if param.name in options:
+                other_options = [o for o in options if o != param.name]
+                if other_options:
+                    help_text = (
+                        (getattr(param, "help") or "")
+                        + "\n"
+                        + _("Option is grouped with {options}.").format(
+                            options=", ".join(other_options)
+                        )
+                    ).strip()
+                    setattr(param, "help", help_text)
+        cmd.option_processors.append(_group_callback)
+        return cmd
+
+    return _inner
 
 
 def resource_lookup_option(*args: t.Any, **kwargs: t.Any) -> t.Callable[[FC], FC]:
@@ -1013,7 +1092,11 @@ def resource_option(*args: t.Any, **kwargs: t.Any) -> t.Callable[[FC], FC]:
                         _(
                             "The type '{plugin}:{resource_type}' "
                             "does not support the '{capability}' capability."
-                        ).format(plugin=plugin, resource_type=resource_type, capability=capability)
+                        ).format(
+                            plugin=plugin,
+                            resource_type=resource_type,
+                            capability=capability,
+                        )
                     )
 
         if parent_resource_lookup:
@@ -1044,7 +1127,7 @@ def resource_option(*args: t.Any, **kwargs: t.Any) -> t.Callable[[FC], FC]:
             "{plugin_default}{type_default}{multiple_note}"
         ).format(
             plugin_form=_("[<plugin>:]") if default_plugin else _("<plugin>:"),
-            type_form=_("[<resource_type>:]") if default_type else _("<resource_type>:"),
+            type_form=(_("[<resource_type>:]") if default_type else _("<resource_type>:")),
             lookup_key=lookup_key,
             plugin_default=(
                 _("'<plugin>' defaults to {plugin}. ").format(plugin=default_plugin)
@@ -1376,7 +1459,9 @@ _common_remote_options = [
         help=_("total number of simultaneous connections"),
     ),
     click.option(
-        "--rate-limit", type=int_or_empty, help=_("limit download rate in requests per second")
+        "--rate-limit",
+        type=int_or_empty,
+        help=_("limit download rate in requests per second"),
     ),
     click.option("--sock-connect-timeout", type=float_or_empty),
     click.option("--sock-read-timeout", type=float_or_empty),

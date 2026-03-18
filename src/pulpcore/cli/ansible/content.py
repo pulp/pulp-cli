@@ -8,18 +8,22 @@ from pulp_glue.ansible.context import (
     PulpAnsibleRepositoryContext,
     PulpAnsibleRoleContext,
 )
-from pulp_glue.common.context import PluginRequirement, PulpContentContext, PulpRepositoryContext
+from pulp_glue.common.context import (
+    PluginRequirement,
+    PulpContentContext,
+    PulpRepositoryContext,
+)
 from pulp_glue.common.i18n import get_translation
 from pulp_glue.core.context import PulpArtifactContext
 
 from pulp_cli.generic import (
-    GroupOption,
     PulpCLIContext,
     chunk_size_callback,
     content_filter_options,
     href_option,
     label_command,
     list_command,
+    option_group,
     pass_content_context,
     pass_pulp_context,
     pulp_group,
@@ -38,7 +42,7 @@ content_context = (PulpAnsibleRoleContext, PulpAnsibleCollectionVersionContext)
 signature_context = (PulpAnsibleCollectionVersionSignatureContext,)
 
 
-def _content_callback(ctx: click.Context, param: click.Parameter, value: t.Any) -> t.Any:
+def _content_callback(ctx: click.Context, value: t.Any) -> t.Any:
     if value:
         entity_ctx = ctx.find_object(PulpContentContext)
         assert entity_ctx is not None
@@ -85,9 +89,15 @@ def content(ctx: click.Context, pulp_ctx: PulpCLIContext, /, content_type: str) 
 list_options = [
     pulp_option("--name", help=_("Name of {entity}"), allowed_with_contexts=content_context),
     pulp_option(
-        "--namespace", help=_("Namespace of {entity}"), allowed_with_contexts=content_context
+        "--namespace",
+        help=_("Namespace of {entity}"),
+        allowed_with_contexts=content_context,
     ),
-    pulp_option("--version", help=_("Version of {entity}"), allowed_with_contexts=content_context),
+    pulp_option(
+        "--version",
+        help=_("Version of {entity}"),
+        allowed_with_contexts=content_context,
+    ),
     pulp_option(
         "--latest",
         "is_highest",
@@ -128,48 +138,52 @@ list_options = [
 ]
 
 lookup_options = [
-    click.option(
+    pulp_option(
         "--name",
         help=_("Name of {entity}"),
-        group=["namespace", "version"],
-        expose_value=False,
-        allowed_with_contexts=(PulpAnsibleRoleContext, PulpAnsibleCollectionVersionContext),
-        cls=GroupOption,
-        callback=_content_callback,
+        allowed_with_contexts=(
+            PulpAnsibleRoleContext,
+            PulpAnsibleCollectionVersionContext,
+        ),
     ),
-    click.option(
+    pulp_option(
         "--namespace",
         help=_("Namespace of {entity}"),
-        group=["name", "version"],
-        expose_value=False,
-        allowed_with_contexts=(PulpAnsibleRoleContext, PulpAnsibleCollectionVersionContext),
-        cls=GroupOption,
+        allowed_with_contexts=(
+            PulpAnsibleRoleContext,
+            PulpAnsibleCollectionVersionContext,
+        ),
     ),
-    click.option(
+    pulp_option(
         "--version",
         help=_("Version of {entity}"),
-        group=["namespace", "name"],
-        expose_value=False,
-        allowed_with_contexts=(PulpAnsibleRoleContext, PulpAnsibleCollectionVersionContext),
-        cls=GroupOption,
+        allowed_with_contexts=(
+            PulpAnsibleRoleContext,
+            PulpAnsibleCollectionVersionContext,
+        ),
     ),
-    click.option(
+    option_group(
+        "content",
+        ["namespace", "name", "version"],
+        expose_value=False,
+        callback=_content_callback,
+    ),
+    pulp_option(
         "--pubkey-fingerprint",
         help=_("Public key fingerprint of the {entity}"),
-        group=["collection"],
-        expose_value=False,
         allowed_with_contexts=signature_context,
-        callback=_content_callback,
-        cls=GroupOption,
     ),
-    click.option(
+    pulp_option(
         "--collection",
         "signed_collection",
         help=_("Collection of {entity}"),
-        group=["pubkey_fingerprint"],
-        expose_value=False,
         allowed_with_contexts=signature_context,
-        cls=GroupOption,
+    ),
+    option_group(
+        "signature_content",
+        ["signed_collection", "pubkey_fingerprint"],
+        expose_value=False,
+        callback=_content_callback,
     ),
     href_option,
 ]
@@ -197,7 +211,10 @@ content.add_command(
     allowed_with_contexts=content_context,
 )
 @pulp_option(
-    "--name", help=_("Name of {entity}"), allowed_with_contexts=role_context, required=True
+    "--name",
+    help=_("Name of {entity}"),
+    allowed_with_contexts=role_context,
+    required=True,
 )
 @pulp_option(
     "--namespace",

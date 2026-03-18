@@ -51,6 +51,7 @@ def no_api(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 @pytest.mark.help_page(base_cmd=[])
+@pytest.mark.filterwarnings("error::UserWarning:click")
 def test_accessing_the_help_page_does_not_invoke_api(
     no_api: None,
     args: list[str],
