@@ -150,6 +150,7 @@ class PulpPythonRepositoryContext(PulpRepositoryContext):
     CAPABILITIES = {
         "sync": [PluginRequirement("python")],
         "pulpexport": [PluginRequirement("python", specifier=">=3.11.0")],
+        "repair_metadata": [PluginRequirement("python", specifier=">=3.26.0")],
     }
     NEEDS_PLUGINS = [PluginRequirement("python", specifier=">=3.1.0")]
 
@@ -158,3 +159,7 @@ class PulpPythonRepositoryContext(PulpRepositoryContext):
         if "autopublish" in body:
             self.pulp_ctx.needs_plugin(PluginRequirement("python", specifier=">=3.3.0"))
         return body
+
+    def repair_metadata(self) -> t.Any:
+        self.needs_capability("repair_metadata")
+        return self.call("repair_metadata", parameters={self.HREF: self.pulp_href})
