@@ -183,3 +183,24 @@ def sync(
         )
 
     repository_ctx.sync(body=body)
+
+
+@repository.command()
+@name_option
+@href_option
+@repository_lookup_option
+@pass_repository_context
+@pass_pulp_context
+def repair_metadata(
+    pulp_ctx: PulpCLIContext,
+    repository_ctx: PulpRepositoryContext,
+    /,
+) -> None:
+    """
+    Repair the metadata for all immediate and on-demand packages in the latest version
+    of the specified repository. For immediate wheel packages, also repair metadata
+    artifacts derived from the main artifact.
+    """
+    assert isinstance(repository_ctx, PulpPythonRepositoryContext)
+    result = repository_ctx.repair_metadata()
+    pulp_ctx.output_result(result)

@@ -32,4 +32,9 @@ expect_succ test "$(echo "$OUTPUT" | jq -r '.remote')" = ""
 expect_succ pulp python repository list
 test "$(echo "$OUTPUT" | jq -r '.|length')" != "0"
 
+if pulp debug has-plugin --name "python" --specifier ">=3.26.0"; then
+  expect_succ pulp python repository repair-metadata --repository "cli_test_python_repo"
+  expect_succ test "$(echo "$OUTPUT" | jq -r '.state')" = "completed"
+fi
+
 expect_succ pulp python repository destroy --name "cli_test_python_repo"
