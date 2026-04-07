@@ -181,6 +181,9 @@ files = "{% if cookiecutter.src_layout %}src{% else %}pulpcore{% endif %}/**/*.p
 mypy_path = ["{% if cookiecutter.src_layout %}src{% else %}.{% endif %}"{% if cookiecutter.glue %}, "pulp-glue{{ cookiecutter.__app_label_suffix }}{% if cookiecutter.src_layout %}/src{% endif %}"{% endif %}]
 namespace_packages = true
 explicit_package_bases = true
+{%- if cookiecutter.__app_label_suffix == "" %}
+plugins = ["pydantic.mypy"]
+{%- endif %}
 
 [[tool.mypy.overrides]]
 # This section is managed by the cookiecutter templates.
