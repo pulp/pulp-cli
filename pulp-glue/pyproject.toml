@@ -54,6 +54,7 @@ files = "src/**/*.py, tests/**/*.py"
 mypy_path = ["src"]
 namespace_packages = true
 explicit_package_bases = true
+plugins = ["pydantic.mypy"]
 
 [[tool.mypy.overrides]]
 # This section is managed by the cookiecutter templates.
