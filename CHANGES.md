@@ -10,6 +10,48 @@
 
 [//]: # (towncrier release notes start)
 
+## 0.39.0 (2026-04-08) {: #0.39.0 }
+
+
+
+#### Features {: #0.39.0-feature }
+
+- Added a prn argument to `pulp show`.
+  [#1236](https://github.com/pulp/pulp-cli/issues/1236)
+- Added `--version` option to `pulp python distribution` for serving content from a specific repository version.
+  [#1324](https://github.com/pulp/pulp-cli/issues/1324)
+- Added `repair-metadata` command to `pulp python repository` for repairing package metadata.
+  [#1340](https://github.com/pulp/pulp-cli/issues/1340)
+- Added missing REST API filters to content list commands across all plugins and grouped common content filters (`repository_version`, `repository_version_added`, `repository_version_removed`) into reusable `content_filter_options`.
+
+
+#### Bugfixes {: #0.39.0-bugfix }
+
+- Fixed warnings about parameters being used multiple times.
+  [#1315](https://github.com/pulp/pulp-cli/issues/1315)
+- Prevent picking up ~/.netrc logins.
+
+
+### Pulp GLUE {: #0.39.0-pulp-glue }
+
+
+#### Features {: #0.39.0-pulp-glue-feature }
+
+- Added `resolve_prn` to the `PulpContext` as a factory for `PulpEntityContext` objects.
+  [#1236](https://github.com/pulp/pulp-cli/issues/1236)
+- Added repository version logic to `PulpPythonDistributionContext` for `pulp_python>=3.21.0`.
+  [#1324](https://github.com/pulp/pulp-cli/issues/1324)
+- Added `repair_metadata` method to `PulpPythonRepositoryContext` for `pulp_python>=3.26.0`.
+  [#1340](https://github.com/pulp/pulp-cli/issues/1340)
+
+
+#### Bugfixes {: #0.39.0-pulp-glue-bugfix }
+
+- Fixed `PulpEntityContext.update` method to correctly pass `partial=True` to `preprocess_entity`.
+
+
+---
+
 ## 0.38.2 (2026-03-04) {: #0.38.2 }
 
 
