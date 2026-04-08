@@ -1,1 +1,0 @@
-Added missing REST API filters to content list commands across all plugins and grouped common content filters (`repository_version`, `repository_version_added`, `repository_version_removed`) into reusable `content_filter_options`.
