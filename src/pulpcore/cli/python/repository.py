@@ -39,6 +39,7 @@ from pulp_cli.generic import (
     resource_option,
     retained_versions_option,
     show_command,
+    type_option,
     update_command,
     version_command,
 )
@@ -64,20 +65,9 @@ CONTENT_LIST_SCHEMA = s.Schema([{"sha256": str, s.Optional("filename"): str}])
 
 
 @pulp_group()
-@click.option(
-    "-t",
-    "--type",
-    "repo_type",
-    type=click.Choice(["python"], case_sensitive=False),
-    default="python",
-)
-@pass_pulp_context
-@click.pass_context
-def repository(ctx: click.Context, pulp_ctx: PulpCLIContext, /, repo_type: str) -> None:
-    if repo_type == "python":
-        ctx.obj = PulpPythonRepositoryContext(pulp_ctx)
-    else:
-        raise NotImplementedError()
+@type_option(choices={"python": PulpPythonRepositoryContext})
+def repository() -> None:
+    pass
 
 
 lookup_options = [href_option, name_option, repository_lookup_option]

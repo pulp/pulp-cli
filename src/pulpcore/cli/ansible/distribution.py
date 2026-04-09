@@ -5,7 +5,6 @@ from pulp_glue.common.context import (
     EntityDefinition,
     EntityFieldDefinition,
     PluginRequirement,
-    PulpContext,
     PulpEntityContext,
 )
 from pulp_glue.common.i18n import get_translation
@@ -21,11 +20,11 @@ from pulp_cli.generic import (
     list_command,
     name_option,
     pass_entity_context,
-    pass_pulp_context,
     pulp_group,
     pulp_labels_option,
     resource_option,
     show_command,
+    type_option,
 )
 
 translation = get_translation(__package__)
@@ -42,20 +41,9 @@ repository_option = resource_option(
 
 
 @pulp_group()
-@click.option(
-    "-t",
-    "--type",
-    "distribution_type",
-    type=click.Choice(["ansible"], case_sensitive=False),
-    default="ansible",
-)
-@pass_pulp_context
-@click.pass_context
-def distribution(ctx: click.Context, pulp_ctx: PulpContext, /, distribution_type: str) -> None:
-    if distribution_type == "ansible":
-        ctx.obj = PulpAnsibleDistributionContext(pulp_ctx)
-    else:
-        raise NotImplementedError()
+@type_option(choices={"ansible": PulpAnsibleDistributionContext})
+def distribution() -> None:
+    pass
 
 
 lookup_options = [href_option, name_option, distribution_lookup_option]

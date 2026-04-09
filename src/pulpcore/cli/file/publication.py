@@ -8,18 +8,17 @@ from pulp_glue.file.context import (
 )
 
 from pulp_cli.generic import (
-    PulpCLIContext,
     create_command,
     destroy_command,
     href_option,
     list_command,
-    pass_pulp_context,
     publication_filter_options,
     pulp_group,
     pulp_option,
     resource_option,
     role_command,
     show_command,
+    type_option,
 )
 
 translation = get_translation(__package__)
@@ -36,27 +35,18 @@ repository_option = resource_option(
 
 
 @pulp_group()
-@click.option(
-    "-t",
-    "--type",
-    "publication_type",
-    type=click.Choice(["file"], case_sensitive=False),
-    default="file",
-)
-@pass_pulp_context
-@click.pass_context
-def publication(ctx: click.Context, pulp_ctx: PulpCLIContext, /, publication_type: str) -> None:
-    if publication_type == "file":
-        ctx.obj = PulpFilePublicationContext(pulp_ctx)
-    else:
-        raise NotImplementedError()
+@type_option(choices={"file": PulpFilePublicationContext})
+def publication() -> None:
+    pass
 
 
 lookup_options = [href_option]
 create_options = [
     repository_option,
     click.option(
-        "--version", type=int, help=_("a repository version number, leave blank for latest")
+        "--version",
+        type=int,
+        help=_("a repository version number, leave blank for latest"),
     ),
     click.option(
         "--manifest",

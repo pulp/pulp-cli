@@ -10,7 +10,6 @@ from pulp_glue.ansible.context import (
 from pulp_glue.common.i18n import get_translation
 
 from pulp_cli.generic import (
-    PulpCLIContext,
     common_remote_create_options,
     common_remote_update_options,
     create_command,
@@ -20,12 +19,12 @@ from pulp_cli.generic import (
     list_command,
     load_file_wrapper,
     name_option,
-    pass_pulp_context,
     pulp_group,
     pulp_option,
     remote_filter_options,
     remote_lookup_option,
     show_command,
+    type_option,
     update_command,
 )
 
@@ -43,23 +42,14 @@ load_yaml_callback = load_file_wrapper(yaml_callback)
 
 
 @pulp_group()
-@click.option(
-    "-t",
-    "--type",
-    "remote_type",
-    type=click.Choice(["collection", "role"], case_sensitive=False),
-    default="collection",
-    is_eager=True,
+@type_option(
+    choices={
+        "collection": PulpAnsibleCollectionRemoteContext,
+        "role": PulpAnsibleRoleRemoteContext,
+    }
 )
-@pass_pulp_context
-@click.pass_context
-def remote(ctx: click.Context, pulp_ctx: PulpCLIContext, /, remote_type: str) -> None:
-    if remote_type == "role":
-        ctx.obj = PulpAnsibleRoleRemoteContext(pulp_ctx)
-    elif remote_type == "collection":
-        ctx.obj = PulpAnsibleCollectionRemoteContext(pulp_ctx)
-    else:
-        raise NotImplementedError()
+def remote() -> None:
+    pass
 
 
 collection_context = (PulpAnsibleCollectionRemoteContext,)

@@ -21,6 +21,7 @@ from pulp_cli.generic import (
     pulp_option,
     resource_option,
     show_command,
+    type_option,
 )
 
 translation = get_translation(__package__)
@@ -70,20 +71,13 @@ repository_option = resource_option(
 
 
 @pulp_group()
-@click.option(
-    "-t",
-    "--type",
-    "content_type",
-    type=click.Choice(["file"], case_sensitive=False),
-    default="file",
+@type_option(
+    choices={
+        "file": PulpFileContentContext,
+    }
 )
-@pass_pulp_context
-@click.pass_context
-def content(ctx: click.Context, pulp_ctx: PulpCLIContext, /, content_type: str) -> None:
-    if content_type == "file":
-        ctx.obj = PulpFileContentContext(pulp_ctx)
-    else:
-        raise NotImplementedError()
+def content() -> None:
+    pass
 
 
 lookup_options = [

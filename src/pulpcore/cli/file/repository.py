@@ -17,7 +17,6 @@ from pulp_glue.file.context import (
 )
 
 from pulp_cli.generic import (
-    PulpCLIContext,
     create_command,
     create_content_json_callback,
     destroy_command,
@@ -29,7 +28,6 @@ from pulp_cli.generic import (
     load_file_wrapper,
     name_option,
     option_group,
-    pass_pulp_context,
     pass_repository_context,
     pulp_group,
     pulp_labels_option,
@@ -41,6 +39,7 @@ from pulp_cli.generic import (
     retained_versions_option,
     role_command,
     show_command,
+    type_option,
     update_command,
     version_command,
 )
@@ -87,20 +86,9 @@ def _content_list_callback(ctx: click.Context, param: click.Parameter, value: st
 
 
 @pulp_group()
-@click.option(
-    "-t",
-    "--type",
-    "repo_type",
-    type=click.Choice(["file"], case_sensitive=False),
-    default="file",
-)
-@pass_pulp_context
-@click.pass_context
-def repository(ctx: click.Context, pulp_ctx: PulpCLIContext, /, repo_type: str) -> None:
-    if repo_type == "file":
-        ctx.obj = PulpFileRepositoryContext(pulp_ctx)
-    else:
-        raise NotImplementedError()
+@type_option(choices={"file": PulpFileRepositoryContext})
+def repository() -> None:
+    pass
 
 
 lookup_options = [href_option, name_option, repository_lookup_option]

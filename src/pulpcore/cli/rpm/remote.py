@@ -4,7 +4,6 @@ from pulp_glue.common.i18n import get_translation
 from pulp_glue.rpm.context import PulpRpmRemoteContext, PulpUlnRemoteContext
 
 from pulp_cli.generic import (
-    PulpCLIContext,
     create_command,
     destroy_command,
     href_option,
@@ -12,13 +11,13 @@ from pulp_cli.generic import (
     list_command,
     load_string_callback,
     name_option,
-    pass_pulp_context,
     pulp_group,
     pulp_option,
     remote_filter_options,
     remote_lookup_option,
     role_command,
     show_command,
+    type_option,
     update_command,
 )
 
@@ -34,22 +33,9 @@ def _uln_url_callback(ctx: click.Context, param: click.Parameter, value: str) ->
 
 
 @pulp_group()
-@click.option(
-    "-t",
-    "--type",
-    "remote_type",
-    type=click.Choice(["rpm", "uln"], case_sensitive=False),
-    default="rpm",
-)
-@pass_pulp_context
-@click.pass_context
-def remote(ctx: click.Context, pulp_ctx: PulpCLIContext, /, remote_type: str) -> None:
-    if remote_type == "rpm":
-        ctx.obj = PulpRpmRemoteContext(pulp_ctx)
-    elif remote_type == "uln":
-        ctx.obj = PulpUlnRemoteContext(pulp_ctx)
-    else:
-        raise NotImplementedError()
+@type_option(choices={"rpm": PulpRpmRemoteContext, "uln": PulpUlnRemoteContext})
+def remote() -> None:
+    pass
 
 
 lookup_options = [href_option, name_option, remote_lookup_option]
@@ -73,7 +59,9 @@ rpm_remote_options = [
     ),
     click.option("--connect-timeout", type=float),
     click.option(
-        "--download-concurrency", type=int, help=_("total number of simultaneous connections")
+        "--download-concurrency",
+        type=int,
+        help=_("total number of simultaneous connections"),
     ),
     click.option(
         "--password",
@@ -82,7 +70,8 @@ rpm_remote_options = [
         ),
     ),
     click.option(
-        "--policy", type=click.Choice(["immediate", "on_demand", "streamed"], case_sensitive=False)
+        "--policy",
+        type=click.Choice(["immediate", "on_demand", "streamed"], case_sensitive=False),
     ),
     click.option("--proxy-url"),
     click.option("--proxy-username"),

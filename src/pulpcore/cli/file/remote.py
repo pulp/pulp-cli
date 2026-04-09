@@ -4,7 +4,6 @@ from pulp_glue.common.i18n import get_translation
 from pulp_glue.file.context import PulpFileRemoteContext
 
 from pulp_cli.generic import (
-    PulpCLIContext,
     common_remote_create_options,
     common_remote_update_options,
     create_command,
@@ -13,12 +12,12 @@ from pulp_cli.generic import (
     label_command,
     list_command,
     name_option,
-    pass_pulp_context,
     pulp_group,
     remote_filter_options,
     remote_lookup_option,
     role_command,
     show_command,
+    type_option,
     update_command,
 )
 
@@ -27,20 +26,9 @@ _ = translation.gettext
 
 
 @pulp_group()
-@click.option(
-    "-t",
-    "--type",
-    "remote_type",
-    type=click.Choice(["file"], case_sensitive=False),
-    default="file",
-)
-@pass_pulp_context
-@click.pass_context
-def remote(ctx: click.Context, pulp_ctx: PulpCLIContext, /, remote_type: str) -> None:
-    if remote_type == "file":
-        ctx.obj = PulpFileRemoteContext(pulp_ctx)
-    else:
-        raise NotImplementedError()
+@type_option(choices={"file": PulpFileRemoteContext})
+def remote() -> None:
+    pass
 
 
 lookup_options = [href_option, name_option, remote_lookup_option]

@@ -9,7 +9,6 @@ from pulp_glue.python.context import (
 )
 
 from pulp_cli.generic import (
-    PulpCLIContext,
     common_distribution_create_options,
     content_guard_option,
     create_command,
@@ -20,12 +19,12 @@ from pulp_cli.generic import (
     label_command,
     list_command,
     name_option,
-    pass_pulp_context,
     pulp_group,
     pulp_labels_option,
     pulp_option,
     resource_option,
     show_command,
+    type_option,
     update_command,
 )
 
@@ -48,20 +47,9 @@ repository_option = resource_option(
 
 
 @pulp_group()
-@click.option(
-    "-t",
-    "--type",
-    "distribution_type",
-    type=click.Choice(["python"], case_sensitive=False),
-    default="python",
-)
-@pass_pulp_context
-@click.pass_context
-def distribution(ctx: click.Context, pulp_ctx: PulpCLIContext, /, distribution_type: str) -> None:
-    if distribution_type == "python":
-        ctx.obj = PulpPythonDistributionContext(pulp_ctx)
-    else:
-        raise NotImplementedError()
+@type_option(choices={"python": PulpPythonDistributionContext})
+def distribution() -> None:
+    pass
 
 
 lookup_options = [href_option, name_option, distribution_lookup_option]

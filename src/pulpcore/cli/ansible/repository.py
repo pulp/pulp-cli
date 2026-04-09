@@ -32,7 +32,6 @@ from pulp_cli.generic import (
     load_string_callback,
     name_option,
     option_group,
-    pass_pulp_context,
     pass_repository_context,
     pulp_group,
     pulp_labels_option,
@@ -43,6 +42,7 @@ from pulp_cli.generic import (
     resource_option,
     retained_versions_option,
     show_command,
+    type_option,
     update_command,
     version_command,
 )
@@ -68,7 +68,13 @@ remote_option = resource_option(
 
 
 CONTENT_LIST_SCHEMA = s.Schema(
-    [{"name": s.And(str, len), "namespace": s.And(str, len), "version": s.And(str, len)}]
+    [
+        {
+            "name": s.And(str, len),
+            "namespace": s.And(str, len),
+            "version": s.And(str, len),
+        }
+    ]
 )
 
 
@@ -87,20 +93,9 @@ def _signing_service_callback(ctx: click.Context, param: click.Parameter, value:
 
 
 @pulp_group()
-@click.option(
-    "-t",
-    "--type",
-    "repo_type",
-    type=click.Choice(["ansible"], case_sensitive=False),
-    default="ansible",
-)
-@pass_pulp_context
-@click.pass_context
-def repository(ctx: click.Context, pulp_ctx: PulpCLIContext, /, repo_type: str) -> None:
-    if repo_type == "ansible":
-        ctx.obj = PulpAnsibleRepositoryContext(pulp_ctx)
-    else:
-        raise NotImplementedError()
+@type_option(choices={"ansible": PulpAnsibleRepositoryContext})
+def repository() -> None:
+    pass
 
 
 lookup_options = [href_option, name_option, repository_lookup_option]
@@ -112,7 +107,9 @@ update_options = [
         callback=load_string_callback,
         needs_plugins=[
             PluginRequirement(
-                "ansible", specifier=">=0.15.0", feature="gpgkeys on ansible repositories"
+                "ansible",
+                specifier=">=0.15.0",
+                feature="gpgkeys on ansible repositories",
             )
         ],
     ),

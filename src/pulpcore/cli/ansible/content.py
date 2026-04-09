@@ -30,6 +30,7 @@ from pulp_cli.generic import (
     pulp_option,
     resource_option,
     show_command,
+    type_option,
 )
 
 translation = get_translation(__package__)
@@ -66,24 +67,15 @@ repository_option = resource_option(
 
 
 @pulp_group()
-@click.option(
-    "-t",
-    "--type",
-    "content_type",
-    type=click.Choice(["collection-version", "role", "signature"], case_sensitive=False),
-    default="collection-version",
+@type_option(
+    choices={
+        "collection-version": PulpAnsibleCollectionVersionContext,
+        "role": PulpAnsibleRoleContext,
+        "signature": PulpAnsibleCollectionVersionSignatureContext,
+    }
 )
-@pass_pulp_context
-@click.pass_context
-def content(ctx: click.Context, pulp_ctx: PulpCLIContext, /, content_type: str) -> None:
-    if content_type == "collection-version":
-        ctx.obj = PulpAnsibleCollectionVersionContext(pulp_ctx)
-    elif content_type == "role":
-        ctx.obj = PulpAnsibleRoleContext(pulp_ctx)
-    elif content_type == "signature":
-        ctx.obj = PulpAnsibleCollectionVersionSignatureContext(pulp_ctx)
-    else:
-        raise NotImplementedError()
+def content() -> None:
+    pass
 
 
 list_options = [
