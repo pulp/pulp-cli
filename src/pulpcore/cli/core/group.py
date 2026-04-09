@@ -105,7 +105,8 @@ group.add_command(destroy_command(decorators=lookup_options))
 group.add_command(create_command(decorators=create_options))
 group.add_command(
     role_command(
-        decorators=lookup_options, needs_plugins=[PluginRequirement("core", specifier=">=3.17.0")]
+        decorators=lookup_options,
+        needs_plugins=[PluginRequirement("core", specifier=">=3.17.0")],
     )
 )
 
@@ -138,7 +139,8 @@ def permission(
 
 permission.add_command(
     list_command(
-        help=_("Show a list of the permissioons granted to a group."), decorators=[group_option]
+        help=_("Show a list of the permissioons granted to a group."),
+        decorators=[group_option],
     )
 )
 

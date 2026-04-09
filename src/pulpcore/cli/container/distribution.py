@@ -17,7 +17,6 @@ from pulp_glue.container.context import (
 )
 
 from pulp_cli.generic import (
-    PulpCLIContext,
     content_guard_option,
     create_command,
     destroy_command,
@@ -28,12 +27,12 @@ from pulp_cli.generic import (
     list_command,
     name_option,
     pass_entity_context,
-    pass_pulp_context,
     pulp_group,
     pulp_labels_option,
     resource_option,
     role_command,
     show_command,
+    type_option,
 )
 
 translation = get_translation(__package__)
@@ -53,20 +52,9 @@ repository_option = resource_option(
 
 
 @pulp_group()
-@click.option(
-    "-t",
-    "--type",
-    "distribution_type",
-    type=click.Choice(["container"], case_sensitive=False),
-    default="container",
-)
-@pass_pulp_context
-@click.pass_context
-def distribution(ctx: click.Context, pulp_ctx: PulpCLIContext, /, distribution_type: str) -> None:
-    if distribution_type == "container":
-        ctx.obj = PulpContainerDistributionContext(pulp_ctx)
-    else:
-        raise NotImplementedError()
+@type_option(choices={"container": PulpContainerDistributionContext})
+def distribution() -> None:
+    pass
 
 
 lookup_options = [href_option, name_option, distribution_lookup_option]

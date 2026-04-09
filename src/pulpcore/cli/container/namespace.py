@@ -28,20 +28,10 @@ namespace_lookup_option = resource_lookup_option(
 
 
 @pulp_group()
-@click.option(
-    "-t",
-    "--type",
-    "namespace_type",
-    type=click.Choice(["container"], case_sensitive=False),
-    default="container",
-)
 @pass_pulp_context
 @click.pass_context
-def namespace(ctx: click.Context, pulp_ctx: PulpCLIContext, /, namespace_type: str) -> None:
-    if namespace_type == "container":
-        ctx.obj = PulpContainerNamespaceContext(pulp_ctx)
-    else:
-        raise NotImplementedError()
+def namespace(ctx: click.Context, pulp_ctx: PulpCLIContext, /) -> None:
+    ctx.obj = PulpContainerNamespaceContext(pulp_ctx)
 
 
 lookup_options = [href_option, name_option, namespace_lookup_option]

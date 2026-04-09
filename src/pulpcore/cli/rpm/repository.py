@@ -29,7 +29,6 @@ from pulp_cli.generic import (
     list_command,
     load_json_callback,
     name_option,
-    pass_pulp_context,
     pass_repository_context,
     pulp_group,
     pulp_labels_option,
@@ -41,6 +40,7 @@ from pulp_cli.generic import (
     retained_versions_option,
     role_command,
     show_command,
+    type_option,
     update_command,
     version_command,
 )
@@ -90,20 +90,9 @@ def choice_to_int_callback(ctx: click.Context, param: click.Parameter, value: t.
 
 
 @pulp_group()
-@click.option(
-    "-t",
-    "--type",
-    "repo_type",
-    type=click.Choice(["rpm"], case_sensitive=False),
-    default="rpm",
-)
-@pass_pulp_context
-@click.pass_context
-def repository(ctx: click.Context, pulp_ctx: PulpCLIContext, /, repo_type: str) -> None:
-    if repo_type == "rpm":
-        ctx.obj = PulpRpmRepositoryContext(pulp_ctx)
-    else:
-        raise NotImplementedError()
+@type_option(choices={"rpm": PulpRpmRepositoryContext})
+def repository() -> None:
+    pass
 
 
 package_options = [

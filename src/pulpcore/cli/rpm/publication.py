@@ -5,19 +5,18 @@ from pulp_glue.common.i18n import get_translation
 from pulp_glue.rpm.context import PulpRpmPublicationContext, PulpRpmRepositoryContext
 
 from pulp_cli.generic import (
-    PulpCLIContext,
     create_command,
     destroy_command,
     href_option,
     list_command,
     load_json_callback,
-    pass_pulp_context,
     publication_filter_options,
     pulp_group,
     pulp_option,
     resource_option,
     role_command,
     show_command,
+    type_option,
 )
 from pulpcore.cli.rpm.common import CHECKSUM_CHOICES
 
@@ -35,27 +34,18 @@ repository_option = resource_option(
 
 
 @pulp_group()
-@click.option(
-    "-t",
-    "--type",
-    "publication_type",
-    type=click.Choice(["rpm"], case_sensitive=False),
-    default="rpm",
-)
-@pass_pulp_context
-@click.pass_context
-def publication(ctx: click.Context, pulp_ctx: PulpCLIContext, /, publication_type: str) -> None:
-    if publication_type == "rpm":
-        ctx.obj = PulpRpmPublicationContext(pulp_ctx)
-    else:
-        raise NotImplementedError()
+@type_option(choices={"rpm": PulpRpmPublicationContext})
+def publication() -> None:
+    pass
 
 
 lookup_options = [href_option]
 create_options = [
     repository_option,
     click.option(
-        "--version", type=int, help=_("a repository version number, leave blank for latest")
+        "--version",
+        type=int,
+        help=_("a repository version number, leave blank for latest"),
     ),
     pulp_option(
         "--repo-config",
