@@ -32,7 +32,7 @@ format:
 lint:
 	find tests .ci -name '*.sh' -print0 | xargs -0 shellcheck -x
 	ruff format --check --diff
-	ruff check --diff
+	ruff check
 {%- if cookiecutter.glue and cookiecutter.app_label %}
 	.ci/scripts/check_cli_dependencies.py
 {%- endif %}
