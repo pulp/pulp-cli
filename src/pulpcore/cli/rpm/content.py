@@ -4,7 +4,11 @@ from uuid import uuid4
 
 import click
 
-from pulp_glue.common.context import PluginRequirement, PulpContentContext, PulpEntityContext
+from pulp_glue.common.context import (
+    PluginRequirement,
+    PulpContentContext,
+    PulpEntityContext,
+)
 from pulp_glue.common.i18n import get_translation
 from pulp_glue.core.context import PulpArtifactContext
 from pulp_glue.rpm.context import (
@@ -161,7 +165,10 @@ list_options = [
     ),
     pulp_option("--epoch", allowed_with_contexts=(PulpRpmPackageContext,)),
     pulp_option(
-        "--epoch-in", "epoch__in", multiple=True, allowed_with_contexts=(PulpRpmPackageContext,)
+        "--epoch-in",
+        "epoch__in",
+        multiple=True,
+        allowed_with_contexts=(PulpRpmPackageContext,),
     ),
     pulp_option("--epoch-ne", "epoch__ne", allowed_with_contexts=(PulpRpmPackageContext,)),
     pulp_option(
@@ -170,7 +177,10 @@ list_options = [
     ),
     pulp_option("--id", allowed_with_contexts=(PulpRpmAdvisoryContext,)),
     pulp_option(
-        "--id-in", "id__in", multiple=True, allowed_with_contexts=(PulpRpmAdvisoryContext,)
+        "--id-in",
+        "id__in",
+        multiple=True,
+        allowed_with_contexts=(PulpRpmAdvisoryContext,),
     ),
     pulp_option("--module", allowed_with_contexts=(PulpRpmModulemdDefaultsContext,)),
     pulp_option(
@@ -249,11 +259,15 @@ list_options = [
     ),
     pulp_option("--status", allowed_with_contexts=(PulpRpmAdvisoryContext,)),
     pulp_option(
-        "--status-in", "status__in", multiple=True, allowed_with_contexts=(PulpRpmAdvisoryContext,)
+        "--status-in",
+        "status__in",
+        multiple=True,
+        allowed_with_contexts=(PulpRpmAdvisoryContext,),
     ),
     pulp_option("--status-ne", "status__ne", allowed_with_contexts=(PulpRpmAdvisoryContext,)),
     pulp_option(
-        "--stream", allowed_with_contexts=(PulpRpmModulemdDefaultsContext, PulpRpmModulemdContext)
+        "--stream",
+        allowed_with_contexts=(PulpRpmModulemdDefaultsContext, PulpRpmModulemdContext),
     ),
     pulp_option(
         "--stream-in",
@@ -263,7 +277,10 @@ list_options = [
     ),
     pulp_option("--type", allowed_with_contexts=(PulpRpmAdvisoryContext,)),
     pulp_option(
-        "--type-in", "type__in", multiple=True, allowed_with_contexts=(PulpRpmAdvisoryContext,)
+        "--type-in",
+        "type__in",
+        multiple=True,
+        allowed_with_contexts=(PulpRpmAdvisoryContext,),
     ),
     pulp_option("--type-ne", "type__ne", allowed_with_contexts=(PulpRpmAdvisoryContext,)),
     pulp_option(
@@ -469,10 +486,8 @@ def upload(
         final_version_number = _latest_version_number(final_dest_repo_ctx)
         if final_version_number:
             click.echo(
-                _(
-                    "Created new version {} in {}".format(
-                        final_version_number, final_dest_repo_ctx.entity["name"]
-                    )
+                _("Created new version {} in {}").format(
+                    final_version_number, final_dest_repo_ctx.entity["name"]
                 ),
                 err=True,
             )
@@ -480,10 +495,14 @@ def upload(
         if do_publish:
             # Publish to generate metadata for the resulting repo-version
             click.echo(
-                _("Publishing repository {}.".format(final_dest_repo_ctx.entity["name"])), err=True
+                _("Publishing repository {}.").format(final_dest_repo_ctx.entity["name"]),
+                err=True,
             )
             publication_ctx = PulpRpmPublicationContext(pulp_ctx)
-            body = {"repository": final_dest_repo_ctx.pulp_href, "version": final_version_number}
+            body = {
+                "repository": final_dest_repo_ctx.pulp_href,
+                "version": final_version_number,
+            }
             result = publication_ctx.create(body)
 
     elif isinstance(entity_ctx, PulpRpmAdvisoryContext):
@@ -519,7 +538,7 @@ def _copy_to_final(
     ]
     copy_ctx = PulpRpmCopyContext(pulp_ctx)
     click.echo(
-        _("Creating new version of repository {}".format(final_dest_repo_ctx.entity["name"])),
+        _("Creating new version of repository {}").format(final_dest_repo_ctx.entity["name"]),
         err=True,
     )
     result = copy_ctx.copy(config=copy_config)
@@ -540,21 +559,17 @@ def _upload_rpms(
     # Build message based on whether we have a repository or not
     if dest_repo_ctx:
         click.echo(
-            _(
-                "About to upload {} files for {}.".format(
-                    len(rpm_names),
-                    dest_repo_ctx.entity["name"],
-                )
+            _("About to upload {} files for {}.").format(
+                len(rpm_names),
+                dest_repo_ctx.entity["name"],
             ),
             err=True,
         )
     else:
         click.echo(
-            _(
-                "About to upload {} files from {}.".format(
-                    len(rpm_names),
-                    directory,
-                )
+            _("About to upload {} files from {}.").format(
+                len(rpm_names),
+                directory,
             ),
             err=True,
         )
@@ -569,7 +584,7 @@ def _upload_rpms(
                 click.echo(_("Uploaded {}...").format(name), err=True)
             successful_uploads += 1
         except Exception as e:
-            click.echo(_("Failed to upload file {} : {}".format(name, e)), err=True)
+            click.echo(_("Failed to upload file {} : {}").format(name, e), err=True)
 
     if not successful_uploads:
         raise click.ClickException(_("No successful uploads using directory {}!").format(directory))

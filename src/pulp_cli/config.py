@@ -66,7 +66,7 @@ def headers_callback(
 ) -> t.Iterable[str]:
     if value:
         header_regex = re.compile(HEADER_REGEX)
-        failed_headers = ", ".join((item for item in value if not header_regex.match(item)))
+        failed_headers = ", ".join(item for item in value if not header_regex.match(item))
         if failed_headers:
             raise click.BadParameter(f"format must be <header-name>:<value> \n{failed_headers}")
 
@@ -190,15 +190,13 @@ def validate_config(config: dict[str, t.Any], strict: bool = False) -> None:
         errors.append(_("'domain' must be a slug string"))
     if "headers" in config:
         if not isinstance(config["headers"], list) or not all(
-            (
-                isinstance(header, str) and re.match(HEADER_REGEX, header)
-                for header in config["headers"]
-            )
+            isinstance(header, str) and re.match(HEADER_REGEX, header)
+            for header in config["headers"]
         ):
             errors.append(_("'headers' must be a list of strings with a colon separator"))
     if "plugins" in config and not (
         isinstance(config["plugins"], list)
-        and all((isinstance(item, str) for item in config["plugins"]))
+        and all(isinstance(item, str) for item in config["plugins"])
     ):
         errors.append(_("'plugins' must be a list of strings"))
     unknown_settings = set(config.keys()) - SETTINGS

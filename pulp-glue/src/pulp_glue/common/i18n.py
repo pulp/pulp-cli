@@ -1,10 +1,10 @@
 import gettext
-from functools import lru_cache
+from functools import cache
 from importlib.resources import files
 
 
 # Need to call lru_cache() before using it as a decorator for python 3.7 compatibility
-@lru_cache(maxsize=None)
+@cache
 def get_translation(name: str) -> gettext.NullTranslations:
     """
     Return a translations object for a certain import path.

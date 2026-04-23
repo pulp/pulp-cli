@@ -10,7 +10,7 @@ from pulp_cli import load_plugins, main
 load_plugins()
 
 
-def traverse_commands(command: click.Command, args: t.List[str]) -> t.Iterator[t.List[str]]:
+def traverse_commands(command: click.Command, args: list[str]) -> t.Iterator[list[str]]:
     yield args
 
     if isinstance(command, click.Group):
@@ -110,8 +110,8 @@ def test_help_shows_all_available_commands(no_api: None) -> None:
 def test_deferred_context(
     monkeypatch: pytest.MonkeyPatch,
     no_api: None,
-    command: t.List[str],
-    options: t.List[str],
+    command: list[str],
+    options: list[str],
 ) -> None:
     monkeypatch.setattr(
         reduce(

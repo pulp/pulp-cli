@@ -393,7 +393,7 @@ class PulpCommand(click.Command):
     def __init__(
         self,
         *args: t.Any,
-        allowed_with_contexts: tuple[t.Type[PulpEntityContext]] | None = None,
+        allowed_with_contexts: tuple[type[PulpEntityContext]] | None = None,
         needs_plugins: list[PluginRequirement] | None = None,
         **kwargs: t.Any,
     ):
@@ -475,7 +475,7 @@ class PulpGroup(PulpCommand, click.Group):
 
 def pulp_command(
     name: str | None = None,
-    cls: t.Type[PulpCommand] = PulpCommand,
+    cls: type[PulpCommand] = PulpCommand,
     **kwargs: t.Any,
 ) -> t.Callable[[_AnyCallable], PulpCommand]:
     """
@@ -490,7 +490,7 @@ def pulp_command(
 
 def pulp_group(
     name: str | None = None,
-    cls: t.Type[PulpGroup] = PulpGroup,
+    cls: type[PulpGroup] = PulpGroup,
     **kwargs: t.Any,
 ) -> t.Callable[[_AnyCallable], PulpGroup]:
     """
@@ -514,7 +514,7 @@ class PulpOption(click.Option):
         self,
         *args: t.Any,
         needs_plugins: list[PluginRequirement] | None = None,
-        allowed_with_contexts: tuple[t.Type[PulpEntityContext]] | None = None,
+        allowed_with_contexts: tuple[type[PulpEntityContext]] | None = None,
         **kwargs: t.Any,
     ):
         self.needs_plugins = needs_plugins
@@ -587,7 +587,7 @@ class GroupOption(PulpOption):
 
 @lru_cache(typed=True)
 def lookup_callback(
-    attribute: str, context_class: t.Type[PulpEntityContext] = PulpEntityContext
+    attribute: str, context_class: type[PulpEntityContext] = PulpEntityContext
 ) -> t.Callable[[click.Context, click.Parameter, str | None], str | None]:
     def _callback(ctx: click.Context, param: click.Parameter, value: str | None) -> str | None:
         if value is not None:
@@ -602,7 +602,7 @@ def lookup_callback(
 
 
 def href_callback(
-    context_class: t.Type[PulpEntityContext] = PulpEntityContext,
+    context_class: type[PulpEntityContext] = PulpEntityContext,
 ) -> t.Callable[[click.Context, click.Parameter, str | None], str | None]:
     def _href_callback(ctx: click.Context, param: click.Parameter, value: str | None) -> str | None:
         if value is not None:
@@ -719,7 +719,7 @@ def load_labels_callback(
 
 
 def create_content_json_callback(
-    context_class: t.Type[PulpContentContext] | None = None,
+    context_class: type[PulpContentContext] | None = None,
     schema: s.Schema | None = None,
 ) -> t.Any:
     @load_file_wrapper
@@ -791,7 +791,7 @@ def remote_header_callback(
         return None
     header_regex = re.compile(HEADER_REGEX)
     failed_headers = ", ".join(
-        (item for item in value if not (item == "" or header_regex.match(item)))
+        item for item in value if not (item == "" or header_regex.match(item))
     )
     if failed_headers:
         raise click.BadParameter(f"format must be <header-name>:<value> \n{failed_headers}")
@@ -812,7 +812,7 @@ def remote_header_callback(
 
 def pulp_option(
     *args: t.Any,
-    cls: t.Type[PulpOption] = PulpOption,
+    cls: type[PulpOption] = PulpOption,
     **kwargs: t.Any,
 ) -> t.Callable[[FC], FC]:
     """
@@ -854,9 +854,9 @@ def option_processor(
 
 def option_group(
     name: str,
-    options: t.List[str],
+    options: list[str],
     /,
-    callback: t.Callable[[click.Context, t.Dict[str, t.Any]], t.Any] | None = None,
+    callback: t.Callable[[click.Context, dict[str, t.Any]], t.Any] | None = None,
     require_all: bool = True,
     expose_value: bool = True,
 ) -> t.Callable[[PulpCommand], PulpCommand]:
@@ -908,7 +908,7 @@ def resource_lookup_option(*args: t.Any, **kwargs: t.Any) -> t.Callable[[FC], FC
     A factory to create a lookup option that will pass the lookup to the closest matching Context.
     """
     lookup_key: str | None = kwargs.pop("lookup_key", "name")
-    context_class: t.Type[PulpEntityContext] = kwargs.pop("context_class")
+    context_class: type[PulpEntityContext] = kwargs.pop("context_class")
 
     def _option_callback(
         ctx: click.Context, param: click.Parameter, value: str | None
@@ -993,10 +993,10 @@ def resource_option(*args: t.Any, **kwargs: t.Any) -> t.Callable[[FC], FC]:
     default_plugin: str | None = kwargs.pop("default_plugin", None)
     default_type: str | None = kwargs.pop("default_type", None)
     lookup_key: str = kwargs.pop("lookup_key", "name")
-    context_table: dict[str, t.Type[PulpEntityContext]] = kwargs.pop("context_table")
+    context_table: dict[str, type[PulpEntityContext]] = kwargs.pop("context_table")
     capabilities: list[str] | None = kwargs.pop("capabilities", None)
     href_pattern: str | None = kwargs.pop("href_pattern", None)
-    parent_resource_lookup: tuple[str, t.Type[PulpEntityContext]] | None = kwargs.pop(
+    parent_resource_lookup: tuple[str, type[PulpEntityContext]] | None = kwargs.pop(
         "parent_resource_lookup", None
     )
 
@@ -1149,7 +1149,7 @@ def type_option(*args: t.Any, **kwargs: t.Any) -> t.Callable[[FC], FC]:
     """
     A factory for `--type` options to allow selecting the class of the `PulpEntityContext` to use.
     """
-    choices: dict[str, t.Type[PulpEntityContext]] = kwargs.pop("choices")
+    choices: dict[str, type[PulpEntityContext]] = kwargs.pop("choices")
     assert choices and isinstance(choices, dict)
     type_names = list(choices.keys())
     case_sensitive = kwargs.pop("case_sensitive", False)

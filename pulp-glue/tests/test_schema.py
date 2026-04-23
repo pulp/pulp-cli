@@ -382,9 +382,7 @@ def test_validation_failed(schema: oas.Schema, value: t.Any, match: str | None) 
     ],
 )
 @pydantic.validate_call
-def test_invalid_schema_raises(
-    schema: oas.Schema, value: t.Any, exc_type: t.Type[Exception]
-) -> None:
+def test_invalid_schema_raises(schema: oas.Schema, value: t.Any, exc_type: type[Exception]) -> None:
     with pytest.raises(exc_type):
         validate(schema, "testvar", value, COMPONENTS)
 

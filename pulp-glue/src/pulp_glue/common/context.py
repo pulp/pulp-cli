@@ -425,7 +425,7 @@ class PulpContext:
         )
         if "headers" in config:
             api_kwargs["headers"] = dict(
-                (header.split(":", maxsplit=1) for header in config["headers"])
+                header.split(":", maxsplit=1) for header in config["headers"]
             )
         for key in ["cert", "key", "user_agent", "cid", "dry_run"]:
             if key in config:
@@ -843,7 +843,7 @@ class PulpEntityContext(PulpViewSetContext):
     PLUGIN: t.ClassVar[str]
     RESOURCE_TYPE: t.ClassVar[str]
     MODEL: t.ClassVar[str]
-    PRN_TYPE_REGISTRY: t.Final[dict[str, t.Type["PulpEntityContext"]]] = {}
+    PRN_TYPE_REGISTRY: t.Final[dict[str, type["PulpEntityContext"]]] = {}
 
     def __init_subclass__(cls, **kwargs: t.Any) -> None:
         super().__init_subclass__(**kwargs)
@@ -1141,13 +1141,11 @@ class PulpEntityContext(PulpViewSetContext):
                 try:
                     if getattr(self, "HREF_PATTERN", None):
                         self.pulp_href = next(
-                            (
-                                h
-                                for h in result["created_resources"]
-                                if re.match(
-                                    re.escape(self.pulp_ctx.api_path) + self.HREF_PATTERN,
-                                    h,
-                                )
+                            h
+                            for h in result["created_resources"]
+                            if re.match(
+                                re.escape(self.pulp_ctx.api_path) + self.HREF_PATTERN,
+                                h,
                             )
                         )
                     else:
@@ -1394,7 +1392,7 @@ class PulpEntityContext(PulpViewSetContext):
             Whether the capability is provided for this context.
         """
         return capability in self.CAPABILITIES and all(
-            (self.pulp_ctx.has_plugin(pr) for pr in self.CAPABILITIES[capability])
+            self.pulp_ctx.has_plugin(pr) for pr in self.CAPABILITIES[capability]
         )
 
     def needs_capability(self, capability: str) -> None:
@@ -1447,7 +1445,7 @@ class PulpRemoteContext(PulpEntityContext):
         "sock_read_timeout",
         "rate_limit",
     }
-    TYPE_REGISTRY: t.Final[dict[str, t.Type["PulpRemoteContext"]]] = {}
+    TYPE_REGISTRY: t.Final[dict[str, type["PulpRemoteContext"]]] = {}
 
     def __init_subclass__(cls, **kwargs: t.Any) -> None:
         if hasattr(cls, "PLUGIN") and hasattr(cls, "RESOURCE_TYPE"):
@@ -1468,7 +1466,7 @@ class PulpPublicationContext(PulpEntityContext):
     ID_PREFIX = "publications"
     HREF_PATTERN = r"publications/(?P<plugin>[\w\-_]+)/(?P<resource_type>[\w\-_]+)/"
     HREF_TEMPLATE = "publications/{plugin}/{resource_type}/{pulp_id}/"
-    TYPE_REGISTRY: t.Final[dict[str, t.Type["PulpPublicationContext"]]] = {}
+    TYPE_REGISTRY: t.Final[dict[str, type["PulpPublicationContext"]]] = {}
 
     def __init_subclass__(cls, **kwargs: t.Any) -> None:
         if hasattr(cls, "PLUGIN") and hasattr(cls, "RESOURCE_TYPE"):
@@ -1503,7 +1501,7 @@ class PulpDistributionContext(PulpEntityContext):
         "repository",
         "repository_version",
     }
-    TYPE_REGISTRY: t.Final[dict[str, t.Type["PulpDistributionContext"]]] = {}
+    TYPE_REGISTRY: t.Final[dict[str, type["PulpDistributionContext"]]] = {}
 
     def __init_subclass__(cls, **kwargs: t.Any) -> None:
         if hasattr(cls, "PLUGIN") and hasattr(cls, "RESOURCE_TYPE"):
@@ -1584,9 +1582,9 @@ class PulpRepositoryContext(PulpEntityContext):
     HREF_PATTERN = r"repositories/(?P<plugin>[\w\-_]+)/(?P<resource_type>[\w\-_]+)/"
     HREF_TEMPLATE = "repositories/{plugin}/{resource_type}/{pulp_id}/"
     ID_PREFIX = "repositories"
-    VERSION_CONTEXT: t.ClassVar[t.Type[PulpRepositoryVersionContext]] = PulpRepositoryVersionContext
+    VERSION_CONTEXT: t.ClassVar[type[PulpRepositoryVersionContext]] = PulpRepositoryVersionContext
     NULLABLES = {"description", "remote", "retain_repo_versions"}
-    TYPE_REGISTRY: t.Final[dict[str, t.Type["PulpRepositoryContext"]]] = {}
+    TYPE_REGISTRY: t.Final[dict[str, type["PulpRepositoryContext"]]] = {}
 
     def __init_subclass__(cls, **kwargs: t.Any) -> None:
         if hasattr(cls, "PLUGIN") and hasattr(cls, "RESOURCE_TYPE"):
@@ -1711,7 +1709,7 @@ class PulpContentContext(PulpEntityContext):
     ID_PREFIX = "content"
     HREF_PATTERN = r"content/(?P<plugin>[\w\-_]+)/(?P<resource_type>[\w\-_]+)/"
     HREF_TEMPLATE = "content/{plugin}/{resource_type}/{pulp_id}/"
-    TYPE_REGISTRY: t.Final[dict[str, t.Type["PulpContentContext"]]] = {}
+    TYPE_REGISTRY: t.Final[dict[str, type["PulpContentContext"]]] = {}
 
     def __init_subclass__(cls, **kwargs: t.Any) -> None:
         if hasattr(cls, "PLUGIN") and hasattr(cls, "RESOURCE_TYPE"):
@@ -1828,7 +1826,7 @@ class PulpACSContext(PulpEntityContext):
     HREF_PATTERN = r"acs/(?P<plugin>[\w\-_]+)/(?P<resource_type>[\w\-_]+)/"
     HREF_TEMPLATE = "acs/{plugin}/{resource_type}/{pulp_id}/"
     ID_PREFIX = "acs"
-    TYPE_REGISTRY: t.Final[dict[str, t.Type["PulpACSContext"]]] = {}
+    TYPE_REGISTRY: t.Final[dict[str, type["PulpACSContext"]]] = {}
 
     def __init_subclass__(cls, **kwargs: t.Any) -> None:
         if hasattr(cls, "PLUGIN") and hasattr(cls, "RESOURCE_TYPE"):
@@ -1853,7 +1851,7 @@ class PulpContentGuardContext(PulpEntityContext):
     HREF_PATTERN = r"contentguards/(?P<plugin>[\w\-_]+)/(?P<resource_type>[\w\-_]+)/"
     HREF_TEMPLATE = "contentguards/{plugin}/{resource_type}/{pulp_id}/"
     NULLABLES = {"description"}
-    TYPE_REGISTRY: t.Final[dict[str, t.Type["PulpContentGuardContext"]]] = {}
+    TYPE_REGISTRY: t.Final[dict[str, type["PulpContentGuardContext"]]] = {}
 
     def __init_subclass__(cls, **kwargs: t.Any) -> None:
         if hasattr(cls, "PLUGIN") and hasattr(cls, "RESOURCE_TYPE"):
