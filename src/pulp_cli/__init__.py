@@ -233,7 +233,7 @@ def main(
 
     api_kwargs = dict(
         base_url=base_url,
-        headers=dict((header.split(":", maxsplit=1) for header in headers)),
+        headers=dict(header.split(":", maxsplit=1) for header in headers),
         verify_ssl=verify_ssl,
         refresh_cache=refresh_api,
         dry_run=dry_run,

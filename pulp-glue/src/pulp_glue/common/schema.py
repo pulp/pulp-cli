@@ -45,7 +45,7 @@ def encode_param(value: t.Any) -> t.Any:
 def _assert_type(
     name: str,
     value: t.Any,
-    types: t.Type[object] | tuple[t.Type[object], ...],
+    types: type[object] | tuple[type[object], ...],
     type_name: str,
 ) -> None:
     if not isinstance(value, types):

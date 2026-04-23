@@ -24,7 +24,7 @@ MOCK_OPENAPI_SPEC = json.dumps(
 def pulp_ctx(
     request: pytest.FixtureRequest, pulp_cli_settings: dict[str, dict[str, t.Any]]
 ) -> PulpContext:
-    if not any((mark.name == "live" for mark in request.node.iter_markers())):
+    if not any(mark.name == "live" for mark in request.node.iter_markers()):
         pytest.fail("This fixture can only be used in live (integration) tests.")
 
     verbose = request.config.getoption("verbose")
@@ -57,7 +57,7 @@ def mock_pulp_ctx(
 def fake_pulp_ctx(
     request: pytest.FixtureRequest, pulp_cli_settings: dict[str, dict[str, t.Any]]
 ) -> PulpContext:
-    if not any((mark.name == "live" for mark in request.node.iter_markers())):
+    if not any(mark.name == "live" for mark in request.node.iter_markers()):
         pytest.fail("This fixture can only be used in live (integration) tests.")
 
     verbose = request.config.getoption("verbose")

@@ -25,7 +25,7 @@ from pulp_cli.generic import (
 _ = gettext.gettext
 
 
-def _content_callback(ctx: click.Context, value: t.Dict[str, t.Any]) -> None:
+def _content_callback(ctx: click.Context, value: dict[str, t.Any]) -> None:
     if value:
         entity_ctx = ctx.find_object(PulpContentContext)
         assert entity_ctx is not None

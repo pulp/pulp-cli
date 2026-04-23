@@ -59,7 +59,7 @@ remote_option = resource_option(
 )
 
 
-def _content_callback(ctx: click.Context, value: t.Dict[str, t.Any]) -> t.Any:
+def _content_callback(ctx: click.Context, value: dict[str, t.Any]) -> t.Any:
     if value:
         entity_ctx = ctx.find_object(PulpFileContentContext)
         assert entity_ctx is not None

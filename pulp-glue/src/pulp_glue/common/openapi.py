@@ -197,8 +197,8 @@ class OpenAPI:
         return self._headers.get("Correlation-Id")
 
     @cached_property
-    def ssl_context(self) -> t.Union[ssl.SSLContext, bool]:
-        _ssl_context: t.Union[ssl.SSLContext, bool]
+    def ssl_context(self) -> ssl.SSLContext | bool:
+        _ssl_context: ssl.SSLContext | bool
         if self._verify_ssl is False:
             _ssl_context = False
         else:
@@ -390,7 +390,7 @@ class OpenAPI:
         candidate_content_types = [
             "multipart/form-data",
         ]
-        if not any((isinstance(value, (bytes, BufferedReader)) for value in body.values())):
+        if not any(isinstance(value, (bytes, BufferedReader)) for value in body.values()):
             candidate_content_types = [
                 "application/json",
                 "application/x-www-form-urlencoded",
@@ -524,11 +524,9 @@ class OpenAPI:
             security_schemes = self._api_spec.components.security_schemes
             try:
                 proposal = next(
-                    (
-                        p
-                        for p in request.security
-                        if self._auth_provider.can_complete(p, security_schemes)
-                    )
+                    p
+                    for p in request.security
+                    if self._auth_provider.can_complete(p, security_schemes)
                 )
             except StopIteration:
                 raise OpenAPIError(_("No suitable auth scheme found."))
