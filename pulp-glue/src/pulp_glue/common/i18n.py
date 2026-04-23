@@ -3,7 +3,6 @@ from functools import cache
 from importlib.resources import files
 
 
-# Need to call lru_cache() before using it as a decorator for python 3.7 compatibility
 @cache
 def get_translation(name: str) -> gettext.NullTranslations:
     """
