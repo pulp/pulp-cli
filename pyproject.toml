@@ -203,7 +203,7 @@ extend-exclude = ["cookiecutter"]
 
 [tool.ruff.lint]
 # This section is managed by the cookiecutter templates.
-extend-select = ["I"]
+extend-select = ["I", "INT"]
 
 [tool.ruff.lint.isort]
 # This section is managed by the cookiecutter templates.
