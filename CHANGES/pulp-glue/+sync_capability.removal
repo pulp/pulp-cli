@@ -1,0 +1,1 @@
+Added a precheck for the `sync` capability to repositories. All repository types should adequately announce it.

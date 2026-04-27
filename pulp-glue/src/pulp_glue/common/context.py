@@ -1643,6 +1643,8 @@ class PulpRepositoryContext(PulpEntityContext):
         Returns:
             Record of the sync task.
         """
+        if not self.capable("sync"):
+            warnings.warn(DeprecationWarning("Repository has not declared 'sync' capability."))
         return self.call("sync", parameters={self.HREF: self.pulp_href}, body=body or {})
 
     def modify(
