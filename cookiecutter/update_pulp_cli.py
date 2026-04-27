@@ -9,6 +9,7 @@
 
 import json
 import logging
+import subprocess
 import urllib.request
 
 import tomlkit
@@ -119,6 +120,9 @@ def main() -> None:
 
         with open("pyproject.toml", "w") as fp:
             tomlkit.dump(pyproject_toml, fp)
+        ret = subprocess.call(["uv", "sync"])
+        if ret != 0:
+            raise RuntimeError("uv sync failed.")
 
 
 if __name__ == "__main__":
