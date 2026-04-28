@@ -72,6 +72,7 @@ paralleltests = {{ cookiecutter.paralleltests | toml_value }}
 # This section is managed by the cookiecutter templates.
 current_version = "{{ cookiecutter.current_version }}"
 commit = false
+pre_commit_hooks = ["uv lock", "git add uv.lock"]
 tag = false
 parse = "(?P<major>\\d+)\\.(?P<minor>\\d+)\\.(?P<patch>\\d+)(\\.(?P<release>[a-z]+))?"
 serialize = [
