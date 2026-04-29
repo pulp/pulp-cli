@@ -51,6 +51,7 @@ core = "pulpcore.cli.core"
 file = "pulpcore.cli.file"
 python = "pulpcore.cli.python"
 rpm = "pulpcore.cli.rpm"
+rust = "pulpcore.cli.rust"
 
 [dependency-groups]
 dev = [
