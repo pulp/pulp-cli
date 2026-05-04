@@ -80,6 +80,15 @@ update_options = [
         needs_plugins=[PluginRequirement("python", specifier=">=3.3.0")],
         default=None,
     ),
+    pulp_option(
+        "--allow-package-substitution/--block-package-substitution",
+        needs_plugins=[PluginRequirement("python", specifier=">=3.28.0")],
+        default=None,
+        help=_(
+            "Allow replacing existing packages with packages of the same filename but"
+            " different checksum. When blocked, such operations are rejected."
+        ),
+    ),
     retained_versions_option,
     pulp_labels_option,
 ]

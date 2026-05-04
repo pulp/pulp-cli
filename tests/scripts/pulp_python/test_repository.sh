@@ -37,4 +37,12 @@ if pulp debug has-plugin --name "python" --specifier ">=3.26.0"; then
   expect_succ test "$(echo "$OUTPUT" | jq -r '.state')" = "completed"
 fi
 
+if pulp debug has-plugin --name "python" --specifier ">=3.28.0"; then
+  expect_succ pulp python repository show --repository "cli_test_python_repo"
+  expect_succ test "$(echo "$OUTPUT" | jq -r '.allow_package_substitution')" = "true"
+  expect_succ pulp python repository update --repository "cli_test_python_repo" --block-package-substitution
+  expect_succ pulp python repository show --repository "cli_test_python_repo"
+  expect_succ test "$(echo "$OUTPUT" | jq -r '.allow_package_substitution')" = "false"
+fi
+
 expect_succ pulp python repository destroy --name "cli_test_python_repo"
