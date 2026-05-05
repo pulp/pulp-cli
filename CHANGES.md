@@ -10,6 +10,21 @@
 
 [//]: # (towncrier release notes start)
 
+## 0.29.5 (2026-05-05) {: #0.29.5 }
+
+
+
+No significant changes.
+
+
+### Pulp GLUE {: #0.29.5-pulp-glue }
+
+
+No significant changes.
+
+
+---
+
 ## 0.29.4 (2025-05-12) {: #0.29.4 }
 
 
