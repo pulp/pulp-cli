@@ -25,7 +25,7 @@ classifiers=[
 dependencies = [
   "pulp-glue==0.29.5.dev",
   "click>=8.0.0,<8.2",  # Proven to not do semver.
-  "packaging>=20.0,<=25",  # CalVer
+  "packaging>=20.0,<=26.2",  # CalVer
   "PyYAML>=5.3,<6.1",
   "schema>=0.7.5,<0.8",
   "toml>=0.10.2,<0.11",
