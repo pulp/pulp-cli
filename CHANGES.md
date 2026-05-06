@@ -10,6 +10,21 @@
 
 [//]: # (towncrier release notes start)
 
+## 0.39.1 (2026-05-05) {: #0.39.1 }
+
+
+
+No significant changes.
+
+
+### Pulp GLUE {: #0.39.1-pulp-glue }
+
+
+No significant changes.
+
+
+---
+
 ## 0.39.0 (2026-04-08) {: #0.39.0 }
 
 
@@ -48,6 +63,21 @@
 #### Bugfixes {: #0.39.0-pulp-glue-bugfix }
 
 - Fixed `PulpEntityContext.update` method to correctly pass `partial=True` to `preprocess_entity`.
+
+
+---
+
+## 0.38.3 (2026-05-05) {: #0.38.3 }
+
+
+
+No significant changes.
+
+
+### Pulp GLUE {: #0.38.3-pulp-glue }
+
+
+No significant changes.
 
 
 ---
@@ -127,6 +157,21 @@ No significant changes.
 
 ---
 
+## 0.37.1 (2026-05-05) {: #0.37.1 }
+
+
+
+No significant changes.
+
+
+### Pulp GLUE {: #0.37.1-pulp-glue }
+
+
+No significant changes.
+
+
+---
+
 ## 0.37.0 (2026-01-07) {: #0.37.0 }
 
 
@@ -163,6 +208,21 @@ No significant changes.
 #### Deprecations and Removals {: #0.37.0-pulp-glue-removal }
 
 - Dropped support for python 3.9.
+
+
+---
+
+## 0.36.4 (2026-05-05) {: #0.36.4 }
+
+
+
+No significant changes.
+
+
+### Pulp GLUE {: #0.36.4-pulp-glue }
+
+
+No significant changes.
 
 
 ---
@@ -236,6 +296,21 @@ No significant changes.
 
 ---
 
+## 0.35.2 (2026-05-05) {: #0.35.2 }
+
+
+
+No significant changes.
+
+
+### Pulp GLUE {: #0.35.2-pulp-glue }
+
+
+No significant changes.
+
+
+---
+
 ## 0.35.1 (2025-10-15) {: #0.35.1 }
 
 
@@ -281,6 +356,21 @@ No significant changes.
 
 ---
 
+## 0.34.2 (2026-05-05) {: #0.34.2 }
+
+
+
+No significant changes.
+
+
+### Pulp GLUE {: #0.34.2-pulp-glue }
+
+
+No significant changes.
+
+
+---
+
 ## 0.34.1 (2025-10-15) {: #0.34.1 }
 
 
@@ -304,6 +394,21 @@ No significant changes.
 
 
 ### Pulp GLUE {: #0.34.0-pulp-glue }
+
+
+No significant changes.
+
+
+---
+
+## 0.33.2 (2026-05-05) {: #0.33.2 }
+
+
+
+No significant changes.
+
+
+### Pulp GLUE {: #0.33.2-pulp-glue }
 
 
 No significant changes.
@@ -364,6 +469,21 @@ No significant changes.
 #### Deprecations and Removals {: #0.33.0-pulp-glue-removal }
 
 - Removed support for gpgcheck, repo_gpgcheck, package_checksum_type and metadata_checksum_type for the RPM plugin for version >=3.30.0
+
+
+---
+
+## 0.32.4 (2026-05-05) {: #0.32.4 }
+
+
+
+No significant changes.
+
+
+### Pulp GLUE {: #0.32.4-pulp-glue }
+
+
+No significant changes.
 
 
 ---
@@ -454,6 +574,21 @@ No significant changes.
 
 ---
 
+## 0.31.3 (2026-05-05) {: #0.31.3 }
+
+
+
+No significant changes.
+
+
+### Pulp GLUE {: #0.31.3-pulp-glue }
+
+
+No significant changes.
+
+
+---
+
 ## 0.31.2 (2025-05-12) {: #0.31.2 }
 
 
@@ -523,6 +658,21 @@ No significant changes.
 
 - Changed the upper version bound of `packaging` to the last available version according to CalVer.
   [#1125](https://github.com/pulp/pulp-cli/issues/1125)
+
+
+---
+
+## 0.30.5 (2026-05-05) {: #0.30.5 }
+
+
+
+No significant changes.
+
+
+### Pulp GLUE {: #0.30.5-pulp-glue }
+
+
+No significant changes.
 
 
 ---
@@ -650,6 +800,21 @@ No significant changes.
 #### Misc {: #0.30.0-pulp-glue-misc }
 
 - Declare compatibility with Python 3.13.
+
+
+---
+
+## 0.29.5 (2026-05-05) {: #0.29.5 }
+
+
+
+No significant changes.
+
+
+### Pulp GLUE {: #0.29.5-pulp-glue }
+
+
+No significant changes.
 
 
 ---
