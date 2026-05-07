@@ -6,11 +6,13 @@ import schema as s
 from pulp_glue.common.context import (
     EntityFieldDefinition,
     PluginRequirement,
+    PulpEntityContext,
     PulpRemoteContext,
     PulpRepositoryContext,
 )
 from pulp_glue.common.i18n import get_translation
 from pulp_glue.python.context import (
+    PulpPythonBlocklistEntryContext,
     PulpPythonContentContext,
     PulpPythonProvenanceContext,
     PulpPythonRemoteContext,
@@ -28,6 +30,7 @@ from pulp_cli.generic import (
     list_command,
     lookup_callback,
     name_option,
+    pass_entity_context,
     pass_pulp_context,
     pass_repository_context,
     pulp_group,
@@ -150,6 +153,96 @@ repository.add_command(
         base_default_type="python",
     )
 )
+
+
+@repository.group(needs_plugins=[PluginRequirement("python", specifier=">=3.30.0")])
+@pass_repository_context
+@pass_pulp_context
+@click.pass_context
+def blocklist(
+    ctx: click.Context,
+    pulp_ctx: PulpCLIContext,
+    repository_ctx: PulpRepositoryContext,
+    /,
+) -> None:
+    """
+    Manage blocklist entries for a Python repository.
+    """
+    assert isinstance(repository_ctx, PulpPythonRepositoryContext)
+    ctx.obj = PulpPythonBlocklistEntryContext(pulp_ctx, repository_ctx)
+
+
+_HELP_BLOCKLIST_NAME = _("Package name to block. Required when 'filename' is not provided.")
+_HELP_BLOCKLIST_VERSION = _("Exact version to block. Only used when 'name' is set.")
+_HELP_BLOCKLIST_FILENAME = _("Exact filename to block. Required when 'name' is not provided.")
+
+blocklist_options = [
+    click.option("--name", help=_HELP_BLOCKLIST_NAME),
+    click.option("--version", help=_HELP_BLOCKLIST_VERSION),
+    click.option("--filename", help=_HELP_BLOCKLIST_FILENAME),
+]
+blocklist_lookup_options = [
+    pulp_option(
+        "--name",
+        help=_HELP_BLOCKLIST_NAME,
+        callback=lookup_callback("name"),
+        expose_value=False,
+    ),
+    pulp_option(
+        "--version",
+        help=_HELP_BLOCKLIST_VERSION,
+        callback=lookup_callback("version"),
+        expose_value=False,
+    ),
+    pulp_option(
+        "--filename",
+        help=_HELP_BLOCKLIST_FILENAME,
+        callback=lookup_callback("filename"),
+        expose_value=False,
+    ),
+    href_option,
+]
+
+blocklist.add_command(
+    create_command(name="add", decorators=nested_lookup_options + blocklist_options)
+)
+blocklist.add_command(list_command(decorators=nested_lookup_options + blocklist_options))
+blocklist.add_command(show_command(decorators=nested_lookup_options + blocklist_lookup_options))
+
+
+@blocklist.command(name="remove")
+@repository_href_option
+@repository_lookup_option
+@click.option("--name", help=_HELP_BLOCKLIST_NAME)
+@click.option("--version", help=_HELP_BLOCKLIST_VERSION)
+@click.option("--filename", help=_HELP_BLOCKLIST_FILENAME)
+@href_option
+@pass_entity_context
+def blocklist_remove(
+    entity_ctx: PulpEntityContext,
+    /,
+    name: str | None,
+    version: str | None,
+    filename: str | None,
+) -> None:
+    """
+    Remove a blocklist entry.
+    """
+    assert isinstance(entity_ctx, PulpPythonBlocklistEntryContext)
+    if version and filename:
+        raise click.ClickException(_("'version' cannot be used with 'filename'."))
+    if version and not name:
+        raise click.ClickException(_("'version' requires 'name' to be provided."))
+    if name and filename:
+        raise click.ClickException(_("Exactly one of 'name' or 'filename' must be provided."))
+
+    if name:
+        entity_ctx.entity = {"name": name}
+    if version:
+        entity_ctx.entity = {"version": version}
+    if filename:
+        entity_ctx.entity = {"filename": filename}
+    entity_ctx.delete()
 
 
 @repository.command()
