@@ -255,7 +255,7 @@ section-order = ["future", "standard-library", "third-party", "second-party", "f
 
 
 [tool.pytest]
-testpaths = ["tests", "pulp_glue/tests"]
+testpaths = ["tests", "pulp-glue/tests"]
 markers = [
   "live: integration tests that run against a live server",
   "glue: tests for pulp-glue in isolation",
