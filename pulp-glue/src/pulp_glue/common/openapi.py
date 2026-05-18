@@ -29,7 +29,12 @@ from pulp_glue.common.exceptions import (
     ValidationError,
 )
 from pulp_glue.common.i18n import get_translation
-from pulp_glue.common.schema import encode_json, encode_param, validate
+from pulp_glue.common.schema import (
+    encode_json,
+    encode_param,
+    encode_stringify,
+    validate,
+)
 
 translation = get_translation(__package__)
 _ = translation.gettext
@@ -423,7 +428,10 @@ class OpenAPI:
                 if content_type.startswith("application/json"):
                     data = encode_json(body)
                 elif content_type.startswith("application/x-www-form-urlencoded"):
-                    data = body
+                    if isinstance(body, dict):
+                        data = {k: encode_stringify(v) for k, v in body.items()}
+                    else:
+                        data = encode_param(body)
                 elif content_type.startswith("multipart/form-data"):
                     data = {}
                     files = {}
@@ -438,7 +446,7 @@ class OpenAPI:
                                     "application/octet-stream",
                                 )
                             else:
-                                data[key] = value
+                                data[key] = encode_stringify(value)
                 break
         else:
             # No known content-type left
