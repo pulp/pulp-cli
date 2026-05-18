@@ -8,8 +8,10 @@ import pytest
 from pulp_glue.common import oas
 from pulp_glue.common.exceptions import SchemaError, ValidationError
 from pulp_glue.common.schema import (
+    encode_html,
     encode_json,
     encode_param,
+    encode_stringify,
     validate,
 )
 
@@ -416,10 +418,7 @@ def test_json_encoder_rejects_stream() -> None:
 
 @pytest.mark.parametrize(
     "value",
-    (
-        pytest.param("asdf", id="string"),
-        pytest.param(42, id="integer"),
-    ),
+    (pytest.param("asdf", id="string"),),
 )
 def test_encode_param_keeps(value: t.Any) -> None:
     assert encode_param(value) == value
@@ -428,6 +427,7 @@ def test_encode_param_keeps(value: t.Any) -> None:
 @pytest.mark.parametrize(
     "value,expected",
     (
+        pytest.param(42, "42", id="integer"),
         pytest.param(datetime.date(2000, 1, 1), "2000-01-01", id="date"),
         pytest.param(
             datetime.datetime(2000, 1, 1, 12, 30), "2000-01-01T12:30:00.000000Z", id="datetime"
@@ -436,3 +436,101 @@ def test_encode_param_keeps(value: t.Any) -> None:
 )
 def test_encode_param_transforms(value: t.Any, expected: t.Any) -> None:
     assert encode_param(value) == expected
+
+
+@pytest.mark.parametrize(
+    "value,expected",
+    (
+        pytest.param(
+            datetime.date(2000, 1, 1),
+            {"": "2000-01-01"},
+            id="date",
+        ),
+        pytest.param(
+            {"a": datetime.datetime(2000, 1, 1, 12, 30)},
+            {"a": "2000-01-01T12:30:00.000000Z"},
+            id="datetime",
+        ),
+        pytest.param(
+            [1, 1, 12, 30],
+            {"[0]": "1", "[1]": "1", "[2]": "12", "[3]": "30"},
+            id="list",
+        ),
+        pytest.param(
+            {"a": 1, "b": 2},
+            {"a": "1", "b": "2"},
+            id="dict",
+        ),
+        pytest.param(
+            {"o": {"a": 1, "b": 2}},
+            {"o.a": "1", "o.b": "2"},
+            id="nested_dict",
+        ),
+        pytest.param(
+            [{"a": 1, "b": 2}, {"c": 3}],
+            {"[0]a": "1", "[0]b": "2", "[1]c": "3"},
+            id="list_of_dicts",
+        ),
+        pytest.param(
+            {"a": [1, 2], "b": [3, 4]},
+            {"a[0]": "1", "a[1]": "2", "b[0]": "3", "b[1]": "4"},
+            id="dict_of_lists",
+        ),
+    ),
+)
+def test_encode_html(value: t.Any, expected: t.Any) -> None:
+    assert encode_html(value) == expected
+
+
+@pytest.mark.parametrize(
+    "value,expected",
+    (
+        pytest.param(
+            "Hello, World!",
+            "Hello, World!",
+            id="string",
+        ),
+        pytest.param(
+            4,
+            "4",
+            id="integer",
+        ),
+        pytest.param(
+            3.14159,
+            "3.14159",
+            id="float",
+        ),
+        pytest.param(
+            False,
+            "false",
+            id="bool",
+        ),
+        pytest.param(
+            datetime.date(2000, 1, 1),
+            "2000-01-01",
+            id="date",
+        ),
+        pytest.param(
+            {"a": datetime.datetime(2000, 1, 1, 12, 30)},
+            '{"a": "2000-01-01T12:30:00.000000Z"}',
+            id="datetime",
+        ),
+        pytest.param(
+            {"a": 1, "b": 2},
+            '{"a": 1, "b": 2}',
+            id="dict",
+        ),
+        pytest.param(
+            {"o": {"a": 1, "b": 2}},
+            '{"o": {"a": 1, "b": 2}}',
+            id="nested_dict",
+        ),
+        pytest.param(
+            {"a": [1, 2], "b": [3, 4]},
+            '{"a": [1, 2], "b": [3, 4]}',
+            id="dict_of_lists",
+        ),
+    ),
+)
+def test_encode_stringify(value: t.Any, expected: str) -> None:
+    assert encode_stringify(value) == expected

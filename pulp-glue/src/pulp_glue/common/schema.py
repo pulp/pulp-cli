@@ -30,16 +30,44 @@ def encode_json(o: t.Any) -> str:
 
 
 def encode_param(value: t.Any) -> t.Any:
-    if isinstance(value, list):
-        return [encode_param(item) for item in value]
     if isinstance(value, datetime.datetime):
         return value.strftime(ISO_DATETIME_FORMAT)
     elif isinstance(value, datetime.date):
         return value.strftime(ISO_DATE_FORMAT)
     elif isinstance(value, bool):
         return "true" if value else "false"
+    elif isinstance(value, (int, float)):
+        return str(value)
+    elif isinstance(value, list):
+        return [encode_param(item) for item in value]
+    elif isinstance(value, dict):
+        return {k: encode_param(v) for k, v in value.items()}
     else:
         return value
+
+
+def encode_html(value: t.Any, *, key: str = "", sep: str = "") -> dict[str, str]:
+    # This is how html forms __can__ supply nested representations.
+    # According to openAPI 3.1 however they should default to json stringify.
+    value = encode_param(value)
+    res = {}
+    if isinstance(value, list):
+        for i, item in enumerate(value):
+            res.update(encode_html(item, key=key + f"[{i}]"))
+    elif isinstance(value, dict):
+        for k, v in value.items():
+            res.update(encode_html(v, key=key + sep + k, sep="."))
+    else:
+        res[key] = value
+    return res
+
+
+def encode_stringify(value: str | dict[str, t.Any]) -> str:
+    if isinstance(value, (dict, list)):
+        value = encode_json(value)
+    elif not isinstance(value, str):
+        value = encode_param(value)
+    return value
 
 
 def _assert_type(

@@ -860,12 +860,13 @@ def option_group(
     require_all: bool = True,
     expose_value: bool = True,
 ) -> t.Callable[[PulpCommand], PulpCommand]:
+    """
+    Group a list of options into a group represented as a dictionary.
+    This allows to add a `callback` function for further processing.
+    `expose_value` allows to hide the value from the command callback.
+    """
+
     def _group_callback(ctx: click.Context) -> None:
-        """
-        Group a list of options into a group represented as a dictionary.
-        This allows to add a `callback` function for further processing.
-        `expose_value` allows to hide the value from the command callback.
-        """
         value = {k: v for k, v in ((k, ctx.params.pop(k, None)) for k in options) if v is not None}
         if value:
             if require_all and (missing_options := set(options) - set(value.keys())):
