@@ -344,7 +344,7 @@ class TestRenderParameters:
 
         res = mock_openapi._render_parameters(path_spec, method_spec, parameters)
 
-        assert res["query"] == {"limit": 2}
+        assert res["query"] == {"limit": "2"}
 
     def test_no_parameters_none_specified(self, mock_openapi: OpenAPI) -> None:
         parameters: dict[str, t.Any] = {}
@@ -368,7 +368,7 @@ class TestRenderParameters:
         assert res == {
             "query": {"query1": "asdf"},
             "header": {},
-            "path": {"pk": 42},
+            "path": {"pk": "42"},
             "cookie": {},
         }
         assert parameters == {"query1": "asdf", "pk": 42}
