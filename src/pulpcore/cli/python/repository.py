@@ -30,7 +30,7 @@ from pulp_cli.generic import (
     list_command,
     lookup_callback,
     name_option,
-    pass_entity_context,
+    option_group,
     pass_pulp_context,
     pass_repository_context,
     pulp_group,
@@ -155,7 +155,7 @@ repository.add_command(
 )
 
 
-@repository.group(needs_plugins=[PluginRequirement("python", specifier=">=3.30.0")])
+@repository.group(needs_plugins=[PluginRequirement("python", specifier=">=3.30.2")])
 @pass_repository_context
 @pass_pulp_context
 @click.pass_context
@@ -172,63 +172,11 @@ def blocklist(
     ctx.obj = PulpPythonBlocklistEntryContext(pulp_ctx, repository_ctx)
 
 
-_HELP_BLOCKLIST_NAME = _("Package name to block. Required when 'filename' is not provided.")
-_HELP_BLOCKLIST_VERSION = _("Exact version to block. Only used when 'name' is set.")
-_HELP_BLOCKLIST_FILENAME = _("Exact filename to block. Required when 'name' is not provided.")
+def _blocklist_callback(ctx: click.Context, value: dict[str, t.Any]) -> t.Any:
+    name = value.get("name")
+    version = value.get("version")
+    filename = value.get("filename")
 
-blocklist_options = [
-    click.option("--name", help=_HELP_BLOCKLIST_NAME),
-    click.option("--version", help=_HELP_BLOCKLIST_VERSION),
-    click.option("--filename", help=_HELP_BLOCKLIST_FILENAME),
-]
-blocklist_lookup_options = [
-    pulp_option(
-        "--name",
-        help=_HELP_BLOCKLIST_NAME,
-        callback=lookup_callback("name"),
-        expose_value=False,
-    ),
-    pulp_option(
-        "--version",
-        help=_HELP_BLOCKLIST_VERSION,
-        callback=lookup_callback("version"),
-        expose_value=False,
-    ),
-    pulp_option(
-        "--filename",
-        help=_HELP_BLOCKLIST_FILENAME,
-        callback=lookup_callback("filename"),
-        expose_value=False,
-    ),
-    href_option,
-]
-
-blocklist.add_command(
-    create_command(name="add", decorators=nested_lookup_options + blocklist_options)
-)
-blocklist.add_command(list_command(decorators=nested_lookup_options + blocklist_options))
-blocklist.add_command(show_command(decorators=nested_lookup_options + blocklist_lookup_options))
-
-
-@blocklist.command(name="remove")
-@repository_href_option
-@repository_lookup_option
-@click.option("--name", help=_HELP_BLOCKLIST_NAME)
-@click.option("--version", help=_HELP_BLOCKLIST_VERSION)
-@click.option("--filename", help=_HELP_BLOCKLIST_FILENAME)
-@href_option
-@pass_entity_context
-def blocklist_remove(
-    entity_ctx: PulpEntityContext,
-    /,
-    name: str | None,
-    version: str | None,
-    filename: str | None,
-) -> None:
-    """
-    Remove a blocklist entry.
-    """
-    assert isinstance(entity_ctx, PulpPythonBlocklistEntryContext)
     if version and filename:
         raise click.ClickException(_("'version' cannot be used with 'filename'."))
     if version and not name:
@@ -236,13 +184,58 @@ def blocklist_remove(
     if name and filename:
         raise click.ClickException(_("Exactly one of 'name' or 'filename' must be provided."))
 
-    if name:
-        entity_ctx.entity = {"name": name}
-    if version:
-        entity_ctx.entity = {"version": version}
-    if filename:
-        entity_ctx.entity = {"filename": filename}
-    entity_ctx.delete()
+    lookup: dict[str, t.Any] = {}
+    if name and version:
+        lookup = {"name": name, "version": version}
+    elif name:
+        lookup = {"name": name, "version__isnull": True}
+    elif filename:
+        lookup = {"filename": filename}
+
+    if lookup:
+        entity_ctx = ctx.find_object(PulpEntityContext)
+        assert entity_ctx is not None
+        entity_ctx.entity = lookup
+
+
+blocklist_options = [
+    click.option(
+        "--name",
+        help=_("Package name to block (all versions). Required when 'filename' is not provided."),
+    ),
+    click.option("--version", help=_("Package version to block. Only used when 'name' is set.")),
+    click.option(
+        "--filename", help=_("Package filename to block. Required when 'name' is not provided.")
+    ),
+]
+blocklist_list_options = [
+    click.option("--name", help="Package name to block."),
+    click.option("--version", help="Package version to block."),
+    click.option("--filename", help="Package filename to block."),
+]
+blocklist_lookup_options = blocklist_options + [
+    option_group(
+        "blocklist_lookup",
+        ["name", "version", "filename"],
+        require_all=False,
+        expose_value=False,
+        callback=_blocklist_callback,
+    ),
+    href_option,
+]
+
+blocklist.add_command(
+    create_command(name="add", decorators=nested_lookup_options + blocklist_options)
+)
+blocklist.add_command(list_command(decorators=nested_lookup_options + blocklist_list_options))
+blocklist.add_command(show_command(decorators=nested_lookup_options + blocklist_lookup_options))
+blocklist.add_command(
+    destroy_command(
+        name="remove",
+        help=_("Remove a {entity}."),
+        decorators=nested_lookup_options + blocklist_lookup_options,
+    )
+)
 
 
 @repository.command()
