@@ -1,1 +1,1 @@
-Added `PulpPythonBlocklistEntryContext` for `pulp_python>=3.30.0`.
+Added `PulpPythonBlocklistEntryContext` for `pulp_python>=3.30.2`.

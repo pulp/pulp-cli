@@ -174,7 +174,7 @@ class PulpPythonBlocklistEntryContext(PulpEntityContext):
     ENTITIES = _("blocklist entries")
     HREF = "python_python_python_blocklist_entry_href"
     ID_PREFIX = "repositories_python_python_blocklist_entries"
-    NEEDS_PLUGINS = [PluginRequirement("python", specifier=">=3.30.0")]
+    NEEDS_PLUGINS = [PluginRequirement("python", specifier=">=3.30.2")]
     repository_ctx: PulpPythonRepositoryContext
 
     def __init__(
