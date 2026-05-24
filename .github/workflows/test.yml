@@ -63,8 +63,8 @@ jobs:
             pulp_oauth2: "true"
             python: "3.14"
           - image_tag: "3.49"
-            pulp_https: "true"
             lower_bounds: true
+            pulp_https: "true"
             python: "3.10"
     steps:
       - name: "Checkout"
