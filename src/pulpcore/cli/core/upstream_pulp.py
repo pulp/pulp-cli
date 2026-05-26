@@ -86,7 +86,14 @@ upstream_pulp.add_command(destroy_command(decorators=lookup_options))
 
 @upstream_pulp.command()
 @lookup_option
+@pulp_option(
+    "--q-select",
+    needs_plugins=[PluginRequirement("core", specifier=">=3.113.0")],
+)
 @pass_entity_context
-def replicate(upstream_pulp_ctx: PulpEntityContext, /) -> None:
+def replicate(upstream_pulp_ctx: PulpEntityContext, /, q_select: str | None) -> None:
     assert isinstance(upstream_pulp_ctx, PulpUpstreamPulpContext)
-    upstream_pulp_ctx.replicate()
+    body = {}
+    if q_select is not None:
+        body["q_select"] = q_select
+    upstream_pulp_ctx.replicate(body=body)

@@ -628,8 +628,8 @@ class PulpUpstreamPulpContext(PulpEntityContext):
             )
         return search_result[0]
 
-    def replicate(self) -> t.Any:
-        return self.call("replicate", parameters={self.HREF: self.pulp_href})
+    def replicate(self, body: EntityDefinition | None = None) -> t.Any:
+        return self.call("replicate", parameters={self.HREF: self.pulp_href}, body=body or {})
 
 
 class PulpVulnerabilityReportContext(PulpEntityContext):
