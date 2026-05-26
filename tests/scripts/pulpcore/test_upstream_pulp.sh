@@ -33,4 +33,9 @@ fi
 # Also this is a real dangerous command, deleting all existing repositories.
 expect_fail pulp upstream-pulp replicate --id "cli_test_upstream_pulp"
 
+if pulp debug has-plugin --name "core" --specifier ">=3.113.0"
+then
+  expect_fail pulp upstream-pulp replicate --id "cli_test_upstream_pulp" --q-select "pulp_label_select=doesnotexist"
+fi
+
 expect_succ pulp upstream-pulp destroy --id "cli_test_upstream_pulp"
