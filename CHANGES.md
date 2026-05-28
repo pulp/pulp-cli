@@ -10,6 +10,23 @@
 
 [//]: # (towncrier release notes start)
 
+## 0.39.2 (2026-05-28) {: #0.39.2 }
+
+
+
+No significant changes.
+
+
+### Pulp GLUE {: #0.39.2-pulp-glue }
+
+
+#### Bugfixes {: #0.39.2-pulp-glue-bugfix }
+
+- Fixed passing nested objects stringified in form-encoded body according to OAS3.1.
+
+
+---
+
 ## 0.39.1 (2026-05-05) {: #0.39.1 }
 
 
