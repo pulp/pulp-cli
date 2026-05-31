@@ -1,0 +1,1 @@
+Added the `hugging-face` command group to manage Hugging Face remotes, repositories, and distributions for pull-through caching of Hugging Face Hub content.
