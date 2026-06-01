@@ -18,7 +18,11 @@ line-length = 100
 
 [tool.ruff.lint]
 # This section is managed by the cookiecutter templates.
-extend-select = ["I", "INT"]
+extend-select = ["I", "ICN", "INT", "T10"]
+
+[tool.ruff.lint.flake8-import-conventions.aliases]
+# This section is managed by the cookiecutter templates.
+typing = "t"
 
 [tool.mypy]
 # This section is managed by the cookiecutter templates.
