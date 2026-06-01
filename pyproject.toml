@@ -49,6 +49,7 @@ common = "pulpcore.cli.common"
 container = "pulpcore.cli.container"
 core = "pulpcore.cli.core"
 file = "pulpcore.cli.file"
+hugging-face = "pulpcore.cli.hugging_face"
 python = "pulpcore.cli.python"
 rpm = "pulpcore.cli.rpm"
 
