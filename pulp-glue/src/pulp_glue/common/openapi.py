@@ -186,7 +186,10 @@ class OpenAPI:
         self._session.proxies = session_settings["proxies"]
         self._session.auth = _RequestsFakeAuth()
 
-        if self._auth_provider is not None and self._auth_provider.can_complete_mutualTLS():
+        if (
+            self._auth_provider is not None
+            and self._auth_provider.can_complete_mutualTLS() is not False
+        ):
             cert, key = self._auth_provider.tls_credentials()
             if key is not None:
                 self._session.cert = (cert, key)
@@ -532,13 +535,18 @@ class OpenAPI:
             and self._auth_provider is not None
         ):
             security_schemes = self._api_spec.components.security_schemes
-            try:
-                proposal = next(
-                    p
+            cost_proposal_iter = (
+                (c, p)
+                for c, p in (
+                    (self._auth_provider.can_complete(p, security_schemes), p)
                     for p in request.security
-                    if self._auth_provider.can_complete(p, security_schemes)
                 )
-            except StopIteration:
+                if c is not False
+            )
+            try:
+                cost, proposal = min(cost_proposal_iter)
+                _logger.debug("Selected authentication %s (cost %s).", proposal, cost)
+            except ValueError:
                 raise OpenAPIError(_("No suitable auth scheme found."))
         return proposal
 
@@ -749,9 +757,6 @@ class OpenAPI:
 
         may_retry = False
         if proposal := self._select_proposal(request):
-            if len(proposal) != 1:
-                warnings.warn("The following exception statement may no longer be true.")
-                raise NotImplementedError("More complex security proposals are not implemented.")
             may_retry = asyncio.run(self._authenticate_request(request, proposal))
 
         response = self._send_request(request)
