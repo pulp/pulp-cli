@@ -101,7 +101,7 @@ class TestGlueAuthProvider:
 
     def test_can_complete_basic_auth_and_provide_credentials(self) -> None:
         provider = GlueAuthProvider(username="user1", password="secret1")
-        assert provider.can_complete_http_basic() is True
+        assert provider.can_complete_http_basic() == 15
         assert asyncio.run(provider.http_basic_credentials()) == (b"user1", b"secret1")
 
     def test_client_id_needs_client_secret(self) -> None:
@@ -110,7 +110,7 @@ class TestGlueAuthProvider:
 
     def test_can_complete_oauth2_client_credentials_and_provide_them(self) -> None:
         provider = GlueAuthProvider(client_id="client1", client_secret="secret1")
-        assert provider.can_complete_oauth2_client_credentials([]) is True
+        assert provider.can_complete_oauth2_client_credentials([]) == 10
         assert asyncio.run(provider.oauth2_client_credentials()) == (
             b"client1",
             b"secret1",
@@ -118,5 +118,5 @@ class TestGlueAuthProvider:
 
     def test_can_complete_mutualTLS_and_provide_cert(self) -> None:
         provider = GlueAuthProvider(cert="FAKECERTIFICATE")
-        assert provider.can_complete_mutualTLS() is True
+        assert provider.can_complete_mutualTLS() == 0
         assert provider.tls_credentials() == ("FAKECERTIFICATE", None)

@@ -218,14 +218,22 @@ class PulpCLIAuthProvider(AuthProviderBase):
         self._password_in_secretstorage: bool | None = None
         self._oauth2_client_credentials: tuple[bytes, bytes] | None = None
 
-    def can_complete_http_basic(self) -> bool:
-        return self.pulp_ctx.username is not None
+    def can_complete_http_basic(self) -> t.Literal[False] | int:
+        if self._http_basic is not None:
+            return 15
+        if self.pulp_ctx.username is not None:
+            return 25 if self.pulp_ctx.password is None else 15
+        return False
 
-    def can_complete_oauth2_client_credentials(self, scopes: list[str]) -> bool:
-        return self.pulp_ctx.oauth2_client_id is not None
+    def can_complete_oauth2_client_credentials(self, scopes: list[str]) -> t.Literal[False] | int:
+        if self._oauth2_client_credentials is not None:
+            return 10
+        if self.pulp_ctx.oauth2_client_id is not None:
+            return 20 if self.pulp_ctx.oauth2_client_secret is None else 10
+        return False
 
-    def can_complete_mutualTLS(self) -> bool:
-        return self.pulp_ctx.cert is not None
+    def can_complete_mutualTLS(self) -> t.Literal[False] | int:
+        return self.pulp_ctx.cert is not None and 0
 
     def _fetch_password(self) -> bytes:
         if SECRET_STORAGE:
