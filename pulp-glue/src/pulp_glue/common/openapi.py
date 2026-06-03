@@ -532,13 +532,17 @@ class OpenAPI:
             and self._auth_provider is not None
         ):
             security_schemes = self._api_spec.components.security_schemes
-            try:
-                proposal = next(
-                    p
+            cost_proposal_iter = (
+                (c, p)
+                for c, p in (
+                    (self._auth_provider.can_complete(p, security_schemes), p)
                     for p in request.security
-                    if self._auth_provider.can_complete(p, security_schemes)
                 )
-            except StopIteration:
+                if c is not False
+            )
+            try:
+                _dummy, proposal = min(cost_proposal_iter)
+            except ValueError:
                 raise OpenAPIError(_("No suitable auth scheme found."))
         return proposal
 
