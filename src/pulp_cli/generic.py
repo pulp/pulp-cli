@@ -1368,7 +1368,7 @@ retained_versions_option = pulp_option(
     "--retain-repo-versions",
     needs_plugins=[PluginRequirement("core", specifier=">=3.13.0")],
     help=_("Number of repository versions to keep."),
-    type=int,
+    type=int_or_empty,
 )
 
 pulp_labels_option = pulp_option(
