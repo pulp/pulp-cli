@@ -874,7 +874,7 @@ wheels = [
 
 [[package]]
 name = "pulp-cli"
-version = "0.40.0.dev0"
+version = "0.41.0.dev0"
 source = { editable = "." }
 dependencies = [
     { name = "click" },
@@ -1006,7 +1006,7 @@ test = [
 
 [[package]]
 name = "pulp-glue"
-version = "0.40.0.dev0"
+version = "0.41.0.dev0"
 source = { editable = "pulp-glue" }
 dependencies = [
     { name = "multidict" },
