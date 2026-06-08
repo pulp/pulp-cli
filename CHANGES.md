@@ -10,6 +10,44 @@
 
 [//]: # (towncrier release notes start)
 
+## 0.40.0 (2026-06-08) {: #0.40.0 }
+
+
+
+#### Features {: #0.40.0-feature }
+
+- Added `--allow-package-substitution`/`--block-package-substitution` options to `pulp python repository` for controlling packages with same filenames but different checksums.
+  [#1375](https://github.com/pulp/pulp-cli/issues/1375)
+- Added `blocklist` subcommand group to `pulp python repository` for managing blocklist entries (add, list, remove, show).
+  [#1391](https://github.com/pulp/pulp-cli/issues/1391)
+- Added `--q-select` option to `pulp upstream-pulp replicate` for selectively syncing a subset of upstream distributions without modifying the stored upstream-pulp configuration.
+
+
+#### Bugfixes {: #0.40.0-bugfix }
+
+- Fixed empty string not being accepted as the value of `--retain-repo-versions`.
+
+
+### Pulp GLUE {: #0.40.0-pulp-glue }
+
+
+#### Features {: #0.40.0-pulp-glue-feature }
+
+- Added `allow_package_substitution` field to `PulpPythonRepositoryContext` for `pulp_python>=3.28.0`.
+  [#1375](https://github.com/pulp/pulp-cli/issues/1375)
+- Added `PulpPythonBlocklistEntryContext` for `pulp_python>=3.30.2`.
+  [#1391](https://github.com/pulp/pulp-cli/issues/1391)
+- Added `body` parameter to `PulpUpstreamPulpContext.replicate()` for passing per-request options like `q_select` for `core>=3.113.0`.
+
+
+#### Bugfixes {: #0.40.0-pulp-glue-bugfix }
+
+- Fixed passing nested objects stringified in form-encoded body according to OAS3.1.
+- Sanitize the filename of the chached `api.json`.
+
+
+---
+
 ## 0.39.3 (2026-05-29) {: #0.39.3 }
 
 

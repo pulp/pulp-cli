@@ -1,1 +1,0 @@
-Fixed empty string not being accepted as the value of `--retain-repo-versions`.
