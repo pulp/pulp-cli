@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools<83"]
+requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -7,7 +7,7 @@ name = "pulp-glue"
 version = "0.38.4.dev"
 description = "Version agnostic glue library to talk to pulpcore's REST API."
 readme = "README.md"
-requires-python = ">=3.10,<3.15"
+requires-python = ">=3.10,<3.16"
 license = "GPL-2.0-or-later"
 authors = [
   {name = "Pulp Team", email = "pulp-list@redhat.com"},
