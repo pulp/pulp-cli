@@ -24,7 +24,7 @@ try:
 except ImportError:
     HAS_CLICK_SHELL = False
 
-__version__ = "0.37.2"
+__version__ = "0.37.3.dev"
 translation = get_translation(__package__)
 _ = translation.gettext
 # Keep track to prevent loading plugins twice
