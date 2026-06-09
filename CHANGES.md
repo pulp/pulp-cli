@@ -10,6 +10,74 @@
 
 [//]: # (towncrier release notes start)
 
+## 0.40.1 (2026-06-08) {: #0.40.1 }
+
+
+
+No significant changes.
+
+
+### Pulp GLUE {: #0.40.1-pulp-glue }
+
+
+No significant changes.
+
+
+---
+
+## 0.40.0 (2026-06-08) {: #0.40.0 }
+
+
+
+#### Features {: #0.40.0-feature }
+
+- Added `--allow-package-substitution`/`--block-package-substitution` options to `pulp python repository` for controlling packages with same filenames but different checksums.
+  [#1375](https://github.com/pulp/pulp-cli/issues/1375)
+- Added `blocklist` subcommand group to `pulp python repository` for managing blocklist entries (add, list, remove, show).
+  [#1391](https://github.com/pulp/pulp-cli/issues/1391)
+- Added `--q-select` option to `pulp upstream-pulp replicate` for selectively syncing a subset of upstream distributions without modifying the stored upstream-pulp configuration.
+
+
+#### Bugfixes {: #0.40.0-bugfix }
+
+- Fixed empty string not being accepted as the value of `--retain-repo-versions`.
+
+
+### Pulp GLUE {: #0.40.0-pulp-glue }
+
+
+#### Features {: #0.40.0-pulp-glue-feature }
+
+- Added `allow_package_substitution` field to `PulpPythonRepositoryContext` for `pulp_python>=3.28.0`.
+  [#1375](https://github.com/pulp/pulp-cli/issues/1375)
+- Added `PulpPythonBlocklistEntryContext` for `pulp_python>=3.30.2`.
+  [#1391](https://github.com/pulp/pulp-cli/issues/1391)
+- Added `body` parameter to `PulpUpstreamPulpContext.replicate()` for passing per-request options like `q_select` for `core>=3.113.0`.
+
+
+#### Bugfixes {: #0.40.0-pulp-glue-bugfix }
+
+- Fixed passing nested objects stringified in form-encoded body according to OAS3.1.
+- Sanitize the filename of the chached `api.json`.
+
+
+---
+
+## 0.39.4 (2026-06-08) {: #0.39.4 }
+
+
+
+No significant changes.
+
+
+### Pulp GLUE {: #0.39.4-pulp-glue }
+
+
+No significant changes.
+
+
+---
+
 ## 0.39.3 (2026-05-29) {: #0.39.3 }
 
 
@@ -95,6 +163,21 @@ No significant changes.
 #### Bugfixes {: #0.39.0-pulp-glue-bugfix }
 
 - Fixed `PulpEntityContext.update` method to correctly pass `partial=True` to `preprocess_entity`.
+
+
+---
+
+## 0.38.4 (2026-06-08) {: #0.38.4 }
+
+
+
+No significant changes.
+
+
+### Pulp GLUE {: #0.38.4-pulp-glue }
+
+
+No significant changes.
 
 
 ---
@@ -185,6 +268,21 @@ No significant changes.
 - Breaking change: Reworked the contract around the `AuthProvider` to allow authentication to be coded independently of the underlying library.
 - The `api_quirk` decorator has been deprecated in favor of the `api_spec_quirk` decorator.
   Quirks are now supposed to work on the raw spec before it is parsed by the `openapi` layer.
+
+
+---
+
+## 0.37.2 (2026-06-08) {: #0.37.2 }
+
+
+
+No significant changes.
+
+
+### Pulp GLUE {: #0.37.2-pulp-glue }
+
+
+No significant changes.
 
 
 ---
