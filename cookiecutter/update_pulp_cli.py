@@ -70,11 +70,9 @@ def latest_version(canonical_name: str, allow_prereleases: bool | None = None) -
     with urllib.request.urlopen(f"{WAREHOUSE}/pypi/{canonical_name}/json") as response:
         releases = json.loads(response.read())["releases"]
     available_versions = sorted(
-        (
-            version
-            for version in (Version(key) for key in releases.keys())
-            if allow_prereleases or not version.is_prerelease
-        )
+        version
+        for version in (Version(key) for key in releases.keys())
+        if allow_prereleases or not version.is_prerelease
     )
     return available_versions[-1]
 
@@ -85,7 +83,7 @@ def main() -> None:
     update = False
     new_specifier: SpecifierSet | None = None
 
-    with open("pyproject.toml", "r") as fp:
+    with open("pyproject.toml") as fp:
         pyproject_toml = tomlkit.load(fp)
     glue_available = bool(pyproject_toml["tool"]["pulp_cli_template"]["app_label"])  # type: ignore
     app_label = str(pyproject_toml["tool"]["pulp_cli_template"]["app_label"])  # type: ignore
@@ -105,7 +103,7 @@ def main() -> None:
 
     if update:
         if glue_available:
-            with open(f"pulp-glue-{app_label}/pyproject.toml", "r") as fp:
+            with open(f"pulp-glue-{app_label}/pyproject.toml") as fp:
                 glue_pyproject_toml = tomlkit.load(fp)
             for i, dependency in enumerate(glue_pyproject_toml["project"]["dependencies"]):  # type: ignore
                 requirement = Requirement(dependency)
