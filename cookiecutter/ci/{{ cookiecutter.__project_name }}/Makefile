@@ -65,7 +65,6 @@ tests/cli.toml:
 .PHONY: _test
 _test: | tests/cli.toml
 	pytest -v tests {%- if cookiecutter.glue %} pulp-glue{{ cookiecutter.__app_label_suffix }}/tests {%- endif %}
-	{%- if cookiecutter.__app_label_suffix == "" %} cookiecutter/pulp_filter_extension.py {%- endif %}
 
 .PHONY: test
 test:
@@ -91,8 +90,7 @@ paralleltest:
 
 .PHONY: _unittest
 _unittest:
-	pytest -v tests {%- if cookiecutter.glue %} pulp-glue{{ cookiecutter.__app_label_suffix }}/tests {%- endif %}
-	{%- if cookiecutter.__app_label_suffix == "" %} cookiecutter/pulp_filter_extension.py {%- endif %} -m "not live"
+	pytest -v tests {%- if cookiecutter.glue %} pulp-glue{{ cookiecutter.__app_label_suffix }}/tests {%- endif %} -m "not live"
 
 .PHONY: unittest
 unittest:
