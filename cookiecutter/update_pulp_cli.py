@@ -11,6 +11,7 @@ import json
 import logging
 import subprocess
 import urllib.request
+from pathlib import Path
 
 import tomlkit
 from packaging.requirements import Requirement
@@ -83,8 +84,7 @@ def main() -> None:
     update = False
     new_specifier: SpecifierSet | None = None
 
-    with open("pyproject.toml") as fp:
-        pyproject_toml = tomlkit.load(fp)
+    pyproject_toml = tomlkit.loads(Path("pyproject.toml").read_text())
     glue_available = bool(pyproject_toml["tool"]["pulp_cli_template"]["app_label"])  # type: ignore
     app_label = str(pyproject_toml["tool"]["pulp_cli_template"]["app_label"])  # type: ignore
 
@@ -103,8 +103,9 @@ def main() -> None:
 
     if update:
         if glue_available:
-            with open(f"pulp-glue-{app_label}/pyproject.toml") as fp:
-                glue_pyproject_toml = tomlkit.load(fp)
+            glue_pyproject_toml = tomlkit.loads(
+                Path(f"pulp-glue-{app_label}/pyproject.toml").read_text()
+            )
             for i, dependency in enumerate(glue_pyproject_toml["project"]["dependencies"]):  # type: ignore
                 requirement = Requirement(dependency)
                 if canonicalize_name(requirement.name, validate=True) == "pulp-glue":
@@ -113,11 +114,11 @@ def main() -> None:
                     glue_pyproject_toml["project"]["dependencies"][i] = str(  # type:ignore
                         requirement
                     )
-            with open(f"pulp-glue-{app_label}/pyproject.toml", "w") as fp:
-                tomlkit.dump(glue_pyproject_toml, fp)
+            Path(f"pulp-glue-{app_label}/pyproject.toml").write_text(
+                tomlkit.dumps(glue_pyproject_toml)
+            )
 
-        with open("pyproject.toml", "w") as fp:
-            tomlkit.dump(pyproject_toml, fp)
+        Path("pyproject.toml").write_text(tomlkit.dumps(pyproject_toml))
         ret = subprocess.call(["uv", "sync"])
         if ret != 0:
             raise RuntimeError("uv sync failed.")

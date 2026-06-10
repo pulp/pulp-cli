@@ -8,15 +8,15 @@
 # ///
 
 import itertools
-import os
 import re
+from pathlib import Path
 
 import tomllib
 from git import GitCommandError, Repo
 from packaging.version import parse as parse_version
 
 # Read Towncrier settings
-with open("pyproject.toml", "rb") as fp:
+with Path("pyproject.toml").open("rb") as fp:
     tc_settings = tomllib.load(fp)["tool"]["towncrier"]
 
 CHANGELOG_FILE = tc_settings.get("filename", "NEWS.rst")
@@ -74,14 +74,13 @@ def split_changelog(changelog):
 
 
 def main():
-    repo = Repo(os.getcwd())
+    repo = Repo(Path.cwd())
     remote = repo.remotes[0]
     branches = [ref for ref in remote.refs if re.match(r"^([0-9]+)\.([0-9]+)$", ref.remote_head)]
     branches.sort(key=lambda ref: parse_version(ref.remote_head), reverse=True)
     branches = [ref.name for ref in branches]
 
-    with open(CHANGELOG_FILE) as f:
-        main_changelog = f.read()
+    main_changelog = Path(CHANGELOG_FILE).read_text()
     preamble, main_changes = split_changelog(main_changelog)
     old_length = len(main_changes)
 
@@ -103,7 +102,7 @@ def main():
     new_length = len(main_changes)
     if old_length < new_length:
         print(f"{new_length - old_length} new versions have been added.")
-        with open(CHANGELOG_FILE, "w") as fp:
+        with Path(CHANGELOG_FILE).open("w") as fp:
             fp.write(preamble)
             fp.writelines(change[1] for change in main_changes)
 

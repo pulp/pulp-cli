@@ -350,8 +350,7 @@ def edit(location: str) -> None:
 @click.option("--strict", is_flag=True, help=_("Validate that all settings are present"))
 def validate(location: str, strict: bool) -> None:
     try:
-        with open(location, "rb") as fp:
-            settings = tomllib.load(fp)
+        settings = tomllib.loads(Path(location).read_text())
     except tomllib.TOMLDecodeError:
         raise click.ClickException(_("Invalid toml file '{location}'.").format(location=location))
 

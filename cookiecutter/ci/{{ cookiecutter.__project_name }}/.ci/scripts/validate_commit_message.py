@@ -14,7 +14,7 @@ from pathlib import Path
 import tomllib
 from github import Github
 
-with open("pyproject.toml", "rb") as fp:
+with Path("pyproject.toml").open("rb") as fp:
     PYPROJECT_TOML = tomllib.load(fp)
 KEYWORDS = ["fixes", "closes"]
 BLOCKING_REGEX = [

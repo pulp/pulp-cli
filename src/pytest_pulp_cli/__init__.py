@@ -95,7 +95,8 @@ def pulp_cli_settings() -> dict[str, dict[str, t.Any]]:
     The `pulp_cli_env` fixture, however depends on it and sets $XDG_CONFIG_HOME up accordingly.
     """
     pulp_cli_test_tmpdir = pathlib.Path(os.environ.get("PULP_CLI_TEST_TMPDIR", "."))
-    with open(os.environ.get("PULP_CLI_CONFIG", "tests/cli.toml"), "rb") as fp:
+    pulp_cli_config_file = pathlib.Path(os.environ.get("PULP_CLI_CONFIG", "tests/cli.toml"))
+    with pulp_cli_config_file.open("rb") as fp:
         settings = {"cli": tomllib.load(fp)["cli"]}
     if os.environ.get("PULP_HTTPS", "false").lower() == "true":
         settings["cli"]["base_url"] = settings["cli"]["base_url"].replace("http://", "https://")
@@ -131,7 +132,7 @@ def pulp_cli_settings_path(
 ) -> pathlib.Path:
     settings_path = tmp_path_factory.mktemp("config", numbered=False)
     (settings_path / "pulp").mkdir(parents=True)
-    with open(settings_path / "pulp" / "cli.toml", "wb") as fp:
+    with (settings_path / "pulp" / "cli.toml").open("wb") as fp:
         tomli_w.dump(pulp_cli_settings, fp)
     return settings_path
 
