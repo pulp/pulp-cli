@@ -46,7 +46,6 @@ def acs_command(
     @acs.group()
     def path() -> None:
         """Manage paths for an ACS."""
-        pass
 
     @path.command()
     @name_option
