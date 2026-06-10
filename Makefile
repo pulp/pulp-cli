@@ -53,7 +53,7 @@ tests/cli.toml:
 
 .PHONY: _test
 _test: | tests/cli.toml
-	pytest -v tests pulp-glue/tests cookiecutter/pulp_filter_extension.py
+	pytest -v tests pulp-glue/tests
 
 .PHONY: test
 test:
@@ -79,7 +79,7 @@ paralleltest:
 
 .PHONY: _unittest
 _unittest:
-	pytest -v tests pulp-glue/tests cookiecutter/pulp_filter_extension.py -m "not live"
+	pytest -v tests pulp-glue/tests -m "not live"
 
 .PHONY: unittest
 unittest:
