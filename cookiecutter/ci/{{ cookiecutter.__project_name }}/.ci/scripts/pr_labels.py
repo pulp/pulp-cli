@@ -19,7 +19,7 @@ from git import Repo
 def main():
     assert len(sys.argv) == 3
 
-    with open("pyproject.toml", "rb") as fp:
+    with Path("pyproject.toml").open("rb") as fp:
         PYPROJECT_TOML = tomllib.load(fp)
     BLOCKING_REGEX = re.compile(r"DRAFT|WIP|NO\s*MERGE|DO\s*NOT\s*MERGE|EXPERIMENT")
     ISSUE_REGEX = re.compile(r"(?:fixes|closes)[\s:]+#(\d+)")

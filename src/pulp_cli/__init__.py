@@ -1,8 +1,8 @@
 import logging
-import os
 import sys
 import typing as t
 from importlib.metadata import entry_points
+from pathlib import Path
 from types import ModuleType
 
 import click
@@ -87,14 +87,12 @@ def _load_config(ctx: click.Context) -> None:
         config_path = ctx.meta[CONFIG_KEY]
         profile_key = ctx.meta[PROFILE_KEY]
         if config_path is not None:
-            with open(config_path, "rb") as fp:
-                config = tomllib.load(fp)
+            config = tomllib.loads(Path(config_path).read_text())
         else:
             config = {"cli": {}}
             for location in CONFIG_LOCATIONS:
                 try:
-                    with open(location, "rb") as fp:
-                        new_config = tomllib.load(fp)
+                    new_config = tomllib.loads(Path(location).read_text())
                 except (FileNotFoundError, PermissionError):
                     pass
                 else:
@@ -270,5 +268,5 @@ if HAS_CLICK_SHELL:
             ctx.parent,
             prompt="pulp> ",
             intro="Starting Pulp3 interactive shell...",
-            hist_file=os.path.join(click.utils.get_app_dir("pulp"), "cli-history"),
+            hist_file=str(Path(click.utils.get_app_dir("pulp")) / "cli-history"),
         ).cmdloop()

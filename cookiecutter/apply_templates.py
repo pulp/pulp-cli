@@ -61,7 +61,7 @@ def main(bootstrap: bool, force: bool) -> None:
     # Select cookiecutter sections to apply.
     # CI
     sections.append("ci")
-    with open(".github/workflows/test.yml") as fp:
+    with Path(".github/workflows/test.yml").open() as fp:
         config["test_matrix"] = yaml.safe_load(fp)["jobs"]["test"]["strategy"]["matrix"]
 
     # Docs

@@ -36,7 +36,7 @@ autofix:
 _lint:
 	find tests .ci -name '*.sh' -print0 | xargs -0 shellcheck -x
 	ruff format --check --diff
-	ruff check
+	ruff check --output-format concise
 	.ci/scripts/check_click_for_mypy.py
 	mypy
 	cd pulp-glue; mypy

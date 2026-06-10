@@ -246,7 +246,7 @@ extend-exclude = ["cookiecutter/bootstrap", "cookiecutter/ci", "cookiecutter/doc
 
 [tool.ruff.lint]
 # This section is managed by the cookiecutter templates.
-extend-select = ["I", "INT"]
+extend-select = ["I", "INT", "PTH"]
 
 [tool.ruff.lint.isort]
 # This section is managed by the cookiecutter templates.

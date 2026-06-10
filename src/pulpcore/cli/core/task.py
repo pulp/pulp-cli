@@ -195,7 +195,7 @@ def profile_artifact_urls(
         uuid_match = re.match(r".*/api/v3/tasks/(?P<uuid>.*)/", task_ctx.entity["pulp_href"])
         assert uuid_match is not None
         uuid = uuid_match.group("uuid")
-        profile_artifact_dir = Path(".") / f"task_profile-{task_name}-{uuid}"
+        profile_artifact_dir = Path(f"task_profile-{task_name}-{uuid}")
         profile_artifact_dir.mkdir(exist_ok=True)
         with pulp_ctx.api._session as session:
             for name, url in urls.items():
