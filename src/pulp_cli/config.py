@@ -177,7 +177,8 @@ def validate_config(config: dict[str, t.Any], strict: bool = False) -> None:
         errors.append(_("'verify_ssl' is not a bool"))
     if "chunk_size" in config:
         try:
-            parse_size(config["chunk_size"])
+            # Casting to string to see if it looks like a positive number with optional units.
+            parse_size(str(config["chunk_size"]))
         except click.ClickException as e:
             errors.append(e.message)
     if "dry_run" in config and not isinstance(config["dry_run"], bool):

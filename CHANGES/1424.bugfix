@@ -1,0 +1,1 @@
+Fixed bug where specifying `--chunk-size` for config commands crashed.
