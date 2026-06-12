@@ -1,4 +1,5 @@
 import typing as t
+import warnings
 
 from pulp_glue.common import oas
 
@@ -11,16 +12,18 @@ class AuthProviderBase:
     Different authentication schemes can be implemented in subclasses.
     """
 
-    def can_complete_http_basic(self) -> bool:
+    def can_complete_http_basic(self) -> t.Literal[False] | int:
         return False
 
-    def can_complete_mutualTLS(self) -> bool:
+    def can_complete_mutualTLS(self) -> t.Literal[False] | int:
         return False
 
-    def can_complete_oauth2_client_credentials(self, scopes: list[str]) -> bool:
+    def can_complete_oauth2_client_credentials(self, scopes: list[str]) -> t.Literal[False] | int:
         return False
 
-    def can_complete_scheme(self, security_scheme: oas.SecurityScheme, scopes: list[str]) -> bool:
+    def can_complete_scheme(
+        self, security_scheme: oas.SecurityScheme, scopes: list[str]
+    ) -> t.Literal[False] | int:
         if isinstance(security_scheme, oas.SecuritySchemeHttp):
             if security_scheme.scheme == "basic":
                 return self.can_complete_http_basic()
@@ -28,27 +31,31 @@ class AuthProviderBase:
             return self.can_complete_mutualTLS()
         elif isinstance(security_scheme, oas.SecuritySchemeOAuth2):
             client_credentials_flow = security_scheme.flows.client_credentials
-            if client_credentials_flow is not None and self.can_complete_oauth2_client_credentials(
-                list(client_credentials_flow.scopes.keys())
-            ):
-                return True
+            if client_credentials_flow is not None:
+                return self.can_complete_oauth2_client_credentials(
+                    list(client_credentials_flow.scopes.keys())
+                )
         return False
 
     def can_complete(
         self,
         proposal: dict[str, list[str]],
         security_schemes: dict[str, oas.SecurityScheme | oas.Reference],
-    ) -> bool:
+    ) -> t.Literal[False] | int:
+        cost: int = 0
         for name, scopes in proposal.items():
             security_scheme = security_schemes.get(name)
-            if (
-                security_scheme is None
-                or isinstance(security_scheme, oas.Reference)
-                or not self.can_complete_scheme(security_scheme, scopes)
-            ):
+            if security_scheme is None:
+                warnings.warn("OpenAPI references security scheme it does not define.")
                 return False
-        # This covers the case where `[]` allows for no auth at all.
-        return True
+            if isinstance(security_scheme, oas.Reference):
+                # TODO implement dereferencing in the authenticating code first.
+                return False
+            if (extra_cost := self.can_complete_scheme(security_scheme, scopes)) is False:
+                return False
+            cost += extra_cost
+        # This covers the case where `[]` allows for no auth at all for zero cost.
+        return cost
 
     async def auth_success_hook(self, **kwargs: t.Any) -> None:
         pass
@@ -76,8 +83,8 @@ class BasicAuthProvider(AuthProviderBase):
         self.username: bytes = username.encode("latin1") if isinstance(username, str) else username
         self.password: bytes = password.encode("latin1") if isinstance(password, str) else password
 
-    def can_complete_http_basic(self) -> bool:
-        return True
+    def can_complete_http_basic(self) -> t.Literal[False] | int:
+        return 1
 
     async def http_basic_credentials(self) -> tuple[bytes, bytes]:
         return self.username, self.password
@@ -120,14 +127,18 @@ class GlueAuthProvider(AuthProviderBase):
         if cert is None and key is not None:
             raise RuntimeError("Key can only be used together with a cert.")
 
-    def can_complete_http_basic(self) -> bool:
-        return self.username is not None
+    def can_complete_http_basic(self) -> t.Literal[False] | int:
+        # Basic auth is comparatively costly on the server side.
+        return self.username is not None and 15
 
-    def can_complete_oauth2_client_credentials(self, scopes: list[str]) -> bool:
-        return self.client_id is not None
+    def can_complete_oauth2_client_credentials(self, scopes: list[str]) -> t.Literal[False] | int:
+        # There is an extra roundtrip for aquiring the token.
+        # Should be cheap afterwards.
+        return self.client_id is not None and 10
 
-    def can_complete_mutualTLS(self) -> bool:
-        return self.cert is not None
+    def can_complete_mutualTLS(self) -> t.Literal[False] | int:
+        # No extra cost, the tls setup will be done anyway.
+        return self.cert is not None and 0
 
     async def http_basic_credentials(self) -> tuple[bytes, bytes]:
         assert self.username is not None
