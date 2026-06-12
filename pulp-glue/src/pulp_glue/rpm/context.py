@@ -371,6 +371,7 @@ class PulpRpmRepositoryVersionContext(PulpRepositoryVersionContext):
     HREF = "rpm_rpm_repository_version_href"
     ID_PREFIX = "repositories_rpm_rpm_versions"
     NEEDS_PLUGINS = [PluginRequirement("rpm", specifier=">=3.9.0")]
+    CAPABILITIES = {"scan": [PluginRequirement("rpm", specifier=">=3.38.0")]}
 
 
 class PulpRpmRepositoryContext(PulpRepositoryContext):
@@ -387,6 +388,7 @@ class PulpRpmRepositoryContext(PulpRepositoryContext):
         "roles": [PluginRequirement("rpm", specifier=">=3.19.0")],
     }
     NEEDS_PLUGINS = [PluginRequirement("rpm", specifier=">=3.9.0")]
+    NULLABLES = PulpRepositoryContext.NULLABLES | {"osv_config"}
 
     def preprocess_entity(self, body: EntityDefinition, partial: bool = False) -> EntityDefinition:
         body = super().preprocess_entity(body, partial=partial)
