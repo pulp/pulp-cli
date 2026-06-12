@@ -30,6 +30,27 @@ jobs:
     needs:
       - "lint"
     uses: "./.github/workflows/codeql.yml"
+  cookiecutter-bootstrap-check:
+    runs-on: "ubuntu-latest"
+    steps:
+      - name: "Checkout"
+        uses: "actions/checkout@v6"
+        with:
+          fetch-depth: 0
+      - name: "Set up Python"
+        uses: "actions/setup-python@v6"
+        with:
+          python-version: "3.14"
+          allow-prereleases: true
+      - name: "Install uv"
+        uses: "astral-sh/setup-uv@v7"
+        with:
+          enable-cache: true
+      - name: "Bootstrap template sanity check"
+        run: |
+          tmpdir="$(mktemp -d)"
+          pushd "$tmpdir"
+          yes "" | uv run "$GITHUB_WORKSPACE/cookiecutter/apply_templates.py" --bootstrap
   check-commits:
     runs-on: "ubuntu-latest"
     steps:
@@ -69,6 +90,7 @@ jobs:
       - "test"
       - "docs"
       - "codeql"
+      - "cookiecutter-bootstrap-check"
     if: "always()"
     steps:
       - name: "Collect needed jobs results"

@@ -17,7 +17,11 @@ for base_path in [
 
     # TODO How deep is your merge?
     # Is merging on the tool level appropriate?
-    pyproject_toml["tool"].update(pyproject_toml_update["tool"])
+    if "tool" in pyproject_toml_update:
+        if "tool" not in pyproject_toml:
+            pyproject_toml["tool"] = pyproject_toml_update["tool"]
+        else:
+            pyproject_toml["tool"].update(pyproject_toml_update["tool"])
 
     if "dependency-groups" in pyproject_toml_update:
         if "dependency-groups" not in pyproject_toml:
@@ -26,8 +30,9 @@ for base_path in [
             pyproject_toml["dependency-groups"].update(pyproject_toml_update["dependency-groups"])
 
     # Remove legacy tools.
-    for tool in ["flake8", "black", "isort"]:
-        pyproject_toml["tool"].pop(tool, None)
+    if "tool" in pyproject_toml:
+        for tool in ["flake8", "black", "isort"]:
+            pyproject_toml["tool"].pop(tool, None)
 
     with open(os.path.join(base_path, "pyproject.toml"), "w") as fp:
         tomlkit.dump(pyproject_toml, fp)

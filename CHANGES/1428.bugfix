@@ -1,0 +1,1 @@
+Fixed cookiecutter bootstrap error caused by a missing [tool] section in pyproject.toml.update during template merge.
