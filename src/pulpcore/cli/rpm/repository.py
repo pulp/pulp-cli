@@ -204,6 +204,17 @@ update_options = [
         ),
         callback=load_json_callback,
     ),
+    pulp_option(
+        "--osv-config",
+        "osv_config",
+        needs_plugins=[PluginRequirement("rpm", specifier=">=3.38.0")],
+        help=_(
+            "A JSON list of ecosystem configs for vulnerability scanning via osv.dev "
+            "(or @file containing a JSON list). "
+            "Each entry must have 'name' and 'releases' keys. Pass '' to clear."
+        ),
+        callback=load_json_callback,
+    ),
 ]
 create_options = update_options + [click.option("--name", required=True)]
 
