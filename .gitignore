@@ -4,6 +4,7 @@ build/
 site/
 dist/
 *.po~
+uv.lock
 
 tests/cli.toml
 GPG-PRIVATE-KEY-fixture-signing
