@@ -52,6 +52,7 @@ REMOVE_PATHS = [
     {%- if cookiecutter.app_label %}
     ".github/dependabot.yml",
     {%- endif %}
+    "uv.lock",
 ]
 
 for path in REMOVE_PATHS:

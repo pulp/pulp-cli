@@ -35,7 +35,6 @@ _autofix:
 
 .PHONY: autofix
 autofix:
-	uv lock
 	uv run --isolated --group lint $(MAKE) _autofix
 
 .PHONY: _lint
@@ -55,7 +54,6 @@ _lint:
 
 .PHONY: lint
 lint:
-	uv lock --check
 	uv run --isolated --group lint $(MAKE) _lint
 
 tests/cli.toml:
