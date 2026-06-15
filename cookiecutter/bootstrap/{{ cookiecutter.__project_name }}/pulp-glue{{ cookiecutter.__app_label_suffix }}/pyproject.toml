@@ -26,5 +26,5 @@ dependencies = [
 ]
 
 [project.urls]
-repository = "https://github.com/pulp/{{ cookiecutter.__project_name }}"
-changelog = "https://github.com/pulp/{{ cookiecutter.__project_name }}/blob/main/CHANGES.md"
+repository = "{{ cookiecutter.repository }}"
+changelog = "{{ cookiecutter.repository }}/blob/main/CHANGES.md"
