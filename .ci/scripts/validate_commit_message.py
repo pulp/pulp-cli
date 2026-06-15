@@ -12,7 +12,6 @@ import sys
 from pathlib import Path
 
 import tomllib
-from github import Github
 
 with Path("pyproject.toml").open("rb") as fp:
     PYPROJECT_TOML = tomllib.load(fp)
@@ -36,11 +35,13 @@ if NOISSUE_MARKER in message:
 if any(re.match(pattern, message) for pattern in BLOCKING_REGEX):
     sys.exit("This PR is not ready for consumption.")
 
-g = Github(os.environ.get("GITHUB_TOKEN"))
-repo = g.get_repo("pulp/pulp-cli")
-
 
 def check_status(issue: str) -> None:
+    from github import Github
+
+    g = Github(os.environ.get("GITHUB_TOKEN"))
+    repo = g.get_repo("pulp/pulp-cli")
+
     gi = repo.get_issue(int(issue))
     if gi.pull_request:
         sys.exit(f"Error: issue #{issue} is a pull request.")
