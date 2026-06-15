@@ -28,6 +28,7 @@ test = [
   "secretstorage>=3.5.0",
   "trustme>=1.1.0,<1.3",
 ]
+{%- if cookiecutter.glue %}
 
 [tool.uv.sources]
 # This section is managed by the cookiecutter templates.
@@ -36,6 +37,7 @@ pulp-glue{{ cookiecutter.__app_label_suffix }} = { workspace = true }
 [tool.uv.workspace]
 # This section is managed by the cookiecutter templates.
 members = ["pulp-glue{{ cookiecutter.__app_label_suffix }}"]
+{%- endif %}
 
 [tool.uv.build-backend]
 # This section is managed by the cookiecutter templates.

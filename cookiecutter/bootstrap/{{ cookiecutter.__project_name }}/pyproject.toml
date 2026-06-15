@@ -39,6 +39,7 @@ changelog = "{{ cookiecutter.repository }}/blob/main/CHANGES.md"
 app_label = {{ cookiecutter.app_label | toml_value }}
 glue = {{ cookiecutter.glue | toml_value }}
 docs = {{ cookiecutter.docs | toml_value }}
+repository = {{ cookiecutter.repository | toml_value }}
 src_layout = true
 translations = {{ cookiecutter.translations | toml_value }}
 

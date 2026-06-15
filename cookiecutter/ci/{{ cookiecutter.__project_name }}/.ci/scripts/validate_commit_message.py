@@ -1,7 +1,9 @@
 # /// script
 # requires-python = ">=3.11"
 # dependencies = [
+{%- if cookiecutter.repository.startswith("https://github.com/") %}
 #     "pygithub>=2.8.1,<3.0.0",
+{%- endif %}
 # ]
 # ///
 
@@ -12,7 +14,6 @@ import sys
 from pathlib import Path
 
 import tomllib
-from github import Github
 
 with Path("pyproject.toml").open("rb") as fp:
     PYPROJECT_TOML = tomllib.load(fp)
@@ -36,16 +37,22 @@ if NOISSUE_MARKER in message:
 if any(re.match(pattern, message) for pattern in BLOCKING_REGEX):
     sys.exit("This PR is not ready for consumption.")
 
-g = Github(os.environ.get("GITHUB_TOKEN"))
-repo = g.get_repo("pulp/pulp-cli{{ cookiecutter.__app_label_suffix }}")
-
 
 def check_status(issue: str) -> None:
+    {%- if cookiecutter.repository.startswith("https://github.com/") %}
+    from github import Github
+
+    g = Github(os.environ.get("GITHUB_TOKEN"))
+    repo = g.get_repo("{{ cookiecutter.repository[19:] }}")
+
     gi = repo.get_issue(int(issue))
     if gi.pull_request:
         sys.exit(f"Error: issue #{issue} is a pull request.")
     if gi.closed_at:
         sys.exit(f"Error: issue #{issue} is closed.")
+    {%- else %}
+    pass
+    {%- endif %}
 
 
 def check_changelog(issue: str) -> None:

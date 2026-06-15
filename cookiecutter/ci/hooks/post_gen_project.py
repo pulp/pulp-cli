@@ -6,7 +6,9 @@ import tomlkit
 
 for base_path in [
     ".",
+    {%- if cookiecutter.glue %}
     "pulp-glue{{ cookiecutter.__app_label_suffix }}",
+    {%- endif %}
 ]:
     # Merge pyproject.toml.update into pyproject.toml
     with open(os.path.join(base_path, "pyproject.toml"), "r") as fp:
@@ -17,13 +19,10 @@ for base_path in [
 
     # TODO How deep is your merge?
     # Is merging on the tool level appropriate?
-    pyproject_toml["tool"].update(pyproject_toml_update["tool"])
+    pyproject_toml.setdefault("tool", {}).update(pyproject_toml_update["tool"])
 
     if "dependency-groups" in pyproject_toml_update:
-        if "dependency-groups" not in pyproject_toml:
-            pyproject_toml["dependency-groups"]=pyproject_toml_update["dependency-groups"]
-        else:
-            pyproject_toml["dependency-groups"].update(pyproject_toml_update["dependency-groups"])
+        pyproject_toml.setdefault("dependency-groups", {}).update(pyproject_toml_update["dependency-groups"])
 
     # Remove legacy tools.
     for tool in ["flake8", "black", "isort"]:
