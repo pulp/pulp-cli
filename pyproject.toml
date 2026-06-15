@@ -72,7 +72,7 @@ lint = [
 ]
 test = [
   "pygments>=2.19.2",
-  "pytest>=7.0.0,<9.1",
+  "pytest>=7.0.0,<9.2",
   "pytest-xdist>=3.8.0,<3.9",
   "python-gnupg>=0.5.0,<0.6",
   "secretstorage>=3.5.0",
