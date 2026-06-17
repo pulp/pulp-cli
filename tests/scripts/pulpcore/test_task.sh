@@ -32,7 +32,7 @@ repository_href="$(echo "$OUTPUT" | jq -r '.pulp_href')"
 if pulp debug has-plugin --name "core" --specifier ">=3.21.0"
 then
   expect_succ pulp --background file repository sync --name "cli_test_core_task_repository" --remote "cli_test_core_task_large_remote"
-  task="$(echo "$ERROUTPUT" | grep -E -o "${PULP_API_ROOT}([-_a-zA-Z0-9]+/)?api/v3/tasks/[-[:xdigit:]]*/")"
+  task="$(echo "$ERROUTPUT" | grep -E -o "${PULP_API_ROOT}([-_a-zA-Z0-9]+/)?api/v[[:digit:]]+/tasks/[-[:xdigit:]]*/")"
   if expect_succ pulp task cancel --href "$task"
   then
     expect_succ pulp task list --name $sync_task --state canceled
@@ -52,7 +52,7 @@ expect_fail pulp --dry-run task cancel --all
 
 # Test waiting for a task
 expect_succ pulp --header X-Task-Diagnostics:memory --background file repository sync --name "cli_test_core_task_repository"
-task=$(echo "$ERROUTPUT" | grep -E -o "${PULP_API_ROOT}([-_a-zA-Z0-9]+/)?api/v3/tasks/[-[:xdigit:]]*/")
+task=$(echo "$ERROUTPUT" | grep -E -o "${PULP_API_ROOT}([-_a-zA-Z0-9]+/)?api/v[[:digit:]]+/tasks/[-[:xdigit:]]*/")
 task_uuid="${task%/}"
 task_uuid="${task_uuid##*/}"
 expect_succ pulp task show --wait --uuid "$task_uuid"

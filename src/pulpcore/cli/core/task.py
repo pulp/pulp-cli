@@ -192,7 +192,9 @@ def profile_artifact_urls(
     pulp_ctx.output_result(urls)
     if download:
         task_name: str = task_ctx.entity["name"]
-        uuid_match = re.match(r".*/api/v3/tasks/(?P<uuid>.*)/", task_ctx.entity["pulp_href"])
+        uuid_match = re.match(
+            r".*/api/(?P<version>v\d+)/tasks/(?P<uuid>.*)/", task_ctx.entity["pulp_href"]
+        )
         assert uuid_match is not None
         uuid = uuid_match.group("uuid")
         profile_artifact_dir = Path(f"task_profile-{task_name}-{uuid}")

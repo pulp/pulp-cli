@@ -728,7 +728,6 @@ class OpenAPI:
         rel_url = path
         for name, value in rendered_parameters["path"].items():
             rel_url = path.replace("{" + name + "}", value)
-
         query_params = rendered_parameters["query"]
 
         url = urljoin(self._base_url, rel_url)
