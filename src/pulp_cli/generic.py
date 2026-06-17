@@ -143,6 +143,7 @@ class PulpCLIContext(PulpContext):
 
     Parameters:
         api_root: The base url (excluding "api/v3/") to the server's api.
+        api_version: The version of Pulp's API to talk to (e.g. "v3").
         api_kwargs: Extra arguments to pass to the wrapped `OpenAPI` object.
         background_tasks: Whether to wait for tasks. If `True`, all tasks triggered will
             immediately raise `PulpNoWait`.
@@ -166,6 +167,7 @@ class PulpCLIContext(PulpContext):
         oauth2_client_id: str | None = None,
         oauth2_client_secret: str | None = None,
         chunk_size: int | None = None,
+        api_version: str | None = "v3",
     ) -> None:
         self.username = username
         self.password = password
@@ -184,6 +186,7 @@ class PulpCLIContext(PulpContext):
             timeout=timeout,
             domain=domain,
             chunk_size=chunk_size,
+            api_version=api_version,
         )
         self.format = format
 
