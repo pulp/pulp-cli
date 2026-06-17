@@ -25,7 +25,7 @@ _ = translation.gettext
 @api_spec_quirk(PluginRequirement("rpm", specifier=">=3.3.0"))
 def patch_rpm_copy_scheme(api_spec: t.Any) -> t.Any:
     path, operation = next(
-        ((k, v["post"]) for k, v in api_spec["paths"].items() if k.endswith("/api/v3/rpm/copy/"))
+        ((k, v["post"]) for k, v in api_spec["paths"].items() if k.endswith("/rpm/copy/"))
     )
     api_spec["components"]["schemas"]["RpmCopy"] = {
         "type": "object",
