@@ -225,6 +225,7 @@ def main(
     dry_run: bool,
     timeout: int,
     cid: str,
+    api_version: str,
 ) -> None:
     if verbose:
         logging.basicConfig(level=logging.DEBUG + 4 - verbose, format="%(message)s")
@@ -252,6 +253,7 @@ def main(
         oauth2_client_id=client_id,
         oauth2_client_secret=client_secret,
         chunk_size=chunk_size,
+        api_version=api_version,
     )
 
 
