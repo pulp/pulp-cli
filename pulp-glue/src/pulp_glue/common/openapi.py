@@ -10,6 +10,7 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from functools import cached_property
 from io import BufferedReader
+from pathlib import Path
 from urllib.parse import urlencode, urljoin
 
 import requests
@@ -220,30 +221,29 @@ class OpenAPI:
 
     def load_api(self, refresh_cache: bool = False) -> None:
         # TODO: Find a way to invalidate caches on upstream change
-        xdg_cache_home: str = os.environ.get("XDG_CACHE_HOME") or "~/.cache"
-        apidoc_cache: str = os.path.join(
-            os.path.expanduser(xdg_cache_home),
-            "squeezer",
-            (self._base_url + "_" + self._doc_path)
+        xdg_cache_home = Path(os.environ.get("XDG_CACHE_HOME") or "~/.cache").expanduser()
+        apidoc_cache = (
+            xdg_cache_home
+            / "squeezer"
+            / (self._base_url + "_" + self._doc_path)
             .replace(":", "_")
             .replace("/", "_")
-            .replace("?", "_"),
+            .replace("?", "_")
         )
+
         try:
             if refresh_cache:
                 # Fake that we did not find the cache.
                 raise OSError()
-            with open(apidoc_cache, "rb") as f:
-                data: bytes = f.read()
+            data = apidoc_cache.read_bytes()
             self._parse_api(data)
         except Exception:
             # Try again with a freshly downloaded version
             data = self._download_api()
             self._parse_api(data)
             # Write to cache as it seems to be valid
-            os.makedirs(os.path.dirname(apidoc_cache), exist_ok=True)
-            with open(apidoc_cache, "bw") as f:
-                f.write(data)
+            apidoc_cache.parent.mkdir(parents=True, exist_ok=True)
+            apidoc_cache.write_bytes(data)
 
     def _parse_api(self, data: bytes) -> None:
         raw_spec = self._patch_api_hook(json.loads(data))

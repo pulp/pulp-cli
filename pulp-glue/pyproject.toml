@@ -75,5 +75,5 @@ line-length = 100
 
 [tool.ruff.lint]
 # This section is managed by the cookiecutter templates.
-extend-select = ["I", "INT"]
+extend-select = ["I", "INT", "PTH"]
 
