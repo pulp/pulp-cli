@@ -1,8 +1,8 @@
 import datetime
 import hashlib
-import os
 import sys
 import typing as t
+from pathlib import Path
 
 from pulp_glue.common.context import (
     EntityDefinition,
@@ -53,7 +53,7 @@ class PulpArtifactContext(PulpEntityContext):
         chunk_size: int | None = None,
         sha256: str | None = None,
     ) -> t.Any:
-        size = os.path.getsize(file.name)
+        size = Path(file.name).stat().st_size
 
         sha256_hasher = hashlib.sha256()
         for chunk in iter(lambda: file.read(10_000_000), b""):
@@ -549,7 +549,7 @@ class PulpUploadContext(PulpEntityContext):
     def upload_file(self, file: t.IO[bytes], chunk_size: int = 1000000) -> t.Any:
         """Upload a file and return the uncommitted upload_href."""
         start = 0
-        size = os.path.getsize(file.name)
+        size = Path(file.name).stat().st_size
         upload_href = self.create(body={"size": size})["pulp_href"]
         try:
             self.pulp_href = upload_href

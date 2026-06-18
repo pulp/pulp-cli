@@ -386,8 +386,7 @@ class PulpContext:
         configs: dict[str, dict[str, t.Any]] = {}
         for location in config_locations:
             try:
-                with open(location, "rb") as fp:
-                    new_configs = tomllib.load(fp)
+                new_configs = tomllib.loads(Path(location).read_text())
             except (FileNotFoundError, PermissionError):
                 pass
             else:
@@ -1750,7 +1749,7 @@ class PulpContentContext(PulpEntityContext):
         chunk_size: int | None,
     ) -> None:
         _chunk_size: int | None = chunk_size or self.pulp_ctx.chunk_size
-        size = os.path.getsize(file.name)
+        size = Path(file.name).stat().st_size
         if not self.pulp_ctx.fake_mode:  # Skip the uploading part in fake_mode
             if _chunk_size is None or _chunk_size > size:
                 body["file"] = file
@@ -1778,7 +1777,7 @@ class PulpContentContext(PulpEntityContext):
             chunk_size: int | None = body.pop("chunk_size", None)
             if file:
                 if isinstance(file, str | Path):
-                    file = open(file, "rb")
+                    file = Path(file).open("rb")
                     cleanup.enter_context(file)
                 self._prepare_upload(body, file, chunk_size)
             if self.repository_ctx is not None:
@@ -1802,7 +1801,7 @@ class PulpContentContext(PulpEntityContext):
         This function is deprecated. The create call can handle the upload logic transparently.
 
         Parameters:
-            file: A file like object that supports `os.path.getsize`.
+            file: A file like object.
             chunk_size: Size of the chunks to upload independently. `None` to disable chunking.
             repository: Repository context to add the newly created content to.
             kwargs: Extra args specific to the content type, passed to the create call.
