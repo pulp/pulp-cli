@@ -1582,7 +1582,7 @@ class PulpRepositoryContext(PulpEntityContext):
     HREF_TEMPLATE = "repositories/{plugin}/{resource_type}/{pulp_id}/"
     ID_PREFIX = "repositories"
     VERSION_CONTEXT: t.ClassVar[type[PulpRepositoryVersionContext]] = PulpRepositoryVersionContext
-    NULLABLES = {"description", "remote", "retain_repo_versions"}
+    NULLABLES = {"description", "remote", "retain_repo_versions", "retain_checkpoints"}
     TYPE_REGISTRY: t.Final[dict[str, type["PulpRepositoryContext"]]] = {}
 
     def __init_subclass__(cls, **kwargs: t.Any) -> None:

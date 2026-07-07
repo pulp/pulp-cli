@@ -36,6 +36,17 @@ expect_succ pulp rpm repository update --repository "cli_test_rpm_sync_repositor
 expect_succ pulp rpm repository show --repository "cli_test_rpm_sync_repository"
 test "$(echo "$OUTPUT" | jq -r '.description')" = "null"
 
+# retain_checkpoints was added to Repository in pulpcore 3.106.0 (pulp/pulpcore#7428)
+if pulp debug has-plugin --name "core" --specifier ">=3.106.0"
+then
+  expect_succ pulp rpm repository update --repository "cli_test_rpm_sync_repository" --retain-checkpoints 5
+  expect_succ pulp rpm repository show --repository "cli_test_rpm_sync_repository"
+  test "$(echo "$OUTPUT" | jq -r '.retain_checkpoints')" = "5"
+  expect_succ pulp rpm repository update --repository "cli_test_rpm_sync_repository" --retain-checkpoints ""
+  expect_succ pulp rpm repository show --repository "cli_test_rpm_sync_repository"
+  test "$(echo "$OUTPUT" | jq -r '.retain_checkpoints')" = "null"
+fi
+
 # sqlite metadata removal from pulp_rpm (pulp/pulp_rpm#3328)
 if pulp debug has-plugin --name "rpm" --specifier "<3.25.0"
 then
