@@ -6,6 +6,7 @@ import schema as s
 from pulp_glue.ansible.context import (
     PulpAnsibleCollectionRemoteContext,
     PulpAnsibleCollectionVersionContext,
+    PulpAnsibleGitRemoteContext,
     PulpAnsibleRepositoryContext,
     PulpAnsibleRoleContext,
     PulpAnsibleRoleRemoteContext,
@@ -59,6 +60,7 @@ remote_option = resource_option(
     context_table={
         "ansible:collection": PulpAnsibleCollectionRemoteContext,
         "ansible:role": PulpAnsibleRoleRemoteContext,
+        "ansible:git": PulpAnsibleGitRemoteContext,
     },
     href_pattern=PulpRemoteContext.HREF_PATTERN,
     help=_(

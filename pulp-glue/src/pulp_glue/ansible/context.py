@@ -101,6 +101,17 @@ class PulpAnsibleRoleRemoteContext(PulpRemoteContext):
     NEEDS_PLUGINS = [PluginRequirement("ansible", specifier=">=0.7.0")]
 
 
+class PulpAnsibleGitRemoteContext(PulpRemoteContext):
+    PLUGIN = "ansible"
+    RESOURCE_TYPE = "git"
+    ENTITY = _("git remote")
+    ENTITIES = _("git remotes")
+    HREF = "ansible_git_remote_href"
+    ID_PREFIX = "remotes_ansible_git"
+    HREF_PATTERN = r"remotes/(?P<plugin>ansible)/(?P<resource_type>git)/"
+    NEEDS_PLUGINS = [PluginRequirement("ansible", specifier=">=0.7.0")]
+
+
 class PulpAnsibleCollectionRemoteContext(PulpRemoteContext):
     PLUGIN = "ansible"
     RESOURCE_TYPE = "collection"
