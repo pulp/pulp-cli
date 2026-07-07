@@ -5,6 +5,7 @@ import yaml
 
 from pulp_glue.ansible.context import (
     PulpAnsibleCollectionRemoteContext,
+    PulpAnsibleGitRemoteContext,
     PulpAnsibleRoleRemoteContext,
 )
 from pulp_glue.common.i18n import get_translation
@@ -46,6 +47,7 @@ load_yaml_callback = load_file_wrapper(yaml_callback)
     choices={
         "collection": PulpAnsibleCollectionRemoteContext,
         "role": PulpAnsibleRoleRemoteContext,
+        "git": PulpAnsibleGitRemoteContext,
     }
 )
 def remote() -> None:
