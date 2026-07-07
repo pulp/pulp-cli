@@ -37,6 +37,7 @@ from pulp_cli.generic import (
     repository_href_option,
     repository_lookup_option,
     resource_option,
+    retain_checkpoints_option,
     retained_versions_option,
     role_command,
     show_command,
@@ -194,6 +195,7 @@ update_options = [
         default=None,
     ),
     retained_versions_option,
+    retain_checkpoints_option,
     pulp_labels_option,
     pulp_option(
         "--repo-config",

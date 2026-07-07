@@ -1379,6 +1379,13 @@ retained_versions_option = pulp_option(
     type=int_or_empty,
 )
 
+retain_checkpoints_option = pulp_option(
+    "--retain-checkpoints",
+    needs_plugins=[PluginRequirement("core", specifier=">=3.106.0")],
+    help=_("Number of checkpoint publications to keep. Leave empty to retain all checkpoints."),
+    type=int_or_empty,
+)
+
 pulp_labels_option = pulp_option(
     "--labels",
     "pulp_labels",

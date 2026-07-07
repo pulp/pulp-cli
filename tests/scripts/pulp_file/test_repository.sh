@@ -42,6 +42,17 @@ test "$(echo "$OUTPUT" | jq -r '.|length')" != "0"
 expect_succ pulp file repository task list --repository "cli_test_file_repo"
 test "$(echo "$OUTPUT" | jq -r '.|length')" = "6"
 
+# retain_checkpoints was added to Repository in pulpcore 3.106.0 (pulp/pulpcore#7428)
+if pulp debug has-plugin --name "core" --specifier ">=3.106.0"
+then
+  expect_succ pulp file repository update --repository "cli_test_file_repo" --retain-checkpoints 5
+  expect_succ pulp file repository show --repository "cli_test_file_repo"
+  test "$(echo "$OUTPUT" | jq -r '.retain_checkpoints')" = "5"
+  expect_succ pulp file repository update --repository "cli_test_file_repo" --retain-checkpoints ""
+  expect_succ pulp file repository show --repository "cli_test_file_repo"
+  test "$(echo "$OUTPUT" | jq -r '.retain_checkpoints')" = "null"
+fi
+
 if pulp debug has-plugin --name "file" --specifier ">=1.7.0"
 then
   expect_succ pulp file repository update --repository "cli_test_file_repo" --manifest "manifest.csv"
