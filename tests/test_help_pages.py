@@ -105,6 +105,17 @@ def test_help_shows_all_available_commands(no_api: None) -> None:
                 "42",
             ],
         ),
+        pytest.param(
+            [
+                "hugging-face",
+                "repository",
+                "show",
+            ],
+            [
+                "--repository",
+                "dummy",
+            ],
+        ),
     ],
 )
 def test_deferred_context(

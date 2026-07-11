@@ -4,7 +4,7 @@ This is the documentation for Pulp 3's command line interface.
 
 Here you can find information about how to install the Pulp 3 CLI, and general usage and syntax information.
 
-Currently `pulp-cli` supports pulpcore and 6 of Pulp's plugins: `pulp_ansible`, `pulp-certguard`, `pulp_container`, `pulp_file`, `pulp_python` and `pulp_rpm`.
+Currently `pulp-cli` supports pulpcore and 7 of Pulp's plugins: `pulp_ansible`, `pulp-certguard`, `pulp_container`, `pulp_file`, `pulp_hugging_face`, `pulp_python` and `pulp_rpm`.
 See section below for information on how to extend the CLI to support other Pulp plugins.
 
 You can find workflow examples for the Pulp 3 CLI throughout the [plugin documentation](site:help/).

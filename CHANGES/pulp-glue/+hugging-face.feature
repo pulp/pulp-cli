@@ -1,0 +1,1 @@
+Added entity contexts for the `hugging_face` plugin (remote, repository, repository version, and distribution).
