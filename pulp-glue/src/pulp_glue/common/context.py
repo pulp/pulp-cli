@@ -342,7 +342,7 @@ class PulpContext:
             # If this is "only" true and we have the PULP_CA_BUNDLE variable set, use it.
             self.verify_ssl = os.environ.get("PULP_CA_BUNDLE", True)
         self._needed_plugins: list[PluginRequirement] = [
-            PluginRequirement("core", specifier=">=3.11.0")
+            PluginRequirement("core", specifier=">=3.49.0")
         ]
         self.pulp_domain: str = domain
 

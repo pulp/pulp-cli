@@ -7,6 +7,7 @@ set -eu
 pulp debug has-plugin --name "container" || exit 23
 
 cleanup() {
+  pulp container distribution destroy --name "cli_test_container_content_distro" || true
   pulp container repository destroy --name "cli_test_container_content_repository" || true
   pulp container remote destroy --name "cli_test_container_content_remote" || true
 }
@@ -16,6 +17,9 @@ trap cleanup EXIT
 pulp container remote create --name "cli_test_container_content_remote" --url "$CONTAINER_REMOTE_URL" --upstream-name "$CONTAINER_IMAGE"
 pulp container repository create --name "cli_test_container_content_repository"
 pulp container repository sync --name "cli_test_container_content_repository" --remote "cli_test_container_content_remote"
+pulp container distribution create --name "cli_test_container_content_distro" \
+  --base-path "cli_test_container_content_distro" \
+  --repository "cli_test_container_content_repository"
 
 # Check each content list
 expect_succ pulp container content -t blob list
@@ -69,3 +73,13 @@ test "$(echo "$OUTPUT" | jq -r length)" -ge "1"
 
 expect_succ pulp container content -t blob list --digest "$blob_digest"
 test "$(echo "$OUTPUT" | jq -r length)" -ge "1"
+
+# Filter tags by repository version and by distribution (resolves to repository version)
+repo_ver_href="$(pulp container repository show --name "cli_test_container_content_repository" | jq -r .latest_version_href)"
+expect_succ pulp container content -t tag list --repository-version "$repo_ver_href"
+test "$(echo "$OUTPUT" | jq -r length)" -ge "1"
+expect_succ pulp container content -t tag list --distribution "cli_test_container_content_distro"
+test "$(echo "$OUTPUT" | jq -r length)" -ge "1"
+expect_fail pulp container content -t tag list \
+  --distribution "cli_test_container_content_distro" \
+  --repository-version "$repo_ver_href"
