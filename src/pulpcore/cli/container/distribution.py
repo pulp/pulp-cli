@@ -5,7 +5,6 @@ import click
 from pulp_glue.common.context import (
     EntityDefinition,
     EntityFieldDefinition,
-    PluginRequirement,
     PulpEntityContext,
     PulpRepositoryContext,
 )
@@ -104,9 +103,6 @@ def update(
 
     distribution: EntityDefinition = distribution_ctx.entity
     body: EntityDefinition = {}
-    non_blocking = base_path is None and distribution_ctx.pulp_ctx.has_plugin(
-        PluginRequirement("core", specifier=">=3.24.0")
-    )
 
     if private is not None:
         body["private"] = private
@@ -127,18 +123,16 @@ def update(
             repository = t.cast(PulpEntityContext, repository)
             if version is not None:
                 if distribution["repository"]:
-                    distribution_ctx.update(body={"repository": ""}, non_blocking=non_blocking)
+                    body["repository"] = ""
                 body["repository_version"] = f"{repository.pulp_href}versions/{version}/"
             else:
                 if distribution["repository_version"]:
-                    distribution_ctx.update(
-                        body={"repository_version": ""}, non_blocking=non_blocking
-                    )
+                    body["repository_version"] = ""
                 body["repository"] = repository.pulp_href
     elif version is not None:
         # keep current repository, change version
         if distribution["repository"]:
-            distribution_ctx.update(body={"repository": ""}, non_blocking=non_blocking)
+            body["repository"] = ""
             body["repository_version"] = f"{distribution['repository']}versions/{version}/"
         elif distribution["repository_version"]:
             # 'dummy' vars are to get us around a mypy/1.2 complaint about '_'
