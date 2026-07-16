@@ -12,7 +12,7 @@ class PulpX509CertGuardContext(PulpContentGuardContext):
     ENTITIES = _("x509 certguards")
     HREF = "certguard_x509_cert_guard_href"
     ID_PREFIX = "contentguards_certguard_x509"
-    NEEDS_PLUGINS = [PluginRequirement("certguard", specifier=">=1.4.0")]
+    NEEDS_PLUGINS = [PluginRequirement("certguard")]
 
 
 class PulpRHSMCertGuardContext(PulpContentGuardContext):
@@ -22,4 +22,4 @@ class PulpRHSMCertGuardContext(PulpContentGuardContext):
     ENTITIES = _("RHSM certguards")
     HREF = "certguard_r_h_s_m_cert_guard_href"
     ID_PREFIX = "contentguards_certguard_rhsm"
-    NEEDS_PLUGINS = [PluginRequirement("certguard", specifier=">=1.4.0")]
+    NEEDS_PLUGINS = [PluginRequirement("certguard")]

@@ -5,7 +5,6 @@ import schema as s
 
 from pulp_glue.common.context import (
     EntityFieldDefinition,
-    PluginRequirement,
     PulpRemoteContext,
     PulpRepositoryContext,
 )
@@ -102,11 +101,7 @@ update_options = [
     click.option("--description"),
     remote_option,
     click.option("--manifest"),
-    pulp_option(
-        "--autopublish/--no-autopublish",
-        needs_plugins=[PluginRequirement("file", specifier=">=1.7.0")],
-        default=None,
-    ),
+    pulp_option("--autopublish/--no-autopublish", default=None),
     retained_versions_option,
     retain_checkpoints_option,
     pulp_labels_option,

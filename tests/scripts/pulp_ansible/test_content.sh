@@ -72,11 +72,8 @@ expect_succ pulp ansible repository content --type "role" add --repository "cli_
 expect_succ pulp ansible repository content --type "role" list --repository "cli_test_ansible_content_repository" --version 2
 test "$(echo "$OUTPUT" | jq -r length)" -eq "1"
 
-if pulp debug has-plugin --name "core" --specifier ">=3.11.0"
-then
-  expect_succ pulp ansible repository content list --repository "cli_test_ansible_content_repository" --version 2 --all-types
-  test "$(echo "$OUTPUT" | jq -r length)" -eq "2"
-fi
+expect_succ pulp ansible repository content list --repository "cli_test_ansible_content_repository" --version 2 --all-types
+test "$(echo "$OUTPUT" | jq -r length)" -eq "2"
 
 expect_succ pulp ansible repository content remove --repository "cli_test_ansible_content_repository" --href "$content_href"
 expect_succ pulp ansible repository content remove --repository "cli_test_ansible_content_repository" --href "$content2_href"

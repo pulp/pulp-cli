@@ -16,11 +16,7 @@ def test_api_quirks_idempotent(pulp_ctx: PulpContext) -> None:
     """
     assert {
         "patch_content_in_query_filters",
-        "patch_field_select_filters",
-        "patch_file_acs_refresh_request_body",
-        "patch_upstream_pulp_replicate_request_body",
         "patch_python_remote_includes_excludes",
-        "patch_ordering_filters",
         "patch_rpm_copy_scheme",
     } <= {quirk[1].__name__ for quirk in _REGISTERED_API_SPEC_QUIRKS}
 
