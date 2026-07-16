@@ -1,0 +1,1 @@
+Removed compatibility checks and workaround for pulpcore < 3.49.

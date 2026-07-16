@@ -53,17 +53,11 @@ then
   test "$(echo "$OUTPUT" | jq -r '.retain_checkpoints')" = "null"
 fi
 
-if pulp debug has-plugin --name "file" --specifier ">=1.7.0"
-then
-  expect_succ pulp file repository update --repository "cli_test_file_repo" --manifest "manifest.csv"
+expect_succ pulp file repository update --repository "cli_test_file_repo" --manifest "manifest.csv"
 
-  if pulp debug has-plugin --name "file" --specifier ">=1.12.0"
-  then
-    expect_succ pulp file repository update --repository "cli_test_file_repo" --manifest ""
-    expect_succ pulp file repository show --repository "cli_test_file_repo"
-    test "$(echo "$OUTPUT" | jq -r '.manifest')" = "null"
-  fi
-fi
+expect_succ pulp file repository update --repository "cli_test_file_repo" --manifest ""
+expect_succ pulp file repository show --repository "cli_test_file_repo"
+test "$(echo "$OUTPUT" | jq -r '.manifest')" = "null"
 
 expect_succ pulp repository list
 test "$(echo "$OUTPUT" | jq -r '.|length')" != "0"

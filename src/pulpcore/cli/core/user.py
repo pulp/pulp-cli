@@ -1,6 +1,6 @@
 import click
 
-from pulp_glue.common.context import PluginRequirement, PulpEntityContext
+from pulp_glue.common.context import PulpEntityContext
 from pulp_glue.common.i18n import get_translation
 from pulp_glue.core.context import PulpDomainContext, PulpUserContext, PulpUserRoleContext
 
@@ -44,8 +44,6 @@ def _object_required_userrole_lookup_callback(
     return userrole_lookup_callback(ctx, param, value)
 
 
-req_core_3_17 = PluginRequirement("core", specifier=">=3.17.0")
-
 username_option = pulp_option(
     "--username",
     help=_("Username of the {entity}"),
@@ -59,7 +57,6 @@ domain_field_options = {
         "core:domain": PulpDomainContext,
     },
     "help": _("Domain the role is applied in"),
-    "needs_plugins": (PluginRequirement("core", specifier=">=3.23"),),
 }
 domain_option = resource_option("--domain", **domain_field_options)
 domain_user_lookup_option = resource_option(
@@ -99,11 +96,9 @@ def user(ctx: click.Context, pulp_ctx: PulpCLIContext, /) -> None:
 
 user.add_command(list_command())
 user.add_command(show_command(decorators=lookup_options))
-user.add_command(create_command(decorators=create_options, needs_plugins=[req_core_3_17]))
-user.add_command(
-    update_command(decorators=lookup_options + update_options, needs_plugins=[req_core_3_17])
-)
-user.add_command(destroy_command(decorators=lookup_options, needs_plugins=[req_core_3_17]))
+user.add_command(create_command(decorators=create_options))
+user.add_command(update_command(decorators=lookup_options + update_options))
+user.add_command(destroy_command(decorators=lookup_options))
 
 
 @user.group(name="role-assignment")
@@ -113,7 +108,6 @@ user.add_command(destroy_command(decorators=lookup_options, needs_plugins=[req_c
 def role(ctx: click.Context, pulp_ctx: PulpCLIContext, user_ctx: PulpEntityContext, /) -> None:
     assert isinstance(user_ctx, PulpUserContext)
 
-    pulp_ctx.needs_plugin(req_core_3_17)
     ctx.obj = PulpUserRoleContext(pulp_ctx, user_ctx)
 
 
