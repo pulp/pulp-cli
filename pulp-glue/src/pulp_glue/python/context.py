@@ -72,11 +72,10 @@ class PulpPythonDistributionContext(PulpDistributionContext):
             self.pulp_ctx.needs_plugin(PluginRequirement("python", specifier=">=3.6.0"))
         if "version" in body:
             self.pulp_ctx.needs_plugin(PluginRequirement("python", specifier=">=3.21.0"))
-        if self.pulp_ctx.has_plugin(PluginRequirement("core", specifier=">=3.16.0")):
-            if "repository" in body and "publication" not in body:
-                body["publication"] = None
-            if "repository" not in body and "publication" in body:
-                body["repository"] = None
+        if "repository" in body and "publication" not in body:
+            body["publication"] = None
+        if "repository" not in body and "publication" in body:
+            body["repository"] = None
 
         version = body.pop("version", None)
         if version is not None:

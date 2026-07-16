@@ -28,21 +28,15 @@ expect_succ pulp content-guard rbac show --name "cli_test_rbac_guard"
 test "$(echo "$OUTPUT" | jq -r '.users' | jq -r length)" -eq "0"
 test "$(echo "$OUTPUT" | jq -r '.groups' | jq -r length)" -eq "0"
 
-if pulp debug has-plugin --name "core" --specifier ">=3.39.0"
-then
-  # Header content guard
-  expect_succ pulp content-guard header create --name "cli_test_header_guard" --header-name "to" --header-value "ken"
-  if pulp debug has-plugin --name "core" --specifier ">=3.43.0"
-  then
-    # Composite content guard
-    expect_succ pulp content-guard composite create --name "cli_test_composite_guard" --guard "rbac:cli_test_rbac_guard" --guard "header:cli_test_header_guard"
-    test "$(echo "$OUTPUT" | jq -r '.guards' | jq -r length)" -eq "2"
-    expect_succ pulp content-guard composite update --name "cli_test_composite_guard" --guard "rbac:cli_test_rbac_guard" --description "Updated composite guard"
-    expect_succ pulp content-guard composite show --name "cli_test_composite_guard"
-    test "$(echo "$OUTPUT" | jq -r '.guards' | jq -r length)" -eq "1"
-    expect_succ pulp content-guard composite destroy --name "cli_test_composite_guard"
-  fi
-  expect_succ pulp content-guard header destroy --name "cli_test_header_guard"
-fi
+# Header content guard
+expect_succ pulp content-guard header create --name "cli_test_header_guard" --header-name "to" --header-value "ken"
+# Composite content guard
+expect_succ pulp content-guard composite create --name "cli_test_composite_guard" --guard "rbac:cli_test_rbac_guard" --guard "header:cli_test_header_guard"
+test "$(echo "$OUTPUT" | jq -r '.guards' | jq -r length)" -eq "2"
+expect_succ pulp content-guard composite update --name "cli_test_composite_guard" --guard "rbac:cli_test_rbac_guard" --description "Updated composite guard"
+expect_succ pulp content-guard composite show --name "cli_test_composite_guard"
+test "$(echo "$OUTPUT" | jq -r '.guards' | jq -r length)" -eq "1"
 
+expect_succ pulp content-guard composite destroy --name "cli_test_composite_guard"
+expect_succ pulp content-guard header destroy --name "cli_test_header_guard"
 expect_succ pulp content-guard rbac destroy --name "cli_test_rbac_guard"
