@@ -18,7 +18,7 @@ from pulp_cli.generic import (
     show_command,
     type_option,
 )
-from pulpcore.cli.rpm.common import CHECKSUM_CHOICES
+from pulpcore.cli.rpm.common import CHECKSUM_CHOICES, COMPRESSION_CHOICES
 
 translation = get_translation(__package__)
 _ = translation.gettext
@@ -62,6 +62,12 @@ create_options = [
         help=_(
             "Option specifying the checksum type to use for package and metadata integrity checks."
         ),
+        needs_plugins=[PluginRequirement("rpm", specifier=">=3.25.0")],
+    ),
+    pulp_option(
+        "--compression-type",
+        type=click.Choice(COMPRESSION_CHOICES, case_sensitive=False),
+        help=_("Option specifying the compression type to use for metadata."),
         needs_plugins=[PluginRequirement("rpm", specifier=">=3.25.0")],
     ),
     pulp_option(
