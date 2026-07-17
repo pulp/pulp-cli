@@ -69,6 +69,9 @@ else
 fi
 export PULP_CONTENT_ORIGIN
 
+PULP_DJANGO_SECRET="$(python3 -c "import secrets; print(secrets.token_urlsafe(50))")"
+export PULP_DJANGO_SECRET
+
 "${CONTAINER_RUNTIME}" \
   run ${RM:+--rm} \
   --env S6_KEEP_ENV=1 \
@@ -79,6 +82,7 @@ export PULP_CONTENT_ORIGIN
   ${PULP_DOMAIN_ENABLED:+--env PULP_DOMAIN_ENABLED} \
   ${PULP_ENABLED_PLUGINS:+--env PULP_ENABLED_PLUGINS} \
   --env PULP_CONTENT_ORIGIN \
+  --env PULP_DJANGO_SECRET \
   --detach \
   --name "pulp-ephemeral" \
   --volume "${PULP_CLI_TEST_TMPDIR}/settings:/etc/pulp${SELINUX:+:Z}" \
