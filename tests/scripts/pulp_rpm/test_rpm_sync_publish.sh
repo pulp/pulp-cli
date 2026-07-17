@@ -122,6 +122,10 @@ else
   expect_succ pulp rpm repository update --name "cli_test_rpm_sync_repository" --package-checksum-type sha1
 fi
 
+expect_succ pulp rpm repository update --repository "cli_test_rpm_sync_repository" --compression-type zstd
+expect_succ pulp rpm publication create --repository "cli_test_rpm_sync_repository" --compression-type gz
+expect_succ test "$(echo "$OUTPUT" | jq -r '.compression_type')" = "gz"
+
 expect_succ pulp rpm distribution destroy --name "cli_test_rpm_sync_distro"
 expect_succ pulp rpm publication destroy --href "$PUBLICATION_HREF"
 expect_succ pulp rpm publication destroy --href "$PUBLICATION_VER_HREF"
