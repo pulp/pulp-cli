@@ -50,6 +50,7 @@ common = "pulpcore.cli.common"
 container = "pulpcore.cli.container"
 core = "pulpcore.cli.core"
 file = "pulpcore.cli.file"
+hugging-face = "pulpcore.cli.hugging_face"
 python = "pulpcore.cli.python"
 rpm = "pulpcore.cli.rpm"
 
@@ -266,6 +267,7 @@ markers = [
   "pulp_container: pulp_container tests",
   "pulp_rpm: pulp_rpm tests",
   "pulp_python: pulp_python tests",
+  "pulp_hugging_face: pulp_hugging_face tests",
 ]
 
 [tool.mypy]
