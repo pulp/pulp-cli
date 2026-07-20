@@ -1,13 +1,10 @@
 import click
 
-from pulp_glue.common.context import PluginRequirement, PulpEntityContext
+from pulp_glue.common.context import PulpEntityContext
 from pulp_glue.common.i18n import get_translation
 from pulp_glue.core.context import (
     PulpDomainContext,
     PulpGroupContext,
-    PulpGroupModelPermissionContext,
-    PulpGroupObjectPermissionContext,
-    PulpGroupPermissionContext,
     PulpGroupRoleContext,
     PulpGroupUserContext,
     PulpUserContext,
@@ -34,19 +31,6 @@ translation = get_translation(__package__)
 _ = translation.gettext
 
 pass_group_context = click.make_pass_decorator(PulpGroupContext)
-
-
-def _object_callback(ctx: click.Context, param: click.Parameter, value: str) -> str:
-    entity_ctx = ctx.find_object(PulpGroupPermissionContext)
-    assert entity_ctx is not None
-    if value is not None:
-        if isinstance(entity_ctx, PulpGroupObjectPermissionContext):
-            entity_ctx.entity = {"obj": value}
-        else:
-            raise click.ClickException(_("This type of Permission does not have an object."))
-    elif isinstance(entity_ctx, PulpGroupObjectPermissionContext):
-        raise click.ClickException(_("This type of Permission needs an object."))
-    return value
 
 
 def _object_required_callback(ctx: click.Context, param: click.Parameter, value: str) -> str:
@@ -78,7 +62,6 @@ domain_field_options = {
         "core:domain": PulpDomainContext,
     },
     "help": _("Domain the role is applied in"),
-    "needs_plugins": (PluginRequirement("core", specifier=">=3.23"),),
 }
 domain_option = resource_option("--domain", **domain_field_options)
 domain_group_lookup_option = resource_option(
@@ -103,78 +86,7 @@ group.add_command(list_command())
 group.add_command(show_command(decorators=lookup_options))
 group.add_command(destroy_command(decorators=lookup_options))
 group.add_command(create_command(decorators=create_options))
-group.add_command(
-    role_command(
-        decorators=lookup_options,
-        needs_plugins=[PluginRequirement("core", specifier=">=3.17.0")],
-    )
-)
-
-
-@group.group(needs_plugins=[PluginRequirement("core", specifier="<3.20.0")])
-@click.option(
-    "-t",
-    "--type",
-    "perm_type",
-    type=click.Choice(["model", "object"], case_sensitive=False),
-    default="model",
-)
-@pass_group_context
-@pass_pulp_context
-@click.pass_context
-def permission(
-    ctx: click.Context,
-    pulp_ctx: PulpCLIContext,
-    group_ctx: PulpGroupContext,
-    /,
-    perm_type: str,
-) -> None:
-    if perm_type == "model":
-        ctx.obj = PulpGroupModelPermissionContext(pulp_ctx, group_ctx)
-    elif perm_type == "object":
-        ctx.obj = PulpGroupObjectPermissionContext(pulp_ctx, group_ctx)
-    else:
-        raise NotImplementedError()
-
-
-permission.add_command(
-    list_command(
-        help=_("Show a list of the permissioons granted to a group."),
-        decorators=[group_option],
-    )
-)
-
-
-@permission.command(name="add", help=_("Grant a permission to the group."))
-@group_option
-@click.option("--permission", required=True)
-@click.option("--object", "obj", callback=_object_callback)
-@pass_entity_context
-def add_permission(entity_ctx: PulpEntityContext, /, permission: str, obj: str | None) -> None:
-    assert isinstance(entity_ctx, PulpGroupPermissionContext)
-
-    body = {"permission": permission}
-    if obj:
-        body["obj"] = obj
-    entity_ctx.create(body=body)
-
-
-permission.add_command(
-    destroy_command(
-        name="remove",
-        help=_("Revoke a permission from the group."),
-        decorators=[
-            group_option,
-            click.option(
-                "--permission",
-                required=True,
-                callback=lookup_callback("permission", PulpGroupPermissionContext),
-                expose_value=False,
-            ),
-            click.option("--object", callback=_object_callback, expose_value=False),
-        ],
-    )
-)
+group.add_command(role_command(decorators=lookup_options))
 
 
 @group.group()

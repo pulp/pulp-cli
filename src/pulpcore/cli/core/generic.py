@@ -3,7 +3,7 @@ import typing as t
 
 import click
 
-from pulp_glue.common.context import DATETIME_FORMATS, PluginRequirement, PulpEntityContext
+from pulp_glue.common.context import DATETIME_FORMATS, PulpEntityContext
 from pulp_glue.common.i18n import get_translation
 from pulp_glue.core.context import PulpTaskContext, PulpWorkerContext
 
@@ -61,7 +61,6 @@ task_filter = [
         "--cid",
         "logging_cid__contains",
         help=_("List only tasks with this correlation id."),
-        needs_plugins=[PluginRequirement("core", specifier=">=3.14.0")],
     ),
     click.option(
         "--state",

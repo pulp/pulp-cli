@@ -28,25 +28,21 @@ expect_succ pulp file remote create --name "cli_test_core_task_large_remote" --u
 expect_succ pulp file repository create --name "cli_test_core_task_repository" --remote "cli_test_core_task_remote"
 repository_href="$(echo "$OUTPUT" | jq -r '.pulp_href')"
 
-# Test canceling a task introduced in 3.12, but not reliable in 3.18
-if pulp debug has-plugin --name "core" --specifier ">=3.21.0"
+expect_succ pulp --background file repository sync --name "cli_test_core_task_repository" --remote "cli_test_core_task_large_remote"
+task="$(echo "$ERROUTPUT" | grep -E -o "${PULP_API_ROOT}([-_a-zA-Z0-9]+/)?api/v3/tasks/[-[:xdigit:]]*/")"
+if expect_succ pulp task cancel --href "$task"
 then
-  expect_succ pulp --background file repository sync --name "cli_test_core_task_repository" --remote "cli_test_core_task_large_remote"
-  task="$(echo "$ERROUTPUT" | grep -E -o "${PULP_API_ROOT}([-_a-zA-Z0-9]+/)?api/v3/tasks/[-[:xdigit:]]*/")"
-  if expect_succ pulp task cancel --href "$task"
-  then
-    expect_succ pulp task list --name $sync_task --state canceled
-    expect_succ test "$(echo "$OUTPUT" | jq -r length)" -eq $((count + 1))
-    expect_succ pulp task show --href "$task"
-    expect_succ test "$(echo "$OUTPUT" | jq -r '.state')" = "canceled"
-  else
-    expect_succ pulp task list --name $sync_task --state canceled
-    expect_succ test "$(echo "$OUTPUT" | jq -r length)" -eq $((count + 0))
-    expect_succ pulp task show --href "$task"
-    expect_succ test "$(echo "$OUTPUT" | jq -r '.state')" = "completed"
-  fi
-  expected_repo_task_count=$((expected_repo_task_count + 1))
+  expect_succ pulp task list --name $sync_task --state canceled
+  expect_succ test "$(echo "$OUTPUT" | jq -r length)" -eq $((count + 1))
+  expect_succ pulp task show --href "$task"
+  expect_succ test "$(echo "$OUTPUT" | jq -r '.state')" = "canceled"
+else
+  expect_succ pulp task list --name $sync_task --state canceled
+  expect_succ test "$(echo "$OUTPUT" | jq -r length)" -eq $((count + 0))
+  expect_succ pulp task show --href "$task"
+  expect_succ test "$(echo "$OUTPUT" | jq -r '.state')" = "completed"
 fi
+expected_repo_task_count=$((expected_repo_task_count + 1))
 
 expect_fail pulp --dry-run task cancel --all
 
@@ -76,23 +72,17 @@ then
   expect_succ test -f "task_profile-pulp_file.app.tasks.synchronizing.synchronize-${task_uuid}/memory_profile"
 fi
 
-if pulp debug has-plugin --name "core" --specifier ">=3.22.0"
-then
-  # New style task resource filters
-  expect_succ pulp task list --reserved-resource-in "$repository_href" --reserved-resource-in "$remote_href"
-  expect_succ test "$(echo "$OUTPUT" | jq -r length)" -eq 1
-  expect_succ pulp task list --reserved-resource "$repository_href"
-  expect_succ test "$(echo "$OUTPUT" | jq -r length)" -eq 2
-  expect_succ pulp task list --exclusive-resource "$repository_href"
-  expect_succ test "$(echo "$OUTPUT" | jq -r length)" -eq 2
-  expect_succ pulp task list --exclusive-resource "$remote_href"
-  expect_succ test "$(echo "$OUTPUT" | jq -r length)" -eq 0
-  expect_succ pulp task list --shared-resource "$remote_href"
-  expect_succ test "$(echo "$OUTPUT" | jq -r length)" -eq 1
-else
-  expect_succ pulp task list --reserved-resource "$repository_href"
-  expect_succ test "$(echo "$OUTPUT" | jq -r length)" -eq "$expected_repo_task_count"
-fi
+# New style task resource filters
+expect_succ pulp task list --reserved-resource-in "$repository_href" --reserved-resource-in "$remote_href"
+expect_succ test "$(echo "$OUTPUT" | jq -r length)" -eq 1
+expect_succ pulp task list --reserved-resource "$repository_href"
+expect_succ test "$(echo "$OUTPUT" | jq -r length)" -eq 2
+expect_succ pulp task list --exclusive-resource "$repository_href"
+expect_succ test "$(echo "$OUTPUT" | jq -r length)" -eq 2
+expect_succ pulp task list --exclusive-resource "$remote_href"
+expect_succ test "$(echo "$OUTPUT" | jq -r length)" -eq 0
+expect_succ pulp task list --shared-resource "$remote_href"
+expect_succ test "$(echo "$OUTPUT" | jq -r length)" -eq 1
 
 expect_fail pulp task list --state=cannotwork
 expect_succ pulp task list --state=COmPLetED

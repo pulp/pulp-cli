@@ -38,12 +38,9 @@ expect_succ pulp file distribution update \
   --publication "$PUBLICATION_HREF" \
   --content-guard ""
 
-if pulp debug has-plugin --name "file" --specifier ">=1.7.0"
-then
-  expect_succ pulp file distribution update \
-    --distribution "cli_test_file_distro" \
-    --repository "cli_test_file_distribution_repository"
-fi
+expect_succ pulp file distribution update \
+  --distribution "cli_test_file_distro" \
+  --repository "cli_test_file_distribution_repository"
 
 expect_succ pulp file distribution list --base-path "cli_test_file_distro"
 test "$(echo "$OUTPUT" | jq -r length)" -eq 1

@@ -81,11 +81,10 @@ class PulpRpmDistributionContext(PulpDistributionContext):
 
     def preprocess_entity(self, body: EntityDefinition, partial: bool = False) -> EntityDefinition:
         body = super().preprocess_entity(body, partial=partial)
-        if self.pulp_ctx.has_plugin(PluginRequirement("core", specifier=">=3.16.0")):
-            if "repository" in body and "publication" not in body:
-                body["publication"] = None
-            if "repository" not in body and "publication" in body:
-                body["repository"] = None
+        if "repository" in body and "publication" not in body:
+            body["publication"] = None
+        if "repository" not in body and "publication" in body:
+            body["repository"] = None
         if body.get("generate_repo_config") is False:
             self.pulp_ctx.needs_plugin(
                 PluginRequirement(

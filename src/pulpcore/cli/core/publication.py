@@ -1,7 +1,6 @@
 import click
 
 from pulp_glue.common.context import (
-    PluginRequirement,
     PulpPublicationContext,
     PulpRepositoryContext,
 )
@@ -18,7 +17,6 @@ from pulp_cli.generic import (
 repository_option = resource_option(
     "--repository",
     context_table=PulpRepositoryContext.TYPE_REGISTRY,
-    needs_plugins=[PluginRequirement("core", specifier=">=3.20.0")],
 )
 
 

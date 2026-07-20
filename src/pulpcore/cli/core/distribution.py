@@ -1,6 +1,6 @@
 import click
 
-from pulp_glue.common.context import PluginRequirement, PulpDistributionContext
+from pulp_glue.common.context import PulpDistributionContext
 
 from pulp_cli.generic import (
     PulpCLIContext,
@@ -21,7 +21,6 @@ def distribution(ctx: click.Context, pulp_ctx: PulpCLIContext, /) -> None:
     Please look for the plugin specific distribution commands for more detailed actions.
     i.e. 'pulp file distribution <...>'
     """
-    pulp_ctx.needs_plugin(PluginRequirement("core", specifier=">=3.19.0"))
     ctx.obj = PulpDistributionContext(pulp_ctx)
 
 

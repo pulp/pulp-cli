@@ -103,7 +103,6 @@ def update(
 
     distribution: EntityDefinition = distribution_ctx.entity
     body: EntityDefinition = {}
-
     if private is not None:
         body["private"] = private
     if base_path is not None:

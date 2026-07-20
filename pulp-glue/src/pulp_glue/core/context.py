@@ -27,15 +27,7 @@ class PulpAccessPolicyContext(PulpEntityContext):
     ID_PREFIX = "access_policies"
 
     def reset(self) -> t.Any:
-        self.pulp_ctx.needs_plugin(PluginRequirement("core", specifier=">=3.17.0"))
         return self.call("reset", parameters={self.HREF: self.pulp_href})
-
-    def preprocess_entity(self, body: EntityDefinition, partial: bool = False) -> EntityDefinition:
-        body = super().preprocess_entity(body, partial=partial)
-        if not self.pulp_ctx.has_plugin(PluginRequirement("core", specifier=">=3.17.0")):
-            if "creation_hooks" in body:
-                body["permissions_assignment"] = body.pop("creation_hooks")
-        return body
 
 
 class PulpArtifactContext(PulpEntityContext):
@@ -101,7 +93,6 @@ class PulpDomainContext(PulpEntityContext):
     ENTITIES = _("Pulp domains")
     HREF = "domain_href"
     ID_PREFIX = "domains"
-    NEEDS_PLUGINS = [PluginRequirement("core", specifier=">=3.23.0")]
 
 
 class PulpExporterContext(PulpEntityContext):
@@ -126,16 +117,9 @@ class PulpExportContext(PulpEntityContext):
 class PulpGroupContext(PulpEntityContext):
     ENTITY = _("user group")
     ENTITIES = _("user groups")
-    # Handled by a workaround
-    # HREF = "group_href"
+    HREF = "group_href"
     ID_PREFIX = "groups"
-    CAPABILITIES = {"roles": [PluginRequirement("core", specifier=">=3.17.0")]}
-
-    @property
-    def HREF(self) -> str:  # type:ignore
-        if not self.pulp_ctx.has_plugin(PluginRequirement("core", specifier=">=3.17.0")):
-            return "auth_group_href"
-        return "group_href"
+    CAPABILITIES = {"roles": []}
 
     def add_user(self, user: "PulpUserContext") -> None:
         pass
@@ -150,94 +134,12 @@ class PulpGroupContext(PulpEntityContext):
         group_user_ctx.delete()
 
 
-class PulpGroupPermissionContext(PulpEntityContext):
-    ENTITY = _("group permission")
-    ENTITIES = _("group permissions")
-    NEEDS_PLUGINS = [PluginRequirement("core", specifier="<3.20.0", feature=_("group permissions"))]
-    group_ctx: PulpGroupContext
-
-    def __init__(self, pulp_ctx: PulpContext, group_ctx: PulpGroupContext) -> None:
-        super().__init__(pulp_ctx)
-        self.group_ctx = group_ctx
-
-    def call(
-        self,
-        operation: str,
-        non_blocking: bool = False,
-        parameters: dict[str, t.Any] | None = None,
-        body: dict[str, t.Any] | None = None,
-        validate_body: bool = False,
-    ) -> t.Any:
-        # Workaroud because the openapi spec for GroupPermissions has always been broken.
-        #
-        # This will probably not be fixed upstream, and GroupPermissions are removed from pulpcore.
-        # So we just skip linting here.
-        return super().call(
-            operation,
-            non_blocking=non_blocking,
-            parameters=parameters,
-            body=body,
-            validate_body=validate_body,
-        )
-
-    def find(self, **kwargs: t.Any) -> t.Any:
-        # Workaroud the missing ability to filter.
-        # # TODO fix upstream and adjust to guard for the proper version
-        # # https://pulp.plan.io/issues/8241
-        # if self.pulp_ctx.has_plugin(PluginRequirement("core", specifier=">=3.99.dev")):
-        #     # Workaround not needed anymore
-        #     return super().find(**kwargs)
-        search_result = self.list(limit=sys.maxsize, offset=0, parameters={})
-        for key, value in kwargs.items():
-            search_result = [res for res in search_result if res[key] == value]
-        if len(search_result) != 1:
-            raise PulpException(
-                _("Could not find {entity} with {kwargs}.").format(
-                    entity=self.ENTITY, kwargs=kwargs
-                )
-            )
-        return search_result[0]
-
-    @property
-    def scope(self) -> dict[str, t.Any]:
-        return {self.group_ctx.HREF: self.group_ctx.pulp_href}
-
-
-class PulpGroupModelPermissionContext(PulpGroupPermissionContext):
-    ENTITY = _("group model permission")
-    ENTITIES = _("group model permissions")
-    # Handled by a workaround
-    # HREF = "groups_model_permission_href"
-    ID_PREFIX = "groups_model_permissions"
-
-    @property
-    def HREF(self) -> str:  # type:ignore
-        if not self.pulp_ctx.has_plugin(PluginRequirement("core", specifier=">=3.17.0")):
-            return "auth_groups_model_permission_href"
-        return "groups_model_permission_href"
-
-
-class PulpGroupObjectPermissionContext(PulpGroupPermissionContext):
-    ENTITY = _("group object permission")
-    ENTITIES = _("group object permissions")
-    # Handled by a workaround
-    # HREF = "groups_object_permission_href"
-    ID_PREFIX = "groups_object_permissions"
-
-    @property
-    def HREF(self) -> str:  # type:ignore
-        if not self.pulp_ctx.has_plugin(PluginRequirement("core", specifier=">=3.17.0")):
-            return "auth_groups_object_permission_href"
-        return "groups_object_permission_href"
-
-
 class PulpGroupRoleContext(PulpEntityContext):
     ENTITY = _("group role")
     ENTITIES = _("group roles")
     HREF = "groups_group_role_href"
     ID_PREFIX = "groups_roles"
     NULLABLES = {"content_object"}
-    NEEDS_PLUGINS = [PluginRequirement("core", specifier=">=3.17.0", feature=_("group roles"))]
     group_ctx: PulpGroupContext
 
     def __init__(self, pulp_ctx: PulpContext, group_ctx: PulpGroupContext) -> None:
@@ -252,16 +154,9 @@ class PulpGroupRoleContext(PulpEntityContext):
 class PulpGroupUserContext(PulpEntityContext):
     ENTITY = _("group user")
     ENTITIES = _("group users")
-    # Handled by a workaround
-    # HREF = "groups_user_href"
+    HREF = "groups_user_href"
     ID_PREFIX = "groups_users"
     group_ctx: PulpGroupContext
-
-    @property
-    def HREF(self) -> str:  # type:ignore
-        if not self.pulp_ctx.has_plugin(PluginRequirement("core", specifier=">=3.17.0")):
-            return "auth_groups_user_href"
-        return "groups_user_href"
 
     def __init__(self, pulp_ctx: PulpContext, group_ctx: PulpGroupContext) -> None:
         super().__init__(pulp_ctx)
@@ -285,21 +180,9 @@ class PulpOrphanContext(PulpViewSetContext):
     def cleanup(self, body: dict[str, t.Any] | None = None) -> t.Any:
         if body is not None:
             body = preprocess_payload(body)
-            if "orphan_protection_time" in body:
-                self.pulp_ctx.needs_plugin(PluginRequirement("core", specifier=">=3.15.0"))
         else:
             body = {}
-        if self.pulp_ctx.has_plugin(PluginRequirement("core", specifier=">=3.14.0")):
-            result = self.call("cleanup", body=body)
-        else:
-            if body:
-                self.pulp_ctx.needs_plugin(PluginRequirement("core", specifier=">=3.14.0"))
-            if not self.pulp_ctx.fake_mode:
-                result = self.pulp_ctx.call("orphans_delete")
-            else:
-                # Do we need something better?
-                result = {}
-        return result
+        return self.call("cleanup", body=body)
 
 
 class PulpCompositeContentGuardContext(PulpContentGuardContext):
@@ -309,7 +192,6 @@ class PulpCompositeContentGuardContext(PulpContentGuardContext):
     ENTITIES = "composite content guards"
     HREF = "composite_content_guard_href"
     ID_PREFIX = "contentguards_core_composite"
-    NEEDS_PLUGINS = [PluginRequirement("core", specifier=">=3.43.0")]
 
 
 class PulpContentRedirectContentGuardContext(PulpContentGuardContext):
@@ -319,7 +201,6 @@ class PulpContentRedirectContentGuardContext(PulpContentGuardContext):
     ENTITIES = "content redirect content guards"
     HREF = "content_redirect_content_guard_href"
     ID_PREFIX = "contentguards_core_content_redirect"
-    NEEDS_PLUGINS = [PluginRequirement("core", specifier=">=3.18.0")]
 
 
 class PulpHeaderContentGuardContext(PulpContentGuardContext):
@@ -329,7 +210,6 @@ class PulpHeaderContentGuardContext(PulpContentGuardContext):
     ENTITIES = "header content guards"
     HREF = "header_content_guard_href"
     ID_PREFIX = "contentguards_core_header"
-    NEEDS_PLUGINS = [PluginRequirement("core", specifier=">=3.39.0")]
 
 
 class PulpRbacContentGuardContext(PulpContentGuardContext):
@@ -340,8 +220,7 @@ class PulpRbacContentGuardContext(PulpContentGuardContext):
     HREF = "r_b_a_c_content_guard_href"
     ID_PREFIX = "contentguards_core_rbac"
     DOWNLOAD_ROLE: t.ClassVar[str] = "core.rbaccontentguard_downloader"
-    CAPABILITIES = {"roles": [PluginRequirement("core", specifier=">=3.17.0")]}
-    NEEDS_PLUGINS = [PluginRequirement("core", specifier=">=3.15.0")]
+    CAPABILITIES = {"roles": []}
 
     def assign(
         self,
@@ -349,15 +228,9 @@ class PulpRbacContentGuardContext(PulpContentGuardContext):
         users: list[str] | None = None,
         groups: list[str] | None = None,
     ) -> t.Any:
-        if self.pulp_ctx.has_plugin(PluginRequirement("core", specifier=">=3.17.0")):
-            body: EntityDefinition = {"users": users, "groups": groups}
-            body["role"] = self.DOWNLOAD_ROLE
-            return self.call("add_role", parameters={self.HREF: href or self.pulp_href}, body=body)
-        else:
-            body = {"usernames": users, "groupnames": groups}
-            return self.call(
-                "assign_permission", parameters={self.HREF: href or self.pulp_href}, body=body
-            )
+        body: EntityDefinition = {"users": users, "groups": groups}
+        body["role"] = self.DOWNLOAD_ROLE
+        return self.call("add_role", parameters={self.HREF: href or self.pulp_href}, body=body)
 
     def remove(
         self,
@@ -365,17 +238,9 @@ class PulpRbacContentGuardContext(PulpContentGuardContext):
         users: list[str] | None = None,
         groups: list[str] | None = None,
     ) -> t.Any:
-        if self.pulp_ctx.has_plugin(PluginRequirement("core", specifier=">=3.17.0")):
-            body: EntityDefinition = {"users": users, "groups": groups}
-            body["role"] = self.DOWNLOAD_ROLE
-            return self.call(
-                "remove_role", parameters={self.HREF: href or self.pulp_href}, body=body
-            )
-        else:
-            body = {"usernames": users, "groupnames": groups}
-            return self.call(
-                "remove_permission", parameters={self.HREF: href or self.pulp_href}, body=body
-            )
+        body: EntityDefinition = {"users": users, "groups": groups}
+        body["role"] = self.DOWNLOAD_ROLE
+        return self.call("remove_role", parameters={self.HREF: href or self.pulp_href}, body=body)
 
 
 class PulpRoleContext(PulpEntityContext):
@@ -384,7 +249,6 @@ class PulpRoleContext(PulpEntityContext):
     HREF = "role_href"
     ID_PREFIX = "roles"
     NULLABLES = {"description"}
-    NEEDS_PLUGINS = [PluginRequirement("core", specifier=">=3.17.0")]
 
 
 class PulpSigningServiceContext(PulpEntityContext):
@@ -400,48 +264,12 @@ class PulpTaskContext(PulpEntityContext):
     ENTITIES = _("tasks")
     HREF = "task_href"
     ID_PREFIX = "tasks"
-    CAPABILITIES = {"roles": [PluginRequirement("core", specifier=">=3.17.0")]}
+    CAPABILITIES = {"roles": []}
     PLUGIN = "core"
     MODEL = "task"
     HREF_TEMPLATE = "tasks/{pulp_id}/"
 
     resource_context: PulpEntityContext | None = None
-
-    def _list(self, limit: int, offset: int, parameters: dict[str, t.Any]) -> list[t.Any]:
-        if (
-            parameters.get("logging_cid") is not None
-            or parameters.get("logging_cid__contains") is not None
-        ):
-            self.pulp_ctx.needs_plugin(PluginRequirement("core", specifier=">=3.14.0"))
-        if not self.pulp_ctx.has_plugin(PluginRequirement("core", specifier=">=3.22.0")):
-            parameters = parameters.copy()
-            reserved_resources = parameters.pop("reserved_resources", None)
-            exclusive_resources = parameters.pop("exclusive_resources", None)
-            shared_resources = parameters.pop("shared_resources", None)
-            if (
-                parameters.pop("reserved_resources__in", None)
-                or parameters.pop("exclusive_resources__in", None)
-                or parameters.pop("shared_resources__in", None)
-            ):
-                self.pulp_ctx.needs_plugin(PluginRequirement("core", specifier=">=3.22.0"))
-            reserved_resources_record = []
-            if reserved_resources:
-                reserved_resources_record.append(reserved_resources)
-            if exclusive_resources:
-                reserved_resources_record.append(exclusive_resources)
-            if shared_resources:
-                reserved_resources_record.append("shared:" + shared_resources)
-            if len(reserved_resources_record) > 1:
-                self.pulp_ctx.needs_plugin(
-                    PluginRequirement(
-                        "core",
-                        specifier=">=3.22.0",
-                        feature=_("specify multiple reserved resources"),
-                    ),
-                )
-            parameters["reserved_resources_record"] = reserved_resources_record
-
-        return super().list(limit=limit, offset=offset, parameters=parameters)
 
     def cancel(self, task_href: str | None = None, background: bool = False) -> t.Any:
         task_href = task_href or self.pulp_href
@@ -468,10 +296,7 @@ class PulpTaskContext(PulpEntityContext):
     @property
     def scope(self) -> dict[str, t.Any]:
         if self.resource_context:
-            if self.pulp_ctx.has_plugin(PluginRequirement("core", specifier=">=3.22.0")):
-                return {"reserved_resources": self.resource_context.pulp_href}
-            else:
-                return {"reserved_resources_record": [self.resource_context.pulp_href]}
+            return {"reserved_resources": self.resource_context.pulp_href}
         else:
             return {}
 
@@ -480,7 +305,6 @@ class PulpTaskContext(PulpEntityContext):
         finished_before: datetime.datetime | None,
         states: list[str] | None,
     ) -> t.Any:
-        self.pulp_ctx.needs_plugin(PluginRequirement("core", specifier=">=3.17.0"))
         body: dict[str, t.Any] = {}
         if finished_before:
             body["finished_before"] = finished_before
@@ -492,19 +316,20 @@ class PulpTaskContext(PulpEntityContext):
         )
 
     def summary(self) -> dict[str, int]:
-        task_states = ["waiting", "skipped", "running", "completed", "failed", "canceled"]
-        if self.pulp_ctx.has_plugin(PluginRequirement("core", specifier=">=3.14.0")):
-            task_states.append("canceling")
+        task_states = [
+            "waiting",
+            "skipped",
+            "running",
+            "completed",
+            "failed",
+            "canceling",
+            "canceled",
+        ]
         result = {}
         for state in task_states:
             payload = {"limit": 1, "state": state}
             result[state] = self.call("list", parameters=payload)["count"]
         return result
-
-    # "list" should be a reserverd word in Python...
-    # In this scope, we want to use the global "list" for typing hints.
-    list = _list
-    del _list
 
 
 class PulpTaskGroupContext(PulpEntityContext):
@@ -608,7 +433,6 @@ class PulpUpstreamPulpContext(PulpEntityContext):
     HREF = "upstream_pulp_href"
     ID_PREFIX = "upstream_pulps"
     HREF_PATTERN = r"upstream-pulps/"
-    NEEDS_PLUGINS = [PluginRequirement("core", specifier=">=3.23.0")]
 
     def find(self, **kwargs: t.Any) -> t.Any:
         # Workaroud the missing ability to filter.
