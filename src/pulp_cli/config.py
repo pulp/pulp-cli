@@ -37,6 +37,7 @@ CONFIG_LOCATIONS = [
     str(Path(click.utils.get_app_dir("pulp"), "cli.toml")),
 ]
 FORMAT_CHOICES = list(REGISTERED_OUTPUT_FORMATTERS.keys())
+VERSIONS = ["v3", "v4", "v5"]
 REQUIRED_SETTINGS = {
     "base_url",
     "api_root",
@@ -57,6 +58,7 @@ OPTIONAL_SETTINGS = {
     "key",
     "chunk_size",
     "plugins",
+    "api_version",
 }
 SETTINGS = REQUIRED_SETTINGS | OPTIONAL_SETTINGS
 
@@ -136,6 +138,12 @@ CONFIG_OPTIONS = [
         type=int,
         count=True,
         help=_("Increase verbosity; explain api calls as they are made"),
+    ),
+    click.option(
+        "--api-version",
+        type=click.Choice(VERSIONS, case_sensitive=True),
+        default="v3",
+        help=_("API version to talk to (e.g., 'v3')"),
     ),
 ]
 

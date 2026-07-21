@@ -100,6 +100,7 @@ class OpenAPI:
         cid: Correlation ID to send with all requests.
         validate_certs: DEPRECATED use verify_ssl instead.
         safe_calls_only: DEPRECATED use dry_run instead.
+        api_version: Version of the Pulp APi to contact (e.g., "v3")
     """
 
     _api_spec: oas.OpenAPISpec
@@ -122,6 +123,7 @@ class OpenAPI:
         validate_certs: bool | None = None,
         safe_calls_only: bool | None = None,
         patch_api_hook: t.Callable[[t.Any], t.Any] | None = None,
+        api_version: str | None = "v3",
     ):
         if validate_certs is not None:
             warnings.warn(
@@ -168,6 +170,7 @@ class OpenAPI:
         self._oauth2_expires: datetime = datetime.now()
 
         self._patch_api_hook: t.Callable[[t.Any], t.Any] = patch_api_hook or (lambda data: data)
+        self._api_version = api_version
         self.load_api(refresh_cache=refresh_cache)
 
     def _setup_session(self) -> None:
@@ -736,7 +739,6 @@ class OpenAPI:
         rel_url = path
         for name, value in rendered_parameters["path"].items():
             rel_url = path.replace("{" + name + "}", value)
-
         query_params = rendered_parameters["query"]
 
         url = urljoin(self._base_url, rel_url)

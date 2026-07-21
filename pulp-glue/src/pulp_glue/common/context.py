@@ -287,7 +287,7 @@ class PulpContext:
     It is an abstraction layer for api access and output handling.
 
     Parameters:
-        api_root: The base url (excluding "api/v3/") to the servers api.
+        api_root: The base url (excluding "api/{version}/") to the servers api.
         api_kwargs: Extra arguments to pass to the wrapped `OpenAPI` object.
         background_tasks: Whether to wait for tasks. If `True`, all tasks triggered will
             immediately raise `PulpNoWait`.
@@ -297,6 +297,7 @@ class PulpContext:
             Where possible, instead of failing, the requested result will be faked.
             This implies `dry_run=True` on the `api_kwargs`.
         verify_ssl: A boolean or a path to the CA bundle.
+        api-version: Version of the Pulp API to talk to (e.g., "v3")
     """
 
     def echo(self, message: str, nl: bool = True, err: bool = False) -> None:
@@ -328,8 +329,10 @@ class PulpContext:
         verify_ssl: bool | str | None = None,
         verify: bool | str | None = None,  # Deprecated
         chunk_size: int | None = None,
+        api_version: str | None = "v3",
     ) -> None:
         self._api: OpenAPI | None = None
+        self._api_version = api_version
         self._api_root: str = api_root
         self._api_kwargs = api_kwargs
         self.verify_ssl = verify_ssl
@@ -353,6 +356,7 @@ class PulpContext:
         self.fake_mode: bool = fake_mode
         if self.fake_mode:
             self._api_kwargs["dry_run"] = True
+        self._api_kwargs["api_version"] = self._api_version
         self.chunk_size = chunk_size
 
     @classmethod
@@ -434,6 +438,7 @@ class PulpContext:
             api_root=config.get("api_root", "/pulp/"),
             domain=config.get("domain", "default"),
             verify_ssl=config.get("verify_ssl", True),
+            api_version=config.get("api_version", "v3"),
             api_kwargs=api_kwargs,
         )
 
@@ -452,8 +457,8 @@ class PulpContext:
     @property
     def api_path(self) -> str:
         if self.domain_enabled:
-            return self._api_root + self.pulp_domain + "/api/v3/"
-        return self._api_root + "api/v3/"
+            return f"{self._api_root}{self.pulp_domain}/api/{self._api_version}/"
+        return f"{self._api_root}api/{self._api_version}/"
 
     @property
     def api(self) -> OpenAPI:
@@ -480,7 +485,7 @@ class PulpContext:
                 )
             try:
                 self._api = OpenAPI(
-                    doc_path=f"{self._api_root}api/v3/docs/api.json",
+                    doc_path=f"{self._api_root}api/{self._api_version}/docs/api.json",
                     verify_ssl=self.verify_ssl,
                     patch_api_hook=_patch_api_hook,
                     **self._api_kwargs,
@@ -534,6 +539,7 @@ class PulpContext:
             if "pulp_domain" in self.api.param_spec(operation_id, "path", required=True):
                 parameters["pulp_domain"] = self.pulp_domain
         parameters = preprocess_payload(parameters)
+
         if body is not None:
             body = preprocess_payload(body)
         try:
