@@ -63,6 +63,15 @@ update_options = [
         ),
     ),
     repository_option,
+    pulp_option(
+        "--version",
+        type=int,
+        help=_(
+            "The repository version number to distribute."
+            " When unset, the latest version of the repository will be auto-distributed."
+        ),
+        needs_plugins=[PluginRequirement("core", specifier=">=3.106.0")],
+    ),
     content_guard_option,
     pulp_labels_option,
     pulp_option(
