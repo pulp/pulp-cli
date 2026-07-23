@@ -12,6 +12,7 @@ from pulp_glue.common.context import (
     PulpRepositoryVersionContext,
     api_spec_quirk,
 )
+from pulp_glue.common.exceptions import PulpException
 from pulp_glue.common.i18n import get_translation
 
 translation = get_translation(__package__)
@@ -87,6 +88,23 @@ class PulpFileDistributionContext(PulpDistributionContext):
                 body["publication"] = None
             if "repository" not in body and "publication" in body:
                 body["repository"] = None
+
+        version = body.pop("version", None)
+        if version is not None:
+            self.pulp_ctx.needs_plugin(PluginRequirement("core", specifier=">=3.106.0"))
+            repository_href = body.pop("repository", None)
+            if repository_href is None and partial:
+                repository_href = self.entity.get("repository")
+            if repository_href is None:
+                raise PulpException(_("--repository must be provided"))
+            body["repository_version"] = f"{repository_href}versions/{version}/"
+            body["repository"] = None
+            body["publication"] = None
+        elif "repository" in body and self.pulp_ctx.has_plugin(
+            PluginRequirement("core", specifier=">=3.106.0")
+        ):
+            body["repository_version"] = None
+
         return body
 
 
