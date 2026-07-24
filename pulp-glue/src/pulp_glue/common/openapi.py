@@ -484,7 +484,8 @@ class OpenAPI:
             security = method_spec.security or self._api_spec.security
         else:
             # No auth required? Don't provide it.
-            # No auth_provider available? Hope for the best (cert auth is now coverd by the provider).
+            # No auth_provider available?
+            #   Hope for the best (cert auth is now covered by the provider).
             # Authorization header present? You wanted it that way...
             security = None
 

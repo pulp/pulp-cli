@@ -42,7 +42,8 @@ def strategy_semver(requirement: Requirement, latest_version: Version) -> Requir
     assert upper_bound is not None
     if latest_version < Version(upper_bound.version):
         _logger.warn(
-            f"Dependency on {requirement} cannot be updated to include latest version {latest_version}."
+            f"Dependency on {requirement} cannot be updated "
+            "to include latest version {latest_version}."
         )
     else:
         if upper_bound.operator == "==":
