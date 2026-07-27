@@ -32,9 +32,11 @@ class PulpAccessPolicyContext(PulpEntityContext):
 
     def preprocess_entity(self, body: EntityDefinition, partial: bool = False) -> EntityDefinition:
         body = super().preprocess_entity(body, partial=partial)
-        if not self.pulp_ctx.has_plugin(PluginRequirement("core", specifier=">=3.17.0")):
-            if "creation_hooks" in body:
-                body["permissions_assignment"] = body.pop("creation_hooks")
+        if (
+            not self.pulp_ctx.has_plugin(PluginRequirement("core", specifier=">=3.17.0"))
+            and "creation_hooks" in body
+        ):
+            body["permissions_assignment"] = body.pop("creation_hooks")
         return body
 
 
@@ -294,11 +296,7 @@ class PulpOrphanContext(PulpViewSetContext):
         else:
             if body:
                 self.pulp_ctx.needs_plugin(PluginRequirement("core", specifier=">=3.14.0"))
-            if not self.pulp_ctx.fake_mode:
-                result = self.pulp_ctx.call("orphans_delete")
-            else:
-                # Do we need something better?
-                result = {}
+            result = {} if self.pulp_ctx.fake_mode else self.pulp_ctx.call("orphans_delete")
         return result
 
 

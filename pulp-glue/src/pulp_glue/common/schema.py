@@ -129,11 +129,10 @@ def validate(
         _validate_ref(schema.ref, name, value, components)
         return
 
-    if value is None:
+    if value is None and schema.nullable:
         # This seems to be the openapi 3.0.3 way.
         # in 3.1.* they use `"type": ["string", "null"]` instead.
-        if schema.nullable:
-            return
+        return
 
     if isinstance(schema, oas.TypeSchema):
         if isinstance(schema.type_, list):
@@ -211,23 +210,20 @@ def _validate_array(
     schema: oas.TypeSchema, name: str, value: t.Any, components: dict[str, t.Any]
 ) -> None:
     _assert_type(name, value, list, "array")
-    if schema.min_items is not None:
-        if len(value) < schema.min_items:
-            raise ValidationError(
-                _("'{name}' is expected to have at least {min_items} items.").format(
-                    name=name, min_items=schema.min_items
-                )
+    if schema.min_items is not None and len(value) < schema.min_items:
+        raise ValidationError(
+            _("'{name}' is expected to have at least {min_items} items.").format(
+                name=name, min_items=schema.min_items
             )
-    if schema.max_items is not None:
-        if len(value) > schema.max_items:
-            raise ValidationError(
-                _("'{name}' is expected to have at most {max_items} items.").format(
-                    name=name, max_items=schema.max_items
-                )
+        )
+    if schema.max_items is not None and len(value) > schema.max_items:
+        raise ValidationError(
+            _("'{name}' is expected to have at most {max_items} items.").format(
+                name=name, max_items=schema.max_items
             )
-    if schema.unique_items:
-        if len(set(value)) != len(value):
-            raise ValidationError(_("'{name}' is expected to have unique items.").format(name=name))
+        )
+    if schema.unique_items and len(set(value)) != len(value):
+        raise ValidationError(_("'{name}' is expected to have unique items.").format(name=name))
 
     if schema.items is not None:
         for i, item in enumerate(value):
@@ -246,13 +242,12 @@ def _validate_integer(
     _assert_type(name, value, int, "integer")
     _assert_min_max(schema, name, value)
 
-    if schema.multiple_of is not None:
-        if value % schema.multiple_of != 0:
-            raise ValidationError(
-                _("'{name}' is expected to be a multiple of {multiple_of}").format(
-                    name=name, multiple_of=schema.multiple_of
-                )
+    if schema.multiple_of is not None and value % schema.multiple_of != 0:
+        raise ValidationError(
+            _("'{name}' is expected to be a multiple of {multiple_of}").format(
+                name=name, multiple_of=schema.multiple_of
             )
+        )
 
 
 def _validate_null(
@@ -289,13 +284,12 @@ def _validate_object(
             )
         for pname, pvalue in extra_values.items():
             validate(schema.additional_properties, f"{name}[{pname}]", pvalue, components)
-    if schema.required is not None:
-        if missing_keys := set(schema.required) - set(value.keys()):
-            raise ValidationError(
-                _("'{name}' is missing properties ({missing}).").format(
-                    name=name, missing=", ".join(missing_keys)
-                )
+    if schema.required is not None and (missing_keys := set(schema.required) - set(value.keys())):
+        raise ValidationError(
+            _("'{name}' is missing properties ({missing}).").format(
+                name=name, missing=", ".join(missing_keys)
             )
+        )
 
 
 def _validate_string(
@@ -314,13 +308,12 @@ def _validate_string(
         _assert_type(name, value, datetime.datetime, "date-time")
     else:
         _assert_type(name, value, str, "string")
-    if schema.enum is not None:
-        if value not in schema.enum:
-            raise ValidationError(
-                _("'{name}' is expected to be one of [{enums}].").format(
-                    name=name, enums=", ".join(schema.enum)
-                )
+    if schema.enum is not None and value not in schema.enum:
+        raise ValidationError(
+            _("'{name}' is expected to be one of [{enums}].").format(
+                name=name, enums=", ".join(schema.enum)
             )
+        )
 
 
 _TYPED_VALIDATORS = {

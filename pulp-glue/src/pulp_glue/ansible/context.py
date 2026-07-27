@@ -124,7 +124,7 @@ class PulpAnsibleCollectionRemoteContext(PulpRemoteContext):
 
     def preprocess_entity(self, body: EntityDefinition, partial: bool = False) -> EntityDefinition:
         body = super().preprocess_entity(body, partial=partial)
-        if "requirements" in body.keys():
+        if "requirements" in body:
             body["requirements_file"] = body.pop("requirements")
         return body
 

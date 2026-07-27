@@ -50,7 +50,7 @@ class ScriptItem(pytest.Function):
     def _runscript(
         self, pulp_cli_env: dict[str, t.Any], tmp_path: pathlib.Path, pulp_container_log: None
     ) -> None:
-        run = subprocess.run([self.path], cwd=tmp_path)
+        run = subprocess.run([self.path], cwd=tmp_path, check=False)
         if run.returncode == 23:
             pytest.skip("Skipped as requested by the script.")
         if run.returncode != 0:
@@ -149,7 +149,7 @@ def pulp_cli_gnupghome(tmp_path_factory: pytest.TempPathFactory) -> pathlib.Path
     if key_file.exists():
         private_key_data = key_file.read_text()
     else:
-        private_key_url = "https://github.com/pulp/pulp-fixtures/raw/master/common/GPG-PRIVATE-KEY-fixture-signing"  # noqa: E501
+        private_key_url = "https://github.com/pulp/pulp-fixtures/raw/master/common/GPG-PRIVATE-KEY-fixture-signing"
         with urllib.request.urlopen(private_key_url) as response:
             private_key_data = response.read()
         key_file.write_bytes(private_key_data)
@@ -182,8 +182,6 @@ def pulp_cli_env(
 
     for key, value in pulp_cli_vars.items():
         monkeypatch.setenv(key, value)
-
-    return None
 
 
 if "PULP_LOGGING" in os.environ:

@@ -190,9 +190,9 @@ def validate_config(config: dict[str, t.Any], strict: bool = False) -> None:
     if "domain" in config and not re.match(r"^[-a-zA-Z0-9_]+\Z", config["domain"]):
         errors.append(_("'domain' must be a slug string"))
     if "headers" in config:
-        if not isinstance(config["headers"], list) or not all(
-            isinstance(header, str) and re.match(HEADER_REGEX, header)
-            for header in config["headers"]
+        headers = config["headers"]
+        if not isinstance(headers, list) or not all(
+            isinstance(header, str) and re.match(HEADER_REGEX, header) for header in headers
         ):
             errors.append(_("'headers' must be a list of strings with a colon separator"))
     if "plugins" in config and not (

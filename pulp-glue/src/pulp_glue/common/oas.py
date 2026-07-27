@@ -18,9 +18,7 @@ class ExtensibleOASBase(OASBase, extra="allow"):
     @pydantic.model_validator(mode="after")
     def _check_extensions(self) -> "t.Self":
         if self.__pydantic_extra__ is not None:
-            invalid_keys = [
-                key for key in self.__pydantic_extra__.keys() if not key.startswith("x-")
-            ]
+            invalid_keys = [key for key in self.__pydantic_extra__ if not key.startswith("x-")]
             if invalid_keys:
                 raise PydanticCustomError(
                     "invalid_extensions",

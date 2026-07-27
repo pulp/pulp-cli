@@ -129,9 +129,8 @@ class PulpRpmPackageContext(PulpContentContext):
 
     def preprocess_entity(self, body: EntityDefinition, partial: bool = False) -> EntityDefinition:
         body = super().preprocess_entity(body, partial=partial)
-        if partial is False:
-            if body.get("relative_path") is None:
-                self.pulp_ctx.needs_plugin(PluginRequirement("rpm", specifier=">=3.18.0"))
+        if partial is False and body.get("relative_path") is None:
+            self.pulp_ctx.needs_plugin(PluginRequirement("rpm", specifier=">=3.18.0"))
         return body
 
     def list_iterator(

@@ -41,7 +41,7 @@ def strategy_semver(requirement: Requirement, latest_version: Version) -> Requir
             rest.append(spec)
     assert upper_bound is not None
     if latest_version < Version(upper_bound.version):
-        _logger.warn(
+        _logger.warning(
             f"Dependency on {requirement} cannot be updated "
             "to include latest version {latest_version}."
         )
@@ -73,7 +73,7 @@ def latest_version(canonical_name: str, allow_prereleases: bool | None = None) -
         releases = json.loads(response.read())["releases"]
     available_versions = sorted(
         version
-        for version in (Version(key) for key in releases.keys())
+        for version in (Version(key) for key in releases)
         if allow_prereleases or not version.is_prerelease
     )
     return available_versions[-1]

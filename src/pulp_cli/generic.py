@@ -441,10 +441,12 @@ class PulpCommand(click.Command):
         params = super().get_params(ctx)
         new_params: list[click.Parameter] = []
         for param in params:
-            if isinstance(param, PulpOption):
-                if param.allowed_with_contexts is not None:
-                    if not isinstance(ctx.obj, param.allowed_with_contexts):
-                        continue
+            if (
+                isinstance(param, PulpOption)
+                and param.allowed_with_contexts is not None
+                and not isinstance(ctx.obj, param.allowed_with_contexts)
+            ):
+                continue
             new_params.append(param)
         return new_params
 
@@ -1121,7 +1123,7 @@ def resource_option(*args: t.Any, **kwargs: t.Any) -> t.Callable[[FC], FC]:
     ) -> t.Iterable[EntityFieldDefinition]:
         if value:
             return [_option_callback(ctx, param, item) for item in value]
-        return tuple()
+        return ()
 
     if "cls" not in kwargs:
         kwargs["cls"] = PulpOption
@@ -1536,10 +1538,9 @@ def list_command(**kwargs: t.Any) -> click.Command:
         """
         Show the list of optionally filtered {entities}.
         """
-        if "ordering" in kwargs:
-            # Workaround for missing ordering filter
-            if not kwargs["ordering"]:
-                kwargs["ordering"] = None
+        # Workaround for missing ordering filter
+        if "ordering" in kwargs and not kwargs["ordering"]:
+            kwargs["ordering"] = None
         result = entity_ctx.list(limit=limit, offset=offset, parameters=kwargs)
         pulp_ctx.output_result(result)
 
