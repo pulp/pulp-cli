@@ -41,10 +41,7 @@ def _package_list_callback(ctx: click.Context, param: click.Parameter, value: st
     if not value:
         return value
 
-    if value.startswith("@"):
-        json_string = f'["{value[1:]}"]'
-    else:
-        json_string = value
+    json_string = f'["{value[1:]}"]' if value.startswith("@") else value
 
     try:
         json_object = json.loads(json_string)

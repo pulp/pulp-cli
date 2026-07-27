@@ -229,15 +229,15 @@ def main(
     if verbose:
         logging.basicConfig(level=logging.DEBUG + 4 - verbose, format="%(message)s")
 
-    api_kwargs = dict(
-        base_url=base_url,
-        headers=dict(header.split(":", maxsplit=1) for header in headers),
-        verify_ssl=verify_ssl,
-        refresh_cache=refresh_api,
-        dry_run=dry_run,
-        user_agent=f"Pulp-CLI/{__version__}",
-        cid=cid,
-    )
+    api_kwargs = {
+        "base_url": base_url,
+        "headers": dict(header.split(":", maxsplit=1) for header in headers),
+        "verify_ssl": verify_ssl,
+        "refresh_cache": refresh_api,
+        "dry_run": dry_run,
+        "user_agent": f"Pulp-CLI/{__version__}",
+        "cid": cid,
+    }
     ctx.obj = PulpCLIContext(
         api_root=api_root,
         api_kwargs=api_kwargs,

@@ -199,9 +199,9 @@ def walk_operations(api_spec: t.Any) -> t.Iterator[tuple[str, str, str, t.Any]]:
 
 def _patch_api_hook(spec: t.Any) -> t.Any:
     for req, quirk in _REGISTERED_API_SPEC_QUIRKS:
-        if ver := spec["info"].get("x-pulp-app-versions", {}).get(req.name):
-            if ver in req:
-                spec = quirk(spec)
+        ver: str | None = spec["info"].get("x-pulp-app-versions", {}).get(req.name)
+        if ver is not None and ver in req:
+            spec = quirk(spec)
     return spec
 
 
@@ -269,15 +269,16 @@ def patch_upstream_pulp_replicate_request_body(api_spec: t.Any) -> t.Any:
 @api_spec_quirk(PluginRequirement("core", specifier="<3.85"))
 def patch_security_scheme_mutual_tls(api_spec: t.Any) -> t.Any:
     # Trick to allow tls cert auth on older Pulp.
-    if (components := api_spec.get("components")) is not None:
-        if (security_schemes := components.get("securitySchemes")) is not None:
-            # Only if it is going to be idempotent...
-            if "gluePatchTLS" not in security_schemes:
-                security_schemes["gluePatchTLS"] = {"type": "mutualTLS"}
-                for path, method, operation_id, operation in walk_operations(api_spec):
-                    security = operation.get("security")
-                    if security is not None:
-                        security.append({"gluePatchTLS": []})
+    if (
+        (components := api_spec.get("components")) is not None
+        and (security_schemes := components.get("securitySchemes")) is not None
+        and "gluePatchTLS" not in security_schemes  # Only if it is going to be idempotent...
+    ):
+        security_schemes["gluePatchTLS"] = {"type": "mutualTLS"}
+        for path, method, operation_id, operation in walk_operations(api_spec):
+            security = operation.get("security")
+            if security is not None:
+                security.append({"gluePatchTLS": []})
     return api_spec
 
 
@@ -529,10 +530,13 @@ class PulpContext:
         """
         if parameters is None:
             parameters = {}
-        if self.domain_enabled:
+        if (
+            self.domain_enabled
+            and
             # Validation will fail if path doesn't need domain parameter
-            if "pulp_domain" in self.api.param_spec(operation_id, "path", required=True):
-                parameters["pulp_domain"] = self.pulp_domain
+            "pulp_domain" in self.api.param_spec(operation_id, "path", required=True)
+        ):
+            parameters["pulp_domain"] = self.pulp_domain
         parameters = preprocess_payload(parameters)
         if body is not None:
             body = preprocess_payload(body)
@@ -558,9 +562,11 @@ class PulpContext:
             )
             if not non_blocking:
                 result = self.wait_for_task(result)
-                if self.has_plugin(PluginRequirement("core", specifier=">=3.86")):
-                    if result["result"] is not None:
-                        result = result["result"]
+                if (
+                    self.has_plugin(PluginRequirement("core", specifier=">=3.86"))
+                    and result["result"] is not None
+                ):
+                    result = result["result"]
         elif isinstance(result, dict) and ["task_group"] == list(result.keys()):
             task_group_href = result["task_group"]
             result = self.api.call(
@@ -1548,7 +1554,7 @@ class PulpRepositoryVersionContext(PulpEntityContext):
     def entity(self) -> EntityDefinition:
         if (
             self._entity is None
-            and "number" in self._entity_lookup.keys()
+            and "number" in self._entity_lookup
             and self._entity_lookup.get("number") is None
         ):
             self.pulp_href = self.repository_ctx.entity["latest_version_href"]
@@ -1625,11 +1631,14 @@ class PulpRepositoryContext(PulpEntityContext):
         body = super().preprocess_entity(body, partial=partial)
         if "retain_repo_versions" in body:
             self.pulp_ctx.needs_plugin(PluginRequirement("core", specifier=">=3.13.0"))
-        if self.pulp_ctx.has_plugin(PluginRequirement("core", specifier=">=3.13.0,<3.15.0")):
+        if (
+            self.pulp_ctx.has_plugin(PluginRequirement("core", specifier=">=3.13.0,<3.15.0"))
+            and
             # "retain_repo_versions" has been named "retained_versions" until pulpcore 3.15
             # https://github.com/pulp/pulpcore/pull/1472
-            if "retain_repo_versions" in body:
-                body["retained_versions"] = body.pop("retain_repo_versions")
+            "retain_repo_versions" in body
+        ):
+            body["retained_versions"] = body.pop("retain_repo_versions")
         return body
 
     def sync(self, body: EntityDefinition | None = None) -> t.Any:
@@ -1777,8 +1786,7 @@ class PulpContentContext(PulpEntityContext):
             chunk_size: int | None = body.pop("chunk_size", None)
             if file:
                 if isinstance(file, str | Path):
-                    file = Path(file).open("rb")
-                    cleanup.enter_context(file)
+                    file = cleanup.enter_context(Path(file).open("rb"))
                 self._prepare_upload(body, file, chunk_size)
             if self.repository_ctx is not None:
                 body["repository"] = self.repository_ctx

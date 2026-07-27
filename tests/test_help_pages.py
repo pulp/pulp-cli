@@ -18,15 +18,14 @@ def traverse_commands(command: click.Command, args: list[str]) -> t.Iterator[lis
             yield from traverse_commands(sub, args + [name])
 
         params = command.params
-        if params:
-            if "--type" in params[0].opts:
-                # iterate over commands with specific context types
-                assert isinstance(params[0].type, click.Choice)
-                for context_type in params[0].type.choices:
-                    yield args + ["--type", context_type]
+        if params and "--type" in params[0].opts:
+            # iterate over commands with specific context types
+            assert isinstance(params[0].type, click.Choice)
+            for context_type in params[0].type.choices:
+                yield args + ["--type", context_type]
 
-                    for name, sub in command.commands.items():
-                        yield from traverse_commands(sub, args + ["--type", context_type, name])
+                for name, sub in command.commands.items():
+                    yield from traverse_commands(sub, args + ["--type", context_type, name])
 
 
 def pytest_generate_tests(metafunc: pytest.Metafunc) -> None:
@@ -38,7 +37,7 @@ def pytest_generate_tests(metafunc: pytest.Metafunc) -> None:
             sub = rel_main.commands[step]
             assert isinstance(sub, click.Group)
             rel_main = sub
-        metafunc.parametrize("args", traverse_commands(rel_main, base_cmd), ids=" ".join)
+        metafunc.parametrize("args", list(traverse_commands(rel_main, base_cmd)), ids=" ".join)
 
 
 @pytest.fixture
@@ -73,7 +72,7 @@ def test_help_shows_all_available_commands(no_api: None) -> None:
     runner = CliRunner()
     result = runner.invoke(main, ["--help"], catch_exceptions=False)
     assert result.exit_code == 0
-    for command in main.commands.keys():
+    for command in main.commands:
         assert command in result.stdout
 
 

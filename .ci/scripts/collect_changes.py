@@ -9,10 +9,12 @@
 
 import itertools
 import re
+import typing as t
 from pathlib import Path
 
 import tomllib
 from git import GitCommandError, Repo
+from packaging.version import Version
 from packaging.version import parse as parse_version
 
 # Read Towncrier settings
@@ -51,7 +53,7 @@ TITLE_REGEX = (
 )
 
 
-def get_changelog(repo, branch):
+def get_changelog(repo: Repo, branch: str) -> str:
     branch_tc_settings = tomllib.loads(repo.git.show(f"{branch}:pyproject.toml"))["tool"][
         "towncrier"
     ]
@@ -59,7 +61,7 @@ def get_changelog(repo, branch):
     return repo.git.show(f"{branch}:{branch_changelog_file}") + "\n"
 
 
-def _tokenize_changes(splits):
+def _tokenize_changes(splits: list[str]) -> t.Iterator[list[Version | str]]:
     assert len(splits) % 3 == 0
     for i in range(len(splits) // 3):
         title = splits[3 * i]
@@ -67,13 +69,13 @@ def _tokenize_changes(splits):
         yield [version, title + splits[3 * i + 2]]
 
 
-def split_changelog(changelog):
+def split_changelog(changelog: str) -> tuple[str, list[list[Version | str]]]:
     preamble, rest = changelog.split(START_STRING, maxsplit=1)
     split_rest = re.split(TITLE_REGEX, rest)
     return preamble + START_STRING + split_rest[0], list(_tokenize_changes(split_rest[1:]))
 
 
-def main():
+def main() -> None:
     repo = Repo(Path.cwd())
     remote = repo.remotes[0]
     branches = [ref for ref in remote.refs if re.match(r"^([0-9]+)\.([0-9]+)$", ref.remote_head)]
@@ -91,7 +93,7 @@ def main():
         except GitCommandError:
             print("No changelog found on this branch.")
             continue
-        dummy, changes = split_changelog(changelog)
+        _dummy, changes = split_changelog(changelog)
         new_changes = sorted(main_changes + changes, key=lambda x: x[0], reverse=True)
         # Now remove duplicates (retain the first one)
         main_changes = [new_changes[0]]
