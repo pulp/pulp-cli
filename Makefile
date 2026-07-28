@@ -93,11 +93,11 @@ unittest_glue:
 
 .PHONY: docs
 docs:
-	pulp-docs build
+	uv run --only-group docs pulp-docs build --draft --no-blog
 
 .PHONY: servedocs
 servedocs:
-	pulp-docs serve -w CHANGES.md -w pulp-glue/pulp_glue -w pulp_cli/generic.py
+	uv run --only-group docs pulp-docs serve --draft --no-blog -w CHANGES.md -w src -w pulp-glue/src
 
 pulp-glue/pulp_glue/%/locale/messages.pot: pulp-glue/pulp_glue/%/*.py
 	xgettext -d $* -o $@ pulp-glue/pulp_glue/$*/*.py

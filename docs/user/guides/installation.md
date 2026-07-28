@@ -2,19 +2,19 @@
 
 ## TL;DR: Get Started Real Fast
 
-=== "pip"
+=== "uv"
 
     ```bash
-    pip install pulp-cli[pygments]
+    uv tool install pulp-cli[pygments]
     pulp config create -e
     # insert your server configuration here
     pulp status
     ```
 
-=== "uv"
+=== "pip"
 
     ```bash
-    uv tool install pulp-cli[pygments]
+    pip install pulp-cli[pygments]
     pulp config create -e
     # insert your server configuration here
     pulp status
@@ -97,14 +97,47 @@ pip install pulp-cli-deb
 ## From a source checkout
 
 If you intend to use unreleased features, or want to contribute to the CLI, you can install from source:
-```bash
-git clone git@github.com:pulp/pulp-cli.git
-pip install -e ./pulp-cli -e ./pulp-cli/pulp-glue
 
-# Optionally install plugins from source
-git clone git@github.com:pulp/pulp-cli-deb.git
-pip install -e ./pulp-cli-deb
+=== "uv"
 
-git clone git@github.com:pulp/pulp-cli-maven.git
-pip install -e ./pulp-cli-maven -e ./pulp-cli-maven/pulp-glue-maven
-```
+    ```bash
+    # Upon entering the source directory, uv handles the virtual environment on the fly.
+
+    git clone git@github.com:pulp/pulp-cli.git
+    cd pulp-cli
+    uv run pulp status
+
+    # Alternatively run in plugin development:
+    git clone git@github.com:pulp/pulp-cli-gem.git
+    cd pulp-cli-gem
+    uv run pulp status
+    ```
+
+=== "uv (install)"
+
+    ```bash
+    # The matching glue development version is automatically taken from the same workspace.
+
+    git clone git@github.com:pulp/pulp-cli.git
+    uv tool install --editable pulp-cli
+
+    # Alternatively install plugins from source:
+    git clone git@github.com:pulp/pulp-cli-gem.git
+    uv tool install pulp-cli --with-editable pulp-cli-gem
+    ```
+
+=== "pip"
+
+    ```bash
+    # The matching glue development version must be installed from the same source.
+
+    git clone git@github.com:pulp/pulp-cli.git
+    pip install -e ./pulp-cli -e ./pulp-cli/pulp-glue
+
+    # Alternatively install plugins from source:
+    git clone git@github.com:pulp/pulp-cli-deb.git
+    pip install -e ./pulp-cli-deb
+
+    git clone git@github.com:pulp/pulp-cli-maven.git
+    pip install -e ./pulp-cli-maven -e ./pulp-cli-maven/pulp-glue-maven
+    ```
