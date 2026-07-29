@@ -80,7 +80,6 @@ update_options = [
     remote_option,
     pulp_option(
         "--autopublish/--no-autopublish",
-        needs_plugins=[PluginRequirement("python", specifier=">=3.3.0")],
         default=None,
     ),
     pulp_option(

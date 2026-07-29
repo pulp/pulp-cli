@@ -1,7 +1,6 @@
 import typing as t
 
 from pulp_glue.common.context import (
-    BATCH_SIZE,
     EntityDefinition,
     PluginRequirement,
     PulpACSContext,
@@ -22,7 +21,7 @@ translation = get_translation(__package__)
 _ = translation.gettext
 
 
-@api_spec_quirk(PluginRequirement("rpm", specifier=">=3.3.0"))
+@api_spec_quirk(PluginRequirement("rpm"))  # TODO fix this upstream and add the version here.
 def patch_rpm_copy_scheme(api_spec: t.Any) -> t.Any:
     path, operation = next(
         ((k, v["post"]) for k, v in api_spec["paths"].items() if k.endswith("/rpm/copy/"))
@@ -53,13 +52,13 @@ class PulpRpmACSContext(PulpACSContext):
     ENTITIES = _("rpm ACSes")
     HREF = "rpm_rpm_alternate_content_source_href"
     ID_PREFIX = "acs_rpm_rpm"
-    NEEDS_PLUGINS = [PluginRequirement("rpm", specifier=">=3.18.0")]
-    CAPABILITIES = {"roles": [PluginRequirement("rpm", specifier=">=3.19.0")]}
+    NEEDS_PLUGINS = [PluginRequirement("rpm", specifier=">=3.26.0")]
+    CAPABILITIES = {"roles": []}
 
 
 class PulpRpmCompsXmlContext(PulpEntityContext):
     UPLOAD_COMPS_ID: t.ClassVar[str] = "rpm_comps_upload"
-    NEEDS_PLUGINS = [PluginRequirement("rpm", specifier=">=3.17.0")]
+    NEEDS_PLUGINS = [PluginRequirement("rpm", specifier=">=3.26.0")]
 
     def upload_comps(self, file: t.IO[bytes], repo_href: str | None, replace: bool | None) -> t.Any:
         self.pulp_ctx.echo(_("Uploading file {filename}").format(filename=file.name), err=True)
@@ -77,8 +76,8 @@ class PulpRpmDistributionContext(PulpDistributionContext):
     ENTITIES = _("rpm distributions")
     HREF = "rpm_rpm_distribution_href"
     ID_PREFIX = "distributions_rpm_rpm"
-    NEEDS_PLUGINS = [PluginRequirement("rpm", specifier=">=3.9.0")]
-    CAPABILITIES = {"roles": [PluginRequirement("rpm", specifier=">=3.19.0")]}
+    NEEDS_PLUGINS = [PluginRequirement("rpm", specifier=">=3.26.0")]
+    CAPABILITIES = {"roles": []}
 
     def preprocess_entity(self, body: EntityDefinition, partial: bool = False) -> EntityDefinition:
         body = super().preprocess_entity(body, partial=partial)
@@ -103,16 +102,6 @@ class PulpRpmDistributionContext(PulpDistributionContext):
         ):
             body["repository_version"] = None
 
-        if body.get("generate_repo_config") is False:
-            self.pulp_ctx.needs_plugin(
-                PluginRequirement(
-                    "rpm",
-                    specifier=">=3.23.0",
-                    feature=_("configuring the generation of the config.repo file"),
-                )
-            )
-        elif self.pulp_ctx.has_plugin(PluginRequirement("rpm", specifier="<3.23.0")):
-            body.pop("generate_repo_config", None)
         return body
 
 
@@ -123,42 +112,8 @@ class PulpRpmPackageContext(PulpContentContext):
     ENTITIES = "rpm packages"
     HREF = "rpm_package_href"
     ID_PREFIX = "content_rpm_packages"
-    NEEDS_PLUGINS = [PluginRequirement("rpm", specifier=">=3.9.0")]
+    NEEDS_PLUGINS = [PluginRequirement("rpm", specifier=">=3.26.0")]
     CAPABILITIES = {"upload": []}
-
-    def preprocess_entity(self, body: EntityDefinition, partial: bool = False) -> EntityDefinition:
-        body = super().preprocess_entity(body, partial=partial)
-        if partial is False and body.get("relative_path") is None:
-            self.pulp_ctx.needs_plugin(PluginRequirement("rpm", specifier=">=3.18.0"))
-        return body
-
-    def list_iterator(
-        self,
-        parameters: dict[str, t.Any] | None = None,
-        offset: int = 0,
-        batch_size: int = BATCH_SIZE,
-        stats: dict[str, t.Any] | None = None,
-    ) -> t.Iterator[t.Any]:
-        contains_startswith = [
-            "name__contains",
-            "name__startswith",
-            "release__contains",
-            "release__startswith",
-            "arch__contains",
-            "arch__startswith",
-        ]
-        if parameters is not None and any(
-            v for k, v in parameters.items() if k in contains_startswith
-        ):
-            self.pulp_ctx.needs_plugin(
-                PluginRequirement("rpm", specifier=">=3.20.0", feature=_("substring filters"))
-            )
-        return super().list_iterator(
-            parameters=parameters,
-            offset=offset,
-            batch_size=batch_size,
-            stats=stats,
-        )
 
     def upload(
         self,
@@ -204,7 +159,7 @@ class PulpRpmAdvisoryContext(PulpContentContext):
     ENTITIES = "rpm advisories"
     HREF = "rpm_update_record_href"
     ID_PREFIX = "content_rpm_advisories"
-    NEEDS_PLUGINS = [PluginRequirement("rpm", specifier=">=3.9.0")]
+    NEEDS_PLUGINS = [PluginRequirement("rpm", specifier=">=3.26.0")]
 
 
 class PulpRpmDistributionTreeContext(PulpContentContext):
@@ -214,7 +169,7 @@ class PulpRpmDistributionTreeContext(PulpContentContext):
     ENTITIES = "rpm distribution trees"
     HREF = "rpm_distribution_tree_href"
     ID_PREFIX = "content_rpm_distribution_trees"
-    NEEDS_PLUGINS = [PluginRequirement("rpm", specifier=">=3.9.0")]
+    NEEDS_PLUGINS = [PluginRequirement("rpm", specifier=">=3.26.0")]
 
 
 class PulpRpmModulemdDefaultsContext(PulpContentContext):
@@ -224,7 +179,7 @@ class PulpRpmModulemdDefaultsContext(PulpContentContext):
     ENTITIES = "rpm modulemd defaults"
     HREF = "rpm_modulemd_defaults_href"
     ID_PREFIX = "content_rpm_modulemd_defaults"
-    NEEDS_PLUGINS = [PluginRequirement("rpm", specifier=">=3.9.0")]
+    NEEDS_PLUGINS = [PluginRequirement("rpm", specifier=">=3.26.0")]
 
 
 class PulpRpmModulemdContext(PulpContentContext):
@@ -234,7 +189,7 @@ class PulpRpmModulemdContext(PulpContentContext):
     ENTITIES = "rpm modulemds"
     HREF = "rpm_modulemd_href"
     ID_PREFIX = "content_rpm_modulemds"
-    NEEDS_PLUGINS = [PluginRequirement("rpm", specifier=">=3.9.0")]
+    NEEDS_PLUGINS = [PluginRequirement("rpm", specifier=">=3.26.0")]
 
 
 class PulpRpmPackageCategoryContext(PulpContentContext):
@@ -244,7 +199,7 @@ class PulpRpmPackageCategoryContext(PulpContentContext):
     ENTITIES = "rpm package categories"
     HREF = "rpm_package_category_href"
     ID_PREFIX = "content_rpm_packagecategories"
-    NEEDS_PLUGINS = [PluginRequirement("rpm", specifier=">=3.9.0")]
+    NEEDS_PLUGINS = [PluginRequirement("rpm", specifier=">=3.26.0")]
 
 
 class PulpRpmPackageEnvironmentContext(PulpContentContext):
@@ -254,7 +209,7 @@ class PulpRpmPackageEnvironmentContext(PulpContentContext):
     ENTITIES = "rpm package environments"
     HREF = "rpm_package_environment_href"
     ID_PREFIX = "content_rpm_packageenvironments"
-    NEEDS_PLUGINS = [PluginRequirement("rpm", specifier=">=3.9.0")]
+    NEEDS_PLUGINS = [PluginRequirement("rpm", specifier=">=3.26.0")]
 
 
 class PulpRpmPackageGroupContext(PulpContentContext):
@@ -264,7 +219,7 @@ class PulpRpmPackageGroupContext(PulpContentContext):
     ENTITIES = "rpm package groups"
     HREF = "rpm_package_group_href"
     ID_PREFIX = "content_rpm_packagegroups"
-    NEEDS_PLUGINS = [PluginRequirement("rpm", specifier=">=3.9.0")]
+    NEEDS_PLUGINS = [PluginRequirement("rpm", specifier=">=3.26.0")]
 
 
 class PulpRpmPackageLangpacksContext(PulpContentContext):
@@ -274,7 +229,7 @@ class PulpRpmPackageLangpacksContext(PulpContentContext):
     ENTITIES = "rpm package langpacks"
     HREF = "rpm_package_langpacks_href"
     ID_PREFIX = "content_rpm_packagelangpacks"
-    NEEDS_PLUGINS = [PluginRequirement("rpm", specifier=">=3.9.0")]
+    NEEDS_PLUGINS = [PluginRequirement("rpm", specifier=">=3.26.0")]
 
 
 class PulpRpmRepoMetadataFileContext(PulpContentContext):
@@ -284,7 +239,7 @@ class PulpRpmRepoMetadataFileContext(PulpContentContext):
     ENTITIES = "rpm repo metadata files"
     HREF = "rpm_repo_metadata_file_href"
     ID_PREFIX = "content_rpm_repo_metadata_files"
-    NEEDS_PLUGINS = [PluginRequirement("rpm", specifier=">=3.9.0")]
+    NEEDS_PLUGINS = [PluginRequirement("rpm", specifier=">=3.26.0")]
 
 
 class PulpRpmPublicationContext(PulpPublicationContext):
@@ -294,8 +249,8 @@ class PulpRpmPublicationContext(PulpPublicationContext):
     ENTITIES = _("rpm publications")
     HREF = "rpm_rpm_publication_href"
     ID_PREFIX = "publications_rpm_rpm"
-    NEEDS_PLUGINS = [PluginRequirement("rpm", specifier=">=3.9.0")]
-    CAPABILITIES = {"roles": [PluginRequirement("rpm", specifier=">=3.19.0")]}
+    NEEDS_PLUGINS = [PluginRequirement("rpm", specifier=">=3.26.0")]
+    CAPABILITIES = {"roles": []}
 
     def preprocess_entity(self, body: EntityDefinition, partial: bool = False) -> EntityDefinition:
         body = super().preprocess_entity(body, partial=partial)
@@ -303,28 +258,8 @@ class PulpRpmPublicationContext(PulpPublicationContext):
         if version is not None:
             repository_href = body.pop("repository")
             body["repository_version"] = f"{repository_href}versions/{version}/"
-        if "repo_config" in body:
-            self.pulp_ctx.needs_plugin(
-                PluginRequirement(
-                    "rpm",
-                    specifier=">=3.24.0",
-                    feature=_("customization of the config.repo file"),
-                )
-            )
-        if "sqlite_metadata" in body:
-            self.pulp_ctx.needs_plugin(
-                PluginRequirement(
-                    "rpm",
-                    specifier=">=3.25.0",
-                    inverted=True,
-                    feature=_("sqlite_metadata generation"),
-                )
-            )
-        if "metadata_checksum_type" in body or "package_checksum_type" in body:
-            metadata_checksum_type = body.get("metadata_checksum_type")
-            package_checksum_type = body.get("metadata_checksum_type")
-            disallowed_checksums = {"md5", "sha1", "sha224"}
 
+        if "metadata_checksum_type" in body or "package_checksum_type" in body:
             self.pulp_ctx.needs_plugin(
                 PluginRequirement(
                     "rpm",
@@ -334,18 +269,6 @@ class PulpRpmPublicationContext(PulpPublicationContext):
                 )
             )
 
-            if metadata_checksum_type and metadata_checksum_type in disallowed_checksums:
-                self.pulp_ctx.needs_plugin(
-                    PluginRequirement(
-                        "rpm", specifier=">=3.25.0", inverted=True, feature=_("weak checksums")
-                    )
-                )
-            if package_checksum_type and package_checksum_type in disallowed_checksums:
-                self.pulp_ctx.needs_plugin(
-                    PluginRequirement(
-                        "rpm", specifier=">=3.25.0", inverted=True, feature=_("weak checksums")
-                    )
-                )
         if "repo_gpgcheck" in body or "gpgcheck" in body:
             self.pulp_ctx.needs_plugin(
                 PluginRequirement(
@@ -367,8 +290,8 @@ class PulpRpmRemoteContext(PulpRemoteContext):
     HREF = "rpm_rpm_remote_href"
     ID_PREFIX = "remotes_rpm_rpm"
     NULLABLES = PulpRemoteContext.NULLABLES | {"sles_auth_token"}
-    NEEDS_PLUGINS = [PluginRequirement("rpm", specifier=">=3.9.0")]
-    CAPABILITIES = {"roles": [PluginRequirement("rpm", specifier=">=3.19.0")]}
+    NEEDS_PLUGINS = [PluginRequirement("rpm", specifier=">=3.26.0")]
+    CAPABILITIES = {"roles": []}
 
 
 class PulpUlnRemoteContext(PulpRemoteContext):
@@ -379,14 +302,14 @@ class PulpUlnRemoteContext(PulpRemoteContext):
     HREF = "rpm_uln_remote_href"
     ID_PREFIX = "remotes_rpm_uln"
     NULLABLES = PulpRemoteContext.NULLABLES | {"uln-server-base-url"}
-    NEEDS_PLUGINS = [PluginRequirement("rpm", specifier=">=3.12.0")]
-    CAPABILITIES = {"roles": [PluginRequirement("rpm", specifier=">=3.19.0")]}
+    NEEDS_PLUGINS = [PluginRequirement("rpm", specifier=">=3.26.0")]
+    CAPABILITIES = {"roles": []}
 
 
 class PulpRpmRepositoryVersionContext(PulpRepositoryVersionContext):
     HREF = "rpm_rpm_repository_version_href"
     ID_PREFIX = "repositories_rpm_rpm_versions"
-    NEEDS_PLUGINS = [PluginRequirement("rpm", specifier=">=3.9.0")]
+    NEEDS_PLUGINS = [PluginRequirement("rpm", specifier=">=3.26.0")]
     CAPABILITIES = {"scan": [PluginRequirement("rpm", specifier=">=3.38.0")]}
 
 
@@ -401,37 +324,14 @@ class PulpRpmRepositoryContext(PulpRepositoryContext):
     CAPABILITIES = {
         "sync": [],
         "pulpexport": [],
-        "roles": [PluginRequirement("rpm", specifier=">=3.19.0")],
+        "roles": [],
     }
-    NEEDS_PLUGINS = [PluginRequirement("rpm", specifier=">=3.9.0")]
+    NEEDS_PLUGINS = [PluginRequirement("rpm", specifier=">=3.26.0")]
     NULLABLES = PulpRepositoryContext.NULLABLES | {"osv_config"}
 
     def preprocess_entity(self, body: EntityDefinition, partial: bool = False) -> EntityDefinition:
         body = super().preprocess_entity(body, partial=partial)
-        if "autopublish" in body:
-            self.pulp_ctx.needs_plugin(PluginRequirement("rpm", specifier=">=3.12.0"))
-        if "repo_config" in body:
-            self.pulp_ctx.needs_plugin(
-                PluginRequirement(
-                    "rpm",
-                    specifier=">=3.24.0",
-                    feature=_("customization of the config.repo file"),
-                )
-            )
-        if "sqlite_metadata" in body:
-            self.pulp_ctx.needs_plugin(
-                PluginRequirement(
-                    "rpm",
-                    specifier=">=3.25.0",
-                    inverted=True,
-                    feature=_("sqlite_metadata generation"),
-                )
-            )
         if "metadata_checksum_type" in body or "package_checksum_type" in body:
-            metadata_checksum_type = body.get("metadata_checksum_type")
-            package_checksum_type = body.get("metadata_checksum_type")
-            disallowed_checksums = {"md5", "sha1", "sha224"}
-
             self.pulp_ctx.needs_plugin(
                 PluginRequirement(
                     "rpm",
@@ -440,29 +340,6 @@ class PulpRpmRepositoryContext(PulpRepositoryContext):
                     feature=_("package_checksum_type/metadata_checksum_type"),
                 )
             )
-
-            if metadata_checksum_type and metadata_checksum_type in disallowed_checksums:
-                self.pulp_ctx.needs_plugin(
-                    PluginRequirement(
-                        "rpm", specifier=">=3.25.0", inverted=True, feature=_("weak checksums")
-                    )
-                )
-            if package_checksum_type and package_checksum_type in disallowed_checksums:
-                self.pulp_ctx.needs_plugin(
-                    PluginRequirement(
-                        "rpm", specifier=">=3.25.0", inverted=True, feature=_("weak checksums")
-                    )
-                )
-
-        if "checksum_type" in body:
-            self.pulp_ctx.needs_plugin(
-                PluginRequirement(
-                    "rpm",
-                    specifier=">=3.25.0",
-                    feature=_("checksum_type"),
-                )
-            )
-
         if "repo_gpgcheck" in body or "gpgcheck" in body:
             self.pulp_ctx.needs_plugin(
                 PluginRequirement(
@@ -475,23 +352,10 @@ class PulpRpmRepositoryContext(PulpRepositoryContext):
 
         return body
 
-    def sync(self, body: EntityDefinition | None = None) -> t.Any:
-        if body:
-            if body.get("optimize") is not None:
-                self.pulp_ctx.needs_plugin(PluginRequirement("rpm", specifier=">=3.3.0"))
-            if body.get("sync_policy") is not None:
-                self.pulp_ctx.needs_plugin(PluginRequirement("rpm", specifier=">=3.16.0"))
-            if "treeinfo" in body.get("skip_types", ""):
-                self.pulp_ctx.needs_plugin(
-                    PluginRequirement("rpm", specifier=">=3.18.10", feature="--skip-type treeinfo")
-                )
-
-        return super().sync(body)
-
 
 class PulpRpmPruneContext(PulpViewSetContext):
     ID_PREFIX: t.ClassVar[str] = "rpm_prune"
-    NEEDS_PLUGINS = [PluginRequirement("rpm", specifier=">=3.27.0.dev")]
+    NEEDS_PLUGINS = [PluginRequirement("rpm", specifier=">=3.27.0")]
 
     def prune_packages(
         self,
@@ -509,7 +373,7 @@ class PulpRpmPruneContext(PulpViewSetContext):
 
 class PulpRpmCopyContext(PulpViewSetContext):
     COPY_ID: t.ClassVar[str] = "rpm_copy_content"
-    NEEDS_PLUGINS = [PluginRequirement("rpm", specifier=">=3.3.0")]
+    NEEDS_PLUGINS = [PluginRequirement("rpm", specifier=">=3.26.0")]
 
     def copy(
         self,

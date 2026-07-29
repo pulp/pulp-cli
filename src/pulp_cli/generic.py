@@ -842,9 +842,9 @@ def pulp_option(
         ```
         pulp_option(
             "--name",
-            needs_plugins=[PluginRequirement("rpm", specifier=">=3.12.0")],
+            needs_plugins=[PluginRequirement("catdog", specifier=">=1.2.3")],
             help=_("Name of {entity}"),
-            allowed_with_contexts=(PulpRpmRepositoryContext,),
+            allowed_with_contexts=(PulpCatDogRepositoryContext,),
         )
         ```
     """

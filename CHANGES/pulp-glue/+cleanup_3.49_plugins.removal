@@ -1,0 +1,2 @@
+Dropped workarounds for plugins no longer maintained branches.
+(`ansible < 0.21`; `container < 2.19`; `python < 3.11`; `rpm < 3.26`)

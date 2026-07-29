@@ -23,8 +23,8 @@ class PulpAnsibleCollectionVersionContext(PulpContentContext):
     HREF = "ansible_collection_version_href"
     ID_PREFIX = "content_ansible_collection_versions"
     UPLOAD_ID: t.ClassVar[str] = "upload_collection"
-    NEEDS_PLUGINS = [PluginRequirement("ansible", specifier=">=0.7.0")]
-    CAPABILITIES = {"upload": [PluginRequirement("ansible", specifier=">=0.16.0")]}
+    NEEDS_PLUGINS = [PluginRequirement("ansible", specifier=">=0.21.0")]
+    CAPABILITIES = {"upload": []}
 
     def upload(self, file: t.IO[bytes], **kwargs: t.Any) -> t.Any:  # type:ignore
         repository: PulpRepositoryContext | None = kwargs.pop("repository", None)
@@ -46,7 +46,7 @@ class PulpAnsibleRoleContext(PulpContentContext):
     ENTITIES = _("ansible roles")
     HREF = "ansible_role_href"
     ID_PREFIX = "content_ansible_roles"
-    NEEDS_PLUGINS = [PluginRequirement("ansible", specifier=">=0.7.0")]
+    NEEDS_PLUGINS = [PluginRequirement("ansible", specifier=">=0.21.0")]
 
 
 class PulpAnsibleCollectionVersionSignatureContext(PulpContentContext):
@@ -56,20 +56,7 @@ class PulpAnsibleCollectionVersionSignatureContext(PulpContentContext):
     ENTITIES = _("ansible collection version signatures")
     HREF = _("ansible_collection_version_signature_href")
     ID_PREFIX = "content_ansible_collection_signatures"
-    NEEDS_PLUGINS = [PluginRequirement("ansible", specifier=">=0.12.0")]
-
-    def create(
-        self,
-        body: EntityDefinition,
-        parameters: t.Mapping[str, t.Any] | None = None,
-        non_blocking: bool = False,
-    ) -> t.Any:
-        self.pulp_ctx.needs_plugin(
-            PluginRequirement(
-                "ansible", specifier=">=0.13.0", feature=_("collection version creation")
-            )
-        )
-        return super().create(body=body, parameters=parameters, non_blocking=non_blocking)
+    NEEDS_PLUGINS = [PluginRequirement("ansible", specifier=">=0.21.0")]
 
 
 class PulpAnsibleDistributionContext(PulpDistributionContext):
@@ -79,7 +66,7 @@ class PulpAnsibleDistributionContext(PulpDistributionContext):
     ENTITIES = _("ansible distributions")
     HREF = "ansible_ansible_distribution_href"
     ID_PREFIX = "distributions_ansible_ansible"
-    NEEDS_PLUGINS = [PluginRequirement("ansible", specifier=">=0.7.0")]
+    NEEDS_PLUGINS = [PluginRequirement("ansible", specifier=">=0.21.0")]
 
     def preprocess_entity(self, body: EntityDefinition, partial: bool = False) -> EntityDefinition:
         body = super().preprocess_entity(body, partial=partial)
@@ -98,7 +85,7 @@ class PulpAnsibleRoleRemoteContext(PulpRemoteContext):
     HREF = "ansible_role_remote_href"
     ID_PREFIX = "remotes_ansible_role"
     HREF_PATTERN = r"remotes/(?P<plugin>ansible)/(?P<resource_type>role)/"
-    NEEDS_PLUGINS = [PluginRequirement("ansible", specifier=">=0.7.0")]
+    NEEDS_PLUGINS = [PluginRequirement("ansible", specifier=">=0.21.0")]
 
 
 class PulpAnsibleGitRemoteContext(PulpRemoteContext):
@@ -109,7 +96,7 @@ class PulpAnsibleGitRemoteContext(PulpRemoteContext):
     HREF = "ansible_git_remote_href"
     ID_PREFIX = "remotes_ansible_git"
     HREF_PATTERN = r"remotes/(?P<plugin>ansible)/(?P<resource_type>git)/"
-    NEEDS_PLUGINS = [PluginRequirement("ansible", specifier=">=0.7.0")]
+    NEEDS_PLUGINS = [PluginRequirement("ansible", specifier=">=0.21.0")]
 
 
 class PulpAnsibleCollectionRemoteContext(PulpRemoteContext):
@@ -120,7 +107,7 @@ class PulpAnsibleCollectionRemoteContext(PulpRemoteContext):
     HREF = "ansible_collection_remote_href"
     ID_PREFIX = "remotes_ansible_collection"
     HREF_PATTERN = r"remotes/(?P<plugin>ansible)/(?P<resource_type>collection)/"
-    NEEDS_PLUGINS = [PluginRequirement("ansible", specifier=">=0.7.0")]
+    NEEDS_PLUGINS = [PluginRequirement("ansible", specifier=">=0.21.0")]
 
     def preprocess_entity(self, body: EntityDefinition, partial: bool = False) -> EntityDefinition:
         body = super().preprocess_entity(body, partial=partial)
@@ -132,7 +119,7 @@ class PulpAnsibleCollectionRemoteContext(PulpRemoteContext):
 class PulpAnsibleRepositoryVersionContext(PulpRepositoryVersionContext):
     HREF = "ansible_ansible_repository_version_href"
     ID_PREFIX = "repositories_ansible_ansible_versions"
-    NEEDS_PLUGINS = [PluginRequirement("ansible", specifier=">=0.7.0")]
+    NEEDS_PLUGINS = [PluginRequirement("ansible", specifier=">=0.21.0")]
 
 
 class PulpAnsibleRepositoryContext(PulpRepositoryContext):
@@ -144,8 +131,8 @@ class PulpAnsibleRepositoryContext(PulpRepositoryContext):
     ENTITIES = _("ansible repositories")
     VERSION_CONTEXT = PulpAnsibleRepositoryVersionContext
     CAPABILITIES = {
-        "sync": [PluginRequirement("ansible")],
-        "pulpexport": [PluginRequirement("ansible")],
+        "sync": [],
+        "pulpexport": [],
     }
     NULLABLES = PulpRepositoryContext.NULLABLES | {"gpgkey"}
-    NEEDS_PLUGINS = [PluginRequirement("ansible", specifier=">=0.7.0")]
+    NEEDS_PLUGINS = [PluginRequirement("ansible", specifier=">=0.21.0")]

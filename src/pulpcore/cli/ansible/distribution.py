@@ -4,7 +4,6 @@ from pulp_glue.ansible.context import PulpAnsibleDistributionContext, PulpAnsibl
 from pulp_glue.common.context import (
     EntityDefinition,
     EntityFieldDefinition,
-    PluginRequirement,
     PulpEntityContext,
 )
 from pulp_glue.common.i18n import get_translation
@@ -69,9 +68,6 @@ distribution.add_command(create_command(decorators=create_options))
 distribution.add_command(
     label_command(
         decorators=nested_lookup_options,
-        need_plugins=[
-            PluginRequirement("ansible", specifier=">=0.8.0"),
-        ],
     )
 )
 

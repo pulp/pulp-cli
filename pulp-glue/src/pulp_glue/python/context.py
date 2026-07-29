@@ -11,27 +11,12 @@ from pulp_glue.common.context import (
     PulpRemoteContext,
     PulpRepositoryContext,
     PulpRepositoryVersionContext,
-    api_spec_quirk,
 )
 from pulp_glue.common.exceptions import PulpException
 from pulp_glue.common.i18n import get_translation
 
 translation = get_translation(__package__)
 _ = translation.gettext
-
-
-@api_spec_quirk(PluginRequirement("python", specifier="<3.9.0"))
-def patch_python_remote_includes_excludes(api_spec: t.Any) -> t.Any:
-    python_remote_serializer = api_spec["components"]["schemas"]["python.PythonRemote"]
-    patched_python_remote_serializer = api_spec["components"]["schemas"][
-        "Patchedpython.PythonRemote"
-    ]
-    for prop in ("includes", "excludes"):
-        python_remote_serializer["properties"][prop]["type"] = "array"
-        python_remote_serializer["properties"][prop]["items"] = {"type": "string"}
-        patched_python_remote_serializer["properties"][prop]["type"] = "array"
-        patched_python_remote_serializer["properties"][prop]["items"] = {"type": "string"}
-    return api_spec
 
 
 class PulpPythonContentContext(PulpContentContext):
@@ -41,7 +26,7 @@ class PulpPythonContentContext(PulpContentContext):
     ENTITIES = _("python packages")
     HREF = "python_python_package_content_href"
     ID_PREFIX = "content_python_packages"
-    NEEDS_PLUGINS = [PluginRequirement("python", specifier=">=3.1.0")]
+    NEEDS_PLUGINS = [PluginRequirement("python", specifier=">=3.11.0")]
     CAPABILITIES = {"upload": []}
 
 
@@ -62,14 +47,10 @@ class PulpPythonDistributionContext(PulpDistributionContext):
     ENTITIES = _("python distributions")
     HREF = "python_python_distribution_href"
     ID_PREFIX = "distributions_python_pypi"
-    NEEDS_PLUGINS = [PluginRequirement("python", specifier=">=3.1.0")]
+    NEEDS_PLUGINS = [PluginRequirement("python", specifier=">=3.11.0")]
 
     def preprocess_entity(self, body: EntityDefinition, partial: bool = False) -> EntityDefinition:
         body = super().preprocess_entity(body, partial=partial)
-        if "allow_uploads" in body:
-            self.pulp_ctx.needs_plugin(PluginRequirement("python", specifier=">=3.4.0"))
-        if "remote" in body:
-            self.pulp_ctx.needs_plugin(PluginRequirement("python", specifier=">=3.6.0"))
         if "version" in body:
             self.pulp_ctx.needs_plugin(PluginRequirement("python", specifier=">=3.21.0"))
         if "repository" in body and "publication" not in body:
@@ -106,7 +87,7 @@ class PulpPythonPublicationContext(PulpPublicationContext):
     ENTITIES = _("python publications")
     HREF = "python_python_publication_href"
     ID_PREFIX = "publications_python_pypi"
-    NEEDS_PLUGINS = [PluginRequirement("python", specifier=">=3.1.0")]
+    NEEDS_PLUGINS = [PluginRequirement("python", specifier=">=3.11.0")]
 
     def preprocess_entity(self, body: EntityDefinition, partial: bool = False) -> EntityDefinition:
         body = super().preprocess_entity(body, partial=partial)
@@ -124,19 +105,13 @@ class PulpPythonRemoteContext(PulpRemoteContext):
     ENTITIES = _("python remotes")
     HREF = "python_python_remote_href"
     ID_PREFIX = "remotes_python_python"
-    NEEDS_PLUGINS = [PluginRequirement("python", specifier=">=3.1.0")]
-
-    def preprocess_entity(self, body: EntityDefinition, partial: bool = False) -> EntityDefinition:
-        body = super().preprocess_entity(body, partial=partial)
-        if "keep_latest_packages" in body or "package_types" in body or "exclude_platforms" in body:
-            self.pulp_ctx.needs_plugin(PluginRequirement("python", specifier=">=3.2.0"))
-        return body
+    NEEDS_PLUGINS = [PluginRequirement("python", specifier=">=3.11.0")]
 
 
 class PulpPythonRepositoryVersionContext(PulpRepositoryVersionContext):
     HREF = "python_python_repository_version_href"
     ID_PREFIX = "repositories_python_python_versions"
-    NEEDS_PLUGINS = [PluginRequirement("python", specifier=">=3.1.0")]
+    NEEDS_PLUGINS = [PluginRequirement("python", specifier=">=3.11.0")]
     CAPABILITIES = {"scan": [PluginRequirement("python", specifier=">=3.21.0")]}
 
 
@@ -149,16 +124,14 @@ class PulpPythonRepositoryContext(PulpRepositoryContext):
     ID_PREFIX = "repositories_python_python"
     VERSION_CONTEXT = PulpPythonRepositoryVersionContext
     CAPABILITIES = {
-        "sync": [PluginRequirement("python")],
-        "pulpexport": [PluginRequirement("python", specifier=">=3.11.0")],
+        "sync": [],
+        "pulpexport": [],
         "repair_metadata": [PluginRequirement("python", specifier=">=3.26.0")],
     }
-    NEEDS_PLUGINS = [PluginRequirement("python", specifier=">=3.1.0")]
+    NEEDS_PLUGINS = [PluginRequirement("python", specifier=">=3.11.0")]
 
     def preprocess_entity(self, body: EntityDefinition, partial: bool = False) -> EntityDefinition:
         body = super().preprocess_entity(body, partial=partial)
-        if "autopublish" in body:
-            self.pulp_ctx.needs_plugin(PluginRequirement("python", specifier=">=3.3.0"))
         if "allow_package_substitution" in body:
             self.pulp_ctx.needs_plugin(PluginRequirement("python", specifier=">=3.28.0"))
         return body

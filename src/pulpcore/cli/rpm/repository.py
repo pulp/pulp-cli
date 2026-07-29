@@ -158,13 +158,11 @@ update_options = [
         help=_(
             "Option specifying the checksum type to use for package and metadata integrity checks."
         ),
-        needs_plugins=[PluginRequirement("rpm", specifier=">=3.25.0")],
     ),
     pulp_option(
         "--compression-type",
         type=click.Choice(COMPRESSION_CHOICES, case_sensitive=False),
         help=_("Option specifying the compression type to use for metadata."),
-        needs_plugins=[PluginRequirement("rpm", specifier=">=3.25.0")],
     ),
     pulp_option(
         "--gpgcheck",
@@ -187,17 +185,7 @@ update_options = [
         needs_plugins=[PluginRequirement("rpm", specifier="<3.30.0")],
     ),
     pulp_option(
-        "--sqlite-metadata/--no-sqlite-metadata",
-        default=None,
-        help=_(
-            """DEPRECATED: An option specifying whether Pulp should generate SQLite metadata.
-            Unavailable for pulp_rpm>=3.25.0"""
-        ),
-        needs_plugins=[PluginRequirement("rpm", specifier="<3.25.0")],
-    ),
-    pulp_option(
         "--autopublish/--no-autopublish",
-        needs_plugins=[PluginRequirement("rpm", specifier=">=3.12.0")],
         default=None,
     ),
     retained_versions_option,
@@ -206,7 +194,6 @@ update_options = [
     pulp_option(
         "--repo-config",
         "repo_config",
-        needs_plugins=[PluginRequirement("rpm", specifier=">=3.24.0")],
         help=_(
             "A JSON dictionary describing config.repo file (or @file containing a JSON dictionary)"
         ),
@@ -264,7 +251,6 @@ repository.add_command(role_command(decorators=lookup_options))
     "--optimize/--no-optimize",
     default=None,
     help="Whether or not to optimize sync.",
-    needs_plugins=[PluginRequirement("rpm", specifier=">=3.3.0")],
 )
 @click.option(
     "--skip-type",
@@ -285,7 +271,6 @@ repository.add_command(role_command(decorators=lookup_options))
     bit-for-bit identical. 'additive' will retain the existing contents of the repository
     and add the contents of the repository being synced.
     """,
-    needs_plugins=[PluginRequirement("rpm", specifier=">=3.16.0")],
 )
 @pass_repository_context
 def sync(
