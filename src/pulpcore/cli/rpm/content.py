@@ -121,21 +121,18 @@ list_options = [
         "--arch-contains",
         "arch__contains",
         allowed_with_contexts=(PulpRpmPackageContext,),
-        needs_plugins=[PluginRequirement("rpm", specifier=">=3.20.0")],
     ),
     pulp_option(
         "--arch-in",
         "arch__in",
         multiple=True,
         allowed_with_contexts=(PulpRpmPackageContext, PulpRpmModulemdContext),
-        needs_plugins=[PluginRequirement("rpm", specifier=">=3.20.0")],
     ),
     pulp_option("--arch-ne", "arch__ne", allowed_with_contexts=(PulpRpmPackageContext,)),
     pulp_option(
         "--arch-startswith",
         "arch__startswith",
         allowed_with_contexts=(PulpRpmPackageContext,),
-        needs_plugins=[PluginRequirement("rpm", specifier=">=3.20.0")],
     ),
     pulp_option(
         "--checksum-type",
@@ -194,7 +191,6 @@ list_options = [
         "--name-contains",
         "name__contains",
         allowed_with_contexts=(PulpRpmPackageContext,),
-        needs_plugins=[PluginRequirement("rpm", specifier=">=3.20.0")],
     ),
     pulp_option(
         "--name-in",
@@ -211,7 +207,6 @@ list_options = [
         "--name-startswith",
         "name__startswith",
         allowed_with_contexts=(PulpRpmPackageContext,),
-        needs_plugins=[PluginRequirement("rpm", specifier=">=3.20.0")],
     ),
     pulp_option("--package-href", allowed_with_contexts=(PulpRpmPackageContext,)),
     pulp_option("--pkgId", allowed_with_contexts=(PulpRpmPackageContext,)),
@@ -226,14 +221,12 @@ list_options = [
         "--release-contains",
         "release__contains",
         allowed_with_contexts=(PulpRpmPackageContext,),
-        needs_plugins=[PluginRequirement("rpm", specifier=">=3.20.0")],
     ),
     pulp_option(
         "--release-in",
         "release__in",
         multiple=True,
         allowed_with_contexts=(PulpRpmPackageContext,),
-        needs_plugins=[PluginRequirement("rpm", specifier=">=3.20.0")],
     ),
     pulp_option("--release-ne", "release__ne", allowed_with_contexts=(PulpRpmPackageContext,)),
     pulp_option(

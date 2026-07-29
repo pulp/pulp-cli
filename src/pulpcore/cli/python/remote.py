@@ -73,17 +73,14 @@ python_remote_options = [
     pulp_option(
         "--keep-latest-packages",
         type=int,
-        needs_plugins=[PluginRequirement("python", specifier=">=3.2.0")],
     ),
     pulp_option(
         "--package-types",
         callback=load_json_callback,
-        needs_plugins=[PluginRequirement("python", specifier=">=3.2.0")],
     ),
     pulp_option(
         "--exclude-platforms",
         callback=load_json_callback,
-        needs_plugins=[PluginRequirement("python", specifier=">=3.2.0")],
     ),
     pulp_option(
         "--provenance/--no-provenance",

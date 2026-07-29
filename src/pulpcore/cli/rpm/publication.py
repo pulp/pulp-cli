@@ -50,7 +50,6 @@ create_options = [
     pulp_option(
         "--repo-config",
         "repo_config",
-        needs_plugins=[PluginRequirement("rpm", specifier=">=3.24.0")],
         help=_(
             "A JSON dictionary describing config.repo file (or @file containing a JSON dictionary)"
         ),
@@ -62,13 +61,11 @@ create_options = [
         help=_(
             "Option specifying the checksum type to use for package and metadata integrity checks."
         ),
-        needs_plugins=[PluginRequirement("rpm", specifier=">=3.25.0")],
     ),
     pulp_option(
         "--compression-type",
         type=click.Choice(COMPRESSION_CHOICES, case_sensitive=False),
         help=_("Option specifying the compression type to use for metadata."),
-        needs_plugins=[PluginRequirement("rpm", specifier=">=3.25.0")],
     ),
     pulp_option(
         "--checkpoint",
