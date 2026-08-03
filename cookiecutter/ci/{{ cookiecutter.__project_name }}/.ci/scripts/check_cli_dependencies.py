@@ -26,8 +26,8 @@ if __name__ == "__main__":
     base_path = Path(__file__).parent.parent.parent
     glue_path = base_path / GLUE_DIR
 
-    cli_dependency = next((r for r in dependencies(base_path) if r.name == "pulp-cli"))
-    glue_dependency = next((r for r in dependencies(glue_path) if r.name == "pulp-glue"))
+    cli_dependency = next(r for r in dependencies(base_path) if r.name == "pulp-cli")
+    glue_dependency = next(r for r in dependencies(glue_path) if r.name == "pulp-glue")
 
     if cli_dependency.specifier != glue_dependency.specifier:
         print("🪢 CLI and GLUE dependencies mismatch:")
