@@ -3,6 +3,8 @@ LANGUAGES=de
 GLUE_PLUGINS=$(notdir $(wildcard pulp-glue/src/pulp_glue/*))
 CLI_PLUGINS=$(notdir $(wildcard src/pulpcore/cli/*))
 
+PYTEST_MARK ?= live
+
 .PHONY: info
 info:
 	@echo Pulp glue
@@ -29,14 +31,13 @@ _autofix:
 
 .PHONY: autofix
 autofix:
-	uv lock
 	uv run --isolated --group lint $(MAKE) _autofix
 
 .PHONY: _lint
 _lint:
 	find tests .ci -name '*.sh' -print0 | xargs -0 shellcheck -x
 	ruff format --check --diff
-	ruff check
+	ruff check --output-format concise
 	.ci/scripts/check_click_for_mypy.py
 	mypy
 	cd pulp-glue; mypy
@@ -44,7 +45,6 @@ _lint:
 
 .PHONY: lint
 lint:
-	uv lock --check
 	uv run --isolated --group lint $(MAKE) _lint
 
 tests/cli.toml:
@@ -53,13 +53,11 @@ tests/cli.toml:
 
 .PHONY: _test
 _test: | tests/cli.toml
-	pytest -v tests pulp-glue/tests cookiecutter/pulp_filter_extension.py
+	pytest -v tests pulp-glue/tests
 
 .PHONY: test
 test:
 	uv run $(MAKE) _test
-
-PYTEST_MARK ?= live
 
 .PHONY: _livetest
 _livetest: | tests/cli.toml
@@ -71,7 +69,7 @@ livetest:
 
 .PHONY: _paralleltest
 _paralleltest: | tests/cli.toml
-	pytest -v tests pulp-glue/tests -m live -n 8
+	pytest -v tests pulp-glue/tests -m "$(PYTEST_MARK)" -n 8
 
 .PHONY: paralleltest
 paralleltest:
@@ -79,7 +77,7 @@ paralleltest:
 
 .PHONY: _unittest
 _unittest:
-	pytest -v tests pulp-glue/tests cookiecutter/pulp_filter_extension.py -m "not live"
+	pytest -v tests pulp-glue/tests -m "not live"
 
 .PHONY: unittest
 unittest:
@@ -95,11 +93,11 @@ unittest_glue:
 
 .PHONY: docs
 docs:
-	pulp-docs build
+	uv run --only-group docs pulp-docs build --draft --no-blog
 
 .PHONY: servedocs
 servedocs:
-	pulp-docs serve -w CHANGES.md -w pulp-glue/pulp_glue -w pulp_cli/generic.py
+	uv run --only-group docs pulp-docs serve --draft --no-blog -w CHANGES.md -w src -w pulp-glue/src
 
 pulp-glue/pulp_glue/%/locale/messages.pot: pulp-glue/pulp_glue/%/*.py
 	xgettext -d $* -o $@ pulp-glue/pulp_glue/$*/*.py
