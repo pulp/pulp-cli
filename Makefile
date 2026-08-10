@@ -69,7 +69,7 @@ livetest:
 
 .PHONY: _paralleltest
 _paralleltest: | tests/cli.toml
-	pytest -v tests pulp-glue/tests -m live -n 8
+	pytest -v tests pulp-glue/tests -m "$(PYTEST_MARK)" -n 8
 
 .PHONY: paralleltest
 paralleltest:
