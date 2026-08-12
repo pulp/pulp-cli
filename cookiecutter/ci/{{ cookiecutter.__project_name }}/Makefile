@@ -80,7 +80,7 @@ livetest:
 
 .PHONY: _paralleltest
 _paralleltest: | tests/cli.toml
-	pytest -v tests {%- if cookiecutter.glue %} pulp-glue{{ cookiecutter.__app_label_suffix }}/tests {%- endif %} -m live -n 8
+	pytest -v tests {%- if cookiecutter.glue %} pulp-glue{{ cookiecutter.__app_label_suffix }}/tests {%- endif %} -m "$(PYTEST_MARK)" -n 8
 
 .PHONY: paralleltest
 paralleltest:
