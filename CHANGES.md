@@ -10,6 +10,23 @@
 
 [//]: # (towncrier release notes start)
 
+## 0.40.2 (2026-08-12) {: #0.40.2 }
+
+
+
+#### Misc {: #0.40.2-misc }
+
+- Honor PYTEST_MARK in `make paralleltest`, matching livetest, so plugin CI can filter parallel livetests.
+
+
+### Pulp GLUE {: #0.40.2-pulp-glue }
+
+
+No significant changes.
+
+
+---
+
 ## 0.40.1 (2026-06-08) {: #0.40.1 }
 
 
