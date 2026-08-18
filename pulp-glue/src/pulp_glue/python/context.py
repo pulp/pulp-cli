@@ -134,6 +134,8 @@ class PulpPythonRepositoryContext(PulpRepositoryContext):
         body = super().preprocess_entity(body, partial=partial)
         if "allow_package_substitution" in body:
             self.pulp_ctx.needs_plugin(PluginRequirement("python", specifier=">=3.28.0"))
+        if "error_on_reject" in body:
+            self.pulp_ctx.needs_plugin(PluginRequirement("python", specifier=">=3.34.0"))
         return body
 
     def repair_metadata(self) -> t.Any:

@@ -91,6 +91,16 @@ update_options = [
             " different checksum. When blocked, such operations are rejected."
         ),
     ),
+    pulp_option(
+        "--error-on-reject/--no-error-on-reject",
+        needs_plugins=[PluginRequirement("python", specifier=">=3.34.0")],
+        default=None,
+        help=_(
+            "Fail the entire repository version when packages are rejected by the"
+            " package substitution or blocklist policies. When disabled, rejected"
+            " packages are skipped and remaining packages are added."
+        ),
+    ),
     retained_versions_option,
     pulp_labels_option,
 ]
