@@ -34,7 +34,8 @@ expect_fail pulp -v file remote show --remote "${repository_prn}"
 
 # Test sync
 expect_succ pulp -v file repository sync --repository "${repository_prn}" --remote "${remote_prn}"
-file_prn=$(pulp file content list --limit 1 --offset 0 | jq -r .[].prn)
+version_prn=$(pulp file repository version show --repository "${repository_prn}" --version 1 | jq -r .prn)
+file_prn=$(pulp file content list --repository-version "${version_prn}" --limit 1 --offset 0 | jq -r .[].prn)
 
 # Test update
 expect_succ pulp -v file repository update --repository "${repository_prn}" --remote "${remote_prn}"
