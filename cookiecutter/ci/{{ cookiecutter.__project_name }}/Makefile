@@ -1,4 +1,7 @@
 {%- set src_infix = "src/" if cookiecutter.src_layout else "" %}
+# This file is managed by the cookiecutter templates.
+# Do not edit manually
+
 {%- if cookiecutter.translations %}
 LANGUAGES=de
 {%- endif %}

@@ -1,4 +1,6 @@
 
+# This file is managed by the cookiecutter templates.
+# Do not edit manually
 LANGUAGES=de
 GLUE_PLUGINS=$(notdir $(wildcard pulp-glue/src/pulp_glue/*))
 CLI_PLUGINS=$(notdir $(wildcard src/pulpcore/cli/*))
