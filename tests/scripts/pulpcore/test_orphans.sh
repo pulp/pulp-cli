@@ -4,9 +4,8 @@ set -eu
 # shellcheck source=tests/scripts/config.source
 . "$(dirname "$(dirname "$(realpath "$0")")")"/config.source
 
-expect_succ pulp orphan cleanup
-
-test "$(echo "${OUTPUT}" | jq -r '.state' )" = "completed"
+expect_fail pulp --dry-run orphan cleanup
+test "${ERROUTPUT}" = "Error: Call aborted due to safe mode"
 
 pulp debug has-plugin --name "file" || exit 23
 
@@ -16,4 +15,6 @@ expect_succ pulp file content upload --file test_1.txt --relative-path orphan_te
 content_href=$(echo "${OUTPUT}" | jq -r .pulp_href)
 
 expect_succ pulp orphan cleanup --content-hrefs "[\"$content_href\"]"
-expect_succ pulp orphan cleanup --protection-time 10
+test "$(echo "${OUTPUT}" | jq -r '.state' )" = "completed"
+
+expect_succ pulp orphan cleanup --protection-time 300
