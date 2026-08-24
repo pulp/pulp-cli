@@ -70,7 +70,9 @@ prn_regex = re.compile(
 
 
 class PreprocessedEntityDefinition(dict[str, t.Any]):
-    pass
+    def __init__(self, /, *args: t.Any, _partial: bool, **kwargs: t.Any):
+        super().__init__(*args, **kwargs)
+        self._partial: bool = _partial
 
 
 EntityDefinition = dict[str, t.Any] | PreprocessedEntityDefinition
@@ -132,7 +134,8 @@ def preprocess_payload(payload: EntityDefinition) -> EntityDefinition:
         return payload
 
     return PreprocessedEntityDefinition(
-        {key: _preprocess_value(value) for key, value in payload.items() if value is not None}
+        {key: _preprocess_value(value) for key, value in payload.items() if value is not None},
+        _partial=False,
     )
 
 
@@ -957,6 +960,15 @@ class PulpEntityContext(PulpViewSetContext):
             return None
         return _preprocess_value(value)
 
+    def _preprocess_entity(self, body: EntityDefinition, partial: bool = False) -> EntityDefinition:
+        if isinstance(body, PreprocessedEntityDefinition):
+            assert body._partial == partial
+            return body
+        else:
+            return PreprocessedEntityDefinition(
+                self.preprocess_entity(body, partial), _partial=partial
+            )
+
     def preprocess_entity(self, body: EntityDefinition, partial: bool = False) -> EntityDefinition:
         """
         Filter to prepare the body for a create or update call.
@@ -971,16 +983,11 @@ class PulpEntityContext(PulpViewSetContext):
         Returns:
             The body ready to be passed to `call`.
         """
-        if isinstance(body, PreprocessedEntityDefinition):
-            return body
-
-        return PreprocessedEntityDefinition(
-            {
-                key: self._preprocess_value(key, value)
-                for key, value in body.items()
-                if value is not None
-            }
-        )
+        return {
+            key: self._preprocess_value(key, value)
+            for key, value in body.items()
+            if value is not None
+        }
 
     def list_iterator(
         self,
@@ -1123,7 +1130,7 @@ class PulpEntityContext(PulpViewSetContext):
         if parameters:
             _parameters.update(parameters)
         if body is not None:
-            body = self.preprocess_entity(body, partial=False)
+            body = self._preprocess_entity(body, partial=False)
         if self.pulp_ctx.fake_mode:
             body["pulp_href"] = "<FAKE ENTITY>"
             self._entity = body
@@ -1182,7 +1189,7 @@ class PulpEntityContext(PulpViewSetContext):
         if parameters:
             _parameters.update(parameters)
         if body is not None:
-            body = self.preprocess_entity(body, partial=True)
+            body = self._preprocess_entity(body, partial=True)
         if self.pulp_ctx.fake_mode:
             assert self._entity is not None
             if body is not None:
@@ -1370,14 +1377,14 @@ class PulpEntityContext(PulpViewSetContext):
                 return True, None, self.create(desired_entity)
             else:
                 update_attributes = {}
-                for k, v in self.preprocess_entity(desired_attributes, partial=True).items():
+                for k, v in self._preprocess_entity(desired_attributes, partial=True).items():
                     if entity.get(k) != v:
                         update_attributes[k] = v
                 if update_attributes:
                     return (
                         True,
                         entity,
-                        self.update(PreprocessedEntityDefinition(update_attributes)),
+                        self.update(PreprocessedEntityDefinition(update_attributes, _partial=True)),
                     )
         return False, entity, entity
 
