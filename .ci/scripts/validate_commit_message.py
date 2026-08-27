@@ -12,9 +12,8 @@ import sys
 from pathlib import Path
 
 import tomllib
-from github import Github
 
-with open("pyproject.toml", "rb") as fp:
+with Path("pyproject.toml").open("rb") as fp:
     PYPROJECT_TOML = tomllib.load(fp)
 KEYWORDS = ["fixes", "closes"]
 BLOCKING_REGEX = [
@@ -33,14 +32,16 @@ message = subprocess.check_output(["git", "log", "--format=%B", "-n 1", sha]).de
 if NOISSUE_MARKER in message:
     sys.exit("Do not add '[noissue]' in the commit message.")
 
-if any((re.match(pattern, message) for pattern in BLOCKING_REGEX)):
+if any(re.match(pattern, message) for pattern in BLOCKING_REGEX):
     sys.exit("This PR is not ready for consumption.")
 
-g = Github(os.environ.get("GITHUB_TOKEN"))
-repo = g.get_repo("pulp/pulp-cli")
 
+def check_status(issue: str) -> None:
+    from github import Github
 
-def check_status(issue):
+    g = Github(os.environ.get("GITHUB_TOKEN"))
+    repo = g.get_repo("pulp/pulp-cli")
+
     gi = repo.get_issue(int(issue))
     if gi.pull_request:
         sys.exit(f"Error: issue #{issue} is a pull request.")
@@ -48,7 +49,7 @@ def check_status(issue):
         sys.exit(f"Error: issue #{issue} is closed.")
 
 
-def check_changelog(issue):
+def check_changelog(issue: str) -> None:
     matches = list(Path("CHANGES").rglob(f"{issue}.*"))
 
     if len(matches) < 1:
@@ -58,7 +59,7 @@ def check_changelog(issue):
             sys.exit(f"Invalid extension for changelog entry '{match}'.")
 
 
-print("Checking commit message for {sha}.".format(sha=sha[0:7]))
+print(f"Checking commit message for {sha[0:7]}.")
 
 # validate the issue attached to the commit
 issue_regex = r"(?:{keywords})[\s:]+#(\d+)".format(keywords=("|").join(KEYWORDS))
@@ -72,4 +73,4 @@ if issues:
             check_status(issue)
             check_changelog(issue)
 
-print("Commit message for {sha} passed.".format(sha=sha[0:7]))
+print(f"Commit message for {sha[0:7]} passed.")
