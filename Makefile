@@ -12,55 +12,92 @@ info:
 
 .PHONY: build
 build:
-	cd pulp-glue; pyproject-build -n
-	pyproject-build -n
+	uv build --all
+
+.PHONY: _format
+_format:
+	ruff format
+	ruff check --select I --fix
 
 .PHONY: format
 format:
-	ruff format
+	uv run --isolated --group lint $(MAKE) _format
+
+.PHONY: _autofix
+_autofix:
 	ruff check --fix
 
-.PHONY: lint
-lint:
+.PHONY: autofix
+autofix:
+	uv run --isolated --group lint $(MAKE) _autofix
+
+.PHONY: _lint
+_lint:
 	find tests .ci -name '*.sh' -print0 | xargs -0 shellcheck -x
 	ruff format --check --diff
-	ruff check --diff
+	ruff check --output-format concise
 	.ci/scripts/check_click_for_mypy.py
 	mypy
 	cd pulp-glue; mypy
 	@echo "🙊 Code 🙈 LGTM 🙉 !"
 
+.PHONY: lint
+lint:
+	uv run --isolated --group lint $(MAKE) _lint
+
 tests/cli.toml:
 	cp $@.example $@
 	@echo "In order to configure the tests to talk to your test server, you might need to edit $@ ."
 
+.PHONY: _test
+_test: | tests/cli.toml
+	pytest -v tests pulp-glue/tests
+
 .PHONY: test
-test: | tests/cli.toml
-	python3 -m pytest -v tests pulp-glue/tests cookiecutter/pulp_filter_extension.py
+test:
+	uv run $(MAKE) _test
+
+PYTEST_MARK ?= live
+
+.PHONY: _livetest
+_livetest: | tests/cli.toml
+	pytest -v tests pulp-glue/tests -m "$(PYTEST_MARK)"
 
 .PHONY: livetest
-livetest: | tests/cli.toml
-	python3 -m pytest -v tests pulp-glue/tests -m live
+livetest:
+	uv run $(MAKE) _livetest
+
+.PHONY: _paralleltest
+_paralleltest: | tests/cli.toml
+	pytest -v tests pulp-glue/tests -m "$(PYTEST_MARK)" -n 8
 
 .PHONY: paralleltest
-paralleltest: | tests/cli.toml
-	python3 -m pytest -v tests pulp-glue/tests -m live -n 8
+paralleltest:
+	uv run $(MAKE) _paralleltest
+
+.PHONY: _unittest
+_unittest:
+	pytest -v tests pulp-glue/tests -m "not live"
 
 .PHONY: unittest
 unittest:
-	python3 -m pytest -v tests pulp-glue/tests cookiecutter/pulp_filter_extension.py -m "not live"
+	uv run $(MAKE) _unittest
+
+.PHONY: _unittest_glue
+_unittest_glue:
+	pytest -v pulp-glue/tests -m "not live"
 
 .PHONY: unittest_glue
 unittest_glue:
-	python3 -m pytest -v pulp-glue/tests -m "not live"
+	uv run $(MAKE) _unittest_glue
 
 .PHONY: docs
 docs:
-	pulp-docs build
+	uv run --only-group docs pulp-docs build --draft --no-blog
 
 .PHONY: servedocs
 servedocs:
-	pulp-docs serve -w CHANGES.md -w pulp-glue/pulp_glue -w pulp_cli/generic.py
+	uv run --only-group docs pulp-docs serve --draft --no-blog -w CHANGES.md -w src -w pulp-glue/src
 
 pulp-glue/pulp_glue/%/locale/messages.pot: pulp-glue/pulp_glue/%/*.py
 	xgettext -d $* -o $@ pulp-glue/pulp_glue/$*/*.py

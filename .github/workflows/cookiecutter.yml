@@ -21,10 +21,6 @@ jobs:
         with:
           token: "${{ secrets.RELEASE_TOKEN }}"
           path: "pulp-cli"
-      - name: "Setup git"
-        run: |
-          git config user.name pulpbot
-          git config user.email pulp-infra@redhat.com
       - name: "Set up Python"
         uses: "actions/setup-python@v6"
         with:
@@ -34,6 +30,10 @@ jobs:
         uses: "astral-sh/setup-uv@v7"
         with:
           enable-cache: true
+      - name: "Setup git"
+        run: |
+          git config user.name pulpbot
+          git config user.email pulp-infra@redhat.com
       - name: "Apply cookiecutter templates"
         run: |
           uv run ../pulp-cli/cookiecutter/apply_templates.py

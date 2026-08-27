@@ -64,13 +64,10 @@ Edit `pulp-glue-my-plugin/pulp_glue/my_plugin/context.py` to define context clas
 ```python
 import typing as t
 
-from pulp_glue.common.context import (
-    PulpEntityContext,
-    PluginRequirement
-) 
+from pulp_glue.common.context import PulpEntityContext, PluginRequirement
 
 
-class PulpMyResourceContext():
+class PulpMyResourceContext:
     """Context for working with my custom resource."""
 
     ID_PREFIX = "my_resource"
@@ -79,12 +76,12 @@ class PulpMyResourceContext():
     def example_action(self, data: t.Dict[str, t.Any]) -> t.Dict[str, t.Any]:
         """Execute an example action with specific data.
 
-    Args:
-        data: The data dictionary to send to the API
+        Args:
+            data: The data dictionary to send to the API
 
-    Returns:
-        The action result
-    """
+        Returns:
+            The action result
+        """
         response = self.call(
             operation="example_action",
             body=data,
@@ -137,7 +134,7 @@ from pulp_cli.common.generic import pass_entity_context
 
 @click.group()
 @pass_pulp_context
-@click.pass_context 
+@click.pass_context
 def my_resource(ctx: click.Context, pulp_ctx: PulpContext, /) -> None:
     """My custom commands."""
     ctx.obj = PulpMyResourceContext(pulp_ctx)

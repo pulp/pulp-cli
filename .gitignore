@@ -1,8 +1,11 @@
 *.egg-info
 __pycache__/
 build/
-tests/cli.toml
-GPG-PRIVATE-KEY-fixture-signing
 site/
 dist/
 *.po~
+uv.lock
+
+tests/cli.toml
+GPG-PRIVATE-KEY-fixture-signing
+.root
