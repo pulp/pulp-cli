@@ -10,6 +10,21 @@
 
 [//]: # (towncrier release notes start)
 
+## 0.40.5 (2026-08-27) {: #0.40.5 }
+
+
+
+No significant changes.
+
+
+### Pulp GLUE {: #0.40.5-pulp-glue }
+
+
+No significant changes.
+
+
+---
+
 ## 0.40.4 (2026-08-26) {: #0.40.4 }
 
 
@@ -106,6 +121,21 @@ No significant changes.
 
 - Fixed passing nested objects stringified in form-encoded body according to OAS3.1.
 - Sanitize the filename of the chached `api.json`.
+
+
+---
+
+## 0.39.5 (2026-08-27) {: #0.39.5 }
+
+
+
+No significant changes.
+
+
+### Pulp GLUE {: #0.39.5-pulp-glue }
+
+
+No significant changes.
 
 
 ---
