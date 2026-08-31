@@ -98,7 +98,7 @@ class ClickNoWait(click.ClickException):
         # Format the message into file or STDERR.
         # Overwritten from base class to not print "Error: ".
         if file is None:
-            file = click.get_text_stream("stderr")
+            file = sys.stderr
         click.echo(self.format_message(), file=file)
 
 
