@@ -10,20 +10,15 @@ on:
 jobs:
   build:
     uses: "./.github/workflows/build.yml"
+  environment: "pypi"
   publish-pypi:
     name: "Publish to PyPI"
     needs: "build"
     runs-on: "ubuntu-latest"
     steps:
-      {{ macros.checkout() | indent(6) }}
       {{ macros.download_wheels() | indent(6) }}
-      {{ macros.setup_python() | indent(6) }}
       {{ macros.install_uv() | indent(6) }}
       - name: "Publish"
-        env:
-          {%- raw %}
-          UV_PUBLISH_TOKEN: "${{ secrets.PYPI_API_TOKEN }}"
-          {%- endraw %}
         run: |
           uv publish
 ...
