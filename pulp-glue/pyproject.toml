@@ -22,7 +22,7 @@ classifiers = [
   "Typing :: Typed",
 ]
 dependencies = [
-  "multidict>=6.0.5,<6.9",
+  "multidict>=6.0.5,<6.10",
   "packaging>=22.0,<=26.3",  # CalVer
   "pydantic>=2.9.2,<3",  # Stable with the exception of experimental features. https://pydantic.dev/docs/validation/latest/get-started/version-policy
   "requests>=2.24.0,<2.35 ; python_version < '3.12'",
