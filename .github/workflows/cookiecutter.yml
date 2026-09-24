@@ -11,15 +11,18 @@ defaults:
 
 jobs:
   update-ci:
+    permissions:
+      contents: "write"
+      pull-requests: "write"
     runs-on: "ubuntu-latest"
     steps:
       - uses: "actions/checkout@v6"
         with:
           repository: "pulp/pulp-cli"
           path: "pulp-cli"
-      - uses: "actions/checkout@v6"
+      - name: "Checkout"
+        uses: "actions/checkout@v6"
         with:
-          token: "${{ secrets.RELEASE_TOKEN }}"
           path: "pulp-cli"
       - name: "Set up Python"
         uses: "actions/setup-python@v6"
@@ -46,7 +49,6 @@ jobs:
         uses: "peter-evans/create-pull-request@v8"
         id: "create_pr"
         with:
-          token: "${{ secrets.RELEASE_TOKEN }}"
           title: "Update cookiecutter"
           body: ""
           branch: "update_cookiecutter"
@@ -57,6 +59,6 @@ jobs:
           gh pr merge --rebase --auto "${{ steps.create_pr.outputs.pull-request-number }}"
         if: "steps.create_pr.outputs.pull-request-number"
         env:
-          GH_TOKEN: "${{ secrets.RELEASE_TOKEN }}"
+          GH_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
         continue-on-error: true
 ...
