@@ -1,6 +1,6 @@
 {%- import 'macros' as macros with context -%}
 ---
-name: "pulp-cli CI"
+name: "Pull Request"
 
 on:
   pull_request:
@@ -30,6 +30,10 @@ jobs:
   codeql:
     needs:
       - "lint"
+    permissions:
+      actions: "read"
+      contents: "read"
+      security-events: "write"
     uses: "./.github/workflows/codeql.yml"
   check-commits:
     runs-on: "ubuntu-latest"
@@ -53,6 +57,7 @@ jobs:
             fi
           done
         shell: "bash"
+        working-directory: "pulp-cli{{ cookiecutter.__app_label_suffix }}"
   ready-to-ship:
     # This is a dummy dependent task to have a single entry for the branch protection rules.
     runs-on: "ubuntu-latest"

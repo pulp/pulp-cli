@@ -4,43 +4,26 @@ name: "Create Release Branch"
 on:
   workflow_dispatch:
 
+defaults:
+  run:
+    working-directory: "pulp-cli{{ cookiecutter.__app_label_suffix }}"
+
 jobs:
   create-release-branch:
+    permissions:
+      contents: "write"
+      issues: "write"
+      pull-requests: "write"
     runs-on: "ubuntu-latest"
     steps:
-      - uses: "actions/checkout@v6"
-        with:
-          {%- raw %}
-          token: "${{ secrets.RELEASE_TOKEN }}"
-          {%- endraw %}
+      {{ macros.checkout() | indent(6) }}
       {{ macros.setup_python() | indent(6) }}
       {{ macros.install_uv() | indent(6) }}
       {{ macros.setup_git() | indent(6) }}
       - name: "Create Release Branch"
         run: |
           uv run --with bump-my-version~=0.20.0 .ci/scripts/create_release_branch.sh
-      - name: "Create Pull Request"
-        uses: "peter-evans/create-pull-request@v8"
-        id: "create_pr"
-        with:
-          {%- raw %}
-          token: "${{ secrets.RELEASE_TOKEN }}"
-          title: "Bump dev-version"
-          body: ""
-          branch: "bump_version"
-          delete-branch: true
-          {%- endraw %}
-      - name: "Mark PR automerge"
-        run: |
-          {%- raw %}
-          gh pr merge --rebase --auto "${{ steps.create_pr.outputs.pull-request-number }}"
-          {%- endraw %}
-        if: "steps.create_pr.outputs.pull-request-number"
-        env:
-          {%- raw %}
-          GH_TOKEN: "${{ secrets.RELEASE_TOKEN }}"
-          {%- endraw %}
-        continue-on-error: true
+      {{ macros.create_pr("bump_version", "Bump dev-version") | indent(6) }}
       - name: "Add Backport Label for new Branch"
         uses: "actions/github-script@v8"
         with:

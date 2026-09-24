@@ -5,6 +5,10 @@ name: "Lint"
 on:
   workflow_call:
 
+defaults:
+  run:
+    working-directory: "pulp-cli{{ cookiecutter.__app_label_suffix }}"
+
 jobs:
   lint:
     runs-on: "ubuntu-latest"
