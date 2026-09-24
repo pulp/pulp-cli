@@ -1,6 +1,6 @@
 {%- import 'macros' as macros with context -%}
 ---
-name: "Pulp CLI PR static checks"
+name: "PR static checks"
 on:
   pull_request_target:
     types: ["opened", "synchronize", "reopened"]
@@ -15,12 +15,16 @@ concurrency:
   {%- endraw %}
   cancel-in-progress: true
 
+defaults:
+  run:
+    working-directory: "pulp-cli{{ cookiecutter.__app_label_suffix }}"
+
 jobs:
   apply_labels:
-    runs-on: "ubuntu-latest"
-    name: "Label PR"
     permissions:
       pull-requests: "write"
+    runs-on: "ubuntu-latest"
+    name: "Label PR"
     steps:
       {{ macros.checkout(deep=true) | indent(6) }}
       {{ macros.setup_python() | indent(6) }}
