@@ -5,8 +5,15 @@ on:
   workflow_call:
   workflow_dispatch:
 
+defaults:
+  run:
+    working-directory: "pulp-cli{{ cookiecutter.__app_label_suffix }}"
+
 jobs:
   collect-changes:
+    permissions:
+      contents: "write"
+      pull-requests: "write"
     runs-on: "ubuntu-latest"
     steps:
       {{ macros.checkout(deep=true) | indent(6) }}
@@ -16,22 +23,5 @@ jobs:
       - name: "Collect changes"
         run: |
           uv run --script .ci/scripts/collect_changes.py
-      {%- raw %}
-      - name: "Create Pull Request"
-        uses: "peter-evans/create-pull-request@v8"
-        id: "create_pr"
-        with:
-          token: "${{ secrets.RELEASE_TOKEN }}"
-          title: "Update Changelog"
-          body: ""
-          branch: "update_changes"
-          delete-branch: true
-      - name: "Mark PR automerge"
-        run: |
-          gh pr merge --rebase --auto "${{ steps.create_pr.outputs.pull-request-number }}"
-        if: "steps.create_pr.outputs.pull-request-number"
-        env:
-          GH_TOKEN: "${{ secrets.RELEASE_TOKEN }}"
-        continue-on-error: true
-      {%- endraw %}
+      {{ macros.create_pr("update_changes", "Update Changelog") | indent(6) }}
 ...
