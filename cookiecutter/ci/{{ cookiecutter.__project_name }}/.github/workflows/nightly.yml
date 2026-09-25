@@ -1,5 +1,5 @@
 ---
-name: "pulp-cli Nightly"
+name: "Nightly"
 
 on:
   schedule:
@@ -14,6 +14,10 @@ jobs:
       - "build"
     uses: "./.github/workflows/test.yml"
   codeql:
+    permissions:
+      actions: "read"
+      contents: "read"
+      security-events: "write"
     uses: "./.github/workflows/codeql.yml"
   collect_changes:
     uses: "./.github/workflows/collect_changes.yml"

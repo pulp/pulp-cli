@@ -5,6 +5,10 @@ name: "Build"
 on:
   workflow_call:
 
+defaults:
+  run:
+    working-directory: "pulp-cli{{ cookiecutter.__app_label_suffix }}"
+
 jobs:
   build:
     runs-on: "ubuntu-latest"
@@ -21,8 +25,8 @@ jobs:
         with:
           name: "pulp_cli_packages"
           path: |
-            .root
-            dist/
+            pulp-cli{{ cookiecutter.__app_label_suffix }}/.root
+            pulp-cli{{ cookiecutter.__app_label_suffix }}/dist/
           if-no-files-found: "error"
           retention-days: 5
 ...

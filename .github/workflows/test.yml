@@ -4,6 +4,10 @@ name: "Test"
 on:
   workflow_call:
 
+defaults:
+  run:
+    working-directory: "pulp-cli"
+
 env:
   COLORTERM: "yes"
   TERM: "xterm-256color"
@@ -16,6 +20,8 @@ jobs:
     steps:
       - name: "Checkout"
         uses: "actions/checkout@v6"
+        with:
+          path: "pulp-cli"
       - name: "Download wheels"
         uses: "actions/download-artifact@v8"
         with:
@@ -31,7 +37,7 @@ jobs:
           enable-cache: true
       - name: "Run tests"
         run: |
-          uv run --isolated --with dist/pulp_glue*.whl --with dist/pulp_cli*.whl --only-group test make _unittest
+          uv run --isolated --with ../dist/pulp_glue*.whl --with ../dist/pulp_cli*.whl --only-group test make _unittest
   test:
     runs-on: "ubuntu-24.04"
     needs:
@@ -69,6 +75,8 @@ jobs:
     steps:
       - name: "Checkout"
         uses: "actions/checkout@v6"
+        with:
+          path: "pulp-cli"
       - name: "Download wheels"
         uses: "actions/download-artifact@v8"
         with:
@@ -105,5 +113,5 @@ jobs:
             RESOLUTION=()
           fi
 
-          uv run "${RESOLUTION[@]}" --isolated --with dist/pulp_glue*.whl --with dist/pulp_cli*.whl --only-group test .ci/run_container.sh make _paralleltest
+          uv run "${RESOLUTION[@]}" --isolated --with ../dist/pulp_glue*.whl --with ../dist/pulp_cli*.whl --only-group test .ci/run_container.sh make _paralleltest
 ...
