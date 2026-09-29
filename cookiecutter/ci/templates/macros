@@ -30,11 +30,11 @@ concurrency:
     allow-prereleases: true
 {%- endmacro -%}
 
-{%- macro install_uv() -%}
+{%- macro install_uv(cache=True) -%}
 - name: "Install uv"
   uses: "astral-sh/setup-uv@v7"
   with:
-    enable-cache: true
+    enable-cache: {% if cache %}true{% else %}false{% endif %}
 {%- endmacro -%}
 
 {%- macro setup_git() -%}
