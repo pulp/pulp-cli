@@ -1,6 +1,6 @@
 {%- import 'macros' as macros with context -%}
 ---
-name: "pulp-cli Release"
+name: "Tag Release"
 
 on:
   workflow_dispatch:

@@ -1,5 +1,5 @@
 ---
-name: "pulp-cli Release"
+name: "Tag Release"
 
 on:
   workflow_dispatch:

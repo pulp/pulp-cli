@@ -1,6 +1,6 @@
 {%- import 'macros' as macros with context -%}
 ---
-name: "pulp-cli Publish"
+name: "Publish"
 
 on:
   push:
@@ -10,14 +10,17 @@ on:
 jobs:
   build:
     uses: "./.github/workflows/build.yml"
-  environment: "pypi"
   publish-pypi:
     name: "Publish to PyPI"
     needs: "build"
     runs-on: "ubuntu-latest"
+    environment:
+      name: "pypi"
+    permissions:
+      id-token: "write"
     steps:
       {{ macros.download_wheels() | indent(6) }}
-      {{ macros.install_uv() | indent(6) }}
+      {{ macros.install_uv(cache=False) | indent(6) }}
       - name: "Publish"
         run: |
           uv publish
