@@ -1,5 +1,5 @@
 ---
-name: "Pulp CLI PR static checks"
+name: "PR static checks"
 on:
   pull_request_target:
     types: ["opened", "synchronize", "reopened"]
@@ -12,16 +12,21 @@ concurrency:
   group: "${{ github.event.pull_request.number }}-${{ github.workflow }}"
   cancel-in-progress: true
 
+defaults:
+  run:
+    working-directory: "pulp-cli"
+
 jobs:
   apply_labels:
-    runs-on: "ubuntu-latest"
-    name: "Label PR"
     permissions:
       pull-requests: "write"
+    runs-on: "ubuntu-latest"
+    name: "Label PR"
     steps:
       - name: "Checkout"
         uses: "actions/checkout@v6"
         with:
+          path: "pulp-cli"
           fetch-depth: 0
       - name: "Set up Python"
         uses: "actions/setup-python@v6"

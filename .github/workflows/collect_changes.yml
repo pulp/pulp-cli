@@ -4,13 +4,21 @@ on:
   workflow_call:
   workflow_dispatch:
 
+defaults:
+  run:
+    working-directory: "pulp-cli"
+
 jobs:
   collect-changes:
+    permissions:
+      contents: "write"
+      pull-requests: "write"
     runs-on: "ubuntu-latest"
     steps:
       - name: "Checkout"
         uses: "actions/checkout@v6"
         with:
+          path: "pulp-cli"
           fetch-depth: 0
       - name: "Set up Python"
         uses: "actions/setup-python@v6"
@@ -32,16 +40,16 @@ jobs:
         uses: "peter-evans/create-pull-request@v8"
         id: "create_pr"
         with:
-          token: "${{ secrets.RELEASE_TOKEN }}"
           title: "Update Changelog"
           body: ""
           branch: "update_changes"
           delete-branch: true
+          path: "pulp-cli"
       - name: "Mark PR automerge"
         run: |
           gh pr merge --rebase --auto "${{ steps.create_pr.outputs.pull-request-number }}"
         if: "steps.create_pr.outputs.pull-request-number"
         env:
-          GH_TOKEN: "${{ secrets.RELEASE_TOKEN }}"
+          GH_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
         continue-on-error: true
 ...
