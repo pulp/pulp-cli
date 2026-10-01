@@ -4,13 +4,21 @@ name: "Tag Release"
 on:
   workflow_dispatch:
 
+defaults:
+  run:
+    working-directory: "pulp-cli"
+
 jobs:
   release:
     name: "Release"
+    permissions:
+      contents: "write"
     runs-on: "ubuntu-latest"
     steps:
-      - uses: "actions/checkout@v6"
+      - name: "Checkout"
+        uses: "actions/checkout@v6"
         with:
+          path: "pulp-cli"
           token: "${{ secrets.RELEASE_TOKEN }}"
       - name: "Set up Python"
         uses: "actions/setup-python@v6"

@@ -11,16 +11,21 @@ defaults:
 
 jobs:
   update-ci:
+    permissions:
+      contents: "write"
+      pull-requests: "write"
     runs-on: "ubuntu-latest"
     steps:
       - uses: "actions/checkout@v6"
         with:
           repository: "pulp/pulp-cli"
-          path: "pulp-cli"
-      - uses: "actions/checkout@v6"
+          ref: "main"
+          path: "pulp-cli_cc"
+      - name: "Checkout"
+        uses: "actions/checkout@v6"
         with:
-          token: "${{ secrets.RELEASE_TOKEN }}"
           path: "pulp-cli"
+          token: "${{ secrets.RELEASE_TOKEN }}"
       - name: "Set up Python"
         uses: "actions/setup-python@v6"
         with:
@@ -36,7 +41,7 @@ jobs:
           git config user.email pulp-infra@redhat.com
       - name: "Apply cookiecutter templates"
         run: |
-          uv run ../pulp-cli/cookiecutter/apply_templates.py
+          uv run ../pulp-cli_cc/cookiecutter/apply_templates.py
           if [ "$(git status --porcelain)" ]
           then
             git add .
@@ -46,17 +51,17 @@ jobs:
         uses: "peter-evans/create-pull-request@v8"
         id: "create_pr"
         with:
-          token: "${{ secrets.RELEASE_TOKEN }}"
           title: "Update cookiecutter"
           body: ""
           branch: "update_cookiecutter"
           delete-branch: true
           path: "pulp-cli"
+          token: "${{ secrets.RELEASE_TOKEN }}"
       - name: "Mark PR automerge"
         run: |
           gh pr merge --rebase --auto "${{ steps.create_pr.outputs.pull-request-number }}"
         if: "steps.create_pr.outputs.pull-request-number"
         env:
-          GH_TOKEN: "${{ secrets.RELEASE_TOKEN }}"
+          GH_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
         continue-on-error: true
 ...

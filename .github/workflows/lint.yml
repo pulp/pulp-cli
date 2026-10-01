@@ -4,6 +4,10 @@ name: "Lint"
 on:
   workflow_call:
 
+defaults:
+  run:
+    working-directory: "pulp-cli"
+
 jobs:
   lint:
     runs-on: "ubuntu-latest"
@@ -16,6 +20,8 @@ jobs:
     steps:
       - name: "Checkout"
         uses: "actions/checkout@v6"
+        with:
+          path: "pulp-cli"
       - name: "Set up Python"
         uses: "actions/setup-python@v6"
         with:
