@@ -139,32 +139,7 @@ def preprocess_payload(payload: EntityDefinition) -> EntityDefinition:
     )
 
 
-_REGISTERED_API_QUIRKS: list[tuple[PluginRequirement, t.Callable[[OpenAPI], None]]] = []
 _REGISTERED_API_SPEC_QUIRKS: list[tuple[PluginRequirement, t.Callable[[t.Any], t.Any]]] = []
-
-
-@deprecated("This decorator is deprecated. Please use api_spec_quirk instead.")
-def api_quirk(
-    req: PluginRequirement,
-) -> t.Callable[[t.Callable[[OpenAPI], None]], None]:
-    """
-    A function decorator to allow manipulating API specs based on the availability of plugins.
-
-    Parameters:
-        req: The plugin specifier to determine when the quirk should be applied.
-
-    Examples:
-        ```
-        @api_quirk(PluginRequirement("catdog", specifier="<1.5.2"))
-        def patch_barking_filter_type(api: OpenAPI) -> None:
-            # fixup api.api_spec here
-        ```
-    """
-
-    def _decorator(patch: t.Callable[[OpenAPI], None]) -> None:
-        _REGISTERED_API_QUIRKS.append((req, patch))
-
-    return _decorator
 
 
 def api_spec_quirk(
@@ -178,8 +153,8 @@ def api_spec_quirk(
 
     Examples:
         ```
-        @api_quirk(PluginRequirement("catdog", specifier="<1.5.2"))
-        def patch_barking_filter_type(api_spec: t.Any) -> None:
+        @api_spec_quirk(PluginRequirement("catdog", specifier="<1.5.2"))
+        def patch_barking_filter_type(api_spec: t.Any) -> t.Any:
             # Fixup api_spec here.
             # This can be destructive on api_spec.
             return api_spec
@@ -407,14 +382,6 @@ class PulpContext:
             api_kwargs=api_kwargs,
         )
 
-    def _patch_api_spec(self) -> None:
-        # A place for last minute fixes to the api_spec.
-        # WARNING: Operations are already indexed at this point.
-        assert self._api is not None
-        for req, patch in _REGISTERED_API_QUIRKS:
-            if self.has_plugin(req):
-                patch(self._api)
-
     @property
     def domain_enabled(self) -> bool:
         return t.cast(bool, self.api.api_spec.get("info", {}).get("x-pulp-domain-enabled", False))
@@ -457,7 +424,6 @@ class PulpContext:
                 )
             except OpenAPIError as e:
                 raise PulpException(str(e))
-            self._patch_api_spec()
             # Rerun scheduled version checks
             for plugin_requirement in self._needed_plugins:
                 self.needs_plugin(plugin_requirement)
@@ -1743,6 +1709,7 @@ class PulpContentContext(PulpEntityContext):
         assert self.repository_ctx is not None
         self.repository_ctx.modify(remove_content=[self.pulp_href])
 
+    @deprecated("The create call can handle the upload logic transparently.")
     def upload(
         self,
         file: t.IO[bytes],
