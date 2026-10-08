@@ -10,6 +10,67 @@
 
 [//]: # (towncrier release notes start)
 
+## 0.41.0 (2026-10-08) {: #0.41.0 }
+
+
+
+#### Features {: #0.41.0-feature }
+
+- Added compression type options to RPM repositories and publications.
+  [#1246](https://github.com/pulp/pulp-cli/issues/1246)
+- Added support for RPM vulnerability reports.
+  This includes the `scan` subcommand for repository versions and the `--osv-config` option for repositories.
+  [#1427](https://github.com/pulp/pulp-cli/issues/1427)
+- Added the `--retain-checkpoints` option to file and rpm repositories.
+  [#1439](https://github.com/pulp/pulp-cli/issues/1439)
+- Added `--distribution` filter to `pulp container content list` to resolve the served repository version and list tags (or other content) for that image.
+- Added `--error-on-reject`/`--no-error-on-reject` options to `pulp python repository`.
+- Added support for file git remotes
+- Added support for pulp_ansible git remotes.
+- Added the `--version` option to rpm and file distribution create and update commands to pin a specific repository version for distribution.
+- Added the abililty to specify which REST API version you want to talk to.
+
+  Use `--api-version=` on the command line, or `api_version=` in your config profile.
+
+
+#### Bugfixes {: #0.41.0-bugfix }
+
+- Fixed bug where specifying `--chunk-size` for config commands crashed.
+  [#1424](https://github.com/pulp/pulp-cli/issues/1424)
+
+
+#### Deprecations and Removals {: #0.41.0-removal }
+
+- Removed deprecated `api_quirk` decorator. Use `api_spec_quirk` instead.
+
+
+#### Misc {: #0.41.0-misc }
+
+- Dust off bootstrap template.
+  [#1428](https://github.com/pulp/pulp-cli/issues/1428),
+  [#1434](https://github.com/pulp/pulp-cli/issues/1434)
+- Honor PYTEST_MARK in `make paralleltest`, matching livetest, so plugin CI can filter parallel livetests.
+
+
+### Pulp GLUE {: #0.41.0-pulp-glue }
+
+
+#### Features {: #0.41.0-pulp-glue-feature }
+
+- Added support for setting `repository_version` on rpm and file distributions via a `version` parameter.
+- Added the pulp_ansible git remote context.
+- Reworked authentication mechanism selection based on abstact cost estimation.
+
+
+#### Deprecations and Removals {: #0.41.0-pulp-glue-removal }
+
+- Dropped workarounds for plugins no longer maintained branches.
+  (`ansible < 0.21`; `container < 2.19`; `python < 3.11`; `rpm < 3.26`)
+- Removed compatibility checks and workaround for pulpcore < 3.49.
+
+
+---
+
 ## 0.40.6 (2026-09-01) {: #0.40.6 }
 
 

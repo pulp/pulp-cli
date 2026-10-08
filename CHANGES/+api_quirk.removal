@@ -1,1 +1,0 @@
-Removed deprecated `api_quirk` decorator. Use `api_spec_quirk` instead.
