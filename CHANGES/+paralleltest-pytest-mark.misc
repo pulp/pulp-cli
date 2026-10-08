@@ -1,1 +1,0 @@
-Honor PYTEST_MARK in `make paralleltest`, matching livetest, so plugin CI can filter parallel livetests.
