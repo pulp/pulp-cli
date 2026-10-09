@@ -68,7 +68,9 @@ def check_changelog(issue: str) -> None:
 print(f"Checking commit message for {sha[0:7]}.")
 
 # validate the issue attached to the commit
-issue_regex = r"(?:{keywords})[\s:]+#(\d+)".format(keywords=("|").join(KEYWORDS))
+issue_regex = r"(?:{keywords})[\s:]+#(\d+)".format(
+    keywords=("|").join(re.escape(k) for k in KEYWORDS)
+)
 issues = re.findall(issue_regex, message, re.IGNORECASE)
 cherry_pick_regex = r"^\s*\(cherry picked from commit [0-9a-f]*\)\s*$"
 cherry_pick = re.search(cherry_pick_regex, message, re.MULTILINE)
@@ -76,7 +78,7 @@ cherry_pick = re.search(cherry_pick_regex, message, re.MULTILINE)
 if issues:
     for issue in issues:
         if not cherry_pick:
-            check_status(issue)
             check_changelog(issue)
+            check_status(issue)
 
 print(f"Commit message for {sha[0:7]} passed.")
