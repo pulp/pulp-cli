@@ -48,6 +48,7 @@ _lint:
 {%- if cookiecutter.glue and cookiecutter.app_label %}
 	.ci/scripts/check_cli_dependencies.py
 {%- endif %}
+	.ci/scripts/check_changelog_snippets.py
 	.ci/scripts/check_click_for_mypy.py
 	mypy
 {%- if cookiecutter.glue %}

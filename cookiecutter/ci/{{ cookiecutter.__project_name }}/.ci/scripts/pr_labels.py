@@ -16,7 +16,7 @@ import tomllib
 from git import Repo
 
 
-def main():
+def main() -> None:
     assert len(sys.argv) == 3
 
     with Path("pyproject.toml").open("rb") as fp:
