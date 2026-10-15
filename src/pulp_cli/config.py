@@ -179,6 +179,9 @@ def validate_config(config: dict[str, t.Any], strict: bool = False) -> None:
             errors.append(_("Failed to parse the 'base_path'."))
     if "api_root" in config and (config["api_root"][0] != "/" or config["api_root"][-1] != "/"):
         errors.append(_("'api_root' must begin and end with '/'"))
+    for key in ["username", "cert", "key", "client_id", "client_secret"]:
+        if config.get(key) == "":
+            errors.append(_("'{}' should not be an empty string.").format(key))
     if "format" in config and config["format"].lower() not in FORMAT_CHOICES:
         errors.append(_("'format' is not one of {choices}").format(choices=FORMAT_CHOICES))
     if "verify_ssl" in config and not isinstance(config["verify_ssl"], bool):
