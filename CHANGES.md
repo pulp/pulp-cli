@@ -10,6 +10,24 @@
 
 [//]: # (towncrier release notes start)
 
+## 0.41.1 (2026-10-16) {: #0.41.1 }
+
+
+
+#### Bugfixes {: #0.41.1-bugfix }
+
+- Added config validation for credential values ('username', 'cert', ...) to not be empty.
+  [#1487](https://github.com/pulp/pulp-cli/issues/1487)
+
+
+### Pulp GLUE {: #0.41.1-pulp-glue }
+
+
+No significant changes.
+
+
+---
+
 ## 0.41.0 (2026-10-08) {: #0.41.0 }
 
 
