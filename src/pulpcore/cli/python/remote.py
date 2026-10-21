@@ -88,6 +88,12 @@ python_remote_options = [
         help=_("Sync available package provenances"),
         needs_plugins=[PluginRequirement("python", specifier=">=3.22.0")],
     ),
+    pulp_option(
+        "--vulnerabilities/--no-vulnerabilities",
+        default=None,
+        help=_("Scan new repository versions for vulnerabilities after each successful sync"),
+        needs_plugins=[PluginRequirement("python", specifier=">=3.37.0")],
+    ),
 ]
 
 remote.add_command(list_command(decorators=remote_filter_options))
