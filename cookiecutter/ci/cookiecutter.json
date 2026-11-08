@@ -8,6 +8,7 @@
   "binary_dependencies": "",
   "current_version": "0.0.1.dev",
   "test_matrix": null,
+  "dependency_groups": null,
   "unittests": false,
   "paralleltests": false,
   "__app_label_suffix": "{{ cookiecutter.app_label and '-' + cookiecutter.app_label }}",
