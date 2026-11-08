@@ -63,6 +63,11 @@ def main(bootstrap: bool, force: bool) -> None:
     sections.append("ci")
     with Path(".github/workflows/test.yml").open() as fp:
         config["test_matrix"] = yaml.safe_load(fp)["jobs"]["test"]["strategy"]["matrix"]
+    # Take test and dev dependencies from pulp-cli.
+    pulp_cli_pyproject = tomllib.loads(
+        (Path(__file__).parent.parent / "pyproject.toml").read_text()
+    )
+    config["dependency_groups"] = pulp_cli_pyproject["dependency-groups"]
 
     # Docs
     if config["docs"]:

@@ -15,7 +15,7 @@ def _quote(s: str) -> str:
     return '"' + s.replace("\\", "\\\\").replace('"', '\\"') + '"'
 
 
-def to_toml_value(value: t.Any) -> str:
+def to_toml_value(value: t.Any, /, oneline=False) -> str:
     if isinstance(value, str):
         return '"' + value + '"'
     elif value is True:
@@ -24,6 +24,28 @@ def to_toml_value(value: t.Any) -> str:
         return "false"
     elif isinstance(value, int):
         return str(value)
+    elif isinstance(value, list):
+        if oneline:
+            prefix = "["
+            infix = ", "
+            postfix = "]"
+        else:
+            prefix = "[\n  "
+            infix = ",\n  "
+            postfix = ",\n]"
+        items = [to_toml_value(v, oneline=True) for v in value]
+        return prefix + infix.join(items) + postfix
+    elif isinstance(value, dict):
+        if oneline:
+            prefix = "{"
+            infix = ", "
+            postfix = "}"
+        else:
+            prefix = "{\n  "
+            infix = ",\n  "
+            postfix = ",\n}"
+        items = [f"{k} = {to_toml_value(v, oneline=True)}" for k, v in value.items()]
+        return prefix + infix.join(items) + postfix
     else:
         raise NotImplementedError("Not an atomic value.")
 
