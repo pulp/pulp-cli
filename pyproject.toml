@@ -57,7 +57,7 @@ rpm = "pulpcore.cli.rpm"
 dev = [
   {include-group = "lint"},
   "pylsp-mypy>=0.7.0",
-  "pylsp-rope>=0.1.17,<0.1.18",
+  "pylsp-rope>=0.1.17,<0.1.19",
 ]
 lint = [
   {include-group = "test"},
