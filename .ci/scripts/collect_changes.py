@@ -1,6 +1,6 @@
 #!/bin/env python3
 # /// script
-# requires-python = ">=3.11"
+# requires-python = ">=3.13"
 # dependencies = [
 #     "gitpython>=3.1.46,<3.2.0",
 #     "packaging>=25.0,<25.1",
@@ -8,15 +8,17 @@
 # ///
 
 import itertools
-import os
 import re
+import typing as t
+from pathlib import Path
 
 import tomllib
 from git import GitCommandError, Repo
+from packaging.version import Version
 from packaging.version import parse as parse_version
 
 # Read Towncrier settings
-with open("pyproject.toml", "rb") as fp:
+with Path("pyproject.toml").open("rb") as fp:
     tc_settings = tomllib.load(fp)["tool"]["towncrier"]
 
 CHANGELOG_FILE = tc_settings.get("filename", "NEWS.rst")
@@ -51,7 +53,7 @@ TITLE_REGEX = (
 )
 
 
-def get_changelog(repo, branch):
+def get_changelog(repo: Repo, branch: str) -> str:
     branch_tc_settings = tomllib.loads(repo.git.show(f"{branch}:pyproject.toml"))["tool"][
         "towncrier"
     ]
@@ -59,7 +61,7 @@ def get_changelog(repo, branch):
     return repo.git.show(f"{branch}:{branch_changelog_file}") + "\n"
 
 
-def _tokenize_changes(splits):
+def _tokenize_changes(splits: list[str]) -> t.Iterator[list[Version | str]]:
     assert len(splits) % 3 == 0
     for i in range(len(splits) // 3):
         title = splits[3 * i]
@@ -67,21 +69,20 @@ def _tokenize_changes(splits):
         yield [version, title + splits[3 * i + 2]]
 
 
-def split_changelog(changelog):
+def split_changelog(changelog: str) -> tuple[str, list[list[Version | str]]]:
     preamble, rest = changelog.split(START_STRING, maxsplit=1)
     split_rest = re.split(TITLE_REGEX, rest)
     return preamble + START_STRING + split_rest[0], list(_tokenize_changes(split_rest[1:]))
 
 
-def main():
-    repo = Repo(os.getcwd())
+def main() -> None:
+    repo = Repo(Path.cwd())
     remote = repo.remotes[0]
     branches = [ref for ref in remote.refs if re.match(r"^([0-9]+)\.([0-9]+)$", ref.remote_head)]
     branches.sort(key=lambda ref: parse_version(ref.remote_head), reverse=True)
     branches = [ref.name for ref in branches]
 
-    with open(CHANGELOG_FILE, "r") as f:
-        main_changelog = f.read()
+    main_changelog = Path(CHANGELOG_FILE).read_text()
     preamble, main_changes = split_changelog(main_changelog)
     old_length = len(main_changes)
 
@@ -92,7 +93,7 @@ def main():
         except GitCommandError:
             print("No changelog found on this branch.")
             continue
-        dummy, changes = split_changelog(changelog)
+        _dummy, changes = split_changelog(changelog)
         new_changes = sorted(main_changes + changes, key=lambda x: x[0], reverse=True)
         # Now remove duplicates (retain the first one)
         main_changes = [new_changes[0]]
@@ -103,10 +104,9 @@ def main():
     new_length = len(main_changes)
     if old_length < new_length:
         print(f"{new_length - old_length} new versions have been added.")
-        with open(CHANGELOG_FILE, "w") as fp:
+        with Path(CHANGELOG_FILE).open("w") as fp:
             fp.write(preamble)
-            for change in main_changes:
-                fp.write(change[1])
+            fp.writelines(change[1] for change in main_changes)
 
         repo.git.commit("-m", "Update Changelog", CHANGELOG_FILE)
 

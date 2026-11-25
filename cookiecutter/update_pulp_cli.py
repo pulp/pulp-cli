@@ -11,12 +11,11 @@ import json
 import logging
 import urllib.request
 
-from packaging.version import Version
+import tomlkit
 from packaging.requirements import Requirement
 from packaging.specifiers import Specifier, SpecifierSet
 from packaging.utils import canonicalize_name
-import tomlkit
-
+from packaging.version import Version
 
 WAREHOUSE = "https://pypi.org"
 _logger = logging.getLogger("venia")
