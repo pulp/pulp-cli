@@ -26,7 +26,7 @@ A plugin must register itself with the main app by specifying its main module as
 === "setup.py"
 
     ```python
-    entry_points={
+    entry_points = {
         "pulp_cli.plugins": [
             "myplugin=pulpcore.cli.myplugin",
         ],
@@ -39,6 +39,7 @@ The plugin should then attach subcommands to the `pulpcore.cli.common.main` comm
 
 ```python
 from pulp_cli.generic import pulp_command
+
 
 @pulp_command()
 def my_command():
@@ -139,7 +140,9 @@ class PulpMyResourceContext(PulpEntityContext):
     NEEDS_PLUGINS = [PluginRequirement("my_plugin", specifier=">=1.0.0")]
 
     def show(self) -> t.Dict[str, t.Any]:
-        if self.pulp_ctx.has_plugin(PluginRequirement("my_plugin", specifier=">=1.2.3", inverted=True)):
+        if self.pulp_ctx.has_plugin(
+            PluginRequirement("my_plugin", specifier=">=1.2.3", inverted=True)
+        ):
             # Versioned workaroud
             # see bug-tracker/12345678
             return lookup_my_content_legacy(self.pulp_href)
@@ -149,7 +152,7 @@ class PulpMyResourceContext(PulpEntityContext):
 # In pulp_cli_my_plugin
 @main.command()
 @pass_pulp_context
-def my_command(pulp_ctx:PulpContext) -> None:
+def my_command(pulp_ctx: PulpContext) -> None:
     pulp_ctx.needs_plugin(PluginRequirement("my_plugin", specifier=">=1.1.0"))
     # From here on we can assume `my_plugin>=1.1.0`.
 ```

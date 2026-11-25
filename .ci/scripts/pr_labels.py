@@ -1,19 +1,25 @@
 #!/bin/env python3
+# /// script
+# requires-python = ">=3.11"
+# dependencies = [
+#     "gitpython>=3.1.46,<3.2.0",
+# ]
+# ///
 
 # This script is running with elevated privileges from the main branch against pull requests.
 
 import re
 import sys
-import tomllib
 from pathlib import Path
 
+import tomllib
 from git import Repo
 
 
-def main():
+def main() -> None:
     assert len(sys.argv) == 3
 
-    with open("pyproject.toml", "rb") as fp:
+    with Path("pyproject.toml").open("rb") as fp:
         PYPROJECT_TOML = tomllib.load(fp)
     BLOCKING_REGEX = re.compile(r"DRAFT|WIP|NO\s*MERGE|DO\s*NOT\s*MERGE|EXPERIMENT")
     ISSUE_REGEX = re.compile(r"(?:fixes|closes)[\s:]+#(\d+)")

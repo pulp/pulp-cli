@@ -527,9 +527,9 @@ class OpenAPI:
             )
         )
         if content_type:
-            assert request.headers["content-type"].startswith(
-                content_type
-            ), f"{request.headers['content-type']} != {content_type}"
+            assert request.headers["content-type"].startswith(content_type), (
+                f"{request.headers['content-type']} != {content_type}"
+            )
         for key, value in request.headers.items():
             self._debug_callback(2, f"  {key}: {value}")
         if request.body is not None:
