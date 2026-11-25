@@ -63,7 +63,8 @@ SECURITY_SCHEMES = TypeAdapter(dict[str, oas.SecurityScheme | oas.Reference]).va
 
 class TestBasicAuthProvider:
     @pytest.fixture(scope="class")
-    def provider(self) -> AuthProviderBase:
+    @classmethod
+    def provider(cls) -> AuthProviderBase:
         return BasicAuthProvider(username="user1", password="password1")
 
     def test_can_complete_basic(self, provider: AuthProviderBase) -> None:
