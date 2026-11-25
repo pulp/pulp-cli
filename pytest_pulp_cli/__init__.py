@@ -211,7 +211,6 @@ if "PULP_LOGGING" in os.environ:
             print(logs.decode())
 
 else:
-
     # MyPy complains about an incompatible redefinition.
     # I don't think this quite applies to the fixtures do dependency injection.
     @pytest.fixture
