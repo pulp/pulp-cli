@@ -6,6 +6,7 @@ from importlib.metadata import entry_points
 from types import ModuleType
 
 import click
+
 from pulp_glue.common.i18n import get_translation
 
 from pulp_cli.config import CONFIG_LOCATIONS, config, config_options, validate_config

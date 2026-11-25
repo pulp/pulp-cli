@@ -2,6 +2,7 @@ import typing as t
 
 import click
 import schema as s
+
 from pulp_glue.common.context import (
     EntityFieldDefinition,
     PluginRequirement,
@@ -210,8 +211,7 @@ update_options = [
         "repo_config",
         needs_plugins=[PluginRequirement("rpm", specifier=">=3.24.0")],
         help=_(
-            "A JSON dictionary describing config.repo file (or "
-            "@file containing a JSON dictionary)"
+            "A JSON dictionary describing config.repo file (or @file containing a JSON dictionary)"
         ),
         callback=load_json_callback,
     ),

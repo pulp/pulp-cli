@@ -54,7 +54,7 @@ rpm = "pulpcore.cli.rpm"
 
 [tool.setuptools.packages.find]
 # This section is managed by the cookiecutter templates.
-where = ["."]
+where = ["src"]
 include = ["pulpcore.cli.*", "pulp_cli", "pytest_pulp_cli"]
 namespaces = true
 
@@ -67,6 +67,7 @@ namespaces = true
 # This section is co-managed by the cookiecutter templates.
 # Changes to existing keys should be preserved.
 app_label = ""
+src_layout = true
 repository = "https://github.com/pulp/pulp-cli"
 glue = true
 docs = true
@@ -74,6 +75,7 @@ translations = true
 main_package = "common"
 binary_dependencies = ""
 unittests = true
+paralleltests = false
 
 [tool.bumpversion]
 # This section is managed by the cookiecutter templates.
@@ -96,19 +98,19 @@ values = [
 
 [[tool.bumpversion.files]]
 # This section is managed by the cookiecutter templates.
-filename = "./pulp_cli/__init__.py"
+filename = "./src/pulp_cli/__init__.py"
 search = "__version__ = \"{current_version}\""
 replace = "__version__ = \"{new_version}\""
 
 [[tool.bumpversion.files]]
 # This section is managed by the cookiecutter templates.
-filename = "./pulp-glue/pulp_glue/common/__init__.py"
+filename = "./pulp-glue/src/pulp_glue/common/__init__.py"
 search = "__version__ = \"{current_version}\""
 replace = "__version__ = \"{new_version}\""
 
 [[tool.bumpversion.files]]
 # This section is managed by the cookiecutter templates.
-filename = "./pulpcore/cli/common/__init__.py"
+filename = "./src/pulpcore/cli/common/__init__.py"
 search = "__version__ = \"{current_version}\""
 replace = "__version__ = \"{new_version}\""
 
@@ -194,26 +196,6 @@ name = "Misc"
 showcontent = true
 
 
-[tool.black]
-# This section is managed by the cookiecutter templates.
-line-length = 100
-exclude = "cookiecutter"
-
-[tool.isort]
-# This section is managed by the cookiecutter templates.
-profile = "black"
-line_length = 100
-extend_skip = ["pulp-glue", "cookiecutter"]
-
-[tool.flake8]
-# This section is managed by the cookiecutter templates.
-exclude = ["./docs/*", "./cookiecutter/*"]
-ignore = ["W503", "Q000", "Q003", "D100", "D104", "D106", "D200", "D202", "D205", "D400", "D401", "D402"]
-# E203: whitespace before ':'; https://github.com/psf/black/issues/279
-# E401: multiple imports on one line
-extend-ignore = ["E203", "E401"]
-max-line-length = 100
-
 [tool.pytest.ini_options]
 markers = [
   "live: integration tests that run against a live server",
@@ -233,9 +215,11 @@ markers = [
 strict = true
 warn_unused_ignores = false
 show_error_codes = true
-files = "pulpcore/**/*.py, tests/*.py, pulp_cli/**/*.py, pytest_pulp_cli/**/*.py"
+files = "src/**/*.py, tests/**/*.py"
+mypy_path = ["src", "pulp-glue/src"]
 namespace_packages = true
 explicit_package_bases = true
+plugins = ["pydantic.mypy"]
 
 [[tool.mypy.overrides]]
 # This section is managed by the cookiecutter templates.
@@ -246,3 +230,74 @@ module = [
   "schema.*",
 ]
 ignore_missing_imports = true
+
+
+[tool.uv.sources]
+# This section is managed by the cookiecutter templates.
+pulp-glue = { workspace = true }
+pulp-docs = { git = "https://github.com/pulp/pulp-docs" }
+
+[tool.uv.workspace]
+# This section is managed by the cookiecutter templates.
+members = ["pulp-glue"]
+
+[tool.uv.dependency-groups]
+# This section is managed by the cookiecutter templates.
+docs = {requires-python = ">=3.11"}
+
+[tool.uv.build-backend]
+# This section is managed by the cookiecutter templates.
+module-name = ["pulpcore.cli", "pulp_cli", "pytest_pulp_cli"]
+namespace = true
+source-exclude = ["*.pot", "*.po", "**/*\\~"]
+
+
+[tool.ruff]
+# This section is managed by the cookiecutter templates.
+line-length = 100
+extend-exclude = ["cookiecutter/bootstrap", "cookiecutter/ci", "cookiecutter/docs"]
+
+[tool.ruff.lint]
+# This section is managed by the cookiecutter templates.
+select = ["E4", "E7", "E9", "F"]
+extend-select = ["FURB", "I", "INT", "PTH", "SIM1", "TID", "T10", "UP"]
+
+[tool.ruff.lint.isort]
+# This section is managed by the cookiecutter templates.
+sections = { second-party = ["pulp_glue"] }
+section-order = ["future", "standard-library", "third-party", "second-party", "first-party", "local-folder"]
+
+[tool.ruff.lint.flake8-tidy-imports.banned-api]
+# This section is managed by the cookiecutter templates.
+"distutils".msg = "The 'distutils' module has been deprecated since Python 3.9."
+"pulpcore.cli.common.generic".msg = "This module moved to 'pulp_cli.generic'."
+
+
+[dependency-groups]
+dev = [
+  {include-group = "lint"},
+  "pylsp-mypy>=0.7.0",
+  "pylsp-rope>=0.1.17,<0.1.19",
+]
+lint = [
+  {include-group = "test"},
+  "mypy~=2.4.0",
+  "ruff~=0.16.0",
+  "shellcheck-py~=0.11.0.1",
+  "types-pygments",
+  "types-pyyaml",
+  "types-requests",
+  "types-setuptools",
+  "types-toml",
+]
+test = [
+  "pygments>=2.19.2",
+  "pytest>=7.0.0,<9.3",
+  "pytest-xdist>=3.8.0,<3.9",
+  "python-gnupg>=0.5.0,<0.6",
+  "secretstorage>=3.5.0",
+  "trustme>=1.1.0,<1.3",
+]
+docs = [
+  "pulp-docs",
+]

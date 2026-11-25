@@ -1,6 +1,7 @@
 import typing as t
 
 import click
+
 from pulp_glue.common.context import (
     EntityDefinition,
     EntityFieldDefinition,
@@ -144,7 +145,7 @@ def update(
         # keep current repository, change version
         if distribution["repository"]:
             distribution_ctx.update(body={"repository": ""}, non_blocking=True)
-            body["repository_version"] = f'{distribution["repository"]}versions/{version}/'
+            body["repository_version"] = f"{distribution['repository']}versions/{version}/"
         elif distribution["repository_version"]:
             # 'dummy' vars are to get us around a mypy/1.2 complaint about '_'
             repository_href, dummy, dummy = distribution["repository_version"].partition("versions")
