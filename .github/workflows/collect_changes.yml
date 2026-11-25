@@ -4,39 +4,52 @@ on:
   workflow_call:
   workflow_dispatch:
 
+defaults:
+  run:
+    working-directory: "pulp-cli"
+
 jobs:
   collect-changes:
+    permissions:
+      contents: "write"
+      pull-requests: "write"
     runs-on: "ubuntu-latest"
     steps:
-      - uses: "actions/checkout@v4"
+      - name: "Checkout"
+        uses: "actions/checkout@v6"
         with:
-          ref: "main"
+          path: "pulp-cli"
           fetch-depth: 0
-      - uses: "actions/setup-python@v5"
+      - name: "Set up Python"
+        uses: "actions/setup-python@v6"
         with:
-          python-version: "3.x"
+          python-version: "3.14"
+          allow-prereleases: true
+      - name: "Install uv"
+        uses: "astral-sh/setup-uv@v7"
+        with:
+          enable-cache: true
       - name: "Setup git"
         run: |
           git config user.name pulpbot
           git config user.email pulp-infra@redhat.com
       - name: "Collect changes"
         run: |
-          pip install GitPython packaging
-          python3 .ci/scripts/collect_changes.py
+          uv run --script .ci/scripts/collect_changes.py
       - name: "Create Pull Request"
-        uses: "peter-evans/create-pull-request@v7"
+        uses: "peter-evans/create-pull-request@v8"
         id: "create_pr"
         with:
-          token: "${{ secrets.RELEASE_TOKEN }}"
           title: "Update Changelog"
           body: ""
           branch: "update_changes"
           delete-branch: true
+          path: "pulp-cli"
       - name: "Mark PR automerge"
         run: |
           gh pr merge --rebase --auto "${{ steps.create_pr.outputs.pull-request-number }}"
         if: "steps.create_pr.outputs.pull-request-number"
         env:
-          GH_TOKEN: "${{ secrets.RELEASE_TOKEN }}"
+          GH_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
         continue-on-error: true
 ...
