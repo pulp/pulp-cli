@@ -1,4 +1,5 @@
 import click
+
 from pulp_glue.common.context import PluginRequirement
 from pulp_glue.common.i18n import get_translation
 from pulp_glue.rpm.context import PulpRpmPublicationContext, PulpRpmRepositoryContext
@@ -61,8 +62,7 @@ create_options = [
         "repo_config",
         needs_plugins=[PluginRequirement("rpm", specifier=">=3.24.0")],
         help=_(
-            "A JSON dictionary describing config.repo file (or "
-            "@file containing a JSON dictionary)"
+            "A JSON dictionary describing config.repo file (or @file containing a JSON dictionary)"
         ),
         callback=load_json_callback,
     ),
