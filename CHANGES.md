@@ -10,6 +10,21 @@
 
 [//]: # (towncrier release notes start)
 
+## 0.41.2 (2026-11-25) {: #0.41.2 }
+
+
+
+No significant changes.
+
+
+### Pulp GLUE {: #0.41.2-pulp-glue }
+
+
+No significant changes.
+
+
+---
+
 ## 0.41.1 (2026-10-16) {: #0.41.1 }
 
 
@@ -85,6 +100,21 @@ No significant changes.
 - Dropped workarounds for plugins no longer maintained branches.
   (`ansible < 0.21`; `container < 2.19`; `python < 3.11`; `rpm < 3.26`)
 - Removed compatibility checks and workaround for pulpcore < 3.49.
+
+
+---
+
+## 0.40.7 (2026-11-25) {: #0.40.7 }
+
+
+
+No significant changes.
+
+
+### Pulp GLUE {: #0.40.7-pulp-glue }
+
+
+No significant changes.
 
 
 ---
@@ -215,6 +245,21 @@ No significant changes.
 
 - Fixed passing nested objects stringified in form-encoded body according to OAS3.1.
 - Sanitize the filename of the chached `api.json`.
+
+
+---
+
+## 0.39.6 (2026-11-25) {: #0.39.6 }
+
+
+
+No significant changes.
+
+
+### Pulp GLUE {: #0.39.6-pulp-glue }
+
+
+No significant changes.
 
 
 ---
